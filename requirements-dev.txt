@@ -1,0 +1,7 @@
+black==20.8b1
+flake8
+bump2version
+pre-commit
+pytest
+pytest-mock
+pytest-cov
