@@ -1,0 +1,41 @@
+# Job to submit a Ray program from a pod outside a running Ray cluster.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: { { .Release.Name } }
+  #  labels:
+  #    app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+  #    app.kubernetes.io/instance: {{.Release.Name | quote }}
+  #    helm.sh/chart: {{.Chart.Name}}-{{.Chart.Version}}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{.Release.Name}}"
+      annotations:
+        rollme: { { randAlphaNum 5 | quote } }
+    #      labels:
+    #        app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+    #        app.kubernetes.io/instance: {{.Release.Name | quote }}
+    #        helm.sh/chart: {{.Chart.Name}}-{{.Chart.Version}}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: { { .Release.Name } }
+          image: { { $.Values.image } }
+          imagePullPolicy: Always
+          command: [ "python" ]
+          args:
+            - azner/azner/web/server.py
+            - hydra.run.dir=.
+            - hydra.output_subdir=null
+            - ray.address=ray://{{ .Release.Name }}-{{ $.Values.rayHeadName }}:10001
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi

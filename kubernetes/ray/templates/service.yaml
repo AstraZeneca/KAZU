@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: { { .Values.rayHeadName } }
+spec:
+  selector:
+    component: { { $.Values.rayHeadName } }
+  ports:
+    - port: { { $.Values.rayServePort } }
+      protocol: TCP
+      targetPort: { { $.Values.rayServePort } }
