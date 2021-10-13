@@ -20,5 +20,5 @@ setup(
     tests_require=["pytest"],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
-    package_data={}
+    package_data={},
 )
