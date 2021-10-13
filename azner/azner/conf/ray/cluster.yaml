@@ -1,5 +1,0 @@
-# @package _global_
-ray:
-  address: "auto"
-  serve:
-    port: 8000
