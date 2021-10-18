@@ -1,0 +1,4 @@
+_target_: azner.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep
+path: ~
+depends_on: ~
+batch_size: 4
