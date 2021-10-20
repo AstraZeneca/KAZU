@@ -1,0 +1,8 @@
+_target_: azner.steps.linking.sapbert.SapBertForEntityLinkingStep
+model_path: ~
+knowledgebase_path: ~
+batch_size: 4
+process_all_entities: False
+rebuild_kb_cache: False
+depends_on: ~
+lookup_cache_size: 5000
