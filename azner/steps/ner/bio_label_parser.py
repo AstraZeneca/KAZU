@@ -155,13 +155,16 @@ class BIOLabelParser:
         """
         self.namespace = namespace
         self.bio_classes = bio_classes
-        self.entity_classes = {
-            x.split("-")[1] for x in bio_classes if x != self.entity_outside_symbol
-        }
+        self.entity_classes = sorted(
+            list({x.split("-")[1] for x in bio_classes if x != self.entity_outside_symbol})
+        )
         self.entity_state_parsers = [
             BIOLabelParser.EntityParseState(entity_class, namespace)
             for entity_class in self.entity_classes
         ]
+        self.active_text = (
+            None  # the last text string passed to update_parse_states. Required by finalise
+        )
 
     def update_parse_states(
         self, label: str, offsets: Tuple[int, int], text: str, confidence: Optional[float]
@@ -185,12 +188,21 @@ class BIOLabelParser:
                 entity_parse_state.update(
                     bio_symbol, entity_class, offsets, text, confidence=confidence
                 )
+        self.active_text = text
+
+    def finalise(self, text: str):
+        """
+        call complete_entity on all EntityParseStates
+        :return:
+        """
+        [x.complete_entity(text) for x in self.entity_state_parsers]
 
     def get_entities(self):
         """
         return all entities that have been found so far
         :return:
         """
+        self.finalise(self.active_text)
         return pydash.flatten([x.entities_found for x in self.entity_state_parsers])
 
     def reset(self):
@@ -201,3 +213,4 @@ class BIOLabelParser:
         """
         for entity_parse_state in self.entity_state_parsers:
             entity_parse_state.clear_entities_found_list()
+        self.active_text = None
