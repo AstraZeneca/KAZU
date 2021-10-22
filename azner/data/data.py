@@ -27,7 +27,9 @@ class Entity(BaseModel):
     start: int  # start offset
     end: int  # end offset
     hash_val: Optional[str] = None  # not required. calculated based on above fields
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Optional[EntityMetadata] = Field(
+        default_factory=EntityMetadata, hash=False
+    )  # generic metadata
 
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):

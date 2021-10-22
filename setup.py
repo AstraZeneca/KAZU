@@ -15,7 +15,7 @@ setup(
         "transformers==4.6.0",
         "ray[serve]==1.6.0",
         "hydra-core==1.1.1",
-        "pytorch-lightning==1.4.9"
+        "pytorch-lightning==1.4.9",
     ],
     tests_require=["pytest"],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
