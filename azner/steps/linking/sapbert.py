@@ -57,9 +57,10 @@ class SapBertForEntityLinkingStep(BaseStep):
                             https://huggingface.co/cambridgeltl/SapBERT-from-PubMedBERT-fulltext
                             This is passed to HF Automodel.from_pretrained()
         :param depends_on: namespaces of dependency stes
-        :param knowledgebase_path: path to parquet of labels to map to. This should have two columns: 'iri' and
-                            'default_label'. The default_label will be used to create an embedding, and the iri will
-                            be used to create a Mapping for the entity. See SapBert paper for further info
+        :param knowledgebase_path: path to parquet of labels to map to. This should have three columns: 'source',
+                            'iri' and 'default_label'. The default_label will be used to create an embedding, and the
+                            source and iri will be used to create a Mapping for the entity.
+                            See SapBert paper for further info
         :param batch_size: batch size for dataloader
         :param process_all_entities: bool flag. Since SapBert involves expensive bert calls, this flag controls whether
                                         it should be used on all entities, or only entities that have no mappings (i.e.
@@ -104,7 +105,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         since the generation of the knowledgebase embeddings is slow, we cache this to disk after this is done once
         :return:
         """
-        self.kb_ids, self.kb_embeddings = self.predict_kb_embeddings()
+        self.sources, self.kb_ids, self.kb_embeddings = self.predict_kb_embeddings()
         cache_path = get_cache_file(self.knowledgebase_path)
         with open(cache_path, "wb") as f:
             pickle.dump(
@@ -118,9 +119,9 @@ class SapBertForEntityLinkingStep(BaseStep):
     def load_kb_cache(self):
         cache_path = get_cache_file(self.knowledgebase_path)
         with open(cache_path, "rb") as f:
-            self.kb_ids, self.kb_embeddings = pickle.load(f)
+            self.sources, self.kb_ids, self.kb_embeddings = pickle.load(f)
 
-    def predict_kb_embeddings(self) -> Tuple[List[str], np.ndarray]:
+    def predict_kb_embeddings(self) -> Tuple[List[str], List[str], np.ndarray]:
         """
         based on the value of self.knowledgebase_path, this returns a Tuple[List[str],np.ndarray]. The strings are the
         iri's, and the ndarray are the embeddings to be queried against
@@ -129,7 +130,7 @@ class SapBertForEntityLinkingStep(BaseStep):
 
         df = pd.read_parquet(self.knowledgebase_path)
         logger.info(f"read {df.shape[0]} rows from kb")
-        df.columns = ["iri", "default_label"]
+        df.columns = ["source", "iri", "default_label"]
 
         default_labels = df["default_label"].tolist()
         batch_encodings = self.tokeniser(default_labels)
@@ -144,7 +145,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         )
         results = torch.cat([x.pooler_output for x in results]).cpu().detach().numpy()
         logger.info("knowledgebase embedding generation successful")
-        return df["iri"].tolist(), results
+        return df["source"].tolist(), df["iri"].tolist(), results
 
     def get_dataloader_for_entities(self, entities: List[Entity]) -> DataLoader:
         """
@@ -194,7 +195,9 @@ class SapBertForEntityLinkingStep(BaseStep):
                 dist = cdist(result, self.kb_embeddings)
                 nn_index = np.argmin(dist)
                 entity = entities[i]
-                new_mapping = Mapping(source="x", idx=self.kb_ids[nn_index], mapping_type="direct")
+                new_mapping = Mapping(
+                    source=self.sources[nn_index], idx=self.kb_ids[nn_index], mapping_type="direct"
+                )
                 update_mappings(entity, new_mapping)
                 self.update_lookup_cache(entity, new_mapping)
         return docs, []
