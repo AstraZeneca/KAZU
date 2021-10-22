@@ -1,4 +1,6 @@
 import logging
+import os
+import pickle
 from typing import List, Tuple
 
 import numpy as np
@@ -16,6 +18,7 @@ from steps.utils.utils import (
     filter_entities_with_kb_mappings,
     get_match_entity_class_hash,
     update_mappings,
+    get_cache_file,
 )
 from torch.utils.data import DataLoader
 from transformers import (
@@ -36,6 +39,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         model_path: str,
         knowledgebase_path: str,
         batch_size: int,
+        trainer: Trainer,
         process_all_entities: bool = False,
         rebuild_kb_cache: bool = False,
         lookup_cache_size: int = 5000,
@@ -74,19 +78,47 @@ class SapBertForEntityLinkingStep(BaseStep):
         self.knowledgebase_path = knowledgebase_path
         self.model = AutoModel.from_pretrained(model_path, config=self.config)
         self.model = PLAutoModel(self.model)
-        self.trainer = Trainer()
-        self.kb_ids, self.kb_embeddings = self.get_or_create_kb_embedding_cache()
+        self.trainer = trainer
+        self.get_or_create_kb_embedding_cache()
         self.lookup_cache = LFUCache(lookup_cache_size)
 
     def get_or_create_kb_embedding_cache(self):
+        """
+        populate self.kb_ids and self.kb_embeddings either by calculating them afresh or loading from a cached version
+        on disk
+        :return:
+        """
+        cache_file_path = get_cache_file(self.knowledgebase_path)
         if self.rebuild_cache:
             logger.info("forcing a rebuild of the kb cache")
-            return self.predict_kb_embeddings()
-        else:
+            self.cache_kb_embeddings()
+        elif os.path.exists(cache_file_path):
+            logger.info(f"loading cached kb file from {cache_file_path}")
             self.load_kb_cache()
+        else:
+            logger.info("No kb cache file found. Building a new one")
+            self.cache_kb_embeddings()
+
+    def cache_kb_embeddings(self):
+        """
+        since the generation of the knowledgebase embeddings is slow, we cache this to disk after this is done once
+        :return:
+        """
+        self.kb_ids, self.kb_embeddings = self.predict_kb_embeddings()
+        cache_path = get_cache_file(self.knowledgebase_path)
+        with open(cache_path, "wb") as f:
+            pickle.dump(
+                (
+                    self.kb_ids,
+                    self.kb_embeddings,
+                ),
+                f,
+            )
 
     def load_kb_cache(self):
-        raise NotImplementedError("kb caching currently not implemented")
+        cache_path = get_cache_file(self.knowledgebase_path)
+        with open(cache_path, "rb") as f:
+            self.kb_ids, self.kb_embeddings = pickle.load(f)
 
     def predict_kb_embeddings(self) -> Tuple[List[str], np.ndarray]:
         """
@@ -133,10 +165,11 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
         logic of entity linker:
 
-        1) first obtain a dataloader and entity list from all docs
-        2) generate embeddings for the entities based on the value of Entity.match
-        3) query this embedding against self.kb_embeddings to detest the best match based on cosine distance
-        4) generate a new Mapping with the queried iri, and update the entity information
+        1) first obtain an entity list from all docs
+        2) check the cache
+        3) generate embeddings for the entities based on the value of Entity.match
+        4) query this embedding against self.kb_embeddings to determine the best match based on cosine distance
+        5) generate a new Mapping with the queried iri, and update the entity information
         :param docs:
         :return:
         """
@@ -172,6 +205,12 @@ class SapBertForEntityLinkingStep(BaseStep):
             self.lookup_cache[hash_val] = mapping
 
     def check_lookup_cache(self, entities: List[Entity]) -> List[Entity]:
+        """
+        checks the cache for mappings. If relevant mappings are found for an entity, update it's mappings
+        accordingly. If not return as a list of cache misses (e.g. for further processing)
+        :param entities:
+        :return:
+        """
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
