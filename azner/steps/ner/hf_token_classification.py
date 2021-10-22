@@ -1,54 +1,26 @@
 import logging
-from typing import List, Iterator, Any, Optional, Tuple
+from typing import List, Tuple
 
 import torch
-from pytorch_lightning import Trainer, LightningModule
+from pytorch_lightning import Trainer
 from torch.nn import Softmax
-from torch.utils.data import IterableDataset, DataLoader
-from torch.utils.data.dataset import T_co
+from torch.utils.data import DataLoader
 from transformers import (
     AutoModelForTokenClassification,
     AutoConfig,
     AutoTokenizer,
     DataCollatorWithPadding,
-    BatchEncoding,
 )
 from transformers.file_utils import PaddingStrategy
 
 from azner.data.data import Document
+from azner.data.pytorch import HFDataset
+from azner.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from azner.steps import BaseStep
-from azner.steps.utils.utils import documents_to_document_section_batch_encodings_map
 from azner.steps.ner.bio_label_parser import BIOLabelParser
+from azner.steps.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
-
-
-class NerDataset(IterableDataset):
-    def __init__(self, encodings: BatchEncoding):
-        """
-        simple implementation of IterableDataset, producing HF tokenizer input_id
-        :param encodings:
-        """
-        self.encodings = encodings
-
-    def __iter__(self) -> Iterator[T_co]:
-        for encoding in self.encodings.data["input_ids"]:
-            yield {"input_ids": encoding}
-
-
-class PLAutoModelForTokenClassification(LightningModule):
-    def __init__(self, model: AutoModelForTokenClassification, *args: Any, **kwargs: Any):
-        """
-        very simple Lightning wrapper for AutoModelForTokenClassification
-        :param model: instance of AutoModelForTokenClassification
-        :param args:
-        :param kwargs:
-        """
-        super().__init__(*args, **kwargs)
-        self.model = model
-
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
-        return self.model(input_ids=batch["input_ids"])
 
 
 class TransformersModelForTokenClassificationNerStep(BaseStep):
@@ -78,7 +50,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         :return:
         """
         batch_encoding, _ = documents_to_document_section_batch_encodings_map(docs, self.tokeniser)
-        dataset = NerDataset(batch_encoding)
+        dataset = HFDataset(batch_encoding)
         collate_func = DataCollatorWithPadding(
             tokenizer=self.tokeniser, padding=PaddingStrategy.LONGEST
         )
