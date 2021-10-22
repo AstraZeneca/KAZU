@@ -19,8 +19,8 @@ def ner_test_cases():
     return texts
 
 
-def entity_linking_easy_cases() -> Tuple[List[Document], List[str]]:
-    docs, iris = [], []
+def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
+    docs, iris, sources = [], [], []
 
     doc = SimpleDocument("Baclofen is a muscle relaxant")
     doc.sections[0].entities = [
@@ -28,6 +28,7 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str]]:
     ]
     docs.append(doc)
     iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL701")
+    sources.append("CHEMBL")
 
     doc = SimpleDocument("Lioresal is another name for baclofen")
     doc.sections[0].entities = [
@@ -35,14 +36,15 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str]]:
     ]
     docs.append(doc)
     iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL701")
-
+    sources.append("CHEMBL")
     doc = SimpleDocument("Helium is a gas.")
     doc.sections[0].entities = [
         Entity(namespace="test", match="Helium", entity_class="Drug", start=0, end=6)
     ]
     iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL1796997")
+    sources.append("CHEMBL")
     docs.append(doc)
-    return docs, iris
+    return docs, iris, sources
 
 
 def get_TransformersModelForTokenClassificationNerStep_model_path():
