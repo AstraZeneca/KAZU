@@ -1,0 +1,4 @@
+defaults:
+  - ray: cluster
+  - TransformersModelForTokenClassificationNerStep: default
+  - pipeline: default
