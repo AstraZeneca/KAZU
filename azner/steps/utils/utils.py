@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple
 
 from transformers import AutoTokenizer, BatchEncoding
 
-from azner.data.data import Document, Entity
+from azner.data.data import Document, Entity, Mapping
 
 
 def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, str]:
@@ -49,3 +49,19 @@ def documents_to_document_section_batch_encodings_map(
     doc_section_to_text_map = documents_to_document_section_text_map(docs)
     batch_encodings = tokenizer(list(doc_section_to_text_map.values()))
     return batch_encodings, list(doc_section_to_text_map.keys())
+
+
+def get_match_entity_class_hash(ent: Entity) -> int:
+    return hash(
+        (
+            ent.match,
+            ent.entity_class,
+        )
+    )
+
+
+def update_mappings(entity: Entity, mapping: Mapping):
+    if entity.metadata.mappings is None:
+        entity.metadata.mappings = [mapping]
+    else:
+        entity.metadata.mappings.append(mapping)
