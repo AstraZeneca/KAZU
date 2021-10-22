@@ -131,3 +131,6 @@ dmypy.json
 *output
 
 .idea
+
+**/lightning_logs
+**/test_assets/**/cached*
