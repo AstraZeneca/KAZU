@@ -1,8 +1,12 @@
+import logging
+import os
+from pathlib import Path
 from typing import List, Dict, Tuple
 
+from azner.data.data import Document, Entity, Mapping
 from transformers import AutoTokenizer, BatchEncoding
 
-from azner.data.data import Document, Entity, Mapping
+logger = logging.getLogger(__name__)
 
 
 def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, str]:
@@ -14,19 +18,6 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
     return {
         (doc.hash_val + section.hash_val): section.text for doc in docs for section in doc.sections
     }
-
-
-def documents_to_entity_list(docs: List[Document]) -> List[Entity]:
-    """
-    takes a list of documents and returns all entities found within them
-    :param docs:
-    :return:
-    """
-    entities = []
-    for doc in docs:
-        for section in doc.sections:
-            entities.extend(section.entities)
-    return entities
 
 
 def filter_entities_with_kb_mappings(entities: List[Entity]) -> List[Entity]:
@@ -65,3 +56,24 @@ def update_mappings(entity: Entity, mapping: Mapping):
         entity.metadata.mappings = [mapping]
     else:
         entity.metadata.mappings.append(mapping)
+
+
+def get_cache_dir(path: str, create_if_not_exist: bool = True) -> Path:
+    path = Path(path)
+    original_filename = path.name
+    original_dir = path.parent
+    new_path = original_dir.joinpath(f"cached_{original_filename}")
+    if create_if_not_exist:
+        try:
+            os.mkdir(new_path)
+        except FileExistsError:
+            logger.info(f"{new_path} already exists. Will not make it")
+    return new_path
+
+
+def get_cache_partition_path(path_str: str, partition_number: int) -> Path:
+    path = Path(path_str)
+    original_filename = path.name
+    cache_dir = get_cache_dir(path_str, False)
+    new_path = cache_dir.joinpath(f"cached_{partition_number}_{original_filename}")
+    return new_path

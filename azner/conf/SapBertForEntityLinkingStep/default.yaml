@@ -6,6 +6,8 @@ process_all_entities: False
 rebuild_kb_cache: False
 depends_on: ~
 lookup_cache_size: 5000
+dl_workers: 1
+kb_partition_size: 100000
 trainer:
   _target_: pytorch_lightning.Trainer
   progress_bar_refresh_rate: 0

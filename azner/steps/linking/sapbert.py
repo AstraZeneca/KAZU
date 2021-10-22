@@ -1,10 +1,12 @@
 import logging
 import os
 import pickle
+import shutil
 from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
+import pydash
 import torch
 from azner.data.data import Document, Entity, Mapping
 from azner.data.pytorch import HFDataset
@@ -13,12 +15,12 @@ from azner.steps import BaseStep
 from cachetools import LFUCache
 from pytorch_lightning import Trainer
 from scipy.spatial.distance import cdist
-from steps.utils.utils import (
-    documents_to_entity_list,
+from azner.steps.utils.utils import (
     filter_entities_with_kb_mappings,
     get_match_entity_class_hash,
     update_mappings,
-    get_cache_file,
+    get_cache_dir,
+    get_cache_partition_path,
 )
 from torch.utils.data import DataLoader
 from transformers import (
@@ -40,6 +42,8 @@ class SapBertForEntityLinkingStep(BaseStep):
         knowledgebase_path: str,
         batch_size: int,
         trainer: Trainer,
+        dl_workers: int,
+        kb_partition_size: int,
         process_all_entities: bool = False,
         rebuild_kb_cache: bool = False,
         lookup_cache_size: int = 5000,
@@ -62,6 +66,9 @@ class SapBertForEntityLinkingStep(BaseStep):
                             source and iri will be used to create a Mapping for the entity.
                             See SapBert paper for further info
         :param batch_size: batch size for dataloader
+        :param dl_workers: number of workers for the dataloader
+        :param trainer: an instance of pytorch lightning trainer
+        :param kb_partition_size: number of rows to process before saving results, when building initial kb cache
         :param process_all_entities: bool flag. Since SapBert involves expensive bert calls, this flag controls whether
                                         it should be used on all entities, or only entities that have no mappings (i.e.
                                         entites that have already been linked via a less expensive method, such as
@@ -71,6 +78,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param lookup_cache_size: this step maintains a cache of {hash(Entity.match,Entity.entity_class):Mapping}, to reduce bert calls. This dictates the size
         """
         super().__init__(depends_on=depends_on)
+        self.dl_workers = dl_workers
         self.rebuild_cache = rebuild_kb_cache
         self.process_all_entities = process_all_entities
         self.batch_size = batch_size
@@ -89,15 +97,19 @@ class SapBertForEntityLinkingStep(BaseStep):
         on disk
         :return:
         """
-        cache_file_path = get_cache_file(self.knowledgebase_path)
+        cache_dir = get_cache_dir(self.knowledgebase_path, create_if_not_exist=False)
         if self.rebuild_cache:
             logger.info("forcing a rebuild of the kb cache")
+            if os.path.exists(cache_dir):
+                shutil.rmtree(cache_dir)
+            get_cache_dir(self.knowledgebase_path, create_if_not_exist=True)
             self.cache_kb_embeddings()
-        elif os.path.exists(cache_file_path):
-            logger.info(f"loading cached kb file from {cache_file_path}")
+        elif os.path.exists(cache_dir):
+            logger.info(f"loading cached kb file from {cache_dir}")
             self.load_kb_cache()
         else:
             logger.info("No kb cache file found. Building a new one")
+            get_cache_dir(self.knowledgebase_path, create_if_not_exist=True)
             self.cache_kb_embeddings()
 
     def cache_kb_embeddings(self):
@@ -105,21 +117,40 @@ class SapBertForEntityLinkingStep(BaseStep):
         since the generation of the knowledgebase embeddings is slow, we cache this to disk after this is done once
         :return:
         """
-        self.sources, self.kb_ids, self.kb_embeddings = self.predict_kb_embeddings()
-        cache_path = get_cache_file(self.knowledgebase_path)
-        with open(cache_path, "wb") as f:
-            pickle.dump(
-                (
-                    self.kb_ids,
-                    self.kb_embeddings,
-                ),
-                f,
+        self.sources, self.kb_ids, self.kb_embeddings = [], [], []
+        for partition_number, sources, kb_ids, kb_embeddings in self.predict_kb_embeddings():
+            logger.info(f"saving partition {partition_number}")
+            cache_path = get_cache_partition_path(
+                self.knowledgebase_path, partition_number=partition_number
             )
+            with open(cache_path, "wb") as f:
+                pickle.dump(
+                    (
+                        sources,
+                        kb_ids,
+                        kb_embeddings,
+                    ),
+                    f,
+                )
+            self.sources.extend(sources)
+            self.kb_embeddings.extend(kb_embeddings)
+            self.kb_ids.extend(kb_ids)
 
     def load_kb_cache(self):
-        cache_path = get_cache_file(self.knowledgebase_path)
-        with open(cache_path, "rb") as f:
-            self.sources, self.kb_ids, self.kb_embeddings = pickle.load(f)
+        self.sources, self.kb_ids, self.kb_embeddings = [], [], []
+        cache_path = get_cache_dir(self.knowledgebase_path, create_if_not_exist=False)
+        cache_files = os.listdir(cache_path)
+        for file in cache_files:
+            with open(cache_path.joinpath(file), "rb") as f:
+                sources, kb_ids, kb_embeddings = pickle.load(f)
+                self.sources.extend(sources)
+                self.kb_ids.extend(kb_ids)
+                self.kb_embeddings.extend(kb_embeddings)
+
+    def split_dataframe(self, df: pd.DataFrame, chunk_size=100000):
+        num_chunks = len(df) // chunk_size + 1
+        for i in range(num_chunks):
+            yield df[i * chunk_size : (i + 1) * chunk_size]
 
     def predict_kb_embeddings(self) -> Tuple[List[str], List[str], np.ndarray]:
         """
@@ -128,24 +159,32 @@ class SapBertForEntityLinkingStep(BaseStep):
         :return:
         """
 
-        df = pd.read_parquet(self.knowledgebase_path)
-        logger.info(f"read {df.shape[0]} rows from kb")
-        df.columns = ["source", "iri", "default_label"]
+        full_df = pd.read_parquet(self.knowledgebase_path)
 
-        default_labels = df["default_label"].tolist()
-        batch_encodings = self.tokeniser(default_labels)
-        dataset = HFDataset(batch_encodings)
-        collate_func = DataCollatorWithPadding(
-            tokenizer=self.tokeniser, padding=PaddingStrategy.LONGEST
-        )
-        loader = DataLoader(dataset=dataset, batch_size=self.batch_size, collate_fn=collate_func)
+        for partition_number, df in enumerate(self.split_dataframe(full_df, 50000)):
+            logger.info(f"creating partitions for partition {partition_number}")
+            logger.info(f"read {df.shape[0]} rows from kb")
+            df.columns = ["source", "iri", "default_label"]
 
-        results = self.trainer.predict(
-            model=self.model, dataloaders=loader, return_predictions=True
-        )
-        results = torch.cat([x.pooler_output for x in results]).cpu().detach().numpy()
-        logger.info("knowledgebase embedding generation successful")
-        return df["source"].tolist(), df["iri"].tolist(), results
+            default_labels = df["default_label"].tolist()
+            batch_encodings = self.tokeniser(default_labels)
+            dataset = HFDataset(batch_encodings)
+            collate_func = DataCollatorWithPadding(
+                tokenizer=self.tokeniser, padding=PaddingStrategy.LONGEST
+            )
+            loader = DataLoader(
+                dataset=dataset,
+                batch_size=self.batch_size,
+                collate_fn=collate_func,
+                num_workers=self.dl_workers,
+            )
+
+            results = self.trainer.predict(
+                model=self.model, dataloaders=loader, return_predictions=True
+            )
+            results = torch.cat([x.pooler_output for x in results]).cpu().detach().numpy()
+            logger.info("knowledgebase embedding generation successful")
+            yield partition_number, df["source"].tolist(), df["iri"].tolist(), results
 
     def get_dataloader_for_entities(self, entities: List[Entity]) -> DataLoader:
         """
@@ -159,7 +198,12 @@ class SapBertForEntityLinkingStep(BaseStep):
         collate_func = DataCollatorWithPadding(
             tokenizer=self.tokeniser, padding=PaddingStrategy.LONGEST
         )
-        loader = DataLoader(dataset=dataset, batch_size=self.batch_size, collate_fn=collate_func)
+        loader = DataLoader(
+            dataset=dataset,
+            batch_size=self.batch_size,
+            collate_fn=collate_func,
+            num_workers=self.dl_workers,
+        )
         return loader
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
@@ -174,7 +218,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param docs:
         :return:
         """
-        entities = documents_to_entity_list(docs)
+        entities = pydash.flatten([x.get_entities() for x in docs])
         if not self.process_all_entities:
             entities = filter_entities_with_kb_mappings(entities)
 
