@@ -18,7 +18,6 @@ from scipy.spatial.distance import cdist
 from azner.steps.utils.utils import (
     filter_entities_with_kb_mappings,
     get_match_entity_class_hash,
-    update_mappings,
     get_cache_dir,
     get_cache_partition_path,
 )
@@ -51,6 +50,19 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
         This step wraps Sapbert: Self Alignment pretraining for biomedical entity representation.
 
+
+        We make use of two caches here:
+        1) KB embeddings
+            Since these are static and numerous, it makes sense to precompute them once and reload them each time
+            This is done automatically if no cache file is detected. A cache fiile is generated with the prefix 'cache_'
+            alongside the location of the original kb file
+
+        2) Runtime LFUCache
+            Since certain entities will come up more frequently, we cache the result of the embedding check rather than
+            call bert repeatedly. This cache is maintained on the basis of the get_match_entity_class_hash(Entity)
+            function
+
+
         Note, the knowledgebase to link against is held in memory as an ndarray. For very large KB's we should use
         faiss (see Nemo example via SapBert github reference)
 
@@ -78,6 +90,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param lookup_cache_size: this step maintains a cache of {hash(Entity.match,Entity.entity_class):Mapping}, to reduce bert calls. This dictates the size
         """
         super().__init__(depends_on=depends_on)
+        self.kb_partition_size = kb_partition_size
         self.dl_workers = dl_workers
         self.rebuild_cache = rebuild_kb_cache
         self.process_all_entities = process_all_entities
@@ -147,7 +160,13 @@ class SapBertForEntityLinkingStep(BaseStep):
                 self.kb_ids.extend(kb_ids)
                 self.kb_embeddings.extend(kb_embeddings)
 
-    def split_dataframe(self, df: pd.DataFrame, chunk_size=100000):
+    def split_dataframe(self, df: pd.DataFrame, chunk_size: int = 100000):
+        """
+        generator to split up a dataframe into partitions
+        :param df:
+        :param chunk_size: size of partittions to create
+        :return:
+        """
         num_chunks = len(df) // chunk_size + 1
         for i in range(num_chunks):
             yield df[i * chunk_size : (i + 1) * chunk_size]
@@ -161,7 +180,9 @@ class SapBertForEntityLinkingStep(BaseStep):
 
         full_df = pd.read_parquet(self.knowledgebase_path)
 
-        for partition_number, df in enumerate(self.split_dataframe(full_df, 50000)):
+        for partition_number, df in enumerate(
+            self.split_dataframe(full_df, self.kb_partition_size)
+        ):
             logger.info(f"creating partitions for partition {partition_number}")
             logger.info(f"read {df.shape[0]} rows from kb")
             df.columns = ["source", "iri", "default_label"]
@@ -242,7 +263,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                 new_mapping = Mapping(
                     source=self.sources[nn_index], idx=self.kb_ids[nn_index], mapping_type="direct"
                 )
-                update_mappings(entity, new_mapping)
+                entity.add_mapping(new_mapping)
                 self.update_lookup_cache(entity, new_mapping)
         return docs, []
 
@@ -265,5 +286,5 @@ class SapBertForEntityLinkingStep(BaseStep):
             if maybe_mapping is None:
                 cache_misses.append(ent)
             else:
-                update_mappings(ent, maybe_mapping)
+                ent.add_mapping(maybe_mapping)
         return cache_misses

@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import List, Dict, Tuple
 
-from azner.data.data import Document, Entity, Mapping
+from azner.data.data import Document, Entity
 from transformers import AutoTokenizer, BatchEncoding
 
 logger = logging.getLogger(__name__)
@@ -49,13 +49,6 @@ def get_match_entity_class_hash(ent: Entity) -> int:
             ent.entity_class,
         )
     )
-
-
-def update_mappings(entity: Entity, mapping: Mapping):
-    if entity.metadata.mappings is None:
-        entity.metadata.mappings = [mapping]
-    else:
-        entity.metadata.mappings.append(mapping)
 
 
 def get_cache_dir(path: str, create_if_not_exist: bool = True) -> Path:

@@ -93,6 +93,12 @@ class Entity(BaseModel):
         """
         return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
+    def add_mapping(self, mapping: Mapping):
+        if self.metadata.mappings is None:
+            self.metadata.mappings = [mapping]
+        else:
+            self.metadata.mappings.append(mapping)
+
 
 class Section(BaseModel):
     text: str  # the text to be processed
