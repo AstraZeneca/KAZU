@@ -130,6 +130,16 @@ class Document(BaseModel):
     def populate_hash(cls, v, values):
         return hash(values.get("idx"))
 
+    def get_entities(self) -> List[Entity]:
+        """
+        get all entities in this document
+        :return:
+        """
+        entities = []
+        for section in self.sections:
+            entities.extend(section.entities)
+        return entities
+
 
 class SimpleDocument(Document):
     """
