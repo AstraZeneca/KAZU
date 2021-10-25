@@ -93,6 +93,12 @@ class Entity(BaseModel):
         """
         return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
+    def add_mapping(self, mapping: Mapping):
+        if self.metadata.mappings is None:
+            self.metadata.mappings = [mapping]
+        else:
+            self.metadata.mappings.append(mapping)
+
 
 class Section(BaseModel):
     text: str  # the text to be processed
@@ -129,6 +135,16 @@ class Document(BaseModel):
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):
         return hash(values.get("idx"))
+
+    def get_entities(self) -> List[Entity]:
+        """
+        get all entities in this document
+        :return:
+        """
+        entities = []
+        for section in self.sections:
+            entities.extend(section.entities)
+        return entities
 
 
 class SimpleDocument(Document):
