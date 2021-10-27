@@ -20,7 +20,7 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
     }
 
 
-def filter_entities_with_kb_mappings(entities: List[Entity]) -> List[Entity]:
+def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entity]:
     """
     finds entities that have no kb mappings
     :param entities:
@@ -64,9 +64,9 @@ def get_cache_dir(path: str, create_if_not_exist: bool = True) -> Path:
     return new_path
 
 
-def get_cache_partition_path(path_str: str, partition_number: int) -> Path:
+def get_cache_path(path_str: str, cache_id: str) -> Path:
     path = Path(path_str)
     original_filename = path.name
     cache_dir = get_cache_dir(path_str, False)
-    new_path = cache_dir.joinpath(f"cached_{partition_number}_{original_filename}")
+    new_path = cache_dir.joinpath(f"cached_{cache_id}_{original_filename}")
     return new_path
