@@ -134,3 +134,5 @@ dmypy.json
 
 **/lightning_logs
 **/test_assets/**/cached*
+
+no_vc/
