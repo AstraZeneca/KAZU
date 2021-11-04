@@ -4,6 +4,20 @@ import sys
 
 import pandas as pd
 
+"""
+Script to create sapbert training data from mondo ontology
+
+use with a mondo json file from the mondo home page
+
+usage: 
+
+python mondo.py <path to mondo.json>
+
+
+outputs: 
+
+mondo_training.csv of training pairs in the current directory
+"""
 
 # path to mondo.json (from mondo ontology dl page)
 x = json.load(open(sys.argv[1], "r"))
