@@ -74,7 +74,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         distances, neighbors = self.index.search(
             embedding.numpy(), self.return_n_nearest_neighbours
         )
-        return distances, neighbors
+        return np.squeeze(distances), np.squeeze(neighbors)
 
     def add(self, embeddings: torch.Tensor):
         if self.index is None:
@@ -102,16 +102,30 @@ class TensorEmbeddingIndex(EmbeddingIndex):
     def save(self, path: str):
         torch.save(self.index, path)
 
-    def search(self, embedding: torch.Tensor):
-        score_matrix = torch.matmul(embedding, self.index.T)
+    def search_cdist(self, embedding: torch.Tensor):
+        score_matrix = torch.cdist(embedding, self.index)
 
         score_matrix = torch.squeeze(score_matrix)
-        neighbours = torch.argsort(score_matrix, descending=True)[
+        neighbours = torch.argsort(score_matrix, descending=False)[
             : self.return_n_nearest_neighbours
         ]
         distances = score_matrix[neighbours]
         distances = 1 / distances
         return distances.cpu().numpy(), neighbours.cpu().numpy()
+
+    def search_matmul(self, embedding: torch.Tensor):
+        score_matrix = torch.matmul(embedding, self.index.T)
+
+        score_matrix = torch.squeeze(score_matrix)
+        neighbours = torch.argsort(score_matrix, descending=False)[
+            : self.return_n_nearest_neighbours
+        ]
+        distances = score_matrix[neighbours]
+        distances = 1 / distances
+        return distances.cpu().numpy(), neighbours.cpu().numpy()
+
+    def search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray]:
+        return self.search_matmul(embedding)
 
     def add(self, embeddings: torch.Tensor):
         if self.index is None:
