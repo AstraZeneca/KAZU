@@ -125,6 +125,11 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         return distances.cpu().numpy(), neighbours.cpu().numpy()
 
     def search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        to meet the abstract method, default to matmul
+        :param embedding:
+        :return:
+        """
         return self.search_matmul(embedding)
 
     def add(self, embeddings: torch.Tensor):
