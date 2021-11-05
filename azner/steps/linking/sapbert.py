@@ -229,7 +229,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         results = self.trainer.predict(
             model=self.model, dataloaders=loader, return_predictions=True
         )
-        results = self.model.get_embeddings(results, as_index=False)
+        results = self.model.get_embeddings(results)
         return results
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
