@@ -188,7 +188,7 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         self.index = None
 
     def _load(self, path: str):
-        return torch.load(path)
+        return torch.load(path, map_location="cpu")
 
     def _save(self, path: str):
         torch.save(self.index, path)
