@@ -383,7 +383,10 @@ class PLSapbertModel(LightningModule):
         full_dict = {}
         for batch_id, batch in enumerate(output):
             full_dict.update(batch)
-        embedding = torch.squeeze(torch.cat(list(full_dict.values())))
+        if len(full_dict) > 1:
+            embedding = torch.squeeze(torch.cat(list(full_dict.values())))
+        else:
+            embedding = torch.cat(list(full_dict.values()))
         return embedding
 
     def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
