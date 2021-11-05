@@ -1,8 +1,6 @@
 import logging
 import os
-import pickle
 import shutil
-from collections import defaultdict
 from typing import List, Tuple, Dict
 
 import pandas as pd
@@ -26,12 +24,9 @@ from azner.steps.utils.utils import (
     filter_entities_with_ontology_mappings,
     get_match_entity_class_hash,
     get_cache_dir,
-    get_cache_path,
 )
 
 logger = logging.getLogger(__name__)
-
-IDENTIFIERS_CACHE_ID = "identifiers"
 
 
 class SapBertForEntityLinkingStep(BaseStep):
@@ -119,17 +114,14 @@ class SapBertForEntityLinkingStep(BaseStep):
             if os.path.exists(cache_dir):
                 shutil.rmtree(cache_dir)
             get_cache_dir(self.ontology_path, create_if_not_exist=True)
-            self.ontology_ids, self.ontology_index_dict = self.cache_ontology_embeddings()
+            self.ontology_index_dict = self.cache_ontology_embeddings()
         elif os.path.exists(cache_dir):
             logger.info(f"loading cached ontology file from {cache_dir}")
-            (
-                self.ontology_ids,
-                self.ontology_index_dict,
-            ) = self.load_ontology_ids_and_ontology_index_dict_from_cache()
+            self.ontology_index_dict = self.load_ontology_index_dict_from_cache()
         else:
             logger.info("No ontology cache file found. Building a new one")
             get_cache_dir(self.ontology_path, create_if_not_exist=True)
-            self.ontology_ids, self.ontology_index_dict = self.cache_ontology_embeddings()
+            self.ontology_index_dict = self.cache_ontology_embeddings()
 
     def get_ontology_slices_from_full_dataframe(self) -> Tuple[str, pd.DataFrame]:
         full_df = pd.read_parquet(self.ontology_path)
@@ -137,75 +129,49 @@ class SapBertForEntityLinkingStep(BaseStep):
         for source in sources:
             yield source, full_df[full_df["source"] == source]
 
-    def cache_ontology_embeddings(self) -> Tuple[Dict[str, List[str]], Dict[str, EmbeddingIndex]]:
+    def cache_ontology_embeddings(self) -> Dict[str, EmbeddingIndex]:
         """
         since the generation of the ontology embeddings is slow, we cache this to disk after this is done once.
-        :return: tuple of the ontology_ids lookup dict and the ontology:Index dict
+        :return: ontology_name:Index dict
         """
-        ontology_ids = defaultdict(list)
         ontology_index_dict = {}
-        for ontology, ontology_df in self.get_ontology_slices_from_full_dataframe():
-            logger.info(f"creating index for {ontology}")
-            index = self.embedding_index_factory.create_index()
+        for ontology_name, ontology_df in self.get_ontology_slices_from_full_dataframe():
+            logger.info(f"creating index for {ontology_name}")
+            index = self.embedding_index_factory.create_index(ontology_name)
             for (
                 partition_number,
-                ontology_ids_list,
+                metadata_df,
                 ontology_embeddings,
             ) in self.predict_ontology_embeddings(ontology_dataframe=ontology_df):
                 logger.info(f"processing partition {partition_number} ")
-                index.add(ontology_embeddings)
+                index.add(ontology_embeddings, metadata_df)
                 logger.info(f"index size is now {len(index)}")
-                ontology_ids[ontology].extend(ontology_ids_list)
 
-            logger.info("saving index metadata ")
-            cache_path = get_cache_path(
-                self.ontology_path, cache_id=f"{IDENTIFIERS_CACHE_ID}_{ontology}"
-            )
-            with open(cache_path, "wb") as f:
-                pickle.dump(
-                    (
-                        ontology_ids[ontology],
-                        ontology,
-                    ),
-                    f,
-                )
+            index_cache_dir = get_cache_dir(self.ontology_path, create_if_not_exist=True)
+            index_path = index.save(index_cache_dir)
+            logger.info(f"saved {ontology_name} index to {index_path.absolute()}")
+            ontology_index_dict[ontology_name] = index
+            logger.info(f"final index size for {ontology_name} is {len(index)}")
+            return ontology_index_dict
 
-            index_path = get_cache_path(
-                self.ontology_path, cache_id=f"{index.__class__.__name__}_{ontology}"
-            )
-            index.save(str(index_path.absolute()))
-            logger.info(f"saved {ontology} index to {index_path.absolute()}")
-            ontology_index_dict[ontology] = index
-            logger.info(f"final index size for {ontology} is {len(index)}")
-            return ontology_ids, ontology_index_dict
-
-    def load_ontology_ids_and_ontology_index_dict_from_cache(
+    def load_ontology_index_dict_from_cache(
         self,
-    ) -> Tuple[Dict[str, List[str]], Dict[str, EmbeddingIndex]]:
+    ) -> Dict[str, EmbeddingIndex]:
         """
-        loads the cached version of ontology ids and associated embedding index from disk
-        :return: tuple of the ontology_ids lookup dict and the ontology:Index dict
+        loads the cached version of the embedding indices from disk
+        :return: ontology:Index dict
         """
-        ontology_ids: Dict[str, List[str]] = defaultdict(list)
         ontology_index_dict: Dict[str, EmbeddingIndex] = {}
 
-        identifiers_cache_dir = get_cache_dir(self.ontology_path, create_if_not_exist=False)
-        ontology_metadata_filenames = [
-            x for x in os.listdir(identifiers_cache_dir) if IDENTIFIERS_CACHE_ID in x
-        ]
-        for filename in ontology_metadata_filenames:
-            with open(identifiers_cache_dir.joinpath(filename), "rb") as f:
-                ontology_ids_list, ontology_name = pickle.load(f)
-                ontology_ids[ontology_name].extend(ontology_ids_list)
-                index = self.embedding_index_factory.create_index()
-                index_cache_path = get_cache_path(
-                    self.ontology_path, cache_id=f"{index.__class__.__name__}_{ontology_name}"
-                )
+        index_cache_dir = get_cache_dir(self.ontology_path, create_if_not_exist=False)
+        index_dirs = os.listdir(index_cache_dir)
 
-                index.load(str(index_cache_path.absolute()))
-                ontology_index_dict[ontology_name] = index
+        for filename in index_dirs:
+            index = self.embedding_index_factory.create_index()
+            index.load(index_cache_dir.joinpath(filename))
+            ontology_index_dict[index.name] = index
 
-        return ontology_ids, ontology_index_dict
+        return ontology_index_dict
 
     def split_dataframe(self, df: pd.DataFrame, chunk_size: int = 100000):
         """
@@ -220,16 +186,17 @@ class SapBertForEntityLinkingStep(BaseStep):
 
     def predict_ontology_embeddings(
         self, ontology_dataframe: pd.DataFrame
-    ) -> Tuple[List[str], List[str], torch.Tensor]:
+    ) -> Tuple[List[str], pd.DataFrame, torch.Tensor]:
         """
         based on the value of self.ontology_path, this returns a Tuple[List[str],np.ndarray]. The strings are the
         iri's, and the torch.Tensor are the embeddings to be queried against
-        :return: partition number, list of iri's, 2d tensor of embeddings
+        :return: partition number, dataframe for metadata, 2d tensor of embeddings
         """
 
         for partition_number, df in enumerate(
             self.split_dataframe(ontology_dataframe, self.ontology_partition_size)
         ):
+            df = df.copy()
             if df.shape[0] == 0:
                 return
             logger.info(f"creating partitions for partition {partition_number}")
@@ -239,7 +206,7 @@ class SapBertForEntityLinkingStep(BaseStep):
             default_labels = df["default_label"].tolist()
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
             results = self.get_embeddings_for_strings(default_labels)
-            yield partition_number, df["iri"].tolist(), results
+            yield partition_number, df, results
 
     def get_embeddings_for_strings(self, texts: List[str]) -> torch.Tensor:
         """
@@ -288,14 +255,21 @@ class SapBertForEntityLinkingStep(BaseStep):
             for i, result in enumerate(results):
                 entity = entities[i]
                 ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
-                distances, neighbors = self.ontology_index_dict[ontology_name].search(result)
-                for ontology_id, dist in zip(neighbors, distances):
-                    ontology_id = self.ontology_ids[ontology_name][ontology_id]
+                distances, neighbors, metadata_df = self.ontology_index_dict[ontology_name].search(
+                    result
+                )
+                for metadata_index, (
+                    neighbour_id,
+                    dist,
+                ) in enumerate(zip(neighbors, distances)):
+                    metadata_dict = metadata_df.iloc[metadata_index].to_dict()
+                    ontology_id = metadata_dict.pop("iri")
+                    metadata_dict["dist"] = dist
                     new_mapping = Mapping(
                         source=ontology_name,
                         idx=ontology_id,
                         mapping_type="direct",
-                        metadata={"distance": dist},
+                        metadata=metadata_dict,
                     )
                     entity.add_mapping(new_mapping)
                     self.update_lookup_cache(entity, new_mapping)
