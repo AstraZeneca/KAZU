@@ -7,7 +7,51 @@ from hydra import initialize_config_module, compose
 from hydra.utils import instantiate
 from steps.linking.sapbert import SapBertForEntityLinkingStep
 from steps.utils.utils import get_cache_dir
-from tests.utils import entity_linking_easy_cases, TINY_CHEMBL_KB_PATH
+from tests.utils import entity_linking_easy_cases, TINY_CHEMBL_KB_PATH, entity_linking_hard_cases
+
+
+class AcceptanceTestError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+def test_sapbert_acceptance():
+    minimum_pass_score = 0.80
+    with initialize_config_module(config_module="azner.conf"):
+        cfg = compose(
+            config_name="config",
+            overrides=[
+                f"SapBertForEntityLinkingStep.model.model_name_or_path={os.getenv('SapBertForEntityLinkingModelPath')}",
+                f"SapBertForEntityLinkingStep.ontology_path={os.getenv('SAPBERT_KB_CACHE')}",
+                "SapBertForEntityLinkingStep.rebuild_ontology_cache=False",
+            ],
+        )
+
+        hits = []
+        misses = []
+        step = instantiate(cfg.SapBertForEntityLinkingStep)
+        easy_test_docs, iris, sources = entity_linking_hard_cases()
+        successes, failures = step(easy_test_docs)
+        entities = pydash.flatten([x.get_entities() for x in successes])
+        for entity, iri, source in zip(entities, iris, sources):
+            if entity.metadata.mappings[0].idx == iri:
+                hits.append(entity)
+            else:
+                misses.append(
+                    (
+                        entity,
+                        iri,
+                    )
+                )
+
+        for entity, iri in misses:
+            print(f"missed {entity.match}: got {entity.metadata.mappings[0].idx}, wanted {iri} ")
+        total = len(hits) + len(misses)
+        score = len(hits) / total
+        if score < minimum_pass_score:
+            raise AcceptanceTestError(
+                f"sapbert scored {score}, which did not reach minimum pass score of {minimum_pass_score}"
+            )
 
 
 @pytest.mark.timeout(10)
@@ -16,9 +60,9 @@ def test_sapbert_step():
         cfg = compose(
             config_name="config",
             overrides=[
-                f"SapBertForEntityLinkingStep.model_path={os.getenv('SapBertForEntityLinkingModelPath')}",
-                f"SapBertForEntityLinkingStep.knowledgebase_path={TINY_CHEMBL_KB_PATH}",
-                "SapBertForEntityLinkingStep.rebuild_kb_cache=True",
+                f"SapBertForEntityLinkingStep.model.model_name_or_path={os.getenv('SapBertForEntityLinkingModelPath')}",
+                f"SapBertForEntityLinkingStep.ontology_path={TINY_CHEMBL_KB_PATH}",
+                "SapBertForEntityLinkingStep.rebuild_ontology_cache=True",
             ],
         )
 
@@ -40,16 +84,16 @@ def test_sapbert_step():
                 assert entity.metadata.mappings[0].source == source
 
 
-def test_sapbert_kb_caching():
+def test_sapbert_ontology_caching():
     with initialize_config_module(config_module="azner.conf"):
 
         # no cache found, so should rebuidl automatically
         cfg = compose(
             config_name="config",
             overrides=[
-                f"SapBertForEntityLinkingStep.model_path={os.getenv('SapBertForEntityLinkingModelPath')}",
-                f"SapBertForEntityLinkingStep.knowledgebase_path={TINY_CHEMBL_KB_PATH}",
-                "SapBertForEntityLinkingStep.rebuild_kb_cache=False",
+                f"SapBertForEntityLinkingStep.model.model_name_or_path={os.getenv('SapBertForEntityLinkingModelPath')}",
+                f"SapBertForEntityLinkingStep.ontology_path={TINY_CHEMBL_KB_PATH}",
+                "SapBertForEntityLinkingStep.rebuild_ontology_cache=False",
             ],
         )
         cache_file_location = get_cache_dir(TINY_CHEMBL_KB_PATH, create_if_not_exist=False)
@@ -58,25 +102,28 @@ def test_sapbert_kb_caching():
 
         step: SapBertForEntityLinkingStep = instantiate(cfg.SapBertForEntityLinkingStep)
         assert os.path.exists(cache_file_location)
-        assert len(step.kb_ids) > 0
-        assert len(step.kb_embeddings) > 0
+        assert len(step.ontology_ids) > 0
+        assert len(step.ontology_index_dict) > 0
 
         # force cache rebuild
         cfg = compose(
             config_name="config",
             overrides=[
-                f"SapBertForEntityLinkingStep.model_path={os.getenv('SapBertForEntityLinkingModelPath')}",
-                f"SapBertForEntityLinkingStep.knowledgebase_path={TINY_CHEMBL_KB_PATH}",
-                "SapBertForEntityLinkingStep.rebuild_kb_cache=True",
+                f"SapBertForEntityLinkingStep.model.model_name_or_path={os.getenv('SapBertForEntityLinkingModelPath')}",
+                f"SapBertForEntityLinkingStep.ontology_path={TINY_CHEMBL_KB_PATH}",
+                "SapBertForEntityLinkingStep.rebuild_ontology_cache=True",
             ],
         )
         step: SapBertForEntityLinkingStep = instantiate(cfg.SapBertForEntityLinkingStep)
         # creating the step should trigger the cache to be build
         assert os.path.exists(cache_file_location)
         # remove references to the loaded cached objects
-        step.kb_ids = None
-        step.kb_embeddings = None
+        step.ontology_ids.clear()
+        step.ontology_index_dict.clear()
         # load the cache from disk
-        step.load_kb_cache()
-        assert len(step.kb_ids) > 0
-        assert len(step.kb_embeddings) > 0
+        (
+            step.ontology_ids,
+            step.ontology_index_dict,
+        ) = step.load_ontology_ids_and_ontology_index_dict_from_cache()
+        assert len(step.ontology_ids) > 0
+        assert len(step.ontology_index_dict) > 0
