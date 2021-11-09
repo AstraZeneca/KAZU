@@ -17,4 +17,4 @@ class HFDataset(IterableDataset):
 
     def __iter__(self) -> Iterator[T_co]:
         for encoding in self.encodings.data:
-            yield {"input_ids": encoding["input_ids"],"attention_mask":encoding["attention_mask"]}
+            yield {"input_ids": encoding["input_ids"], "attention_mask": encoding["attention_mask"]}
