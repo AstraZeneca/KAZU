@@ -28,7 +28,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
-from azner.steps.utils.embedding_index import (
+from azner.utils.embedding_index import (
     EmbeddingIndex,
     MatMulTensorEmbeddingIndex,
 )
