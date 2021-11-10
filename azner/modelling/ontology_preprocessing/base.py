@@ -9,11 +9,13 @@ from rdflib import URIRef
 import sqlite3
 from tqdm.auto import tqdm
 
+from abc import ABC
 
-class OntologyParser:
+
+class OntologyParser(ABC):
     """
     Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking
-    Implementations should override static field 'name' to something suitably representative
+    Implementations should have a class attribute 'name' to something suitably representative
     """
 
     name = "unnamed"
@@ -42,7 +44,8 @@ class OntologyParser:
 
     def post_process_synonym_table(self) -> pd.DataFrame:
         df = self.format_synonym_table()
-        df.columns = self.all_synonym_column_names
+        # ensure correct order
+        df = df[self.all_synonym_column_names]
         # make sure default labels are also in the synonym list
         default_labels_df = df[["iri", "default_label"]].drop_duplicates()
         default_labels_df["syn"] = default_labels_df["default_label"]
@@ -229,6 +232,7 @@ class EnsemblOntologyParser(OntologyParser):
 
     def format_synonym_table(self) -> pd.DataFrame:
         df = pd.read_csv(self.in_path, sep="\t")
+        df.columns = self.all_synonym_column_names
         return df
 
 
