@@ -102,7 +102,6 @@ def test_sapbert_ontology_caching():
 
         step: SapBertForEntityLinkingStep = instantiate(cfg.SapBertForEntityLinkingStep)
         assert os.path.exists(cache_file_location)
-        assert len(step.ontology_ids) > 0
         assert len(step.ontology_index_dict) > 0
 
         # force cache rebuild
@@ -118,12 +117,7 @@ def test_sapbert_ontology_caching():
         # creating the step should trigger the cache to be build
         assert os.path.exists(cache_file_location)
         # remove references to the loaded cached objects
-        step.ontology_ids.clear()
         step.ontology_index_dict.clear()
         # load the cache from disk
-        (
-            step.ontology_ids,
-            step.ontology_index_dict,
-        ) = step.load_ontology_ids_and_ontology_index_dict_from_cache()
-        assert len(step.ontology_ids) > 0
+        step.ontology_index_dict = step.load_ontology_index_dict_from_cache()
         assert len(step.ontology_index_dict) > 0

@@ -21,5 +21,5 @@ trainer:
   gpus: 0
 embedding_index_factory:
   _target_: azner.steps.utils.embedding_index.EmbeddingIndexFactory
-  embedding_index_class_name: TensorEmbeddingIndex
+  embedding_index_class_name: MatMulTensorEmbeddingIndex
   return_n_nearest_neighbours: 5

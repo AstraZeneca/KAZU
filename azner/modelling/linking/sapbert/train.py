@@ -28,7 +28,10 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
-from azner.steps.utils.embedding_index import TensorEmbeddingIndex, EmbeddingIndex
+from azner.steps.utils.embedding_index import (
+    EmbeddingIndex,
+    MatMulTensorEmbeddingIndex,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -370,26 +373,21 @@ class PLSapbertModel(LightningModule):
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
         return self(batch)
 
-    def get_embeddings(
-        self, output: List[Dict[int, torch.Tensor]], as_index: bool = False
-    ) -> Union[torch.Tensor, EmbeddingIndex]:
+    def get_embeddings(self, output: List[Dict[int, torch.Tensor]]) -> torch.Tensor:
         """
-        get a tensor of embeddings in original order, or if preferred, as a TensorEmbeddingIndex for easy querying
+        get a tensor of embeddings in original order
         :param output: List[Dict[int, torch.Tensor]] int is the original index of the input (i.e. what comes out of
                         self.forward
-        :param as_index: return a TensorEmbeddingIndex instead of a torch.Tensor
         :return:
         """
         full_dict = {}
         for batch_id, batch in enumerate(output):
             full_dict.update(batch)
-        embedding = torch.squeeze(torch.cat(list(full_dict.values())))
-        if as_index:
-            index = TensorEmbeddingIndex(self.sapbert_training_params.topk)
-            index.add(embeddings=embedding)
+        if len(full_dict) > 1:
+            embedding = torch.squeeze(torch.cat(list(full_dict.values())))
         else:
-            index = embedding
-        return index
+            embedding = torch.cat(list(full_dict.values()))
+        return embedding
 
     def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         """
@@ -409,11 +407,16 @@ class PLSapbertModel(LightningModule):
                     outputs_all[output_index],
                     outputs_all[output_index + 1],
                 )
-                ontology_embeddings = self.get_embeddings(ontology_output, as_index=True)
-                query_embeddings = self.get_embeddings(query_output, as_index=False)
-                queries = self.generate_evaluation_data(
-                    dataset_name, ontology_embeddings, query_embeddings
+                ontology_embeddings = self.get_embeddings(ontology_output)
+                index = MatMulTensorEmbeddingIndex(
+                    name=dataset_name, return_n_nearest_neighbours=self.sapbert_training_params.topk
                 )
+                ontology_source = self.sapbert_evaluation_manager.datasets[
+                    dataset_name
+                ].ontology_source
+                index.add(ontology_embeddings, ontology_source)
+                query_embeddings = self.get_embeddings(query_output)
+                queries = self.generate_evaluation_data(dataset_name, index, query_embeddings)
                 metrics = self.evaluate_topk_acc(queries)
                 self.log_results(dataset_name, metrics)
 
@@ -433,12 +436,10 @@ class PLSapbertModel(LightningModule):
             ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
                 dataset_name
             ].query_source.iloc[i]
-            np_candidates = self.get_candidate_dataframe(
-                dataset_name, ontology_embeddings, query_embedding
-            )
+            _, _, candidate_df_slice = ontology_embeddings.search(query_embedding)
             default_label = ontology_entry["default_label"]
             golden_iri = ontology_entry["iri"]
-            dict_candidates = self.get_candidate_dict(np_candidates, golden_iri)
+            dict_candidates = self.get_candidate_dict(candidate_df_slice, golden_iri)
             gold_example = GoldStandardExample(
                 gold_default_label=default_label, gold_iri=golden_iri, candidates=dict_candidates
             )
@@ -450,22 +451,6 @@ class PLSapbertModel(LightningModule):
             if key.startswith("acc"):
                 self.log(key, value=val, rank_zero_only=True)
                 logger.info(f"{dataset_name}: {key}, {val}")
-
-    def get_candidate_dataframe(
-        self, dataset_name: str, ontology_embeddings: EmbeddingIndex, query_embedding: torch.Tensor
-    ) -> pd.DataFrame:
-        """
-        for a given query, return a dataframe of the ontology candidates, ordered by distance
-        :param dataset_name: dataset name to query
-        :param ontology_embeddings:
-        :param query_embedding:
-        :return:
-        """
-        _, candidate_idxs = ontology_embeddings.search(query_embedding)
-        df = self.sapbert_evaluation_manager.datasets[dataset_name].ontology_source.iloc[
-            candidate_idxs
-        ]
-        return df
 
     def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
         """
