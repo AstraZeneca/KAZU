@@ -126,6 +126,7 @@ class SapBertForEntityLinkingStep(BaseStep):
     def get_ontology_slices_from_full_dataframe(self) -> Tuple[str, pd.DataFrame]:
         full_df = pd.read_parquet(self.ontology_path)
         sources = full_df["source"].unique()
+        logger.info(f"detected the following sources in the ontology file: {sources}")
         for source in sources:
             yield source, full_df[full_df["source"] == source]
 
@@ -152,7 +153,7 @@ class SapBertForEntityLinkingStep(BaseStep):
             logger.info(f"saved {ontology_name} index to {index_path.absolute()}")
             ontology_index_dict[ontology_name] = index
             logger.info(f"final index size for {ontology_name} is {len(index)}")
-            return ontology_index_dict
+        return ontology_index_dict
 
     def load_ontology_index_dict_from_cache(
         self,
@@ -201,8 +202,6 @@ class SapBertForEntityLinkingStep(BaseStep):
                 return
             logger.info(f"creating partitions for partition {partition_number}")
             logger.info(f"read {df.shape[0]} rows from ontology")
-            df.columns = ["source", "iri", "default_label"]
-
             default_labels = df["default_label"].tolist()
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
             results = self.get_embeddings_for_strings(default_labels)
@@ -255,24 +254,26 @@ class SapBertForEntityLinkingStep(BaseStep):
             for i, result in enumerate(results):
                 entity = entities[i]
                 ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
-                distances, neighbors, metadata_df = self.ontology_index_dict[ontology_name].search(
-                    result
-                )
-                for metadata_index, (
-                    neighbour_id,
-                    dist,
-                ) in enumerate(zip(neighbors, distances)):
-                    metadata_dict = metadata_df.iloc[metadata_index].to_dict()
-                    ontology_id = metadata_dict.pop("iri")
-                    metadata_dict["dist"] = dist
-                    new_mapping = Mapping(
-                        source=ontology_name,
-                        idx=ontology_id,
-                        mapping_type="direct",
-                        metadata=metadata_dict,
+                index = self.ontology_index_dict.get(ontology_name,None)
+                if index is not None:
+                    distances, neighbors, metadata_df = index.search(
+                        result
                     )
-                    entity.add_mapping(new_mapping)
-                    self.update_lookup_cache(entity, new_mapping)
+                    for metadata_index, (
+                        neighbour_id,
+                        dist,
+                    ) in enumerate(zip(neighbors, distances)):
+                        metadata_dict = metadata_df.iloc[metadata_index].to_dict()
+                        ontology_id = metadata_dict.pop("iri")
+                        metadata_dict["dist"] = dist
+                        new_mapping = Mapping(
+                            source=ontology_name,
+                            idx=ontology_id,
+                            mapping_type="direct",
+                            metadata=metadata_dict,
+                        )
+                        entity.add_mapping(new_mapping)
+                        self.update_lookup_cache(entity, new_mapping)
 
         return docs, []
 
