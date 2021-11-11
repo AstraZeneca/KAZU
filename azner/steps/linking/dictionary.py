@@ -5,9 +5,9 @@ import pydash
 
 from azner.data.data import Document, Mapping
 from azner.steps import BaseStep
-from azner.steps.utils.caching import EntityLinkingLookupCache
-from azner.steps.utils.dictionary_index import DictionaryIndex
-from azner.steps.utils.utils import (
+from azner.utils.caching import EntityLinkingLookupCache
+from azner.utils.dictionary_index import DictionaryIndex
+from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
 )
 
