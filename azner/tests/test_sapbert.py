@@ -7,7 +7,11 @@ from hydra import initialize_config_module, compose
 from hydra.utils import instantiate
 from steps.linking.sapbert import SapBertForEntityLinkingStep
 from azner.utils.utils import get_cache_dir
-from azner.tests.utils import entity_linking_easy_cases, TINY_CHEMBL_KB_PATH, entity_linking_hard_cases
+from azner.tests.utils import (
+    entity_linking_easy_cases,
+    TINY_CHEMBL_KB_PATH,
+    entity_linking_hard_cases,
+)
 
 
 class AcceptanceTestError(Exception):

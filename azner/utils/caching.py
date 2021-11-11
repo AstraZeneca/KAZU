@@ -3,7 +3,7 @@ from typing import List
 from cachetools import LFUCache
 
 from azner.data.data import Entity, Mapping
-from utils.utils import get_match_entity_class_hash
+from azner.utils.utils import get_match_entity_class_hash
 
 
 class EntityLinkingLookupCache:

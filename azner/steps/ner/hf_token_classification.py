@@ -18,7 +18,7 @@ from azner.data.pytorch import HFDataset
 from azner.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from azner.steps import BaseStep
 from azner.steps.ner.bio_label_parser import BIOLabelParser
-from utils.utils import documents_to_document_section_batch_encodings_map
+from azner.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
 
