@@ -1,6 +1,5 @@
 _target_: azner.steps.linking.dictionary.DictionaryEntityLinkingStep
 depends_on: ~
-ontology_path: ~
 entity_class_to_ontology_mappings:
   Drug: CHEMBL
   Disease: MONDO
