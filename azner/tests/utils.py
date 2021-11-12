@@ -9,12 +9,18 @@ TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 TINY_CHEMBL_KB_PATH = TEST_ASSETS_PATH.joinpath("sapbert").joinpath("tiny_chembl.parquet")
 
 
-def ner_test_cases():
+def ner_simple_test_cases():
     texts = [
-        "EGFR is a gene",
-        "CAT1 is a gene",
-        "my cat sat on the mat",
-        "cat1 is my number plate",
+        ("EGFR is a gene", "gene"),
+        ("CAT1 is a gene", "gene"),
+        ("my cat sat on the mat", "species"),
+    ]
+    return texts
+
+
+def ner_long_document_test_cases():
+    texts = [
+        ("EGFR is a gene, that is also mentioned in this very long document. " * 300, 300, "gene")
     ]
     return texts
 
