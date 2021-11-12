@@ -66,11 +66,11 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         self.debug = debug
         if max_sequence_length % 2 != 0:
             raise RuntimeError(
-                f"max_sequence_length must %2 ==0 in order for correct document windowing"
+                "max_sequence_length must %2 ==0 in order for correct document windowing"
             )
         self.max_sequence_length = max_sequence_length
         if stride % 2 != 0:
-            raise RuntimeError(f"stride must %2 ==0 in order for correct document windowing")
+            raise RuntimeError("stride must %2 ==0 in order for correct document windowing")
         self.stride = stride
         self.batch_size = batch_size
         self.config = AutoConfig.from_pretrained(path)
