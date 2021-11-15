@@ -16,11 +16,11 @@ from azner.modelling.linking.sapbert.train import (
     get_embedding_dataloader_from_strings,
 )
 from azner.steps import BaseStep
-from azner.steps.utils.embedding_index import (
+from azner.utils.embedding_index import (
     EmbeddingIndexFactory,
     EmbeddingIndex,
 )
-from azner.steps.utils.utils import (
+from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
     get_match_entity_class_hash,
     get_cache_dir,
