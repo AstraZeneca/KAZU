@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from steps.utils.embedding_index import EmbeddingIndexFactory
+from azner.utils.embedding_index import EmbeddingIndexFactory
 import torch
 import numpy as np
 

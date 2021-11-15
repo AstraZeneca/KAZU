@@ -20,7 +20,7 @@ from azner.utils.embedding_index import (
     EmbeddingIndexFactory,
     EmbeddingIndex,
 )
-from utils.utils import (
+from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
     get_match_entity_class_hash,
     get_cache_dir,
