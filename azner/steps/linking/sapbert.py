@@ -254,11 +254,9 @@ class SapBertForEntityLinkingStep(BaseStep):
             for i, result in enumerate(results):
                 entity = entities[i]
                 ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
-                index = self.ontology_index_dict.get(ontology_name,None)
+                index = self.ontology_index_dict.get(ontology_name, None)
                 if index is not None:
-                    distances, neighbors, metadata_df = index.search(
-                        result
-                    )
+                    distances, neighbors, metadata_df = index.search(result)
                     for metadata_index, (
                         neighbour_id,
                         dist,
