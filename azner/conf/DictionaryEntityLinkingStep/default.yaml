@@ -1,0 +1,32 @@
+_target_: azner.steps.linking.dictionary.DictionaryEntityLinkingStep
+depends_on: ~
+entity_class_to_ontology_mappings:
+  Drug: CHEMBL
+  Disease: MONDO
+  Gene: ENSEMBL
+  Anatomy: UBERON
+ontology_dictionary_index:
+  MONDO:
+    _target_: azner.utils.dictionary_index.DictionaryIndex
+    path: ~
+    name: MONDO
+    fuzzy: true
+  UBERON:
+    _target_: azner.utils.dictionary_index.DictionaryIndex
+    path: ~
+    name: UBERON
+    fuzzy: true
+  CHEMBL:
+    _target_: azner.utils.dictionary_index.DictionaryIndex
+    path: ~
+    name: CHEMBL
+    fuzzy: true
+  ENSEMBL:
+    _target_: azner.utils.dictionary_index.DictionaryIndex
+    path: ~
+    name: ENSEMBL
+    fuzzy: true
+process_all_entities: true
+lookup_cache_size: 5000
+
+

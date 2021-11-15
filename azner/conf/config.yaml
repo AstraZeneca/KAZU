@@ -2,5 +2,6 @@ defaults:
   - ray: cluster
   - TransformersModelForTokenClassificationNerStep: default
   - SapBertForEntityLinkingStep: default
+  - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
   - pipeline: default
