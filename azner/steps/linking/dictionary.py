@@ -47,9 +47,7 @@ class DictionaryEntityLinkingStep(BaseStep):
 
         1) first obtain an entity list from all docs
         2) check the lookup LRUCache to see if it's been recently processed
-        3) generate embeddings for the entities based on the value of Entity.match
-        4) query this embedding against self.ontology_index_dict to determine the best matches based on cosine distance
-        5) generate a new Mapping with the queried iri, and update the entity information
+        3) if the cache misses, run a string similarity search based upon DictionaryIndex
         :param docs:
         :return:
         """
