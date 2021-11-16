@@ -26,6 +26,12 @@ class TokenizedWord(BaseModel):
     word_offsets: List[Tuple[int, int]] = Field(
         default_factory=list, hash=False
     )  # original offsets of each token
+    bio_labels: Optional[List[str]] = Field(
+        default_factory=list, hash=False
+    )  # BIO labels separated from class. Populate with parse_labels_to_bio_and_class
+    class_labels: Optional[List[str]] = Field(
+        default_factory=list, hash=False
+    )  # class labels separated from BIO. Populate with parse_labels_to_bio_and_class
 
     def parse_labels_to_bio_and_class(self):
         """
