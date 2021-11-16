@@ -43,7 +43,7 @@ class TokenizedWord(BaseModel):
             list,
             zip(
                 *[
-                    x.split("-")
+                    x.split("-")  # split for BIO schema - i.e. B-gene, I-gene -> (B,gene), (I,gene)
                     if x is not ENTITY_OUTSIDE_SYMBOL
                     else (
                         ENTITY_OUTSIDE_SYMBOL,
