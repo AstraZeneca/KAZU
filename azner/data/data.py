@@ -2,6 +2,7 @@ import tempfile
 import uuid
 import webbrowser
 from typing import List, Any, Dict, Optional, Tuple, Union
+import pandas as pd
 from pydantic import BaseModel, Field, validator
 from spacy import displacy
 
@@ -203,7 +204,7 @@ class Entity(BaseModel):
         Describe the tag
         :return: tag match description
         """
-        return f"{self.namespace}:{self.match}:{self.entity_class}:{self.metadata}:{self.match}:{self.start}:{self.end}"
+        return f"{self.namespace}:{self.match}:{self.entity_class}:{self.metadata}:{self.start}:{self.end}"
 
     def as_brat(self):
         """
@@ -321,6 +322,31 @@ class Section(BaseModel):
             else:
                 raise RuntimeError("offset map is in indeterminate state")
         return new_section
+
+    def entities_as_dataframe(self) -> Optional[pd.DataFrame]:
+        """
+        convert entities into a pandas dataframe. Useful for building annotation sets
+        :return:
+        """
+        data = []
+        for ent in self.entities:
+            if (
+                ent.metadata is not None
+                and ent.metadata.mappings is not None
+                and len(ent.metadata.mappings) > 0
+            ):
+                mapping_id = ent.metadata.mappings[0].idx
+            else:
+                mapping_id = None
+            data.append(
+                (ent.namespace, ent.match, ent.entity_class, ent.start, ent.end, mapping_id)
+            )
+        if len(data) > 0:
+            data = pd.DataFrame.from_records(data)
+            data.columns = ["namespace", "match", "entity_class", "start", "end", "mapping_id"]
+            return data
+        else:
+            return None
 
 
 class Document(BaseModel):
