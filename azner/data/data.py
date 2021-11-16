@@ -75,6 +75,30 @@ class MultiFrameSection(BaseModel):
         default_factory=list, hash=False
     )  # confidence for each token
 
+    def to_tokenized_words(self, id2label: Dict[int, str]) -> List[TokenizedWord]:
+        """
+        return a List[TokenizedWord]
+        :param id2label: Dict mapping labels to strings
+        :return:
+        """
+        prev_word_id = 0
+        word = TokenizedWord()
+        all_words = []
+        for i, word_id in enumerate(self.all_frame_word_ids):
+            if word_id is not None:
+                if word_id != prev_word_id:
+                    # new word
+                    all_words.append(word)
+                    word = TokenizedWord()
+                word.word_labels.append(self.all_frame_labels[i])
+                word.word_labels_strings = [id2label[x] for x in word.word_labels]
+                word.word_confidences.append(self.all_frame_confidences[i])
+                word.word_offsets.append(self.all_frame_offsets[i])
+                prev_word_id = word_id
+
+        all_words.append(word)
+        return all_words
+
 
 class Mapping(BaseModel):
     source: str  # the knowledgebase name
