@@ -10,6 +10,10 @@ TINY_CHEMBL_KB_PATH = TEST_ASSETS_PATH.joinpath("sapbert").joinpath("tiny_chembl
 
 
 def ner_simple_test_cases():
+    """
+    should return list of tuples: 0 = the text, 1 = the entity class
+    :return:
+    """
     texts = [
         ("EGFR is a gene", "gene"),
         ("CAT1 is a gene", "gene"),
@@ -19,6 +23,11 @@ def ner_simple_test_cases():
 
 
 def ner_long_document_test_cases():
+    """
+    should return list of tuples: 0 = the text, 1 = the number of times an entity class is expected to be found,
+    2 = the entity class type
+    :return:
+    """
     texts = [
         ("EGFR is a gene, that is also mentioned in this very long document. " * 300, 300, "gene")
     ]
