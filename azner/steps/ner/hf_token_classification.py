@@ -15,7 +15,7 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from azner.data.data import Document, Section, MultiFrameSection
+from azner.data.data import Document, Section, NerProcessedSection
 from azner.data.pytorch import HFDataset
 from azner.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from azner.steps import BaseStep
@@ -114,9 +114,9 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         section_index: int,
         batch_encoding: BatchEncoding,
         confidence_and_labels_tensor: Tuple[Tensor, Tensor],
-    ) -> MultiFrameSection:
+    ) -> NerProcessedSection:
         """
-        for a given section index, obtain a MultiFrameSection representing all of the inferred labels for that section
+        for a given section index, obtain a NerProcessedSection representing all of the inferred labels for that section
         :param section_index: int of the section index
         :param batch_encoding: the BatchEncoding for this dataset
         :param confidence_and_labels_tensor: a tuple of the confidence and labels from the model
@@ -152,7 +152,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
             all_frame_word_ids.extend(frame_word_ids)
             all_frame_offsets.extend(frame_offsets)
 
-        return MultiFrameSection(
+        return NerProcessedSection(
             all_frame_offsets=all_frame_offsets,
             all_frame_labels=all_frame_labels,
             all_frame_word_ids=all_frame_word_ids,
@@ -166,12 +166,12 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         for section_index, section in id_section_map.items():
             # for long docs, we need to split section.text into frames (i.e. portions that will fit into Bert or
             # similar)
-            multi_frame_section = self.merge_section_frames(
+            ner_processed_section = self.merge_section_frames(
                 section_index=section_index,
                 batch_encoding=loader.dataset.encodings,
                 confidence_and_labels_tensor=confidence_and_labels_tensor,
             )
-            all_words = multi_frame_section.to_tokenized_words(self.config.id2label)
+            all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
             for word in all_words:
                 # TODO: add BioLabelPreProcessor here
                 for i, label in enumerate(word.word_labels_strings):
