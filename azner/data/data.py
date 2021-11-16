@@ -1,7 +1,71 @@
 import uuid
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Optional, Tuple
 
 from pydantic import BaseModel, Field, validator
+
+# BIO schema
+ENTITY_START_SYMBOL = "B"
+ENTITY_INSIDE_SYMBOL = "I"
+ENTITY_OUTSIDE_SYMBOL = "O"
+
+
+class TokenizedWord(BaseModel):
+    """
+    A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
+    """
+
+    word_labels: List[int] = Field(default_factory=list, hash=False)  # label ids of the word
+    word_labels_strings: List[str] = Field(
+        default_factory=list, hash=False
+    )  # optional strings associated with labels
+    word_confidences: List[float] = Field(
+        default_factory=list, hash=False
+    )  # confidence associated with each label
+    word_offsets: List[Tuple[int, int]] = Field(
+        default_factory=list, hash=False
+    )  # original offsets of each token
+
+    def parse_labels_to_bio_and_class(self):
+        """
+        since the BIO schema actually encodes two pieces of info, it's often useful to handle them separately.
+        This method parses the BIO labels in self.word_labels_strings and add the fields bio_labels and class labels
+        :return:
+        """
+        self.bio_labels, self.class_labels = map(
+            list,
+            zip(
+                *[
+                    x.split("-")
+                    if x is not ENTITY_OUTSIDE_SYMBOL
+                    else (
+                        ENTITY_OUTSIDE_SYMBOL,
+                        None,
+                    )
+                    for x in self.word_labels_strings
+                ]
+            ),
+        )
+
+    def __repr__(self) -> str:
+        return f"{self.word_labels_strings}\n{self.word_offsets}"
+
+
+class MultiFrameSection(BaseModel):
+    """
+    long Sections may need to be split into multiple frames when processing with a transformer. This class is a
+    convenient container to reassemble the frames into a coherent object
+    """
+
+    all_frame_offsets: List[Tuple[int, int]] = Field(
+        default_factory=list, hash=False
+    )  # offsets associated with each token
+    all_frame_word_ids: List[Optional[int]] = Field(
+        default_factory=list, hash=False
+    )  # word ids associated with each token
+    all_frame_labels: List[int] = Field(default_factory=list, hash=False)  # labels for each token
+    all_frame_confidences: List[float] = Field(
+        default_factory=list, hash=False
+    )  # confidence for each token
 
 
 class Mapping(BaseModel):
