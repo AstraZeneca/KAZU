@@ -15,7 +15,7 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from azner.data.data import Document, Section, TokenizedWord, MultiFrameSection
+from azner.data.data import Document, Section, MultiFrameSection
 from azner.data.pytorch import HFDataset
 from azner.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from azner.steps import BaseStep
@@ -159,32 +159,6 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
             all_frame_confidences=all_frame_confidences,
         )
 
-    def process_multi_frame_section(
-        self, multiframe_section: MultiFrameSection
-    ) -> List[TokenizedWord]:
-        """
-        convert a MultiFrameSection into a List[TokenizedWord]
-        :param multiframe_section:
-        :return:
-        """
-        prev_word_id = 0
-        word = TokenizedWord()
-        all_words = []
-        for i, word_id in enumerate(multiframe_section.all_frame_word_ids):
-            if word_id is not None:
-                if word_id != prev_word_id:
-                    # new word
-                    all_words.append(word)
-                    word = TokenizedWord()
-                word.word_labels.append(multiframe_section.all_frame_labels[i])
-                word.word_labels_strings = [self.config.id2label[x] for x in word.word_labels]
-                word.word_confidences.append(multiframe_section.all_frame_confidences[i])
-                word.word_offsets.append(multiframe_section.all_frame_offsets[i])
-                prev_word_id = word_id
-
-        all_words.append(word)
-        return all_words
-
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         loader, id_section_map = self.get_dataloader(docs)
         # run the transformer and get results
@@ -197,7 +171,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 batch_encoding=loader.dataset.encodings,
                 confidence_and_labels_tensor=confidence_and_labels_tensor,
             )
-            all_words = self.process_multi_frame_section(multi_frame_section)
+            all_words = multi_frame_section.to_tokenized_words(self.config.id2label)
             for word in all_words:
                 # TODO: add BioLabelPreProcessor here
                 for i, label in enumerate(word.word_labels_strings):
