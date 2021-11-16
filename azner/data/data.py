@@ -1,7 +1,7 @@
 import tempfile
 import uuid
 import webbrowser
-from typing import List, Any, Dict, Optional,Tuple
+from typing import List, Any, Dict, Optional, Tuple
 from pydantic import BaseModel, Field, validator
 from spacy import displacy
 
