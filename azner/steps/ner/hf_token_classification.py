@@ -175,7 +175,6 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
             )
             all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
             for word in all_words:
-                # TODO: add BioLabelPreProcessor here
                 transformed_word = self.bio_preprocessor(word)
                 for i, label in enumerate(transformed_word.word_labels_strings):
                     if self.debug:
