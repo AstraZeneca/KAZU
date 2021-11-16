@@ -58,10 +58,10 @@ class TokenizedWord(BaseModel):
         return f"{self.word_labels_strings}\n{self.word_offsets}"
 
 
-class MultiFrameSection(BaseModel):
+class NerProcessedSection(BaseModel):
     """
     long Sections may need to be split into multiple frames when processing with a transformer. This class is a
-    convenient container to reassemble the frames into a coherent object
+    convenient container to reassemble the frames into a coherent object, post transformer
     """
 
     all_frame_offsets: List[Tuple[int, int]] = Field(
