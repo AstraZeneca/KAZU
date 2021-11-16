@@ -1,10 +1,103 @@
 import tempfile
 import uuid
 import webbrowser
-from typing import List, Any, Dict, Optional
-
+from typing import List, Any, Dict, Optional, Tuple
 from pydantic import BaseModel, Field, validator
 from spacy import displacy
+
+# BIO schema
+ENTITY_START_SYMBOL = "B"
+ENTITY_INSIDE_SYMBOL = "I"
+ENTITY_OUTSIDE_SYMBOL = "O"
+
+
+class TokenizedWord(BaseModel):
+    """
+    A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
+    """
+
+    word_labels: List[int] = Field(default_factory=list, hash=False)  # label ids of the word
+    word_labels_strings: List[str] = Field(
+        default_factory=list, hash=False
+    )  # optional strings associated with labels
+    word_confidences: List[float] = Field(
+        default_factory=list, hash=False
+    )  # confidence associated with each label
+    word_offsets: List[Tuple[int, int]] = Field(
+        default_factory=list, hash=False
+    )  # original offsets of each token
+    bio_labels: Optional[List[str]] = Field(
+        default_factory=list, hash=False
+    )  # BIO labels separated from class. Populate with parse_labels_to_bio_and_class
+    class_labels: Optional[List[str]] = Field(
+        default_factory=list, hash=False
+    )  # class labels separated from BIO. Populate with parse_labels_to_bio_and_class
+
+    def parse_labels_to_bio_and_class(self):
+        """
+        since the BIO schema actually encodes two pieces of info, it's often useful to handle them separately.
+        This method parses the BIO labels in self.word_labels_strings and add the fields bio_labels and class labels
+        :return:
+        """
+        self.bio_labels, self.class_labels = map(
+            list,
+            zip(
+                *[
+                    x.split("-")  # split for BIO schema - i.e. B-gene, I-gene -> (B,gene), (I,gene)
+                    if x is not ENTITY_OUTSIDE_SYMBOL
+                    else (
+                        ENTITY_OUTSIDE_SYMBOL,
+                        None,
+                    )
+                    for x in self.word_labels_strings
+                ]
+            ),
+        )
+
+    def __repr__(self) -> str:
+        return f"{self.word_labels_strings}\n{self.word_offsets}"
+
+
+class NerProcessedSection(BaseModel):
+    """
+    long Sections may need to be split into multiple frames when processing with a transformer. This class is a
+    convenient container to reassemble the frames into a coherent object, post transformer
+    """
+
+    all_frame_offsets: List[Tuple[int, int]] = Field(
+        default_factory=list, hash=False
+    )  # offsets associated with each token
+    all_frame_word_ids: List[Optional[int]] = Field(
+        default_factory=list, hash=False
+    )  # word ids associated with each token
+    all_frame_labels: List[int] = Field(default_factory=list, hash=False)  # labels for each token
+    all_frame_confidences: List[float] = Field(
+        default_factory=list, hash=False
+    )  # confidence for each token
+
+    def to_tokenized_words(self, id2label: Dict[int, str]) -> List[TokenizedWord]:
+        """
+        return a List[TokenizedWord]
+        :param id2label: Dict mapping labels to strings
+        :return:
+        """
+        prev_word_id = 0
+        word = TokenizedWord()
+        all_words = []
+        for i, word_id in enumerate(self.all_frame_word_ids):
+            if word_id is not None:
+                if word_id != prev_word_id:
+                    # new word
+                    all_words.append(word)
+                    word = TokenizedWord()
+                word.word_labels.append(self.all_frame_labels[i])
+                word.word_labels_strings = [id2label[x] for x in word.word_labels]
+                word.word_confidences.append(self.all_frame_confidences[i])
+                word.word_offsets.append(self.all_frame_offsets[i])
+                prev_word_id = word_id
+
+        all_words.append(word)
+        return all_words
 
 
 class Mapping(BaseModel):

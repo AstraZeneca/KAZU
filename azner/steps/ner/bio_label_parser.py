@@ -86,16 +86,16 @@ class BIOLabelParser:
                     f"Tried to complete {self.entity_class} but not properly formed. start: {self.start}, end: {self.end}, inside: {self.inside}, text: {text}"
                 )
             else:
-                self.entities_found.append(
-                    Entity(
-                        start=self.start,
-                        end=self.end,
-                        match=text[self.start : self.end],
-                        namespace=self.namespace,
-                        entity_class=self.entity_class,
-                        hit_metadata=EntityMetadata(entity_meta=self.get_confidence_info()),
-                    )
+                entity = Entity(
+                    start=self.start,
+                    end=self.end,
+                    match=text[self.start : self.end],
+                    namespace=self.namespace,
+                    entity_class=self.entity_class,
+                    metadata=EntityMetadata(metadata=self.get_confidence_info()),
                 )
+
+                self.entities_found.append(entity)
             self.reset_state()
 
         def update(

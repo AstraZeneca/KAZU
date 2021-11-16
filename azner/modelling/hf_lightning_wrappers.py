@@ -22,7 +22,7 @@ class PLAutoModelForTokenClassification(LightningModule):
         self.model = model
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
-        return self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"])
+        return self.model(**batch.data)
 
 
 class PLAutoModel(LightningModule):

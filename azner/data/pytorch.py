@@ -14,7 +14,13 @@ class HFDataset(IterableDataset):
         :param encodings:
         """
         self.encodings = encodings
+        self.dataset_size = len(encodings.data["input_ids"])
 
     def __iter__(self) -> Iterator[T_co]:
-        for encoding in self.encodings.data:
-            yield {"input_ids": encoding["input_ids"], "attention_mask": encoding["attention_mask"]}
+
+        for i in range(self.dataset_size):
+            yield {
+                "input_ids": self.encodings.data["input_ids"][i],
+                "attention_mask": self.encodings.data["attention_mask"][i],
+                "token_type_ids": self.encodings.data["token_type_ids"][i],
+            }

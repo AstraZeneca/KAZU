@@ -3,7 +3,10 @@ import os
 from pathlib import Path
 from typing import List, Dict, Tuple
 
-from azner.data.data import Document, Entity
+from transformers.file_utils import PaddingStrategy
+from transformers.tokenization_utils_base import TruncationStrategy
+
+from azner.data.data import Document, Entity, Section
 from transformers import AutoTokenizer, BatchEncoding
 
 logger = logging.getLogger(__name__)
@@ -20,6 +23,21 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
     }
 
 
+def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
+    """
+    return a map of documents, indexed by order of sections
+    :param docs:
+    :return:
+    """
+    result = {}
+    i = 0
+    for doc in docs:
+        for section in doc.sections:
+            result[i] = section
+            i += 1
+    return result
+
+
 def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entity]:
     """
     finds entities that have no kb mappings
@@ -30,16 +48,25 @@ def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entit
 
 
 def documents_to_document_section_batch_encodings_map(
-    docs: List[Document], tokenizer: AutoTokenizer
-) -> Tuple[BatchEncoding, List[str]]:
+    docs: List[Document], tokenizer: AutoTokenizer, stride: int = 128, max_length: int = 512
+) -> Tuple[BatchEncoding, Dict[int, Section]]:
     """
-    convert documents into a BatchEncoding. Also returns a list of <dochash + sectionhash> for each batch encoding
+    convert documents into a BatchEncoding. Also returns a list of <int + section> for the resulting encoding
     :param docs:
     :return:
     """
-    doc_section_to_text_map = documents_to_document_section_text_map(docs)
-    batch_encodings = tokenizer(list(doc_section_to_text_map.values()))
-    return batch_encodings, list(doc_section_to_text_map.keys())
+    id_section_map = documents_to_id_section_map(docs)
+    strings = [section.text for section in id_section_map.values()]
+
+    batch_encodings = tokenizer(
+        strings,
+        stride=stride,
+        max_length=max_length,
+        truncation=TruncationStrategy.LONGEST_FIRST,
+        return_overflowing_tokens=True,
+        padding=PaddingStrategy.MAX_LENGTH,
+    )
+    return batch_encodings, id_section_map
 
 
 def get_match_entity_class_hash(ent: Entity) -> int:
