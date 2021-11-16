@@ -1,7 +1,10 @@
+import tempfile
 import uuid
+import webbrowser
 from typing import List, Any, Dict, Optional
 
 from pydantic import BaseModel, Field, validator
+from spacy import displacy
 
 
 class Mapping(BaseModel):
@@ -118,6 +121,23 @@ class Section(BaseModel):
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):
         return hash((values.get("text"), values.get("name")))
+
+    def render(self):
+        ordered_ends = sorted(self.entities, key=lambda x: x.start)
+        ex = [
+            {
+                "text": self.text,
+                "ents": [
+                    {"start": x.start, "end": x.end, "label": x.entity_class} for x in ordered_ends
+                ],
+                "title": None,
+            }
+        ]
+        html = displacy.render(ex, style="ent", manual=True)
+        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as f:
+            url = "file://" + f.name
+            f.write(html)
+        webbrowser.open(url, new=2)
 
 
 class Document(BaseModel):
