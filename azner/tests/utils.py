@@ -27,14 +27,14 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(namespace="test", match="Baclofen", entity_class="Drug", start=0, end=8)
     ]
     docs.append(doc)
-    iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL701")
+    iris.append("CHEMBL701")
     sources.append("CHEMBL")
 
     doc = SimpleDocument("Helium is a gas.")
     doc.sections[0].entities = [
         Entity(namespace="test", match="Helium", entity_class="Drug", start=0, end=6)
     ]
-    iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL1796997")
+    iris.append("CHEMBL1796997")
     sources.append("CHEMBL")
     docs.append(doc)
     return docs, iris, sources
@@ -54,7 +54,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL701")
+    iris.append("CHEMBL701")
     sources.append("CHEMBL")
 
     doc = SimpleDocument("Tagrisso")
@@ -68,7 +68,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL3353410")
+    iris.append("CHEMBL3353410")
     sources.append("CHEMBL")
 
     doc = SimpleDocument("Osimertinib")
@@ -82,7 +82,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL3353410")
+    iris.append("CHEMBL3353410")
     sources.append("CHEMBL")
 
     doc = SimpleDocument("Osimertinib Mesylate")
@@ -96,7 +96,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL3545063")
+    iris.append("CHEMBL3545063")
     sources.append("CHEMBL")
 
     doc = SimpleDocument("pain in the head")
@@ -222,7 +222,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://identifiers.org/ensembl/ENSG00000146648")
+    iris.append("ENSG00000146648")
     sources.append("ENSEMBL")
 
     doc = SimpleDocument("epidermal growth factor receptor")
@@ -236,7 +236,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://identifiers.org/ensembl/ENSG00000146648")
+    iris.append("ENSG00000146648")
     sources.append("ENSEMBL")
 
     doc = SimpleDocument("ERBB1")
@@ -250,7 +250,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://identifiers.org/ensembl/ENSG00000146648")
+    iris.append("ENSG00000146648")
     sources.append("ENSEMBL")
 
     doc = SimpleDocument("MAPK10")
@@ -264,7 +264,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://identifiers.org/ensembl/ENSG00000109339")
+    iris.append("ENSG00000109339")
     sources.append("ENSEMBL")
 
     doc = SimpleDocument("mitogen-activated protein kinase 10")
@@ -278,7 +278,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://identifiers.org/ensembl/ENSG00000109339")
+    iris.append("ENSG00000109339")
     sources.append("ENSEMBL")
 
     doc = SimpleDocument("JNK3")
@@ -292,7 +292,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         )
     ]
     docs.append(doc)
-    iris.append("http://identifiers.org/ensembl/ENSG00000109339")
+    iris.append("ENSG00000109339")
     sources.append("ENSEMBL")
 
     return docs, iris, sources
