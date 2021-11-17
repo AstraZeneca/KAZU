@@ -3,3 +3,4 @@ ray:
   address: "auto"
   serve:
     port: 8000
+  detached: True
