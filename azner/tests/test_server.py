@@ -18,9 +18,7 @@ def test_api():
     with initialize_config_dir(config_dir=os.environ.get("KAZU_TEST_CONFIG_DIR")):
         cfg = compose(
             config_name="config",
-            overrides=[
-                "ray=local",
-            ],
+            overrides=["ray=local", "ray.detached=True"],
         )
         start(cfg)
         response = requests.post(
