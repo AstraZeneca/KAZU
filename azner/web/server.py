@@ -1,4 +1,5 @@
 import logging
+import time
 
 import hydra
 import ray
@@ -52,6 +53,11 @@ def start(cfg: DictConfig) -> None:
         detached=cfg.ray.detached, http_options={"host": "0.0.0.0", "location": "EveryNode"}
     )
     AZNerWebApp.deploy(cfg)
+    if not cfg.ray.detached:
+        while True:
+            logger.info(serve.list_deployments())
+            time.sleep(10)
+
 
 
 if __name__ == "__main__":
