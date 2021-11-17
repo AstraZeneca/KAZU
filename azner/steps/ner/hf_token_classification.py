@@ -26,24 +26,6 @@ from azner.steps.ner.bio_label_preprocessor import BioLabelPreProcessor
 logger = logging.getLogger(__name__)
 
 
-class SequenceValidator:
-    """
-    class that validates the word id for sequential frames are contiguous
-    """
-
-    def __init__(self):
-        self.processed_word_ids = set()
-        self.all_section_word_ids = set()
-        self.prev_last_word = -1
-
-    def validate_next_frame_is_contiguous(self, first_word_id: int):
-        if first_word_id != self.prev_last_word + 1:
-            raise RuntimeError("Sequence validation failed. Frames are not contiguous")
-
-    def update_previous_frame_last_word_id(self, last_word_id_of_frame: int):
-        self.prev_last_word = last_word_id_of_frame
-
-
 class TransformersModelForTokenClassificationNerStep(BaseStep):
     def __init__(
         self,
@@ -132,7 +114,6 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         section_frame_indices = self.get_list_of_batch_encoding_frames_for_section(
             batch_encoding, section_index
         )
-        sequence_validator = SequenceValidator()
         for frame_index, section_frame_index in enumerate(section_frame_indices):
             (
                 frame_offsets,
@@ -146,9 +127,6 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 section_frame_index=section_frame_index,
                 confidence_and_labels_tensor=confidence_and_labels_tensor,
             )
-            sequence_validator.validate_next_frame_is_contiguous(frame_word_ids[0])
-            sequence_validator.update_previous_frame_last_word_id(frame_word_ids[-1])
-
             all_frame_confidences.extend(frame_confidence.numpy().tolist())
             all_frame_labels.extend(frame_labels.numpy().tolist())
             all_frame_word_ids.extend(frame_word_ids)
