@@ -59,6 +59,5 @@ def start(cfg: DictConfig) -> None:
             time.sleep(10)
 
 
-
 if __name__ == "__main__":
     start()
