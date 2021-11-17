@@ -174,8 +174,8 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 confidence_and_labels_tensor=confidence_and_labels_tensor,
             )
             all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
-            for word in all_words:
-                transformed_word = self.bio_preprocessor(word)
+            transformed_words = self.bio_preprocessor(all_words)
+            for transformed_word in transformed_words:
                 for i, label in enumerate(transformed_word.word_labels_strings):
                     if self.debug:
                         logger.info(
