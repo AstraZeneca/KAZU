@@ -32,6 +32,9 @@ class TokenizedWord(BaseModel):
     class_labels: Optional[List[str]] = Field(
         default_factory=list, hash=False
     )  # class labels separated from BIO. Populate with parse_labels_to_bio_and_class
+    modified_post_inference: bool = (
+        False  # has the word been modified poost inference by e.g. BioLabelPreProcessor?
+    )
 
     def parse_labels_to_bio_and_class(self):
         """
@@ -55,7 +58,7 @@ class TokenizedWord(BaseModel):
         )
 
     def __repr__(self) -> str:
-        return f"{self.word_labels_strings}\n{self.word_offsets}"
+        return f"MODIFIED:{self.modified_post_inference}. {self.word_labels_strings}\n{self.word_offsets}"
 
 
 class NerProcessedSection(BaseModel):

@@ -4,7 +4,13 @@ from typing import Optional, Dict, Tuple, List
 
 import pydash
 
-from azner.data.data import Entity, EntityMetadata
+from azner.data.data import (
+    Entity,
+    EntityMetadata,
+    ENTITY_INSIDE_SYMBOL,
+    ENTITY_OUTSIDE_SYMBOL,
+    ENTITY_START_SYMBOL,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +19,6 @@ class BIOLabelParser:
     """
     A parser that turns a BIO style labelling schema into instances of Entity
     """
-
-    entity_start_symbol = "B"
-    entity_inside_symbol = "I"
-    entity_outside_symbol = "O"
 
     class EntityParseState:
         def __init__(self, entity_class: str, namespace: str):
@@ -81,7 +83,10 @@ class BIOLabelParser:
             :param text: the text string the entity was derived from
             :return:
             """
-            if any([not self.inside, self.start is None, self.end is None]):
+            if all([not self.inside, self.start is None, self.end is None]):
+                # if not inside and start/end are None, assume no further parsing required
+                pass
+            elif any([not self.inside, self.start is None, self.end is None]):
                 logger.warning(
                     f"Tried to complete {self.entity_class} but not properly formed. start: {self.start}, end: {self.end}, inside: {self.inside}, text: {text}"
                 )
@@ -117,12 +122,11 @@ class BIOLabelParser:
             """
 
             if (
-                entity_class == self.entity_class
-                or bio_symbol == BIOLabelParser.entity_outside_symbol
+                entity_class == self.entity_class or bio_symbol == ENTITY_OUTSIDE_SYMBOL
             ):  # do nothing if entity class not related to this instance, or is not an outside symbol
                 # if inside an instance of an entity, and a new one is starting, complete current entity and start a new
                 # one
-                if bio_symbol == BIOLabelParser.entity_start_symbol and self.inside:
+                if bio_symbol == ENTITY_START_SYMBOL and self.inside:
                     self.complete_entity(text)
                     self.inside = True
                     self.start = offsets[0]
@@ -130,7 +134,7 @@ class BIOLabelParser:
                     if isinstance(confidence, float):
                         self.token_confidences.append(confidence)
                 # if entity is starting and not currently inside, change state to inside
-                elif bio_symbol == BIOLabelParser.entity_start_symbol:
+                elif bio_symbol == ENTITY_START_SYMBOL:
                     self.inside = True
                     self.start = offsets[0]
                     self.end = offsets[1]
@@ -138,13 +142,13 @@ class BIOLabelParser:
                         self.token_confidences.append(confidence)
                     self.token_confidences.append(confidence)
                 # if currently inside and next BIO symbol is still inside, update state accordingly
-                elif bio_symbol == BIOLabelParser.entity_inside_symbol:
+                elif bio_symbol == ENTITY_INSIDE_SYMBOL:
                     self.end = offsets[1]
                     if isinstance(confidence, float):
                         self.token_confidences.append(confidence)
                     self.token_confidences.append(confidence)
                 # if currently inside and next BIO symbol is outside, complete the entity
-                elif bio_symbol == BIOLabelParser.entity_outside_symbol and self.inside:
+                elif bio_symbol == ENTITY_OUTSIDE_SYMBOL and self.inside:
                     self.complete_entity(text)
 
     def __init__(self, bio_classes: List[str], namespace: str):
@@ -156,7 +160,7 @@ class BIOLabelParser:
         self.namespace = namespace
         self.bio_classes = bio_classes
         self.entity_classes = sorted(
-            list({x.split("-")[1] for x in bio_classes if x != self.entity_outside_symbol})
+            list({x.split("-")[1] for x in bio_classes if x != ENTITY_OUTSIDE_SYMBOL})
         )
         self.entity_state_parsers = [
             BIOLabelParser.EntityParseState(entity_class, namespace)
@@ -179,7 +183,7 @@ class BIOLabelParser:
         :return:
         """
 
-        if label == BIOLabelParser.entity_outside_symbol:
+        if label == ENTITY_OUTSIDE_SYMBOL:
             for entity_parse_state in self.entity_state_parsers:
                 entity_parse_state.update(label, None, offsets, text, confidence=None)
         else:

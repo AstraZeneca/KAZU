@@ -21,6 +21,7 @@ from azner.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassificat
 from azner.steps import BaseStep
 from azner.steps.ner.bio_label_parser import BIOLabelParser
 from azner.utils.utils import documents_to_document_section_batch_encodings_map
+from azner.steps.ner.bio_label_preprocessor import BioLabelPreProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         self.entity_mapper = BIOLabelParser(
             list(self.config.id2label.values()), namespace=self.namespace()
         )
+        self.bio_preprocessor = BioLabelPreProcessor()
 
     def get_dataloader(self, docs: List[Document]) -> Tuple[DataLoader, Dict[int, Section]]:
         """
@@ -172,18 +174,18 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 confidence_and_labels_tensor=confidence_and_labels_tensor,
             )
             all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
-            for word in all_words:
-                # TODO: add BioLabelPreProcessor here
-                for i, label in enumerate(word.word_labels_strings):
+            transformed_words = self.bio_preprocessor(all_words)
+            for transformed_word in transformed_words:
+                for i, label in enumerate(transformed_word.word_labels_strings):
                     if self.debug:
                         logger.info(
-                            f"processing label: {label} for token {section.text[word.word_offsets[i][0]:word.word_offsets[i][1]]}"
+                            f"processing label: {label} for token {section.text[transformed_word.word_offsets[i][0]:transformed_word.word_offsets[i][1]]}"
                         )
                     self.entity_mapper.update_parse_states(
                         label,
-                        offsets=word.word_offsets[i],
+                        offsets=transformed_word.word_offsets[i],
                         text=section.text,
-                        confidence=word.word_confidences[i],
+                        confidence=transformed_word.word_confidences[i],
                     )
 
             # at the end of the section, get the results
