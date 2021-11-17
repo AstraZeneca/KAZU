@@ -20,6 +20,7 @@ setup(
         "pandas==1.3.4",
         "pyarrow==5.0.0",
         "pytorch-metric-learning==0.9.99",
+        "rapidfuzz==1.8.2",
     ],
     tests_require=["pytest"],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
