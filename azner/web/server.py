@@ -48,7 +48,9 @@ def start(cfg: DictConfig) -> None:
     # Connect to the running Ray cluster, or run as single node
     ray.init(address=cfg.ray.address, namespace="serve")
     # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
-    serve.start(detached=True, http_options={"host": "0.0.0.0", "location": "EveryNode"})
+    serve.start(
+        detached=cfg.ray.detached, http_options={"host": "0.0.0.0", "location": "EveryNode"}
+    )
     AZNerWebApp.deploy(cfg)
 
 
