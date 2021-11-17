@@ -1,0 +1,31 @@
+,namespace,match,entity_class,start,end,mapping_id
+0,TransformersModelForTokenClassificationNerStep,non-small cell lung cancer,disease,289,315,http://purl.obolibrary.org/obo/MONDO_0005233
+1,TransformersModelForTokenClassificationNerStep,NSCLC,disease,317,322,http://purl.obolibrary.org/obo/MONDO_0005233
+2,TransformersModelForTokenClassificationNerStep,tumor,disease,1400,1405,http://purl.obolibrary.org/obo/HP_0002664
+3,TransformersModelForTokenClassificationNerStep,EGFR NSCLC,disease,1592,1602,http://purl.obolibrary.org/obo/MONDO_0005233
+4,TransformersModelForTokenClassificationNerStep,Osimertinib,drug,0,11,CHEMBL3353410
+5,TransformersModelForTokenClassificationNerStep,osimertinib,drug,1278,1289,CHEMBL3353410
+6,TransformersModelForTokenClassificationNerStep,osimertinib,drug,1554,1565,CHEMBL3353410
+7,TransformersModelForTokenClassificationNerStep,epidermal growth factor receptor tyrosine kinase,gene,55,103,
+8,TransformersModelForTokenClassificationNerStep,EGFR-TK,gene,115,122,
+9,TransformersModelForTokenClassificationNerStep,EGFR,gene,156,160,ENSG00000146648
+10,TransformersModelForTokenClassificationNerStep,EGFR,gene,181,185,ENSG00000146648
+11,TransformersModelForTokenClassificationNerStep,wild-type EGFR,gene,241,255,
+12,TransformersModelForTokenClassificationNerStep,EGFR,gene,479,483,ENSG00000146648
+13,TransformersModelForTokenClassificationNerStep,EGFR,gene,656,660,ENSG00000146648
+14,TransformersModelForTokenClassificationNerStep,EGFR,gene,833,837,ENSG00000146648
+15,TransformersModelForTokenClassificationNerStep,EGFR mutations,gene,858,872,
+16,TransformersModelForTokenClassificationNerStep,EGFR mutations,gene,924,938,
+17,TransformersModelForTokenClassificationNerStep,PDXs,gene,1151,1155,
+18,TransformersModelForTokenClassificationNerStep,PDX,gene,1427,1430,ENSG00000128567
+19,TransformersModelForTokenClassificationNerStep,T790M,mutation,186,191,
+20,TransformersModelForTokenClassificationNerStep,L858R,mutation,409,414,
+21,TransformersModelForTokenClassificationNerStep,G719X,mutation,968,973,
+22,TransformersModelForTokenClassificationNerStep,L861Q,mutation,975,980,
+23,TransformersModelForTokenClassificationNerStep,S768I,mutation,982,987,
+24,TransformersModelForTokenClassificationNerStep,G719X,mutation,1172,1177,
+25,TransformersModelForTokenClassificationNerStep,G719X,mutation,1341,1346,
+26,TransformersModelForTokenClassificationNerStep,G719X,mutation,1445,1450,
+27,TransformersModelForTokenClassificationNerStep,L861Q,mutation,1489,1494,
+28,TransformersModelForTokenClassificationNerStep,patient,species,1077,1084,
+29,TransformersModelForTokenClassificationNerStep,patients,species,1569,1577,

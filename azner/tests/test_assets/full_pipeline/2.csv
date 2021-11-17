@@ -1,0 +1,18 @@
+,namespace,match,entity_class,start,end,mapping_id
+0,TransformersModelForTokenClassificationNerStep,chronic obstructive pulmonary disease,disease,120,157,http://purl.obolibrary.org/obo/MONDO_0005002
+1,TransformersModelForTokenClassificationNerStep,COPD,disease,159,163,http://purl.obolibrary.org/obo/MONDO_0005002
+2,TransformersModelForTokenClassificationNerStep,COPD,disease,658,662,http://purl.obolibrary.org/obo/MONDO_0005002
+3,TransformersModelForTokenClassificationNerStep,BGF,disease,1155,1158,http://purl.obolibrary.org/obo/MONDO_0007189
+4,TransformersModelForTokenClassificationNerStep,BFF,disease,1356,1359,http://purl.obolibrary.org/obo/MONDO_0010244
+5,TransformersModelForTokenClassificationNerStep,budesonide,drug,200,210,CHEMBL1370
+6,TransformersModelForTokenClassificationNerStep,glycopyrrolate,drug,211,225,CHEMBL1201027
+7,TransformersModelForTokenClassificationNerStep,formoterol fumarate,drug,226,245,CHEMBL3989798
+8,TransformersModelForTokenClassificationNerStep,glycopyrrolate,drug,308,322,CHEMBL1201027
+9,TransformersModelForTokenClassificationNerStep,formoterol fumarate,drug,323,342,CHEMBL3989798
+10,TransformersModelForTokenClassificationNerStep,budesonide,drug,829,839,CHEMBL1370
+11,TransformersModelForTokenClassificationNerStep,formoterol fumarate,drug,840,859,CHEMBL3989798
+12,TransformersModelForTokenClassificationNerStep,patients,species,372,380,
+13,TransformersModelForTokenClassificationNerStep,patients,species,548,556,
+14,TransformersModelForTokenClassificationNerStep,Patients,species,620,628,
+15,TransformersModelForTokenClassificationNerStep,patients,species,1704,1712,
+16,TransformersModelForTokenClassificationNerStep,patients,species,1981,1989,
