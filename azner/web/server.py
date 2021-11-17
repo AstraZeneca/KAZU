@@ -20,11 +20,11 @@ class AZNerWebApp:
     Web app to serve results
     """
 
-    def __init__(self, pipeline: Pipeline):
+    def __init__(self, cfg: DictConfig):
         """
         :param azner_runner: instance of PipelineRunner
         """
-        self.pipeline = pipeline
+        self.pipeline = Pipeline(load_steps(cfg))
 
     @app.get("/")
     def get(self):
@@ -49,8 +49,7 @@ def start(cfg: DictConfig) -> None:
     ray.init(address=cfg.ray.address, namespace="serve")
     # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
     serve.start(detached=True, http_options={"host": "0.0.0.0", "location": "EveryNode"})
-    pipeline = Pipeline(load_steps(cfg))
-    AZNerWebApp.deploy(pipeline)
+    AZNerWebApp.deploy(cfg)
 
 
 if __name__ == "__main__":
