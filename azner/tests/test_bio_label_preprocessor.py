@@ -29,31 +29,54 @@ def test_bio_label_preprocessor():
     word_label_strings = ["B-gene", "I-gene", "I-gene"]
     expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
     word = make_tokenized_word(word_label_strings)
-    word = preprocessor(word)
-
-    for observed, expected in zip(word.word_labels_strings, expected_word_label_strings):
+    words = preprocessor([word])
+    for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
     # case 2: all O, no action required
     word_label_strings = ["O", "O", "O"]
     expected_word_label_strings = ["O", "O", "O"]
     word = make_tokenized_word(word_label_strings)
-    word = preprocessor(word)
-    for observed, expected in zip(word.word_labels_strings, expected_word_label_strings):
+    words = preprocessor([word])
+    for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
     # case 3: missing I's
     word_label_strings = ["B-gene", "O", "O"]
     expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
     word = make_tokenized_word(word_label_strings)
-    word = preprocessor(word)
-    for observed, expected in zip(word.word_labels_strings, expected_word_label_strings):
+    words = preprocessor([word])
+    for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
     # case 4: missing B
     word_label_strings = ["I-gene", "I-gene", "I-gene"]
     expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
     word = make_tokenized_word(word_label_strings)
-    word = preprocessor(word)
-    for observed, expected in zip(word.word_labels_strings, expected_word_label_strings):
+    words = preprocessor([word])
+    for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
+        assert observed == expected
+
+    # case 5: multi word entity
+    word1_label_strings = ["B-gene", "I-gene", "I-gene"]
+    word2_label_strings = ["I-gene", "I-gene", "I-gene"]
+
+    expected_word_label_strings = ["I-gene", "I-gene", "I-gene"]
+    word1 = make_tokenized_word(word1_label_strings)
+    word2 = make_tokenized_word(word2_label_strings)
+
+    words = preprocessor([word1, word2])
+    for observed, expected in zip(words[1].word_labels_strings, expected_word_label_strings):
+        assert observed == expected
+
+    # case 6: two entities next to each other. Second needs processing
+    word1_label_strings = ["B-disease", "I-disease", "I-disease"]
+    word2_label_strings = ["I-gene", "I-gene", "I-gene"]
+
+    expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
+    word1 = make_tokenized_word(word1_label_strings)
+    word2 = make_tokenized_word(word2_label_strings)
+
+    words = preprocessor([word1, word2])
+    for observed, expected in zip(words[1].word_labels_strings, expected_word_label_strings):
         assert observed == expected
