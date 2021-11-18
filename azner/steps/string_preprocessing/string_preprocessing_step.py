@@ -44,7 +44,7 @@ class StringPreprocessorStep(BaseStep):
         self, section: Section, modifications: List[Tuple[CharSpan, str]]
     ) -> Tuple[str, Dict[CharSpan, CharSpan]]:
         """
-        processes a document for modifications, returning a new string with all abbreviations expanded
+        processes a document for modifications, returning a new string with all modifications processed
         :param section: section to modify
         :return: modifications list of Tuples of the charspan to change, and the string to change it with
         """
@@ -99,6 +99,15 @@ class StringPreprocessorStep(BaseStep):
         return new_uniques_map
 
     def create_modifications(self, section: Section) -> List[Tuple[CharSpan, str]]:
+        """
+        implementations should return a List[Tuple[Charspan,str]] of the modifications you want to make
+        the Charspan refers to the span in the Section.get_text() that you want to modify. The str is the text that you
+         want to insert (i.e. use '' for deletion).Note, that Section.get_text() is an accessor for Section.text,
+         returning either an already preprocessed string if available, or the original if not. This allows you to chain
+         together multiple modifiers, while retaining a reference to the original text via Section.offset_map
+        :param section:
+        :return:
+        """
         raise NotImplementedError()
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
