@@ -7,7 +7,7 @@ from spacy.matcher import Matcher
 from spacy.tokens import Span, Doc
 
 from azner.data.data import Document, Section, CharSpan
-from azner.steps import StringPreprocessorStep
+from .string_preprocessing_step import StringPreprocessorStep
 
 logger = logging.getLogger(__name__)
 
