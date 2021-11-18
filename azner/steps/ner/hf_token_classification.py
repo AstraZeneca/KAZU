@@ -144,7 +144,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         # run the transformer and get results
         confidence_and_labels_tensor = self.get_confidence_and_labels_tensor(loader)
         for section_index, section in id_section_map.items():
-            # for long docs, we need to split section.text into frames (i.e. portions that will fit into Bert or
+            # for long docs, we need to split section.get_text() into frames (i.e. portions that will fit into Bert or
             # similar)
             ner_processed_section = self.merge_section_frames(
                 section_index=section_index,
@@ -157,12 +157,12 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 for i, label in enumerate(transformed_word.word_labels_strings):
                     if self.debug:
                         logger.info(
-                            f"processing label: {label} for token {section.text[transformed_word.word_offsets[i][0]:transformed_word.word_offsets[i][1]]}"
+                            f"processing label: {label} for token {section.get_text()[transformed_word.word_offsets[i][0]:transformed_word.word_offsets[i][1]]}"
                         )
                     self.entity_mapper.update_parse_states(
                         label,
                         offsets=transformed_word.word_offsets[i],
-                        text=section.text,
+                        text=section.get_text(),
                         confidence=transformed_word.word_confidences[i],
                     )
 
