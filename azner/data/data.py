@@ -11,6 +11,25 @@ ENTITY_INSIDE_SYMBOL = "I"
 ENTITY_OUTSIDE_SYMBOL = "O"
 
 
+class CharSpan(BaseModel):
+    """A concept similar to a Spacy Span, except is offset based rather than token based"""
+
+    start: int
+    end: int
+
+    def is_overlapped(self, other):
+        return self.start >= other.start and self.end <= other.end
+
+    def __lt__(self, other):
+        return self.start < other.start
+
+    def __gt__(self, other):
+        return self.end > other.end
+
+    def __hash__(self):
+        return hash((self.start, self.end))
+
+
 class TokenizedWord(BaseModel):
     """
     A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
@@ -203,16 +222,35 @@ class Section(BaseModel):
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
     hash_val: Optional[str] = None  # not required. calculated based on above fields
+
+    preprocessed_text: Optional[
+        str
+    ] = None  # not required. a string representing text that has been preprocessed by e.g. abbreviation expansion
+    offset_map: Optional[
+        Dict[CharSpan, CharSpan]
+    ] = None  # not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
     metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
     entities: List[Entity] = Field(
         default_factory=list, hash=False
     )  # entities detected in this section
 
     def __str__(self):
-        return f"name: {self.name}, text: {self.text[:100]}"
+        return f"name: {self.name}, text: {self.get_text()[:100]}"
 
     def __hash__(self):
         return self.hash_val
+
+    def get_text(self) -> str:
+        """
+        rather than accessing text or preprocessed_text directly, this method provides a convenient wrapper to get
+        preprocessed_text if available, or text if not. We can't use property due to this issue:
+        https://github.com/samuelcolvin/pydantic/issues/935
+        :return:
+        """
+        if self.preprocessed_text is None:
+            return self.text
+        else:
+            return self.preprocessed_text
 
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):
@@ -222,7 +260,7 @@ class Section(BaseModel):
         ordered_ends = sorted(self.entities, key=lambda x: x.start)
         ex = [
             {
-                "text": self.text,
+                "text": self.get_text(),
                 "ents": [
                     {"start": x.start, "end": x.end, "label": x.entity_class} for x in ordered_ends
                 ],

@@ -62,10 +62,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Drug",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -76,10 +76,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Drug",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -90,10 +90,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Drug",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -104,10 +104,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Drug",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -118,10 +118,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Disease",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -132,10 +132,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Disease",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -146,10 +146,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Disease",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -160,10 +160,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Disease",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -174,10 +174,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Disease",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -188,10 +188,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Anatomy",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -202,10 +202,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Anatomy",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -216,10 +216,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Anatomy",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -230,10 +230,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Gene",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -244,10 +244,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Gene",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -258,10 +258,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Gene",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -272,10 +272,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Gene",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -286,10 +286,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Gene",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
@@ -300,10 +300,10 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     doc.sections[0].entities = [
         Entity(
             namespace="test",
-            match=doc.sections[0].text,
+            match=doc.sections[0].get_text(),
             entity_class="Gene",
             start=0,
-            end=len(doc.sections[0].text),
+            end=len(doc.sections[0].get_text()),
         )
     ]
     docs.append(doc)
