@@ -234,7 +234,8 @@ class EnsemblOntologyParser(OntologyParser):
 
         keys_to_check = [
             "uniprot_ids",
-            "alias_name" "alias_symbol",
+            "alias_name",
+            "alias_symbol",
             "prev_name",
             "lncipedia",
             "prev_symbol",
