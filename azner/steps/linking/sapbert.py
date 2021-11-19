@@ -263,7 +263,8 @@ class SapBertForEntityLinkingStep(BaseStep):
                     ) in enumerate(zip(neighbors, distances)):
                         metadata_dict = metadata_df.iloc[metadata_index].to_dict()
                         ontology_id = metadata_dict.pop("iri")
-                        metadata_dict["dist"] = dist
+                        # convert np to python type for serialisation
+                        metadata_dict["dist"] = dist.tolist()
                         new_mapping = Mapping(
                             source=ontology_name,
                             idx=ontology_id,
