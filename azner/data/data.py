@@ -260,16 +260,37 @@ class Section(BaseModel):
 
     def render(self):
         ordered_ends = sorted(self.entities, key=lambda x: x.start)
+        colors = {
+            "gene_linked": "#00f518",
+            "gene": "#84fa90",
+            "disease_linked": "#ff0000",
+            "disease": "#fc7979",
+            "drug": "#7d81ff",
+            "drug_linked": "#384cff",
+            "mutation": "#ff96f5",
+        }
+        linked = {
+            "gene": "gene_linked",
+            "disease": "disease_linked",
+            "drug": "drug_linked",
+        }
+
+        def label_colors(entity: Entity):
+            if entity.metadata.mappings is not None and len(entity.metadata.mappings) > 0:
+                return linked[entity.entity_class]
+            else:
+                return entity.entity_class
+
         ex = [
             {
                 "text": self.get_text(),
                 "ents": [
-                    {"start": x.start, "end": x.end, "label": x.entity_class} for x in ordered_ends
+                    {"start": x.start, "end": x.end, "label": label_colors(x)} for x in ordered_ends
                 ],
                 "title": None,
             }
         ]
-        html = displacy.render(ex, style="ent", manual=True)
+        html = displacy.render(ex, style="ent", options={"colors": colors}, manual=True)
         with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as f:
             url = "file://" + f.name
             f.write(html)
