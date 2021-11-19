@@ -168,9 +168,11 @@ class SapBertForEntityLinkingStep(BaseStep):
         index_dirs = os.listdir(index_cache_dir)
 
         for filename in index_dirs:
-            index = self.embedding_index_factory.create_index()
-            index.load(index_cache_dir.joinpath(filename))
-            ontology_index_dict[index.name] = index
+            # skip hidden files created by os
+            if not filename.startswith("."):
+                index = self.embedding_index_factory.create_index()
+                index.load(index_cache_dir.joinpath(filename))
+                ontology_index_dict[index.name] = index
 
         return ontology_index_dict
 
