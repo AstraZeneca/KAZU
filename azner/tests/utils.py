@@ -1,12 +1,43 @@
 import os
+from os.path import basename
 from pathlib import Path
 from typing import List, Tuple
+
+import pandas as pd
 
 from data.data import SimpleDocument, Entity, Document
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
 TINY_CHEMBL_KB_PATH = TEST_ASSETS_PATH.joinpath("sapbert").joinpath("tiny_chembl.parquet")
+
+FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS = TEST_ASSETS_PATH.joinpath("full_pipeline")
+
+SKIP_MESSAGE = """
+skipping acceptance test as KAZU_TEST_CONFIG_DIR is not provided as an environment variable. This should be the path 
+to a hydra config directory, configured with paths to the various resources/models to run the production pipeline 
+"""  # noqa
+
+
+class AcceptanceTestError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+def full_pipeline_test_cases() -> Tuple[List[SimpleDocument], List[pd.DataFrame]]:
+    docs = []
+    dfs = []
+    test_ids = set(
+        [basename(x).split(".")[0] for x in os.listdir(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS)]
+    )
+    for id in test_ids:
+        with open(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.joinpath(f"{id}.txt"), "r") as f:
+            text = f.read()
+            doc = SimpleDocument(text)
+            df = pd.read_csv(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.joinpath(f"{id}.csv"))
+            docs.append(doc)
+            dfs.append(df)
+    return docs, dfs
 
 
 def ner_simple_test_cases():
