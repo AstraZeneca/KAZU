@@ -225,14 +225,56 @@ class MondoParser(OntologyParser):
 class EnsemblOntologyParser(OntologyParser):
     name = "ENSEMBL"
     """
-    input is a tsv file with three cols, that line up to ["iri", "default_label", "syn"]
-    Typically exported from Ensembl BioMart https://www.ensembl.org/biomart/
+    input is a json from HGNC
+     e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
     :return:
     """
 
     def format_synonym_table(self) -> pd.DataFrame:
-        df = pd.read_csv(self.in_path, sep="\t")
-        df.columns = self.all_synonym_column_names
+
+        keys_to_check = [
+            "uniprot_ids",
+            "alias_name" "alias_symbol",
+            "prev_name",
+            "lncipedia",
+            "prev_symbol",
+            "vega_id",
+            "refseq_accession" "hgnc_id",
+            "mgd_id" "rgd_id",
+            "ccds_id",
+            "pseudogene.org",
+        ]
+
+        with open(self.in_path, "r") as f:
+            data = json.load(f)
+        ids = []
+        default_label = []
+        all_syns = []
+
+        docs = data["response"]["docs"]
+        for doc in docs:
+
+            def get_with_default_list(key: str):
+                found = doc.get(key, [])
+                if not isinstance(found, list):
+                    found = [found]
+                return found
+
+            ensembl_gene_id = doc.get("ensembl_gene_id", None)
+            symbol = doc.get("symbol", None)
+            if ensembl_gene_id is None or symbol is None:
+                continue
+            else:
+                # find synonyms
+                synonyms = []
+                [synonyms.extend(get_with_default_list(x)) for x in keys_to_check]
+                synonyms = list(set(synonyms))
+
+                [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
+                [default_label.append(symbol) for _ in range(len(synonyms))]
+                all_syns.extend(synonyms)
+
+        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_label, "syn": all_syns})
         return df
 
 
