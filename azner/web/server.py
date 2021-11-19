@@ -1,4 +1,5 @@
 import logging
+import time
 
 import hydra
 import ray
@@ -20,11 +21,11 @@ class AZNerWebApp:
     Web app to serve results
     """
 
-    def __init__(self, pipeline: Pipeline):
+    def __init__(self, cfg: DictConfig):
         """
         :param azner_runner: instance of PipelineRunner
         """
-        self.pipeline = pipeline
+        self.pipeline = Pipeline(load_steps(cfg))
 
     @app.get("/")
     def get(self):
@@ -48,9 +49,14 @@ def start(cfg: DictConfig) -> None:
     # Connect to the running Ray cluster, or run as single node
     ray.init(address=cfg.ray.address, namespace="serve")
     # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
-    serve.start(detached=True, http_options={"host": "0.0.0.0", "location": "EveryNode"})
-    pipeline = Pipeline(load_steps(cfg))
-    AZNerWebApp.deploy(pipeline)
+    serve.start(
+        detached=cfg.ray.detached, http_options={"host": "0.0.0.0", "location": "EveryNode"}
+    )
+    AZNerWebApp.deploy(cfg)
+    if not cfg.ray.detached:
+        while True:
+            logger.info(serve.list_deployments())
+            time.sleep(10)
 
 
 if __name__ == "__main__":
