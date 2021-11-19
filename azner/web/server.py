@@ -36,7 +36,7 @@ class AZNerWebApp:
     def ner(self, doc: SimpleDocument):
         logger.info(f"received request: {doc}")
         result = self.pipeline([doc])
-        return result[0]
+        return result[0].as_serialisable()
 
 
 @hydra.main(config_path="../conf", config_name="config")

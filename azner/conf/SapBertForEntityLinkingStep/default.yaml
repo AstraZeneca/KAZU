@@ -11,10 +11,12 @@ lookup_cache_size: 5000
 dl_workers: 1
 ontology_partition_size: 100000
 entity_class_to_ontology_mappings:
-  Drug: CHEMBL
-  Disease: MONDO
-  Gene: ENSEMBL
-  Anatomy: UBERON
+  drug: CHEMBL
+  disease: MONDO
+  gene: ENSEMBL
+  anatomy: UBERON
+  species: NOT_IMPLEMENTED
+  mutation: NOT_IMPLEMENTED
 trainer:
   _target_: pytorch_lightning.Trainer
   progress_bar_refresh_rate: 0

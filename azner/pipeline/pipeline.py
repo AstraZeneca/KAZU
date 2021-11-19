@@ -1,11 +1,11 @@
 import logging
-from typing import List, Dict, Type
+from typing import List, Dict
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
-from azner.steps import BaseStep
 from azner.data.data import Document
+from azner.steps import BaseStep
 from azner.steps.base.step import StepMetadata
 from azner.utils.stopwatch import Stopwatch
 
@@ -15,47 +15,11 @@ logger = logging.getLogger(__name__)
 def load_steps(cfg: DictConfig) -> List[BaseStep]:
     """
     loads steps based on the cfg.pipeline
-    This function looks for subclasses of BaseStep, and initialises them via hydra instantiate.
-    The hydra config is passed to the step constructor based on the class name. Therefore, to
-    instantiate instances of BaseStep via this method, the following must be true:
-
-    1) the module containing the Step to be instantiated must be loaded before this method is called
-    2) a hydra configuration directory must be available, corresponding to the name of the Step to be
-    instantiated
-    3) this hydra yaml must follow the following pattern:
-
-    _target_: # fully qualified name of class to be instantiated
-    <list of kwargs> :  #for the __init__ method of the class
-
-     e.g.
-     _target_: azner.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep
-    path: ~
-    depends_on: ~
-
-    :param cfg: Hydra DictConfig
-    :return: List of Step instances
     """
-
-    def get_all_subclasses(cls: Type) -> List[Type]:
-        """
-        recursively find all subclasses for a given type
-        :param cls: query type
-        :return: list of subclasses
-        """
-        all_subclasses = []
-        for subclass in cls.__subclasses__():
-            all_subclasses.append(subclass)
-            all_subclasses.extend(get_all_subclasses(subclass))
-
-        return all_subclasses
-
-    base_step_subclasses = get_all_subclasses(BaseStep)
-    base_step_subclasses_names = [x.__name__ for x in base_step_subclasses]
     steps = []
     for step in cfg.pipeline.steps:
-        if step in base_step_subclasses_names:
-            new_step = instantiate(cfg[step])
-            steps.append(new_step)
+        new_step = instantiate(cfg[step])
+        steps.append(new_step)
 
     return steps
 
