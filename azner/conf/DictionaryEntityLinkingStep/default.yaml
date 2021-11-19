@@ -1,10 +1,12 @@
 _target_: azner.steps.linking.dictionary.DictionaryEntityLinkingStep
 depends_on: ~
 entity_class_to_ontology_mappings:
-  Drug: CHEMBL
-  Disease: MONDO
-  Gene: ENSEMBL
-  Anatomy: UBERON
+  drug: CHEMBL
+  disease: MONDO
+  gene: ENSEMBL
+  anatomy: UBERON
+  species: NOT_IMPLEMENTED
+  mutation: NOT_IMPLEMENTED
 ontology_dictionary_index:
   MONDO:
     _target_: azner.utils.dictionary_index.DictionaryIndex
