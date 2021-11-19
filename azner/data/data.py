@@ -1,7 +1,7 @@
 import tempfile
 import uuid
 import webbrowser
-from typing import List, Any, Dict, Optional, Tuple
+from typing import List, Any, Dict, Optional, Tuple, Union
 from pydantic import BaseModel, Field, validator
 from spacy import displacy
 
@@ -227,8 +227,9 @@ class Section(BaseModel):
         str
     ] = None  # not required. a string representing text that has been preprocessed by e.g. abbreviation expansion
     offset_map: Optional[
-        Dict[CharSpan, CharSpan]
+        Union[Dict[CharSpan, CharSpan], Dict[int, List[CharSpan]]]
     ] = None  # not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
+
     metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
     entities: List[Entity] = Field(
         default_factory=list, hash=False
@@ -273,6 +274,54 @@ class Section(BaseModel):
             f.write(html)
         webbrowser.open(url, new=2)
 
+    def as_serialisable(self):
+        """
+        Since offset map is not json serialisable, we need to convert it something that can be jsonified when using
+        the web api. Generally speaking, it's easier to call Document.as_serialisable() which returns a serialisable
+        copy of the whole document.
+        :return:
+        """
+        offsets = self.offset_map
+        new_section = self.copy(deep=True)
+        if offsets is not None and len(offsets) > 0:
+            if isinstance(list(offsets.keys())[0], CharSpan):
+                serialiable_offsets = {}
+                for i, modified_char_span in enumerate(offsets):
+                    serialiable_offsets[i] = [modified_char_span, offsets[modified_char_span]]
+                new_section.offset_map = serialiable_offsets
+            elif isinstance(list(offsets.keys())[0], int):
+                # is already serialised
+                pass
+            else:
+                raise RuntimeError("offset map is in indeterminate state")
+        return new_section
+
+    def rehydrate(self):
+        """
+        the inverse of as_serialisable.
+        :return:
+        """
+        new_section = self.copy(deep=True)
+        offsets = self.offset_map
+        if offsets is not None and len(offsets) > 0:
+            if isinstance(list(offsets.keys())[0], int):
+                original_offsets = {}
+                for i, offsets_list in self.offset_map.items():
+                    modified_char_span = CharSpan(
+                        start=offsets_list[0]["start"], end=offsets_list[0]["end"]
+                    )
+                    original_char_span = CharSpan(
+                        start=offsets_list[1]["start"], end=offsets_list[1]["end"]
+                    )
+                    original_offsets[modified_char_span] = original_char_span
+                    new_section.offset_map = original_offsets
+            elif isinstance(list(offsets.keys())[0], CharSpan):
+                # doc is already in normal form
+                pass
+            else:
+                raise RuntimeError("offset map is in indeterminate state")
+        return new_section
+
 
 class Document(BaseModel):
     idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
@@ -299,6 +348,27 @@ class Document(BaseModel):
         for section in self.sections:
             entities.extend(section.entities)
         return entities
+
+    def as_serialisable(self):
+        """
+        return a copy of the document, in a format that can be json serialised. Intended to be used
+        :return:
+        """
+        new_doc = self.copy()
+        for i in range(len(new_doc.sections)):
+            new_doc.sections[i] = new_doc.sections[i].as_serialisable()
+        return new_doc
+
+    def rehydrate(self):
+        """
+        the inverse of as_serialisable
+        return a copy of the document, in a format that can be json serialised
+        :return:
+        """
+        new_doc = self.copy()
+        for i in range(len(new_doc.sections)):
+            new_doc.sections[i] = new_doc.sections[i].rehydrate()
+        return new_doc
 
 
 class SimpleDocument(Document):

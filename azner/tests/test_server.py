@@ -21,5 +21,5 @@ def test_api():
         response = requests.post(
             f"http://127.0.0.1:{cfg.ray.serve.port}/api/{AZNER}/", json={"text": "hello"}
         ).json()
-        result = Document(**response)
+        result = Document(**response).rehydrate()
         assert isinstance(result, Document)

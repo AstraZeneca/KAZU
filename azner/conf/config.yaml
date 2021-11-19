@@ -1,5 +1,6 @@
 defaults:
   - ray: cluster
+  - SciSpacyAbbreviationExpansionStep: default
   - TransformersModelForTokenClassificationNerStep: default
   - SapBertForEntityLinkingStep: default
   - DictionaryEntityLinkingStep: default
