@@ -70,7 +70,7 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
 
     doc = SimpleDocument("Baclofen is a muscle relaxant")
     doc.sections[0].entities = [
-        Entity(namespace="test", match="Baclofen", entity_class="Drug", start=0, end=8)
+        Entity(namespace="test", match="Baclofen", entity_class="drug", start=0, end=8)
     ]
     docs.append(doc)
     iris.append("CHEMBL701")
@@ -78,7 +78,7 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
 
     doc = SimpleDocument("Helium is a gas.")
     doc.sections[0].entities = [
-        Entity(namespace="test", match="Helium", entity_class="Drug", start=0, end=6)
+        Entity(namespace="test", match="Helium", entity_class="drug", start=0, end=6)
     ]
     iris.append("CHEMBL1796997")
     sources.append("CHEMBL")
@@ -94,7 +94,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Drug",
+            entity_class="drug",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -108,7 +108,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Drug",
+            entity_class="drug",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -122,7 +122,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Drug",
+            entity_class="drug",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -136,7 +136,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Drug",
+            entity_class="drug",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -150,7 +150,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Disease",
+            entity_class="disease",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -164,7 +164,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Disease",
+            entity_class="disease",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -178,7 +178,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Disease",
+            entity_class="disease",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -192,7 +192,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Disease",
+            entity_class="disease",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -206,7 +206,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Disease",
+            entity_class="disease",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -220,7 +220,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Anatomy",
+            entity_class="anatomy",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -234,7 +234,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Anatomy",
+            entity_class="anatomy",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -248,7 +248,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Anatomy",
+            entity_class="anatomy",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -262,7 +262,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Gene",
+            entity_class="gene",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -276,7 +276,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Gene",
+            entity_class="gene",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -290,7 +290,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Gene",
+            entity_class="gene",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -304,7 +304,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Gene",
+            entity_class="gene",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -318,7 +318,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Gene",
+            entity_class="gene",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
@@ -332,7 +332,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
         Entity(
             namespace="test",
             match=doc.sections[0].get_text(),
-            entity_class="Gene",
+            entity_class="gene",
             start=0,
             end=len(doc.sections[0].get_text()),
         )
