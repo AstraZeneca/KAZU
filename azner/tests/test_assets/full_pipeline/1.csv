@@ -1,0 +1,48 @@
+,namespace,match,entity_class,start,end,mapping_id
+0,TransformersModelForTokenClassificationNerStep,benzimidazole,drug,83,96,CHEMBL306226
+1,TransformersModelForTokenClassificationNerStep,omeprazole,drug,256,266,CHEMBL1503
+2,TransformersModelForTokenClassificationNerStep,esomeprazole,drug,268,280,CHEMBL1201320
+3,TransformersModelForTokenClassificationNerStep,lansoprazole,drug,282,294,CHEMBL480
+4,TransformersModelForTokenClassificationNerStep,pantoprazole,drug,296,308,CHEMBL1502
+5,TransformersModelForTokenClassificationNerStep,rabeprazole,drug,314,325,CHEMBL1219
+6,TransformersModelForTokenClassificationNerStep,S-mephenytoin,drug,672,685,
+7,TransformersModelForTokenClassificationNerStep,R-omeprazole,drug,707,719,
+8,TransformersModelForTokenClassificationNerStep,lansoprazole,drug,912,924,CHEMBL480
+9,TransformersModelForTokenClassificationNerStep,omeprazole,drug,944,954,CHEMBL1503
+10,TransformersModelForTokenClassificationNerStep,esomeprazole,drug,983,995,CHEMBL1201320
+11,TransformersModelForTokenClassificationNerStep,pantoprazole,drug,1017,1029,CHEMBL1502
+12,TransformersModelForTokenClassificationNerStep,Pantoprazole,drug,1068,1080,CHEMBL1502
+13,TransformersModelForTokenClassificationNerStep,diclofenac,drug,1134,1144,CHEMBL139
+14,TransformersModelForTokenClassificationNerStep,midazolam,drug,1183,1192,CHEMBL655
+15,TransformersModelForTokenClassificationNerStep,bufuralol,drug,1383,1392,CHEMBL251642
+16,TransformersModelForTokenClassificationNerStep,rabeprazole,drug,1499,1510,CHEMBL1219
+17,TransformersModelForTokenClassificationNerStep,rabeprazole thioether,drug,1512,1533,
+18,TransformersModelForTokenClassificationNerStep,R-omeprazole,drug,1741,1753,
+19,TransformersModelForTokenClassificationNerStep,lansoprazole,drug,1996,2008,CHEMBL480
+20,TransformersModelForTokenClassificationNerStep,pantoprazole,drug,2013,2025,CHEMBL1502
+21,TransformersModelForTokenClassificationNerStep,Esomeprazole,drug,2103,2115,CHEMBL1201320
+22,TransformersModelForTokenClassificationNerStep,omeprazole,drug,2161,2171,CHEMBL1503
+23,TransformersModelForTokenClassificationNerStep,rabeprazole,drug,2220,2231,CHEMBL1219
+24,TransformersModelForTokenClassificationNerStep,thioether,drug,2293,2302,
+25,TransformersModelForTokenClassificationNerStep,proton pump,gene,23,34,
+26,TransformersModelForTokenClassificationNerStep,hepatic cytochrome P450,gene,133,156,
+27,TransformersModelForTokenClassificationNerStep,P450,gene,158,162,
+28,TransformersModelForTokenClassificationNerStep,cytochrome P450 enzymes,gene,349,372,
+29,TransformersModelForTokenClassificationNerStep,CYP2C9,gene,374,380,ENSG00000138109
+30,TransformersModelForTokenClassificationNerStep,2C19,gene,382,386,
+31,TransformersModelForTokenClassificationNerStep,recombinant CYP2C19,gene,479,498,
+32,TransformersModelForTokenClassificationNerStep,CYP2C19,gene,632,639,ENSG00000165841
+33,TransformersModelForTokenClassificationNerStep,recombinant CYP2C19,gene,780,799,
+34,TransformersModelForTokenClassificationNerStep,CYP2C19,gene,860,867,ENSG00000165841
+35,TransformersModelForTokenClassificationNerStep,CYP2C9,gene,1632,1638,ENSG00000138109
+36,TransformersModelForTokenClassificationNerStep,CYP2C19,gene,1658,1665,ENSG00000165841
+37,TransformersModelForTokenClassificationNerStep,CYP2D6,gene,1681,1687,ENSG00000100197
+38,TransformersModelForTokenClassificationNerStep,P450 enzymes,gene,1774,1786,
+39,TransformersModelForTokenClassificationNerStep,CYP2C9,gene,1862,1868,ENSG00000138109
+40,TransformersModelForTokenClassificationNerStep,2C19,gene,1873,1877,
+41,TransformersModelForTokenClassificationNerStep,CYP2C19,gene,2069,2076,ENSG00000165841
+42,TransformersModelForTokenClassificationNerStep,CYP2C9,gene,2081,2087,ENSG00000138109
+43,TransformersModelForTokenClassificationNerStep,P450 enzymes,gene,2342,2354,
+44,TransformersModelForTokenClassificationNerStep,human,species,4,9,
+45,TransformersModelForTokenClassificationNerStep,human,species,439,444,
+46,TransformersModelForTokenClassificationNerStep,human,species,754,759,

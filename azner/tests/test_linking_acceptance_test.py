@@ -5,22 +5,10 @@ import pytest
 from hydra import compose, initialize_config_dir
 
 from pipeline.pipeline import Pipeline, load_steps
-from azner.tests.utils import entity_linking_hard_cases
+from azner.tests.utils import entity_linking_hard_cases, AcceptanceTestError, SKIP_MESSAGE
 
 
-class AcceptanceTestError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-
-skip_msg = (
-    "skipping acceptance test as KAZU_TEST_CONFIG_DIR is not provided as an environment variable. This should "
-    "be the path to a hydra config directory, configured with paths to the various resources/models to run the "
-    "production pipeline"
-)
-
-
-@pytest.mark.skipif(os.environ.get("KAZU_TEST_CONFIG_DIR") is None, reason=skip_msg)
+@pytest.mark.skipif(os.environ.get("KAZU_TEST_CONFIG_DIR") is None, reason=SKIP_MESSAGE)
 def test_dictionary_entity_linking():
     minimum_pass_score = 0.80
     with initialize_config_dir(config_dir=os.environ.get("KAZU_TEST_CONFIG_DIR")):

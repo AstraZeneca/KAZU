@@ -1,4 +1,7 @@
-from data.data import TokenizedWord
+import pytest
+
+from data.data import TokenizedWord, SimpleDocument, CharSpan
+from fastapi.encoders import jsonable_encoder
 
 
 def test_tokenized_word():
@@ -30,3 +33,15 @@ def test_tokenized_word():
         assert expected == observed
     for expected, observed in zip(expected_class_labels, word.class_labels):
         assert expected == observed
+
+
+def test_serialisation():
+    x = SimpleDocument("Hello")
+    x.sections[0].offset_map = {CharSpan(start=1, end=2): CharSpan(start=1, end=2)}
+    # should raise a type error
+    with pytest.raises(TypeError):
+        jsonable_encoder(x)
+
+    # call to as_serialisable means we can encode it
+    y = x.as_serialisable()
+    jsonable_encoder(y)
