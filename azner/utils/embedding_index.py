@@ -94,7 +94,7 @@ class EmbeddingIndex(abc.ABC):
         directory = Path(path).joinpath(self.name)
         if directory.exists():
             shutil.rmtree(directory)
-        os.mkdir(directory)
+        os.makedirs(directory)
 
         self.metadata.to_parquet(self.get_dataframe_path(directory), index=None)
         with open(self.get_index_metadata_path(directory), "w") as f:
@@ -240,7 +240,7 @@ class EmbeddingIndexFactory:
         self.return_n_nearest_neighbours = return_n_nearest_neighbours
         self.embedding_index_class_name = embedding_index_class_name
 
-    def create_index(self, name: Optional[str] = None):
+    def create_index(self, name: str = 'unnamed_index'):
         if self.embedding_index_class_name == MatMulTensorEmbeddingIndex.__name__:
             return MatMulTensorEmbeddingIndex(
                 name=name, return_n_nearest_neighbours=self.return_n_nearest_neighbours
