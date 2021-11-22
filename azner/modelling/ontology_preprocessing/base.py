@@ -233,6 +233,8 @@ class EnsemblOntologyParser(OntologyParser):
     def format_synonym_table(self) -> pd.DataFrame:
 
         keys_to_check = [
+            "name",
+            "symbol",
             "uniprot_ids",
             "alias_name",
             "alias_symbol",
@@ -240,8 +242,10 @@ class EnsemblOntologyParser(OntologyParser):
             "lncipedia",
             "prev_symbol",
             "vega_id",
-            "refseq_accession" "hgnc_id",
-            "mgd_id" "rgd_id",
+            "refseq_accession",
+            "hgnc_id",
+            "mgd_id",
+            "rgd_id",
             "ccds_id",
             "pseudogene.org",
         ]
