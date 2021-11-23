@@ -336,6 +336,8 @@ class EnsemblOntologyParser(OntologyParser):
                         synonyms.extend(self.post_process_synonym(y))
 
                 synonyms = list(set(synonyms))
+                # filter any very short matches
+                synonyms = [x for x in synonyms if len(x) > 2]
                 [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
                 [default_label.append(symbol) for _ in range(len(synonyms))]
                 all_syns.extend(synonyms)
@@ -356,9 +358,12 @@ class EnsemblOntologyParser(OntologyParser):
             # expand brackets
             matches = re.match(paren_re, syn)
             if matches is not None:
+                all_groups_no_brackets = []
                 for group in matches.groups():
                     if group not in self.EXCLUDED_PARENTHESIS:
                         to_add.append(group)
+                        all_groups_no_brackets.append(group)
+                to_add.append("".join(all_groups_no_brackets))
         # expand slashes
         for x in range(len(to_add)):
             if "/" in to_add[x]:
