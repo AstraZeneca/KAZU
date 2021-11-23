@@ -3,6 +3,8 @@ from typing import Tuple, List
 import pandas as pd
 from rapidfuzz import process, fuzz
 
+from azner.data.data import LINK_SCORE
+
 
 class DictionaryIndex:
     """
@@ -83,5 +85,5 @@ class DictionaryIndex:
             hits = self.post_process_hits(query, hits)
             locs = [x[2] for x in hits]
             hit_df = targets.iloc[locs].copy()
-            hit_df["ratio"] = [x[1] for x in hits]
+            hit_df[LINK_SCORE] = [x[1] for x in hits]
             return hit_df
