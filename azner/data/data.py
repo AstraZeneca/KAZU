@@ -14,6 +14,12 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 # key for Document Processing Failed
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
+# key for namespace in metadata
+NAMESPACE = "namespace"
+
+# key for linking score
+LINK_SCORE = "link_score"
+
 
 class CharSpan(BaseModel):
     """A concept similar to a Spacy Span, except is offset based rather than token based"""
