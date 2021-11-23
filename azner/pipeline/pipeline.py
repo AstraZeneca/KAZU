@@ -39,6 +39,25 @@ class FailedDocsHandler:
         raise NotImplementedError()
 
 
+class FailedDocsLogHandler(FailedDocsHandler):
+    """
+    implementation that logs to warning
+    """
+
+    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+        for step_namespace, docs in step_docs_map.items():
+            for doc in docs:
+                error_message = doc.metadata.get(PROCESSING_EXCEPTION, None)
+                if error_message is not None:
+                    logger.warning(
+                        f"processing failed for step {step_namespace}, doc: {doc.idx}, {error_message} "
+                    )
+                else:
+                    logger.warning(
+                        f"processing failed for step {step_namespace}, doc: {doc.idx}, No error mesasge found in doc metadata "
+                    )
+
+
 class FailedDocsFileHandler(FailedDocsHandler):
     """
     implementation logs docs to a directory, along with exception message
