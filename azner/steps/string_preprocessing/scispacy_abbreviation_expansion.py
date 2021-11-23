@@ -1,4 +1,5 @@
 import logging
+import traceback
 from collections import defaultdict
 from typing import Tuple, List, Optional, Set, Dict
 
@@ -6,7 +7,7 @@ from spacy.lang.en import English
 from spacy.matcher import Matcher
 from spacy.tokens import Span, Doc
 
-from azner.data.data import Document, Section, CharSpan
+from azner.data.data import Document, Section, CharSpan, PROCESSING_EXCEPTION
 from .string_preprocessing_step import StringPreprocessorStep
 
 logger = logging.getLogger(__name__)
@@ -265,9 +266,14 @@ class SciSpacyAbbreviationExpansionStep(StringPreprocessorStep):
         :param docs:
         :return:
         """
+        failed_docs = []
         for doc in docs:
-            self.expand_abbreviations_section(doc)
-        return docs, []
+            try:
+                self.expand_abbreviations_section(doc)
+            except Exception:
+                doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                failed_docs.append(doc)
+        return docs, failed_docs
 
     def expand_abbreviations(self, section: Section) -> Tuple[str, Dict[CharSpan, CharSpan]]:
         """
