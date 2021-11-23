@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     """
-    using the result of documents_to_entities_list_map, find the document associated with an Entity
+    for a given entity and a list of docs, find the doc the entity belongs to
     :param list_map:
     :param entity:
     :return:
