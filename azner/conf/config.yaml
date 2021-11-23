@@ -5,4 +5,5 @@ defaults:
   - SapBertForEntityLinkingStep: default
   - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
+  - EnsembleEntityLinkingStep: default
   - pipeline: default
