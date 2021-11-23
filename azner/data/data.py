@@ -11,6 +11,9 @@ ENTITY_START_SYMBOL = "B"
 ENTITY_INSIDE_SYMBOL = "I"
 ENTITY_OUTSIDE_SYMBOL = "O"
 
+# key for Document Processing Failed
+PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
+
 
 class CharSpan(BaseModel):
     """A concept similar to a Spacy Span, except is offset based rather than token based"""
