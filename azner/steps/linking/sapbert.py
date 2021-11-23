@@ -279,8 +279,12 @@ class SapBertForEntityLinkingStep(BaseStep):
                             entity.add_mapping(new_mapping)
                             self.update_lookup_cache(entity, new_mapping)
         except Exception:
+            affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
-                doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                message = (
+                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
+                )
+                doc.metadata[PROCESSING_EXCEPTION] = message
                 failed_docs.append(doc)
 
         return docs, failed_docs
