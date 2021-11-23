@@ -10,7 +10,7 @@ import torch
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
-from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION
+from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION, NAMESPACE, LINK_SCORE
 from azner.modelling.linking.sapbert.train import (
     PLSapbertModel,
     get_embedding_dataloader_from_strings,
@@ -269,9 +269,10 @@ class SapBertForEntityLinkingStep(BaseStep):
                             dist,
                         ) in enumerate(zip(neighbors, distances)):
                             metadata_dict = metadata_df.iloc[metadata_index].to_dict()
+                            metadata_dict[NAMESPACE] = self.namespace()
                             ontology_id = metadata_dict.pop("iri")
                             # convert np to python type for serialisation
-                            metadata_dict["dist"] = dist.tolist()
+                            metadata_dict[LINK_SCORE] = dist.tolist()
                             new_mapping = Mapping(
                                 source=ontology_name,
                                 idx=ontology_id,
