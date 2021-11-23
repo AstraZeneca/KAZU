@@ -174,8 +174,12 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 # reset the entity mapper in preparation for the next section
                 self.entity_mapper.reset()
         except Exception:
+            affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
-                doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                message = (
+                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
+                )
+                doc.metadata[PROCESSING_EXCEPTION] = message
                 failed_docs.append(doc)
 
         return docs, failed_docs
