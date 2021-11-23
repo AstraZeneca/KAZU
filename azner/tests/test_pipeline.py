@@ -30,3 +30,13 @@ def test_pipeline_error_handling():
         error_files = os.listdir(os.path.join(f, step.namespace()))
         # should be two files per doc - one with exception, one with doc contents
         assert len(error_files) == 2 * len(docs)
+
+        # should flush docs between calls
+        assert len(pipeline.failed_docs) == 0
+
+        more_docs = [SimpleDocument("hello") for _ in range(5)]
+
+        pipeline(more_docs)
+        error_files = os.listdir(os.path.join(f, step.namespace()))
+        # should be two files per doc - one with exception, one with doc contents
+        assert len(error_files) == 2 * (len(docs) + len(more_docs))
