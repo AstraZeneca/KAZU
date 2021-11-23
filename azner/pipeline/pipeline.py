@@ -26,11 +26,24 @@ def load_steps(cfg: DictConfig) -> List[BaseStep]:
 
 
 class FailedDocsHandler:
+    """
+    class to somehow handle failed docs
+    """
+
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
+        """
+
+        :param step_docs_map: a dict of step namespace and the docs that failed for it
+        :return:
+        """
         raise NotImplementedError()
 
 
 class FailedDocsFileHandler(FailedDocsHandler):
+    """
+    implementation logs docs to a directory, along with exception message
+    """
+
     def __init__(self, log_dir: str):
         self.log_dir = log_dir
 
