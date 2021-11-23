@@ -12,6 +12,19 @@ from transformers import AutoTokenizer, BatchEncoding
 logger = logging.getLogger(__name__)
 
 
+def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
+    """
+    using the result of documents_to_entities_list_map, find the document associated with an Entity
+    :param list_map:
+    :param entity:
+    :return:
+    """
+    for doc in docs:
+        if entity in doc.get_entities():
+            return doc
+    raise RuntimeError(f"Error! Entity {entity}is not attached to a document")
+
+
 def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, str]:
     """
     convert documents into a dict of <dochash + sectionhash>: text
