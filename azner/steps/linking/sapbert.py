@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import traceback
 from typing import List, Tuple, Dict
 
 import pandas as pd
@@ -10,7 +11,7 @@ from cachetools import LFUCache
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
-from azner.data.data import Document, Entity, Mapping
+from azner.data.data import Document, Entity, Mapping, PROCESSING_EXCEPTION
 from azner.modelling.linking.sapbert.train import (
     PLSapbertModel,
     get_embedding_dataloader_from_strings,
@@ -245,38 +246,44 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param docs:
         :return:
         """
-        entities = pydash.flatten([x.get_entities() for x in docs])
-        if not self.process_all_entities:
-            entities = filter_entities_with_ontology_mappings(entities)
+        failed_docs = []
+        try:
+            entities = pydash.flatten([x.get_entities() for x in docs])
+            if not self.process_all_entities:
+                entities = filter_entities_with_ontology_mappings(entities)
 
-        entities = self.check_lookup_cache(entities)
-        if len(entities) > 0:
-            results = self.get_embeddings_for_strings([x.match for x in entities])
-            results = torch.unsqueeze(results, 1)
-            for i, result in enumerate(results):
-                entity = entities[i]
-                ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
-                index = self.ontology_index_dict.get(ontology_name, None)
-                if index is not None:
-                    distances, neighbors, metadata_df = index.search(result)
-                    for metadata_index, (
-                        neighbour_id,
-                        dist,
-                    ) in enumerate(zip(neighbors, distances)):
-                        metadata_dict = metadata_df.iloc[metadata_index].to_dict()
-                        ontology_id = metadata_dict.pop("iri")
-                        # convert np to python type for serialisation
-                        metadata_dict["dist"] = dist.tolist()
-                        new_mapping = Mapping(
-                            source=ontology_name,
-                            idx=ontology_id,
-                            mapping_type="direct",
-                            metadata=metadata_dict,
-                        )
-                        entity.add_mapping(new_mapping)
-                        self.update_lookup_cache(entity, new_mapping)
+            entities = self.check_lookup_cache(entities)
+            if len(entities) > 0:
+                results = self.get_embeddings_for_strings([x.match for x in entities])
+                results = torch.unsqueeze(results, 1)
+                for i, result in enumerate(results):
+                    entity = entities[i]
+                    ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
+                    index = self.ontology_index_dict.get(ontology_name, None)
+                    if index is not None:
+                        distances, neighbors, metadata_df = index.search(result)
+                        for metadata_index, (
+                            neighbour_id,
+                            dist,
+                        ) in enumerate(zip(neighbors, distances)):
+                            metadata_dict = metadata_df.iloc[metadata_index].to_dict()
+                            ontology_id = metadata_dict.pop("iri")
+                            # convert np to python type for serialisation
+                            metadata_dict["dist"] = dist.tolist()
+                            new_mapping = Mapping(
+                                source=ontology_name,
+                                idx=ontology_id,
+                                mapping_type="direct",
+                                metadata=metadata_dict,
+                            )
+                            entity.add_mapping(new_mapping)
+                            self.update_lookup_cache(entity, new_mapping)
+        except Exception:
+            for doc in docs:
+                doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                failed_docs.append(doc)
 
-        return docs, []
+        return docs, failed_docs
 
     def update_lookup_cache(self, entity: Entity, mapping: Mapping):
         hash_val = get_match_entity_class_hash(entity)
