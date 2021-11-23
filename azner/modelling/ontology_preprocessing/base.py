@@ -1,5 +1,6 @@
 import itertools
 import json
+import re
 from pathlib import Path
 from typing import List
 
@@ -225,15 +226,187 @@ class MondoParser(OntologyParser):
 class EnsemblOntologyParser(OntologyParser):
     name = "ENSEMBL"
     """
-    input is a tsv file with three cols, that line up to ["iri", "default_label", "syn"]
-    Typically exported from Ensembl BioMart https://www.ensembl.org/biomart/
+    input is a json from HGNC
+     e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
     :return:
     """
 
+    GREEK_SUBS = {
+        "\u0391": "alpha",
+        "\u0392": "beta",
+        "\u0393": "gamma",
+        "\u0394": "delta",
+        "\u0395": "epsilon",
+        "\u0396": "zeta",
+        "\u0397": "eta",
+        "\u0398": "theta",
+        "\u0399": "iota",
+        "\u039A": "kappa",
+        "\u039B": "lamda",
+        "\u039C": "mu",
+        "\u039D": "nu",
+        "\u039E": "xi",
+        "\u039F": "omicron",
+        "\u03A0": "pi",
+        "\u03A1": "rho",
+        "\u03A3": "sigma",
+        "\u03A4": "tau",
+        "\u03A5": "upsilon",
+        "\u03A6": "phi",
+        "\u03A7": "chi",
+        "\u03A8": "psi",
+        "\u03A9": "omega",
+        "\u03F4": "theta",
+        "\u03B1": "alpha",
+        "\u03B2": "beta",
+        "\u03B3": "gamma",
+        "\u03B4": "delta",
+        "\u03B5": "epsilon",
+        "\u03B6": "zeta",
+        "\u03B7": "eta",
+        "\u03B8": "theta",
+        "\u03B9": "iota",
+        "\u03BA": "kappa",
+        "\u03BC": "mu",
+        "\u03BD": "nu",
+        "\u03BE": "xi",
+        "\u03BF": "omicron",
+        "\u03C0": "pi",
+        "\u03C1": "rho",
+        "\u03C2": "final sigma",
+        "\u03C3": "sigma",
+        "\u03C4": "tau",
+        "\u03C5": "upsilon",
+        "\u03C6": "phi",
+        "\u03C7": "chi",
+        "\u03C8": "psi",
+        "\u03C9": "omega",
+    }
+
+    GREEK_SUBS_ABBRV = {k: v[0] for k, v in GREEK_SUBS.items()}
+    GREEK_SUBS_REVERSED = {v: k for k, v in GREEK_SUBS.items()}
+
+    EXCLUDED_PARENTHESIS = ["", "non-protein coding"]
+
     def format_synonym_table(self) -> pd.DataFrame:
-        df = pd.read_csv(self.in_path, sep="\t")
-        df.columns = self.all_synonym_column_names
+
+        keys_to_check = [
+            "name",
+            "symbol",
+            "uniprot_ids",
+            "alias_name",
+            "alias_symbol",
+            "prev_name",
+            "lncipedia",
+            "prev_symbol",
+            "vega_id",
+            "refseq_accession",
+            "hgnc_id",
+            "mgd_id",
+            "rgd_id",
+            "ccds_id",
+            "pseudogene.org",
+        ]
+
+        with open(self.in_path, "r") as f:
+            data = json.load(f)
+        ids = []
+        default_label = []
+        all_syns = []
+
+        docs = data["response"]["docs"]
+        for doc in docs:
+
+            def get_with_default_list(key: str):
+                found = doc.get(key, [])
+                if not isinstance(found, list):
+                    found = [found]
+                return found
+
+            ensembl_gene_id = doc.get("ensembl_gene_id", None)
+            symbol = doc.get("symbol", None)
+            if ensembl_gene_id is None or symbol is None:
+                continue
+            else:
+                # find synonyms
+                synonyms = []
+                for x in keys_to_check:
+                    synonyms_this_entity = get_with_default_list(x)
+                    for y in synonyms_this_entity:
+                        synonyms.extend(self.post_process_synonym(y))
+
+                synonyms = list(set(synonyms))
+                # filter any very short matches
+                synonyms = [x for x in synonyms if len(x) > 2]
+                [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
+                [default_label.append(symbol) for _ in range(len(synonyms))]
+                all_syns.extend(synonyms)
+
+        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_label, "syn": all_syns})
         return df
+
+    def post_process_synonym(self, syn: str) -> List[str]:
+        """
+        need to also do some basic string processing on HGNC
+        :param syn:
+        :return:
+        """
+        to_add = []
+        paren_re = r"(.*)\((.*)\)(.*)"
+        to_add.append(syn)
+        if "(" in syn and ")" in syn:
+            # expand brackets
+            matches = re.match(paren_re, syn)
+            if matches is not None:
+                all_groups_no_brackets = []
+                for group in matches.groups():
+                    if group not in self.EXCLUDED_PARENTHESIS:
+                        to_add.append(group)
+                        all_groups_no_brackets.append(group)
+                to_add.append("".join(all_groups_no_brackets))
+        # expand slashes
+        for x in range(len(to_add)):
+            if "/" in to_add[x]:
+                splits = to_add[x].split("/")
+                to_add.extend(splits)
+
+        # sub greek
+        for x in range(len(to_add)):
+            to_add.append(self.substitute_greek_unicode(to_add[x]))
+            to_add.append(self.substitute_english_with_greek_unicode(to_add[x]))
+            to_add.append(self.substitute_greek_unicode_abbrvs(to_add[x]))
+
+        return to_add
+
+    def substitute_greek_unicode(self, text: str) -> str:
+        if any([x in text for x in self.GREEK_SUBS.keys()]):
+            for greek_unicode in self.GREEK_SUBS.keys():
+                if greek_unicode in text:
+                    text = text.replace(greek_unicode, self.GREEK_SUBS[greek_unicode])
+                    text = self.substitute_greek_unicode(text)
+            return text
+        else:
+            return text
+
+    def substitute_greek_unicode_abbrvs(self, text: str) -> str:
+        if any([x in text for x in self.GREEK_SUBS_ABBRV.keys()]):
+            for greek_unicode in self.GREEK_SUBS_ABBRV.keys():
+                if greek_unicode in text:
+                    text = text.replace(greek_unicode, self.GREEK_SUBS_ABBRV[greek_unicode])
+                    text = self.substitute_greek_unicode_abbrvs(text)
+            return text
+        else:
+            return text
+
+    def substitute_english_with_greek_unicode(self, text: str) -> str:
+        if any([x in text for x in self.GREEK_SUBS_REVERSED.keys()]):
+            for greek_unicode in self.GREEK_SUBS_REVERSED.keys():
+                if greek_unicode in text:
+                    text = text.replace(greek_unicode, self.GREEK_SUBS_REVERSED[greek_unicode])
+                    text = self.substitute_english_with_greek_unicode(text)
+            return text
+        else:
+            return text
 
 
 class ChemblOntologyParser(OntologyParser):
