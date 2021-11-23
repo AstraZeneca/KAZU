@@ -1,14 +1,16 @@
 import logging
+import traceback
 from typing import List, Tuple, Dict
 
 import pydash
 
-from azner.data.data import Document, Mapping
+from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION
 from azner.steps import BaseStep
 from azner.utils.caching import EntityLinkingLookupCache
 from azner.utils.dictionary_index import DictionaryIndex
 from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
+    find_document_from_entity,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,6 +53,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param docs:
         :return:
         """
+        failed_docs = []
         entities = pydash.flatten([x.get_entities() for x in docs])
         if not self.process_all_entities:
             entities = filter_entities_with_ontology_mappings(entities)
@@ -58,20 +61,25 @@ class DictionaryEntityLinkingStep(BaseStep):
         entities = self.lookup_cache.check_lookup_cache(entities)
         if len(entities) > 0:
             for entity in entities:
-                ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
-                index = self.ontology_index_dict.get(ontology_name, None)
-                if index is not None:
-                    metadata_df = index.search(entity.match)
-                    for i, row in metadata_df.iterrows():
-                        row_dict = row.to_dict()
-                        ontology_id = row_dict.pop("iri")
-                        new_mapping = Mapping(
-                            source=ontology_name,
-                            idx=ontology_id,
-                            mapping_type="direct",
-                            metadata=row_dict,
-                        )
-                        entity.add_mapping(new_mapping)
-                        self.lookup_cache.update_lookup_cache(entity, new_mapping)
+                try:
+                    ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
+                    index = self.ontology_index_dict.get(ontology_name, None)
+                    if index is not None:
+                        metadata_df = index.search(entity.match)
+                        for i, row in metadata_df.iterrows():
+                            row_dict = row.to_dict()
+                            ontology_id = row_dict.pop("iri")
+                            new_mapping = Mapping(
+                                source=ontology_name,
+                                idx=ontology_id,
+                                mapping_type="direct",
+                                metadata=row_dict,
+                            )
+                            entity.add_mapping(new_mapping)
+                            self.lookup_cache.update_lookup_cache(entity, new_mapping)
+                except Exception:
+                    doc = find_document_from_entity(docs, entity)
+                    doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                    failed_docs.append(doc)
 
-        return docs, []
+        return docs, failed_docs
