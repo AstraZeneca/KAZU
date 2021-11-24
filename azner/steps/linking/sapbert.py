@@ -7,23 +7,22 @@ from typing import List, Tuple, Dict
 import pandas as pd
 import pydash
 import torch
-from cachetools import LFUCache
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
-from azner.data.data import Document, Entity, Mapping, PROCESSING_EXCEPTION
+from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION
 from azner.modelling.linking.sapbert.train import (
     PLSapbertModel,
     get_embedding_dataloader_from_strings,
 )
 from azner.steps import BaseStep
+from azner.utils.caching import EntityLinkingLookupCache
 from azner.utils.embedding_index import (
     EmbeddingIndexFactory,
     EmbeddingIndex,
 )
 from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
-    get_match_entity_class_hash,
     get_cache_dir,
 )
 
@@ -101,7 +100,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         self.model = model
         self.trainer = trainer
         self.get_or_create_ontology_index_dict()
-        self.lookup_cache = LFUCache(lookup_cache_size)
+        self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
 
     def get_or_create_ontology_index_dict(self):
         """
@@ -252,12 +251,15 @@ class SapBertForEntityLinkingStep(BaseStep):
             if not self.process_all_entities:
                 entities = filter_entities_with_ontology_mappings(entities)
 
-            entities = self.check_lookup_cache(entities)
+            entities = self.lookup_cache.check_lookup_cache(entities)
             if len(entities) > 0:
                 results = self.get_embeddings_for_strings([x.match for x in entities])
                 results = torch.unsqueeze(results, 1)
                 for i, result in enumerate(results):
                     entity = entities[i]
+                    cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
+                    if len(cache_missed_entities) == 0:
+                        continue
                     ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
                     index = self.ontology_index_dict.get(ontology_name, None)
                     if index is not None:
@@ -277,7 +279,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                                 metadata=metadata_dict,
                             )
                             entity.add_mapping(new_mapping)
-                            self.update_lookup_cache(entity, new_mapping)
+                            self.lookup_cache.update_lookup_cache(entity, new_mapping)
         except Exception:
             affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
@@ -288,25 +290,3 @@ class SapBertForEntityLinkingStep(BaseStep):
                 failed_docs.append(doc)
 
         return docs, failed_docs
-
-    def update_lookup_cache(self, entity: Entity, mapping: Mapping):
-        hash_val = get_match_entity_class_hash(entity)
-        if hash_val not in self.lookup_cache:
-            self.lookup_cache[hash_val] = mapping
-
-    def check_lookup_cache(self, entities: List[Entity]) -> List[Entity]:
-        """
-        checks the cache for mappings. If relevant mappings are found for an entity, update it's mappings
-        accordingly. If not return as a list of cache misses (e.g. for further processing)
-        :param entities:
-        :return:
-        """
-        cache_misses = []
-        for ent in entities:
-            hash_val = get_match_entity_class_hash(ent)
-            maybe_mapping = self.lookup_cache.get(hash_val, None)
-            if maybe_mapping is None:
-                cache_misses.append(ent)
-            else:
-                ent.add_mapping(maybe_mapping)
-        return cache_misses

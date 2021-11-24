@@ -360,14 +360,36 @@ class Section(BaseModel):
                 and len(ent.metadata.mappings) > 0
             ):
                 mapping_id = ent.metadata.mappings[0].idx
+                mapping_label = ent.metadata.mappings[0].metadata["default_label"]
+                metadata = ent.metadata.mappings[0].metadata
             else:
                 mapping_id = None
+                mapping_label = None
+                metadata = None
             data.append(
-                (ent.namespace, ent.match, ent.entity_class, ent.start, ent.end, mapping_id)
+                (
+                    ent.namespace,
+                    ent.match,
+                    mapping_label,
+                    metadata,
+                    mapping_id,
+                    ent.entity_class,
+                    ent.start,
+                    ent.end,
+                )
             )
         if len(data) > 0:
             data = pd.DataFrame.from_records(data)
-            data.columns = ["namespace", "match", "entity_class", "start", "end", "mapping_id"]
+            data.columns = [
+                "namespace",
+                "match",
+                "mapping_label",
+                "metadata",
+                "mapping_id",
+                "entity_class",
+                "start",
+                "end",
+            ]
             return data
         else:
             return None
