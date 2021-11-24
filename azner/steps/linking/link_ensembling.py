@@ -1,16 +1,24 @@
+from enum import Enum
 from typing import Optional, List, Tuple
 
 from azner.data.data import Document, Mapping, LINK_SCORE
 from azner.steps import BaseStep
 
 
+class EnsemblMethods(Enum):
+    HIGHEST_SCORE = "highest_score"
+
+
 class EnsembleEntityLinkingStep(BaseStep):
     """
-    ensemble methods to use information from multiple linkers when choosing the 'best' mapping
+    ensemble methods to use information from multiple linkers when choosing the 'best' mapping.
     """
 
     def __init__(
-        self, depends_on: Optional[List[str]], keep_top_n: int = 1, method: str = "highest_conf"
+        self,
+        depends_on: Optional[List[str]],
+        keep_top_n: int = 1,
+        method: str = EnsemblMethods.HIGHEST_SCORE,
     ):
         super().__init__(depends_on)
         self.method = method
@@ -23,11 +31,11 @@ class EnsembleEntityLinkingStep(BaseStep):
                 if entity.metadata is None and entity.metadata.mappings is None:
                     continue
                 else:
-                    if self.method == "highest_conf":
-                        entity.metadata.mappings = self.highest_coonfidence(
-                            entity.metadata.mappings
-                        )
+                    if self.method == EnsemblMethods.HIGHEST_SCORE.value:
+                        entity.metadata.mappings = self.highest_confidence(entity.metadata.mappings)
         return docs, []
 
-    def highest_coonfidence(self, mappings: List[Mapping]):
-        return sorted(mappings, key=lambda x: x[LINK_SCORE], reverse=True)[: self.keep_top_n]
+    def highest_confidence(self, mappings: List[Mapping]):
+        return sorted(mappings, key=lambda x: x.metadata[LINK_SCORE], reverse=True)[
+            : self.keep_top_n
+        ]
