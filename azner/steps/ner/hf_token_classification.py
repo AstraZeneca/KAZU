@@ -35,6 +35,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         batch_size: int,
         stride: int,
         max_sequence_length: int,
+        trainer: Trainer,
         debug=False,
     ):
         """
@@ -61,7 +62,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         self.tokeniser = AutoTokenizer.from_pretrained(path, config=self.config)
         self.model = AutoModelForTokenClassification.from_pretrained(path, config=self.config)
         self.model = PLAutoModelForTokenClassification(self.model)
-        self.trainer = Trainer()
+        self.trainer = trainer
         self.softmax = Softmax(dim=-1)
         self.entity_mapper = BIOLabelParser(
             list(self.config.id2label.values()), namespace=self.namespace()
