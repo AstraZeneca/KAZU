@@ -4,7 +4,7 @@ model:
   model_name_or_path: cambridgeltl/SapBERT-from-PubMedBERT-fulltext
 ontology_path: ~
 batch_size: 4
-process_all_entities: False
+process_all_entities: True
 rebuild_ontology_cache: False
 depends_on: ~
 lookup_cache_size: 5000
