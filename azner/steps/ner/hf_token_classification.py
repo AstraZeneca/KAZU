@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import List, Tuple, Dict
 
 import torch
@@ -15,7 +16,7 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from azner.data.data import Document, Section, NerProcessedSection
+from azner.data.data import Document, Section, NerProcessedSection, PROCESSING_EXCEPTION
 from azner.data.pytorch import HFDataset
 from azner.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from azner.steps import BaseStep
@@ -140,38 +141,48 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         )
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        loader, id_section_map = self.get_dataloader(docs)
-        # run the transformer and get results
-        confidence_and_labels_tensor = self.get_confidence_and_labels_tensor(loader)
-        for section_index, section in id_section_map.items():
-            # for long docs, we need to split section.get_text() into frames (i.e. portions that will fit into Bert or
-            # similar)
-            ner_processed_section = self.merge_section_frames(
-                section_index=section_index,
-                batch_encoding=loader.dataset.encodings,
-                confidence_and_labels_tensor=confidence_and_labels_tensor,
-            )
-            all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
-            transformed_words = self.bio_preprocessor(all_words)
-            for transformed_word in transformed_words:
-                for i, label in enumerate(transformed_word.word_labels_strings):
-                    if self.debug:
-                        logger.info(
-                            f"processing label: {label} for token {section.get_text()[transformed_word.word_offsets[i][0]:transformed_word.word_offsets[i][1]]}"
+        failed_docs = []
+        try:
+            loader, id_section_map = self.get_dataloader(docs)
+            # run the transformer and get results
+            confidence_and_labels_tensor = self.get_confidence_and_labels_tensor(loader)
+            for section_index, section in id_section_map.items():
+                # for long docs, we need to split section.get_text() into frames (i.e. portions that will fit into Bert or
+                # similar)
+                ner_processed_section = self.merge_section_frames(
+                    section_index=section_index,
+                    batch_encoding=loader.dataset.encodings,
+                    confidence_and_labels_tensor=confidence_and_labels_tensor,
+                )
+                all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
+                transformed_words = self.bio_preprocessor(all_words)
+                for transformed_word in transformed_words:
+                    for i, label in enumerate(transformed_word.word_labels_strings):
+                        if self.debug:
+                            logger.info(
+                                f"processing label: {label} for token {section.get_text()[transformed_word.word_offsets[i][0]:transformed_word.word_offsets[i][1]]}"
+                            )
+                        self.entity_mapper.update_parse_states(
+                            label,
+                            offsets=transformed_word.word_offsets[i],
+                            text=section.get_text(),
+                            confidence=transformed_word.word_confidences[i],
                         )
-                    self.entity_mapper.update_parse_states(
-                        label,
-                        offsets=transformed_word.word_offsets[i],
-                        text=section.get_text(),
-                        confidence=transformed_word.word_confidences[i],
-                    )
 
-            # at the end of the section, get the results
-            section.entities = self.entity_mapper.get_entities()
-            # reset the entity mapper in preparation for the next section
-            self.entity_mapper.reset()
+                # at the end of the section, get the results
+                section.entities = self.entity_mapper.get_entities()
+                # reset the entity mapper in preparation for the next section
+                self.entity_mapper.reset()
+        except Exception:
+            affected_doc_ids = [doc.idx for doc in docs]
+            for doc in docs:
+                message = (
+                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
+                )
+                doc.metadata[PROCESSING_EXCEPTION] = message
+                failed_docs.append(doc)
 
-        return docs, []
+        return docs, failed_docs
 
     def get_list_of_batch_encoding_frames_for_section(
         self, batch_encoding: BatchEncoding, section_index: int

@@ -1,10 +1,11 @@
 import logging
-from typing import List, Dict
-
+import os.path
+from typing import List, Dict, Optional
+import json
 from hydra.utils import instantiate
 from omegaconf import DictConfig
-
-from azner.data.data import Document
+from fastapi.encoders import jsonable_encoder
+from azner.data.data import Document, PROCESSING_EXCEPTION
 from azner.steps import BaseStep
 from azner.steps.base.step import StepMetadata
 from azner.utils.stopwatch import Stopwatch
@@ -24,12 +25,80 @@ def load_steps(cfg: DictConfig) -> List[BaseStep]:
     return steps
 
 
+class FailedDocsHandler:
+    """
+    class to somehow handle failed docs
+    """
+
+    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+        """
+
+        :param step_docs_map: a dict of step namespace and the docs that failed for it
+        :return:
+        """
+        raise NotImplementedError()
+
+
+class FailedDocsLogHandler(FailedDocsHandler):
+    """
+    implementation that logs to warning
+    """
+
+    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+        for step_namespace, docs in step_docs_map.items():
+            for doc in docs:
+                error_message = doc.metadata.get(PROCESSING_EXCEPTION, None)
+                if error_message is not None:
+                    logger.warning(
+                        f"processing failed for step {step_namespace}, doc: {doc.idx}, {error_message} "
+                    )
+                else:
+                    logger.warning(
+                        f"processing failed for step {step_namespace}, doc: {doc.idx}, No error mesasge found in doc metadata "
+                    )
+
+
+class FailedDocsFileHandler(FailedDocsHandler):
+    """
+    implementation logs docs to a directory, along with exception message
+    """
+
+    def __init__(self, log_dir: str):
+        self.log_dir = log_dir
+
+    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+        for step_namespace, docs in step_docs_map.items():
+            step_logging_dir = os.path.join(self.log_dir, step_namespace)
+            if not os.path.exists(step_logging_dir):
+                os.makedirs(step_logging_dir, exist_ok=True)
+
+            for doc in docs:
+                serialisable_doc = doc.as_serialisable()
+                doc_id = doc.idx
+                doc_path = os.path.join(step_logging_dir, doc_id + ".json")
+                doc_error_path = os.path.join(step_logging_dir, doc_id + "_error.txt")
+                with open(doc_path, "w") as f:
+                    f.write(json.dumps(jsonable_encoder(serialisable_doc)))
+                with open(doc_error_path, "w") as f:
+                    error_message = doc.metadata.get(PROCESSING_EXCEPTION, None)
+                    if error_message is not None:
+                        f.write(error_message)
+                    else:
+                        logger.warning(
+                            f"No error message found for doc: {doc}. Cannot write exception"
+                        )
+
+
 class Pipeline:
-    def __init__(self, steps: List[BaseStep]):
+    def __init__(
+        self, steps: List[BaseStep], failure_handler: Optional[List[FailedDocsHandler]] = None
+    ):
         """
         A basic pipeline, used to help run a series of steps
         :param steps: list of steps to run
+        :param failure_handler: optional list of handlers to process failed docs
         """
+        self.failure_handlers = failure_handler
         self.pipeline_metadata: Dict[str, StepMetadata] = {}  # metadata about each step
         self.steps = steps
         # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
@@ -67,13 +136,19 @@ class Pipeline:
             self.stopwatch.message(
                 f"{step.namespace} finished. Successful: {len(succeeded_docs)}, failed: {len(failed_docs)}"
             )
-            self.update_metadata(step, StepMetadata(has_run=True))
             self.update_failed_docs(step, failed_docs)
-
-        return docs
-
-    def update_metadata(self, step: BaseStep, metadata: StepMetadata):
-        self.pipeline_metadata[step.namespace()] = metadata
+        self.reset()
+        return succeeded_docs
 
     def update_failed_docs(self, step: BaseStep, failed_docs: List[Document]):
         self.failed_docs[step.namespace()] = failed_docs
+
+    def flush_failed_docs(self):
+        if self.failure_handlers is not None:
+            for handler in self.failure_handlers:
+                handler(self.failed_docs)
+        self.failed_docs = {}
+
+    def reset(self):
+        self.flush_failed_docs()
+        self.pipeline_metadata: Dict[str, StepMetadata] = {}
