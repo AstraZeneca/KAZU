@@ -3,3 +3,4 @@ ray:
   address: ~
   serve:
     port: 8000
+  detached: False
