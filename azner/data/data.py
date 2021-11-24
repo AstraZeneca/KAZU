@@ -19,6 +19,7 @@ NAMESPACE = "namespace"
 
 # key for linking score
 LINK_SCORE = "link_score"
+LINK_CONFIDENCE = "link_confidence"
 
 
 class CharSpan(BaseModel):
@@ -367,16 +368,19 @@ class Section(BaseModel):
             ):
                 mapping_id = ent.metadata.mappings[0].idx
                 mapping_label = ent.metadata.mappings[0].metadata["default_label"]
+                mapping_conf = ent.metadata.mappings[0].metadata[LINK_CONFIDENCE]
                 metadata = ent.metadata.mappings[0].metadata
             else:
                 mapping_id = None
                 mapping_label = None
+                mapping_conf = None
                 metadata = None
             data.append(
                 (
                     ent.namespace,
                     ent.match,
                     mapping_label,
+                    mapping_conf,
                     metadata,
                     mapping_id,
                     ent.entity_class,
@@ -390,6 +394,7 @@ class Section(BaseModel):
                 "namespace",
                 "match",
                 "mapping_label",
+                "mapping_conf",
                 "metadata",
                 "mapping_id",
                 "entity_class",
