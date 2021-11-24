@@ -1,0 +1,27 @@
+_target_: azner.steps.linking.sapbert.SapBertForEntityLinkingStep
+model:
+  _target_: azner.steps.linking.sapbert.PLSapbertModel
+  model_name_or_path: /home/ray/model_pack/sapbert/SapBERT-from-PubMedBERT-fulltext
+ontology_path: /home/ray/model_pack/sapbert/MONDO_UBERON_default_labels.parquet
+batch_size: 4
+process_all_entities: False
+rebuild_ontology_cache: False
+depends_on: ~
+lookup_cache_size: 5000
+dl_workers: 0
+ontology_partition_size: 100000
+entity_class_to_ontology_mappings:
+  drug: CHEMBL
+  disease: MONDO
+  gene: ENSEMBL
+  anatomy: UBERON
+  species: NOT_IMPLEMENTED
+  mutation: NOT_IMPLEMENTED
+trainer:
+  _target_: pytorch_lightning.Trainer
+  progress_bar_refresh_rate: 0
+  gpus: 0
+embedding_index_factory:
+  _target_: azner.utils.embedding_index.EmbeddingIndexFactory
+  embedding_index_class_name: MatMulTensorEmbeddingIndex
+  return_n_nearest_neighbours: 5
