@@ -58,6 +58,93 @@ def make_mapping(
 
 
 @pytest.mark.parametrize("keep_top_n", [1, 3])
+def test_best_score_link_ensembling(keep_top_n):
+    bad_mappings = [
+        make_mapping(
+            score=0.5,
+            linker_namespace="noisy_linker",
+            default_label="bad_match",
+            syn="goodbye",
+            idx="bad_match",
+        ),
+        make_mapping(
+            score=0.81,
+            linker_namespace="noisy_linker",
+            default_label="bad_match",
+            syn="goodbye",
+            idx="bad_match",
+        ),
+    ]
+
+    # case 1: match on string overlap
+    target_best_mapping = make_mapping(
+        score=60.0,  # <- should match here
+        linker_namespace="good_linker",
+        default_label="blaaah",
+        syn="goodbye",
+        idx="correct",
+    )
+    mappings = bad_mappings + [target_best_mapping]
+    perform_test(
+        mappings,
+        target_best_mapping,
+        keep_top_n=keep_top_n,
+        expected_confidence=LinkRanks.LOW_CONFIDENCE.value,
+    )
+
+
+@pytest.mark.parametrize("keep_top_n", [1, 3])
+def test_query_contained_in_hits_link_ensembling(keep_top_n):
+    bad_mappings = [
+        make_mapping(
+            score=0.5,
+            linker_namespace="noisy_linker",
+            default_label="bad_match",
+            syn="goodbye",
+            idx="bad_match",
+        ),
+        make_mapping(
+            score=0.81,
+            linker_namespace="noisy_linker",
+            default_label="bad_match",
+            syn="goodbye",
+            idx="bad_match",
+        ),
+    ]
+
+    # case 1: match on string overlap
+    target_best_mapping = make_mapping(
+        score=60.0,
+        linker_namespace="good_linker",
+        default_label="hello to you",  # <- should match here
+        syn="goodbye",
+        idx="correct",
+    )
+    mappings = bad_mappings + [target_best_mapping]
+    perform_test(
+        mappings,
+        target_best_mapping,
+        keep_top_n=keep_top_n,
+        expected_confidence=LinkRanks.MEDIUM_CONFIDENCE.value,
+    )
+
+    target_best_mapping = make_mapping(
+        score=60.0,
+        linker_namespace="good_linker",
+        default_label="gahh",
+        syn="hello to you",  # <- should match here
+        idx="correct",
+    )
+    mappings = bad_mappings + [target_best_mapping]
+    perform_test(
+        mappings,
+        target_best_mapping,
+        keep_top_n=keep_top_n,
+        expected_confidence=LinkRanks.MEDIUM_CONFIDENCE.value,
+    )
+
+
+@pytest.mark.parametrize("keep_top_n", [1, 3])
 def test_similarly_ranked_link_ensembling(keep_top_n):
     bad_mappings = [
         make_mapping(
