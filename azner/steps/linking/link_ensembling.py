@@ -87,7 +87,7 @@ class MappingPostProcessing:
         """
         query_length = len(self.match)
         containing_hits = []
-        if query_length > 5:
+        if query_length >= 5:
             containing_hits = (
                 self.lookup_df[
                     (
