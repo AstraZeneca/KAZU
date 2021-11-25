@@ -25,4 +25,4 @@ trainer:
 embedding_index_factory:
   _target_: azner.utils.embedding_index.EmbeddingIndexFactory
   embedding_index_class_name: MatMulTensorEmbeddingIndex
-  return_n_nearest_neighbours: 5
+  return_n_nearest_neighbours: 20
