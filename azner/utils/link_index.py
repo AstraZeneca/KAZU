@@ -62,7 +62,7 @@ class DictionaryIndex(Index):
         self.fuzzy = fuzzy
         self.name = name
         self.df = pd.read_parquet(path)
-        self.df["syn"] = self.df["syn"].str.lower()
+        self.df[SYN] = self.df[SYN].str.lower()
 
     def search(self, query: str) -> pd.DataFrame:
         """
