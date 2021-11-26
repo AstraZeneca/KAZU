@@ -7,7 +7,7 @@ import pydash
 from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION, NAMESPACE
 from azner.steps import BaseStep
 from azner.utils.caching import EntityLinkingLookupCache
-from azner.utils.dictionary_index import DictionaryIndex
+from azner.utils.link_index import DictionaryIndex, IDX, MAPPING_TYPE
 from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
     find_document_from_entity,
@@ -71,12 +71,13 @@ class DictionaryEntityLinkingStep(BaseStep):
                             metadata_df = index.search(entity.match)
                             for i, row in metadata_df.iterrows():
                                 row_dict = row.to_dict()
-                                ontology_id = row_dict.pop("iri")
+                                ontology_id = row_dict.pop(IDX)
+                                mapping_type = row_dict.pop(MAPPING_TYPE)
                                 row_dict[NAMESPACE] = self.namespace()
                                 new_mapping = Mapping(
                                     source=ontology_name,
                                     idx=ontology_id,
-                                    mapping_type="direct",
+                                    mapping_type=mapping_type,
                                     metadata=row_dict,
                                 )
                                 entity.add_mapping(new_mapping)

@@ -10,16 +10,20 @@ import torch
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 
-from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION, NAMESPACE, LINK_SCORE
+from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION, NAMESPACE
 from azner.modelling.linking.sapbert.train import (
     PLSapbertModel,
     get_embedding_dataloader_from_strings,
 )
 from azner.steps import BaseStep
 from azner.utils.caching import EntityLinkingLookupCache
-from azner.utils.embedding_index import (
+from azner.utils.link_index import (
     EmbeddingIndexFactory,
     EmbeddingIndex,
+    IDX,
+    MAPPING_TYPE,
+    DEFAULT_LABEL,
+    SOURCE,
 )
 from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
@@ -128,7 +132,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         sources = full_df["source"].unique()
         logger.info(f"detected the following sources in the ontology file: {sources}")
         for source in sources:
-            yield source, full_df[full_df["source"] == source]
+            yield source, full_df[full_df[SOURCE] == source]
 
     def cache_ontology_embeddings(self) -> Dict[str, EmbeddingIndex]:
         """
@@ -204,7 +208,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                 return
             logger.info(f"creating partitions for partition {partition_number}")
             logger.info(f"read {df.shape[0]} rows from ontology")
-            default_labels = df["default_label"].tolist()
+            default_labels = df[DEFAULT_LABEL].tolist()
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
             results = self.get_embeddings_for_strings(default_labels)
             yield partition_number, df, results
@@ -263,20 +267,17 @@ class SapBertForEntityLinkingStep(BaseStep):
                     ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
                     index = self.ontology_index_dict.get(ontology_name, None)
                     if index is not None:
-                        distances, neighbors, metadata_df = index.search(result)
-                        for metadata_index, (
-                            neighbour_id,
-                            dist,
-                        ) in enumerate(zip(neighbors, distances)):
-                            metadata_dict = metadata_df.iloc[metadata_index].to_dict()
+                        metadata_df = index.search(result)
+                        for i, row in metadata_df.iterrows():
+                            metadata_dict = row.to_dict()
                             metadata_dict[NAMESPACE] = self.namespace()
-                            ontology_id = metadata_dict.pop("iri")
+                            ontology_id = metadata_dict.pop(IDX)
+                            mapping_type = metadata_dict.pop(MAPPING_TYPE)
                             # convert np to python type for serialisation
-                            metadata_dict[LINK_SCORE] = dist.tolist()
                             new_mapping = Mapping(
                                 source=ontology_name,
                                 idx=ontology_id,
-                                mapping_type="direct",
+                                mapping_type=mapping_type,
                                 metadata=metadata_dict,
                             )
                             entity.add_mapping(new_mapping)
