@@ -17,7 +17,10 @@ class EntityLinkingLookupCache:
     def update_lookup_cache(self, entity: Entity, mapping: Mapping):
         hash_val = get_match_entity_class_hash(entity)
         if hash_val not in self.lookup_cache:
-            self.lookup_cache[hash_val] = mapping
+            self.lookup_cache[hash_val] = [mapping]
+        else:
+            cache_hit = self.lookup_cache[hash_val]
+            self.lookup_cache[hash_val] = cache_hit + [mapping]
 
     def check_lookup_cache(self, entities: List[Entity]) -> List[Entity]:
         """
@@ -29,9 +32,10 @@ class EntityLinkingLookupCache:
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
-            maybe_mapping = self.lookup_cache.get(hash_val, None)
-            if maybe_mapping is None:
+            maybe_mappings = self.lookup_cache.get(hash_val, None)
+            if maybe_mappings is None:
                 cache_misses.append(ent)
             else:
-                ent.add_mapping(maybe_mapping)
+                for mapping in maybe_mappings:
+                    ent.add_mapping(mapping)
         return cache_misses
