@@ -21,7 +21,6 @@ from azner.utils.link_index import (
     EmbeddingIndexFactory,
     EmbeddingIndex,
     IDX,
-    MAPPING_TYPE,
     DEFAULT_LABEL,
     SOURCE,
 )
@@ -272,12 +271,11 @@ class SapBertForEntityLinkingStep(BaseStep):
                             metadata_dict = row.to_dict()
                             metadata_dict[NAMESPACE] = self.namespace()
                             ontology_id = metadata_dict.pop(IDX)
-                            mapping_type = metadata_dict.pop(MAPPING_TYPE)
-                            # convert np to python type for serialisation
+                            # note, we set mapping type to inferred as sapbert doesn't really have the concept
                             new_mapping = Mapping(
                                 source=ontology_name,
                                 idx=ontology_id,
-                                mapping_type=mapping_type,
+                                mapping_type=["inferred"],
                                 metadata=metadata_dict,
                             )
                             entity.add_mapping(new_mapping)
