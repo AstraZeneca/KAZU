@@ -108,6 +108,19 @@ class BioLabelPreProcessor:
         word.word_labels_strings[0] = f"{ENTITY_START_SYMBOL}-{word.class_labels[0]}"
         word.modified_post_inference = True
 
+    def _test_for_no_previous_word(self, word: TokenizedWord, prev_word: TokenizedWord) -> bool:
+        """
+        check if all I's should be converted to a BI as there is no previous word
+        :param word:
+        :param prev_word:
+        :return:
+        """
+        return (
+            all([x == ENTITY_INSIDE_SYMBOL for x in word.bio_labels])
+            and len(set(word.class_labels)) == 1
+            and ((prev_word is None))
+        )
+
     def _test_for_previous_word_is_i_or_b(
         self, word: TokenizedWord, prev_word: TokenizedWord
     ) -> bool:
@@ -145,6 +158,8 @@ class BioLabelPreProcessor:
             pass
         elif self._test_for_perfectly_formed_bio_word(word):
             pass
+        elif self._test_for_no_previous_word(word, prev_word=previous_word):
+            self._fix_missing_b_then_i(word)
         elif self._test_for_previous_word_is_i_or_b(word, prev_word=previous_word):
             pass
         elif self._test_for_b_then_mixed_bio(word):
