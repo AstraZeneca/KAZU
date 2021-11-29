@@ -488,7 +488,8 @@ class CellosaurusOntologyParser(OntologyParser):
 class MeddraOntologyParser(OntologyParser):
     name = "MEDDRA"
     """
-    input is an mdhier.asc file from a MEddra release (Note, requires licence)
+    input is an unzipped directory to a MEddra release (Note, requires licence). This
+    should contain the files 'mdhier.asc' and 'llt.asc'
     :return:
     """
 
