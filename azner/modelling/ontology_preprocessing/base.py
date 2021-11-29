@@ -521,6 +521,7 @@ class MeddraOntologyParser(OntologyParser):
         ids = []
         default_labels = []
         all_syns = []
+        mapping_type = []
 
         for i, row in hier_df.iterrows():
             idx = row["pt_code"]
@@ -529,9 +530,13 @@ class MeddraOntologyParser(OntologyParser):
             ids.append(idx)
             default_labels.append(pt_name)
             all_syns.append(pt_name)
+            mapping_type.append("meddra_link")
             for j, llt_row in llts.iterrows():
                 ids.append(idx)
                 default_labels.append(pt_name)
                 all_syns.append(llt_row["llt_name"])
-        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_labels, "syn": all_syns})
+                mapping_type.append("meddra_link")
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
+        )
         return df
