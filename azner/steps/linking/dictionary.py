@@ -72,7 +72,7 @@ class DictionaryEntityLinkingStep(BaseStep):
                             for i, row in metadata_df.iterrows():
                                 row_dict = row.to_dict()
                                 ontology_id = row_dict.pop(IDX)
-                                mapping_type = row_dict.pop(MAPPING_TYPE)
+                                mapping_type = row_dict.pop(MAPPING_TYPE).tolist()
                                 row_dict[NAMESPACE] = self.namespace()
                                 new_mapping = Mapping(
                                     source=ontology_name,
