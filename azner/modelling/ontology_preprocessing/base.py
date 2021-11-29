@@ -184,22 +184,28 @@ class RDFGraphParser(OntologyParser):
     def format_synonym_table(self) -> pd.DataFrame:
         g = rdflib.Graph()
         g.parse(self.in_path)
-        label_predicates = URIRef("http://www.w3.org/2000/01/rdf-schema#label")
+        label_pred_str = "http://www.w3.org/2000/01/rdf-schema#label"
+        label_predicates = URIRef(label_pred_str)
         synonym_predicates = [URIRef(x) for x in self._get_synonym_predicates()]
         default_labels = []
         iris = []
         syns = []
+        mapping_type = []
 
         for sub, obj in g.subject_objects(label_predicates):
             default_labels.append(str(obj))
             iris.append(str(sub))
             syns.append(str(obj))
+            mapping_type.append(label_pred_str)
             for syn_predicate in synonym_predicates:
                 for other_syn_obj in g.objects(subject=sub, predicate=syn_predicate):
                     default_labels.append(str(obj))
                     iris.append(str(sub))
                     syns.append(str(other_syn_obj))
-        df = pd.DataFrame.from_dict({DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns})
+                    mapping_type.append(syn_predicate)
+        df = pd.DataFrame.from_dict(
+            {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
+        )
         return df
 
 
@@ -350,7 +356,7 @@ class EnsemblOntologyParser(OntologyParser):
         ids = []
         default_label = []
         all_syns = []
-
+        all_mapping_type = []
         docs = data["response"]["docs"]
         for doc in docs:
 
@@ -370,16 +376,24 @@ class EnsemblOntologyParser(OntologyParser):
                 for x in keys_to_check:
                     synonyms_this_entity = get_with_default_list(x)
                     for y in synonyms_this_entity:
-                        synonyms.extend(self.post_process_synonym(y))
+                        generated_syns = self.post_process_synonym(y)
+                        for syn in generated_syns:
+                            synonyms.append(
+                                (syn, x),
+                            )
 
                 synonyms = list(set(synonyms))
                 # filter any very short matches
-                synonyms = [x for x in synonyms if len(x) > 2]
+                synonyms = [x for x in synonyms if len(x[0]) > 2]
+                synonyms = [x[0] for x in synonyms]
+                all_mapping_type.extend([x[1] for x in synonyms])
                 [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
                 [default_label.append(name) for _ in range(len(synonyms))]
                 all_syns.extend(synonyms)
 
-        df = pd.DataFrame.from_dict({IDX: ids, DEFAULT_LABEL: default_label, SYN: all_syns})
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_label, SYN: all_syns, MAPPING_TYPE: all_mapping_type}
+        )
         return df
 
     def post_process_synonym(self, syn: str) -> List[str]:
@@ -456,14 +470,14 @@ class ChemblOntologyParser(OntologyParser):
 
     def format_synonym_table(self) -> pd.DataFrame:
         conn = sqlite3.connect(self.in_path)
-        query = """
-            SELECT chembl_id AS iri, pref_name AS default_label, synonyms AS syn
+        query = f"""
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE} 
             FROM molecule_dictionary AS md
                      JOIN molecule_synonyms ms ON md.molregno = ms.molregno
             UNION ALL
-            SELECT chembl_id AS iri, pref_name AS default_label, pref_name AS syn
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE} 
             FROM molecule_dictionary
-        """
+        """  # noqa
         df = pd.read_sql(query, conn)
         df[DEFAULT_LABEL] = df[DEFAULT_LABEL].str.lower()
         df[SYN] = df[SYN].str.lower()
@@ -501,6 +515,7 @@ class CellosaurusOntologyParser(OntologyParser):
         ids = []
         default_labels = []
         all_syns = []
+        mapping_type = []
         with open(self.in_path, "r") as f:
             id = None
             default_label = None
@@ -512,10 +527,14 @@ class CellosaurusOntologyParser(OntologyParser):
                     default_label = text.split(" ")[1][1:]
                 elif text.startswith("synonym:"):
                     syn = text.split(" ")[1][1:-1]
+                    mapping = text.split(" ")[2]
                     ids.append(id)
                     default_labels.append(default_label)
                     all_syns.append(syn)
+                    mapping_type.append(mapping)
                 else:
                     pass
-        df = pd.DataFrame.from_dict({IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns})
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
+        )
         return df
