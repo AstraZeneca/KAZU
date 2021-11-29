@@ -1,5 +1,6 @@
 import itertools
 import json
+import os
 import re
 from pathlib import Path
 from typing import List
@@ -480,5 +481,57 @@ class CellosaurusOntologyParser(OntologyParser):
                     all_syns.append(syn)
                 else:
                     pass
+        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_labels, "syn": all_syns})
+        return df
+
+
+class MeddraOntologyParser(OntologyParser):
+    name = "MEDDRA"
+    """
+    input is an mdhier.asc file from a MEddra release (Note, requires licence)
+    :return:
+    """
+
+    def format_synonym_table(self) -> pd.DataFrame:
+        # hierarchy path
+        mdheir_path = os.path.join(self.in_path, "mdhier.asc")
+        # low level term path
+        llt_path = os.path.join(self.in_path, "llt.asc")
+        hier_df = pd.read_csv(mdheir_path, sep="$", header=None)
+        hier_df.columns = [
+            "pt_code",
+            "hlt_code",
+            "hlgt_code",
+            "soc_code",
+            "pt_name",
+            "hlt_name",
+            "hlgt_name",
+            "soc_name",
+            "soc_abbrev",
+            "null_field",
+            "pt_soc_code",
+            "primary_soc_fg",
+            "NULL",
+        ]
+
+        llt_df = pd.read_csv(llt_path, sep="$", header=None)
+        llt_df = llt_df.T.dropna().T
+        llt_df.columns = ["llt_code", "llt_name", "pt_code", "llt_currency"]
+
+        ids = []
+        default_labels = []
+        all_syns = []
+
+        for i, row in hier_df.iterrows():
+            idx = row["pt_code"]
+            pt_name = row["pt_name"]
+            llts = llt_df[llt_df["pt_code"] == idx]
+            ids.append(idx)
+            default_labels.append(pt_name)
+            all_syns.append(pt_name)
+            for j, llt_row in llts.iterrows():
+                ids.append(idx)
+                default_labels.append(pt_name)
+                all_syns.append(llt_row["llt_name"])
         df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_labels, "syn": all_syns})
         return df
