@@ -66,13 +66,16 @@ class OntologyParser(ABC):
         df = self.format_synonym_table()
         # ensure correct order
         df = df[self.all_synonym_column_names]
+        # group mapping types of same synonym together
+        df = df.groupby(by=[IDX, DEFAULT_LABEL, SYN]).agg(set).reset_index()
         # make sure default labels are also in the synonym list
-        default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates()
-        default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
-        df = pd.concat([df, default_labels_df])
+        # default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates()
+        # default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
+        # df = pd.concat([df, default_labels_df])
         df = df.dropna(axis=0)
-        df = df.drop_duplicates()
         df.sort_values(by=[IDX, DEFAULT_LABEL, SYN], inplace=True)
+        # needs to be a list so can be serialised
+        df[MAPPING_TYPE] = df[MAPPING_TYPE].apply(list)
         return df
 
     def format_synonym_table(self) -> pd.DataFrame:
@@ -241,27 +244,35 @@ class MondoParser(OntologyParser):
         graph = x["graphs"][0]
         nodes = graph["nodes"]
         ids = []
-        default_label = []
+        default_label_list = []
         all_syns = []
         mapping_type = []
         for i, node in enumerate(nodes):
+            idx = node["id"]
+            default_label = node.get("lbl")
+            # add default_label to syn type
+            all_syns.append(default_label)
+            default_label_list.append(default_label)
+            mapping_type.append("lbl")
+            ids.append(idx)
+
             syns = node.get("meta", {}).get("synonyms", [])
             for syn_dict in syns:
                 pred = syn_dict["pred"]
                 mapping_type.append(pred)
                 syn = syn_dict["val"]
-                ids.append(node["id"])
-                default_label.append(node.get("lbl"))
+                ids.append(idx)
+                default_label_list.append(default_label)
                 all_syns.append(syn)
                 no_stops_syn = self.sw_remover(syn)
                 if no_stops_syn != syn:
-                    ids.append(node["id"])
-                    default_label.append(node.get("lbl"))
+                    ids.append(idx)
+                    default_label_list.append(default_label)
                     all_syns.append(no_stops_syn)
                     mapping_type.append(pred)
 
         df = pd.DataFrame.from_dict(
-            {IDX: ids, DEFAULT_LABEL: default_label, SYN: all_syns, MAPPING_TYPE: mapping_type}
+            {IDX: ids, DEFAULT_LABEL: default_label_list, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
         return df
 
@@ -373,20 +384,20 @@ class EnsemblOntologyParser(OntologyParser):
             else:
                 # find synonyms
                 synonyms = []
-                for x in keys_to_check:
-                    synonyms_this_entity = get_with_default_list(x)
-                    for y in synonyms_this_entity:
-                        generated_syns = self.post_process_synonym(y)
+                for hgnc_key in keys_to_check:
+                    synonyms_this_entity = get_with_default_list(hgnc_key)
+                    for potential_synonym in synonyms_this_entity:
+                        generated_syns = self.post_process_synonym(potential_synonym)
                         for syn in generated_syns:
                             synonyms.append(
-                                (syn, x),
+                                (syn, hgnc_key),
                             )
 
                 synonyms = list(set(synonyms))
                 # filter any very short matches
-                synonyms = [x for x in synonyms if len(x[0]) > 2]
-                synonyms = [x[0] for x in synonyms]
-                all_mapping_type.extend([x[1] for x in synonyms])
+                synonyms_and_mapping_type = [x for x in synonyms if len(x[0]) > 2]
+                synonyms = [x[0] for x in synonyms_and_mapping_type]
+                all_mapping_type.extend([x[1] for x in synonyms_and_mapping_type])
                 [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
                 [default_label.append(name) for _ in range(len(synonyms))]
                 all_syns.extend(synonyms)
@@ -525,6 +536,10 @@ class CellosaurusOntologyParser(OntologyParser):
                     id = text.split(" ")[1]
                 elif text.startswith("name:"):
                     default_label = text.split(" ")[1][1:]
+                    ids.append(id)
+                    default_labels.append(default_label)
+                    all_syns.append(default_label)
+                    mapping_type.append("name")
                 elif text.startswith("synonym:"):
                     syn = text.split(" ")[1][1:-1]
                     mapping = text.split(" ")[2]
