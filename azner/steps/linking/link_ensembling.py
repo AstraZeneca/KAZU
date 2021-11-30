@@ -146,9 +146,9 @@ class MappingPostProcessing:
         else:
             return []
 
-    def sort_scores(self) -> List[Mapping]:
-        mappings = self.lookup_df.sort_values(by=[LINK_SCORE], ascending=False)["mapping"].tolist()
-        self.update_with_confidence(mappings, LinkRanks.LOW_CONFIDENCE.value)
+    def sort_and_add_confidence(self, df: pd.DataFrame, conf: LinkRanks) -> List[Mapping]:
+        mappings = df.sort_values(by=[LINK_SCORE], ascending=False)["mapping"].tolist()
+        self.update_with_confidence(mappings, conf)
         return mappings
 
     @staticmethod
