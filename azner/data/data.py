@@ -14,6 +14,13 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 # key for Document Processing Failed
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
+# key for namespace in metadata
+NAMESPACE = "namespace"
+
+# key for linking score
+LINK_SCORE = "link_score"
+LINK_CONFIDENCE = "link_confidence"
+
 
 class CharSpan(BaseModel):
     """A concept similar to a Spacy Span, except is offset based rather than token based"""
@@ -130,12 +137,12 @@ class Mapping(BaseModel):
     source: str  # the knowledgebase name
     idx: str  # the identifier within the KB
     mapping_type: str  # the type of KB mapping
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
 
 class EntityMetadata(BaseModel):
-    mappings: Optional[List[Mapping]]  # KB mappings
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    mappings: List[Mapping] = Field(default_factory=list, hash=False)  # KB mappings
+    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
 
 class Entity(BaseModel):
@@ -149,9 +156,7 @@ class Entity(BaseModel):
     start: int  # start offset
     end: int  # end offset
     hash_val: Optional[str] = None  # not required. calculated based on above fields
-    metadata: Optional[EntityMetadata] = Field(
-        default_factory=EntityMetadata, hash=False
-    )  # generic metadata
+    metadata: EntityMetadata = Field(default_factory=EntityMetadata, hash=False)  # generic metadata
 
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):
@@ -361,16 +366,19 @@ class Section(BaseModel):
             ):
                 mapping_id = ent.metadata.mappings[0].idx
                 mapping_label = ent.metadata.mappings[0].metadata["default_label"]
+                mapping_conf = ent.metadata.mappings[0].metadata[LINK_CONFIDENCE]
                 metadata = ent.metadata.mappings[0].metadata
             else:
                 mapping_id = None
                 mapping_label = None
+                mapping_conf = None
                 metadata = None
             data.append(
                 (
                     ent.namespace,
                     ent.match,
                     mapping_label,
+                    mapping_conf,
                     metadata,
                     mapping_id,
                     ent.entity_class,
@@ -384,6 +392,7 @@ class Section(BaseModel):
                 "namespace",
                 "match",
                 "mapping_label",
+                "mapping_conf",
                 "metadata",
                 "mapping_id",
                 "entity_class",
@@ -399,7 +408,7 @@ class Document(BaseModel):
     idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
     hash_val: Optional[str] = None  # calculated automatically based on above fields
     sections: List[Section]  # sections comprising this document
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
     def __str__(self):
         return f"idx: {self.idx}"

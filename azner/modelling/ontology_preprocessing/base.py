@@ -324,8 +324,8 @@ class EnsemblOntologyParser(OntologyParser):
                 return found
 
             ensembl_gene_id = doc.get("ensembl_gene_id", None)
-            symbol = doc.get("symbol", None)
-            if ensembl_gene_id is None or symbol is None:
+            name = doc.get("name", None)
+            if ensembl_gene_id is None or name is None:
                 continue
             else:
                 # find synonyms
@@ -339,7 +339,7 @@ class EnsemblOntologyParser(OntologyParser):
                 # filter any very short matches
                 synonyms = [x for x in synonyms if len(x) > 2]
                 [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
-                [default_label.append(symbol) for _ in range(len(synonyms))]
+                [default_label.append(name) for _ in range(len(synonyms))]
                 all_syns.extend(synonyms)
 
         df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_label, "syn": all_syns})

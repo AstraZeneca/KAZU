@@ -227,7 +227,7 @@ class MatMulTensorEmbeddingIndex(TensorEmbeddingIndex):
             : self.return_n_nearest_neighbours
         ]
         distances = score_matrix[neighbours]
-        distances = 1 / distances
+        distances = 100 - (1 / distances)
         return distances.cpu().numpy(), neighbours.cpu().numpy()
 
 

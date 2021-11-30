@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict
 
 import pydash
 
-from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION
+from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION, NAMESPACE
 from azner.steps import BaseStep
 from azner.utils.caching import EntityLinkingLookupCache
 from azner.utils.dictionary_index import DictionaryIndex
@@ -72,6 +72,7 @@ class DictionaryEntityLinkingStep(BaseStep):
                             for i, row in metadata_df.iterrows():
                                 row_dict = row.to_dict()
                                 ontology_id = row_dict.pop("iri")
+                                row_dict[NAMESPACE] = self.namespace()
                                 new_mapping = Mapping(
                                     source=ontology_name,
                                     idx=ontology_id,
