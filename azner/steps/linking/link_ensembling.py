@@ -151,9 +151,10 @@ class MappingPostProcessing:
         self.update_with_confidence(mappings, LinkRanks.LOW_CONFIDENCE.value)
         return mappings
 
-    def update_with_confidence(self, mappings: List[Mapping], confidence: str):
+    @staticmethod
+    def update_with_confidence(mappings: List[Mapping], confidence: LinkRanks):
         for mapping in mappings:
-            mapping.metadata[LINK_CONFIDENCE] = confidence
+            mapping.metadata[LINK_CONFIDENCE] = confidence.value
 
     def __call__(self):
         """
