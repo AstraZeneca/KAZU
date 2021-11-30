@@ -7,6 +7,7 @@ from hydra import initialize_config_module, compose
 from hydra.utils import instantiate
 
 from azner.tests.utils import entity_linking_easy_cases
+from azner.utils.link_index import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 
 
 def test_dictionary_entity_linking():
@@ -17,7 +18,8 @@ def test_dictionary_entity_linking():
         for doc in easy_test_docs:
             ents = doc.get_entities()
             texts.extend([x.match for x in ents])
-        df = pd.DataFrame.from_dict({"iri": iris, "default_label": iris, "syn": texts})
+        df = pd.DataFrame.from_dict({IDX: iris, DEFAULT_LABEL: iris, SYN: texts})
+        df[MAPPING_TYPE] = [["inferred"] for _ in range(df.shape[0])]
         df.to_parquet(test_path)
 
         with initialize_config_module(config_module="azner.conf"):

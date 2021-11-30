@@ -4,7 +4,7 @@ import shutil
 import pandas as pd
 import pytest
 
-from azner.utils.embedding_index import EmbeddingIndexFactory
+from azner.utils.link_index import EmbeddingIndexFactory
 import torch
 import numpy as np
 
@@ -46,20 +46,20 @@ def perform_index_tests(factory: EmbeddingIndexFactory):
     index_save_dir = "index_test_dir"
     index = factory.create_index(name=index_name)
     index.add(index_embeddings, metadata)
-    distance, neighbours, hit_info = index.search(query_embedding)
-    assert np.array_equal(neighbours, np.array([2, 1, 3]))
+    hit_info = index.search(query_embedding)
+    assert np.array_equal(hit_info.index.to_numpy(), np.array([2, 1, 3]))
     assert np.array_equal(hit_info["id"].array, np.array([0, 1, 2]))
     metadata_copy = metadata.copy()
     metadata_copy["id"] = metadata_copy["id"] * 2
     index.add(index_embeddings * 2, metadata_copy)
-    distance, neighbours, hit_info = index.search(query_embedding)
-    assert np.array_equal(neighbours, np.array([2, 1, 3]))
+    hit_info = index.search(query_embedding)
+    assert np.array_equal(hit_info.index.to_numpy(), np.array([2, 1, 3]))
     assert np.array_equal(hit_info["id"].array, np.array([0, 1, 2]))
     index.save(index_save_dir)
     index = factory.create_index()
     assert index.index is None
     index.load(os.path.join(index_save_dir, index_name))
-    distance, neighbours, hit_info = index.search(query_embedding)
-    assert np.array_equal(neighbours, np.array([2, 1, 3]))
+    hit_info = index.search(query_embedding)
+    assert np.array_equal(hit_info.index.to_numpy(), np.array([2, 1, 3]))
     assert np.array_equal(hit_info["id"].array, np.array([0, 1, 2]))
     shutil.rmtree(index_save_dir)

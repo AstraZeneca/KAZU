@@ -2,7 +2,7 @@ import logging
 from typing import List, Tuple, Optional, Dict
 
 from azner.data.data import Document, CharSpan, Section
-from steps import BaseStep
+from azner.steps import BaseStep
 
 logger = logging.getLogger(__name__)
 

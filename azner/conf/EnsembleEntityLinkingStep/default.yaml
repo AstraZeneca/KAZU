@@ -1,4 +1,6 @@
 _target_: azner.steps.linking.link_ensembling.EnsembleEntityLinkingStep
 depends_on: ~
 keep_top_n: 1
-method: highest_conf
+linker_score_thresholds:
+  SapBertForEntityLinkingStep: 99.995
+  DictionaryEntityLinkingStep: 100.0
