@@ -1,10 +1,12 @@
 name: Python package
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 
 jobs:
   build:
@@ -27,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .[dev]
+        pip install -e .[dev]
     - name: Check precommit
       run: |
         pre-commit run --all-files
