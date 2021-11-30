@@ -7,24 +7,24 @@ entity_class_to_ontology_mappings:
   anatomy: UBERON
   species: NOT_IMPLEMENTED
   mutation: NOT_IMPLEMENTED
-ontology_dictionary_index:
+ontology_link_index:
   MONDO:
-    _target_: azner.utils.dictionary_index.DictionaryIndex
+    _target_: azner.utils.link_index.DictionaryIndex
     path: /home/ray/model_pack/dictionary/MONDO_synonyms.parquet
     name: MONDO
     fuzzy: true
   UBERON:
-    _target_: azner.utils.dictionary_index.DictionaryIndex
+    _target_: azner.utils.link_index.DictionaryIndex
     path: /home/ray/model_pack/dictionary/UBERON_synonyms.parquet
     name: UBERON
     fuzzy: true
   CHEMBL:
-    _target_: azner.utils.dictionary_index.DictionaryIndex
+    _target_: azner.utils.link_index.DictionaryIndex
     path: /home/ray/model_pack/dictionary/CHEMBL_synonyms.parquet
     name: CHEMBL
     fuzzy: true
   ENSEMBL:
-    _target_: azner.utils.dictionary_index.DictionaryIndex
+    _target_: azner.utils.link_index.DictionaryIndex
     path: /home/ray/model_pack/dictionary/ENSEMBL_synonyms.parquet
     name: ENSEMBL
     fuzzy: true

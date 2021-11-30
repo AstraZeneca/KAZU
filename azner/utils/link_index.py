@@ -9,9 +9,85 @@ import faiss
 import numpy as np
 import pandas as pd
 import torch
+from rapidfuzz import process, fuzz
+
+from azner.data.data import LINK_SCORE
+
+# dataframe column keys
+DEFAULT_LABEL = "default_label"
+IDX = "idx"
+SYN = "syn"
+MAPPING_TYPE = "mapping_type"
+SOURCE = "source"
 
 
-class EmbeddingIndex(abc.ABC):
+class Index(abc.ABC):
+    """
+    base class for all indices.
+    """
+
+    def search(self, *args, **kwargs) -> pd.DataFrame:
+        """
+        calls to search should return a :py:class:`<pd.DataFrame>`
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        raise NotImplementedError()
+
+
+class DictionaryIndex(Index):
+    """
+    a simple dictionary index for linking
+    """
+
+    def __init__(
+        self,
+        path: str,
+        name: str = "unnamed_index",
+        fuzzy: bool = False,
+        score_cutoff: int = 99.0,
+        top_n: int = 20,
+    ):
+        """
+
+        :param path: path to parquet file of synonyms
+        :param name: a name for this index
+        :param fuzzy: use fuzzy matching
+        :param score_cutoff: minimum score for fuzzy matching
+        :param top_n: number of hits to return
+        """
+        self.top_n = top_n
+        self.score_cutoff = score_cutoff
+        self.fuzzy = fuzzy
+        self.name = name
+        self.df = pd.read_parquet(path)
+        self.df[SYN] = self.df[SYN].str.lower()
+
+    def search(self, query: str) -> pd.DataFrame:
+        """
+        search the index
+        :param query: a string to query against
+        :return: a df of hits
+        """
+        query = query.lower()
+        if not self.fuzzy:
+            return self.df[self.df[SYN] == query]
+        else:
+            hits = process.extract(
+                query,
+                self.df[SYN].tolist(),
+                scorer=fuzz.WRatio,
+                limit=self.top_n,
+                score_cutoff=self.score_cutoff,
+            )
+            locs = [x[2] for x in hits]
+            hit_df = self.df.iloc[locs].copy()
+            hit_df[LINK_SCORE] = [x[1] for x in hits]
+            return hit_df
+
+
+class EmbeddingIndex(Index):
     """
     a wrapper around an embedding index strategy. Concrete implementations below
     """
@@ -55,14 +131,17 @@ class EmbeddingIndex(abc.ABC):
         """
         raise NotImplementedError()
 
-    def search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+    def search(self, embedding: torch.Tensor) -> pd.DataFrame:
         """
         search the index
         :param embedding: a 2d tensor to query the index with
         :return: a tuple of 2d numpy arrays: distances, nearest neighbours, and a pd.DataFrame of metadata
         """
         distances, neighbors = self._search(embedding)
-        return distances, neighbors, self.metadata.iloc[neighbors]
+        hit_df = self.metadata.iloc[neighbors].copy()
+
+        hit_df[LINK_SCORE] = distances.tolist()
+        return hit_df
 
     def _search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray]:
         """
