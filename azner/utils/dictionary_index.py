@@ -42,7 +42,7 @@ class DictionaryIndex:
                 limit=20,
                 score_cutoff=self.score_cutoff,
             )
-            locs = [x[2] for x in hits]
+            locs = (x[2] for x in hits)
             hit_df = self.df.iloc[locs].copy()
             hit_df[LINK_SCORE] = [x[1] for x in hits]
             return hit_df
