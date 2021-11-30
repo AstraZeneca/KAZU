@@ -1,6 +1,6 @@
 import pytest
 
-from data.data import TokenizedWord, SimpleDocument, CharSpan
+from azner.data.data import TokenizedWord, SimpleDocument, CharSpan
 from fastapi.encoders import jsonable_encoder
 
 

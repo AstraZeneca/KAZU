@@ -23,7 +23,14 @@ metadata = pd.DataFrame.from_dict({"id": [3, 1, 0, 2, 4]})
 
 query_embedding = torch.tensor([index_embedding])
 
+SKIP_FAISS = False
+try:
+    import faiss  # noqa
+except ImportError:
+    SKIP_FAISS = True
 
+
+@pytest.mark.skipif(SKIP_FAISS, reason="Skipping faiss tests as not available")
 def test_faiss_index():
     factory = EmbeddingIndexFactory("FaissEmbeddingIndex", 3)
     perform_index_tests(factory)

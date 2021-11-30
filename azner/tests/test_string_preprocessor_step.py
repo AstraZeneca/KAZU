@@ -1,7 +1,7 @@
 from typing import List, Tuple, Optional
 
 from azner.steps.string_preprocessing.string_preprocessing_step import StringPreprocessorStep
-from data.data import Section, CharSpan, SimpleDocument
+from azner.data.data import Section, CharSpan, SimpleDocument
 
 
 class AddSomeCharsStep(StringPreprocessorStep):

@@ -1,7 +1,7 @@
 from typing import List
 
-from data.data import TokenizedWord
-from steps.ner.bio_label_preprocessor import BioLabelPreProcessor
+from azner.data.data import TokenizedWord
+from azner.steps.ner.bio_label_preprocessor import BioLabelPreProcessor
 
 preprocessor = BioLabelPreProcessor()
 
