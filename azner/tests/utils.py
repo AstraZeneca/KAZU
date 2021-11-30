@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import pandas as pd
 
-from data.data import SimpleDocument, Entity, Document
+from azner.data.data import SimpleDocument, Entity, Document
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
