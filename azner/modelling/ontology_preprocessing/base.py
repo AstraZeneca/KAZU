@@ -9,8 +9,27 @@ import rdflib
 from rdflib import URIRef
 import sqlite3
 from tqdm.auto import tqdm
+from azner.utils.link_index import DEFAULT_LABEL, IDX, SYN, MAPPING_TYPE, SOURCE
 
 from abc import ABC
+import spacy
+
+
+class StopWordRemover:
+    """
+    remove stopwords from a string
+    """
+
+    def __init__(self):
+        self.nlp = spacy.load("en_core_web_sm")
+        self.all_stopwords = self.nlp.Defaults.stop_words
+
+    def __call__(self, text: str) -> str:
+        lst = []
+        for token in text.split():
+            if token.lower() not in self.all_stopwords:  # checking whether the word is not
+                lst.append(token)
+        return " ".join(lst)
 
 
 class OntologyParser(ABC):
@@ -21,8 +40,8 @@ class OntologyParser(ABC):
 
     name = "unnamed"
     training_col_names = ["id", "syn1", "syn2"]
-    default_label_column_names = ["source", "default_label", "iri"]
-    all_synonym_column_names = ["iri", "default_label", "syn"]
+    minimum_default_label_column_names = [SOURCE, DEFAULT_LABEL, IDX]
+    all_synonym_column_names = [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
 
     def __init__(self, in_path: str):
         """
@@ -47,22 +66,27 @@ class OntologyParser(ABC):
         df = self.format_synonym_table()
         # ensure correct order
         df = df[self.all_synonym_column_names]
+        # group mapping types of same synonym together
+        df = df.groupby(by=[IDX, DEFAULT_LABEL, SYN]).agg(set).reset_index()
         # make sure default labels are also in the synonym list
-        default_labels_df = df[["iri", "default_label"]].drop_duplicates()
-        default_labels_df["syn"] = default_labels_df["default_label"]
-        df = pd.concat([df, default_labels_df])
+        # default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates()
+        # default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
+        # df = pd.concat([df, default_labels_df])
         df = df.dropna(axis=0)
-        df = df.drop_duplicates()
-        df.sort_values(by=["iri", "default_label", "syn"], inplace=True)
+        df.sort_values(by=[IDX, DEFAULT_LABEL, SYN], inplace=True)
+        # needs to be a list so can be serialised
+        df[MAPPING_TYPE] = df[MAPPING_TYPE].apply(list)
         return df
 
     def format_synonym_table(self) -> pd.DataFrame:
         """
         implementations should override this method, returning a 'long, thin' pd.DataFrame of
-        ["id", "default_label", "syn"]
+        ["id", "default_label", SYN,"mapping_type"]
         id: the ontology id
         default_label: the preferred label
         syn: a synonym of the concept
+        mapping_type: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by
+                    the ontology
         :return:
         """
         raise NotImplementedError()
@@ -73,8 +97,8 @@ class OntologyParser(ABC):
         :return:
         """
         self.cache_synonym_table()
-        default_label_df = self.synonym_table[["iri", "default_label"]].drop_duplicates().copy()
-        default_label_df["source"] = self.name
+        default_label_df = self.synonym_table[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
+        default_label_df[SOURCE] = self.name
         return default_label_df
 
     def format_training_table(self) -> pd.DataFrame:
@@ -84,11 +108,11 @@ class OntologyParser(ABC):
         """
         self.cache_synonym_table()
         tqdm.pandas(desc=f"generating training pairs for {self.name}")
-        df = self.synonym_table.groupby(by=["iri"]).progress_apply(self.select_pos_pairs)
+        df = self.synonym_table.groupby(by=[IDX]).progress_apply(self.select_pos_pairs)
         df.index = [i for i in range(df.shape[0])]
-        df = df[[0, 1, "iri"]]
+        df = df[[0, 1, IDX]]
         df.columns = OntologyParser.training_col_names
-        df["id"] = df["id"].astype("category").cat.codes
+        df[IDX] = df[IDX].astype("category").cat.codes
         return df
 
     def select_pos_pairs(self, df: pd.Series):
@@ -97,13 +121,13 @@ class OntologyParser(ABC):
         :param df:
         :return:
         """
-        id = df["iri"].unique()[0]
-        labels = df["syn"].unique()
+        id = df[IDX].unique()[0]
+        labels = df[SYN].unique()
         if len(labels) > 50:
             labels = list(labels)[:50]
         combinations = list(itertools.combinations(labels, 2))
         new_df = pd.DataFrame(combinations)
-        new_df["iri"] = id
+        new_df[IDX] = id
         return new_df
 
     def write_training_pairs(self, out_path: str):
@@ -163,22 +187,28 @@ class RDFGraphParser(OntologyParser):
     def format_synonym_table(self) -> pd.DataFrame:
         g = rdflib.Graph()
         g.parse(self.in_path)
-        label_predicates = URIRef("http://www.w3.org/2000/01/rdf-schema#label")
+        label_pred_str = "http://www.w3.org/2000/01/rdf-schema#label"
+        label_predicates = URIRef(label_pred_str)
         synonym_predicates = [URIRef(x) for x in self._get_synonym_predicates()]
         default_labels = []
         iris = []
         syns = []
+        mapping_type = []
 
         for sub, obj in g.subject_objects(label_predicates):
             default_labels.append(str(obj))
             iris.append(str(sub))
             syns.append(str(obj))
+            mapping_type.append(label_pred_str)
             for syn_predicate in synonym_predicates:
                 for other_syn_obj in g.objects(subject=sub, predicate=syn_predicate):
                     default_labels.append(str(obj))
                     iris.append(str(sub))
                     syns.append(str(other_syn_obj))
-        df = pd.DataFrame.from_dict({"default_label": default_labels, "iri": iris, "syn": syns})
+                    mapping_type.append(syn_predicate)
+        df = pd.DataFrame.from_dict(
+            {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
+        )
         return df
 
 
@@ -205,21 +235,45 @@ class MondoParser(OntologyParser):
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
 
+    def __init__(self, in_path: str):
+        super().__init__(in_path)
+        self.sw_remover = StopWordRemover()
+
     def format_synonym_table(self) -> pd.DataFrame:
         x = json.load(open(self.in_path, "r"))
         graph = x["graphs"][0]
         nodes = graph["nodes"]
         ids = []
-        default_label = []
+        default_label_list = []
         all_syns = []
+        mapping_type = []
         for i, node in enumerate(nodes):
+            idx = node["id"]
+            default_label = node.get("lbl")
+            # add default_label to syn type
+            all_syns.append(default_label)
+            default_label_list.append(default_label)
+            mapping_type.append("lbl")
+            ids.append(idx)
+
             syns = node.get("meta", {}).get("synonyms", [])
             for syn_dict in syns:
-                if syn_dict["pred"] == "hasExactSynonym":
-                    ids.append(node["id"])
-                    default_label.append(node.get("lbl"))
-                    all_syns.append(syn_dict["val"])
-        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_label, "syn": all_syns})
+                pred = syn_dict["pred"]
+                mapping_type.append(pred)
+                syn = syn_dict["val"]
+                ids.append(idx)
+                default_label_list.append(default_label)
+                all_syns.append(syn)
+                no_stops_syn = self.sw_remover(syn)
+                if no_stops_syn != syn:
+                    ids.append(idx)
+                    default_label_list.append(default_label)
+                    all_syns.append(no_stops_syn)
+                    mapping_type.append(pred)
+
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_label_list, SYN: all_syns, MAPPING_TYPE: mapping_type}
+        )
         return df
 
 
@@ -313,7 +367,7 @@ class EnsemblOntologyParser(OntologyParser):
         ids = []
         default_label = []
         all_syns = []
-
+        all_mapping_type = []
         docs = data["response"]["docs"]
         for doc in docs:
 
@@ -324,25 +378,33 @@ class EnsemblOntologyParser(OntologyParser):
                 return found
 
             ensembl_gene_id = doc.get("ensembl_gene_id", None)
-            symbol = doc.get("symbol", None)
-            if ensembl_gene_id is None or symbol is None:
+            name = doc.get("name", None)
+            if ensembl_gene_id is None or name is None:
                 continue
             else:
                 # find synonyms
                 synonyms = []
-                for x in keys_to_check:
-                    synonyms_this_entity = get_with_default_list(x)
-                    for y in synonyms_this_entity:
-                        synonyms.extend(self.post_process_synonym(y))
+                for hgnc_key in keys_to_check:
+                    synonyms_this_entity = get_with_default_list(hgnc_key)
+                    for potential_synonym in synonyms_this_entity:
+                        generated_syns = self.post_process_synonym(potential_synonym)
+                        for syn in generated_syns:
+                            synonyms.append(
+                                (syn, hgnc_key),
+                            )
 
                 synonyms = list(set(synonyms))
                 # filter any very short matches
-                synonyms = [x for x in synonyms if len(x) > 2]
+                synonyms_and_mapping_type = [x for x in synonyms if len(x[0]) > 2]
+                synonyms = [x[0] for x in synonyms_and_mapping_type]
+                all_mapping_type.extend([x[1] for x in synonyms_and_mapping_type])
                 [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
-                [default_label.append(symbol) for _ in range(len(synonyms))]
+                [default_label.append(name) for _ in range(len(synonyms))]
                 all_syns.extend(synonyms)
 
-        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_label, "syn": all_syns})
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_label, SYN: all_syns, MAPPING_TYPE: all_mapping_type}
+        )
         return df
 
     def post_process_synonym(self, syn: str) -> List[str]:
@@ -419,17 +481,17 @@ class ChemblOntologyParser(OntologyParser):
 
     def format_synonym_table(self) -> pd.DataFrame:
         conn = sqlite3.connect(self.in_path)
-        query = """
-            SELECT chembl_id AS iri, pref_name AS default_label, synonyms AS syn
+        query = f"""
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE} 
             FROM molecule_dictionary AS md
                      JOIN molecule_synonyms ms ON md.molregno = ms.molregno
             UNION ALL
-            SELECT chembl_id AS iri, pref_name AS default_label, pref_name AS syn
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE} 
             FROM molecule_dictionary
-        """
+        """  # noqa
         df = pd.read_sql(query, conn)
-        df["default_label"] = df["default_label"].str.lower()
-        df["syn"] = df["syn"].str.lower()
+        df[DEFAULT_LABEL] = df[DEFAULT_LABEL].str.lower()
+        df[SYN] = df[SYN].str.lower()
 
         df.drop_duplicates(inplace=True)
 
@@ -464,6 +526,7 @@ class CellosaurusOntologyParser(OntologyParser):
         ids = []
         default_labels = []
         all_syns = []
+        mapping_type = []
         with open(self.in_path, "r") as f:
             id = None
             default_label = None
@@ -473,12 +536,20 @@ class CellosaurusOntologyParser(OntologyParser):
                     id = text.split(" ")[1]
                 elif text.startswith("name:"):
                     default_label = text.split(" ")[1][1:]
+                    ids.append(id)
+                    default_labels.append(default_label)
+                    all_syns.append(default_label)
+                    mapping_type.append("name")
                 elif text.startswith("synonym:"):
                     syn = text.split(" ")[1][1:-1]
+                    mapping = text.split(" ")[2]
                     ids.append(id)
                     default_labels.append(default_label)
                     all_syns.append(syn)
+                    mapping_type.append(mapping)
                 else:
                     pass
-        df = pd.DataFrame.from_dict({"iri": ids, "default_label": default_labels, "syn": all_syns})
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
+        )
         return df

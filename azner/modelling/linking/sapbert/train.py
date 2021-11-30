@@ -28,7 +28,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
-from azner.utils.embedding_index import (
+from azner.utils.link_index import (
     EmbeddingIndex,
     MatMulTensorEmbeddingIndex,
 )
@@ -436,7 +436,7 @@ class PLSapbertModel(LightningModule):
             ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
                 dataset_name
             ].query_source.iloc[i]
-            _, _, candidate_df_slice = ontology_embeddings.search(query_embedding)
+            candidate_df_slice = ontology_embeddings.search(query_embedding)
             default_label = ontology_entry["default_label"]
             golden_iri = ontology_entry["iri"]
             dict_candidates = self.get_candidate_dict(candidate_df_slice, golden_iri)
