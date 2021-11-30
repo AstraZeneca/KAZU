@@ -95,7 +95,7 @@ class MappingPostProcessing:
                             string_overlaps, query=self.match
                         )
                     )
-                    | (self.lookup_df["syn"].apply(string_overlaps, **{"query": self.match}))
+                    | (self.lookup_df["syn"].apply(string_overlaps, query=self.match))
                 ]
                 .sort_values(by=[LINK_SCORE], ascending=False)["mapping"]
                 .tolist()
