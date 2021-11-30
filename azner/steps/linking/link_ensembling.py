@@ -15,6 +15,7 @@ from azner.data.data import (
     PROCESSING_EXCEPTION,
 )
 from azner.steps import BaseStep
+from azner.utils.link_index import IDX, SYN, DEFAULT_LABEL
 
 
 class LinkRanks(Enum):
@@ -51,13 +52,13 @@ class MappingPostProcessing:
         data = defaultdict(list)
         for mapping in self.mappings:
             data[NAMESPACE].append(mapping.metadata[NAMESPACE])
-            data["idx"].append(mapping.idx)
-            syn_lower = mapping.metadata.get("syn")
+            data[IDX].append(mapping.idx)
+            syn_lower = mapping.metadata.get(SYN)
             syn_lower = syn_lower.lower() if syn_lower is not None else None
-            data["syn"].append(syn_lower)
-            label_lower = mapping.metadata.get("default_label")
+            data[SYN].append(syn_lower)
+            label_lower = mapping.metadata.get(DEFAULT_LABEL)
             label_lower = label_lower.lower() if label_lower is not None else None
-            data["default_label"].append(label_lower)
+            data[DEFAULT_LABEL].append(label_lower)
             data["mapping"].append(mapping)
             data[LINK_SCORE].append(mapping.metadata[LINK_SCORE])
         self.lookup_df = pd.DataFrame.from_dict(data)
@@ -69,8 +70,8 @@ class MappingPostProcessing:
         :return:
         """
         hits = self.lookup_df[
-            (self.match == self.lookup_df["default_label"])
-            | (self.match == self.lookup_df["syn"])
+            (self.match == self.lookup_df[DEFAULT_LABEL])
+            | (self.match == self.lookup_df[SYN])
             | (self.lookup_df[LINK_SCORE] == 100.0)
         ]
         hits = self.sort_and_add_confidence(hits, LinkRanks.HIGH_CONFIDENCE)
@@ -95,7 +96,7 @@ class MappingPostProcessing:
         :return:
         """
         if len(self.lookup_df[NAMESPACE].unique().tolist()) > 1:
-            raw_hits = self.lookup_df.groupby(by=["idx"]).filter(
+            raw_hits = self.lookup_df.groupby(by=[IDX]).filter(
                 lambda x: x[NAMESPACE].nunique() >= 2
             )
             hits = self.sort_and_add_confidence(raw_hits, LinkRanks.MEDIUM_HIGH_CONFIDENCE)
@@ -113,8 +114,8 @@ class MappingPostProcessing:
         hits = []
         if query_length >= 5:
             containing_hits = self.lookup_df[
-                (self.lookup_df["default_label"].apply(string_subsumes, query=self.match))
-                | (self.lookup_df["syn"].apply(string_subsumes, query=self.match))
+                (self.lookup_df[DEFAULT_LABEL].apply(string_subsumes, query=self.match))
+                | (self.lookup_df[SYN].apply(string_subsumes, query=self.match))
             ]
 
             hits = self.sort_and_add_confidence(containing_hits, LinkRanks.MEDIUM_CONFIDENCE)

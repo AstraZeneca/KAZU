@@ -136,7 +136,7 @@ class NerProcessedSection(BaseModel):
 class Mapping(BaseModel):
     source: str  # the knowledgebase name
     idx: str  # the identifier within the KB
-    mapping_type: str  # the type of KB mapping
+    mapping_type: List[str]  # the type of KB mapping
     metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
 
@@ -190,7 +190,7 @@ class Entity(BaseModel):
         return self.hash_val
 
     def __eq__(self, other):
-        return other.hash == self.hash_val
+        return other.hash_val == self.hash_val
 
     def overlapped(self, other) -> bool:
         """

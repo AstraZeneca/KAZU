@@ -46,7 +46,7 @@ def make_mapping(
         start=0,
         end=1,
         idx=idx,
-        mapping_type="test",
+        mapping_type=["test"],
         source="test",
         metadata={
             "default_label": default_label,
