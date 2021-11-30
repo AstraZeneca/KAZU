@@ -137,12 +137,12 @@ class Mapping(BaseModel):
     source: str  # the knowledgebase name
     idx: str  # the identifier within the KB
     mapping_type: str  # the type of KB mapping
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
 
 class EntityMetadata(BaseModel):
-    mappings: Optional[List[Mapping]]  # KB mappings
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    mappings: List[Mapping] = Field(default_factory=list, hash=False)  # KB mappings
+    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
 
 class Entity(BaseModel):
@@ -156,9 +156,7 @@ class Entity(BaseModel):
     start: int  # start offset
     end: int  # end offset
     hash_val: Optional[str] = None  # not required. calculated based on above fields
-    metadata: Optional[EntityMetadata] = Field(
-        default_factory=EntityMetadata, hash=False
-    )  # generic metadata
+    metadata: EntityMetadata = Field(default_factory=EntityMetadata, hash=False)  # generic metadata
 
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):
@@ -410,7 +408,7 @@ class Document(BaseModel):
     idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
     hash_val: Optional[str] = None  # calculated automatically based on above fields
     sections: List[Section]  # sections comprising this document
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
 
     def __str__(self):
         return f"idx: {self.idx}"
