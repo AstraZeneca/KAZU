@@ -4,8 +4,6 @@ import os
 import shutil
 from pathlib import Path
 from typing import Tuple, Any
-
-import faiss
 import numpy as np
 import pandas as pd
 import torch
@@ -227,15 +225,22 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         :param dims: the dimensions of the embeddings
         :param return_n_nearest_neighbours: when a call to .search is made, this may neightbours will be returned
         """
+        try:
+            import faiss
+
+            self.faiss = faiss
+        except ImportError:
+            raise RuntimeError(f"faiss is not installed. Cannot use {self.__class__.__name__}")
+
         super().__init__(*args, **kwargs)
         self.return_n_nearest_neighbours = return_n_nearest_neighbours
         self.index = None
 
     def _load(self, path: str):
-        return faiss.read_index(path)
+        return self.faiss.read_index(path)
 
     def _save(self, path: str):
-        faiss.write_index(self.index, path)
+        self.faiss.write_index(self.index, path)
 
     def _search(self, embedding: torch.Tensor):
         distances, neighbors = self.index.search(
@@ -244,7 +249,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         return np.squeeze(distances), np.squeeze(neighbors)
 
     def _create_index(self, embeddings: torch.Tensor):
-        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index = self.faiss.IndexFlatL2(embeddings.shape[1])
         index.add(embeddings.numpy())
         return index
 
