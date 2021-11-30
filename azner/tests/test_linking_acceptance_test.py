@@ -4,7 +4,7 @@ import pydash
 import pytest
 from hydra import compose, initialize_config_dir
 
-from pipeline.pipeline import Pipeline, load_steps
+from azner.pipeline.pipeline import Pipeline, load_steps
 from azner.tests.utils import entity_linking_hard_cases, AcceptanceTestError, SKIP_MESSAGE
 
 
