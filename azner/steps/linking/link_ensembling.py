@@ -92,7 +92,7 @@ class MappingPostProcessing:
                 self.lookup_df[
                     (
                         self.lookup_df["default_label"].apply(
-                            string_overlaps, **{"query": self.match}
+                            string_overlaps, query=self.match
                         )
                     )
                     | (self.lookup_df["syn"].apply(string_overlaps, **{"query": self.match}))
