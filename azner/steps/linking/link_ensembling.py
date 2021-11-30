@@ -43,7 +43,7 @@ class MappingPostProcessing:
         """
 
         :param entity: the entity to process
-        :param linker_score_thresholds:  a dict of Linker Step name, and score threshold. Used by fiilter_scores
+        :param linker_score_thresholds:  a dict of Linker Step name, and score threshold. Used by filter_scores
         """
         self.match = entity.match.lower()
         self.linker_score_thresholds = linker_score_thresholds
