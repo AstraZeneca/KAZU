@@ -132,15 +132,9 @@ class MappingPostProcessing:
         :return:
         """
         if len(self.lookup_df[NAMESPACE].unique().tolist()) > 1:
-            namespaceid_groups = (
-                self.lookup_df[[NAMESPACE, "idx"]].groupby(by=[NAMESPACE]).agg(set)["idx"].tolist()
-            )
-            common_ids = set.intersection(*namespaceid_groups)
-            hits = (
-                self.lookup_df[self.lookup_df["idx"].isin(common_ids)]
-                .sort_values(by=[LINK_SCORE], ascending=False)["mapping"]
-                .tolist()
-            )
+        raw_hits = multiple_hits.groupby(by=["idx"]).filter(lambda x: x[NAMESPACE].nunique() >= 2)
+        hits = raw_hits.sort_values(by=[LINK_SCORE], ascending=False)["mapping"].tolist()
+        
             self.update_with_confidence(hits, LinkRanks.MEDIUM_HIGH_CONFIDENCE.value)
             return hits
         else:
