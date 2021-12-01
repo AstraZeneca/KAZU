@@ -3,6 +3,8 @@ from typing import List
 from azner.data.data import TokenizedWord
 from azner.steps.ner.bio_label_preprocessor import BioLabelPreProcessor
 
+preprocessor = BioLabelPreProcessor()
+
 
 def make_tokenized_word(label_list: List[str]) -> TokenizedWord:
     word_labels = [0 for _ in range(len(label_list))]
@@ -23,8 +25,8 @@ def make_tokenized_word(label_list: List[str]) -> TokenizedWord:
     return word
 
 
-def test_bio_label_preprocessor():
-    preprocessor = BioLabelPreProcessor()
+def test_bio_label_preprocessor_1():
+
     # case 1: properly formed, no action required
     word_label_strings = ["B-gene", "I-gene", "I-gene"]
     expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
@@ -33,6 +35,8 @@ def test_bio_label_preprocessor():
     for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
+
+def test_bio_label_preprocessor_2():
     # case 2: all O, no action required
     word_label_strings = ["O", "O", "O"]
     expected_word_label_strings = ["O", "O", "O"]
@@ -41,6 +45,8 @@ def test_bio_label_preprocessor():
     for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
+
+def test_bio_label_preprocessor_3():
     # case 3: missing I's
     word_label_strings = ["B-gene", "O", "O"]
     expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
@@ -49,6 +55,8 @@ def test_bio_label_preprocessor():
     for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
+
+def test_bio_label_preprocessor_4():
     # case 4: missing B
     word_label_strings = ["I-gene", "I-gene", "I-gene"]
     expected_word_label_strings = ["B-gene", "I-gene", "I-gene"]
@@ -57,6 +65,8 @@ def test_bio_label_preprocessor():
     for observed, expected in zip(words[0].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
+
+def test_bio_label_preprocessor_5():
     # case 5: multi word entity
     word1_label_strings = ["B-gene", "I-gene", "I-gene"]
     word2_label_strings = ["I-gene", "I-gene", "I-gene"]
@@ -69,6 +79,8 @@ def test_bio_label_preprocessor():
     for observed, expected in zip(words[1].word_labels_strings, expected_word_label_strings):
         assert observed == expected
 
+
+def test_bio_label_preprocessor_6():
     # case 6: two entities next to each other. Second needs processing
     word1_label_strings = ["B-disease", "I-disease", "I-disease"]
     word2_label_strings = ["I-gene", "I-gene", "I-gene"]
