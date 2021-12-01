@@ -1,5 +1,6 @@
 import itertools
 import json
+import os
 import re
 from pathlib import Path
 from typing import List
@@ -549,6 +550,64 @@ class CellosaurusOntologyParser(OntologyParser):
                     mapping_type.append(mapping)
                 else:
                     pass
+        df = pd.DataFrame.from_dict(
+            {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
+        )
+        return df
+
+
+class MeddraOntologyParser(OntologyParser):
+    name = "MEDDRA"
+    """
+    input is an unzipped directory to a MEddra release (Note, requires licence). This
+    should contain the files 'mdhier.asc' and 'llt.asc'
+    :return:
+    """
+
+    def format_synonym_table(self) -> pd.DataFrame:
+        # hierarchy path
+        mdheir_path = os.path.join(self.in_path, "mdhier.asc")
+        # low level term path
+        llt_path = os.path.join(self.in_path, "llt.asc")
+        hier_df = pd.read_csv(mdheir_path, sep="$", header=None)
+        hier_df.columns = [
+            "pt_code",
+            "hlt_code",
+            "hlgt_code",
+            "soc_code",
+            "pt_name",
+            "hlt_name",
+            "hlgt_name",
+            "soc_name",
+            "soc_abbrev",
+            "null_field",
+            "pt_soc_code",
+            "primary_soc_fg",
+            "NULL",
+        ]
+
+        llt_df = pd.read_csv(llt_path, sep="$", header=None)
+        llt_df = llt_df.T.dropna().T
+        llt_df.columns = ["llt_code", "llt_name", "pt_code", "llt_currency"]
+
+        ids = []
+        default_labels = []
+        all_syns = []
+        mapping_type = []
+
+        for i, row in hier_df.iterrows():
+            idx = row["pt_code"]
+            pt_name = row["pt_name"]
+            llts = llt_df[llt_df["pt_code"] == idx]
+            ids.append(idx)
+            default_labels.append(pt_name)
+            all_syns.append(pt_name)
+            mapping_type.append("meddra_link")
+            for j, llt_row in llts.iterrows():
+                ids.append(idx)
+                default_labels.append(pt_name)
+                all_syns.append(llt_row["llt_name"])
+                mapping_type.append("meddra_link")
         df = pd.DataFrame.from_dict(
             {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
