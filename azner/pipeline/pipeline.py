@@ -95,6 +95,7 @@ class Pipeline:
     ):
         """
         A basic pipeline, used to help run a series of steps
+
         :param steps: list of steps to run
         :param failure_handler: optional list of handlers to process failed docs
         """
@@ -111,6 +112,7 @@ class Pipeline:
         each step can have a list of dependencies - the namespace of other steps that must have run for a step to
         be able to run. This method checks the dependencies of :param step against the pipeline_metadata, to ensure
         the step is able to run. Raises RuntimeError if this check fails
+
         :param step:
         :return:
         """
@@ -125,6 +127,7 @@ class Pipeline:
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
         run the pipeline
+
         :param docs: Docs to process
         :return: processed docs
         """
