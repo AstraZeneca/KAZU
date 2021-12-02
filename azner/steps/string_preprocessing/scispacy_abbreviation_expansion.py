@@ -12,6 +12,27 @@ from .string_preprocessing_step import StringPreprocessorStep
 
 logger = logging.getLogger(__name__)
 
+"""
+Original Credit:
+https://github.com/allenai/scispacy
+@inproceedings{neumann-etal-2019-scispacy,
+title = "{S}cispa{C}y: {F}ast and {R}obust {M}odels for {B}iomedical {N}atural {L}anguage {P}rocessing",
+author = "Neumann, Mark  and
+  King, Daniel  and
+  Beltagy, Iz  and
+  Ammar, Waleed",
+booktitle = "Proceedings of the 18th BioNLP Workshop and Shared Task",
+month = aug,
+year = "2019",
+address = "Florence, Italy",
+publisher = "Association for Computational Linguistics",
+url = "https://www.aclweb.org/anthology/W19-5034",
+doi = "10.18653/v1/W19-5034",
+pages = "319--327",
+eprint = {arXiv:1902.07669},
+}
+"""
+
 
 def find_abbreviation(
     long_form_candidate: Span, short_form_candidate: Span
@@ -25,18 +46,12 @@ def find_abbreviation(
     in order, as well as requiring that the first letter of the abbreviated form matches the
     _beginning_ letter of a word.
 
-    Parameters
-    ----------
-    long_form_candidate: Span, required.
-        The spaCy span for the long form candidate of the definition.
-    short_form_candidate: Span, required.
-        The spaCy span for the abbreviation candidate.
-
-    Returns
-    -------
-    A Tuple[Span, Optional[Span]], representing the short form abbreviation and the
-    span corresponding to the long form expansion, or None if a match is not found.
+    :param long_form_candidate:
+    :param short_form_candidate:
+    :return: A Tuple[Span, Optional[Span]], representing the short form abbreviation and the span corresponding to the
+        long form expansion, or None if a match is not found.
     """
+
     long_form = " ".join([x.text for x in long_form_candidate])
     short_form = " ".join([x.text for x in short_form_candidate])
 
@@ -179,7 +194,6 @@ class AbbreviationDetector:
         """
         add matcher rules based on abbreviations found
         :param doc:
-        :return:
         """
         matches = self.matcher(doc)
         matches_no_brackets = [(x[0], x[1] + 1, x[2] - 1) for x in matches]
@@ -208,8 +222,8 @@ class AbbreviationDetector:
     def run_rules(self, doc: Doc) -> Doc:
         """
         apply abbreviation matcher rules to a spacy doc
+
         :param doc:
-        :return:
         """
         all_occurences: Dict[Span, Set[Span]] = defaultdict(set)
         global_matches = self.global_matcher(doc)
@@ -230,7 +244,6 @@ class AbbreviationDetector:
         in this implementation, the matcher rules retains state, allowing the rules learnt from one section to be
         applied to another. Calling reset removes this state, allowing new rules to be learnt (i.e. when processing
         another document)
-        :return:
         """
         keys = [self.to_remove.pop() for _ in range(len(self.to_remove))]
         for key in keys:
@@ -242,18 +255,15 @@ class AbbreviationDetector:
 
 class SciSpacyAbbreviationExpansionStep(StringPreprocessorStep):
     """
-    Use the scispacy abbreviation finder rules, to expand abbreviations ahead of NER
+    Detects abbreviations using the algorithm in "A simple algorithm for identifying
+    abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
+    Uses a modified version of the scispacy abbreviation finder rules, to expand abbreviations. In this implementation,
+    it's possible to apply abbreviations across the multiple sections in a :class:`azner.data.data.Document`.
+    For instance, abbreviations learnt in an abstract will also be applied throughout the body of the text
+
     """
 
     def __init__(self, depends_on: List[str]):
-        """
-
-        :param depends_on:
-        :param override_original_section_text: if True, original section text is moved to the section metadata under
-                "original_text", and Section.text becomes expanded text. If false, expanded text is added to metadata
-                under "expanded_abbreviations". In all cases, a map of offsets from modifications to abbreviations is
-                created under "abbreviations_offset_mappings"
-        """
         super().__init__(depends_on)
         self.nlp = English()
         self.nlp.add_pipe("sentencizer")
@@ -263,6 +273,7 @@ class SciSpacyAbbreviationExpansionStep(StringPreprocessorStep):
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
         we need to override _run, as we need to calculate abbreviations over all sections in a document
+
         :param docs:
         :return:
         """
@@ -278,6 +289,7 @@ class SciSpacyAbbreviationExpansionStep(StringPreprocessorStep):
     def expand_abbreviations(self, section: Section) -> Tuple[str, Dict[CharSpan, CharSpan]]:
         """
         processes a document for abbreviations, returning a new string with all abbreviations expanded
+
         :param text: input document
         :return: expanded input document
         """
