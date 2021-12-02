@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Quickstart &#8212; Kazu  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Kazu data model" href="datamodel.html" />
+    <link rel="prev" title="Welcome to Kazu’s documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="datamodel.html" title="Kazu data model"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Kazu’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Kazu  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Quickstart</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Note, currently not functional - install from repo only at present</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install kazu</span>
+</pre></div>
+</div>
+</section>
+<section id="model-pack">
+<h2>Model Pack<a class="headerlink" href="#model-pack" title="Permalink to this headline">¶</a></h2>
+<p>In order to use the majority of Kazu, you will need the model pack, which contains
+the pretrained models required by the pipeline. This is available from &lt;TBA&gt;</p>
+</section>
+<section id="runnin-steps">
+<h2>Runnin Steps<a class="headerlink" href="#runnin-steps" title="Permalink to this headline">¶</a></h2>
+<p>Components are wrapped as instances of BaseStep.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">azner.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
+<span class="kn">import</span> <span class="nn">azner.steps.string_preprocessing.scispacy_abbreviation_expansion</span>
+<span class="n">step</span> <span class="o">=</span> <span class="n">SciSpacyAbbreviationExpansionStep</span><span class="p">([])</span>
+<span class="n">doc</span> <span class="o">=</span> <span class="n">SimpleDocument</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
+<span class="c1"># a step may fail to process a document, so it returns two lists, successes and failures</span>
+<span class="n">succeeded</span><span class="p">,</span><span class="n">failed</span> <span class="o">=</span> <span class="n">step</span><span class="p">([</span><span class="n">doc</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">succeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="advanced-pipeline-configuration-with-hydra">
+<h2>Advanced Pipeline configuration with Hydra<a class="headerlink" href="#advanced-pipeline-configuration-with-hydra" title="Permalink to this headline">¶</a></h2>
+<p>To create an NLP pipeline, you need to instantiate steps. Given the large amount
+of configuration required, the easiest way to do this is with Hydra <a class="reference external" href="https://hydra.cc/docs/intro/">https://hydra.cc/docs/intro/</a></p>
+<p>Here, you will need a hydra config directory (see azner/conf for an example)</p>
+<p>first, export the path of your config directory to KAZU_CONFIG_DIR
+(note, you will need to update the model paths in the config dir as appropriate)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">hydra</span> <span class="kn">import</span> <span class="n">compose</span><span class="p">,</span> <span class="n">initialize_config_dir</span>
+<span class="kn">from</span> <span class="nn">azner.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
+<span class="kn">from</span> <span class="nn">azner.pipeline.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">load_steps</span>
+<span class="c1">#some text we want to process</span>
+<span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;EGFR is a gene&quot;&quot;&quot;</span>
+
+<span class="k">with</span> <span class="n">initialize_config_dir</span><span class="p">(</span><span class="n">config_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;KAZU_CONFIG_DIR&quot;</span><span class="p">)):</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">compose</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">)</span>
+    <span class="c1"># instantiate a pipeline based on Hydra defaults</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">load_steps</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+    <span class="c1"># create an instance of SimpleDocument from our text string</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">SimpleDocument</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="c1"># Pipeline takes a List[Document] as an argument to __call__</span>
+    <span class="c1"># and returns a processes List[Document]</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">SimpleDocument</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">([</span><span class="n">doc</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># a Document is composed of Sections (SimpleDocument only has one)</span>
+    <span class="c1"># calling render() renders the entities with displacy</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+    <span class="c1"># the entities can also be transformed into a pandas Dataframe</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entities_as_dataframe</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quickstart</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#model-pack">Model Pack</a></li>
+<li><a class="reference internal" href="#runnin-steps">Runnin Steps</a></li>
+<li><a class="reference internal" href="#advanced-pipeline-configuration-with-hydra">Advanced Pipeline configuration with Hydra</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Kazu’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="datamodel.html"
+                        title="next chapter">Kazu data model</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quickstart.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="datamodel.html" title="Kazu data model"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Kazu’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Kazu  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Quickstart</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Korea University, AstraZeneca.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.1.
+    </div>
+  </body>
+</html>
