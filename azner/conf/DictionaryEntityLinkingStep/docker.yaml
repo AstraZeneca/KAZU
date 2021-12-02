@@ -7,7 +7,7 @@ entity_class_to_ontology_mappings:
   anatomy: UBERON
   species: NOT_IMPLEMENTED
   mutation: NOT_IMPLEMENTED
-ontology_link_index:
+ontology_dictionary_index:
   MONDO:
     _target_: azner.utils.link_index.DictionaryIndex
     path: /home/ray/model_pack/dictionary/MONDO_synonyms.parquet
