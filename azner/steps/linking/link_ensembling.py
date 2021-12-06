@@ -35,9 +35,12 @@ def string_subsumes(target: str, query: str):
 
 class MappingPostProcessing:
     """
-    ensemble and resolve mapping information for an entity, according to a custom algorithm (see __call__)
-
-
+    Ensemble and resolve mapping information for an entity, according to a custom algorithm:
+    1) exact string match hit in ontology -> High confidence
+    2) scores above threshold for a single linker -> Medium-high confidence
+    3) different linkers suggest same ontology id -> Medium-high confidence
+    4) matched text is contained in, or contains mapping default label or synonym -> Medium confidence
+    5) best score overall, across all linkers -> Low confidence
     """
 
     def __init__(self, entity: Entity, linker_score_thresholds: Dict[str, float]):
@@ -128,15 +131,6 @@ class MappingPostProcessing:
         return mappings
 
     def __call__(self):
-        """
-        preference:
-        1) exact hits -> High confidence
-        2) scores above threshold for a single linker -> Medium-high confidence
-        3) different linkers suggest same idx -> Medium-high confidence
-        4) matched text is contained in, or contains mapping default label or synonym -> Medium confidence
-        5) best score overall -> Low confidence
-        :return:
-        """
         hits = self.exact_hits()
         if len(hits) == 0:
             hits = self.filter_scores()
@@ -151,7 +145,8 @@ class MappingPostProcessing:
 
 class EnsembleEntityLinkingStep(BaseStep):
     """
-    ensemble methods to use information from multiple linkers when choosing the 'best' mapping.
+    ensemble methods to use information from multiple linkers when choosing the 'best' mapping. See
+    :class:`azner.steps.linking.link_ensembling.MappingPostProcessing`
     """
 
     def __init__(
@@ -160,6 +155,12 @@ class EnsembleEntityLinkingStep(BaseStep):
         linker_score_thresholds: Dict[str, float],
         keep_top_n: int = 1,
     ):
+        """
+
+        :param depends_on:
+        :param linker_score_thresholds: Dict that maps a linker namespace to it's score threshold
+        :param keep_top_n:
+        """
         super().__init__(depends_on)
         self.linker_score_thresholds = linker_score_thresholds
         self.keep_top_n = keep_top_n

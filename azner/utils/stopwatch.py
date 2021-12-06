@@ -9,6 +9,7 @@ class Stopwatch:
     def __init__(self, call_count_interval: int = 1):
         """
         a stop watch! will produce a logging message from the Stopwatch.message().
+
         :param call_count_interval: when message()  is called, only log if self.call_count %
                                     self.call_count_interval == 0
         """
@@ -22,6 +23,7 @@ class Stopwatch:
     def message(self, message: str):
         """
         helper function for benchmarking in logs
+
         :param start:
         :return:
         """

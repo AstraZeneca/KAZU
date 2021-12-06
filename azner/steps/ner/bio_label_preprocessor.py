@@ -13,11 +13,12 @@ logger = logging.getLogger(__name__)
 
 class BioLabelPreProcessor:
     """
-    because of the inherent obscurity of the inner workings of transformers, sometimes they produce BIO tags that
+    Because of the inherent obscurity of the inner workings of transformers, sometimes they produce BIO tags that
     don't correctly align to whole words. So what do we do? Fix it with rules :~Z
 
     This class is designed to work when an entire sequence of NER labels is known and therefore we can apply some
     post-processing logic - i.e. a hack until we have time to debug the model
+
     """
 
     def test_for_single_token(self, word: TokenizedWord) -> bool:

@@ -33,6 +33,17 @@ logger = logging.getLogger(__name__)
 
 
 class SapBertForEntityLinkingStep(BaseStep):
+    """
+    This step wraps Sapbert: Self Alignment pretraining for biomedical entity representation.
+    We make use of two caches here:
+    1) :class:`azner.utils.link_index.EmbeddingIndex` Since these are static and numerous, it makes sense to
+    precompute them once and reload them each time. This is done automatically if no cache file is detected.
+    2) :class:`azner.utils.caching.EntityLinkingLookupCache` Since certain entities will come up more frequently, we
+    cache the result mappings rather than call bert repeatedly.
+
+    Original paper https://aclanthology.org/2021.naacl-main.334.pdf
+    """
+
     def __init__(
         self,
         depends_on: List[str],
@@ -49,47 +60,22 @@ class SapBertForEntityLinkingStep(BaseStep):
         lookup_cache_size: int = 5000,
     ):
         """
-        This step wraps Sapbert: Self Alignment pretraining for biomedical entity representation.
 
-
-        We make use of two caches here:
-        1) Ontology embeddings
-            Since these are static and numerous, it makes sense to precompute them once and reload them each time
-            This is done automatically if no cache file is detected. A cache directory is generated with the prefix
-            'cache_' alongside the location of the original ontology file
-
-        2) Runtime LFUCache
-            Since certain entities will come up more frequently, we cache the result of the embedding check rather than
-            call bert repeatedly. This cache is maintained on the basis of the get_match_entity_class_hash(Entity)
-            function
-
-
-        Note, the ontology to link against is held in memory as an ndarray. For very large KB's we should use
-        faiss (see Nemo example via SapBert github reference)
-
-        Original paper
-        https://aclanthology.org/2021.naacl-main.334.pdf
-
-        :param model: path to HF SAPBERT model, config and tokenizer. A good pretrained default is available at
-                            https://huggingface.co/cambridgeltl/SapBERT-from-PubMedBERT-fulltext
-                            This is passed to HF Automodel.from_pretrained()
         :param depends_on: namespaces of dependency stes
-        :param ontology_path: path to parquet of labels to map to. This should have three columns: 'source',
-                            'iri' and 'default_label'. The default_label will be used to create an embedding, and the
-                            source and iri will be used to create a Mapping for the entity.
-                            See SapBert paper for further info
-        :param batch_size: batch size for dataloader
-        :param dl_workers: number of workers for the dataloader
-        :param trainer: an instance of pytorch lightning trainer
-        :param embedding_index_factory: an instance of EmbeddingIndexFactory, used to instantiate embedding indexes
-        :param ontology_partition_size: number of rows to process before saving results, when building initial ontology cache
-        :param process_all_entities: bool flag. Since SapBert involves expensive bert calls, this flag controls whether
-                                        it should be used on all entities, or only entities that have no mappings (i.e.
-                                        entites that have already been linked via a less expensive method, such as
-                                        dictionary lookup). This flag check for the presence of at least one entry in
-                                        Entity.metadata.mappings
-        :param rebuild_ontology_cache: should the ontology embedding cache be rebuilt?
-        :param lookup_cache_size: this step maintains a cache of {hash(Entity.match,Entity.entity_class):Mapping}, to reduce bert calls. This dictates the size
+        :param model: a pretrained Sapbert Model
+        :param ontology_path: path to file to generate embeddings from. See :meth:`azner.modelling.
+            ontology_preprocessing.base.OntologyParser.OntologyParser.write_default_labels` for format
+        :param batch_size: for inference with Pytorch
+        :param trainer: a pytorch lightning Trainer to handle the inference for us
+        :param dl_workers: number fo dataloader workers
+        :param ontology_partition_size: when generating embeddings, process n in a partition before serialising to disk.
+            (reduce if memory is an issue)
+        :param embedding_index_factory: For creating Embedding Indexes
+        :param entity_class_to_ontology_mappings: A Dict[str,str] that maps an entity class to the Ontology it should be
+            processed against
+        :param process_all_entities: if False, ignore entities that already have a mapping
+        :param rebuild_ontology_cache: Force rebuild of embedding cache
+        :param lookup_cache_size: size of lookup cache to maintain
         """
         super().__init__(depends_on=depends_on)
         self.embedding_index_factory = embedding_index_factory
@@ -107,9 +93,8 @@ class SapBertForEntityLinkingStep(BaseStep):
 
     def get_or_create_ontology_index_dict(self):
         """
-        populate self.ontology_ids and self.ontology_index_dict either by calculating them afresh or loading from a cached
-        version on disk
-        :return:
+        populate self.ontology_ids and self.ontology_index_dict either by calculating them afresh or loading from a
+        cached version on disk
         """
         cache_dir = get_cache_dir(self.ontology_path, create_if_not_exist=False)
         if self.rebuild_cache:

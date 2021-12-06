@@ -111,6 +111,7 @@ class NerProcessedSection(BaseModel):
     def to_tokenized_words(self, id2label: Dict[int, str]) -> List[TokenizedWord]:
         """
         return a List[TokenizedWord]
+
         :param id2label: Dict mapping labels to strings
         :return:
         """
@@ -195,6 +196,7 @@ class Entity(BaseModel):
     def overlapped(self, other) -> bool:
         """
         Test for distinct offsets
+
         :param other: query Entity
         :return: True if the offsets are completely distinct, False otherwise
         """
@@ -203,6 +205,7 @@ class Entity(BaseModel):
     def __len__(self) -> int:
         """
         Span length
+
         :return: number of characters enclosed by span
         """
         return self.end - self.start
@@ -210,14 +213,16 @@ class Entity(BaseModel):
     def __repr__(self) -> str:
         """
         Describe the tag
+
         :return: tag match description
         """
         return f"{self.namespace}:{self.match}:{self.entity_class}:{self.metadata}:{self.start}:{self.end}"
 
     def as_brat(self):
         """
-        self as the third party biomedical nlp Brat format, (see docs on Brat)
+        :return: self as the third party biomedical nlp Brat format, (see docs on Brat)
         """
+
         return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
     def add_mapping(self, mapping: Mapping):
@@ -255,6 +260,7 @@ class Section(BaseModel):
         rather than accessing text or preprocessed_text directly, this method provides a convenient wrapper to get
         preprocessed_text if available, or text if not. We can't use property due to this issue:
         https://github.com/samuelcolvin/pydantic/issues/935
+
         :return:
         """
         if self.preprocessed_text is None:
@@ -309,6 +315,7 @@ class Section(BaseModel):
         Since offset map is not json serialisable, we need to convert it something that can be jsonified when using
         the web api. Generally speaking, it's easier to call Document.as_serialisable() which returns a serialisable
         copy of the whole document.
+
         :return:
         """
         offsets = self.offset_map
@@ -329,6 +336,7 @@ class Section(BaseModel):
     def rehydrate(self):
         """
         the inverse of as_serialisable.
+
         :return:
         """
         new_section = self.copy(deep=True)
@@ -355,6 +363,7 @@ class Section(BaseModel):
     def entities_as_dataframe(self) -> Optional[pd.DataFrame]:
         """
         convert entities into a pandas dataframe. Useful for building annotation sets
+
         :return:
         """
         data = []
@@ -423,6 +432,7 @@ class Document(BaseModel):
     def get_entities(self) -> List[Entity]:
         """
         get all entities in this document
+
         :return:
         """
         entities = []
@@ -433,6 +443,7 @@ class Document(BaseModel):
     def as_serialisable(self):
         """
         return a copy of the document, in a format that can be json serialised. Intended to be used
+
         :return:
         """
         new_doc = self.copy()
@@ -444,6 +455,7 @@ class Document(BaseModel):
         """
         the inverse of as_serialisable
         return a copy of the document, in a format that can be json serialised
+
         :return:
         """
         new_doc = self.copy()

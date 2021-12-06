@@ -28,6 +28,13 @@ logger = logging.getLogger(__name__)
 
 
 class TransformersModelForTokenClassificationNerStep(BaseStep):
+    """
+    An wrapper for :class:`transformers.AutoModelForTokenClassification' and
+    :class:`azner.steps.ner.bio_label_preprocessor.BioLabelPreProcessor`. This implementation uses a sliding
+    window concept to process large documents that don't fit into the maximum sequence length allowed by a model.
+
+    """
+
     def __init__(
         self,
         path: str,
@@ -39,7 +46,6 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         debug=False,
     ):
         """
-        this step wraps a HF AutoModelForTokenClassification, and a BIOLabelParser
         :param stride: passed to HF tokenizers (for splitting long docs)
         :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
         :param path: path to HF model, config and tokenizer. Passed to HF .from_pretrained()
@@ -72,6 +78,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
     def get_dataloader(self, docs: List[Document]) -> Tuple[DataLoader, Dict[int, Section]]:
         """
         get a dataloader from a List of Document. Collation is handled via DataCollatorWithPadding
+
         :param docs:
         :return: a tuple of dataloader, and a dict of int:Section. The int maps to overflow_to_sample_mapping in the
                 underlying batch encoding, allowing the processing of docs longer than can fit within the maximum

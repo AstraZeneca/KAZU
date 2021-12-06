@@ -1,0 +1,588 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>API Documentation &#8212; Kazu  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="TBA" href="training.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="training.html" title="TBA"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Kazu  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-azner.data.data">
+<span id="api-documentation"></span><h1>API Documentation<a class="headerlink" href="#module-azner.data.data" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.data.data.CharSpan">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.data.data.</span></span><span class="sig-name descname"><span class="pre">CharSpan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.CharSpan" title="Permalink to this definition">¶</a></dt>
+<dd><p>A concept similar to a Spacy Span, except is offset based rather than token based</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.data.data.Entity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.data.data.</span></span><span class="sig-name descname"><span class="pre">Entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">azner.data.data.EntityMetadata</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.Entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic data class representing a unique entity in a string</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.data.data.Entity.as_brat">
+<span class="sig-name descname"><span class="pre">as_brat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.Entity.as_brat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>self as the third party biomedical nlp Brat format, (see docs on Brat)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.data.data.Entity.exact_overlap">
+<span class="sig-name descname"><span class="pre">exact_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_same_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.Entity.exact_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>compare one entity to other</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> – query Entity</p></li>
+<li><p><strong>also_same_class</strong> – if True, will return true if entity_class matches</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.data.data.Entity.overlapped">
+<span class="sig-name descname"><span class="pre">overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#azner.data.data.Entity.overlapped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test for distinct offsets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> – query Entity</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the offsets are completely distinct, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.data.data.NerProcessedSection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.data.data.</span></span><span class="sig-name descname"><span class="pre">NerProcessedSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_word_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_confidences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.NerProcessedSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>long Sections may need to be split into multiple frames when processing with a transformer. This class is a
+convenient container to reassemble the frames into a coherent object, post transformer</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.data.data.NerProcessedSection.to_tokenized_words">
+<span class="sig-name descname"><span class="pre">to_tokenized_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id2label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.data.data.TokenizedWord" title="azner.data.data.TokenizedWord"><span class="pre">azner.data.data.TokenizedWord</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.data.data.NerProcessedSection.to_tokenized_words" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a List[TokenizedWord]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id2label</strong> – Dict mapping labels to strings</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.data.data.TokenizedWord">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.data.data.</span></span><span class="sig-name descname"><span class="pre">TokenizedWord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_labels_strings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_confidences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bio_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_post_inference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.TokenizedWord" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.data.data.TokenizedWord.parse_labels_to_bio_and_class">
+<span class="sig-name descname"><span class="pre">parse_labels_to_bio_and_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.data.TokenizedWord.parse_labels_to_bio_and_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>since the BIO schema actually encodes two pieces of info, it’s often useful to handle them separately.
+This method parses the BIO labels in self.word_labels_strings and add the fields bio_labels and class labels
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-azner.data.pytorch"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.data.pytorch.HFDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.data.pytorch.</span></span><span class="sig-name descname"><span class="pre">HFDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encodings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">transformers.tokenization_utils_base.BatchEncoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.pytorch.HFDataset" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="azner.data.pytorch.HFDataset.reinforce_type">
+<span class="sig-name descname"><span class="pre">reinforce_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.data.pytorch.HFDataset.reinforce_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reinforce the type for DataPipe instance. And the ‘expected_type’ is required
+to be a subtype of the original type hint to restrict the type requirement
+of DataPipe instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-azner.modelling.hf_lightning_wrappers"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.modelling.hf_lightning_wrappers.PLAutoModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.modelling.hf_lightning_wrappers.</span></span><span class="sig-name descname"><span class="pre">PLAutoModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">transformers.models.auto.modeling_auto.AutoModel</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.modelling.hf_lightning_wrappers.PLAutoModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="azner.modelling.hf_lightning_wrappers.PLAutoModel.predict_step">
+<span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#azner.modelling.hf_lightning_wrappers.PLAutoModel.predict_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step function called during <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code>.
+By default, it calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code>.
+Override to add any processing logic.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict_step()</span></code> is used
+to scale inference on multi-devices.</p>
+<p>To prevent an OOM error, it is possible to use <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code>
+callback to write the predictions to disk or database after each batch or on epoch end.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code> should be used while using a spawn
+based accelerator. This happens for <code class="docutils literal notranslate"><span class="pre">Trainer(accelerator=&quot;ddp_spawn&quot;)</span></code>
+or training on 8 TPU cores with <code class="docutils literal notranslate"><span class="pre">Trainer(tpu_cores=8)</span></code> as predictions won’t be returned.</p>
+<p>Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">LightningModule</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">predicts_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="n">dm</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Args:</dt><dd><p>batch: Current batch
+batch_idx: Index of current batch
+dataloader_idx: Index of the current dataloader</p>
+</dd>
+<dt>Return:</dt><dd><p>Predicted output</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.modelling.hf_lightning_wrappers.PLAutoModelForTokenClassification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.modelling.hf_lightning_wrappers.</span></span><span class="sig-name descname"><span class="pre">PLAutoModelForTokenClassification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">transformers.models.auto.modeling_auto.AutoModelForTokenClassification</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.modelling.hf_lightning_wrappers.PLAutoModelForTokenClassification" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="azner.modelling.hf_lightning_wrappers.PLAutoModelForTokenClassification.predict_step">
+<span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#azner.modelling.hf_lightning_wrappers.PLAutoModelForTokenClassification.predict_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step function called during <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code>.
+By default, it calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code>.
+Override to add any processing logic.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict_step()</span></code> is used
+to scale inference on multi-devices.</p>
+<p>To prevent an OOM error, it is possible to use <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code>
+callback to write the predictions to disk or database after each batch or on epoch end.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code> should be used while using a spawn
+based accelerator. This happens for <code class="docutils literal notranslate"><span class="pre">Trainer(accelerator=&quot;ddp_spawn&quot;)</span></code>
+or training on 8 TPU cores with <code class="docutils literal notranslate"><span class="pre">Trainer(tpu_cores=8)</span></code> as predictions won’t be returned.</p>
+<p>Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">LightningModule</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">predicts_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="n">dm</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Args:</dt><dd><p>batch: Current batch
+batch_idx: Index of current batch
+dataloader_idx: Index of the current dataloader</p>
+</dd>
+<dt>Return:</dt><dd><p>Predicted output</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-azner.pipeline.pipeline"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.pipeline.pipeline.FailedDocsFileHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.pipeline.pipeline.</span></span><span class="sig-name descname"><span class="pre">FailedDocsFileHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.pipeline.pipeline.FailedDocsFileHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>implementation logs docs to a directory, along with exception message</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.pipeline.pipeline.FailedDocsHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.pipeline.pipeline.</span></span><span class="sig-name descname"><span class="pre">FailedDocsHandler</span></span><a class="headerlink" href="#azner.pipeline.pipeline.FailedDocsHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>class to somehow handle failed docs</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.pipeline.pipeline.FailedDocsLogHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.pipeline.pipeline.</span></span><span class="sig-name descname"><span class="pre">FailedDocsLogHandler</span></span><a class="headerlink" href="#azner.pipeline.pipeline.FailedDocsLogHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>implementation that logs to warning</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="azner.pipeline.pipeline.load_steps">
+<span class="sig-prename descclassname"><span class="pre">azner.pipeline.pipeline.</span></span><span class="sig-name descname"><span class="pre">load_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">omegaconf.dictconfig.DictConfig</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.steps.base.step.BaseStep</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.pipeline.pipeline.load_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads steps based on the cfg.pipeline</p>
+</dd></dl>
+
+<span class="target" id="module-azner.steps"></span><span class="target" id="module-azner.steps.linking.link_ensembling"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.steps.linking.link_ensembling.MappingPostProcessing">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.steps.linking.link_ensembling.</span></span><span class="sig-name descname"><span class="pre">MappingPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#azner.data.data.Entity" title="azner.data.data.Entity"><span class="pre">azner.data.data.Entity</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">linker_score_thresholds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.steps.linking.link_ensembling.MappingPostProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensemble and resolve mapping information for an entity, according to a custom algorithm:
+1) exact string match hit in ontology -&gt; High confidence
+2) scores above threshold for a single linker -&gt; Medium-high confidence
+3) different linkers suggest same ontology id -&gt; Medium-high confidence
+4) matched text is contained in, or contains mapping default label or synonym -&gt; Medium confidence
+5) best score overall, across all linkers -&gt; Low confidence</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.steps.linking.link_ensembling.MappingPostProcessing.exact_hits">
+<span class="sig-name descname"><span class="pre">exact_hits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Mapping</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.steps.linking.link_ensembling.MappingPostProcessing.exact_hits" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns any perfect mappings - i.e. mappings where the match is the same as the default label, synonym, or linker
+score is 100.0 (depends on linkers correctly normalising scores between 0-100). High confidence
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.steps.linking.link_ensembling.MappingPostProcessing.filter_scores">
+<span class="sig-name descname"><span class="pre">filter_scores</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Mapping</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.steps.linking.link_ensembling.MappingPostProcessing.filter_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>do any of the mappings return a score above a threshold for a linker, to suggest a good mapping?
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.steps.linking.link_ensembling.MappingPostProcessing.query_contained_in_hits">
+<span class="sig-name descname"><span class="pre">query_contained_in_hits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Mapping</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.steps.linking.link_ensembling.MappingPostProcessing.query_contained_in_hits" title="Permalink to this definition">¶</a></dt>
+<dd><p>is the match substring in any of the mappings, or vice versa? Medium confidence. Note, we only check
+matches of 5 chars or more, otherwise will be noisy
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.steps.linking.link_ensembling.MappingPostProcessing.similarly_ranked">
+<span class="sig-name descname"><span class="pre">similarly_ranked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Mapping</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.steps.linking.link_ensembling.MappingPostProcessing.similarly_ranked" title="Permalink to this definition">¶</a></dt>
+<dd><p>compare the results of all mapping id’s between linkers via set.intersection. Return any that all linkers agree
+on, sorted by score
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-azner.utils.caching"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.caching.EntityLinkingLookupCache">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EntityLinkingLookupCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.EntityLinkingLookupCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple wrapper around LFUCache to reduce calls to expensive processes (e.g. bert)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.EntityLinkingLookupCache.check_lookup_cache">
+<span class="sig-name descname"><span class="pre">check_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.data.data.Entity" title="azner.data.data.Entity"><span class="pre">azner.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.data.data.Entity" title="azner.data.data.Entity"><span class="pre">azner.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.caching.EntityLinkingLookupCache.check_lookup_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks the cache for mappings. If relevant mappings are found for an entity, update it’s mappings
+accordingly. If not return as a list of cache misses (e.g. for further processing)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>entities</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-azner.utils.link_index"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.CDistTensorEmbeddingIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">CDistTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.CDistTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate embedding based on cosine distance</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.DictionaryIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fuzzy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">99.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.DictionaryIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>a simple dictionary index for linking</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.DictionaryIndex.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.DictionaryIndex.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>search the index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>query</strong> – a string to query against</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a df of hits</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>a wrapper around an embedding index strategy. Concrete implementations below</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embeddings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>add embeddings to the index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embeddings</strong> – a 2d tensor of embeddings</p></li>
+<li><p><strong>metadata</strong> – a pd.DataFrame of metadata</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>load from disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>save to disk. Makes a directory at the path location with all the index assets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Path to where the index was saved</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>search the index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>embedding</strong> – a 2d tensor to query the index with</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple of 2d numpy arrays: distances, nearest neighbours, and a pd.DataFrame of metadata</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndexFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndexFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding_index_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndexFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>since we want to make multiple indices (one per ontology), this factory class helps us build them consistently</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.FaissEmbeddingIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">FaissEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.FaissEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>an embedding index that uses faiss.IndexFlatL2</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.Index">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><a class="headerlink" href="#azner.utils.link_index.Index" title="Permalink to this definition">¶</a></dt>
+<dd><p>base class for all indices.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.Index.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.Index.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>calls to search should return a <code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;pd.DataFrame&gt;</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.MatMulTensorEmbeddingIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">MatMulTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.MatMulTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate embedding based on MatMul</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.TensorEmbeddingIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">TensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.TensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>a simple index of torch tensors, that is queried with torch.matmul</p>
+</dd></dl>
+
+<span class="target" id="module-azner.utils.stopwatch"></span><span class="target" id="module-azner.utils.utils"></span><dl class="py function">
+<dt class="sig sig-object py" id="azner.utils.utils.documents_to_document_section_batch_encodings_map">
+<span class="sig-prename descclassname"><span class="pre">azner.utils.utils.</span></span><span class="sig-name descname"><span class="pre">documents_to_document_section_batch_encodings_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Document</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">transformers.models.auto.tokenization_auto.AutoTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.tokenization_utils_base.BatchEncoding</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">azner.data.data.Section</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.utils.documents_to_document_section_batch_encodings_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert documents into a BatchEncoding. Also returns a list of &lt;int + section&gt; for the resulting encoding</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>docs</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="azner.utils.utils.documents_to_document_section_text_map">
+<span class="sig-prename descclassname"><span class="pre">azner.utils.utils.</span></span><span class="sig-name descname"><span class="pre">documents_to_document_section_text_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Document</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.utils.documents_to_document_section_text_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert documents into a dict of &lt;dochash + sectionhash&gt;: text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>docs</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="azner.utils.utils.documents_to_id_section_map">
+<span class="sig-prename descclassname"><span class="pre">azner.utils.utils.</span></span><span class="sig-name descname"><span class="pre">documents_to_id_section_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Document</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">azner.data.data.Section</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.utils.documents_to_id_section_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a map of documents, indexed by order of sections</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>docs</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="azner.utils.utils.filter_entities_with_ontology_mappings">
+<span class="sig-prename descclassname"><span class="pre">azner.utils.utils.</span></span><span class="sig-name descname"><span class="pre">filter_entities_with_ontology_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.data.data.Entity" title="azner.data.data.Entity"><span class="pre">azner.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.data.data.Entity" title="azner.data.data.Entity"><span class="pre">azner.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.utils.filter_entities_with_ontology_mappings" title="Permalink to this definition">¶</a></dt>
+<dd><p>finds entities that have no kb mappings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>entities</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="azner.utils.utils.find_document_from_entity">
+<span class="sig-prename descclassname"><span class="pre">azner.utils.utils.</span></span><span class="sig-name descname"><span class="pre">find_document_from_entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Document</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#azner.data.data.Entity" title="azner.data.data.Entity"><span class="pre">azner.data.data.Entity</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">azner.data.data.Document</span></span></span><a class="headerlink" href="#azner.utils.utils.find_document_from_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>for a given entity and a list of docs, find the doc the entity belongs to</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_map</strong> – </p></li>
+<li><p><strong>entity</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-azner.web.server"></span><dl class="py function">
+<dt class="sig sig-object py" id="azner.web.server.start">
+<span class="sig-prename descclassname"><span class="pre">azner.web.server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">omegaconf.dictconfig.DictConfig</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#azner.web.server.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>deploy the web app to Ray Serve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cfg</strong> – DictConfig from Hydra</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="training.html"
+                        title="previous chapter">TBA</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/apidocs.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="training.html" title="TBA"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Kazu  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Korea University, AstraZeneca.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.1.
+    </div>
+  </body>
+</html>

@@ -21,7 +21,7 @@ class BaseStep(ABC):
     def namespace(cls) -> str:
         """
         the namespace is a piece of metadata to describe the step, and is used in various places.
-         defaults to  cls.__name__
+        defaults to  cls.__name__
         :return:
         """
         return cls.__name__
@@ -29,8 +29,8 @@ class BaseStep(ABC):
     def __init__(self, depends_on: Optional[List[str]]):
         """
         :param depends_on: a list of step namespaces that this step expects. Note, this is not used by the step itself,
-        but should be used via some step orchestration logic (e.g. Pipeline) to determine whether the step should run
-        or not.
+            but should be used via some step orchestration logic (e.g. Pipeline) to determine whether the step should
+            run or not.
         """
         self.depends_on = depends_on if depends_on is not None else []
 

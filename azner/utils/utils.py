@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     """
     for a given entity and a list of docs, find the doc the entity belongs to
+
     :param list_map:
     :param entity:
     :return:
@@ -28,6 +29,7 @@ def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
 def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, str]:
     """
     convert documents into a dict of <dochash + sectionhash>: text
+
     :param docs:
     :return:
     """
@@ -41,6 +43,7 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
 def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
     """
     return a map of documents, indexed by order of sections
+
     :param docs:
     :return:
     """
@@ -56,6 +59,7 @@ def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
 def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entity]:
     """
     finds entities that have no kb mappings
+
     :param entities:
     :return:
     """
@@ -67,6 +71,7 @@ def documents_to_document_section_batch_encodings_map(
 ) -> Tuple[BatchEncoding, Dict[int, Section]]:
     """
     convert documents into a BatchEncoding. Also returns a list of <int + section> for the resulting encoding
+
     :param docs:
     :return:
     """

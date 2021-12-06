@@ -43,6 +43,7 @@ class AZNerWebApp:
 def start(cfg: DictConfig) -> None:
     """
     deploy the web app to Ray Serve
+
     :param cfg: DictConfig from Hydra
     :return: None
     """

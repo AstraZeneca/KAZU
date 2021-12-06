@@ -26,6 +26,7 @@ class EntityLinkingLookupCache:
         """
         checks the cache for mappings. If relevant mappings are found for an entity, update it's mappings
         accordingly. If not return as a list of cache misses (e.g. for further processing)
+
         :param entities:
         :return:
         """

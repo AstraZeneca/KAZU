@@ -2,4 +2,6 @@ from .base.step import BaseStep
 from .ner.hf_token_classification import TransformersModelForTokenClassificationNerStep
 from .linking.sapbert import SapBertForEntityLinkingStep
 from .linking.dictionary import DictionaryEntityLinkingStep
+from .linking.link_ensembling import EnsembleEntityLinkingStep
+from .string_preprocessing.string_preprocessing_step import StringPreprocessorStep
 from .string_preprocessing.scispacy_abbreviation_expansion import SciSpacyAbbreviationExpansionStep

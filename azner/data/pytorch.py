@@ -11,6 +11,7 @@ class HFDataset(IterableDataset):
     def __init__(self, encodings: BatchEncoding):
         """
         simple implementation of IterableDataset, producing HF tokenizer input_id
+
         :param encodings:
         """
         self.encodings = encodings

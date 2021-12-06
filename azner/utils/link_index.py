@@ -27,6 +27,7 @@ class Index(abc.ABC):
     def search(self, *args, **kwargs) -> pd.DataFrame:
         """
         calls to search should return a :py:class:`<pd.DataFrame>`
+
         :param args:
         :param kwargs:
         :return:
@@ -65,6 +66,7 @@ class DictionaryIndex(Index):
     def search(self, query: str) -> pd.DataFrame:
         """
         search the index
+
         :param query: a string to query against
         :return: a df of hits
         """
@@ -99,6 +101,7 @@ class EmbeddingIndex(Index):
     def add(self, embeddings: torch.Tensor, metadata: pd.DataFrame):
         """
         add embeddings to the index
+
         :param embeddings: a 2d tensor of embeddings
         :param metadata: a pd.DataFrame of metadata
         :return:
@@ -117,6 +120,7 @@ class EmbeddingIndex(Index):
         """
         concrete implementations should implement this to create an index. This should also add the embeddings
         after the index is created
+
         :param embeddings:
         :return:
         """
@@ -125,6 +129,7 @@ class EmbeddingIndex(Index):
     def _add(self, embeddings: torch.Tensor) -> None:
         """
         concrete implementations should implement this to add to an index
+
         :return:
         """
         raise NotImplementedError()
@@ -132,6 +137,7 @@ class EmbeddingIndex(Index):
     def search(self, embedding: torch.Tensor) -> pd.DataFrame:
         """
         search the index
+
         :param embedding: a 2d tensor to query the index with
         :return: a tuple of 2d numpy arrays: distances, nearest neighbours, and a pd.DataFrame of metadata
         """
@@ -144,6 +150,7 @@ class EmbeddingIndex(Index):
     def _search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray]:
         """
         concrete implementations should implement this to search  an index
+
         :param embedding: a 2d tensor to query the index with
         :return: a tuple of 2d numpy arrays: distances, nearest neighbours
         """
@@ -165,6 +172,7 @@ class EmbeddingIndex(Index):
     def save(self, path: str) -> Path:
         """
         save to disk. Makes a directory at the path location with all the index assets
+
         :param path:
         :return: a Path to where the index was saved
         """
@@ -182,6 +190,7 @@ class EmbeddingIndex(Index):
     def _save(self, path: str):
         """
         concrete implementations should implement this to save an index
+
         :param path:
         :return:
         """
@@ -190,6 +199,7 @@ class EmbeddingIndex(Index):
     def load(self, path: str):
         """
         load from disk
+
         :param path:
         :return:
         """
@@ -202,6 +212,7 @@ class EmbeddingIndex(Index):
     def _load(self, path: str) -> Any:
         """
         concrete implementations should implement this to load an index
+
         :param path:
         :return:
         """
@@ -210,6 +221,7 @@ class EmbeddingIndex(Index):
     def __len__(self):
         """
         the number of embeddings in the index
+
         :return:
         """
         raise NotImplementedError()
@@ -291,6 +303,10 @@ class TensorEmbeddingIndex(EmbeddingIndex):
 
 
 class CDistTensorEmbeddingIndex(TensorEmbeddingIndex):
+    """
+    Calculate embedding based on cosine distance
+    """
+
     def _search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray]:
         score_matrix = torch.cdist(embedding, self.index)
 
@@ -303,6 +319,10 @@ class CDistTensorEmbeddingIndex(TensorEmbeddingIndex):
 
 
 class MatMulTensorEmbeddingIndex(TensorEmbeddingIndex):
+    """
+    calculate embedding based on MatMul
+    """
+
     def _search(self, embedding: torch.Tensor) -> Tuple[np.ndarray, np.ndarray]:
         score_matrix = torch.matmul(embedding, self.index.T)
 
