@@ -4,7 +4,8 @@ Quickstart
 Installation
 ------------
 
-Note, currently not functional - install from repo only at present
+Note, currently not functional - install from repo only at present.
+Ensure you are on version 21.0 or newer of pip.
 
 .. code-block:: console
 
