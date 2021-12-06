@@ -47,7 +47,8 @@
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>Note, currently not functional - install from repo only at present</p>
+<p>Note, currently not functional - install from repo only at present.
+Ensure you are on version 21.0 or newer of pip.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install kazu</span>
 </pre></div>
 </div>
@@ -57,8 +58,8 @@
 <p>In order to use the majority of Kazu, you will need the model pack, which contains
 the pretrained models required by the pipeline. This is available from &lt;TBA&gt;</p>
 </section>
-<section id="runnin-steps">
-<h2>Runnin Steps<a class="headerlink" href="#runnin-steps" title="Permalink to this headline">¶</a></h2>
+<section id="running-steps">
+<h2>Running Steps<a class="headerlink" href="#running-steps" title="Permalink to this headline">¶</a></h2>
 <p>Components are wrapped as instances of BaseStep.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">azner.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
 <span class="kn">import</span> <span class="nn">azner.steps.string_preprocessing.scispacy_abbreviation_expansion</span>
@@ -115,7 +116,7 @@ of configuration required, the easiest way to do this is with Hydra <a class="re
 <li><a class="reference internal" href="#">Quickstart</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#model-pack">Model Pack</a></li>
-<li><a class="reference internal" href="#runnin-steps">Runnin Steps</a></li>
+<li><a class="reference internal" href="#running-steps">Running Steps</a></li>
 <li><a class="reference internal" href="#advanced-pipeline-configuration-with-hydra">Advanced Pipeline configuration with Hydra</a></li>
 </ul>
 </li>
