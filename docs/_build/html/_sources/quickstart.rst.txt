@@ -4,7 +4,8 @@ Quickstart
 Installation
 ------------
 
-Note, currently not functional - install from repo only at present
+Note, currently not functional - install from repo only at present.
+Ensure you are on version 21.0 or newer of pip.
 
 .. code-block:: console
 
@@ -17,7 +18,7 @@ Model Pack
 In order to use the majority of Kazu, you will need the model pack, which contains
 the pretrained models required by the pipeline. This is available from <TBA>
 
-Runnin Steps
+Running Steps
 -------------
 Components are wrapped as instances of BaseStep.
 

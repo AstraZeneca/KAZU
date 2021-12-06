@@ -41,11 +41,7 @@ def test_sapbert_acceptance():
         successes, failures = step(easy_test_docs)
         entities = pydash.flatten([x.get_entities() for x in successes])
         for entity, iri, source in zip(entities, iris, sources):
-            if (
-                entity.metadata.mappings is not None
-                and len(entity.metadata.mappings) > 0
-                and entity.metadata.mappings[0].idx == iri
-            ):
+            if len(entity.metadata.mappings) > 0 and entity.metadata.mappings[0].idx == iri:
                 hits.append(entity)
             else:
                 misses.append(

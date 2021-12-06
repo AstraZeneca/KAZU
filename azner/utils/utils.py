@@ -63,7 +63,7 @@ def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entit
     :param entities:
     :return:
     """
-    return [x for x in entities if x.metadata.mappings is None]
+    return [x for x in entities if len(x.metadata.mappings) == 0]
 
 
 def documents_to_document_section_batch_encodings_map(

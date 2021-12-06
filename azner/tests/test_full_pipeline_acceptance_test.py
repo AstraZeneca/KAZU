@@ -27,11 +27,7 @@ def test_full_pipeline_acceptance_test():
 
 
 def query_annotations_df(annotations: pd.DataFrame, entity: Entity):
-    if (
-        entity.metadata is not None
-        and entity.metadata.mappings is not None
-        and len(entity.metadata.mappings) > 0
-    ):
+    if len(entity.metadata.mappings) > 0:
         mapping_id = entity.metadata.mappings[0].idx
     else:
         mapping_id = None

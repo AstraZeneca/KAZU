@@ -20,9 +20,7 @@ def test_dictionary_entity_linking():
         successes = pipeline(easy_test_docs)
         entities = pydash.flatten([x.get_entities() for x in successes])
         for entity, iri, source in zip(entities, iris, sources):
-            if entity.metadata.mappings is not None and iri in [
-                x.idx for x in entity.metadata.mappings
-            ]:
+            if iri in [x.idx for x in entity.metadata.mappings]:
                 hits.append(entity)
             else:
                 misses.append(
@@ -33,7 +31,7 @@ def test_dictionary_entity_linking():
                 )
 
         for entity, iri in misses:
-            if entity.metadata.mappings is not None:
+            if len(entity.metadata.mappings) > 0:
                 print(
                     f"missed {entity.match}: got {entity.metadata.mappings[0].idx}, wanted {iri} "
                 )
