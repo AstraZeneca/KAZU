@@ -226,10 +226,7 @@ class Entity(BaseModel):
         return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
     def add_mapping(self, mapping: Mapping):
-        if self.metadata.mappings is None:
-            self.metadata.mappings = [mapping]
-        else:
-            self.metadata.mappings.append(mapping)
+        self.metadata.mappings.append(mapping)
 
 
 class Section(BaseModel):
@@ -290,7 +287,7 @@ class Section(BaseModel):
         }
 
         def label_colors(entity: Entity):
-            if entity.metadata.mappings is not None and len(entity.metadata.mappings) > 0:
+            if len(entity.metadata.mappings) > 0:
                 return linked[entity.entity_class]
             else:
                 return entity.entity_class
@@ -368,11 +365,7 @@ class Section(BaseModel):
         """
         data = []
         for ent in self.entities:
-            if (
-                ent.metadata is not None
-                and ent.metadata.mappings is not None
-                and len(ent.metadata.mappings) > 0
-            ):
+            if len(ent.metadata.mappings) > 0:
                 mapping_id = ent.metadata.mappings[0].idx
                 mapping_label = ent.metadata.mappings[0].metadata["default_label"]
                 mapping_conf = ent.metadata.mappings[0].metadata[LINK_CONFIDENCE]
