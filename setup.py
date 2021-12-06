@@ -22,7 +22,6 @@ setup(
         "rapidfuzz==1.8.2",
     ],
     extras_require={
-        "test": ["pytest"],
         "dev": [
             "black==20.8b1",
             "flake8",
@@ -31,7 +30,9 @@ setup(
             "pytest",
             "pytest-mock",
             "pytest-cov",
+            "pytest-timeout",
             "sphinx",
+            "myst_parser",
         ],
     },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
