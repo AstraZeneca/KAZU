@@ -7,7 +7,7 @@ from hydra import initialize_config_module, compose
 from hydra.utils import instantiate
 
 from azner.tests.utils import entity_linking_easy_cases
-from azner.utils.link_index import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
+from azner.modelling.ontology_preprocessing.base import DEFAULT_LABEL, IDX, SYN, MAPPING_TYPE
 
 
 def test_dictionary_entity_linking():
@@ -25,14 +25,7 @@ def test_dictionary_entity_linking():
         with initialize_config_module(config_module="azner.conf"):
             cfg = compose(
                 config_name="config",
-                overrides=[
-                    f"DictionaryEntityLinkingStep.ontology_dictionary_index.CHEMBL.path={test_path}",
-                    "DictionaryEntityLinkingStep.ontology_dictionary_index.CHEMBL.fuzzy=true",
-                    "DictionaryEntityLinkingStep.ontology_dictionary_index.CHEMBL.name=CHEMBL",
-                    "~DictionaryEntityLinkingStep.ontology_dictionary_index.MONDO",
-                    "~DictionaryEntityLinkingStep.ontology_dictionary_index.UBERON",
-                    "~DictionaryEntityLinkingStep.ontology_dictionary_index.ENSEMBL",
-                ],
+                overrides=[],
             )
 
             step = instantiate(cfg.DictionaryEntityLinkingStep)
