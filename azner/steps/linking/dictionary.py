@@ -1,13 +1,13 @@
 import logging
 import traceback
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 
 import pydash
 
-from azner.data.data import Document, Mapping, PROCESSING_EXCEPTION, NAMESPACE
+from azner.data.data import Document, PROCESSING_EXCEPTION
 from azner.steps import BaseStep
+from azner.utils.caching import CachedIndexGroup
 from azner.utils.caching import EntityLinkingLookupCache
-from azner.utils.link_index import DictionaryIndex, IDX, MAPPING_TYPE
 from azner.utils.utils import (
     filter_entities_with_ontology_mappings,
     find_document_from_entity,
@@ -24,10 +24,10 @@ class DictionaryEntityLinkingStep(BaseStep):
     def __init__(
         self,
         depends_on: List[str],
-        entity_class_to_ontology_mappings: Dict[str, str],
-        ontology_dictionary_index: Dict[str, DictionaryIndex],
+        index_group: CachedIndexGroup,
         process_all_entities: bool = False,
         lookup_cache_size: int = 5000,
+        fuzzy: bool = True,
     ):
         """
 
@@ -38,9 +38,10 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param lookup_cache_size: cache size to prevent repeated calls to the index
         """
         super().__init__(depends_on=depends_on)
-        self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
+        self.fuzzy = fuzzy
         self.process_all_entities = process_all_entities
-        self.ontology_index_dict = ontology_dictionary_index
+        self.index_group = index_group
+        self.index_group.load()
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
@@ -65,23 +66,15 @@ class DictionaryEntityLinkingStep(BaseStep):
                     continue
                 else:
                     try:
-                        ontology_name = self.entity_class_to_ontology_mappings[entity.entity_class]
-                        index = self.ontology_index_dict.get(ontology_name, None)
-                        if index is not None:
-                            metadata_df = index.search(entity.match)
-                            for i, row in metadata_df.iterrows():
-                                row_dict = row.to_dict()
-                                ontology_id = row_dict.pop(IDX)
-                                mapping_type = row_dict.pop(MAPPING_TYPE).tolist()
-                                row_dict[NAMESPACE] = self.namespace()
-                                new_mapping = Mapping(
-                                    source=ontology_name,
-                                    idx=ontology_id,
-                                    mapping_type=mapping_type,
-                                    metadata=row_dict,
-                                )
-                                entity.add_mapping(new_mapping)
-                                self.lookup_cache.update_lookup_cache(entity, new_mapping)
+                        mappings = self.index_group.search(
+                            query=entity.match,
+                            entity_class=entity.entity_class,
+                            fuzzy=self.fuzzy,
+                            namespace=self.namespace(),
+                        )
+                        for mapping in mappings:
+                            entity.add_mapping(mapping)
+                            self.lookup_cache.update_lookup_cache(entity, mapping)
                     except Exception:
                         doc = find_document_from_entity(docs, entity)
                         doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
