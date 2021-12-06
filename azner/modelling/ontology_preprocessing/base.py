@@ -10,10 +10,19 @@ import rdflib
 from rdflib import URIRef
 import sqlite3
 from tqdm.auto import tqdm
-from azner.utils.link_index import DEFAULT_LABEL, IDX, SYN, MAPPING_TYPE, SOURCE
+
 
 from abc import ABC
 import spacy
+
+# dataframe column keys
+
+
+DEFAULT_LABEL = "default_label"
+IDX = "idx"
+SYN = "syn"
+MAPPING_TYPE = "mapping_type"
+SOURCE = "source"
 
 
 class StopWordRemover:
@@ -41,7 +50,6 @@ class OntologyParser(ABC):
 
     name = "unnamed"
     training_col_names = ["id", "syn1", "syn2"]
-    minimum_default_label_column_names = [SOURCE, DEFAULT_LABEL, IDX]
     all_synonym_column_names = [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
 
     def __init__(self, in_path: str):
@@ -77,6 +85,7 @@ class OntologyParser(ABC):
         df.sort_values(by=[IDX, DEFAULT_LABEL, SYN], inplace=True)
         # needs to be a list so can be serialised
         df[MAPPING_TYPE] = df[MAPPING_TYPE].apply(list)
+        df.reset_index(inplace=True)
         return df
 
     def format_synonym_table(self) -> pd.DataFrame:
@@ -98,8 +107,12 @@ class OntologyParser(ABC):
         :return:
         """
         self.cache_synonym_table()
-        default_label_df = self.synonym_table[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
-        default_label_df[SOURCE] = self.name
+        default_label_df = (
+            self.synonym_table.drop([SYN, MAPPING_TYPE], axis=1)
+            .drop_duplicates(subset=[IDX])
+            .copy()
+        )
+        default_label_df.reset_index(inplace=True)
         return default_label_df
 
     def format_training_table(self) -> pd.DataFrame:
@@ -213,7 +226,7 @@ class RDFGraphParser(OntologyParser):
         return df
 
 
-class UberonParser(RDFGraphParser):
+class UberonOntologyParser(RDFGraphParser):
     name = "UBERON"
     """
     input should be an UBERON owl file
@@ -228,7 +241,7 @@ class UberonParser(RDFGraphParser):
         ]
 
 
-class MondoParser(OntologyParser):
+class MondoOntologyParser(OntologyParser):
     name = "MONDO"
     """
     input should be an MONDO owl file
