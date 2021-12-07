@@ -12,7 +12,7 @@ import torch
 from rapidfuzz import process, fuzz
 
 from azner.data.data import LINK_SCORE
-from azner.modelling.ontology_preprocessing.base import SYN, IDX
+from azner.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class Index(abc.ABC):
 
     def _search(
         self, query: Any, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         calls to search should return a :py:class:`<pd.DataFrame>`
 
@@ -58,8 +58,7 @@ class Index(abc.ABC):
         :param query: a string to query against
         :return: a df of hits
         """
-        locs, scores = self._search(query, score_cutoff=score_cutoff, top_n=top_n, **kwargs)
-        hit_df = self.metadata.iloc[locs].copy()
+        hit_df, scores = self._search(query, score_cutoff=score_cutoff, top_n=top_n, **kwargs)
         hit_df[LINK_SCORE] = scores
         return hit_df
 
@@ -74,11 +73,11 @@ class Index(abc.ABC):
         if directory.exists():
             shutil.rmtree(directory)
         os.makedirs(directory)
-        with open(self.get_index_data_path(directory), "wb") as f:
+        with open(self.get_index_path(directory), "wb") as f:
             pickle.dump(self, f)
         self.metadata.to_parquet(self.get_dataframe_path(directory), index=None)
 
-        self._save(str(self.get_index_path(directory)))
+        self._save(str(self.get_index_data_path(directory)))
         return directory
 
     @staticmethod
@@ -128,9 +127,9 @@ class Index(abc.ABC):
     def __setstate__(self, state):
         self.name = state
 
-    def _load(self, path: str) -> Any:
+    def _load(self, path: str) -> None:
         """
-        concrete implementations should implement this to load an index
+        concrete implementations should implement this to load any fields required by the index
 
         :param path:
         :return:
@@ -160,7 +159,7 @@ class DictionaryIndex(Index):
 
     def _search(
         self, query: Any, score_cutoff: int = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         search the index
 
@@ -169,7 +168,7 @@ class DictionaryIndex(Index):
         """
         query = query.lower()
         if not fuzzy:
-            idx_list = self.synonym_df[self.synonym_df[SYN] == query][IDX]
+            idx_list = self.synonym_df[self.synonym_df[SYN] == query]
             # score 100 for exact matches
             scores = [100.0 for _ in range(len(idx_list))]
         else:
@@ -181,9 +180,10 @@ class DictionaryIndex(Index):
                 score_cutoff=score_cutoff,
             )
             locs = [x[2] for x in hits]
-            idx_list = self.synonym_df.iloc[locs][IDX]
+            idx_list = self.synonym_df.iloc[locs]
             scores = [x[1] for x in hits]
-        return self.metadata[self.metadata[IDX].isin(idx_list)].index, np.array(scores)
+        hit_df = self.metadata.join(idx_list, on=[IDX], how="left")
+        return hit_df, np.array(scores)
 
     def _load(self, path: str) -> Any:
         self.synonym_df = pd.read_parquet(path)
@@ -247,17 +247,6 @@ class EmbeddingIndex(Index):
         """
         raise NotImplementedError()
 
-    def _search(
-        self, query: Any, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        concrete implementations should implement this to search  an index
-
-        :param embedding: a 2d tensor to query the index with
-        :return: a tuple of 2d numpy arrays: distances, nearest neighbours
-        """
-        raise NotImplementedError()
-
     def __len__(self):
         """
         the number of embeddings in the index
@@ -265,6 +254,30 @@ class EmbeddingIndex(Index):
         :return:
         """
         raise NotImplementedError()
+
+    def _search_func(
+        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        should be implemented
+        :param query:
+        :param score_cutoff:
+        :param top_n:
+        :param kwargs:
+        :return:
+        """
+        raise NotImplementedError()
+
+    def _search(
+        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
+        distances, neighbours = self._search_func(
+            query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
+        )
+        hit_df = self.metadata.iloc[neighbours].copy()
+        # all mapping types are inferred for embedding based matches
+        hit_df[MAPPING_TYPE] = "inferred"
+        return hit_df, distances
 
 
 class FaissEmbeddingIndex(EmbeddingIndex):
@@ -289,11 +302,11 @@ class FaissEmbeddingIndex(EmbeddingIndex):
     def _save(self, path: str):
         self.faiss.write_index(self.index, path)
 
-    def _search(
+    def _search_func(
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
-        distances, neighbors = self.index.search(query.numpy(), top_n)
-        return np.squeeze(neighbors), np.squeeze(distances)
+        distances, neighbours = self.index.search(query.numpy(), top_n)
+        return distances.numpy(), neighbours.numpy()
 
     def _create_index(self, embeddings: torch.Tensor):
         index = self.faiss.IndexFlatL2(embeddings.shape[1])
@@ -319,15 +332,10 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         self.index = None
 
     def _load(self, path: str):
-        return torch.load(path, map_location="cpu")
+        self.index = torch.load(path, map_location="cpu")
 
     def _save(self, path: str):
         torch.save(self.index, path)
-
-    def _search(
-        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError()
 
     def _add(self, embeddings: torch.Tensor):
         return torch.cat([self.index, embeddings])
@@ -344,7 +352,7 @@ class CDistTensorEmbeddingIndex(TensorEmbeddingIndex):
     Calculate embedding based on cosine distance
     """
 
-    def _search(
+    def _search_func(
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         score_matrix = torch.cdist(query, self.index)
@@ -352,10 +360,7 @@ class CDistTensorEmbeddingIndex(TensorEmbeddingIndex):
         score_matrix = torch.squeeze(score_matrix)
         neighbours = torch.argsort(score_matrix, descending=False)[:top_n]
         distances = score_matrix[neighbours]
-        return (
-            neighbours.cpu().numpy(),
-            distances.cpu().numpy(),
-        )
+        return distances.cpu().numpy(), neighbours.cpu().numpy()
 
 
 class MatMulTensorEmbeddingIndex(TensorEmbeddingIndex):
@@ -363,13 +368,13 @@ class MatMulTensorEmbeddingIndex(TensorEmbeddingIndex):
     calculate embedding based on MatMul
     """
 
-    def _search(
+    def _search_func(
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         score_matrix = torch.matmul(query, self.index.T)
 
         score_matrix = torch.squeeze(score_matrix)
         neighbours = torch.argsort(score_matrix, descending=True)[:top_n]
         distances = score_matrix[neighbours]
         distances = 100 - (1 / distances)
-        return neighbours.cpu().numpy(), distances.cpu().numpy()
+        return distances.cpu().numpy(), neighbours.cpu().numpy()
