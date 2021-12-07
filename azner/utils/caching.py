@@ -89,7 +89,8 @@ class EntityLinkingLookupCache:
 
 
 class OntologyCacheManager:
-    def __init__(self, rebuild_cache: bool = False):
+    def __init__(self, index_type: str, rebuild_cache: bool = False):
+        self.index_type = select_index_type(index_type)
         self.rebuild_cache = rebuild_cache
 
     def get_or_create_ontology_index(self, parser: OntologyParser) -> Index:
@@ -97,19 +98,21 @@ class OntologyCacheManager:
         populate self.ontology_ids and self.ontology_index_dict either by calculating them afresh or loading from a
         cached version on disk
         """
-        cache_dir = get_cache_dir(parser.in_path, create_if_not_exist=False)
+        cache_dir = get_cache_dir(
+            parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=False
+        )
         if self.rebuild_cache:
             logger.info("forcing a rebuild of the ontology cache")
             if os.path.exists(cache_dir):
                 shutil.rmtree(cache_dir)
-            get_cache_dir(parser.in_path, create_if_not_exist=True)
+            get_cache_dir(parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True)
             return self.build_ontology_cache(cache_dir, parser)
         elif os.path.exists(cache_dir):
             logger.info(f"loading cached ontology file from {cache_dir}")
             return self.load_ontology_from_cache(cache_dir, parser)
         else:
             logger.info("No ontology cache file found. Building a new one")
-            get_cache_dir(parser.in_path, create_if_not_exist=True)
+            get_cache_dir(parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True)
             return self.build_ontology_cache(cache_dir, parser)
 
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
@@ -120,20 +123,16 @@ class OntologyCacheManager:
 
 
 class DictionaryOntologyCacheManager(OntologyCacheManager):
-    def __init__(self, rebuild_cache: bool = False):
-
-        super().__init__(rebuild_cache)
+    def __init__(self, index_type: str, rebuild_cache: bool = False):
+        super().__init__(index_type, rebuild_cache)
 
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
-
-        index = DictionaryIndex(name=parser.name)
-
+        index = self.index_type(name=parser.name)
         ontology_df = parser.format_default_labels()
         synonym_df = parser.synonym_table
         index.add(synonym_df, ontology_df)
-        index_cache_dir = get_cache_dir(parser.in_path, create_if_not_exist=True)
-        index_path = index.save(str(index_cache_dir))
+        index_path = index.save(str(cache_dir))
         logger.info(f"saved {index.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {index.name} is {len(index)}")
         return index
@@ -151,8 +150,7 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
         rebuild_cache: bool = False,
     ):
 
-        super().__init__(rebuild_cache)
-        self.index_type = select_index_type(index_type)
+        super().__init__(index_type, rebuild_cache)
         self.ontology_partition_size = ontology_partition_size
         self.dl_workers = dl_workers
         self.batch_size = batch_size
@@ -173,9 +171,7 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
             logger.info(f"processing partition {partition_number} ")
             index.add(ontology_embeddings, metadata_df)
             logger.info(f"index size is now {len(index)}")
-
-        index_cache_dir = get_cache_dir(parser.in_path, create_if_not_exist=True)
-        index_path = index.save(index_cache_dir)
+        index_path = index.save(cache_dir)
         logger.info(f"saved {parser.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {parser.name} is {len(index)}")
         return index
@@ -210,7 +206,9 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
             logger.info(f"read {df.shape[0]} rows from ontology")
             default_labels = df[DEFAULT_LABEL].tolist()
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
-            results = self.model.get_embeddings_for_strings(default_labels)
+            results = self.model.get_embeddings_for_strings(
+                texts=default_labels, trainer=self.trainer, batch_size=self.batch_size
+            )
             yield partition_number, df, results
 
 
@@ -241,21 +239,25 @@ class CachedIndexGroup:
                 index_results = index.search(query=query, **kwargs)
                 index_results[SOURCE] = index.name
                 results.append(index_results)
-        results = pd.concat(results).sort_values(by=LINK_SCORE)
+
         mappings = []
-        for i, row in results.iterrows():
-            row_dict = row.to_dict()
-            ontology_id = row_dict.pop(IDX)
-            mapping_type = row_dict.pop(MAPPING_TYPE)
-            source = row_dict.pop(SOURCE)
-            row_dict[NAMESPACE] = namespace
-            new_mapping = Mapping(
-                source=source,
-                idx=ontology_id,
-                mapping_type=mapping_type,
-                metadata=row_dict,
-            )
-            mappings.append(new_mapping)
+        if len(results) > 0:
+            results = pd.concat(results).sort_values(by=LINK_SCORE)
+            for i, row in results.iterrows():
+                row_dict = row.to_dict()
+                ontology_id = row_dict.pop(IDX)
+                mapping_type = row_dict.pop(MAPPING_TYPE)
+                if not isinstance(mapping_type, list):
+                    mapping_type = [mapping_type]
+                source = row_dict.pop(SOURCE)
+                row_dict[NAMESPACE] = namespace
+                new_mapping = Mapping(
+                    source=source,
+                    idx=ontology_id,
+                    mapping_type=mapping_type,
+                    metadata=row_dict,
+                )
+                mappings.append(new_mapping)
         return mappings
 
     def load(self):
