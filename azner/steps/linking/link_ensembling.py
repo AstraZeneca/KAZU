@@ -15,7 +15,8 @@ from azner.data.data import (
     PROCESSING_EXCEPTION,
 )
 from azner.steps import BaseStep
-from azner.utils.link_index import IDX, SYN, DEFAULT_LABEL
+from azner.utils.link_index import IDX, SYN
+from azner.modelling.ontology_preprocessing.base import DEFAULT_LABEL
 
 
 class LinkRanks(Enum):
