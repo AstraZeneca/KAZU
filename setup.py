@@ -13,6 +13,7 @@ setup(
         "torchaudio==0.10.0",
         "transformers==4.12.5",
         "ray[serve]==1.6.0",
+        "rdflib==6.0.2",
         "hydra-core==1.1.1",
         "pytorch-lightning==1.4.9",
         "pydash==5.1.0",
