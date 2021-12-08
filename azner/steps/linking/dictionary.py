@@ -28,6 +28,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         process_all_entities: bool = False,
         lookup_cache_size: int = 5000,
         fuzzy: bool = True,
+        top_n: int = 20,
     ):
         """
 
@@ -38,6 +39,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param lookup_cache_size: cache size to prevent repeated calls to the index
         """
         super().__init__(depends_on=depends_on)
+        self.top_n = top_n
         self.fuzzy = fuzzy
         self.process_all_entities = process_all_entities
         self.index_group = index_group
@@ -70,6 +72,7 @@ class DictionaryEntityLinkingStep(BaseStep):
                             query=entity.match,
                             entity_class=entity.entity_class,
                             fuzzy=self.fuzzy,
+                            top_n=self.top_n,
                             namespace=self.namespace(),
                         )
                         for mapping in mappings:

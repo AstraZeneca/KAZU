@@ -15,14 +15,13 @@ from azner.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
 )
-from data.data import Mapping
-from tests.utils import BERT_TEST_MODEL_PATH
 from azner.utils.caching import (
     EmbeddingOntologyCacheManager,
     DictionaryOntologyCacheManager,
     CachedIndexGroup,
 )
 from azner.utils.link_index import Index
+from tests.utils import BERT_TEST_MODEL_PATH
 
 DUMMY_SOURCE = "test_parser"
 DUMMY_DATA = {
@@ -41,18 +40,8 @@ class DummyParser(OntologyParser):
         return pd.DataFrame.from_dict(DUMMY_DATA)
 
 
-def mock_search():
-    return Mapping(source=DUMMY_SOURCE, idx="second", mapping_type=["int"])
-    # mocker.patch(
-    #     'azner.utils.link_index.Index.search',
-    #     mock_search
-    # )
-
-
 @pytest.mark.parametrize("index_type", ["MatMulTensorEmbeddingIndex", "CDistTensorEmbeddingIndex"])
 def test_embedding_cache_manager(index_type, mocker):
-    mocker.patch("azner.utils.link_index.Index.search", mock_search)
-
     with tempfile.TemporaryDirectory() as f:
         in_path = Path(f).joinpath(DUMMY_SOURCE)
         os.mkdir(in_path)
