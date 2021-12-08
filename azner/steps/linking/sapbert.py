@@ -62,8 +62,8 @@ class SapBertForEntityLinkingStep(BaseStep):
 
         if not isinstance(index_group.cache_manager, EmbeddingOntologyCacheManager):
             raise RuntimeError(
-                f"The CachedIndexGroup must be configured with an EmbeddingOntologyCacheManager to work"
-                f"correctly with the Sapbert Step"
+                "The CachedIndexGroup must be configured with an EmbeddingOntologyCacheManager to work"
+                "correctly with the Sapbert Step"
             )
 
         self.top_n = top_n
