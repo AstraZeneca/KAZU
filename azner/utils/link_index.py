@@ -182,7 +182,7 @@ class DictionaryIndex(Index):
             locs = [x[2] for x in hits]
             idx_list = self.synonym_df.iloc[locs]
             scores = [x[1] for x in hits]
-        hit_df = self.metadata.join(idx_list, on=[IDX], how="left")
+        hit_df = idx_list.join(self.metadata, on=IDX, how="left")
         return hit_df, np.array(scores)
 
     def _load(self, path: str) -> Any:
@@ -287,6 +287,11 @@ class FaissEmbeddingIndex(EmbeddingIndex):
 
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
+        self.import_faiss()
+
+        self.index = None
+
+    def import_faiss(self):
         try:
             import faiss
 
@@ -294,10 +299,9 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         except ImportError:
             raise RuntimeError(f"faiss is not installed. Cannot use {self.__class__.__name__}")
 
-        self.index = None
-
     def _load(self, path: str):
-        return self.faiss.read_index(path)
+        self.import_faiss()
+        self.index = self.faiss.read_index(str(path))
 
     def _save(self, path: str):
         self.faiss.write_index(self.index, path)
@@ -306,7 +310,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         distances, neighbours = self.index.search(query.numpy(), top_n)
-        return distances.numpy(), neighbours.numpy()
+        return np.squeeze(distances), np.squeeze(neighbours)
 
     def _create_index(self, embeddings: torch.Tensor):
         index = self.faiss.IndexFlatL2(embeddings.shape[1])
