@@ -129,7 +129,7 @@ class DictionaryOntologyCacheManager(OntologyCacheManager):
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
-        ontology_df = parser.format_default_labels()
+        ontology_df = parser.get_ontology_metadata()
         synonym_df = parser.synonym_table
         index.add(synonym_df, ontology_df)
         index_path = index.save(str(cache_dir))
@@ -162,7 +162,7 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
         logger.info(f"creating index for {parser.in_path}")
 
         index = self.index_type(parser.name)
-        ontology_df = parser.format_default_labels()
+        ontology_df = parser.get_ontology_metadata()
         for (
             partition_number,
             metadata_df,
