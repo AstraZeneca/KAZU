@@ -1,28 +1,47 @@
 _target_: azner.steps.linking.sapbert.SapBertForEntityLinkingStep
-model:
-  _target_: azner.steps.linking.sapbert.PLSapbertModel
-  model_name_or_path: cambridgeltl/SapBERT-from-PubMedBERT-fulltext
-ontology_path: ~
-batch_size: 4
-process_all_entities: True
-rebuild_ontology_cache: False
+top_n: 20
 depends_on: ~
 lookup_cache_size: 5000
-dl_workers: 1
-ontology_partition_size: 100000
-entity_class_to_ontology_mappings:
-  drug: CHEMBL
-  disease: MONDO
-  gene: ENSEMBL
-  anatomy: UBERON
-  species: NOT_IMPLEMENTED
-  mutation: NOT_IMPLEMENTED
-trainer:
-  _target_: pytorch_lightning.Trainer
-  progress_bar_refresh_rate: 0
-  gpus: 0
-  logger: false
-embedding_index_factory:
-  _target_: azner.utils.link_index.EmbeddingIndexFactory
-  embedding_index_class_name: MatMulTensorEmbeddingIndex
-  return_n_nearest_neighbours: 20
+score_cutoff: 99.0
+index_group:
+  _target_: azner.utils.caching.CachedIndexGroup
+  entity_class_to_ontology_mappings:
+    drug:
+      - CHEMBL
+    disease:
+      - MONDO
+      - MEDDRA
+    gene:
+      - ENSEMBL
+    anatomy:
+      - UBERON
+    species:
+      - NOT_IMPLEMENTED
+    mutation:
+      - NOT_IMPLEMENTED
+  cache_managers:
+    - _target_: azner.utils.caching.EmbeddingIndexCacheManager
+      rebuild_cache: False
+      model:
+        _target_: azner.modelling.linking.sapbert.train.PLSapbertModel
+        model_name_or_path: cambridgeltl/SapBERT-from-PubMedBERT-fulltext
+      batch_size: 16
+      trainer:
+        _target_: pytorch_lightning.Trainer
+        progress_bar_refresh_rate: 0
+        gpus: 0
+        logger: false
+      dl_workers: 0
+      ontology_partition_size: 10000
+      index_type: MatMulTensorEmbeddingIndex
+      parsers:
+        - _target_: azner.modelling.ontology_preprocessing.base.EnsemblOntologyParser
+          in_path: ???
+        - _target_: azner.modelling.ontology_preprocessing.base.MondoOntologyParser
+          in_path: ???
+        - _target_: azner.modelling.ontology_preprocessing.base.UberonOntologyParser
+          in_path: ???
+        - _target_: azner.modelling.ontology_preprocessing.base.MeddraOntologyParser
+          in_path: ???
+        - _target_: azner.modelling.ontology_preprocessing.base.ChemblOntologyParser
+          in_path: ???
