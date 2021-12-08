@@ -3,7 +3,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import pandas as pd
 import rdflib
@@ -50,7 +50,8 @@ class OntologyParser(ABC):
 
     name = "unnamed"
     training_col_names = ["id", "syn1", "syn2"]
-    all_synonym_column_names = [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
+    all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
+    minimum_metadata_column_names = [IDX, DEFAULT_LABEL]
 
     def __init__(self, in_path: str):
         """
@@ -60,35 +61,39 @@ class OntologyParser(ABC):
         self.in_path = in_path
         self.synonym_table = None
 
-    def cache_synonym_table(self):
+    def parse_and_cache(self):
         """
         populate self.synonym_table, if not already done so
         :return:
         """
-        if self.synonym_table is None:
-            self.synonym_table = self.post_process_synonym_table()
+        if self.synonym_table is None or self.metadata_df is None:
+            self.synonym_table, self.metadata_df = self.post_process_ontology_table()
         assert len(
             set(self.synonym_table.columns) & set(OntologyParser.all_synonym_column_names)
         ) == len(OntologyParser.all_synonym_column_names)
 
-    def post_process_synonym_table(self) -> pd.DataFrame:
-        df = self.format_synonym_table()
+    def post_process_ontology_table(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        df = self.parse_to_dataframe()
         # ensure correct order
-        df = df[self.all_synonym_column_names]
+        syn_df = df[self.all_synonym_column_names]
         # group mapping types of same synonym together
-        df = df.groupby(by=[IDX, DEFAULT_LABEL, SYN]).agg(set).reset_index()
-        # make sure default labels are also in the synonym list
-        # default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates()
-        # default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
-        # df = pd.concat([df, default_labels_df])
-        df = df.dropna(axis=0)
-        df.sort_values(by=[IDX, DEFAULT_LABEL, SYN], inplace=True)
+        syn_df = syn_df.groupby(by=[IDX, SYN]).agg(set).reset_index()
+        syn_df = syn_df.dropna(axis=0)
+        syn_df.sort_values(by=[IDX, SYN], inplace=True)
         # needs to be a list so can be serialised
-        df[MAPPING_TYPE] = df[MAPPING_TYPE].apply(list)
-        df.reset_index(inplace=True)
-        return df
+        syn_df[MAPPING_TYPE] = syn_df[MAPPING_TYPE].apply(list)
+        syn_df.reset_index(inplace=True, drop=True)
+        metadata_columns = df.columns.tolist()
+        metadata_columns.remove(MAPPING_TYPE)
+        metadata_columns.remove(SYN)
+        metadata_df = df[metadata_columns]
+        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).copy()
 
-    def format_synonym_table(self) -> pd.DataFrame:
+        metadata_df.set_index(inplace=True, drop=True, keys=IDX)
+
+        return syn_df, metadata_df
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
         """
         implementations should override this method, returning a 'long, thin' pd.DataFrame of
         ["id", "default_label", SYN,"mapping_type"]
@@ -101,26 +106,28 @@ class OntologyParser(ABC):
         """
         raise NotImplementedError()
 
-    def format_default_labels(self) -> pd.DataFrame:
+    def get_ontology_metadata(self) -> pd.DataFrame:
         """
         get a dataframe of default labels and ids. Useful for generating e.g. embeddings
         :return:
         """
-        self.cache_synonym_table()
-        default_label_df = (
-            self.synonym_table.drop([SYN, MAPPING_TYPE], axis=1)
-            .drop_duplicates(subset=[IDX])
-            .copy()
-        )
-        default_label_df.reset_index(inplace=True)
-        return default_label_df
+        self.parse_and_cache()
+        return self.metadata_df
+
+    def get_ontology_synonyms(self) -> pd.DataFrame:
+        """
+        get a dataframe of default labels and ids. Useful for generating e.g. embeddings
+        :return:
+        """
+        self.parse_and_cache()
+        return self.synonym_table
 
     def format_training_table(self) -> pd.DataFrame:
         """
         generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)
         :return:
         """
-        self.cache_synonym_table()
+        self.parse_and_cache()
         tqdm.pandas(desc=f"generating training pairs for {self.name}")
         df = self.synonym_table.groupby(by=[IDX]).progress_apply(self.select_pos_pairs)
         df.index = [i for i in range(df.shape[0])]
@@ -157,31 +164,6 @@ class OntologyParser(ABC):
             path.joinpath(f"{self.name}_training_pairs.parquet"), index=None
         )
 
-    def write_synonym_table(self, out_path: str):
-        """
-        write synonym table to a directory.
-        :param out_path: directory to write to
-        :return:
-        """
-        self.cache_synonym_table()
-        path = Path(out_path)
-        if not path.is_dir():
-            raise RuntimeError(f"{path} is not a directory")
-        self.synonym_table.to_parquet(path.joinpath(f"{self.name}_synonyms.parquet"), index=None)
-
-    def write_default_labels(self, out_path: str):
-        """
-        write default labels to a directory.
-        :param out_path: directory to write to
-        :return:
-        """
-        path = Path(out_path)
-        if not path.is_dir():
-            raise RuntimeError(f"{path} is not a directory")
-        self.format_default_labels().to_parquet(
-            path.joinpath(f"{self.name}_default_labels.parquet"), index=None
-        )
-
 
 class RDFGraphParser(OntologyParser):
     """
@@ -198,7 +180,7 @@ class RDFGraphParser(OntologyParser):
         """
         raise NotImplementedError()
 
-    def format_synonym_table(self) -> pd.DataFrame:
+    def parse_to_dataframe(self) -> pd.DataFrame:
         g = rdflib.Graph()
         g.parse(self.in_path)
         label_pred_str = "http://www.w3.org/2000/01/rdf-schema#label"
@@ -253,7 +235,7 @@ class MondoOntologyParser(OntologyParser):
         super().__init__(in_path)
         self.sw_remover = StopWordRemover()
 
-    def format_synonym_table(self) -> pd.DataFrame:
+    def parse_to_dataframe(self) -> pd.DataFrame:
         x = json.load(open(self.in_path, "r"))
         graph = x["graphs"][0]
         nodes = graph["nodes"]
@@ -356,7 +338,7 @@ class EnsemblOntologyParser(OntologyParser):
 
     EXCLUDED_PARENTHESIS = ["", "non-protein coding"]
 
-    def format_synonym_table(self) -> pd.DataFrame:
+    def parse_to_dataframe(self) -> pd.DataFrame:
 
         keys_to_check = [
             "name",
@@ -493,7 +475,7 @@ class ChemblOntologyParser(OntologyParser):
     :return:
     """
 
-    def format_synonym_table(self) -> pd.DataFrame:
+    def parse_to_dataframe(self) -> pd.DataFrame:
         conn = sqlite3.connect(self.in_path)
         query = f"""
             SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE} 
@@ -535,7 +517,7 @@ class CellosaurusOntologyParser(OntologyParser):
     :return:
     """
 
-    def format_synonym_table(self) -> pd.DataFrame:
+    def parse_to_dataframe(self) -> pd.DataFrame:
 
         ids = []
         default_labels = []
@@ -577,7 +559,7 @@ class MeddraOntologyParser(OntologyParser):
     :return:
     """
 
-    def format_synonym_table(self) -> pd.DataFrame:
+    def parse_to_dataframe(self) -> pd.DataFrame:
         # hierarchy path
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
