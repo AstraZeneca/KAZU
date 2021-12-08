@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import pandas as pd
 
-from azner.data.data import SimpleDocument, Entity, Document
+from azner.data.data import SimpleDocument, Entity, Document, Mapping
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -13,10 +13,34 @@ TINY_CHEMBL_KB_PATH = TEST_ASSETS_PATH.joinpath("sapbert").joinpath("tiny_chembl
 
 FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS = TEST_ASSETS_PATH.joinpath("full_pipeline")
 
+BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
+
 SKIP_MESSAGE = """
 skipping acceptance test as KAZU_TEST_CONFIG_DIR is not provided as an environment variable. This should be the path 
 to a hydra config directory, configured with paths to the various resources/models to run the production pipeline 
 """  # noqa
+
+
+class MockedCachedIndexGroup:
+    """
+    class for mocking a call to CachedIndexGroup.search
+    """
+
+    def __init__(self, iris: List[str], sources: List[str]):
+        self.iris = iris
+        self.sources = sources
+        self.callcount = 0
+
+    def mock_search(self, *args, **kwargs):
+        mappings = [
+            Mapping(
+                source=self.sources[self.callcount],
+                idx=self.iris[self.callcount],
+                mapping_type=["test"],
+            )
+        ]
+        self.callcount += 1
+        return mappings
 
 
 class AcceptanceTestError(Exception):
