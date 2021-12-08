@@ -89,31 +89,40 @@ class EntityLinkingLookupCache:
 
 
 class OntologyCacheManager:
-    def __init__(self, index_type: str, rebuild_cache: bool = False):
+    def __init__(self, index_type: str, parsers: List[OntologyParser], rebuild_cache: bool = False):
+        self.parsers = parsers
         self.index_type = select_index_type(index_type)
         self.rebuild_cache = rebuild_cache
 
-    def get_or_create_ontology_index(self, parser: OntologyParser) -> Index:
+    def get_or_create_ontology_indices(self) -> List[Index]:
         """
         populate self.ontology_ids and self.ontology_index_dict either by calculating them afresh or loading from a
         cached version on disk
         """
-        cache_dir = get_cache_dir(
-            parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=False
-        )
-        if self.rebuild_cache:
-            logger.info("forcing a rebuild of the ontology cache")
-            if os.path.exists(cache_dir):
-                shutil.rmtree(cache_dir)
-            get_cache_dir(parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True)
-            return self.build_ontology_cache(cache_dir, parser)
-        elif os.path.exists(cache_dir):
-            logger.info(f"loading cached ontology file from {cache_dir}")
-            return self.load_ontology_from_cache(cache_dir, parser)
-        else:
-            logger.info("No ontology cache file found. Building a new one")
-            get_cache_dir(parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True)
-            return self.build_ontology_cache(cache_dir, parser)
+
+        indices = []
+        for parser in self.parsers:
+            cache_dir = get_cache_dir(
+                parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=False
+            )
+            if self.rebuild_cache:
+                logger.info("forcing a rebuild of the ontology cache")
+                if os.path.exists(cache_dir):
+                    shutil.rmtree(cache_dir)
+                get_cache_dir(
+                    parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True
+                )
+                indices.append(self.build_ontology_cache(cache_dir, parser))
+            elif os.path.exists(cache_dir):
+                logger.info(f"loading cached ontology file from {cache_dir}")
+                indices.append(self.load_ontology_from_cache(cache_dir, parser))
+            else:
+                logger.info("No ontology cache file found. Building a new one")
+                get_cache_dir(
+                    parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True
+                )
+            indices.append(self.build_ontology_cache(cache_dir, parser))
+        return indices
 
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         raise NotImplementedError()
@@ -123,9 +132,6 @@ class OntologyCacheManager:
 
 
 class DictionaryOntologyCacheManager(OntologyCacheManager):
-    def __init__(self, index_type: str, rebuild_cache: bool = False):
-        super().__init__(index_type, rebuild_cache)
-
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
@@ -141,16 +147,17 @@ class DictionaryOntologyCacheManager(OntologyCacheManager):
 class EmbeddingOntologyCacheManager(OntologyCacheManager):
     def __init__(
         self,
+        index_type: str,
+        parsers: List[OntologyParser],
         model: PLSapbertModel,
         batch_size: int,
         trainer: Trainer,
         dl_workers: int,
         ontology_partition_size: int,
-        index_type: str,
         rebuild_cache: bool = False,
     ):
 
-        super().__init__(index_type, rebuild_cache)
+        super().__init__(index_type, parsers, rebuild_cache)
         self.ontology_partition_size = ontology_partition_size
         self.dl_workers = dl_workers
         self.batch_size = batch_size
@@ -220,11 +227,9 @@ class CachedIndexGroup:
     def __init__(
         self,
         entity_class_to_ontology_mappings: Dict[str, List[str]],
-        parsers: List[OntologyParser],
-        cache_manager: OntologyCacheManager,
+        cache_managers: List[OntologyCacheManager],
     ):
-        self.cache_manager = cache_manager
-        self.parsers = parsers
+        self.cache_managers = cache_managers
         self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
         self.ontology_index_dict: Dict[str, Index] = {}
 
@@ -263,8 +268,8 @@ class CachedIndexGroup:
     def load(self):
         """
         loads the cached version of the embedding indices from disk
-        :return: ontology:Index dict
         """
-        for parser in self.parsers:
-            index = self.cache_manager.get_or_create_ontology_index(parser)
-            self.ontology_index_dict[index.name] = index
+        for cache_manager in self.cache_managers:
+            indices = cache_manager.get_or_create_ontology_indices()
+            for index in indices:
+                self.ontology_index_dict[index.name] = index

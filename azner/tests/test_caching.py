@@ -41,12 +41,13 @@ class DummyParser(OntologyParser):
 
 
 @pytest.mark.parametrize("index_type", ["MatMulTensorEmbeddingIndex", "CDistTensorEmbeddingIndex"])
-def test_embedding_cache_manager(index_type, mocker):
+def test_embedding_cache_manager(index_type):
     with tempfile.TemporaryDirectory() as f:
         in_path = Path(f).joinpath(DUMMY_SOURCE)
         os.mkdir(in_path)
         model = PLSapbertModel(model_name_or_path=BERT_TEST_MODEL_PATH)
         trainer = Trainer(logger=False)
+        parser = DummyParser(in_path=str(in_path))
         manager = EmbeddingOntologyCacheManager(
             model=model,
             batch_size=16,
@@ -55,9 +56,10 @@ def test_embedding_cache_manager(index_type, mocker):
             ontology_partition_size=20,
             index_type=index_type,
             rebuild_cache=False,
+            parsers=[parser],
         )
-        parser = DummyParser(in_path=str(in_path))
-        index = manager.get_or_create_ontology_index(parser)
+
+        index = manager.get_or_create_ontology_indices()[0]
         assert isinstance(index, Index)
         assert len(index) == len(set(DUMMY_DATA[IDX]))
         # there should now be a cached file at the parent of the target in_path
@@ -76,8 +78,9 @@ def test_embedding_cache_manager(index_type, mocker):
                 ontology_partition_size=20,
                 index_type=index_type,
                 rebuild_cache=False,
+                parsers=[parser],
             )
-            manager.get_or_create_ontology_index(parser)
+            manager.get_or_create_ontology_indices()
             load_ontology_from_cache.assert_called_with(cache_dir, parser)
 
 
@@ -85,9 +88,11 @@ def test_dictionary_cache_manager():
     with tempfile.TemporaryDirectory() as f:
         in_path = Path(f).joinpath(DUMMY_SOURCE)
         os.mkdir(in_path)
-        manager = DictionaryOntologyCacheManager(index_type="DictionaryIndex", rebuild_cache=False)
         parser = DummyParser(in_path=str(in_path))
-        index = manager.get_or_create_ontology_index(parser)
+        manager = DictionaryOntologyCacheManager(
+            index_type="DictionaryIndex", parsers=[parser], rebuild_cache=False
+        )
+        index = manager.get_or_create_ontology_indices()[0]
         assert isinstance(index, Index)
         assert len(index) == len(set(DUMMY_DATA[IDX]))
         # there should now be a cached file at the parent of the target in_path
@@ -99,9 +104,9 @@ def test_dictionary_cache_manager():
             "azner.utils.caching.DictionaryOntologyCacheManager.load_ontology_from_cache"
         ) as load_ontology_from_cache:
             manager = DictionaryOntologyCacheManager(
-                index_type="DictionaryIndex", rebuild_cache=False
+                index_type="DictionaryIndex", parsers=[parser], rebuild_cache=False
             )
-            manager.get_or_create_ontology_index(parser)
+            manager.get_or_create_ontology_indices()
             load_ontology_from_cache.assert_called_with(cache_dir, parser)
 
 
@@ -109,20 +114,23 @@ def test_cached_index_group():
     with tempfile.TemporaryDirectory() as f:
         in_path1 = Path(f).joinpath(DUMMY_SOURCE + "1")
         os.mkdir(in_path1)
-        manager = DictionaryOntologyCacheManager(index_type="DictionaryIndex", rebuild_cache=False)
+
         parser1 = DummyParser(in_path=str(in_path1))
         parser1.name = "ontology_1"
         in_path2 = Path(f).joinpath(DUMMY_SOURCE + "2")
         os.mkdir(in_path2)
         parser2 = DummyParser(in_path=str(in_path2))
         parser2.name = "ontology_2"
+        manager = DictionaryOntologyCacheManager(
+            index_type="DictionaryIndex", rebuild_cache=False, parsers=[parser1, parser2]
+        )
+
         entity_ontology_mappings = {
             "entity_class_1": [parser1.name],
             "entity_class_2": [parser2.name],
         }
         cached_index_group = CachedIndexGroup(
-            cache_manager=manager,
-            parsers=[parser1, parser2],
+            cache_managers=[manager],
             entity_class_to_ontology_mappings=entity_ontology_mappings,
         )
         cached_index_group.load()

@@ -60,10 +60,20 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
         super().__init__(depends_on=depends_on)
 
-        if not isinstance(index_group.cache_manager, EmbeddingOntologyCacheManager):
+        if not all(
+            [isinstance(x, EmbeddingOntologyCacheManager) for x in index_group.cache_managers]
+        ):
             raise RuntimeError(
                 "The CachedIndexGroup must be configured with an EmbeddingOntologyCacheManager to work"
                 "correctly with the Sapbert Step"
+            )
+
+        if len(index_group.cache_managers) > 1:
+            logger.warning(
+                f"multiple cache managers detected for {self.namespace()}. This may mean you are loading"
+                f"multiple instances of a model, which is memory inefficient. In addition, this instance will"
+                f" reuse the model data associated with the first detected cache manager. This may have "
+                f"unintended consequences."
             )
 
         self.top_n = top_n
@@ -71,10 +81,10 @@ class SapBertForEntityLinkingStep(BaseStep):
         self.index_group = index_group
         self.index_group.load()
         # we reuse the instance of the model associated with the cache manager, so we don't have to instantiate it twice
-        self.dl_workers = index_group.cache_manager.dl_workers
-        self.batch_size = index_group.cache_manager.batch_size
-        self.model = index_group.cache_manager.model
-        self.trainer = index_group.cache_manager.trainer
+        self.dl_workers = index_group.cache_managers[0].dl_workers
+        self.batch_size = index_group.cache_managers[0].batch_size
+        self.model = index_group.cache_managers[0].model
+        self.trainer = index_group.cache_managers[0].trainer
         self.process_all_entities = process_all_entities
 
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)

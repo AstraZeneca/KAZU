@@ -24,12 +24,10 @@ def test_dictionary_step():
         azner.utils.caching.CachedIndexGroup, "search", side_effect=ds.mock_search
     ):
         manager = DictionaryOntologyCacheManager(
-            index_type="DictionaryIndex",
-            rebuild_cache=False,
+            index_type="DictionaryIndex", rebuild_cache=False, parsers=[]
         )
         cached_index_group = CachedIndexGroup(
-            cache_manager=manager,
-            parsers=[],
+            cache_managers=[manager],
             entity_class_to_ontology_mappings={},
         )
         step = DictionaryEntityLinkingStep(
@@ -54,10 +52,10 @@ def test_sapbert_step():
             ontology_partition_size=20,
             index_type="MatMulTensorEmbeddingIndex",
             rebuild_cache=False,
+            parsers=[],
         )
         cached_index_group = CachedIndexGroup(
-            cache_manager=manager,
-            parsers=[],
+            cache_managers=[manager],
             entity_class_to_ontology_mappings={},
         )
         step = SapBertForEntityLinkingStep(
