@@ -13,7 +13,7 @@ def test_docker_configs():
             overrides=[
                 "DictionaryEntityLinkingStep=docker",
                 "SapBertForEntityLinkingStep=docker",
-                "TransformersModelForTokenClassificationNerStep=docker"
+                "TransformersModelForTokenClassificationNerStep=docker",
             ],
         )
         # should raise OSErrors from missing files

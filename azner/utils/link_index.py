@@ -33,9 +33,7 @@ class Index(abc.ABC):
         self.name = name
         self.metadata = None
 
-    def _search(
-        self, query: Any, **kwargs
-    ) -> Tuple[pd.DataFrame, np.ndarray]:
+    def _search(self, query: Any, **kwargs) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         subclasses should implement this method, which describes the logic to actually perform the search
         calls to search should return a tuple of  :py:class:`pandas.DataFrame` and numpy.ndarray.
@@ -47,9 +45,7 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
-    def search(
-        self, query: Any, **kwargs
-    ) -> pd.DataFrame:
+    def search(self, query: Any, **kwargs) -> pd.DataFrame:
         """
         search the index
         :param query: the query to use

@@ -20,7 +20,8 @@ skipping acceptance test as KAZU_TEST_CONFIG_DIR is not provided as an environme
 to a hydra config directory, configured with paths to the various resources/models to run the production pipeline 
 """  # noqa
 
-CONFIG_DIR = Path(__file__).parent.parent.joinpath('conf')
+CONFIG_DIR = Path(__file__).parent.parent.joinpath("conf")
+
 
 class MockedCachedIndexGroup:
     """

@@ -30,9 +30,7 @@ def test_dictionary_step():
             cache_managers=[manager],
             entity_class_to_ontology_mappings={},
         )
-        step = DictionaryEntityLinkingStep(
-            depends_on=[], index_group=cached_index_group
-        )
+        step = DictionaryEntityLinkingStep(depends_on=[], index_group=cached_index_group)
         assert_step_runs(easy_test_docs, iris, sources, step)
 
 
@@ -58,9 +56,7 @@ def test_sapbert_step():
             cache_managers=[manager],
             entity_class_to_ontology_mappings={},
         )
-        step = SapBertForEntityLinkingStep(
-            depends_on=[], index_group=cached_index_group
-        )
+        step = SapBertForEntityLinkingStep(depends_on=[], index_group=cached_index_group)
         assert_step_runs(easy_test_docs, iris, sources, step)
 
 
