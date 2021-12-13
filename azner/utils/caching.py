@@ -287,6 +287,7 @@ class CachedIndexGroup:
     def search(self, query: Any, entity_class: str, namespace: str, **kwargs) -> List[Mapping]:
         """
         search across all indices.
+
         :param query: passed to the search method of each index
         :param entity_class: used to restrict the search space to certain indices - see
             entity_class_to_ontology_mappings in constructor
