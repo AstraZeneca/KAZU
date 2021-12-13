@@ -286,6 +286,87 @@ on, sorted by score
 </dd></dl>
 
 <span class="target" id="module-azner.utils.caching"></span><dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.caching.CachedIndexGroup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">CachedIndexGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_class_to_ontology_mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_managers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.utils.caching.IndexCacheManager" title="azner.utils.caching.IndexCacheManager"><span class="pre">azner.utils.caching.IndexCacheManager</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.CachedIndexGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience class for building and loading Indices, and querying against them</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.CachedIndexGroup.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.CachedIndexGroup.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads the cached version of the indices from disk</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.CachedIndexGroup.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.data.data.Mapping</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.caching.CachedIndexGroup.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>search across all indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> – passed to the search method of each index</p></li>
+<li><p><strong>entity_class</strong> – used to restrict the search space to certain indices - see
+entity_class_to_ontology_mappings in constructor</p></li>
+<li><p><strong>namespace</strong> – the namespace of the calling step (added to mapping metadata)</p></li>
+<li><p><strong>kwargs</strong> – any other kwargs to pass to the search method of each index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.caching.DictionaryIndexCacheManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndexCacheManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.DictionaryIndexCacheManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>implementation for use with <a class="reference internal" href="steps.html#azner.steps.DictionaryEntityLinkingStep" title="azner.steps.linking.dictionary.DictionaryEntityLinkingStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">azner.steps.linking.dictionary.DictionaryEntityLinkingStep</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.DictionaryIndexCacheManager.build_ontology_cache">
+<span class="sig-name descname"><span class="pre">build_ontology_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#azner.utils.link_index.Index" title="azner.utils.link_index.Index"><span class="pre">azner.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#azner.utils.caching.DictionaryIndexCacheManager.build_ontology_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementations should implement this method to determine how an index gets built for a given parser
+:param cache_dir:
+:param parser:
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.caching.EmbeddingIndexCacheManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndexCacheManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">azner.modelling.linking.sapbert.train.PLSapbertModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pytorch_lightning.trainer.trainer.Trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology_partition_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.EmbeddingIndexCacheManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>implementation for use with embedding style linking steps, such as
+<a class="reference internal" href="steps.html#azner.steps.SapBertForEntityLinkingStep" title="azner.steps.linking.sapbert.SapBertForEntityLinkingStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">azner.steps.linking.sapbert.SapBertForEntityLinkingStep</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.EmbeddingIndexCacheManager.build_ontology_cache">
+<span class="sig-name descname"><span class="pre">build_ontology_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#azner.utils.link_index.Index" title="azner.utils.link_index.Index"><span class="pre">azner.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#azner.utils.caching.EmbeddingIndexCacheManager.build_ontology_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementations should implement this method to determine how an index gets built for a given parser
+:param cache_dir:
+:param parser:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.EmbeddingIndexCacheManager.predict_ontology_embeddings">
+<span class="sig-name descname"><span class="pre">predict_ontology_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ontology_dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.caching.EmbeddingIndexCacheManager.predict_ontology_embeddings" title="Permalink to this definition">¶</a></dt>
+<dd><p>since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
+and add them to the index sequentially
+:param ontology_dataframe:
+:return: partition number, metadata dataframe and embeddings</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.EmbeddingIndexCacheManager.split_dataframe">
+<span class="sig-name descname"><span class="pre">split_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.EmbeddingIndexCacheManager.split_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>generator to split up a dataframe into partitions
+:param df:
+:param chunk_size: size of partittions to create
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="azner.utils.caching.EntityLinkingLookupCache">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EntityLinkingLookupCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.EntityLinkingLookupCache" title="Permalink to this definition">¶</a></dt>
 <dd><p>A simple wrapper around LFUCache to reduce calls to expensive processes (e.g. bert)</p>
@@ -306,28 +387,65 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.caching.IndexCacheManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">IndexCacheManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.caching.IndexCacheManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>An IndexCacheManager is responsible for creating, saving and loading a set of <code class="xref py py-class docutils literal notranslate"><span class="pre">azner.utils.caching.Index</span></code>.
+It’s useful to use this class, instead of an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">azner.utils.caching.Index</span></code> directly, as this class
+will automatically cache any expensive index creation aspects (such as embedding generation for sapbert)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.IndexCacheManager.build_ontology_cache">
+<span class="sig-name descname"><span class="pre">build_ontology_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#azner.utils.link_index.Index" title="azner.utils.link_index.Index"><span class="pre">azner.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#azner.utils.caching.IndexCacheManager.build_ontology_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementations should implement this method to determine how an index gets built for a given parser
+:param cache_dir:
+:param parser:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.IndexCacheManager.get_or_create_ontology_indices">
+<span class="sig-name descname"><span class="pre">get_or_create_ontology_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#azner.utils.link_index.Index" title="azner.utils.link_index.Index"><span class="pre">azner.utils.link_index.Index</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#azner.utils.caching.IndexCacheManager.get_or_create_ontology_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>for each parser in self.parsers, create an index. If a cached version is available, load it instead
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.caching.IndexCacheManager.load_ontology_from_cache">
+<span class="sig-name descname"><span class="pre">load_ontology_from_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">azner.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#azner.utils.link_index.Index" title="azner.utils.link_index.Index"><span class="pre">azner.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#azner.utils.caching.IndexCacheManager.load_ontology_from_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>load an index from the cache
+:param cache_dir:
+:param parser:
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="azner.utils.caching.select_index_type">
+<span class="sig-prename descclassname"><span class="pre">azner.utils.caching.</span></span><span class="sig-name descname"><span class="pre">select_index_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_class_name</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span></span></span><a class="headerlink" href="#azner.utils.caching.select_index_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>select a index type based on it’s string name
+:param index_class_name:
+:return:</p>
+</dd></dl>
+
 <span class="target" id="module-azner.utils.link_index"></span><dl class="py class">
 <dt class="sig sig-object py" id="azner.utils.link_index.CDistTensorEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">CDistTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.CDistTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">CDistTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.CDistTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate embedding based on cosine distance</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="azner.utils.link_index.DictionaryIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fuzzy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">99.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.DictionaryIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.DictionaryIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>a simple dictionary index for linking</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="azner.utils.link_index.DictionaryIndex.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.DictionaryIndex.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>search the index</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>query</strong> – a string to query against</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a df of hits</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="azner.utils.link_index.DictionaryIndex.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.DictionaryIndex.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>add data to the index. Two indices are required - synonyms and metadata. Metadata should have a primary key
+(IDX) and synonyms should use IDX as a foreign key
+:param synonym_df: synonyms dataframe
+:param metadata_df: metadata dataframe
+:return:</p>
 </dd></dl>
 
 </dd></dl>
@@ -335,7 +453,7 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 <dl class="py class">
 <dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>a wrapper around an embedding index strategy. Concrete implementations below</p>
+<dd><p>a wrapper around an embedding index strategy.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embeddings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.add" title="Permalink to this definition">¶</a></dt>
@@ -353,23 +471,39 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.FaissEmbeddingIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">FaissEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.FaissEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>an embedding index that uses faiss.IndexFlatL2</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="azner.utils.link_index.Index">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.Index" title="Permalink to this definition">¶</a></dt>
+<dd><p>base class for all indices.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>load from disk</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="azner.utils.link_index.Index.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.Index.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>add data to the index
+:param args:
+:param kwargs:
+:return:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.save" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="azner.utils.link_index.Index.load">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.Index.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>load from disk
+:param path: the parent path of the index
+:param name: the name of the index within the parent path
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="azner.utils.link_index.Index.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#azner.utils.link_index.Index.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>save to disk. Makes a directory at the path location with all the index assets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -382,66 +516,26 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndex.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndex.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>search the index</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>embedding</strong> – a 2d tensor to query the index with</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a tuple of 2d numpy arrays: distances, nearest neighbours, and a pd.DataFrame of metadata</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="azner.utils.link_index.EmbeddingIndexFactory">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndexFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding_index_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.EmbeddingIndexFactory" title="Permalink to this definition">¶</a></dt>
-<dd><p>since we want to make multiple indices (one per ontology), this factory class helps us build them consistently</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="azner.utils.link_index.FaissEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">FaissEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.FaissEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>an embedding index that uses faiss.IndexFlatL2</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="azner.utils.link_index.Index">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><a class="headerlink" href="#azner.utils.link_index.Index" title="Permalink to this definition">¶</a></dt>
-<dd><p>base class for all indices.</p>
-<dl class="py method">
 <dt class="sig sig-object py" id="azner.utils.link_index.Index.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.Index.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>calls to search should return a <code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;pd.DataFrame&gt;</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> – </p></li>
-<li><p><strong>kwargs</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#azner.utils.link_index.Index.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>search the index
+:param query: the query to use
+:param kwargs: any other arguments to pass to self._search
+:return: a <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> of hits, with a score column</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="azner.utils.link_index.MatMulTensorEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">MatMulTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.MatMulTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">MatMulTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.MatMulTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculate embedding based on MatMul</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="azner.utils.link_index.TensorEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">TensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_n_nearest_neighbours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.TensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>a simple index of torch tensors, that is queried with torch.matmul</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">azner.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">TensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#azner.utils.link_index.TensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>a simple index of torch tensors.</p>
 </dd></dl>
 
 <span class="target" id="module-azner.utils.stopwatch"></span><span class="target" id="module-azner.utils.utils"></span><dl class="py function">
