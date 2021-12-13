@@ -1,7 +1,9 @@
 from seqeval.metrics import f1_score
 
+
 def accuracy(preds, labels):
     return (preds == labels).mean()
+
 
 def numeric_label_f1_score(preds, label_ids, label_list):
     """
@@ -14,5 +16,5 @@ def numeric_label_f1_score(preds, label_ids, label_list):
         pred_labels_list.append([label_list[ele] for ele in id_sequence])
     for id_sequence in label_ids.astype(int):
         labels_list.append([label_list[ele] for ele in id_sequence])
-    
+
     return f1_score(labels_list, pred_labels_list)

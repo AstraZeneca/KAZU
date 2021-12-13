@@ -24,6 +24,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from azner.modelling.distillation.dataprocessor.data_utils import to_unicode
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -81,9 +82,10 @@ class DataProcessor(object):
             lines = []
             for line in reader:
                 if sys.version_info[0] == 2:
-                    line = list(to_unicode(cell, 'utf-8') for cell in line)
+                    line = list(to_unicode(cell, "utf-8") for cell in line)
                 lines.append(line)
             return lines
+
 
 def get_tensor_data(output_mode, features):
     if output_mode == "seqtag":
@@ -97,16 +99,17 @@ def get_tensor_data(output_mode, features):
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
     all_input_mask = torch.tensor([f.input_mask for f in features], dtype=torch.long)
     all_segment_ids = torch.tensor([f.segment_ids for f in features], dtype=torch.long)
-    tensor_data = TensorDataset(all_input_ids, all_input_mask, all_segment_ids,
-                                all_label_ids, all_seq_lengths)
+    tensor_data = TensorDataset(
+        all_input_ids, all_input_mask, all_segment_ids, all_label_ids, all_seq_lengths
+    )
     return tensor_data, all_label_ids
 
 
 def get_data_loader(args, data_type, processor, label_list, tokenizer, output_mode):
     """
     Train and validate data preparation.
-    TODO : make multi-processing-enabled Custom Dataset class with 
-        {get_train_examples, get_aug_examples, get_dev_examples}, convert_examples_to_features and get_tensor_data functions. 
+    TODO : make multi-processing-enabled Custom Dataset class with
+        {get_train_examples, get_aug_examples, get_dev_examples}, convert_examples_to_features and get_tensor_data functions.
 
     :param data_type: [description]
     :type data_type: [type]
@@ -123,9 +126,17 @@ def get_data_loader(args, data_type, processor, label_list, tokenizer, output_mo
     shuffle = True if data_type in ["train", "aug_train"] else False
 
     features = processor.convert_examples_to_features(
-        examples, label_list, args.max_seq_length, tokenizer, output_mode, 
-        mode=data_mode, batch_size=args.train_batch_size, output_dir=args.output_dir
-    ) # WJ: TODO: bottle-neck
+        examples,
+        label_list,
+        args.max_seq_length,
+        tokenizer,
+        output_mode,
+        mode=data_mode,
+        batch_size=args.train_batch_size,
+        output_dir=args.output_dir,
+    )  # WJ: TODO: bottle-neck
     data, labels = get_tensor_data(output_mode, features)
-    dataloader = DataLoader(data, shuffle=shuffle, batch_size=args.eval_batch_size, num_workers=args.num_workers) # by default, DistributedSampler will be used by PL
+    dataloader = DataLoader(
+        data, shuffle=shuffle, batch_size=args.eval_batch_size, num_workers=args.num_workers
+    )  # by default, DistributedSampler will be used by PL
     return dataloader, len_examples
