@@ -28,37 +28,35 @@ class Index(abc.ABC):
     ):
         """
 
-        :param path: path to parquet file of synonyms
-        :param name: a name for this index
-        :param fuzzy: use fuzzy matching
-        :param score_cutoff: minimum score for fuzzy matching
-        :param top_n: number of hits to return
+        :param name: the name of the index. default is unnamed_index
         """
         self.name = name
         self.metadata = None
 
     def _search(
-        self, query: Any, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: Any, **kwargs
     ) -> Tuple[pd.DataFrame, np.ndarray]:
         """
-        calls to search should return a :py:class:`<pd.DataFrame>`
-
-        :param args:
-        :param kwargs:
+        subclasses should implement this method, which describes the logic to actually perform the search
+        calls to search should return a tuple of  :py:class:`pandas.DataFrame` and numpy.ndarray.
+        the dataframe should be a slice of self.metadata, and the ndarray should be a 1 d array equal to the row count,
+        with the scores for each hit
+        :param query: the query to use
+        :param kwargs: any other arguments that are required
         :return:
         """
         raise NotImplementedError()
 
     def search(
-        self, query: Any, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: Any, **kwargs
     ) -> pd.DataFrame:
         """
         search the index
-
-        :param query: a string to query against
-        :return: a df of hits
+        :param query: the query to use
+        :param kwargs: any other arguments to pass to self._search
+        :return: a :class:`pandas.DataFrame` of hits, with a score column
         """
-        hit_df, scores = self._search(query, score_cutoff=score_cutoff, top_n=top_n, **kwargs)
+        hit_df, scores = self._search(query, **kwargs)
         hit_df[LINK_SCORE] = scores
         return hit_df
 
@@ -84,10 +82,11 @@ class Index(abc.ABC):
     def load(path: str, name: str):
         """
         load from disk
-
-        :param path:
+        :param path: the parent path of the index
+        :param name: the name of the index within the parent path
         :return:
         """
+
         path = Path(path).joinpath(name)
         with open(Index.get_index_path(path), "rb") as f:
             index = pickle.load(f)
@@ -114,8 +113,8 @@ class Index(abc.ABC):
 
     def _save(self, path: str):
         """
-        concrete implementations should implement this to save an index
-
+        concrete implementations should implement this to save any data specific to the implementation. This method is
+        called by self.save
         :param path:
         :return:
         """
@@ -129,7 +128,8 @@ class Index(abc.ABC):
 
     def _load(self, path: str) -> None:
         """
-        concrete implementations should implement this to load any fields required by the index
+        concrete implementations should implement this to load any data specific to the implementation. This method is
+        called by self.load
 
         :param path:
         :return:
@@ -137,6 +137,12 @@ class Index(abc.ABC):
         raise NotImplementedError()
 
     def add(self, *args, **kwargs):
+        """
+        add data to the index
+        :param args:
+        :param kwargs:
+        :return:
+        """
         raise NotImplementedError()
 
 
@@ -146,25 +152,20 @@ class DictionaryIndex(Index):
     """
 
     def __init__(self, name: str = "unnamed_index"):
-        """
-
-        :param path: path to parquet file of synonyms
-        :param name: a name for this index
-        :param fuzzy: use fuzzy matching
-        :param score_cutoff: minimum score for fuzzy matching
-        :param top_n: number of hits to return
-        """
         super().__init__(name)
         self.synonym_df = None
 
     def _search(
-        self, query: Any, score_cutoff: int = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
+        self, query: str, score_cutoff: int = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
     ) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         search the index
-
-        :param query: a string to query against
-        :return: a df of hits
+        :param query: a string of text
+        :param score_cutoff: minimum rapidfuzz match score. ignored if fuzzy-False
+        :param top_n: return up to this many hits
+        :param fuzzy: use rapidfuzz fuzzy matching
+        :param kwargs:
+        :return:
         """
         query = query.lower()
         if not fuzzy:
@@ -192,6 +193,13 @@ class DictionaryIndex(Index):
         self.synonym_df.to_parquet(path, index=None)
 
     def add(self, synonym_df: pd.DataFrame, metadata_df: pd.DataFrame):
+        """
+        add data to the index. Two indices are required - synonyms and metadata. Metadata should have a primary key
+        (IDX) and synonyms should use IDX as a foreign key
+        :param synonym_df: synonyms dataframe
+        :param metadata_df: metadata dataframe
+        :return:
+        """
         if self.synonym_df is None and self.metadata is None:
             self.synonym_df = synonym_df
             self.metadata = metadata_df
@@ -205,7 +213,7 @@ class DictionaryIndex(Index):
 
 class EmbeddingIndex(Index):
     """
-    a wrapper around an embedding index strategy. Concrete implementations below
+    a wrapper around an embedding index strategy.
     """
 
     def __init__(self, name: str = "unnamed_index"):
@@ -241,7 +249,7 @@ class EmbeddingIndex(Index):
 
     def _add(self, embeddings: torch.Tensor) -> None:
         """
-        concrete implementations should implement this to add to an index
+        concrete implementations should implement this to add embeddings to the index
 
         :return:
         """
@@ -260,9 +268,9 @@ class EmbeddingIndex(Index):
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         should be implemented
-        :param query:
-        :param score_cutoff:
-        :param top_n:
+        :param query: a string of text
+        :param score_cutoff: minimum rapidfuzz match score
+        :param top_n: return up to this many hits
         :param kwargs:
         :return:
         """
@@ -327,7 +335,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
 
 class TensorEmbeddingIndex(EmbeddingIndex):
     """
-    a simple index of torch tensors, that is queried with torch.matmul
+    a simple index of torch tensors.
     """
 
     def __init__(self, name: str):

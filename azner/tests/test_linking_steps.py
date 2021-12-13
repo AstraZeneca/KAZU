@@ -11,8 +11,8 @@ from azner.tests.utils import (
 )
 from azner.utils.caching import (
     CachedIndexGroup,
-    EmbeddingOntologyCacheManager,
-    DictionaryOntologyCacheManager,
+    EmbeddingIndexCacheManager,
+    DictionaryIndexCacheManager,
 )
 from steps import DictionaryEntityLinkingStep
 
@@ -23,7 +23,7 @@ def test_dictionary_step():
     with mock.patch.object(
         azner.utils.caching.CachedIndexGroup, "search", side_effect=ds.mock_search
     ):
-        manager = DictionaryOntologyCacheManager(
+        manager = DictionaryIndexCacheManager(
             index_type="DictionaryIndex", rebuild_cache=False, parsers=[]
         )
         cached_index_group = CachedIndexGroup(
@@ -31,7 +31,7 @@ def test_dictionary_step():
             entity_class_to_ontology_mappings={},
         )
         step = DictionaryEntityLinkingStep(
-            depends_on=[], index_group=cached_index_group, process_all_entities=True
+            depends_on=[], index_group=cached_index_group
         )
         assert_step_runs(easy_test_docs, iris, sources, step)
 
@@ -44,7 +44,7 @@ def test_sapbert_step():
     ):
         model = PLSapbertModel(model_name_or_path=BERT_TEST_MODEL_PATH)
         trainer = Trainer(logger=False)
-        manager = EmbeddingOntologyCacheManager(
+        manager = EmbeddingIndexCacheManager(
             model=model,
             batch_size=16,
             trainer=trainer,
@@ -59,7 +59,7 @@ def test_sapbert_step():
             entity_class_to_ontology_mappings={},
         )
         step = SapBertForEntityLinkingStep(
-            depends_on=[], index_group=cached_index_group, process_all_entities=True
+            depends_on=[], index_group=cached_index_group
         )
         assert_step_runs(easy_test_docs, iris, sources, step)
 

@@ -39,17 +39,22 @@ from azner.utils.utils import (
 logger = logging.getLogger(__name__)
 
 
-def select_index_type(embedding_index_class_name) -> Type:
-    if embedding_index_class_name == MatMulTensorEmbeddingIndex.__name__:
+def select_index_type(index_class_name) -> Type:
+    """
+    select a index type based on it's string name
+    :param index_class_name:
+    :return:
+    """
+    if index_class_name == MatMulTensorEmbeddingIndex.__name__:
         return MatMulTensorEmbeddingIndex
-    elif embedding_index_class_name == FaissEmbeddingIndex.__name__:
+    elif index_class_name == FaissEmbeddingIndex.__name__:
         return FaissEmbeddingIndex
-    elif embedding_index_class_name == CDistTensorEmbeddingIndex.__name__:
+    elif index_class_name == CDistTensorEmbeddingIndex.__name__:
         return CDistTensorEmbeddingIndex
-    elif embedding_index_class_name == DictionaryIndex.__name__:
+    elif index_class_name == DictionaryIndex.__name__:
         return DictionaryIndex
     else:
-        raise NotImplementedError(f"{embedding_index_class_name} not implemented in factory")
+        raise NotImplementedError(f"{index_class_name} not implemented in factory")
 
 
 class EntityLinkingLookupCache:
@@ -88,7 +93,13 @@ class EntityLinkingLookupCache:
         return cache_misses
 
 
-class OntologyCacheManager:
+class IndexCacheManager:
+    """
+    An IndexCacheManager is responsible for creating, saving and loading a set of :class:`azner.utils.caching.Index`.
+    It's useful to use this class, instead of an instance of :class:`azner.utils.caching.Index` directly, as this class
+    will automatically cache any expensive index creation aspects (such as embedding generation for sapbert)
+    """
+
     def __init__(self, index_type: str, parsers: List[OntologyParser], rebuild_cache: bool = False):
         self.parsers = parsers
         self.index_type = select_index_type(index_type)
@@ -96,8 +107,8 @@ class OntologyCacheManager:
 
     def get_or_create_ontology_indices(self) -> List[Index]:
         """
-        populate self.ontology_ids and self.ontology_index_dict either by calculating them afresh or loading from a
-        cached version on disk
+        for each parser in self.parsers, create an index. If a cached version is available, load it instead
+        :return:
         """
 
         indices = []
@@ -125,13 +136,29 @@ class OntologyCacheManager:
         return indices
 
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
+        """
+        Implementations should implement this method to determine how an index gets built for a given parser
+        :param cache_dir:
+        :param parser:
+        :return:
+        """
         raise NotImplementedError()
 
     def load_ontology_from_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
+        """
+        load an index from the cache
+        :param cache_dir:
+        :param parser:
+        :return:
+        """
         return Index.load(str(cache_dir), parser.name)
 
 
-class DictionaryOntologyCacheManager(OntologyCacheManager):
+class DictionaryIndexCacheManager(IndexCacheManager):
+    """
+    implementation for use with :class:`azner.steps.linking.dictionary.DictionaryEntityLinkingStep`
+    """
+
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
@@ -144,7 +171,12 @@ class DictionaryOntologyCacheManager(OntologyCacheManager):
         return index
 
 
-class EmbeddingOntologyCacheManager(OntologyCacheManager):
+class EmbeddingIndexCacheManager(IndexCacheManager):
+    """
+    implementation for use with embedding style linking steps, such as
+    :class:`azner.steps.linking.sapbert.SapBertForEntityLinkingStep`
+    """
+
     def __init__(
         self,
         index_type: str,
@@ -156,6 +188,18 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
         ontology_partition_size: int,
         rebuild_cache: bool = False,
     ):
+        """
+
+        :param index_type: type of index to create
+        :param parsers: list of parsers to create indices for
+        :param model: model for generating embeddings with
+        :param batch_size: batch size to use
+        :param trainer: instance of lightning trainer to use
+        :param dl_workers: number of data loaders to use
+        :param ontology_partition_size: size of each partition when generating embeddings. reduce if running into
+            memory issues
+        :param rebuild_cache: force a rebuild of the cache
+        """
 
         super().__init__(index_type, parsers, rebuild_cache)
         self.ontology_partition_size = ontology_partition_size
@@ -196,11 +240,12 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
 
     def predict_ontology_embeddings(
         self, ontology_dataframe: pd.DataFrame
-    ) -> Tuple[List[str], pd.DataFrame, torch.Tensor]:
+    ) -> Tuple[int, pd.DataFrame, torch.Tensor]:
         """
-        based on the value of self.ontology_path, this returns a Tuple[List[str],np.ndarray]. The strings are the
-        iri's, and the torch.Tensor are the embeddings to be queried against
-        :return: partition number, dataframe for metadata, 2d tensor of embeddings
+        since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
+        and add them to the index sequentially
+        :param ontology_dataframe:
+        :return: partition number, metadata dataframe and embeddings
         """
 
         for partition_number, df in enumerate(
@@ -221,19 +266,34 @@ class EmbeddingOntologyCacheManager(OntologyCacheManager):
 
 class CachedIndexGroup:
     """
-    Convenience class for building and managing a group of indexes, and querying against them
+    Convenience class for building and loading Indices, and querying against them
     """
 
     def __init__(
         self,
         entity_class_to_ontology_mappings: Dict[str, List[str]],
-        cache_managers: List[OntologyCacheManager],
+        cache_managers: List[IndexCacheManager],
     ):
+        """
+
+        :param entity_class_to_ontology_mappings: mapping of entity classes to ontologies - i.e. which ontologies
+            should be queried for each entity class
+        :param cache_managers: list of IndexCacheManagers to use for this instance
+        """
         self.cache_managers = cache_managers
         self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
         self.ontology_index_dict: Dict[str, Index] = {}
 
     def search(self, query: Any, entity_class: str, namespace: str, **kwargs) -> List[Mapping]:
+        """
+        search across all indices.
+        :param query: passed to the search method of each index
+        :param entity_class: used to restrict the search space to certain indices - see
+            entity_class_to_ontology_mappings in constructor
+        :param namespace: the namespace of the calling step (added to mapping metadata)
+        :param kwargs: any other kwargs to pass to the search method of each index
+        :return:
+        """
         ontologies_to_search = self.entity_class_to_ontology_mappings.get(entity_class, [])
         results = []
         for ontology_name in ontologies_to_search:
@@ -267,7 +327,7 @@ class CachedIndexGroup:
 
     def load(self):
         """
-        loads the cached version of the embedding indices from disk
+        loads the cached version of the indices from disk
         """
         for cache_manager in self.cache_managers:
             indices = cache_manager.get_or_create_ontology_indices()

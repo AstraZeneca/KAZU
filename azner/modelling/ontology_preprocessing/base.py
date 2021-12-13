@@ -44,13 +44,17 @@ class StopWordRemover:
 
 class OntologyParser(ABC):
     """
-    Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking
+    Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking. This involves generating
+    two dataframes: one that holds the linking metadata (e.g. default label, IDX and other info), ad another that
+    holds any synonym information
     Implementations should have a class attribute 'name' to something suitably representative
     """
 
     name = "unnamed"
     training_col_names = ["id", "syn1", "syn2"]
+    # the synonym table should have these (and only these columns)
     all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
+    # the metadata table should have at least these columns
     minimum_metadata_column_names = [IDX, DEFAULT_LABEL]
 
     def __init__(self, in_path: str):
@@ -67,12 +71,17 @@ class OntologyParser(ABC):
         :return:
         """
         if self.synonym_table is None or self.metadata_df is None:
-            self.synonym_table, self.metadata_df = self.post_process_ontology_table()
+            self.synonym_table, self.metadata_df = self.generate_synonym_and_metadata_dataframes()
         assert len(
             set(self.synonym_table.columns) & set(OntologyParser.all_synonym_column_names)
         ) == len(OntologyParser.all_synonym_column_names)
 
-    def post_process_ontology_table(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        splits a table of ontology information into a synonym table and a metadata table, deduplicating and grouping
+        as appropriate
+        :return: a 2-tuple - first is synonym dataframe, second is metadata
+        """
         df = self.parse_to_dataframe()
         # ensure correct order
         syn_df = df[self.all_synonym_column_names]
@@ -88,19 +97,21 @@ class OntologyParser(ABC):
         metadata_columns.remove(SYN)
         metadata_df = df[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).copy()
-
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
-
         return syn_df, metadata_df
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
-        implementations should override this method, returning a 'long, thin' pd.DataFrame of
-        ["id", "default_label", SYN,"mapping_type"]
-        id: the ontology id
-        default_label: the preferred label
-        syn: a synonym of the concept
-        mapping_type: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by
+        implementations should override this method, returning a 'long, thin' pd.DataFrame of at least the following
+        columns:
+
+
+        [IDX, DEFAULT_LABEL, SYN,MAPPING_TYPE]
+
+        IDX: the ontology id
+        DEFAULT_LABEL: the preferred label
+        SYN: a synonym of the concept
+        MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by
                     the ontology
         :return:
         """
@@ -108,7 +119,7 @@ class OntologyParser(ABC):
 
     def get_ontology_metadata(self) -> pd.DataFrame:
         """
-        get a dataframe of default labels and ids. Useful for generating e.g. embeddings
+        get a dataframe of metadata for an ontology
         :return:
         """
         self.parse_and_cache()
@@ -116,7 +127,7 @@ class OntologyParser(ABC):
 
     def get_ontology_synonyms(self) -> pd.DataFrame:
         """
-        get a dataframe of default labels and ids. Useful for generating e.g. embeddings
+        get a dataframe of synonyms for an ontology
         :return:
         """
         self.parse_and_cache()

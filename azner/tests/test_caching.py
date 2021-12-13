@@ -16,12 +16,12 @@ from azner.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
 )
 from azner.utils.caching import (
-    EmbeddingOntologyCacheManager,
-    DictionaryOntologyCacheManager,
+    EmbeddingIndexCacheManager,
+    DictionaryIndexCacheManager,
     CachedIndexGroup,
 )
 from azner.utils.link_index import Index
-from tests.utils import BERT_TEST_MODEL_PATH
+from azner.tests.utils import BERT_TEST_MODEL_PATH
 
 DUMMY_SOURCE = "test_parser"
 DUMMY_DATA = {
@@ -48,7 +48,7 @@ def test_embedding_cache_manager(index_type):
         model = PLSapbertModel(model_name_or_path=BERT_TEST_MODEL_PATH)
         trainer = Trainer(logger=False)
         parser = DummyParser(in_path=str(in_path))
-        manager = EmbeddingOntologyCacheManager(
+        manager = EmbeddingIndexCacheManager(
             model=model,
             batch_size=16,
             trainer=trainer,
@@ -68,9 +68,9 @@ def test_embedding_cache_manager(index_type):
         assert os.path.exists(cache_dir)
         # now check the load cache method is called
         with patch(
-            "azner.utils.caching.EmbeddingOntologyCacheManager.load_ontology_from_cache"
+            "azner.utils.caching.EmbeddingIndexCacheManager.load_ontology_from_cache"
         ) as load_ontology_from_cache:
-            manager = EmbeddingOntologyCacheManager(
+            manager = EmbeddingIndexCacheManager(
                 model=model,
                 batch_size=16,
                 trainer=trainer,
@@ -89,7 +89,7 @@ def test_dictionary_cache_manager():
         in_path = Path(f).joinpath(DUMMY_SOURCE)
         os.mkdir(in_path)
         parser = DummyParser(in_path=str(in_path))
-        manager = DictionaryOntologyCacheManager(
+        manager = DictionaryIndexCacheManager(
             index_type="DictionaryIndex", parsers=[parser], rebuild_cache=False
         )
         index = manager.get_or_create_ontology_indices()[0]
@@ -101,9 +101,9 @@ def test_dictionary_cache_manager():
         assert os.path.exists(cache_dir)
         # now check the load cache method is called
         with patch(
-            "azner.utils.caching.DictionaryOntologyCacheManager.load_ontology_from_cache"
+            "azner.utils.caching.DictionaryIndexCacheManager.load_ontology_from_cache"
         ) as load_ontology_from_cache:
-            manager = DictionaryOntologyCacheManager(
+            manager = DictionaryIndexCacheManager(
                 index_type="DictionaryIndex", parsers=[parser], rebuild_cache=False
             )
             manager.get_or_create_ontology_indices()
@@ -121,7 +121,7 @@ def test_cached_index_group():
         os.mkdir(in_path2)
         parser2 = DummyParser(in_path=str(in_path2))
         parser2.name = "ontology_2"
-        manager = DictionaryOntologyCacheManager(
+        manager = DictionaryIndexCacheManager(
             index_type="DictionaryIndex", rebuild_cache=False, parsers=[parser1, parser2]
         )
 
