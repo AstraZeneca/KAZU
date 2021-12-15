@@ -1,37 +1,15 @@
 seed: 42
-trainer:
-  _target_: pytorch_lightning.Trainer
-  progress_bar_refresh_rate: -1
-  num_sanity_val_steps: 2
-  gpus: 0
-  accelerator: ddp
-  val_check_interval: 1.0
-  accumulate_grad_batches: 1
+cudnn:
+  deterministic: True
+  benchmark: False
+monitoring:
+  monitor: entity_f1
+  mode: max
+training_params:
   max_epochs: 10
-  num_nodes: ~
-
-  plugins:
-    - _target_: azner.modelling.distillation.distillation.custom_checkpoint.StudentModelCheckpointIO
-      model_name_or_path: ???
-  callbacks:
-    - _target_: pytorch_lightning.callbacks.ModelCheckpoint
-      dirpath: ???
-      filename: "student_model-{epoch:02d}-{valF1:.4f}-{validation_loss_epoch:.3f}-{step:05d}"
-      metric: entity_f1
-      mode: max
-      save_top_k: 5
-      save_last: True
-      every_n_train_steps: ~
-      every_n_epochs: ~
-    - _target_: pytorch_lightning.callbacks.early_stopping.EarlyStopping
-      monitor: entity_f1
-      mode: max
-      min_delta: 0.00
-      patience: 5
-      verbose: True
-
+save_dir: ???
 model:
-  _target_: azner.modelling.distillation.distillation.models.SequenceTaggingTaskSpecificDistillation
+  _target_: azner.modelling.distillation.models.SequenceTaggingTaskSpecificDistillation
   data_dir: ???
   label_list:
     - B-disease
@@ -47,12 +25,42 @@ model:
     - O
   student_model_path: ???
   teacher_model_path: ???
-  batch_size: 32
+  batch_size: 8
   num_workers: 2
   temperature: 1.0
-  warmup_steps: ~
+  warmup_steps: 0
   learning_rate: 5e-5
   schedule: warmup_linear
   weight_decay: 0.01
-  accumulate_grad_batches: ${trainer.accumulate_grad_batches}
+  accumulate_grad_batches: ${DistillationTraining.trainer.accumulate_grad_batches}
+  max_epochs: ${DistillationTraining.training_params.max_epochs}
+trainer:
+  _target_: pytorch_lightning.Trainer
+  progress_bar_refresh_rate: 1
+  num_sanity_val_steps: 2
+  gpus: 0
+  accelerator: ~
+  val_check_interval: 1.0
+  accumulate_grad_batches: 1
+  max_epochs: ${DistillationTraining.training_params.max_epochs}
+  plugins:
+    - _target_: azner.modelling.distillation.lightning_plugins.StudentModelCheckpointIO
+      model_name_or_path: ${DistillationTraining.model.student_model_path}
+  callbacks:
+    - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+      dirpath: ${DistillationTraining.save_dir}
+      filename: "student_model-{epoch:02d}-{valF1:.4f}-{validation_loss_epoch:.3f}-{step:05d}"
+      monitor: ${DistillationTraining.monitoring.monitor}
+      mode: ${DistillationTraining.monitoring.mode}
+      save_top_k: 5
+      save_last: True
+      every_n_train_steps: ~
+      every_n_epochs: ~
+    - _target_: pytorch_lightning.callbacks.early_stopping.EarlyStopping
+      monitor: ${DistillationTraining.monitoring.monitor}
+      mode: ${DistillationTraining.monitoring.mode}
+      min_delta: 0.00
+      patience: 5
+      verbose: True
+
 

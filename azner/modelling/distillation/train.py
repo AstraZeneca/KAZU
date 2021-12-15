@@ -7,18 +7,18 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
 
-from azner.modelling.distillation.distillation.models import SequenceTaggingTaskSpecificDistillation
+from azner.modelling.distillation.models import SequenceTaggingTaskSpecificDistillation
 
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(config_path="../../../conf", config_name="config")
+@hydra.main(config_path="../../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
 
     if torch.backends.cudnn.is_available():  # for reproducibility
-        torch.backends.cudnn.determinstic = True
+        torch.backends.cudnn.deterministic = cfg.DistillationTraining.cudnn.deterministic
         torch.backends.cudnn.benchmark = (
-            False  # set true if the model is not for research; True will make training faster
+            cfg.DistillationTraining.cudnn.benchmark  # set true if the model is not for research; True will make training faster
         )
 
     pytorch_lightning.seed_everything(cfg.DistillationTraining.seed)

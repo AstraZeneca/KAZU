@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, Optional, Union
 
 import torch
+from omegaconf import OmegaConf
 
 from pytorch_lightning.plugins import CheckpointIO
 from transformers import AutoTokenizer
@@ -25,7 +26,7 @@ class StudentModelCheckpointIO(CheckpointIO):
         storage_options: Optional[Any] = None,
     ) -> None:
         """
-        Save distilled (student) model.
+        Save distilled (student) model. Loading currently not implemented
 
         :param checkpoint: contents to save. Including `state_dict`, `optimizer_states` and `callbacks`.
         :param path:
@@ -35,7 +36,9 @@ class StudentModelCheckpointIO(CheckpointIO):
         dirPath = os.path.dirname(path)
 
         output_config_file = os.path.join(dirPath, "hyper_parameters.json")
-        json.dump(obj=checkpoint["hyper_parameters"], fp=open(output_config_file, "w"), indent=2)
+        OmegaConf.save(
+            OmegaConf.create(checkpoint["hyper_parameters"]), output_config_file, resolve=True
+        )
 
         if os.path.basename(path) != "last.ckpt":
             output_log_file = os.path.join(dirPath, "train_callback_log.json")

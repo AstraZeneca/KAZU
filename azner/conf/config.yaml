@@ -7,3 +7,4 @@ defaults:
   - SapBertTraining: default
   - EnsembleEntityLinkingStep: default
   - pipeline: default
+  - DistillationTraining: default
