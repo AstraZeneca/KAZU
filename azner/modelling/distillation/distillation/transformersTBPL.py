@@ -185,7 +185,6 @@ class TinyBertForSequenceTagging(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.seqTagger = nn.Linear(in_features=config.hidden_size, out_features=self.num_labels)
-        self.classifier = self.seqTagger  # legacy TODO : delete
         self.fit_dense = nn.Linear(config.hidden_size, fit_size)
         self.init_weights()
 

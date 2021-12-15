@@ -1,0 +1,32 @@
+seed: 42
+processor_config:
+  processor:
+    _target_: azner.modelling.distillation.dataprocessor.seqtag_tasks.NerProcessor
+  label_path: ???
+  max_seq_length: 128
+
+student_model:
+  do_lower_case: True
+  model_name_or_path: ???
+trainer:
+  _target_: pytorch_lightning.Trainer
+  progress_bar_refresh_rate: -1
+  num_sanity_val_steps: 2
+  gpus: 0
+  accelerator: ddp
+
+
+model:
+  _target_: azner.modelling.distillation.distillation.models.SequenceTaggingTaskSpecificDistillation
+  data_dir: ???
+  label_list:
+    - B-Gene
+    - I-Gene
+  student_model_path: ???
+  teacher_model_path: ???
+  batch_size: 32
+  num_workers: 2
+  temperature: 1.0
+  warmup_steps: ~
+  learning_rate: 5e-5
+  schedule: torchStepLR

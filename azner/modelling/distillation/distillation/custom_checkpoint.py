@@ -6,16 +6,17 @@ from typing import Any, Dict, Optional, Union
 import torch
 
 from pytorch_lightning.plugins import CheckpointIO
+from transformers import AutoTokenizer
 
 
-class CustomCheckpointIO(CheckpointIO):
+class StudentModelCheckpointIO(CheckpointIO):
     """
     A plugin for saving student model (without saving teacher model)
     """
 
-    def __init__(self, tokenizer):
+    def __init__(self, model_name_or_path: str):
         super().__init__()
-        self.tokenizer = tokenizer
+        self.model_name_or_path = model_name_or_path
 
     def save_checkpoint(
         self,
@@ -63,7 +64,9 @@ class CustomCheckpointIO(CheckpointIO):
         ), "Missing structures while saving trained model."
         torch.save(studentModel_state_dict, path)
 
-        self.tokenizer.save_vocabulary(os.path.dirname(path))
+        AutoTokenizer.from_pretrained(self.model_name_or_path).save_vocabulary(
+            os.path.dirname(path)
+        )
 
     def load_checkpoint(
         self, path: Union[str, Path], storage_options: Optional[Any] = None
