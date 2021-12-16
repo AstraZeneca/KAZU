@@ -14,7 +14,7 @@ from azner.utils.caching import (
     EmbeddingIndexCacheManager,
     DictionaryIndexCacheManager,
 )
-from steps import DictionaryEntityLinkingStep
+from azner.steps import DictionaryEntityLinkingStep
 
 
 def test_dictionary_step():
