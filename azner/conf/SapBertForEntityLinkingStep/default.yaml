@@ -24,7 +24,7 @@ index_group:
       rebuild_cache: False
       model:
         _target_: azner.modelling.linking.sapbert.train.PLSapbertModel
-        model_name_or_path: cambridgeltl/SapBERT-from-PubMedBERT-fulltext
+        model_name_or_path: ${env:KAZU_MODEL_PACK}/sapbert/SapBERT-from-PubMedBERT-fulltext
       batch_size: 16
       trainer:
         _target_: pytorch_lightning.Trainer
@@ -35,13 +35,15 @@ index_group:
       ontology_partition_size: 10000
       index_type: MatMulTensorEmbeddingIndex
       parsers:
-        - _target_: azner.modelling.ontology_preprocessing.base.EnsemblOntologyParser
-          in_path: ???
-        - _target_: azner.modelling.ontology_preprocessing.base.MondoOntologyParser
-          in_path: ???
-        - _target_: azner.modelling.ontology_preprocessing.base.UberonOntologyParser
-          in_path: ???
-        - _target_: azner.modelling.ontology_preprocessing.base.MeddraOntologyParser
-          in_path: ???
         - _target_: azner.modelling.ontology_preprocessing.base.ChemblOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
+        - _target_: azner.modelling.ontology_preprocessing.base.EnsemblOntologyParser
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/hgnc.json
+        - _target_: azner.modelling.ontology_preprocessing.base.MondoOntologyParser
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/mondo.json
+        - _target_: azner.modelling.ontology_preprocessing.base.UberonOntologyParser
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+        - _target_: azner.modelling.ontology_preprocessing.base.MeddraOntologyParser
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+        - _target_: azner.modelling.ontology_preprocessing.base.CLOOntologyParser
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/clo.owl

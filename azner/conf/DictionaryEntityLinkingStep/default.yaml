@@ -26,16 +26,16 @@ index_group:
       index_type: DictionaryIndex
       parsers:
         - _target_: azner.modelling.ontology_preprocessing.base.ChemblOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
         - _target_: azner.modelling.ontology_preprocessing.base.EnsemblOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/hgnc.json
         - _target_: azner.modelling.ontology_preprocessing.base.MondoOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/mondo.json
         - _target_: azner.modelling.ontology_preprocessing.base.UberonOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/uberon.owl
         - _target_: azner.modelling.ontology_preprocessing.base.MeddraOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
         - _target_: azner.modelling.ontology_preprocessing.base.CLOOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/clo.owl
         - _target_: azner.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
-          in_path: ???
+          in_path: ${env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
