@@ -16,8 +16,8 @@ FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS = TEST_ASSETS_PATH.joinpath("full_pipeline")
 BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
 
 SKIP_MESSAGE = """
-skipping acceptance test as KAZU_TEST_CONFIG_DIR is not provided as an environment variable. This should be the path 
-to a hydra config directory, configured with paths to the various resources/models to run the production pipeline 
+skipping acceptance test as KAZU_MODEL_PACK is not provided as an environment variable. This should be the path 
+to the kazu model pack root
 """  # noqa
 
 CONFIG_DIR = Path(__file__).parent.parent.joinpath("conf")

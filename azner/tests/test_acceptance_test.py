@@ -11,6 +11,7 @@ from azner.pipeline.pipeline import Pipeline, load_steps
 from azner.tests.utils import (
     entity_linking_hard_cases,
     SKIP_MESSAGE,
+    CONFIG_DIR,
 )
 from azner.tests.utils import full_pipeline_test_cases, AcceptanceTestError
 
@@ -18,15 +19,13 @@ from azner.tests.utils import full_pipeline_test_cases, AcceptanceTestError
 # one
 
 
-@pytest.mark.skipif(os.environ.get("KAZU_TEST_CONFIG_DIR") is None, reason=SKIP_MESSAGE)
+@pytest.mark.skipif(os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE)
 def test_sapbert_acceptance():
     minimum_pass_score = 0.80
-    with initialize_config_dir(config_dir=os.environ.get("KAZU_TEST_CONFIG_DIR")):
+    with initialize_config_dir(config_dir=str(CONFIG_DIR)):
         cfg = compose(
             config_name="config",
-            overrides=[
-                "SapBertForEntityLinkingStep.rebuild_ontology_cache=False",
-            ],
+            overrides=[],
         )
 
         hits = []
@@ -60,9 +59,9 @@ def test_sapbert_acceptance():
             )
 
 
-@pytest.mark.skipif(os.environ.get("KAZU_TEST_CONFIG_DIR") is None, reason=SKIP_MESSAGE)
+@pytest.mark.skipif(os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE)
 def test_full_pipeline_acceptance_test():
-    with initialize_config_dir(config_dir=os.environ.get("KAZU_TEST_CONFIG_DIR")):
+    with initialize_config_dir(config_dir=str(CONFIG_DIR)):
         cfg = compose(config_name="config")
         pipeline = Pipeline(steps=load_steps(cfg))
 
@@ -102,10 +101,10 @@ def query_annotations_df(annotations: pd.DataFrame, entity: Entity):
     return matches
 
 
-@pytest.mark.skipif(os.environ.get("KAZU_TEST_CONFIG_DIR") is None, reason=SKIP_MESSAGE)
+@pytest.mark.skipif(os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE)
 def test_dictionary_entity_linking():
     minimum_pass_score = 0.80
-    with initialize_config_dir(config_dir=os.environ.get("KAZU_TEST_CONFIG_DIR")):
+    with initialize_config_dir(config_dir=str(CONFIG_DIR)):
         cfg = compose(config_name="config", overrides=["pipeline=entity_linking_only"])
         hits = []
         misses = []
