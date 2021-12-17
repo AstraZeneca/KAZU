@@ -7,7 +7,7 @@ monitoring:
   mode: max
 training_params:
   max_epochs: 10
-save_dir: ???
+save_dir: "." # save dir managed by hydra. Override here if required
 model:
   _target_: azner.modelling.distillation.models.SequenceTaggingTaskSpecificDistillation
   data_dir: ???
@@ -43,13 +43,17 @@ trainer:
   val_check_interval: 1.0
   accumulate_grad_batches: 1
   max_epochs: ${DistillationTraining.training_params.max_epochs}
+  logger:
+    - _target_: pytorch_lightning.loggers.CSVLogger
+      save_dir: ${DistillationTraining.save_dir}
+      name: csv_log
   plugins:
     - _target_: azner.modelling.distillation.lightning_plugins.StudentModelCheckpointIO
       model_name_or_path: ${DistillationTraining.model.student_model_path}
   callbacks:
     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
       dirpath: ${DistillationTraining.save_dir}
-      filename: "student_model-{epoch:02d}-{valF1:.4f}-{validation_loss_epoch:.3f}-{step:05d}"
+      filename: "student_model-{epoch:02d}-{entity_f1:.4f}-{validation_loss_epoch:.3f}-{step:05d}"
       monitor: ${DistillationTraining.monitoring.monitor}
       mode: ${DistillationTraining.monitoring.mode}
       save_top_k: 5
