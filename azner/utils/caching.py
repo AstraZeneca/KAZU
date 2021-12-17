@@ -132,7 +132,7 @@ class IndexCacheManager:
                 get_cache_dir(
                     parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True
                 )
-            indices.append(self.build_ontology_cache(cache_dir, parser))
+                indices.append(self.build_ontology_cache(cache_dir, parser))
         return indices
 
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
