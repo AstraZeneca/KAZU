@@ -1,11 +1,9 @@
-from pathlib import Path
 import os
-import json
+from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import torch
 from omegaconf import OmegaConf
-
 from pytorch_lightning.plugins import CheckpointIO
 from transformers import AutoTokenizer
 
@@ -39,19 +37,6 @@ class StudentModelCheckpointIO(CheckpointIO):
         OmegaConf.save(
             OmegaConf.create(checkpoint["hyper_parameters"]), output_config_file, resolve=True
         )
-
-        if os.path.basename(path) != "last.ckpt":
-            output_log_file = os.path.join(dirPath, "train_callback_log.json")
-            with open(output_log_file, "a") as callbackLogFP:
-                jsonable_callback_log = {
-                    k: str(v)
-                    for k, v in checkpoint["callbacks"][
-                        list(checkpoint["callbacks"].keys())[0]
-                    ].items()
-                }
-                json.dump(obj=jsonable_callback_log, fp=callbackLogFP)
-                callbackLogFP.write("\n")
-
         studentModel_state_dict = {
             key[len("student_model.") :]: value
             for key, value in checkpoint["state_dict"].items()
@@ -74,7 +59,7 @@ class StudentModelCheckpointIO(CheckpointIO):
     def load_checkpoint(
         self, path: Union[str, Path], storage_options: Optional[Any] = None
     ) -> Dict[str, Any]:
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def remove_checkpoint(
         self,
