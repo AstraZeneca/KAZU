@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 import torch
 from cachetools import LRUCache
 from omegaconf import ListConfig, OmegaConf
-from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
+from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS, EPOCH_OUTPUT
 from torch.nn import CrossEntropyLoss
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataset import T_co
@@ -17,7 +17,6 @@ from transformers import (
     get_cosine_schedule_with_warmup,
     get_constant_schedule_with_warmup,
 )
-from transformers.file_utils import PaddingStrategy
 from transformers.utils import check_min_version
 
 from azner.modelling.distillation.data_utils import printable_text
@@ -239,7 +238,9 @@ class TaskSpecificDistillation(pl.LightningModule):
             attention_mask=batch["attention_mask"],
             is_student=True,
         )
-        # self.teacher_model.eval()
+
+        # @Wonjin - I added this in because I think it should be here. Can you check it?
+        self.teacher_model.eval()
         with torch.no_grad():
             teacher_logits, teacher_atts, teacher_reps = self.teacher_model(
                 input_ids=batch["input_ids"],
@@ -252,12 +253,16 @@ class TaskSpecificDistillation(pl.LightningModule):
         )
 
         # Logging
-        self.log("trainLoss", loss, prog_bar=True)
+        self.log("training_loss", loss, prog_bar=True, on_step=True)
         lr_list = self.lr_schedulers().get_lr()
-        self.log("lr0", lr_list[0], prog_bar=True)
-        self.log("lr1", lr_list[1], prog_bar=True)
+        self.log("lr0", lr_list[0], prog_bar=True, on_step=True)
+        self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
 
         return loss
+
+    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+        epoch_loss_mean = torch.mean(torch.tensor([x["loss"] for x in outputs]))
+        self.log("training_loss", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True)
 
 
 class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
@@ -347,9 +352,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
             .item()
         )
 
-        self.log(
-            "validation_loss_step", loss
-        )  # Add sync_dist=True to sync logging across all GPU workers
+        self.log("validation_loss", loss, sync_dist=True, on_step=True, prog_bar=True)
         return {
             "loss": loss,
             "logits": logits.detach().cpu(),
@@ -362,32 +365,30 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
 
     def validation_epoch_end(self, val_step_outputs):
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
-        self.log(
-            "validation_loss_epoch", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True
-        )
+        self.log("validation_loss", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True)
 
-        attention_mask = torch.cat([x["attention_mask"] for x in val_step_outputs])
-        label_ids = torch.cat([x["label_ids"] for x in val_step_outputs])
-        label_ids = self.tensor_to_jagged_np_array(label_ids, attention_mask)
-        preds_logits = torch.cat([x["logits"] for x in val_step_outputs])
-        preds = torch.argmax(preds_logits, dim=-1)
-        preds = self.tensor_to_jagged_np_array(preds, attention_mask)
+        preds, golds = [], []
+        for output in val_step_outputs:
 
-        result = numeric_label_f1_score(
-            preds=preds.tolist(), golds=label_ids.tolist(), label_list=self.label_list
-        )
+            attention_mask = output["attention_mask"]
+            golds.extend(self.tensor_to_jagged_array(output["label_ids"], attention_mask))
+            preds.extend(
+                self.tensor_to_jagged_array(torch.argmax(output["logits"], dim=-1), attention_mask)
+            )
+
+        result = numeric_label_f1_score(preds=preds, golds=golds, label_list=self.label_list)
         self.log(
             self.metric, result, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True
         )  # Micro F1
         return epoch_loss_mean
 
-    def tensor_to_jagged_np_array(
+    def tensor_to_jagged_array(
         self, tensor: torch.Tensor, attention_mask: torch.Tensor
-    ) -> np.ndarray:
+    ) -> List[List[int]]:
         result = []
         for arr, mask in zip(tensor.numpy(), attention_mask.numpy()):
-            result.append(arr[0 : mask.sum()])
-        return np.array(result, dtype="object")
+            result.append(arr[0 : mask.sum()].tolist())
+        return result
 
     def test_step(self, batch, batch_idx):
         raise NotImplementedError
@@ -397,11 +398,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
         dataset = NerDataset(
             tokenizer=self.tokenizer, examples=self.training_examples, label_map=self.label_map
         )
-        collator = DataCollatorForTokenClassification(
-            tokenizer=self.tokenizer,
-            padding=PaddingStrategy.MAX_LENGTH,
-            max_length=self.student_model.config.max_position_embeddings,
-        )
+        collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
         return DataLoader(
             dataset=dataset,
             batch_size=self.batch_size,
@@ -409,6 +406,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
             num_workers=self.num_workers,
             collate_fn=collator,
             pin_memory=True,
+            persistent_workers=True,
         )
 
     def get_training_examples(self) -> List[InputExample]:
@@ -417,11 +415,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
     def val_dataloader(self) -> EVAL_DATALOADERS:
         examples = self.processor.get_dev_examples(self.data_dir)
         dataset = NerDataset(tokenizer=self.tokenizer, examples=examples, label_map=self.label_map)
-        collator = DataCollatorForTokenClassification(
-            tokenizer=self.tokenizer,
-            padding=PaddingStrategy.MAX_LENGTH,
-            max_length=self.student_model.config.max_position_embeddings,
-        )
+        collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
         return DataLoader(
             dataset=dataset,
             batch_size=self.batch_size,
@@ -429,4 +423,5 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
             num_workers=self.num_workers,
             collate_fn=collator,
             pin_memory=True,
+            persistent_workers=True,
         )
