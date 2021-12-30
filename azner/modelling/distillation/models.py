@@ -239,8 +239,7 @@ class TaskSpecificDistillation(pl.LightningModule):
             is_student=True,
         )
 
-        # @Wonjin - I added this in because I think it should be here. Can you check it?
-        self.teacher_model.eval()
+        #self.teacher_model.eval()
         with torch.no_grad():
             teacher_logits, teacher_atts, teacher_reps = self.teacher_model(
                 input_ids=batch["input_ids"],
