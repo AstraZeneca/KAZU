@@ -45,7 +45,11 @@ class NerDataset(Dataset):
     """
 
     def __init__(
-        self, tokenizer: AutoTokenizer, examples: List[InputExample], label_map: Dict[str, int]
+        self, 
+        tokenizer: AutoTokenizer, 
+        examples: List[InputExample], 
+        label_map: Dict[str, int], 
+        max_length: int,
     ):
         """
 
@@ -53,10 +57,13 @@ class NerDataset(Dataset):
         :param examples: a list of InputExample, typically created from a
             :class:`azner.modelling.distillation.dataprocessor.NerProcessor`
         :param label_map: str to int mapping of labels
+        :param max_length: The maximum number of tokens per instance that the model can handle. 
+            Inputs longer than max_length value will be truncated.
         """
         self.label_map = label_map
         self.examples = examples
         self.tokenizer = tokenizer
+        self.max_length = max_length
         self.cache = LRUCache(5000)
 
     def __getitem__(self, index) -> T_co:
@@ -98,6 +105,14 @@ class NerDataset(Dataset):
                 label_id.append(self.label_map["O"])
             else:
                 label_id.append(self.label_map[labels[i]])
+        
+        # Truncation
+        if len(ntokens) > self.max_length-1:
+            assert (len(ntokens)==len(segment_ids)) and (len(ntokens)==len(label_id))
+            ntokens = ntokens[:self.max_length-1]
+            segment_ids = segment_ids[:self.max_length-1]
+            label_id = label_id[:self.max_length-1]
+
         ntokens.append("[SEP]")
         segment_ids.append(0)
         label_id.append(self.label_map["O"])  # putting O instead of [SEP]
@@ -278,6 +293,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
         batch_size: int,
         accumulate_grad_batches: int,
         max_epochs: int,
+        max_length: int,
         data_dir: str,
         label_list: Union[List, ListConfig],
         student_model_path: str,
@@ -305,6 +321,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
         """
         self.processor = NerProcessor()
         self.data_dir = data_dir
+        self.max_length = max_length
         self.tokenizer = AutoTokenizer.from_pretrained(student_model_path)
         super().__init__(
             schedule=schedule,
@@ -395,7 +412,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
 
         dataset = NerDataset(
-            tokenizer=self.tokenizer, examples=self.training_examples, label_map=self.label_map
+            tokenizer=self.tokenizer, examples=self.training_examples, label_map=self.label_map, max_length=self.max_length
         )
         collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
         return DataLoader(
@@ -413,7 +430,9 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
         examples = self.processor.get_dev_examples(self.data_dir)
-        dataset = NerDataset(tokenizer=self.tokenizer, examples=examples, label_map=self.label_map)
+        dataset = NerDataset(
+            tokenizer=self.tokenizer, examples=examples, label_map=self.label_map, max_length=self.max_length
+        )
         collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
         return DataLoader(
             dataset=dataset,

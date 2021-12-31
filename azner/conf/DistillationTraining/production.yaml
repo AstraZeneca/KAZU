@@ -6,7 +6,7 @@ monitoring:
   monitor: entity_f1
   mode: max
 training_params:
-  max_epochs: 10
+  max_epochs: 5
 save_dir: "." # save dir managed by hydra. Override here if required
 model:
   _target_: azner.modelling.distillation.models.SequenceTaggingTaskSpecificDistillation
@@ -25,11 +25,12 @@ model:
     - O
   student_model_path: ???
   teacher_model_path: ???
-  batch_size: 8
-  num_workers: 2
+  batch_size: 128
+  max_length: 128
+  num_workers: 4
   temperature: 1.0
   warmup_steps: 0
-  learning_rate: 5e-5
+  learning_rate: 3e-5
   schedule: torchStepLR
   weight_decay: 0.01
   accumulate_grad_batches: ${DistillationTraining.trainer.accumulate_grad_batches}
@@ -38,11 +39,12 @@ trainer:
   _target_: pytorch_lightning.Trainer
   progress_bar_refresh_rate: 1
   num_sanity_val_steps: 2
-  gpus: 0
-  accelerator: ~
-  val_check_interval: 1.0
+  devices: "auto"
+  accelerator: "auto"
+  val_check_interval: 0.05
   accumulate_grad_batches: 1
   max_epochs: ${DistillationTraining.training_params.max_epochs}
+  strategy: "ddp"
   logger:
     - _target_: pytorch_lightning.loggers.CSVLogger
       save_dir: ${DistillationTraining.save_dir}
@@ -64,5 +66,5 @@ trainer:
       monitor: ${DistillationTraining.monitoring.monitor}
       mode: ${DistillationTraining.monitoring.mode}
       min_delta: 0.00
-      patience: 5
+      patience: 10
       verbose: True
