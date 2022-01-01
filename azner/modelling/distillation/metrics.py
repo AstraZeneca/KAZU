@@ -4,6 +4,7 @@ from seqeval.metrics import f1_score
 
 IGNORE_IDX = -100
 
+
 def accuracy(preds, labels):
     return (preds == labels).mean()
 
@@ -19,7 +20,7 @@ def numeric_label_f1_score(preds: List[List[int]], golds: List[List[int]], label
 
     pred_clean_labels_list = []
     gold_clean_labels_list = []
-    
+
     assert len(preds) == len(golds)
     for preds_id_sequence, golds_id_sequence in zip(preds, golds):
         assert len(preds_id_sequence) == len(golds_id_sequence)

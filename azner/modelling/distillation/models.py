@@ -45,10 +45,10 @@ class NerDataset(Dataset):
     """
 
     def __init__(
-        self, 
-        tokenizer: AutoTokenizer, 
-        examples: List[InputExample], 
-        label_map: Dict[str, int], 
+        self,
+        tokenizer: AutoTokenizer,
+        examples: List[InputExample],
+        label_map: Dict[str, int],
         max_length: int,
     ):
         """
@@ -57,7 +57,7 @@ class NerDataset(Dataset):
         :param examples: a list of InputExample, typically created from a
             :class:`azner.modelling.distillation.dataprocessor.NerProcessor`
         :param label_map: str to int mapping of labels
-        :param max_length: The maximum number of tokens per instance that the model can handle. 
+        :param max_length: The maximum number of tokens per instance that the model can handle.
             Inputs longer than max_length value will be truncated.
         """
         self.label_map = label_map
@@ -106,13 +106,13 @@ class NerDataset(Dataset):
                 label_id.append(IGNORE_IDX)
             else:
                 label_id.append(self.label_map[labels[i]])
-        
+
         # Truncation
-        if len(ntokens) > self.max_length-1:
-            assert (len(ntokens)==len(segment_ids)) and (len(ntokens)==len(label_id))
-            ntokens = ntokens[:self.max_length-1]
-            segment_ids = segment_ids[:self.max_length-1]
-            label_id = label_id[:self.max_length-1]
+        if len(ntokens) > self.max_length - 1:
+            assert (len(ntokens) == len(segment_ids)) and (len(ntokens) == len(label_id))
+            ntokens = ntokens[: self.max_length - 1]
+            segment_ids = segment_ids[: self.max_length - 1]
+            label_id = label_id[: self.max_length - 1]
 
         ntokens.append("[SEP]")
         segment_ids.append(0)
@@ -256,7 +256,7 @@ class TaskSpecificDistillation(pl.LightningModule):
             is_student=True,
         )
 
-        #self.teacher_model.eval()
+        # self.teacher_model.eval()
         with torch.no_grad():
             teacher_logits, teacher_atts, teacher_reps = self.teacher_model(
                 input_ids=batch["input_ids"],
@@ -415,7 +415,10 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
 
         dataset = NerDataset(
-            tokenizer=self.tokenizer, examples=self.training_examples, label_map=self.label_map, max_length=self.max_length
+            tokenizer=self.tokenizer,
+            examples=self.training_examples,
+            label_map=self.label_map,
+            max_length=self.max_length,
         )
         collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
         return DataLoader(
@@ -434,7 +437,10 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
     def val_dataloader(self) -> EVAL_DATALOADERS:
         examples = self.processor.get_dev_examples(self.data_dir)
         dataset = NerDataset(
-            tokenizer=self.tokenizer, examples=examples, label_map=self.label_map, max_length=self.max_length
+            tokenizer=self.tokenizer,
+            examples=examples,
+            label_map=self.label_map,
+            max_length=self.max_length,
         )
         collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
         return DataLoader(
