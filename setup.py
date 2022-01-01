@@ -14,12 +14,13 @@ setup(
         "transformers==4.12.5",
         "ray[serve]==1.6.0",
         "hydra-core==1.1.1",
-        "pytorch-lightning==1.4.9",
+        "pytorch-lightning==1.5.2",
         "pydash==5.1.0",
         "pandas==1.3.4",
         "pyarrow==5.0.0",
         "pytorch-metric-learning==0.9.99",
         "rapidfuzz==1.8.2",
+        "seqeval==1.2.2",
     ],
     extras_require={
         "dev": [
