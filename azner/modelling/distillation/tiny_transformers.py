@@ -30,7 +30,7 @@ class TinyBertForSequenceTagging(BertPreTrainedModel):
             self.num_labels = num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.seq_tagger = nn.Linear(in_features=config.hidden_size, out_features=self.num_labels)
+        self.classifier = nn.Linear(in_features=config.hidden_size, out_features=self.num_labels)
         self.fit_dense = nn.Linear(config.hidden_size, fit_size)
         self.init_weights()
 
@@ -49,7 +49,7 @@ class TinyBertForSequenceTagging(BertPreTrainedModel):
         sequence_output = output["hidden_states"]
         # sequence_output [list of torch tensor] = (number of layers + 1) * [batch_size, sequence_length, hidden_size]
         att_output = output["attentions"]
-        logits = self.seq_tagger(sequence_output[-1])
+        logits = self.classifier(sequence_output[-1])
 
         tmp = []
         if is_student:
