@@ -21,7 +21,7 @@ from transformers.utils import check_min_version
 
 from azner.modelling.distillation.data_utils import printable_text
 from azner.modelling.distillation.dataprocessor import NerProcessor
-from azner.modelling.distillation.metrics import numeric_label_f1_score
+from azner.modelling.distillation.metrics import numeric_label_f1_score, IGNORE_IDX
 from azner.modelling.distillation.tiny_transformers import TinyBertForSequenceTagging
 
 check_min_version("4.0.0")  # at least 4.0.0... for optimerzers
@@ -64,6 +64,7 @@ class NerDataset(Dataset):
         self.examples = examples
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.call_count = 0
         self.cache = LRUCache(5000)
 
     def __getitem__(self, index) -> T_co:
@@ -71,6 +72,7 @@ class NerDataset(Dataset):
             self.cache[index] = self.convert_single_example(
                 ex_index=index, example=self.examples[index]
             )
+        self.call_count += 1
         return self.cache[index]
 
     def __len__(self):
@@ -91,18 +93,17 @@ class NerDataset(Dataset):
                 else:
                     labels.append("X")
 
-        # drop if token is longer than max_seq_length
         ntokens = []
         segment_ids = []
         label_id = []
         ntokens.append("[CLS]")
         segment_ids.append(0)
-        label_id.append(self.label_map["O"])  # putting O instead of [CLS]
+        label_id.append(IGNORE_IDX)
         for i, token in enumerate(tokens):
             ntokens.append(token)
             segment_ids.append(0)
             if labels[i] == "X":
-                label_id.append(self.label_map["O"])
+                label_id.append(IGNORE_IDX)
             else:
                 label_id.append(self.label_map[labels[i]])
         
@@ -115,15 +116,16 @@ class NerDataset(Dataset):
 
         ntokens.append("[SEP]")
         segment_ids.append(0)
-        label_id.append(self.label_map["O"])  # putting O instead of [SEP]
+        label_id.append(IGNORE_IDX)
 
         input_ids = self.tokenizer.convert_tokens_to_ids(ntokens)
         # The mask has 1 for real tokens and 0 for padding tokens.
         input_mask = [1] * len(input_ids)
-        if ex_index < 4:  # Examples before model run
+        if self.call_count < 4 and ex_index < 4:  # Examples. Executed only once per model run
             logger.info("*** Example ***")
             logger.info("guid: %s" % (example.guid))
             logger.info("tokens: %s" % " ".join([printable_text(x) for x in tokens]))
+            logger.info("ntokens: %s" % " ".join([printable_text(x) for x in ntokens]))
             logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
             logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
             logger.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
@@ -349,7 +351,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
         self.student_model = TinyBertForSequenceTagging.from_pretrained(
             student_model_path, num_labels=self.num_labels
         )
-        self.loss = CrossEntropyLoss()
+        self.loss = CrossEntropyLoss(ignore_index=IGNORE_IDX)
         self.save_hyperparameters()
 
     def validation_step_predLayer(self, batch, batch_idx):
@@ -357,6 +359,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
             input_ids=batch["input_ids"],
             token_type_ids=batch["token_type_ids"],
             attention_mask=batch["attention_mask"],
+            is_student=True,
         )
 
         loss = (

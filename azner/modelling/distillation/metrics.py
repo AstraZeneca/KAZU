@@ -2,6 +2,7 @@ from typing import List
 
 from seqeval.metrics import f1_score
 
+IGNORE_IDX = -100
 
 def accuracy(preds, labels):
     return (preds == labels).mean()
@@ -16,11 +17,19 @@ def numeric_label_f1_score(preds: List[List[int]], golds: List[List[int]], label
     :return:
     """
 
-    pred_labels_list = []
-    labels_list = []
-    for id_sequence in preds:
-        pred_labels_list.append([label_list[ele] for ele in id_sequence])
-    for id_sequence in golds:
-        labels_list.append([label_list[ele] for ele in id_sequence])
+    pred_clean_labels_list = []
+    gold_clean_labels_list = []
+    
+    assert len(preds) == len(golds)
+    for preds_id_sequence, golds_id_sequence in zip(preds, golds):
+        assert len(preds_id_sequence) == len(golds_id_sequence)
+        p_labels = []
+        g_labels = []
+        for pred_label, gold_label in zip(preds_id_sequence, golds_id_sequence):
+            if gold_label != IGNORE_IDX:
+                p_labels.append(label_list[pred_label])
+                g_labels.append(label_list[gold_label])
+        pred_clean_labels_list.append(p_labels)
+        gold_clean_labels_list.append(g_labels)
 
-    return f1_score(labels_list, pred_labels_list)
+    return f1_score(gold_clean_labels_list, pred_clean_labels_list)
