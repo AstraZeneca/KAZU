@@ -45,7 +45,7 @@ class StopWordRemover:
 class OntologyParser(ABC):
     """
     Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking. This involves generating
-    two dataframes: one that holds the linking metadata (e.g. default label, IDX and other info), ad another that
+    two dataframes: one that holds the linking metadata (e.g. default label, IDX and other info), and another that
     holds any synonym information
     Implementations should have a class attribute 'name' to something suitably representative
     """
@@ -106,7 +106,7 @@ class OntologyParser(ABC):
         columns:
 
 
-        [IDX, DEFAULT_LABEL, SYN,MAPPING_TYPE]
+        [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
 
         IDX: the ontology id
         DEFAULT_LABEL: the preferred label
