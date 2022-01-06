@@ -96,7 +96,7 @@ class OntologyParser(ABC):
         metadata_columns.remove(MAPPING_TYPE)
         metadata_columns.remove(SYN)
         metadata_df = df[metadata_columns]
-        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).copy()
+        metadata_df = metadata_df.drop_duplicates(subset=[IDX])
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         return syn_df, metadata_df
 
