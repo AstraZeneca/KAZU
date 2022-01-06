@@ -13,7 +13,7 @@ from tqdm.auto import tqdm
 
 
 from abc import ABC
-import spacy
+import en_core_web_sm
 
 # dataframe column keys
 
@@ -31,7 +31,7 @@ class StopWordRemover:
     """
 
     def __init__(self):
-        self.nlp = spacy.load("en_core_web_sm")
+        self.nlp = en_core_web_sm.load()
         self.all_stopwords = self.nlp.Defaults.stop_words
 
     def __call__(self, text: str) -> str:
