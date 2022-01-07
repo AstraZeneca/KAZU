@@ -74,8 +74,8 @@ class Index(abc.ABC):
         self._save(str(self.get_index_data_path(directory)))
         return directory
 
-    @staticmethod
-    def load(path: str, name: str):
+    @classmethod
+    def load(cls, path: str, name: str):
         """
         load from disk
         :param path: the parent path of the index
@@ -84,28 +84,23 @@ class Index(abc.ABC):
         """
 
         path = Path(path).joinpath(name)
-        with open(Index.get_index_path(path), "rb") as f:
+        with open(cls.get_index_path(path), "rb") as f:
             index = pickle.load(f)
-        index.metadata = pd.read_parquet(Index.get_dataframe_path(path))
-        index._load(Index.get_index_data_path(path))
+        index.metadata = pd.read_parquet(cls.get_dataframe_path(path))
+        index._load(cls.get_index_data_path(path))
         return index
 
     @staticmethod
-    def get_path_for_ancillory_file(directory: Path, filename: str) -> Path:
-        path = Path(directory).joinpath(filename)
-        return path
-
-    @staticmethod
     def get_dataframe_path(path: Path) -> Path:
-        return Index.get_path_for_ancillory_file(path, "ontology_metadata.parquet")
+        return path.joinpath("ontology_metadata.parquet")
 
     @staticmethod
     def get_index_path(path: Path) -> Path:
-        return Index.get_path_for_ancillory_file(path, "index.pkl")
+        return path.joinpath("index.pkl")
 
     @staticmethod
     def get_index_data_path(path: Path) -> Path:
-        return Index.get_path_for_ancillory_file(path, "index.data")
+        return path.joinpath("index.data")
 
     def _save(self, path: str):
         """
