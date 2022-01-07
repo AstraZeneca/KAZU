@@ -44,14 +44,14 @@ class DummyParser(OntologyParser):
         return dummy_df()
 
 
-def test_split_dataframe():
+def test_enumerate_dataframe_chunks():
     # + 1 to check we can handle chunk sizes larger than the df
     for chunk_size in range(1, len(DUMMY_DATA[IDX]) + 1):
         print(f"chunk size: {chunk_size}")
-        res = list(EmbeddingIndexCacheManager.split_dataframe(dummy_df(), chunk_size))
-        for split_df in res[:-1]:
+        res = list(EmbeddingIndexCacheManager.enumerate_dataframe_chunks(dummy_df(), chunk_size))
+        for _, split_df in res[:-1]:
             assert len(split_df) == chunk_size
-        assert 0 < len(res[-1]) <= chunk_size
+        assert 0 < len(res[-1][1]) <= chunk_size
 
 
 @pytest.mark.parametrize("index_type", ["MatMulTensorEmbeddingIndex", "CDistTensorEmbeddingIndex"])

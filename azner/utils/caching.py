@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from pathlib import Path
-from typing import Type, Dict, Any, Iterable
+from typing import Type, Dict, Any, Iterable, Tuple
 
 from cachetools import LFUCache
 
@@ -225,7 +225,9 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         return index
 
     @staticmethod
-    def split_dataframe(df: pd.DataFrame, chunk_size: int = 100000) -> Iterable[pd.DataFrame]:
+    def enumerate_dataframe_chunks(
+        df: pd.DataFrame, chunk_size: int = 100000
+    ) -> Iterable[Tuple[int, pd.DataFrame]]:
         """
         generator to split up a dataframe into partitions
         :param df:
@@ -233,7 +235,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         :return:
         """
         for i in range(0, len(df), chunk_size):
-            yield df[i : i + chunk_size]
+            yield i, df[i : i + chunk_size]
 
     def predict_ontology_embeddings(
         self, ontology_dataframe: pd.DataFrame
@@ -245,8 +247,8 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         :return: partition number, metadata dataframe and embeddings
         """
 
-        for partition_number, df in enumerate(
-            self.split_dataframe(ontology_dataframe, self.ontology_partition_size)
+        for partition_number, df in self.enumerate_dataframe_chunks(
+            ontology_dataframe, self.ontology_partition_size
         ):
             df = df.copy()
             if df.shape[0] == 0:
