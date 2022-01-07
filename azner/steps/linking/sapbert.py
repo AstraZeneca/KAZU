@@ -94,8 +94,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                     [x.match for x in entities], trainer=self.trainer, batch_size=self.batch_size
                 )
                 results = torch.unsqueeze(results, 1)
-                for i, result in enumerate(results):
-                    entity = entities[i]
+                for entity, result in zip(entities, results):
                     cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
                     if len(cache_missed_entities) == 0:
                         continue
