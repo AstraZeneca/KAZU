@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import logging
 from pathlib import Path
 from typing import Type, Dict, Any
@@ -93,7 +94,7 @@ class EntityLinkingLookupCache:
         return cache_misses
 
 
-class IndexCacheManager:
+class IndexCacheManager(ABC):
     """
     An IndexCacheManager is responsible for creating, saving and loading a set of :class:`azner.utils.caching.Index`.
     It's useful to use this class, instead of an instance of :class:`azner.utils.caching.Index` directly, as this class
@@ -135,6 +136,7 @@ class IndexCacheManager:
                 indices.append(self.build_ontology_cache(cache_dir, parser))
         return indices
 
+    @abstractmethod
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         """
         Implementations should implement this method to determine how an index gets built for a given parser
@@ -142,7 +144,7 @@ class IndexCacheManager:
         :param parser:
         :return:
         """
-        raise NotImplementedError()
+        pass
 
     def load_ontology_from_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         """
