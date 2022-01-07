@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class DictionaryEntityLinkingStep(BaseStep):
     """
-    Uses synonym lists to match entities to ontologies. Note,
+    Uses synonym lists to match entities to ontologies.
     """
 
     def __init__(
