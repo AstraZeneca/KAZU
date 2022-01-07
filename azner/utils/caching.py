@@ -40,7 +40,7 @@ from azner.utils.utils import (
 logger = logging.getLogger(__name__)
 
 
-def select_index_type(index_class_name) -> Type:
+def select_index_type(index_class_name) -> Type[Index]:
     """
     select a index type based on it's string name
     :param index_class_name:

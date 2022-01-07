@@ -51,7 +51,7 @@ def test_cdist_tensor_index():
     perform_index_tests(CDistTensorEmbeddingIndex)
 
 
-def perform_index_tests(index_type: Type):
+def perform_index_tests(index_type: Type[Index]):
     with tempfile.TemporaryDirectory() as f:
         index_name = "test_index"
         index_save_dir = f
