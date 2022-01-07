@@ -35,11 +35,7 @@ def test_sapbert_acceptance():
         successes, failures = step(easy_test_docs)
         entities = pydash.flatten([x.get_entities() for x in successes])
         for entity, iri, source in zip(entities, iris, sources):
-            if (
-                entity.metadata.mappings is not None
-                and len(entity.metadata.mappings) > 0
-                and entity.metadata.mappings[0].idx == iri
-            ):
+            if len(entity.metadata.mappings) > 0 and entity.metadata.mappings[0].idx == iri:
                 hits.append(entity)
             else:
                 misses.append(
@@ -78,11 +74,7 @@ def test_full_pipeline_acceptance_test():
 
 
 def query_annotations_df(annotations: pd.DataFrame, entity: Entity):
-    if (
-        entity.metadata is not None
-        and entity.metadata.mappings is not None
-        and len(entity.metadata.mappings) > 0
-    ):
+    if len(entity.metadata.mappings) > 0:
         mapping_id = entity.metadata.mappings[0].idx
     else:
         mapping_id = None
@@ -113,9 +105,7 @@ def test_dictionary_entity_linking():
         successes = pipeline(easy_test_docs)
         entities = pydash.flatten([x.get_entities() for x in successes])
         for entity, iri, source in zip(entities, iris, sources):
-            if entity.metadata.mappings is not None and iri in [
-                x.idx for x in entity.metadata.mappings
-            ]:
+            if iri in [x.idx for x in entity.metadata.mappings]:
                 hits.append(entity)
             else:
                 misses.append(
@@ -126,7 +116,7 @@ def test_dictionary_entity_linking():
                 )
 
         for entity, iri in misses:
-            if entity.metadata.mappings is not None:
+            if len(entity.metadata.mappings) > 0:
                 print(
                     f"missed {entity.match}: got {entity.metadata.mappings[0].idx}, wanted {iri} "
                 )
