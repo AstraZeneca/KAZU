@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from pathlib import Path
-from typing import Type, Dict, Any
+from typing import Type, Dict, Any, Iterable
 
 from cachetools import LFUCache
 
@@ -224,7 +224,8 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         logger.info(f"final index size for {parser.name} is {len(index)}")
         return index
 
-    def split_dataframe(self, df: pd.DataFrame, chunk_size: int = 100000):
+    @staticmethod
+    def split_dataframe(df: pd.DataFrame, chunk_size: int = 100000) -> Iterable[pd.DataFrame]:
         """
         generator to split up a dataframe into partitions
         :param df:
