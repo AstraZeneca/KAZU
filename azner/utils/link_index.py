@@ -273,9 +273,9 @@ class EmbeddingIndex(Index):
         distances, neighbours = self._search_func(
             query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
         )
-        hit_df = self.metadata.iloc[neighbours].copy()
+        hit_df = self.metadata.iloc[neighbours]
         # all mapping types are inferred for embedding based matches
-        hit_df[MAPPING_TYPE] = "inferred"
+        hit_df = hit_df.assign(**{MAPPING_TYPE: "inferred"})
         return hit_df, distances
 
 
