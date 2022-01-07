@@ -17,7 +17,6 @@ from azner.utils.link_index import (
 from azner.utils.utils import get_match_entity_class_hash
 
 
-import os
 import shutil
 from typing import List, Tuple
 
@@ -119,20 +118,16 @@ class IndexCacheManager(ABC):
             )
             if self.rebuild_cache:
                 logger.info("forcing a rebuild of the ontology cache")
-                if os.path.exists(cache_dir):
+                if cache_dir.exists():
                     shutil.rmtree(cache_dir)
-                get_cache_dir(
-                    parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True
-                )
+                cache_dir.mkdir()
                 indices.append(self.build_ontology_cache(cache_dir, parser))
-            elif os.path.exists(cache_dir):
+            elif cache_dir.exists():
                 logger.info(f"loading cached ontology file from {cache_dir}")
                 indices.append(self.load_ontology_from_cache(cache_dir, parser))
             else:
                 logger.info("No ontology cache file found. Building a new one")
-                get_cache_dir(
-                    parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=True
-                )
+                cache_dir.mkdir()
                 indices.append(self.build_ontology_cache(cache_dir, parser))
         return indices
 
