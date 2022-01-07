@@ -250,7 +250,6 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         for partition_number, df in self.enumerate_dataframe_chunks(
             ontology_dataframe, self.ontology_partition_size
         ):
-            df = df.copy()
             if df.shape[0] == 0:
                 return
             logger.info(f"creating partitions for partition {partition_number}")
