@@ -250,10 +250,11 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         for partition_number, df in self.enumerate_dataframe_chunks(
             ontology_dataframe, self.ontology_partition_size
         ):
-            if df.shape[0] == 0:
+            len_df = len(df)
+            if len_df == 0:
                 return
             logger.info(f"creating partitions for partition {partition_number}")
-            logger.info(f"read {df.shape[0]} rows from ontology")
+            logger.info(f"read {len_df} rows from ontology")
             default_labels = df[DEFAULT_LABEL].tolist()
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
             results = self.model.get_embeddings_for_strings(

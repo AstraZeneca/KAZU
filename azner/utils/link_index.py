@@ -199,7 +199,7 @@ class DictionaryIndex(Index):
             self.metadata = pd.concat([self.metadata, metadata_df])
 
     def __len__(self):
-        return self.metadata.shape[0]
+        return len(self.metadata)
 
 
 class EmbeddingIndex(Index):
@@ -219,8 +219,8 @@ class EmbeddingIndex(Index):
         :return:
         """
 
-        if embeddings.shape[0] != metadata.shape[0]:
-            raise ValueError("embeddings shape not equal to metadata length")
+        if len(embeddings) != len(metadata):
+            raise ValueError("embeddings length not equal to metadata length")
         if self.index is None:
             self.index = self._create_index(embeddings)
             self.metadata = metadata
@@ -347,7 +347,7 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         return embeddings
 
     def __len__(self):
-        return self.index.shape[0]
+        return len(self.index)
 
 
 class CDistTensorEmbeddingIndex(TensorEmbeddingIndex):
