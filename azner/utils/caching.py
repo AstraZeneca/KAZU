@@ -232,9 +232,8 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         :param chunk_size: size of partittions to create
         :return:
         """
-        num_chunks = len(df) // chunk_size + 1
-        for i in range(num_chunks):
-            yield df[i * chunk_size : (i + 1) * chunk_size]
+        for i in range(0, len(df), chunk_size):
+            yield df[i : i + chunk_size]
 
     def predict_ontology_embeddings(
         self, ontology_dataframe: pd.DataFrame
