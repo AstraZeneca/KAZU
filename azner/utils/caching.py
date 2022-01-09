@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 def select_index_type(index_class_name) -> Type[Index]:
     """
-    select a index type based on it's string name
+    select a index type based on its string name
     :param index_class_name:
     :return:
     """
@@ -75,7 +75,7 @@ class EntityLinkingLookupCache:
 
     def check_lookup_cache(self, entities: List[Entity]) -> List[Entity]:
         """
-        checks the cache for mappings. If relevant mappings are found for an entity, update it's mappings
+        checks the cache for mappings. If relevant mappings are found for an entity, update its mappings
         accordingly. If not return as a list of cache misses (e.g. for further processing)
 
         :param entities:

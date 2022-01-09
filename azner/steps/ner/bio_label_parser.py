@@ -46,7 +46,7 @@ class BIOLabelParser:
 
         def reset_state(self):
             """
-            reset the status to it's initial state
+            reset the status to its initial state
             :return:
             """
             self.start = None
