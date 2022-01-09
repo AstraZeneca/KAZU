@@ -36,22 +36,19 @@ except ImportError:
     SKIP_FAISS = True
 
 
-@pytest.mark.skipif(SKIP_FAISS, reason="Skipping faiss tests as not available")
-def test_faiss_index():
-    perform_index_tests(FaissEmbeddingIndex)
-
-
-# TODO: find a better way to test matmul search
-@pytest.mark.skip
-def test_matmul_tensor_index():
-    perform_index_tests(MatMulTensorEmbeddingIndex)
-
-
-def test_cdist_tensor_index():
-    perform_index_tests(CDistTensorEmbeddingIndex)
-
-
-def perform_index_tests(index_type: Type[Index]):
+@pytest.mark.parametrize(
+    "index_type",
+    (
+        pytest.param(
+            FaissEmbeddingIndex,
+            marks=pytest.mark.skipif(SKIP_FAISS, reason="Skipping faiss tests as not available"),
+        ),
+        # TODO: find a better way to test matmul search
+        pytest.param(MatMulTensorEmbeddingIndex, marks=pytest.mark.skip),
+        CDistTensorEmbeddingIndex,
+    ),
+)
+def test_embedding_index(index_type: Type[Index]):
     with tempfile.TemporaryDirectory() as f:
         index_name = "test_index"
         index_save_dir = f
