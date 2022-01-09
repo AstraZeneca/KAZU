@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from pathlib import Path
-from typing import Type, Dict, Any, Iterable, Tuple, Set
+from typing import Type, Dict, Any, Iterable, Tuple, List, Set
 
 from cachetools import LFUCache
 
@@ -18,7 +18,6 @@ from azner.utils.utils import get_match_entity_class_hash
 
 
 import shutil
-from typing import List, Tuple
 
 import pandas as pd
 import torch
