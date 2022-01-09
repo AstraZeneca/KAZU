@@ -4,8 +4,12 @@ from hydra.utils import instantiate
 
 from azner.data.data import Entity
 from azner.pipeline.pipeline import Pipeline, load_steps
-from azner.tests.utils import entity_linking_hard_cases, requires_model_pack
-from azner.tests.utils import full_pipeline_test_cases, AcceptanceTestError
+from azner.tests.utils import (
+    entity_linking_hard_cases,
+    requires_model_pack,
+    full_pipeline_test_cases,
+    AcceptanceTestError,
+)
 
 # TODO: we need a much better/consistent evaluation dataset for acceptance tests. Currently these all fail until we have
 # one
