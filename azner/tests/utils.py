@@ -50,11 +50,6 @@ class MockedCachedIndexGroup:
         return mappings
 
 
-class AcceptanceTestError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-
 def full_pipeline_test_cases() -> Tuple[List[SimpleDocument], List[pd.DataFrame]]:
     docs = []
     dfs = []

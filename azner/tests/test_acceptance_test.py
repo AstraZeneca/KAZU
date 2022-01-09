@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 import pydash
 from hydra.utils import instantiate
 
@@ -8,7 +9,6 @@ from azner.tests.utils import (
     entity_linking_hard_cases,
     requires_model_pack,
     full_pipeline_test_cases,
-    AcceptanceTestError,
 )
 
 # TODO: we need a much better/consistent evaluation dataset for acceptance tests. Currently these all fail until we have
@@ -43,7 +43,7 @@ def test_sapbert_acceptance(kazu_test_config):
     total = len(hits) + len(misses)
     score = len(hits) / total
     if score < minimum_pass_score:
-        raise AcceptanceTestError(
+        pytest.fail(
             f"sapbert scored {score}, which did not reach minimum pass score of {minimum_pass_score}"
         )
 
@@ -57,7 +57,7 @@ def test_full_pipeline_acceptance_test(kazu_test_config):
         for entity in section.entities:
             matches = query_annotations_df(annotations, entity)
             if matches.shape[0] != 1:
-                raise AcceptanceTestError(f"failed to match {entity} in section: {section.text}")
+                pytest.fail(f"failed to match {entity} in section: {section.text}")
 
 
 def query_annotations_df(annotations: pd.DataFrame, entity: Entity):
@@ -108,6 +108,6 @@ def test_dictionary_entity_linking(override_kazu_test_config):
     total = len(hits) + len(misses)
     score = len(hits) / total
     if score < minimum_pass_score:
-        raise AcceptanceTestError(
+        pytest.fail(
             f"sapbert scored {score}, which did not reach minimum pass score of {minimum_pass_score}"
         )
