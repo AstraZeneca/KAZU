@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from pathlib import Path
-from typing import Type, Dict, Any, Iterable, Tuple
+from typing import Type, Dict, Any, Iterable, Tuple, Set
 
 from cachetools import LFUCache
 
@@ -281,7 +281,7 @@ class CachedIndexGroup:
         """
         self.cache_managers = cache_managers
         self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
-        self.ontology_index_dict: Dict[str, Index] = {}
+        self.entity_class_to_indices: Dict[str, Set[Index]] = {}
 
     def search(self, query: Any, entity_class: str, namespace: str, **kwargs) -> List[Mapping]:
         """
@@ -294,16 +294,12 @@ class CachedIndexGroup:
         :param kwargs: any other kwargs to pass to the search method of each index
         :return:
         """
-        ontologies_to_search = self.entity_class_to_ontology_mappings.get(entity_class, [])
+        indices_to_use = self.entity_class_to_indices.get(entity_class, None)
         results = []
-        for ontology_name in ontologies_to_search:
-            index = self.ontology_index_dict.get(ontology_name)
-            if index is None:
-                logger.warning(f"tried to search indices for {ontology_name}, but none were found")
-            else:
-                index_results = index.search(query=query, **kwargs)
-                index_results[SOURCE] = index.name
-                results.append(index_results)
+        for index in indices_to_use:
+            index_results = index.search(query=query, **kwargs)
+            index_results[SOURCE] = index.name
+            results.append(index_results)
 
         mappings = []
         if len(results) > 0:
@@ -330,6 +326,19 @@ class CachedIndexGroup:
         loads the cached version of the indices from disk
         """
         for cache_manager in self.cache_managers:
-            indices = cache_manager.get_or_create_ontology_indices()
-            for index in indices:
-                self.ontology_index_dict[index.name] = index
+            all_indices = {
+                index.name: index for index in cache_manager.get_or_create_ontology_indices()
+            }
+
+            for entity_class, ontologies in self.entity_class_to_ontology_mappings.items():
+                current_indices = set()
+                for ontology_name in ontologies:
+                    index = all_indices.get(ontology_name)
+                    if index is None:
+                        logger.warning(f"No index found for {ontology_name}")
+                    else:
+                        current_indices.add(index)
+
+                if not current_indices:
+                    logger.warning(f"No indices loaded for entity class {entity_class}")
+                self.entity_class_to_indices[entity_class] = current_indices
