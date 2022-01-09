@@ -489,6 +489,36 @@ class PLSapbertModel(LightningModule):
 
         return result
 
+    def get_embeddings_for_strings(
+        self, texts: List[str], trainer: Optional[Trainer] = None, batch_size: Optional[int] = None
+    ) -> torch.Tensor:
+        """
+        convenience function: for a list of strings, generate embeddings
+        :param texts:
+        :param trainer: an optional PL Trainer to use. If not specified, uses the default one
+        :param batch size: optional batch size to use. If not specified, use 16
+        :return: a 2d tensor of embeddings
+        """
+        if trainer is None:
+            trainer = Trainer()
+        if batch_size is None:
+            batch_size = 16
+
+        loader = get_embedding_dataloader_from_strings(texts, self.tokeniser, batch_size, 0)
+        results = self.get_embeddings_from_dataloader(loader, trainer)
+        return results
+
+    def get_embeddings_from_dataloader(self, loader: DataLoader, trainer: Trainer) -> torch.Tensor:
+        """
+        get the cls token output from all data in a dataloader as a 2d tensor
+        :param loader:
+        :param trainer: the PL Trainer to use
+        :return: 2d tensor of cls  output
+        """
+        results = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
+        results = self.get_embeddings(results)
+        return results
+
 
 @hydra.main(config_path="../../../conf", config_name="config")
 def start(cfg: DictConfig) -> None:

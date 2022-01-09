@@ -34,7 +34,7 @@ Components are wrapped as instances of BaseStep.
 
 
 Advanced Pipeline configuration with Hydra
----------------------------------
+-------------------------------------------
 
 To create an NLP pipeline, you need to instantiate steps. Given the large amount
 of configuration required, the easiest way to do this is with Hydra https://hydra.cc/docs/intro/

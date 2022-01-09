@@ -40,6 +40,7 @@
 <div class="genindex-jumpbox">
  <a href="#_"><strong>_</strong></a>
  | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
@@ -77,8 +78,14 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndex.add">add() (azner.utils.link_index.EmbeddingIndex method)</a>
+      <li><a href="apidocs.html#azner.utils.link_index.DictionaryIndex.add">add() (azner.utils.link_index.DictionaryIndex method)</a>
+
+      <ul>
+        <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndex.add">(azner.utils.link_index.EmbeddingIndex method)</a>
 </li>
+        <li><a href="apidocs.html#azner.utils.link_index.Index.add">(azner.utils.link_index.Index method)</a>
+</li>
+      </ul></li>
       <li><a href="apidocs.html#azner.data.data.Entity.as_brat">as_brat() (azner.data.data.Entity method)</a>
 </li>
       <li>
@@ -163,10 +170,24 @@
   </ul></td>
 </tr></table>
 
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs.html#azner.utils.caching.DictionaryIndexCacheManager.build_ontology_cache">build_ontology_cache() (azner.utils.caching.DictionaryIndexCacheManager method)</a>
+
+      <ul>
+        <li><a href="apidocs.html#azner.utils.caching.EmbeddingIndexCacheManager.build_ontology_cache">(azner.utils.caching.EmbeddingIndexCacheManager method)</a>
+</li>
+        <li><a href="apidocs.html#azner.utils.caching.IndexCacheManager.build_ontology_cache">(azner.utils.caching.IndexCacheManager method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.cache_ontology_embeddings">cache_ontology_embeddings() (azner.steps.SapBertForEntityLinkingStep method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.CachedIndexGroup">CachedIndexGroup (class in azner.utils.caching)</a>
 </li>
       <li><a href="apidocs.html#azner.utils.link_index.CDistTensorEmbeddingIndex">CDistTensorEmbeddingIndex (class in azner.utils.link_index)</a>
 </li>
@@ -186,6 +207,8 @@
 </li>
       <li><a href="apidocs.html#azner.utils.link_index.DictionaryIndex">DictionaryIndex (class in azner.utils.link_index)</a>
 </li>
+      <li><a href="apidocs.html#azner.utils.caching.DictionaryIndexCacheManager">DictionaryIndexCacheManager (class in azner.utils.caching)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#azner.utils.utils.documents_to_document_section_batch_encodings_map">documents_to_document_section_batch_encodings_map() (in module azner.utils.utils)</a>
@@ -202,15 +225,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndex">EmbeddingIndex (class in azner.utils.link_index)</a>
 </li>
-      <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndexFactory">EmbeddingIndexFactory (class in azner.utils.link_index)</a>
+      <li><a href="apidocs.html#azner.utils.caching.EmbeddingIndexCacheManager">EmbeddingIndexCacheManager (class in azner.utils.caching)</a>
 </li>
       <li><a href="steps.html#azner.steps.EnsembleEntityLinkingStep">EnsembleEntityLinkingStep (class in azner.steps)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#azner.data.data.Entity">Entity (class in azner.data.data)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#azner.utils.caching.EntityLinkingLookupCache">EntityLinkingLookupCache (class in azner.utils.caching)</a>
+</li>
+      <li><a href="apidocs.html#azner.utils.caching.EmbeddingIndexCacheManager.enumerate_dataframe_chunks">enumerate_dataframe_chunks() (azner.utils.caching.EmbeddingIndexCacheManager static method)</a>
 </li>
       <li><a href="apidocs.html#azner.steps.linking.link_ensembling.MappingPostProcessing.exact_hits">exact_hits() (azner.steps.linking.link_ensembling.MappingPostProcessing method)</a>
 </li>
@@ -248,17 +273,13 @@
 </li>
       <li><a href="steps.html#azner.steps.TransformersModelForTokenClassificationNerStep.get_dataloader">get_dataloader() (azner.steps.TransformersModelForTokenClassificationNerStep method)</a>
 </li>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.get_embeddings_for_strings">get_embeddings_for_strings() (azner.steps.SapBertForEntityLinkingStep method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.get_embeddings_from_dataloader">get_embeddings_from_dataloader() (azner.steps.SapBertForEntityLinkingStep method)</a>
-</li>
       <li><a href="steps.html#azner.steps.TransformersModelForTokenClassificationNerStep.get_list_of_batch_encoding_frames_for_section">get_list_of_batch_encoding_frames_for_section() (azner.steps.TransformersModelForTokenClassificationNerStep method)</a>
 </li>
       <li><a href="steps.html#azner.steps.TransformersModelForTokenClassificationNerStep.get_offset_and_word_id_frames">get_offset_and_word_id_frames() (azner.steps.TransformersModelForTokenClassificationNerStep method)</a>
 </li>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.get_or_create_ontology_index_dict">get_or_create_ontology_index_dict() (azner.steps.SapBertForEntityLinkingStep method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.IndexCacheManager.get_or_create_ontology_indices">get_or_create_ontology_indices() (azner.utils.caching.IndexCacheManager method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -277,16 +298,24 @@
       <li><a href="apidocs.html#azner.utils.link_index.Index">Index (class in azner.utils.link_index)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs.html#azner.utils.caching.IndexCacheManager">IndexCacheManager (class in azner.utils.caching)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndex.load">load() (azner.utils.link_index.EmbeddingIndex method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.CachedIndexGroup.load">load() (azner.utils.caching.CachedIndexGroup method)</a>
+
+      <ul>
+        <li><a href="apidocs.html#azner.utils.link_index.Index.load">(azner.utils.link_index.Index class method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.load_ontology_index_dict_from_cache">load_ontology_index_dict_from_cache() (azner.steps.SapBertForEntityLinkingStep method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.IndexCacheManager.load_ontology_from_cache">load_ontology_from_cache() (azner.utils.caching.IndexCacheManager method)</a>
 </li>
       <li><a href="apidocs.html#azner.pipeline.pipeline.load_steps">load_steps() (in module azner.pipeline.pipeline)</a>
 </li>
@@ -359,7 +388,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.predict_ontology_embeddings">predict_ontology_embeddings() (azner.steps.SapBertForEntityLinkingStep method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.EmbeddingIndexCacheManager.predict_ontology_embeddings">predict_ontology_embeddings() (azner.utils.caching.EmbeddingIndexCacheManager method)</a>
 </li>
       <li><a href="apidocs.html#azner.modelling.hf_lightning_wrappers.PLAutoModel.predict_step">predict_step() (azner.modelling.hf_lightning_wrappers.PLAutoModel method)</a>
 
@@ -391,23 +420,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep">SapBertForEntityLinkingStep (class in azner.steps)</a>
 </li>
-      <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndex.save">save() (azner.utils.link_index.EmbeddingIndex method)</a>
+      <li><a href="apidocs.html#azner.utils.link_index.Index.save">save() (azner.utils.link_index.Index method)</a>
 </li>
       <li><a href="steps.html#azner.steps.SciSpacyAbbreviationExpansionStep">SciSpacyAbbreviationExpansionStep (class in azner.steps)</a>
 </li>
-      <li><a href="apidocs.html#azner.utils.link_index.DictionaryIndex.search">search() (azner.utils.link_index.DictionaryIndex method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.CachedIndexGroup.search">search() (azner.utils.caching.CachedIndexGroup method)</a>
 
       <ul>
-        <li><a href="apidocs.html#azner.utils.link_index.EmbeddingIndex.search">(azner.utils.link_index.EmbeddingIndex method)</a>
-</li>
         <li><a href="apidocs.html#azner.utils.link_index.Index.search">(azner.utils.link_index.Index method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs.html#azner.steps.linking.link_ensembling.MappingPostProcessing.similarly_ranked">similarly_ranked() (azner.steps.linking.link_ensembling.MappingPostProcessing method)</a>
+      <li><a href="apidocs.html#azner.utils.caching.select_index_type">select_index_type() (in module azner.utils.caching)</a>
 </li>
-      <li><a href="steps.html#azner.steps.SapBertForEntityLinkingStep.split_dataframe">split_dataframe() (azner.steps.SapBertForEntityLinkingStep method)</a>
+      <li><a href="apidocs.html#azner.steps.linking.link_ensembling.MappingPostProcessing.similarly_ranked">similarly_ranked() (azner.steps.linking.link_ensembling.MappingPostProcessing method)</a>
 </li>
       <li><a href="apidocs.html#azner.web.server.start">start() (in module azner.web.server)</a>
 </li>

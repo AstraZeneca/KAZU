@@ -15,7 +15,7 @@ from azner.data.data import (
     PROCESSING_EXCEPTION,
 )
 from azner.steps import BaseStep
-from azner.utils.link_index import IDX, SYN, DEFAULT_LABEL
+from azner.modelling.ontology_preprocessing.base import DEFAULT_LABEL, IDX, SYN
 
 
 class LinkRanks(Enum):
@@ -158,7 +158,7 @@ class EnsembleEntityLinkingStep(BaseStep):
         """
 
         :param depends_on:
-        :param linker_score_thresholds: Dict that maps a linker namespace to it's score threshold
+        :param linker_score_thresholds: Dict that maps a linker namespace to its score threshold
         :param keep_top_n:
         """
         super().__init__(depends_on)

@@ -1,34 +1,41 @@
 _target_: azner.steps.linking.dictionary.DictionaryEntityLinkingStep
 depends_on: ~
-entity_class_to_ontology_mappings:
-  drug: CHEMBL
-  disease: MONDO
-  gene: ENSEMBL
-  anatomy: UBERON
-  species: NOT_IMPLEMENTED
-  mutation: NOT_IMPLEMENTED
-ontology_dictionary_index:
-  MONDO:
-    _target_: azner.utils.link_index.DictionaryIndex
-    path: ~
-    name: MONDO
-    fuzzy: true
-  UBERON:
-    _target_: azner.utils.link_index.DictionaryIndex
-    path: ~
-    name: UBERON
-    fuzzy: true
-  CHEMBL:
-    _target_: azner.utils.link_index.DictionaryIndex
-    path: ~
-    name: CHEMBL
-    fuzzy: true
-  ENSEMBL:
-    _target_: azner.utils.link_index.DictionaryIndex
-    path: ~
-    name: ENSEMBL
-    fuzzy: true
-process_all_entities: true
 lookup_cache_size: 5000
-
-
+fuzzy: True
+top_n: 20
+score_cutoff: 90.0
+index_group:
+  _target_: azner.utils.caching.CachedIndexGroup
+  entity_class_to_ontology_mappings:
+    drug:
+      - CHEMBL
+    disease:
+      - MONDO
+      - MEDDRA
+    gene:
+      - ENSEMBL
+    anatomy:
+      - UBERON
+    species:
+      - NOT_IMPLEMENTED
+    mutation:
+      - NOT_IMPLEMENTED
+  cache_managers:
+    - _target_: azner.utils.caching.DictionaryIndexCacheManager
+      rebuild_cache: True
+      index_type: DictionaryIndex
+      parsers:
+        - _target_: azner.modelling.ontology_preprocessing.base.ChemblOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
+        - _target_: azner.modelling.ontology_preprocessing.base.EnsemblOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/hgnc.json
+        - _target_: azner.modelling.ontology_preprocessing.base.MondoOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
+        - _target_: azner.modelling.ontology_preprocessing.base.UberonOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+        - _target_: azner.modelling.ontology_preprocessing.base.MeddraOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+        - _target_: azner.modelling.ontology_preprocessing.base.CLOOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
+        - _target_: azner.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo

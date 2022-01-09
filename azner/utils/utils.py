@@ -98,11 +98,11 @@ def get_match_entity_class_hash(ent: Entity) -> int:
     )
 
 
-def get_cache_dir(path: str, create_if_not_exist: bool = True) -> Path:
+def get_cache_dir(path: str, prefix: str = "", create_if_not_exist: bool = True) -> Path:
     path = Path(path)
     original_filename = path.name
     original_dir = path.parent
-    new_path = original_dir.joinpath(f"cached_{original_filename}")
+    new_path = original_dir.joinpath(f"cached_{prefix}_{original_filename}")
     if create_if_not_exist:
         try:
             os.mkdir(new_path)
