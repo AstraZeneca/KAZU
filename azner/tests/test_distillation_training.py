@@ -1,9 +1,8 @@
 import tempfile
 
-from azner.tests.utils import TEST_ASSETS_PATH
+from azner.tests.utils import TEST_ASSETS_PATH, BERT_TEST_MODEL_PATH
 from azner.modelling.distillation.train import start
 
-BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
 DATA_DIR = TEST_ASSETS_PATH.joinpath("tinybern")
 
 
