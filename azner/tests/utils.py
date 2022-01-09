@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import pandas as pd
+import pytest
 
 from azner.data.data import SimpleDocument, Entity, Document, Mapping
 
@@ -15,12 +16,16 @@ FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS = TEST_ASSETS_PATH.joinpath("full_pipeline")
 
 BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
 
+CONFIG_DIR = Path(__file__).parent.parent.joinpath("conf")
+
 SKIP_MESSAGE = """
 skipping acceptance test as KAZU_MODEL_PACK is not provided as an environment variable. This should be the path 
 to the kazu model pack root
 """  # noqa
 
-CONFIG_DIR = Path(__file__).parent.parent.joinpath("conf")
+requires_model_pack = pytest.mark.skipif(
+    os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE
+)
 
 
 class MockedCachedIndexGroup:
