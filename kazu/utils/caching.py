@@ -301,8 +301,14 @@ class CachedIndexGroup:
             results.append(index_results)
 
         mappings = []
-        if len(results) > 0:
-            results = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
+        len_results = len(results)
+        if len_results > 0:
+            if len_results == 1:
+                # results contains a single, already-sorted DataFrame
+                # so avoid sorting again
+                results = results[0]
+            else:
+                results = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
             for ontology_id, row in results.iterrows():
                 row_dict = row.to_dict()
                 mapping_type = row_dict.pop(MAPPING_TYPE)
