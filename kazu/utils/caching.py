@@ -302,7 +302,7 @@ class CachedIndexGroup:
 
         mappings = []
         if len(results) > 0:
-            results = pd.concat(results).sort_values(by=LINK_SCORE)
+            results = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
             for i, row in results.iterrows():
                 row_dict = row.to_dict()
                 ontology_id = row_dict.pop(IDX)
