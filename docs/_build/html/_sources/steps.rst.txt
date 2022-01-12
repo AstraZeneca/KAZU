@@ -1,16 +1,16 @@
 String Preprocessing
 ================================
 
-.. autoclass:: azner.steps.StringPreprocessorStep
+.. autoclass:: kazu.steps.StringPreprocessorStep
 
 Current implementations of StringPreprocessorStep
 -------------------------------------------------
-.. autoclass:: azner.steps.SciSpacyAbbreviationExpansionStep
+.. autoclass:: kazu.steps.SciSpacyAbbreviationExpansionStep
 
 NER
 ===
 
-.. autoclass:: azner.steps.TransformersModelForTokenClassificationNerStep
+.. autoclass:: kazu.steps.TransformersModelForTokenClassificationNerStep
    :members:
 
    .. automethod:: __init__
@@ -18,12 +18,12 @@ NER
 Linking
 =======
 
-.. autoclass:: azner.steps.SapBertForEntityLinkingStep
+.. autoclass:: kazu.steps.SapBertForEntityLinkingStep
    :members:
 
    .. automethod:: __init__
 
-.. autoclass:: azner.steps.DictionaryEntityLinkingStep
+.. autoclass:: kazu.steps.DictionaryEntityLinkingStep
    :members:
 
    .. automethod:: __init__
@@ -31,7 +31,7 @@ Linking
 Ensembling linking methods
 ===========================
 
-.. autoclass:: azner.steps.EnsembleEntityLinkingStep
+.. autoclass:: kazu.steps.EnsembleEntityLinkingStep
    :members:
 
    .. automethod:: __init__
