@@ -1,3 +1,4 @@
+import itertools
 import traceback
 from collections import defaultdict
 from enum import Enum
@@ -159,7 +160,7 @@ class EnsembleEntityLinkingStep(BaseStep):
 
         :param depends_on:
         :param linker_score_thresholds: Dict that maps a linker namespace to its score threshold
-        :param keep_top_n:
+        :param keep_top_n: keep the top n mappings per given ontology
         """
         super().__init__(depends_on)
         self.linker_score_thresholds = linker_score_thresholds
@@ -172,7 +173,14 @@ class EnsembleEntityLinkingStep(BaseStep):
                 entities = doc.get_entities()
                 for entity in entities:
                     processing = MappingPostProcessing(entity, self.linker_score_thresholds)
-                    entity.metadata.mappings = processing()[: self.keep_top_n]
+                    best_mappings = sorted(processing(), key=lambda x: x.source)
+                    best_mappings_by_ontology = itertools.groupby(
+                        best_mappings, key=lambda x: x.source
+                    )
+                    selected_mappings = []
+                    for source, mapping_iter in best_mappings_by_ontology:
+                        selected_mappings.extend(list(mapping_iter)[: self.keep_top_n])
+                    entity.metadata.mappings = selected_mappings
             except Exception:
                 doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                 failed_docs.append(doc)
