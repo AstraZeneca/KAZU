@@ -373,7 +373,7 @@ class MatMulTensorEmbeddingIndex(TensorEmbeddingIndex):
 
     def _search_func(
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
-    ) -> Tuple[pd.DataFrame, np.ndarray]:
+    ) -> Tuple[np.ndarray, np.ndarray]:
         score_matrix = torch.matmul(query, self.index.T)
 
         score_matrix = torch.squeeze(score_matrix)
