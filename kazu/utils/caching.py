@@ -293,7 +293,7 @@ class CachedIndexGroup:
         :param kwargs: any other kwargs to pass to the search method of each index
         :return:
         """
-        indices_to_use = self.entity_class_to_indices.get(entity_class, None)
+        indices_to_use = self.entity_class_to_indices.get(entity_class, set())
         results = []
         for index in indices_to_use:
             index_results = index.search(query=query, **kwargs)
