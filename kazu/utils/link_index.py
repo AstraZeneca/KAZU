@@ -174,7 +174,7 @@ class DictionaryIndex(Index):
             locs = [x[2] for x in hits]
             idx_list = self.synonym_df.iloc[locs]
             scores = [x[1] for x in hits]
-        hit_df = idx_list.join(self.metadata, on=IDX, how="left")
+        hit_df = idx_list.set_index(IDX).join(self.metadata, how="left")
         return hit_df, np.array(scores)
 
     def _load(self, path: str) -> Any:

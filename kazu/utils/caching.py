@@ -6,7 +6,7 @@ from typing import Type, Dict, Any, Iterable, Tuple, List, Set
 from cachetools import LFUCache
 
 from kazu.data.data import Entity, LINK_SCORE, NAMESPACE
-from kazu.modelling.ontology_preprocessing.base import OntologyParser, IDX, MAPPING_TYPE
+from kazu.modelling.ontology_preprocessing.base import OntologyParser, MAPPING_TYPE
 from kazu.utils.link_index import (
     Index,
     MatMulTensorEmbeddingIndex,
@@ -303,9 +303,8 @@ class CachedIndexGroup:
         mappings = []
         if len(results) > 0:
             results = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
-            for i, row in results.iterrows():
+            for ontology_id, row in results.iterrows():
                 row_dict = row.to_dict()
-                ontology_id = row_dict.pop(IDX)
                 mapping_type = row_dict.pop(MAPPING_TYPE)
                 if not isinstance(mapping_type, list):
                     mapping_type = [mapping_type]
