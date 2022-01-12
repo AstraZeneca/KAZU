@@ -31,7 +31,7 @@ spec:
           imagePullPolicy: Always
           command: [ "python" ]
           args:
-            - azner/azner/web/server.py
+            - kazu/kazu/web/server.py
             - hydra.run.dir=.
             - hydra.output_subdir=null
             - ray.address=ray://{{ .Release.Name }}-{{ $.Values.rayHeadName }}:10001

@@ -10,7 +10,7 @@ for text and metadata, (such as entities detected by an NER step).
 
 .. code-block:: python
 
-    from azner.data.data import SimpleDocument
+    from kazu.data.data import SimpleDocument
     # a SimpleDocument is a subclass for Document for simple text strings
     step = SciSpacyAbbreviationExpansionStep([])
     doc = SimpleDocument("EGFR (Epidermal Growth Factor Receptor) is a gene")
