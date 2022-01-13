@@ -59,7 +59,10 @@ def full_pipeline_test_cases() -> Tuple[List[SimpleDocument], List[pd.DataFrame]
     for id in test_ids:
         with open(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.joinpath(f"{id}.txt"), "r") as f:
             text = f.read()
-            doc = SimpleDocument(text)
+            # .read leaves a final newline if there is one at the end of the file
+            # as is standard in a unix file
+            assert text[-1] == "\n"
+            doc = SimpleDocument(text[:-1])
             df = pd.read_csv(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.joinpath(f"{id}.csv"))
             docs.append(doc)
             dfs.append(df)
