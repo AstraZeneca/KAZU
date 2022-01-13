@@ -23,7 +23,7 @@ class KazuWebApp:
 
     def __init__(self, cfg: DictConfig):
         """
-        :param kazu_runner: instance of PipelineRunner
+        :param cfg: DictConfig from Hydra
         """
         self.pipeline = Pipeline(load_steps(cfg))
 
