@@ -136,5 +136,5 @@ dmypy.json
 **/test_assets/**/cached*
 
 no_vc/
-#model files
+# model files
 model_pack/
