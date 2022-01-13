@@ -138,3 +138,12 @@ dmypy.json
 no_vc/
 # model files
 model_pack/
+
+# MacOS directory files
+.DS_Store
+
+# VS Code config
+.vscode
+
+# direnv config file
+.envrc
