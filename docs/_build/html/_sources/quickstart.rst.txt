@@ -67,7 +67,3 @@ first, export the path of your config directory to KAZU_CONFIG_DIR
         result.sections[0].render()
         # the entities can also be transformed into a pandas Dataframe
         df = result.sections[0].entities_as_dataframe()
-
-
-
-
