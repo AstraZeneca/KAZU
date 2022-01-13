@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="azner",
+    name="kazu",
     version="0.0.1",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",

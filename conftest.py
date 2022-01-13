@@ -3,7 +3,7 @@ from typing import List
 import pytest
 from hydra import compose, initialize_config_dir
 
-from azner.tests.utils import CONFIG_DIR
+from kazu.tests.utils import CONFIG_DIR
 
 
 @pytest.fixture(scope="session")

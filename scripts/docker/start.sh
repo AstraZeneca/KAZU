@@ -14,7 +14,7 @@ echo "running ray deployment"
 RAY_SERVE_CONFIG="${RAY_SERVE_CONFIG:-local}"
 echo "ray config set to ${RAY_SERVE_CONFIG}"
 export TOKENIZERS_PARALLELISM=false
-python -m azner.web.server \
+python -m kazu.web.server \
 SapBertForEntityLinkingStep=docker \
 ray=${RAY_SERVE_CONFIG} \
 TransformersModelForTokenClassificationNerStep=docker \

@@ -24,8 +24,8 @@ Components are wrapped as instances of BaseStep.
 
 .. code-block:: python
 
-    from azner.data.data import SimpleDocument
-    import azner.steps.string_preprocessing.scispacy_abbreviation_expansion
+    from kazu.data.data import SimpleDocument
+    import kazu.steps.string_preprocessing.scispacy_abbreviation_expansion
     step = SciSpacyAbbreviationExpansionStep([])
     doc = SimpleDocument("EGFR (Epidermal Growth Factor Receptor) is a gene")
     # a step may fail to process a document, so it returns two lists, successes and failures
@@ -39,7 +39,7 @@ Advanced Pipeline configuration with Hydra
 To create an NLP pipeline, you need to instantiate steps. Given the large amount
 of configuration required, the easiest way to do this is with Hydra https://hydra.cc/docs/intro/
 
-Here, you will need a hydra config directory (see azner/conf for an example)
+Here, you will need a hydra config directory (see kazu/conf for an example)
 
 first, export the path of your config directory to KAZU_CONFIG_DIR
 (note, you will need to update the model paths in the config dir as appropriate)
@@ -48,8 +48,8 @@ first, export the path of your config directory to KAZU_CONFIG_DIR
 
     import os
     from hydra import compose, initialize_config_dir
-    from azner.data.data import SimpleDocument
-    from azner.pipeline.pipeline import Pipeline, load_steps
+    from kazu.data.data import SimpleDocument
+    from kazu.pipeline.pipeline import Pipeline, load_steps
     #some text we want to process
     text = """EGFR is a gene"""
 

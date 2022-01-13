@@ -1,35 +1,35 @@
 API Documentation
 =================
 
-.. automodule:: azner.data.data
+.. automodule:: kazu.data.data
    :members: CharSpan,TokenizedWord,NerProcessedSection,Mapping,EntityMetadata,Entity
 
-.. automodule:: azner.data.pytorch
+.. automodule:: kazu.data.pytorch
    :members:
 
-.. automodule:: azner.modelling.hf_lightning_wrappers
+.. automodule:: kazu.modelling.hf_lightning_wrappers
    :members:
 
-.. automodule:: azner.pipeline.pipeline
+.. automodule:: kazu.pipeline.pipeline
    :members:
 
-.. automodule:: azner.steps
+.. automodule:: kazu.steps
    :members:
 
-.. automodule:: azner.steps.linking.link_ensembling
+.. automodule:: kazu.steps.linking.link_ensembling
    :members: MappingPostProcessing
 
-.. automodule:: azner.utils.caching
+.. automodule:: kazu.utils.caching
    :members:
 
-.. automodule:: azner.utils.link_index
+.. automodule:: kazu.utils.link_index
    :members:
 
-.. automodule:: azner.utils.stopwatch
+.. automodule:: kazu.utils.stopwatch
    :members:
 
-.. automodule:: azner.utils.utils
+.. automodule:: kazu.utils.utils
    :members:
 
-.. automodule:: azner.web.server
+.. automodule:: kazu.web.server
    :members:

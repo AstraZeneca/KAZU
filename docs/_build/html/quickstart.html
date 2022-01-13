@@ -61,8 +61,8 @@ the pretrained models required by the pipeline. This is available from &lt;TBA&g
 <section id="running-steps">
 <h2>Running Steps<a class="headerlink" href="#running-steps" title="Permalink to this headline">¶</a></h2>
 <p>Components are wrapped as instances of BaseStep.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">azner.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
-<span class="kn">import</span> <span class="nn">azner.steps.string_preprocessing.scispacy_abbreviation_expansion</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
+<span class="kn">import</span> <span class="nn">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</span>
 <span class="n">step</span> <span class="o">=</span> <span class="n">SciSpacyAbbreviationExpansionStep</span><span class="p">([])</span>
 <span class="n">doc</span> <span class="o">=</span> <span class="n">SimpleDocument</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
 <span class="c1"># a step may fail to process a document, so it returns two lists, successes and failures</span>
@@ -75,13 +75,13 @@ the pretrained models required by the pipeline. This is available from &lt;TBA&g
 <h2>Advanced Pipeline configuration with Hydra<a class="headerlink" href="#advanced-pipeline-configuration-with-hydra" title="Permalink to this headline">¶</a></h2>
 <p>To create an NLP pipeline, you need to instantiate steps. Given the large amount
 of configuration required, the easiest way to do this is with Hydra <a class="reference external" href="https://hydra.cc/docs/intro/">https://hydra.cc/docs/intro/</a></p>
-<p>Here, you will need a hydra config directory (see azner/conf for an example)</p>
+<p>Here, you will need a hydra config directory (see kazu/conf for an example)</p>
 <p>first, export the path of your config directory to KAZU_CONFIG_DIR
 (note, you will need to update the model paths in the config dir as appropriate)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">hydra</span> <span class="kn">import</span> <span class="n">compose</span><span class="p">,</span> <span class="n">initialize_config_dir</span>
-<span class="kn">from</span> <span class="nn">azner.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
-<span class="kn">from</span> <span class="nn">azner.pipeline.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">load_steps</span>
+<span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
+<span class="kn">from</span> <span class="nn">kazu.pipeline.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">load_steps</span>
 <span class="c1">#some text we want to process</span>
 <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;EGFR is a gene&quot;&quot;&quot;</span>
 
@@ -170,7 +170,7 @@ of configuration required, the easiest way to do this is with Hydra <a class="re
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Korea University, AstraZeneca.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
     </div>
   </body>
 </html>

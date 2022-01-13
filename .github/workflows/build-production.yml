@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{secrets.CONTAINER_REGISTERY_NAME}}/azner:latest,${{secrets.CONTAINER_REGISTERY_NAME}}/azner:${{ steps.fetch_version.outputs.TAG }}
+          tags: ${{secrets.CONTAINER_REGISTERY_NAME}}/kazu:latest,${{secrets.CONTAINER_REGISTERY_NAME}}/kazu:${{ steps.fetch_version.outputs.TAG }}
           push: true
   deploy:
     runs-on: ubuntu-latest
@@ -65,5 +65,5 @@ jobs:
           --install ray-cluster \
           --create-namespace \
           --set dns.name=${{ secrets.DNS_NAME }}  \
-          --set image=${{secrets.CONTAINER_REGISTERY_NAME}}/azner:${{ steps.fetch_version.outputs.TAG }} \
+          --set image=${{secrets.CONTAINER_REGISTERY_NAME}}/kazu:${{ steps.fetch_version.outputs.TAG }} \
           ./kubernetes/ray
