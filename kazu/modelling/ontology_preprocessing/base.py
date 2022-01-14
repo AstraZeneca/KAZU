@@ -72,7 +72,6 @@ class OntologyParser(ABC):
         """
         if self.synonym_table is None or self.metadata_df is None:
             self.synonym_table, self.metadata_df = self.generate_synonym_and_metadata_dataframes()
-        assert set(OntologyParser.all_synonym_column_names).issubset(self.synonym_table.columns)
 
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
@@ -96,6 +95,7 @@ class OntologyParser(ABC):
         metadata_df = df[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
+        assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
         return syn_df, metadata_df
 
     def parse_to_dataframe(self) -> pd.DataFrame:
