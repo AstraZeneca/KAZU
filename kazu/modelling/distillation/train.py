@@ -28,7 +28,7 @@ def start(cfg: DictConfig) -> None:
     pytorch_lightning.seed_everything(cfg.DistillationTraining.seed)
     trainer: Trainer = instantiate(cfg.DistillationTraining.trainer)
     model: Union[
-        SequenceTaggingDistillationForFinalLayer, SequenceTaggingTaskSpecificDistillationForInmLayer
+        SequenceTaggingDistillationForFinalLayer, SequenceTaggingDistillationForIntermediateLayer
     ] = instantiate(cfg.DistillationTraining.model)
     trainer.fit(model)
 

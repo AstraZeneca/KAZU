@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 import torch
 from cachetools import LRUCache
 from omegaconf import ListConfig, OmegaConf
-from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS, EPOCH_OUTPUT
+from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 from torch.nn import CrossEntropyLoss, MSELoss
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataset import T_co
@@ -473,7 +473,14 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
     def validation_epoch_end(self, val_step_outputs):
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
-        self.log("validation_loss", epoch_loss_mean, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
+        self.log(
+            "validation_loss",
+            epoch_loss_mean,
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+            sync_dist=True,
+        )
 
         preds, golds = [], []
         for output in val_step_outputs:
@@ -571,30 +578,38 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
                 token_type_ids=batch["token_type_ids"],
                 attention_mask=batch["attention_mask"],
             )
-        
+
         teacher_layer_num = len(teacher_atts)
         student_layer_num = len(student_atts)
         assert teacher_layer_num % student_layer_num == 0
         layers_per_block = int(teacher_layer_num / student_layer_num)
-        
-        att_loss = 0.
-        rep_loss = 0.
 
-        new_teacher_atts = [teacher_atts[i * layers_per_block + layers_per_block - 1] for i in range(student_layer_num)]
-        
+        att_loss = 0.0
+        rep_loss = 0.0
+
+        new_teacher_atts = [
+            teacher_atts[i * layers_per_block + layers_per_block - 1]
+            for i in range(student_layer_num)
+        ]
+
         for student_att, teacher_att in zip(student_atts, new_teacher_atts):
-            student_att_cond = torch.where(student_att <= -1e2, torch.zeros_like(student_att), student_att)
-            teacher_att_cond = torch.where(teacher_att <= -1e2, torch.zeros_like(teacher_att), teacher_att)
-            
+            student_att_cond = torch.where(
+                student_att <= -1e2, torch.zeros_like(student_att), student_att
+            )
+            teacher_att_cond = torch.where(
+                teacher_att <= -1e2, torch.zeros_like(teacher_att), teacher_att
+            )
+
             att_loss += self.loss(student_att_cond, teacher_att_cond)
-            
-        new_teacher_reps = [teacher_reps[i * layers_per_block] for i in range(student_layer_num + 1)]
+
+        new_teacher_reps = [
+            teacher_reps[i * layers_per_block] for i in range(student_layer_num + 1)
+        ]
 
         for student_rep, teacher_rep in zip(student_reps, new_teacher_reps):
             rep_loss += self.loss(student_rep, teacher_rep)
-            
-        return rep_loss, att_loss
 
+        return rep_loss, att_loss
 
     def training_step(self, batch, batch_idx):
         rep_loss, att_loss = self._run_step(batch, batch_idx)
@@ -610,7 +625,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
             self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
 
         return loss
-    
+
     def validation_step(self, batch, batch_idx):
         rep_loss, att_loss = self._run_step(batch, batch_idx)
         loss = rep_loss + att_loss
@@ -623,11 +638,32 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
     def validation_epoch_end(self, val_step_outputs):
 
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
-        self.log(self.metric, epoch_loss_mean, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
+        self.log(
+            self.metric,
+            epoch_loss_mean,
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+            sync_dist=True,
+        )
 
         epoch_rep_loss_mean = np.mean([x["rep_loss"] for x in val_step_outputs])
-        self.log("val_rep_loss", epoch_rep_loss_mean, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
+        self.log(
+            "val_rep_loss",
+            epoch_rep_loss_mean,
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+            sync_dist=True,
+        )
         epoch_att_loss_mean = np.mean([x["att_loss"] for x in val_step_outputs])
-        self.log("val_att_loss", epoch_att_loss_mean, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
-        
+        self.log(
+            "val_att_loss",
+            epoch_att_loss_mean,
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+            sync_dist=True,
+        )
+
         return epoch_loss_mean
