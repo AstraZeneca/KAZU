@@ -9,7 +9,7 @@ training_params:
   max_epochs: 10
 save_dir: "." # save dir managed by hydra. Override here if required
 model:
-  _target_: kazu.modelling.distillation.models.SequenceTaggingTaskSpecificDistillation
+  _target_: kazu.modelling.distillation.models.SequenceTaggingDistillationForFinalLayer
   data_dir: ???
   label_list:
     - B-disease

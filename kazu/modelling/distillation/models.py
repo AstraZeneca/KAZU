@@ -7,7 +7,7 @@ import torch
 from cachetools import LRUCache
 from omegaconf import ListConfig, OmegaConf
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS, EPOCH_OUTPUT
-from torch.nn import CrossEntropyLoss
+from torch.nn import CrossEntropyLoss, MSELoss
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataset import T_co
 from transformers import AdamW, AutoTokenizer, InputExample, DataCollatorForTokenClassification
@@ -243,49 +243,8 @@ class TaskSpecificDistillation(pl.LightningModule):
         lr_scheduler_config = {"scheduler": scheduler, "interval": "step", "frequency": 1}
         return {"optimizer": optimizer, "lr_scheduler": lr_scheduler_config}
 
-    def soft_cross_entropy(self, predicts, targets):
-        student_likelihood = torch.nn.functional.log_softmax(predicts, dim=-1)
-        targets_prob = torch.nn.functional.softmax(targets, dim=-1)
-        return (-targets_prob * student_likelihood).mean()
 
-    def training_step(self, batch, batch_idx):
-        student_logits, student_atts, student_reps = self.student_model(
-            input_ids=batch["input_ids"],
-            token_type_ids=batch["token_type_ids"],
-            attention_mask=batch["attention_mask"],
-            is_student=True,
-        )
-
-        # self.teacher_model.eval()
-        with torch.no_grad():
-            teacher_logits, teacher_atts, teacher_reps = self.teacher_model(
-                input_ids=batch["input_ids"],
-                token_type_ids=batch["token_type_ids"],
-                attention_mask=batch["attention_mask"],
-            )
-
-        loss = self.soft_cross_entropy(
-            student_logits / self.temperature, teacher_logits / self.temperature
-        )
-
-        # Logging
-        self.log("training_loss", loss, prog_bar=True, on_step=True)
-        lr_list = self.lr_schedulers().get_lr()
-        self.log("lr0", lr_list[0], prog_bar=True, on_step=True)
-        self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
-
-        return loss
-
-    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        epoch_loss_mean = torch.mean(torch.tensor([x["loss"] for x in outputs]))
-        self.log("training_loss", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True)
-
-
-class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
-    """
-    Sequence tagging implementation
-    """
-
+class SequenceTaggingDistillationBase(TaskSpecificDistillation):
     def __init__(
         self,
         temperature: float,
@@ -305,6 +264,7 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
         metric: str = "entity_f1",
     ):
         """
+        Base class for sequence tagging (task-specific) distillation steps
 
         :param temperature:
         :param warmup_steps:
@@ -351,8 +311,143 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
         self.student_model = TinyBertForSequenceTagging.from_pretrained(
             student_model_path, num_labels=self.num_labels
         )
+
+    def train_dataloader(self) -> TRAIN_DATALOADERS:
+        dataset = NerDataset(
+            tokenizer=self.tokenizer,
+            examples=self.training_examples,
+            label_map=self.label_map,
+            max_length=self.max_length,
+        )
+        collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
+        return DataLoader(
+            dataset=dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            collate_fn=collator,
+            pin_memory=True,
+            persistent_workers=True,
+        )
+
+    def get_training_examples(self) -> List[InputExample]:
+        return self.processor.get_train_examples(self.data_dir)
+
+    def val_dataloader(self) -> EVAL_DATALOADERS:
+        examples = self.processor.get_dev_examples(self.data_dir)
+        dataset = NerDataset(
+            tokenizer=self.tokenizer,
+            examples=examples,
+            label_map=self.label_map,
+            max_length=self.max_length,
+        )
+        collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
+        return DataLoader(
+            dataset=dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            collate_fn=collator,
+            pin_memory=True,
+            persistent_workers=True,
+        )
+
+
+class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
+    def __init__(
+        self,
+        temperature: float,
+        warmup_steps: int,
+        learning_rate: float,
+        weight_decay: float,
+        batch_size: int,
+        accumulate_grad_batches: int,
+        max_epochs: int,
+        max_length: int,
+        data_dir: str,
+        label_list: Union[List, ListConfig],
+        student_model_path: str,
+        teacher_model_path: str,
+        num_workers: int,
+        schedule: str = None,
+        metric: str = "entity_f1",
+    ):
+        """
+        A class for sequence tagging (task-specific) final-layer distillation step
+
+        :param temperature:
+        :param warmup_steps:
+        :param learning_rate:
+        :param weight_decay:
+        :param batch_size:
+        :param accumulate_grad_batches:
+        :param max_epochs:
+        :param data_dir:
+        :param label_list:
+        :param student_model_path:
+        :param teacher_model_path:
+        :param num_workers:
+        :param schedule:
+        :param metric:
+        """
+        super().__init__(
+            temperature=temperature,
+            warmup_steps=warmup_steps,
+            weight_decay=weight_decay,
+            learning_rate=learning_rate,
+            batch_size=batch_size,
+            accumulate_grad_batches=accumulate_grad_batches,
+            max_epochs=max_epochs,
+            max_length=max_length,
+            data_dir=data_dir,
+            label_list=label_list,
+            student_model_path=student_model_path,
+            teacher_model_path=teacher_model_path,
+            num_workers=num_workers,
+            schedule=schedule,
+            metric="entity_f1",
+        )
+
+        # Loss function: self.soft_cross_entropy for training, CrossEntropyLoss for validation
         self.loss = CrossEntropyLoss(ignore_index=IGNORE_IDX)
         self.save_hyperparameters()
+
+    def soft_cross_entropy(self, predicts, targets):
+        student_likelihood = torch.nn.functional.log_softmax(predicts, dim=-1)
+        targets_prob = torch.nn.functional.softmax(targets, dim=-1)
+        return (-targets_prob * student_likelihood).mean()
+
+    def training_step(self, batch, batch_idx):
+        student_logits, student_atts, student_reps = self.student_model(
+            input_ids=batch["input_ids"],
+            token_type_ids=batch["token_type_ids"],
+            attention_mask=batch["attention_mask"],
+            is_student=True,
+        )
+
+        # self.teacher_model.eval()
+        with torch.no_grad():
+            teacher_logits, teacher_atts, teacher_reps = self.teacher_model(
+                input_ids=batch["input_ids"],
+                token_type_ids=batch["token_type_ids"],
+                attention_mask=batch["attention_mask"],
+            )
+
+        loss = self.soft_cross_entropy(
+            student_logits / self.temperature, teacher_logits / self.temperature
+        )
+
+        # Logging
+        self.log("training_loss", loss, prog_bar=True, on_step=True)
+        lr_list = self.lr_schedulers().get_lr()
+        self.log("lr0", lr_list[0], prog_bar=True, on_step=True)
+        self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
+
+        return loss
+
+    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+        epoch_loss_mean = torch.mean(torch.tensor([x["loss"] for x in outputs]))
+        self.log("training_loss", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True)
 
     def validation_step_predLayer(self, batch, batch_idx):
         logits, _, _ = self.student_model(
@@ -409,46 +504,64 @@ class SequenceTaggingTaskSpecificDistillation(TaskSpecificDistillation):
             result.append(arr[0 : mask.sum()].tolist())
         return result
 
-    def test_step(self, batch, batch_idx):
-        raise NotImplementedError
 
-    def train_dataloader(self) -> TRAIN_DATALOADERS:
+class SequenceTaggingTaskSpecificDistillationForInmLayer(SequenceTaggingDistillationBase):
+    """
+    A class for sequence tagging (task-specific) intermediate-layer distillation step
+    """
 
-        dataset = NerDataset(
-            tokenizer=self.tokenizer,
-            examples=self.training_examples,
-            label_map=self.label_map,
-            max_length=self.max_length,
-        )
-        collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
-        return DataLoader(
-            dataset=dataset,
-            batch_size=self.batch_size,
-            shuffle=True,
-            num_workers=self.num_workers,
-            collate_fn=collator,
-            pin_memory=True,
-            persistent_workers=True,
+    def __init__(
+        self,
+        temperature: float,
+        warmup_steps: int,
+        learning_rate: float,
+        weight_decay: float,
+        batch_size: int,
+        accumulate_grad_batches: int,
+        max_epochs: int,
+        max_length: int,
+        data_dir: str,
+        label_list: Union[List, ListConfig],
+        student_model_path: str,
+        teacher_model_path: str,
+        num_workers: int,
+        schedule: str = None,
+        metric: str = "entity_f1",
+    ):
+        """
+
+        :param temperature:
+        :param warmup_steps:
+        :param learning_rate:
+        :param weight_decay:
+        :param batch_size:
+        :param accumulate_grad_batches:
+        :param max_epochs:
+        :param data_dir:
+        :param label_list:
+        :param student_model_path:
+        :param teacher_model_path:
+        :param num_workers:
+        :param schedule:
+        :param metric:
+        """
+        super().__init__(
+            temperature=temperature,
+            warmup_steps=warmup_steps,
+            weight_decay=weight_decay,
+            learning_rate=learning_rate,
+            batch_size=batch_size,
+            accumulate_grad_batches=accumulate_grad_batches,
+            max_epochs=max_epochs,
+            max_length=max_length,
+            data_dir=data_dir,
+            label_list=label_list,
+            student_model_path=student_model_path,
+            teacher_model_path=teacher_model_path,
+            num_workers=num_workers,
+            schedule=schedule,
+            metric="entity_f1",
         )
 
-    def get_training_examples(self) -> List[InputExample]:
-        return self.processor.get_train_examples(self.data_dir)
-
-    def val_dataloader(self) -> EVAL_DATALOADERS:
-        examples = self.processor.get_dev_examples(self.data_dir)
-        dataset = NerDataset(
-            tokenizer=self.tokenizer,
-            examples=examples,
-            label_map=self.label_map,
-            max_length=self.max_length,
-        )
-        collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer, padding=True)
-        return DataLoader(
-            dataset=dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            collate_fn=collator,
-            pin_memory=True,
-            persistent_workers=True,
-        )
+        self.loss = CrossEntropyLoss(ignore_index=IGNORE_IDX)
+        self.save_hyperparameters()
