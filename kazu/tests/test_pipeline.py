@@ -4,7 +4,7 @@ from typing import List, Tuple
 import tempfile
 from kazu.steps import BaseStep
 from kazu.data.data import Document, PROCESSING_EXCEPTION, SimpleDocument
-from kazu.pipeline.pipeline import FailedDocsFileHandler, Pipeline
+from kazu.pipeline import FailedDocsFileHandler, Pipeline
 
 
 class BrokenStep(BaseStep):

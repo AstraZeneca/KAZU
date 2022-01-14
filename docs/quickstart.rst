@@ -53,7 +53,7 @@ or manually update the model paths that use the variable - search for
     import os
     from hydra import compose, initialize_config_dir
     from kazu.data.data import SimpleDocument
-    from kazu.pipeline.pipeline import Pipeline, load_steps
+    from kazu.pipeline import Pipeline, load_steps
     #some text we want to process
     text = """EGFR is a gene"""
 

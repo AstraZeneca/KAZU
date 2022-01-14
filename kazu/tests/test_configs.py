@@ -1,7 +1,7 @@
 import pytest
 from hydra.utils import instantiate
 
-from kazu.pipeline.pipeline import Pipeline, load_steps
+from kazu.pipeline import Pipeline, load_steps
 
 
 def test_docker_configs(override_kazu_test_config):

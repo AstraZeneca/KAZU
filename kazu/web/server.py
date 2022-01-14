@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 from ray import serve
 from kazu.web.routes import KAZU
 from kazu.data.data import SimpleDocument
-from kazu.pipeline.pipeline import Pipeline, load_steps
+from kazu.pipeline import Pipeline, load_steps
 
 logger = logging.getLogger("ray")
 app = FastAPI()
