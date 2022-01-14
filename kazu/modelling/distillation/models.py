@@ -261,7 +261,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         teacher_model_path: str,
         num_workers: int,
         schedule: str = None,
-        metric: str = "entity_f1",
+        metric: str = "Default",
     ):
         """
         Base class for sequence tagging (task-specific) distillation steps
@@ -370,7 +370,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         teacher_model_path: str,
         num_workers: int,
         schedule: str = None,
-        metric: str = "entity_f1",
+        metric: str = "Default",
     ):
         """
         A class for sequence tagging (task-specific) final-layer distillation step
@@ -405,9 +405,8 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
             teacher_model_path=teacher_model_path,
             num_workers=num_workers,
             schedule=schedule,
-            metric="entity_f1",
+            metric=metric,
         )
-
         # Loss function: self.soft_cross_entropy for training, CrossEntropyLoss for validation
         self.loss = CrossEntropyLoss(ignore_index=IGNORE_IDX)
         self.save_hyperparameters()
@@ -439,15 +438,12 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
         # Logging
         self.log("training_loss", loss, prog_bar=True, on_step=True)
-        lr_list = self.lr_schedulers().get_lr()
-        self.log("lr0", lr_list[0], prog_bar=True, on_step=True)
-        self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
+        lr_list = self.lr_schedulers().get_last_lr()
+        self.log("lr", lr_list[0], prog_bar=True, on_step=True)
+        if lr_list[0] != lr_list[1]:
+            self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
 
         return loss
-
-    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        epoch_loss_mean = torch.mean(torch.tensor([x["loss"] for x in outputs]))
-        self.log("training_loss", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True)
 
     def validation_step_predLayer(self, batch, batch_idx):
         logits, _, _ = self.student_model(
@@ -465,8 +461,6 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
             .mean()
             .item()
         )
-
-        self.log("validation_loss", loss, sync_dist=True, on_step=True, prog_bar=True)
         return {
             "loss": loss,
             "logits": logits.detach().cpu(),
@@ -479,7 +473,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
     def validation_epoch_end(self, val_step_outputs):
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
-        self.log("validation_loss", epoch_loss_mean, on_step=False, on_epoch=True, sync_dist=True)
+        self.log("validation_loss", epoch_loss_mean, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
 
         preds, golds = [], []
         for output in val_step_outputs:
@@ -505,11 +499,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         return result
 
 
-class SequenceTaggingTaskSpecificDistillationForInmLayer(SequenceTaggingDistillationBase):
-    """
-    A class for sequence tagging (task-specific) intermediate-layer distillation step
-    """
-
+class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillationBase):
     def __init__(
         self,
         temperature: float,
@@ -526,10 +516,10 @@ class SequenceTaggingTaskSpecificDistillationForInmLayer(SequenceTaggingDistilla
         teacher_model_path: str,
         num_workers: int,
         schedule: str = None,
-        metric: str = "entity_f1",
+        metric: str = "Default",
     ):
         """
-
+        A class for sequence tagging (task-specific) intermediate-layer (Transformer, Embedding) distillation step
         :param temperature:
         :param warmup_steps:
         :param learning_rate:
@@ -560,8 +550,8 @@ class SequenceTaggingTaskSpecificDistillationForInmLayer(SequenceTaggingDistilla
             teacher_model_path=teacher_model_path,
             num_workers=num_workers,
             schedule=schedule,
-            metric="entity_f1",
+            metric=metric,
         )
 
-        self.loss = CrossEntropyLoss(ignore_index=IGNORE_IDX)
+        self.loss = MSELoss()
         self.save_hyperparameters()

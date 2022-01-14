@@ -35,6 +35,7 @@ model:
   weight_decay: 0.01
   accumulate_grad_batches: ${DistillationTraining.trainer.accumulate_grad_batches}
   max_epochs: ${DistillationTraining.training_params.max_epochs}
+  metric: ${DistillationTraining.monitoring.monitor}
 trainer:
   _target_: pytorch_lightning.Trainer
   num_sanity_val_steps: 2

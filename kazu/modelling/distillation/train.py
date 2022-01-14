@@ -10,7 +10,7 @@ from typing import Union
 
 from kazu.modelling.distillation.models import (
     SequenceTaggingDistillationForFinalLayer,
-    SequenceTaggingTaskSpecificDistillationForInmLayer,
+    SequenceTaggingDistillationForIntermediateLayer,
 )
 
 logger = logging.getLogger(__name__)
