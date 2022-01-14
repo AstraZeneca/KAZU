@@ -72,9 +72,7 @@ class OntologyParser(ABC):
         """
         if self.synonym_table is None or self.metadata_df is None:
             self.synonym_table, self.metadata_df = self.generate_synonym_and_metadata_dataframes()
-        assert len(
-            set(self.synonym_table.columns) & set(OntologyParser.all_synonym_column_names)
-        ) == len(OntologyParser.all_synonym_column_names)
+        assert set(OntologyParser.all_synonym_column_names).issubset(self.synonym_table.columns)
 
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
