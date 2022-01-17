@@ -16,3 +16,14 @@ repos:
     entry:  flake8
     types: [python]
     exclude: setup.py
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+  - id: end-of-file-fixer
+    exclude: "\\.png$|\
+      \\.bin$|\
+      \\.parquet$|\
+      \\.inv$|\
+      ^docs/_build|\
+      ^kazu/tests/test_assets/tinybern"

@@ -15,4 +15,3 @@ for text and metadata, (such as entities detected by an NER step).
     step = SciSpacyAbbreviationExpansionStep([])
     doc = SimpleDocument("EGFR (Epidermal Growth Factor Receptor) is a gene")
     print(succeeded[0].get_text())
-

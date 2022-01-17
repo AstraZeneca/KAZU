@@ -67,5 +67,3 @@ trainer:
       min_delta: 0.00
       patience: 5
       verbose: True
-
-
