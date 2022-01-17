@@ -112,9 +112,9 @@ def get_cache_dir(path: PathLike, prefix: str = "", create_if_not_exist: bool = 
     return new_path
 
 
-def get_cache_path(path_str: str, cache_id: str) -> Path:
-    path = Path(path_str)
+def get_cache_path(path: PathLike, cache_id: str) -> Path:
+    path = path if isinstance(path, Path) else Path(path)
     original_filename = path.name
-    cache_dir = get_cache_dir(path_str, False)
+    cache_dir = get_cache_dir(path, False)
     new_path = cache_dir.joinpath(f"cached_{cache_id}_{original_filename}")
     return new_path
