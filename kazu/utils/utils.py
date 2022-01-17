@@ -1,7 +1,6 @@
 import logging
-import os
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
@@ -98,16 +97,18 @@ def get_match_entity_class_hash(ent: Entity) -> int:
     )
 
 
-def get_cache_dir(path: str, prefix: str = "", create_if_not_exist: bool = True) -> Path:
-    path = Path(path)
-    original_filename = path.name
-    original_dir = path.parent
-    new_path = original_dir.joinpath(f"cached_{prefix}_{original_filename}")
+PathLike = Union[str, Path]
+
+
+def get_cache_dir(path: PathLike, prefix: str = "", create_if_not_exist: bool = True) -> Path:
+    path = path if isinstance(path, Path) else Path(path)
+    new_path = path.with_name(f"cached_{prefix}_{path.name}")
     if create_if_not_exist:
-        try:
-            os.mkdir(new_path)
-        except FileExistsError:
+        if new_path.exists():
             logger.info(f"{new_path} already exists. Will not make it")
+        else:
+            new_path.mkdir()
+
     return new_path
 
 
