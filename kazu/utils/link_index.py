@@ -13,6 +13,7 @@ from rapidfuzz import process, fuzz
 
 from kazu.data.data import LINK_SCORE
 from kazu.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE
+from kazu.utils.utils import PathLike, as_path
 
 logger = logging.getLogger(__name__)
 
@@ -56,14 +57,14 @@ class Index(abc.ABC):
         hit_df[LINK_SCORE] = scores
         return hit_df
 
-    def save(self, path: str) -> Path:
+    def save(self, path: PathLike) -> Path:
         """
         save to disk. Makes a directory at the path location with all the index assets
 
         :param path:
         :return: a Path to where the index was saved
         """
-        directory = Path(path).joinpath(self.name)
+        directory = as_path(path).joinpath(self.name)
         if directory.exists():
             shutil.rmtree(directory)
         os.makedirs(directory)
@@ -71,11 +72,11 @@ class Index(abc.ABC):
             pickle.dump(self, f)
         self.metadata.to_parquet(self.get_dataframe_path(directory), index=None)
 
-        self._save(str(self.get_index_data_path(directory)))
+        self._save(self.get_index_data_path(directory))
         return directory
 
     @classmethod
-    def load(cls, path: str, name: str):
+    def load(cls, path: PathLike, name: str):
         """
         load from disk
         :param path: the parent path of the index
@@ -83,7 +84,8 @@ class Index(abc.ABC):
         :return:
         """
 
-        path = Path(path).joinpath(name)
+        root_path = as_path(path)
+        path = root_path.joinpath(name)
         with open(cls.get_index_path(path), "rb") as f:
             index = pickle.load(f)
         index.metadata = pd.read_parquet(cls.get_dataframe_path(path))
@@ -102,7 +104,7 @@ class Index(abc.ABC):
     def get_index_data_path(path: Path) -> Path:
         return path.joinpath("index.data")
 
-    def _save(self, path: str):
+    def _save(self, path: PathLike):
         """
         concrete implementations should implement this to save any data specific to the implementation. This method is
         called by self.save
@@ -117,7 +119,7 @@ class Index(abc.ABC):
     def __setstate__(self, state):
         self.name = state
 
-    def _load(self, path: str) -> None:
+    def _load(self, path: PathLike) -> None:
         """
         concrete implementations should implement this to load any data specific to the implementation. This method is
         called by self.load
@@ -177,10 +179,10 @@ class DictionaryIndex(Index):
         hit_df = idx_list.set_index(IDX).join(self.metadata, how="left")
         return hit_df, np.array(scores)
 
-    def _load(self, path: str) -> Any:
+    def _load(self, path: PathLike) -> Any:
         self.synonym_df = pd.read_parquet(path)
 
-    def _save(self, path: str):
+    def _save(self, path: PathLike):
         self.synonym_df.to_parquet(path, index=None)
 
     def add(self, synonym_df: pd.DataFrame, metadata_df: pd.DataFrame):
@@ -298,12 +300,12 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         except ImportError:
             raise RuntimeError(f"faiss is not installed. Cannot use {self.__class__.__name__}")
 
-    def _load(self, path: str):
+    def _load(self, path: PathLike):
         self.import_faiss()
         self.index = self.faiss.read_index(str(path))
 
-    def _save(self, path: str):
-        self.faiss.write_index(self.index, path)
+    def _save(self, path: PathLike):
+        self.faiss.write_index(self.index, str(path))
 
     def _search_func(
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
@@ -334,10 +336,10 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         super().__init__(name)
         self.index = None
 
-    def _load(self, path: str):
+    def _load(self, path: PathLike):
         self.index = torch.load(path, map_location="cpu")
 
-    def _save(self, path: str):
+    def _save(self, path: PathLike):
         torch.save(self.index, path)
 
     def _add(self, embeddings: torch.Tensor):
