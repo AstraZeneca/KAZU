@@ -132,15 +132,18 @@ class MappingPostProcessing:
         return mappings
 
     def __call__(self):
-        hits = self.exact_hits()
-        if len(hits) == 0:
-            hits = self.filter_scores()
-        if len(hits) == 0:
-            hits = self.similarly_ranked()
-        if len(hits) == 0:
-            hits = self.query_contained_in_hits()
-        if len(hits) == 0:
-            hits = self.sort_and_add_confidence(self.lookup_df, LinkRanks.LOW_CONFIDENCE)
+        if self.lookup_df.shape[0] > 0:
+            hits = self.exact_hits()
+            if len(hits) == 0:
+                hits = self.filter_scores()
+            if len(hits) == 0:
+                hits = self.similarly_ranked()
+            if len(hits) == 0:
+                hits = self.query_contained_in_hits()
+            if len(hits) == 0:
+                hits = self.sort_and_add_confidence(self.lookup_df, LinkRanks.LOW_CONFIDENCE)
+        else:
+            hits = []
         return hits
 
 
