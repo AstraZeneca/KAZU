@@ -1,5 +1,6 @@
 import logging
 import traceback
+from collections import defaultdict
 from typing import List, Tuple
 
 import pydash
@@ -89,26 +90,33 @@ class SapBertForEntityLinkingStep(BaseStep):
         try:
             entities = pydash.flatten([x.get_entities() for x in docs])
             entities = self.lookup_cache.check_lookup_cache(entities)
+            entity_string_to_ent_list = defaultdict(list)
+            # group entities by their match string, so we only need to process one string for all matches in a set
+            # of documents
+            [entity_string_to_ent_list[x.match].append(x) for x in entities]
+
             if len(entities) > 0:
                 results = self.model.get_embeddings_for_strings(
-                    [x.match for x in entities], trainer=self.trainer, batch_size=self.batch_size
+                    list(entity_string_to_ent_list.keys()),
+                    trainer=self.trainer,
+                    batch_size=self.batch_size,
                 )
                 results = torch.unsqueeze(results, 1)
-                for entity, result in zip(entities, results):
-                    cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
-                    if len(cache_missed_entities) == 0:
-                        continue
-
-                    mappings = self.index_group.search(
-                        query=result,
-                        entity_class=entity.entity_class,
-                        namespace=self.namespace(),
-                        top_n=self.top_n,
-                        score_cutoff=self.score_cutoff,
-                    )
-                    for mapping in mappings:
-                        entity.add_mapping(mapping)
-                        self.lookup_cache.update_lookup_cache(entity, mapping)
+                # look over the matched string and associated entities, updating the cache as we go
+                for match_key, result in zip(entity_string_to_ent_list, results):
+                    for entity in entity_string_to_ent_list[match_key]:
+                        cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
+                        if not len(cache_missed_entities) == 0:
+                            mappings = self.index_group.search(
+                                query=result,
+                                entity_class=entity.entity_class,
+                                namespace=self.namespace(),
+                                top_n=self.top_n,
+                                score_cutoff=self.score_cutoff,
+                            )
+                            for mapping in mappings:
+                                entity.add_mapping(mapping)
+                                self.lookup_cache.update_lookup_cache(entity, mapping)
         except Exception:
             affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
