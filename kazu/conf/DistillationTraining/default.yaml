@@ -54,7 +54,7 @@ trainer:
   callbacks:
     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
       dirpath: ${DistillationTraining.save_dir}
-      filename: "student_model-{epoch:02d}-{entity_f1:.4f}-{validation_loss_epoch:.3f}-{step:05d}"
+      filename: "student_model-{epoch:02d}-{entity_f1:.4f}-{validation_loss:.3f}-{step:05d}"
       monitor: ${DistillationTraining.monitoring.monitor}
       mode: ${DistillationTraining.monitoring.mode}
       save_top_k: 5
