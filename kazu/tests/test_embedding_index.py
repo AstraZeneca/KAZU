@@ -1,5 +1,5 @@
-import tempfile
 from typing import Type
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -48,23 +48,21 @@ except ImportError:
         CDistTensorEmbeddingIndex,
     ),
 )
-def test_embedding_index(index_type: Type[Index]):
-    with tempfile.TemporaryDirectory() as f:
-        index_name = "test_index"
-        index_save_dir = f
-        index = index_type(name=index_name)
-        index.add(index_embeddings, metadata)
-        df = index.search(query_embedding, top_n=3)
-        assert np.array_equal(df.index.to_numpy(), np.array([2, 1, 3]))
-        assert np.array_equal(df[IDX].array, np.array([0, 1, 2]))
-        metadata_copy = metadata.copy()
-        metadata_copy[IDX] = metadata_copy[IDX] * 2
-        index.add(index_embeddings * 2, metadata_copy)
-        df = index.search(query_embedding, top_n=3)
-        assert np.array_equal(df.index.to_numpy(), np.array([2, 1, 3]))
-        assert np.array_equal(df[IDX].array, np.array([0, 1, 2]))
-        index.save(index_save_dir)
-        Index.load(index_save_dir, index_name)
-        hit_info = index.search(query_embedding, top_n=3)
-        assert np.array_equal(hit_info.index.to_numpy(), np.array([2, 1, 3]))
-        assert np.array_equal(hit_info[IDX].array, np.array([0, 1, 2]))
+def test_embedding_index(tmp_path: Path, index_type: Type[Index]):
+    index_name = "test_index"
+    index = index_type(name=index_name)
+    index.add(index_embeddings, metadata)
+    df = index.search(query_embedding, top_n=3)
+    assert np.array_equal(df.index.to_numpy(), np.array([2, 1, 3]))
+    assert np.array_equal(df[IDX].array, np.array([0, 1, 2]))
+    metadata_copy = metadata.copy()
+    metadata_copy[IDX] = metadata_copy[IDX] * 2
+    index.add(index_embeddings * 2, metadata_copy)
+    df = index.search(query_embedding, top_n=3)
+    assert np.array_equal(df.index.to_numpy(), np.array([2, 1, 3]))
+    assert np.array_equal(df[IDX].array, np.array([0, 1, 2]))
+    index.save(tmp_path)
+    Index.load(tmp_path, index_name)
+    hit_info = index.search(query_embedding, top_n=3)
+    assert np.array_equal(hit_info.index.to_numpy(), np.array([2, 1, 3]))
+    assert np.array_equal(hit_info[IDX].array, np.array([0, 1, 2]))

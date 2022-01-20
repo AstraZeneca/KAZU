@@ -1,5 +1,4 @@
 import os
-from os.path import basename
 from pathlib import Path
 from typing import List, Tuple
 
@@ -53,19 +52,17 @@ class MockedCachedIndexGroup:
 def full_pipeline_test_cases() -> Tuple[List[SimpleDocument], List[pd.DataFrame]]:
     docs = []
     dfs = []
-    test_ids = set(
-        [basename(x).split(".")[0] for x in os.listdir(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS)]
-    )
-    for id in test_ids:
-        with open(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.joinpath(f"{id}.txt"), "r") as f:
+    for test_text_path in FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.glob("*.txt"):
+        with test_text_path.open(mode="r") as f:
             text = f.read()
             # .read leaves a final newline if there is one at the end of the file
             # as is standard in a unix file
             assert text[-1] == "\n"
-            doc = SimpleDocument(text[:-1])
-            df = pd.read_csv(FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.joinpath(f"{id}.csv"))
-            docs.append(doc)
-            dfs.append(df)
+        doc = SimpleDocument(text[:-1])
+        test_results_path = test_text_path.with_suffix(".csv")
+        df = pd.read_csv(test_results_path)
+        docs.append(doc)
+        dfs.append(df)
     return docs, dfs
 
 

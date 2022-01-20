@@ -39,10 +39,14 @@ Advanced Pipeline configuration with Hydra
 To create an NLP pipeline, you need to instantiate steps. Given the large amount
 of configuration required, the easiest way to do this is with Hydra https://hydra.cc/docs/intro/
 
-Here, you will need a hydra config directory (see kazu/conf for an example)
+Here, you will need a hydra config directory (see kazu/conf for an example).
 
-first, export the path of your config directory to KAZU_CONFIG_DIR
-(note, you will need to update the model paths in the config dir as appropriate)
+First, export the path of your config directory to KAZU_CONFIG_DIR.
+
+To use the example kazu/conf config you will need to
+set the environment variable KAZU_MODEL_PACK to a path for a kazu model pack,
+or manually update the model paths that use the variable - search for
+`${oc.env:KAZU_MODEL_PACK}` in kazu/conf).
 
 .. code-block:: python
 

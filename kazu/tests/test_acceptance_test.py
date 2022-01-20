@@ -4,7 +4,7 @@ import pydash
 from hydra.utils import instantiate
 
 from kazu.data.data import Entity
-from kazu.pipeline.pipeline import Pipeline, load_steps
+from kazu.pipeline import Pipeline, load_steps
 from kazu.tests.utils import (
     entity_linking_hard_cases,
     requires_model_pack,
