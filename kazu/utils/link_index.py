@@ -12,7 +12,7 @@ import torch
 from rapidfuzz import process, fuzz
 
 from kazu.data.data import LINK_SCORE
-from kazu.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE
+from kazu.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE, DEFAULT_LABEL
 from kazu.utils.utils import PathLike, as_path
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,8 @@ class Index(abc.ABC):
     """
     base class for all indices.
     """
+
+    column_type_dict = {SYN: str, IDX: str, MAPPING_TYPE: list, DEFAULT_LABEL: str}
 
     def __init__(
         self,
@@ -88,7 +90,7 @@ class Index(abc.ABC):
         path = root_path.joinpath(name)
         with open(cls.get_index_path(path), "rb") as f:
             index = pickle.load(f)
-        index.metadata = pd.read_parquet(cls.get_dataframe_path(path))
+        index.metadata = cls.check_dataframe_types(pd.read_parquet(cls.get_dataframe_path(path)))
         index._load(cls.get_index_data_path(path))
         return index
 
@@ -138,6 +140,19 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
+    @staticmethod
+    def check_dataframe_types(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        certain fields in the metadata dataframe must be of a certain type. This method modifies a df to ensure the
+        types are consistently used.
+        :param df:
+        :return:
+        """
+        for column_name, _type in Index.column_type_dict.items():
+            if column_name in df.columns:
+                df[column_name] = df[column_name].apply(_type)
+        return df
+
 
 class DictionaryIndex(Index):
     """
@@ -180,7 +195,7 @@ class DictionaryIndex(Index):
         return hit_df, np.array(scores)
 
     def _load(self, path: PathLike) -> Any:
-        self.synonym_df = pd.read_parquet(path)
+        self.synonym_df = self.check_dataframe_types(pd.read_parquet(path))
 
     def _save(self, path: PathLike):
         self.synonym_df.to_parquet(path, index=None)
@@ -193,6 +208,8 @@ class DictionaryIndex(Index):
         :param metadata_df: metadata dataframe
         :return:
         """
+        metadata_df = self.check_dataframe_types(metadata_df)
+        synonym_df = self.check_dataframe_types(synonym_df)
         if self.synonym_df is None and self.metadata is None:
             self.synonym_df = synonym_df
             self.metadata = metadata_df
@@ -220,7 +237,7 @@ class EmbeddingIndex(Index):
         :param metadata: a pd.DataFrame of metadata
         :return:
         """
-
+        metadata = self.check_dataframe_types(metadata)
         if len(embeddings) != len(metadata):
             raise ValueError("embeddings length not equal to metadata length")
         if self.index is None:
@@ -275,10 +292,14 @@ class EmbeddingIndex(Index):
         distances, neighbours = self._search_func(
             query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
         )
-        hit_df = self.metadata.iloc[neighbours]
-        # all mapping types are inferred for embedding based matches
-        hit_df = hit_df.assign(**{MAPPING_TYPE: "inferred"})
+        hit_df = self.metadata.iloc[neighbours].copy()
+        self.add_inferred_mapping_type_to_dataframe(hit_df)
         return hit_df, distances
+
+    @staticmethod
+    def add_inferred_mapping_type_to_dataframe(df: pd.DataFrame):
+        # all mapping types are inferred for embedding based matches
+        df[MAPPING_TYPE] = [["inferred"] for _ in range(df.shape[0])]
 
 
 class FaissEmbeddingIndex(EmbeddingIndex):
