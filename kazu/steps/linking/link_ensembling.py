@@ -1,5 +1,5 @@
+import itertools
 import traceback
-from collections import defaultdict
 from enum import Enum
 from typing import Optional, List, Tuple, Dict
 
@@ -52,7 +52,8 @@ class MappingPostProcessing:
         self.match = entity.match.lower()
         self.linker_score_thresholds = linker_score_thresholds
         self.mappings = entity.metadata.mappings
-        data = defaultdict(list)
+        columns = (NAMESPACE, IDX, SYN, DEFAULT_LABEL, "mapping", LINK_SCORE)
+        data = {column: [] for column in columns}
         for mapping in self.mappings:
             data[NAMESPACE].append(mapping.metadata[NAMESPACE])
             data[IDX].append(mapping.idx)
@@ -159,7 +160,7 @@ class EnsembleEntityLinkingStep(BaseStep):
 
         :param depends_on:
         :param linker_score_thresholds: Dict that maps a linker namespace to its score threshold
-        :param keep_top_n:
+        :param keep_top_n: keep the top n mappings per given ontology
         """
         super().__init__(depends_on)
         self.linker_score_thresholds = linker_score_thresholds
@@ -171,8 +172,16 @@ class EnsembleEntityLinkingStep(BaseStep):
             try:
                 entities = doc.get_entities()
                 for entity in entities:
-                    processing = MappingPostProcessing(entity, self.linker_score_thresholds)
-                    entity.metadata.mappings = processing()[: self.keep_top_n]
+                    if len(entity.metadata.mappings) > 0:
+                        processing = MappingPostProcessing(entity, self.linker_score_thresholds)
+                        best_mappings = sorted(processing(), key=lambda x: x.source)
+                        best_mappings_by_ontology = itertools.groupby(
+                            best_mappings, key=lambda x: x.source
+                        )
+                        selected_mappings = []
+                        for source, mapping_iter in best_mappings_by_ontology:
+                            selected_mappings.extend(list(mapping_iter)[: self.keep_top_n])
+                        entity.metadata.mappings = selected_mappings
             except Exception:
                 doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                 failed_docs.append(doc)
