@@ -312,8 +312,6 @@ class CachedIndexGroup:
             for ontology_id, row in results.iterrows():
                 row_dict = row.to_dict()
                 mapping_type = row_dict.pop(MAPPING_TYPE)
-                if not isinstance(mapping_type, list):
-                    mapping_type = [mapping_type]
                 source = row_dict.pop(SOURCE)
                 row_dict[NAMESPACE] = namespace
                 new_mapping = Mapping(
