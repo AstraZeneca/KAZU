@@ -1,6 +1,5 @@
 import itertools
 import traceback
-from collections import defaultdict
 from enum import Enum
 from typing import Optional, List, Tuple, Dict
 
@@ -53,7 +52,8 @@ class MappingPostProcessing:
         self.match = entity.match.lower()
         self.linker_score_thresholds = linker_score_thresholds
         self.mappings = entity.metadata.mappings
-        data = defaultdict(list)
+        columns = (NAMESPACE, IDX, SYN, DEFAULT_LABEL, "mapping", LINK_SCORE)
+        data = {column: [] for column in columns}
         for mapping in self.mappings:
             data[NAMESPACE].append(mapping.metadata[NAMESPACE])
             data[IDX].append(mapping.idx)
@@ -132,18 +132,15 @@ class MappingPostProcessing:
         return mappings
 
     def __call__(self):
-        if self.lookup_df.shape[0] > 0:
-            hits = self.exact_hits()
-            if len(hits) == 0:
-                hits = self.filter_scores()
-            if len(hits) == 0:
-                hits = self.similarly_ranked()
-            if len(hits) == 0:
-                hits = self.query_contained_in_hits()
-            if len(hits) == 0:
-                hits = self.sort_and_add_confidence(self.lookup_df, LinkRanks.LOW_CONFIDENCE)
-        else:
-            hits = []
+        hits = self.exact_hits()
+        if len(hits) == 0:
+            hits = self.filter_scores()
+        if len(hits) == 0:
+            hits = self.similarly_ranked()
+        if len(hits) == 0:
+            hits = self.query_contained_in_hits()
+        if len(hits) == 0:
+            hits = self.sort_and_add_confidence(self.lookup_df, LinkRanks.LOW_CONFIDENCE)
         return hits
 
 
@@ -175,15 +172,16 @@ class EnsembleEntityLinkingStep(BaseStep):
             try:
                 entities = doc.get_entities()
                 for entity in entities:
-                    processing = MappingPostProcessing(entity, self.linker_score_thresholds)
-                    best_mappings = sorted(processing(), key=lambda x: x.source)
-                    best_mappings_by_ontology = itertools.groupby(
-                        best_mappings, key=lambda x: x.source
-                    )
-                    selected_mappings = []
-                    for source, mapping_iter in best_mappings_by_ontology:
-                        selected_mappings.extend(list(mapping_iter)[: self.keep_top_n])
-                    entity.metadata.mappings = selected_mappings
+                    if len(entity.metadata.mappings) > 0:
+                        processing = MappingPostProcessing(entity, self.linker_score_thresholds)
+                        best_mappings = sorted(processing(), key=lambda x: x.source)
+                        best_mappings_by_ontology = itertools.groupby(
+                            best_mappings, key=lambda x: x.source
+                        )
+                        selected_mappings = []
+                        for source, mapping_iter in best_mappings_by_ontology:
+                            selected_mappings.extend(list(mapping_iter)[: self.keep_top_n])
+                        entity.metadata.mappings = selected_mappings
             except Exception:
                 doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                 failed_docs.append(doc)
