@@ -82,7 +82,7 @@ class DictionaryEntityLinkingStep(BaseStep):
                         )
                         for mapping in mappings:
                             entity.add_mapping(mapping)
-                            self.lookup_cache.update_lookup_cache(entity, mapping)
+                        self.lookup_cache.update_lookup_cache(entity, mappings)
                     except Exception:
                         doc = find_document_from_entity(docs, entity)
                         doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()

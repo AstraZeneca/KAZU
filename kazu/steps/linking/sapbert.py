@@ -93,7 +93,8 @@ class SapBertForEntityLinkingStep(BaseStep):
             entity_string_to_ent_list = defaultdict(list)
             # group entities by their match string, so we only need to process one string for all matches in a set
             # of documents
-            [entity_string_to_ent_list[x.match].append(x) for x in entities]
+            for x in entities:
+                entity_string_to_ent_list[x.match].append(x)
 
             if len(entities) > 0:
                 results = self.model.get_embeddings_for_strings(
@@ -103,8 +104,8 @@ class SapBertForEntityLinkingStep(BaseStep):
                 )
                 results = torch.unsqueeze(results, 1)
                 # look over the matched string and associated entities, updating the cache as we go
-                for match_key, result in zip(entity_string_to_ent_list, results):
-                    for entity in entity_string_to_ent_list[match_key]:
+                for entities_grouped, result in zip(entity_string_to_ent_list.values(), results):
+                    for entity in entities_grouped:
                         cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
                         if not len(cache_missed_entities) == 0:
                             mappings = self.index_group.search(
@@ -116,7 +117,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                             )
                             for mapping in mappings:
                                 entity.add_mapping(mapping)
-                                self.lookup_cache.update_lookup_cache(entity, mapping)
+                            self.lookup_cache.update_lookup_cache(entity, mappings)
         except Exception:
             affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
