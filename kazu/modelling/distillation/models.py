@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -445,7 +445,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
         return loss
 
-    def validation_step_predLayer(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx):
         logits, _, _ = self.student_model(
             input_ids=batch["input_ids"],
             token_type_ids=batch["token_type_ids"],
@@ -467,9 +467,6 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
             "label_ids": batch["labels"].detach().cpu(),
             "attention_mask": batch["attention_mask"].detach().cpu(),
         }
-
-    def validation_step(self, batch, batch_idx):
-        return self.validation_step_predLayer(batch, batch_idx)
 
     def validation_epoch_end(self, val_step_outputs):
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
@@ -495,7 +492,6 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         self.log(
             self.metric, result, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True
         )  # Micro F1
-        return epoch_loss_mean
 
     def tensor_to_jagged_array(
         self, tensor: torch.Tensor, attention_mask: torch.Tensor
@@ -563,7 +559,18 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.loss = MSELoss()
         self.save_hyperparameters()
 
-    def _run_step(self, batch, batch_idx):
+    def _run_step(self, batch) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        function for the training/validation step.
+        Computes attention based distillation loss and hidden states based distillation loss.
+
+        :param batch: The output of DataLoader.
+        :type batch: [type]
+        :return: A tuple of tensors. (rep_loss, att_loss)
+        rep_loss: hidden states based distillation loss (includes embedding-layer distillation)
+        att_loss: attention based distillation loss
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         student_logits, student_atts, student_reps = self.student_model(
             input_ids=batch["input_ids"],
             token_type_ids=batch["token_type_ids"],
@@ -612,7 +619,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         return rep_loss, att_loss
 
     def training_step(self, batch, batch_idx):
-        rep_loss, att_loss = self._run_step(batch, batch_idx)
+        rep_loss, att_loss = self._run_step(batch)
         loss = rep_loss + att_loss
 
         # Logging
@@ -627,7 +634,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         return loss
 
     def validation_step(self, batch, batch_idx):
-        rep_loss, att_loss = self._run_step(batch, batch_idx)
+        rep_loss, att_loss = self._run_step(batch)
         loss = rep_loss + att_loss
         return {
             "loss": loss.detach().cpu(),
@@ -665,5 +672,3 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
             on_epoch=True,
             sync_dist=True,
         )
-
-        return epoch_loss_mean
