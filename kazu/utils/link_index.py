@@ -12,7 +12,8 @@ import torch
 from rapidfuzz import process, fuzz
 
 from kazu.data.data import LINK_SCORE
-from kazu.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE
+from kazu.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE, DEFAULT_LABEL
+from kazu.utils.utils import PathLike, as_path
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,8 @@ class Index(abc.ABC):
     """
     base class for all indices.
     """
+
+    column_type_dict = {SYN: str, IDX: str, MAPPING_TYPE: list, DEFAULT_LABEL: str}
 
     def __init__(
         self,
@@ -56,14 +59,14 @@ class Index(abc.ABC):
         hit_df[LINK_SCORE] = scores
         return hit_df
 
-    def save(self, path: str) -> Path:
+    def save(self, path: PathLike) -> Path:
         """
         save to disk. Makes a directory at the path location with all the index assets
 
         :param path:
         :return: a Path to where the index was saved
         """
-        directory = Path(path).joinpath(self.name)
+        directory = as_path(path).joinpath(self.name)
         if directory.exists():
             shutil.rmtree(directory)
         os.makedirs(directory)
@@ -71,11 +74,11 @@ class Index(abc.ABC):
             pickle.dump(self, f)
         self.metadata.to_parquet(self.get_dataframe_path(directory), index=None)
 
-        self._save(str(self.get_index_data_path(directory)))
+        self._save(self.get_index_data_path(directory))
         return directory
 
     @classmethod
-    def load(cls, path: str, name: str):
+    def load(cls, path: PathLike, name: str):
         """
         load from disk
         :param path: the parent path of the index
@@ -83,10 +86,11 @@ class Index(abc.ABC):
         :return:
         """
 
-        path = Path(path).joinpath(name)
+        root_path = as_path(path)
+        path = root_path.joinpath(name)
         with open(cls.get_index_path(path), "rb") as f:
             index = pickle.load(f)
-        index.metadata = pd.read_parquet(cls.get_dataframe_path(path))
+        index.metadata = cls.check_dataframe_types(pd.read_parquet(cls.get_dataframe_path(path)))
         index._load(cls.get_index_data_path(path))
         return index
 
@@ -102,7 +106,7 @@ class Index(abc.ABC):
     def get_index_data_path(path: Path) -> Path:
         return path.joinpath("index.data")
 
-    def _save(self, path: str):
+    def _save(self, path: PathLike):
         """
         concrete implementations should implement this to save any data specific to the implementation. This method is
         called by self.save
@@ -117,7 +121,7 @@ class Index(abc.ABC):
     def __setstate__(self, state):
         self.name = state
 
-    def _load(self, path: str) -> None:
+    def _load(self, path: PathLike) -> None:
         """
         concrete implementations should implement this to load any data specific to the implementation. This method is
         called by self.load
@@ -135,6 +139,19 @@ class Index(abc.ABC):
         :return:
         """
         raise NotImplementedError()
+
+    @staticmethod
+    def check_dataframe_types(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        certain fields in the metadata dataframe must be of a certain type. This method modifies a df to ensure the
+        types are consistently used.
+        :param df:
+        :return:
+        """
+        for column_name, _type in Index.column_type_dict.items():
+            if column_name in df.columns:
+                df[column_name] = df[column_name].apply(_type)
+        return df
 
 
 class DictionaryIndex(Index):
@@ -177,10 +194,10 @@ class DictionaryIndex(Index):
         hit_df = idx_list.set_index(IDX).join(self.metadata, how="left")
         return hit_df, np.array(scores)
 
-    def _load(self, path: str) -> Any:
-        self.synonym_df = pd.read_parquet(path)
+    def _load(self, path: PathLike) -> Any:
+        self.synonym_df = self.check_dataframe_types(pd.read_parquet(path))
 
-    def _save(self, path: str):
+    def _save(self, path: PathLike):
         self.synonym_df.to_parquet(path, index=None)
 
     def add(self, synonym_df: pd.DataFrame, metadata_df: pd.DataFrame):
@@ -191,6 +208,8 @@ class DictionaryIndex(Index):
         :param metadata_df: metadata dataframe
         :return:
         """
+        metadata_df = self.check_dataframe_types(metadata_df)
+        synonym_df = self.check_dataframe_types(synonym_df)
         if self.synonym_df is None and self.metadata is None:
             self.synonym_df = synonym_df
             self.metadata = metadata_df
@@ -218,7 +237,7 @@ class EmbeddingIndex(Index):
         :param metadata: a pd.DataFrame of metadata
         :return:
         """
-
+        metadata = self.check_dataframe_types(metadata)
         if len(embeddings) != len(metadata):
             raise ValueError("embeddings length not equal to metadata length")
         if self.index is None:
@@ -273,10 +292,14 @@ class EmbeddingIndex(Index):
         distances, neighbours = self._search_func(
             query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
         )
-        hit_df = self.metadata.iloc[neighbours]
-        # all mapping types are inferred for embedding based matches
-        hit_df = hit_df.assign(**{MAPPING_TYPE: "inferred"})
+        hit_df = self.metadata.iloc[neighbours].copy()
+        self.add_inferred_mapping_type_to_dataframe(hit_df)
         return hit_df, distances
+
+    @staticmethod
+    def add_inferred_mapping_type_to_dataframe(df: pd.DataFrame):
+        # all mapping types are inferred for embedding based matches
+        df[MAPPING_TYPE] = [["inferred"] for _ in range(df.shape[0])]
 
 
 class FaissEmbeddingIndex(EmbeddingIndex):
@@ -298,12 +321,12 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         except ImportError:
             raise RuntimeError(f"faiss is not installed. Cannot use {self.__class__.__name__}")
 
-    def _load(self, path: str):
+    def _load(self, path: PathLike):
         self.import_faiss()
         self.index = self.faiss.read_index(str(path))
 
-    def _save(self, path: str):
-        self.faiss.write_index(self.index, path)
+    def _save(self, path: PathLike):
+        self.faiss.write_index(self.index, str(path))
 
     def _search_func(
         self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
@@ -334,10 +357,10 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         super().__init__(name)
         self.index = None
 
-    def _load(self, path: str):
+    def _load(self, path: PathLike):
         self.index = torch.load(path, map_location="cpu")
 
-    def _save(self, path: str):
+    def _save(self, path: PathLike):
         torch.save(self.index, path)
 
     def _add(self, embeddings: torch.Tensor):

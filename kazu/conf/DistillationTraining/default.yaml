@@ -69,4 +69,3 @@ trainer:
       verbose: True
     - _target_: pytorch_lightning.callbacks.progress.TQDMProgressBar
       refresh_rate: 1
-

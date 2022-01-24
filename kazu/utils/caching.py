@@ -64,13 +64,11 @@ class EntityLinkingLookupCache:
     def __init__(self, lookup_cache_size: int = 5000):
         self.lookup_cache = LFUCache(lookup_cache_size)
 
-    def update_lookup_cache(self, entity: Entity, mapping: Mapping):
+    def update_lookup_cache(self, entity: Entity, mappings: List[Mapping]):
         hash_val = get_match_entity_class_hash(entity)
-        if hash_val not in self.lookup_cache:
-            self.lookup_cache[hash_val] = [mapping]
-        else:
-            cache_hit = self.lookup_cache[hash_val]
-            self.lookup_cache[hash_val] = cache_hit + [mapping]
+        cache_hit = self.lookup_cache.get(hash_val)
+        if cache_hit is None:
+            self.lookup_cache[hash_val] = mappings
 
     def check_lookup_cache(self, entities: List[Entity]) -> List[Entity]:
         """
@@ -83,11 +81,11 @@ class EntityLinkingLookupCache:
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
-            maybe_mappings = self.lookup_cache.get(hash_val, None)
-            if maybe_mappings is None:
+            cache_hits = self.lookup_cache.get(hash_val, None)
+            if cache_hits is None:
                 cache_misses.append(ent)
             else:
-                for mapping in maybe_mappings:
+                for mapping in cache_hits:
                     ent.add_mapping(mapping)
         return cache_misses
 
@@ -312,8 +310,6 @@ class CachedIndexGroup:
             for ontology_id, row in results.iterrows():
                 row_dict = row.to_dict()
                 mapping_type = row_dict.pop(MAPPING_TYPE)
-                if not isinstance(mapping_type, list):
-                    mapping_type = [mapping_type]
                 source = row_dict.pop(SOURCE)
                 row_dict[NAMESPACE] = namespace
                 new_mapping = Mapping(
