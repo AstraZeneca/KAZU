@@ -91,7 +91,7 @@ class StringPreprocessorStep(BaseStep):
         new_uniques_map = {}
         for key1 in map1:
             for key2 in map2:
-                if key1.is_overlapped(key2):
+                if key1.is_completely_overlapped(key2):
                     new_mod_span = CharSpan(
                         start=min([key1.start, key2.start]), end=max([key1.end, key2.end])
                     )
