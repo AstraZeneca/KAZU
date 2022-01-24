@@ -10,6 +10,7 @@ from kazu.data.data import (
     ENTITY_INSIDE_SYMBOL,
     ENTITY_OUTSIDE_SYMBOL,
     ENTITY_START_SYMBOL,
+    CharSpan,
 )
 
 logger = logging.getLogger(__name__)
@@ -92,8 +93,7 @@ class BIOLabelParser:
                 )
             else:
                 entity = Entity(
-                    start=self.start,
-                    end=self.end,
+                    spans=frozenset([CharSpan(start=self.start, end=self.end)]),
                     match=text[self.start : self.end],
                     namespace=self.namespace,
                     entity_class=self.entity_class,
