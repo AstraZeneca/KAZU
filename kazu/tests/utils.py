@@ -5,7 +5,7 @@ from typing import List, Tuple
 import pandas as pd
 import pytest
 
-from kazu.data.data import SimpleDocument, Entity, Document, Mapping
+from kazu.data.data import SimpleDocument, Entity, Document, Mapping, CharSpan
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -96,7 +96,12 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
 
     doc = SimpleDocument("Baclofen is a muscle relaxant")
     doc.sections[0].entities = [
-        Entity(namespace="test", match="Baclofen", entity_class="drug", start=0, end=8)
+        Entity(
+            namespace="test",
+            match="Baclofen",
+            entity_class="drug",
+            spans=frozenset([CharSpan(start=0, end=8)]),
+        )
     ]
     docs.append(doc)
     iris.append("CHEMBL701")
@@ -104,7 +109,12 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
 
     doc = SimpleDocument("Helium is a gas.")
     doc.sections[0].entities = [
-        Entity(namespace="test", match="Helium", entity_class="drug", start=0, end=6)
+        Entity(
+            namespace="test",
+            match="Helium",
+            entity_class="drug",
+            spans=frozenset([CharSpan(start=0, end=6)]),
+        )
     ]
     iris.append("CHEMBL1796997")
     sources.append("CHEMBL")
@@ -121,8 +131,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="drug",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -135,8 +144,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="drug",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -149,8 +157,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="drug",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -163,8 +170,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="drug",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -177,8 +183,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="disease",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -191,8 +196,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="disease",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -205,8 +209,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="disease",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -219,8 +222,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="disease",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -233,8 +235,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="disease",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -247,8 +248,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="anatomy",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -261,8 +261,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="anatomy",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -275,8 +274,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="anatomy",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -289,8 +287,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="gene",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -303,8 +300,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="gene",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -317,8 +313,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="gene",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -331,8 +326,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="gene",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -345,8 +339,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="gene",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
@@ -359,8 +352,7 @@ def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class="gene",
-            start=0,
-            end=len(doc.sections[0].get_text()),
+            spans=frozenset([CharSpan(start=0, end=len(doc.sections[0].get_text()))]),
         )
     ]
     docs.append(doc)
