@@ -170,7 +170,7 @@ class Entity(BaseModel):
     namespace: str  # namespace of BaseStep that produced this instance
     match: str  # exact text representation
     entity_class: str  # entity class
-    spans: FrozenSet[CharSpan]  # start offset
+    spans: FrozenSet[CharSpan]  # charspans
     hash_val: Optional[str] = None  # not required. calculated based on above fields
     metadata: EntityMetadata = Field(default_factory=EntityMetadata, hash=False)  # generic metadata
     _start: Optional[int] = None
