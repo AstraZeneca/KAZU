@@ -3,13 +3,13 @@ cudnn:
   deterministic: True
   benchmark: False
 monitoring:
-  monitor: entity_f1
-  mode: max
+  monitor: mserror
+  mode: min
 training_params:
-  max_epochs: 10
+  max_epochs: 5
 save_dir: "." # save dir managed by hydra. Override here if required
 model:
-  _target_: kazu.modelling.distillation.models.SequenceTaggingDistillationForFinalLayer
+  _target_: kazu.modelling.distillation.models.SequenceTaggingDistillationForIntermediateLayer
   data_dir: ???
   label_list:
     - B-disease
@@ -25,13 +25,13 @@ model:
     - O
   student_model_path: ???
   teacher_model_path: ???
-  batch_size: 8
+  batch_size: 128
   max_length: 128
-  num_workers: 2
+  num_workers: 4
   temperature: 1.0
   warmup_steps: 0
-  learning_rate: 5e-5
-  schedule: warmup_linear
+  learning_rate: 3e-5
+  schedule: torchStepLR
   weight_decay: 0.01
   accumulate_grad_batches: ${DistillationTraining.trainer.accumulate_grad_batches}
   max_epochs: ${DistillationTraining.training_params.max_epochs}
@@ -39,11 +39,12 @@ model:
 trainer:
   _target_: pytorch_lightning.Trainer
   num_sanity_val_steps: 2
-  gpus: 0
-  accelerator: ~
-  val_check_interval: 1.0
+  devices: "auto"
+  accelerator: "auto"
+  val_check_interval: 0.05
   accumulate_grad_batches: 1
   max_epochs: ${DistillationTraining.training_params.max_epochs}
+  strategy: "ddp"
   logger:
     - _target_: pytorch_lightning.loggers.CSVLogger
       save_dir: ${DistillationTraining.save_dir}
@@ -54,7 +55,7 @@ trainer:
   callbacks:
     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
       dirpath: ${DistillationTraining.save_dir}
-      filename: "student_model-{epoch:02d}-{entity_f1:.4f}-{validation_loss:.3f}-{step:05d}"
+      filename: "student_model_inm_layer-{epoch:02d}-{mserror:.4f}-{step:05d}"
       monitor: ${DistillationTraining.monitoring.monitor}
       mode: ${DistillationTraining.monitoring.mode}
       save_top_k: 5
@@ -65,7 +66,7 @@ trainer:
       monitor: ${DistillationTraining.monitoring.monitor}
       mode: ${DistillationTraining.monitoring.mode}
       min_delta: 0.00
-      patience: 5
+      patience: 10
       verbose: True
     - _target_: pytorch_lightning.callbacks.progress.TQDMProgressBar
       refresh_rate: 1

@@ -6,8 +6,12 @@ import torch
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
+from typing import Union
 
-from kazu.modelling.distillation.models import SequenceTaggingTaskSpecificDistillation
+from kazu.modelling.distillation.models import (
+    SequenceTaggingDistillationForFinalLayer,
+    SequenceTaggingDistillationForIntermediateLayer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +27,9 @@ def start(cfg: DictConfig) -> None:
 
     pytorch_lightning.seed_everything(cfg.DistillationTraining.seed)
     trainer: Trainer = instantiate(cfg.DistillationTraining.trainer)
-    model: SequenceTaggingTaskSpecificDistillation = instantiate(cfg.DistillationTraining.model)
+    model: Union[
+        SequenceTaggingDistillationForFinalLayer, SequenceTaggingDistillationForIntermediateLayer
+    ] = instantiate(cfg.DistillationTraining.model)
     trainer.fit(model)
 
 

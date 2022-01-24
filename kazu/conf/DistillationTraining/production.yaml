@@ -9,7 +9,7 @@ training_params:
   max_epochs: 5
 save_dir: "." # save dir managed by hydra. Override here if required
 model:
-  _target_: kazu.modelling.distillation.models.SequenceTaggingTaskSpecificDistillation
+  _target_: kazu.modelling.distillation.models.SequenceTaggingDistillationForFinalLayer
   data_dir: ???
   label_list:
     - B-disease
@@ -35,9 +35,9 @@ model:
   weight_decay: 0.01
   accumulate_grad_batches: ${DistillationTraining.trainer.accumulate_grad_batches}
   max_epochs: ${DistillationTraining.training_params.max_epochs}
+  metric: ${DistillationTraining.monitoring.monitor}
 trainer:
   _target_: pytorch_lightning.Trainer
-  progress_bar_refresh_rate: 1
   num_sanity_val_steps: 2
   devices: "auto"
   accelerator: "auto"
@@ -55,7 +55,7 @@ trainer:
   callbacks:
     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
       dirpath: ${DistillationTraining.save_dir}
-      filename: "student_model-{epoch:02d}-{entity_f1:.4f}-{validation_loss_epoch:.3f}-{step:05d}"
+      filename: "student_model-{epoch:02d}-{entity_f1:.4f}-{validation_loss:.3f}-{step:05d}"
       monitor: ${DistillationTraining.monitoring.monitor}
       mode: ${DistillationTraining.monitoring.mode}
       save_top_k: 5
@@ -68,3 +68,5 @@ trainer:
       min_delta: 0.00
       patience: 10
       verbose: True
+    - _target_: pytorch_lightning.callbacks.progress.TQDMProgressBar
+      refresh_rate: 1
