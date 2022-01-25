@@ -11,6 +11,7 @@ from kazu.data.data import (
     NAMESPACE,
     LINK_CONFIDENCE,
     PROCESSING_EXCEPTION,
+    CharSpan,
 )
 
 LINKING_THRESHOLDS = {
@@ -32,7 +33,12 @@ def perform_test(request):
             [], keep_top_n=keep_top_n, linker_score_thresholds=LINKING_THRESHOLDS
         )
         doc = SimpleDocument("hello")
-        entity = Entity(namespace="test", start=0, end=1, match="hello", entity_class="test")
+        entity = Entity(
+            namespace="test",
+            spans=frozenset([CharSpan(start=0, end=1)]),
+            match="hello",
+            entity_class="test",
+        )
         entity.metadata.mappings = mappings
         doc.sections[0].entities = [entity]
         result, _ = step([doc])
@@ -51,8 +57,6 @@ def make_mapping(
     score: float, linker_namespace: str, default_label: str, syn: Optional[str], idx: str
 ) -> Mapping:
     return Mapping(
-        start=0,
-        end=1,
         idx=idx,
         mapping_type=["test"],
         source="test",

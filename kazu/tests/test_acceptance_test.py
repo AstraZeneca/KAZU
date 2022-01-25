@@ -67,8 +67,8 @@ def query_annotations_df(annotations: pd.DataFrame, entity: Entity):
         mapping_id = None
 
     matches = annotations[
-        (annotations["start"] == entity.start)
-        & (annotations["end"] == entity.end)
+        (annotations["start"] == entity.start())
+        & (annotations["end"] == entity.end())
         & (annotations["match"] == entity.match)
         & (annotations["entity_class"] == entity.entity_class)
         & (

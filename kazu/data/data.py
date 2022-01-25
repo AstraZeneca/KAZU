@@ -1,7 +1,8 @@
 import tempfile
 import uuid
 import webbrowser
-from typing import List, Any, Dict, Optional, Tuple, Union
+from math import inf
+from typing import List, Any, Dict, Optional, Tuple, Union, FrozenSet
 import pandas as pd
 from pydantic import BaseModel, Field, validator
 from spacy import displacy
@@ -23,13 +24,26 @@ LINK_CONFIDENCE = "link_confidence"
 
 
 class CharSpan(BaseModel):
-    """A concept similar to a Spacy Span, except is offset based rather than token based"""
+    """A concept similar to a Spacy Span, except is character index based rather than token based"""
 
     start: int
     end: int
 
-    def is_overlapped(self, other):
+    def is_completely_overlapped(self, other):
+        """
+        True if other completely overlaps this span
+        :param other:
+        :return:
+        """
         return self.start >= other.start and self.end <= other.end
+
+    def is_partially_overlapped(self, other):
+        """
+        True if other partially overlaps this span
+        :param other:
+        :return:
+        """
+        return (other.start <= self.start <= other.end) or (other.start <= self.end <= other.end)
 
     def __lt__(self, other):
         return self.start < other.start
@@ -148,16 +162,46 @@ class EntityMetadata(BaseModel):
 
 class Entity(BaseModel):
     """
-    Generic data class representing a unique entity in a string
+    Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
+    we have to define the semantics of overlapping spans.
     """
 
     namespace: str  # namespace of BaseStep that produced this instance
     match: str  # exact text representation
     entity_class: str  # entity class
-    start: int  # start offset
-    end: int  # end offset
+    spans: FrozenSet[CharSpan]  # charspans
     hash_val: Optional[str] = None  # not required. calculated based on above fields
     metadata: EntityMetadata = Field(default_factory=EntityMetadata, hash=False)  # generic metadata
+    _start: Optional[int] = None
+    _end: Optional[int] = None
+
+    def calc_starts_and_ends(self) -> Tuple[int, int]:
+        earliest_start = inf
+        latest_end = 0
+        for span in self.spans:
+            if span.start < earliest_start:
+                earliest_start = span.start
+            if span.end > latest_end:
+                latest_end = span.end
+        return earliest_start, latest_end
+
+    def end(self):
+        """
+        get the last end char for this Entity
+        :return:
+        """
+        if self._end is None:
+            self._start, self._end = self.calc_starts_and_ends()
+        return self._end
+
+    def start(self):
+        """
+        get the first start char for this Entity
+        :return:
+        """
+        if self._start is None:
+            self._start, self._end = self.calc_starts_and_ends()
+        return self._start
 
     @validator("hash_val", always=True)
     def populate_hash(cls, v, values):
@@ -166,26 +210,58 @@ class Entity(BaseModel):
                 values.get("namespace"),
                 values.get("match"),
                 values.get("entity_class"),
-                values.get("start"),
-                values.get("end"),
+                values.get("spans"),
             )
         )
 
-    def exact_overlap(self, other, also_same_class: bool = False):
+    def is_completely_overlapped(self, other):
         """
-        compare one entity to other
+        True if all CharSpan instances are completely encompassed by all other CharSpan instances
+        :param other:
+        :return:
+        """
+        for charspan in self.spans:
+            for other_charspan in other.spans:
+                if charspan.is_completely_overlapped(other_charspan):
+                    break
+            else:
+                return False
+        return True
 
-        :param other: query Entity
-        :param also_same_class: if True, will return true if entity_class matches
+    def is_partially_overlapped(self, other):
         """
-        if (
-            also_same_class
-            and self.entity_class == other.entity_class
-            and all([self.start == other.start, self.end == other.end])
-        ):
-            return True
+        True if only one CharSpan instance is defined in both self and other, and they are partially overlapped
+
+        If multiple CharSpan are defined in both self and other, this becomes pathological, as while they may overlap
+        in the technical sense, they may have distinct semantic meaning. For instance, consider the case where
+        we may want to use is_partially_overlapped to select the longest annotation span suggested
+        by some NER system.
+
+        case 1:
+        text: the patient has metastatic liver cancers
+        entity1:  metastatic liver cancer -> [CharSpan(16,39]
+        entity2: liver cancers -> [CharSpan(27,40]
+
+        result: is_partially_overlapped -> True (entities are part of same concept)
+
+
+        case 2: non-contiguous entities
+
+        text: lung and liver cancer
+        lung cancer -> [CharSpan(0,4), CharSpan(1521
+        liver cancer -> [CharSpan(9,21)]
+
+        result: is_partially_overlapped -> False (entities are distinct)
+
+        :param other:
+        :return:
+        """
+        if len(self.spans) == 1 and len(other.spans) == 1:
+            (charspan,) = self.spans
+            (other_charspan,) = other.spans
+            return charspan.is_partially_overlapped(other_charspan)
         else:
-            return all([self.start == other.start, self.end == other.end])
+            return False
 
     def __hash__(self):
         return self.hash_val
@@ -193,22 +269,13 @@ class Entity(BaseModel):
     def __eq__(self, other):
         return other.hash_val == self.hash_val
 
-    def overlapped(self, other) -> bool:
-        """
-        Test for distinct offsets
-
-        :param other: query Entity
-        :return: True if the offsets are completely distinct, False otherwise
-        """
-        return (self.end <= other.start) or (self.start >= other.end)
-
     def __len__(self) -> int:
         """
         Span length
 
         :return: number of characters enclosed by span
         """
-        return self.end - self.start
+        return self.end() - self.start()
 
     def __repr__(self) -> str:
         """
@@ -216,17 +283,46 @@ class Entity(BaseModel):
 
         :return: tag match description
         """
-        return f"{self.namespace}:{self.match}:{self.entity_class}:{self.metadata}:{self.start}:{self.end}"
+        return f"{self.namespace}:{self.match}:{self.entity_class}:{self.metadata}:{self.start()}:{self.end()}"
 
     def as_brat(self):
         """
         :return: self as the third party biomedical nlp Brat format, (see docs on Brat)
         """
-
-        return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
+        # TODO: update this to make use of non-contiguous entities
+        return f"{self.hash_val}\t{self.entity_class}\t{self.start()}\t{self.end()}\t{self.match}\n"
 
     def add_mapping(self, mapping: Mapping):
         self.metadata.mappings.append(mapping)
+
+    @classmethod
+    def from_spans(cls, spans: List[Tuple[int, int]], text: str, **kwargs):
+        """
+        create an instance of Entity from a list of character indices. A text string of underlying doc is
+        also required to produce a representative match
+        :param spans:
+        :param text:
+        :param kwargs:
+        :return:
+        """
+        spans = frozenset([CharSpan(start=x[0], end=x[1]) for x in spans])
+        match = " ".join([text[x.start : x.end] for x in spans])
+        return cls(spans=spans, match=match, **kwargs)
+
+
+class ContiguousEntity(Entity):
+    """
+    Simple subclass of Entity for convenience, consisting of only one span
+    """
+
+    def __init__(
+        self,
+        start: int,
+        end: int,
+        **kwargs,
+    ):
+        single_span = frozenset([CharSpan(start=start, end=end)])
+        super().__init__(spans=single_span, _start=start, _end=end, **kwargs)
 
 
 class Section(BaseModel):
@@ -270,7 +366,7 @@ class Section(BaseModel):
         return hash((values.get("text"), values.get("name")))
 
     def render(self):
-        ordered_ends = sorted(self.entities, key=lambda x: x.start)
+        ordered_ends = sorted(self.entities, key=lambda x: x.start())
         colors = {
             "gene_linked": "#00f518",
             "gene": "#84fa90",
@@ -296,7 +392,8 @@ class Section(BaseModel):
             {
                 "text": self.get_text(),
                 "ents": [
-                    {"start": x.start, "end": x.end, "label": label_colors(x)} for x in ordered_ends
+                    {"start": x.start(), "end": x.end(), "label": label_colors(x)}
+                    for x in ordered_ends
                 ],
                 "title": None,
             }
@@ -360,7 +457,7 @@ class Section(BaseModel):
     def entities_as_dataframe(self) -> Optional[pd.DataFrame]:
         """
         convert entities into a pandas dataframe. Useful for building annotation sets
-
+        non-contiguous entities currently not supported
         :return:
         """
         data = []
@@ -384,8 +481,8 @@ class Section(BaseModel):
                     metadata,
                     mapping_id,
                     ent.entity_class,
-                    ent.start,
-                    ent.end,
+                    ent.start(),
+                    ent.end(),
                 )
             )
         if len(data) > 0:

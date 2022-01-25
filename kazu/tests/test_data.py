@@ -1,6 +1,6 @@
 import pytest
 
-from kazu.data.data import TokenizedWord, SimpleDocument, CharSpan
+from kazu.data.data import TokenizedWord, SimpleDocument, CharSpan, Entity
 from fastapi.encoders import jsonable_encoder
 
 
@@ -45,3 +45,36 @@ def test_serialisation():
     # call to as_serialisable means we can encode it
     y = x.as_serialisable()
     jsonable_encoder(y)
+
+
+def test_overlap_logic():
+    # e.g. "the patient has metastatic liver cancers"
+    e1 = Entity(
+        namespace="test",
+        match="metastatic liver cancer",
+        entity_class="test",
+        spans=frozenset([CharSpan(start=16, end=39)]),
+    )
+    e2 = Entity(
+        namespace="test",
+        match="liver cancers",
+        entity_class="test",
+        spans=frozenset([CharSpan(start=27, end=40)]),
+    )
+
+    assert e1.is_partially_overlapped(e2)
+
+    # e.g. 'liver and lung cancer'
+    e1 = Entity(
+        namespace="test",
+        match="liver cancer",
+        entity_class="test",
+        spans=frozenset([CharSpan(start=0, end=4), CharSpan(start=15, end=21)]),
+    )
+    e2 = Entity(
+        namespace="test",
+        match="lung cancer",
+        entity_class="test",
+        spans=frozenset([CharSpan(start=9, end=21)]),
+    )
+    assert not e1.is_partially_overlapped(e2)
