@@ -22,7 +22,7 @@ index_group:
       - NOT_IMPLEMENTED
   cache_managers:
     - _target_: kazu.utils.caching.DictionaryIndexCacheManager
-      rebuild_cache: True
+      rebuild_cache: False
       index_type: DictionaryIndex
       parsers:
         - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser

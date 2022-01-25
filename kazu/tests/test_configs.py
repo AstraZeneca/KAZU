@@ -1,23 +1,8 @@
-import pytest
-from hydra.utils import instantiate
-
 from kazu.pipeline import Pipeline, load_steps
+from kazu.tests.utils import requires_model_pack
 
 
-def test_docker_configs(override_kazu_test_config):
-    cfg = override_kazu_test_config(
-        overrides=[
-            "DictionaryEntityLinkingStep=docker",
-            "SapBertForEntityLinkingStep=docker",
-            "TransformersModelForTokenClassificationNerStep=docker",
-        ],
-    )
-    # should raise OSErrors from missing files
-    with pytest.raises(OSError):
-        instantiate(cfg.DictionaryEntityLinkingStep)
-    with pytest.raises(OSError):
-        instantiate(cfg.SapBertForEntityLinkingStep)
-    with pytest.raises(OSError):
-        instantiate(cfg.TransformersModelForTokenClassificationNerStep)
-    with pytest.raises(OSError):
-        Pipeline(steps=load_steps(cfg))
+@requires_model_pack
+def test_configs(kazu_test_config):
+    # test the default pipeline can load/configs are all correct
+    Pipeline(steps=load_steps(kazu_test_config))
