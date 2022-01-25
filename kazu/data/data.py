@@ -42,8 +42,8 @@ class CharSpan(BaseModel):
         :param other:
         :return:
         """
-        return (self.start >= other.start and self.start <= other.end) or (
-            self.end >= other.start and self.end <= other.end
+        return (other.start <= self.start <= other.end) or (
+            other.start <= self.end <= other.end
         )
 
     def __lt__(self, other):
@@ -163,7 +163,7 @@ class EntityMetadata(BaseModel):
 
 class Entity(BaseModel):
     """
-    Generic data class representing a unique entity in a string. Note, since en entity can consist of multiple CharSpan,
+    Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
     we have to define the semantics of overlapping spans.
     """
 
@@ -177,12 +177,14 @@ class Entity(BaseModel):
     _end: Optional[int] = None
 
     def calc_starts_and_ends(self) -> Tuple[int, int]:
-        starts = []
-        ends = []
+        earliest_start = inf
+        latest_end = 0
         for span in self.spans:
-            starts.append(span.start)
-            ends.append(span.end)
-        return min(starts), max(ends)
+            if span.start < earliest_start:
+                earliest_start = span.start
+            if span.end > latest_end:
+                latest_end = span.end
+        return earliest_start, latest_end
 
     def end(self):
         """
@@ -190,9 +192,7 @@ class Entity(BaseModel):
         :return:
         """
         if self._end is None:
-            start, end = self.calc_starts_and_ends()
-            self._start = start
-            self._end = end
+            self._start, self._end = self.calc_starts_and_ends()
         return self._end
 
     def start(self):
@@ -201,9 +201,7 @@ class Entity(BaseModel):
         :return:
         """
         if self._start is None:
-            start, end = self.calc_starts_and_ends()
-            self._start = start
-            self._end = end
+            self._start, self._end = self.calc_starts_and_ends()
         return self._start
 
     @validator("hash_val", always=True)
@@ -223,13 +221,13 @@ class Entity(BaseModel):
         :param other:
         :return:
         """
-        overlaps = []
         for charspan in self.spans:
             for other_charspan in other.spans:
                 if charspan.is_completely_overlapped(other_charspan):
-                    overlaps.append(True)
                     break
-        return len(overlaps) == len(self.spans)
+            else:
+                return False
+        return True
 
     def is_partially_overlapped(self, other):
         """
