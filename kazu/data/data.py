@@ -1,6 +1,7 @@
 import tempfile
 import uuid
 import webbrowser
+from math import inf
 from typing import List, Any, Dict, Optional, Tuple, Union, FrozenSet
 import pandas as pd
 from pydantic import BaseModel, Field, validator
@@ -42,9 +43,7 @@ class CharSpan(BaseModel):
         :param other:
         :return:
         """
-        return (other.start <= self.start <= other.end) or (
-            other.start <= self.end <= other.end
-        )
+        return (other.start <= self.start <= other.end) or (other.start <= self.end <= other.end)
 
     def __lt__(self, other):
         return self.start < other.start
@@ -246,13 +245,13 @@ class Entity(BaseModel):
         result: is_partially_overlapped -> True (entities are part of same concept)
 
 
-        case 2: discontiguous entities
+        case 2: non-contiguous entities
 
         text: lung and liver cancer
         lung cancer -> [CharSpan(0,4), CharSpan(1521
         liver cancer -> [CharSpan(9,21)]
 
-        result: is_partially_overlapped -> True (entities are distinct)
+        result: is_partially_overlapped -> False (entities are distinct)
 
         :param other:
         :return:
@@ -290,7 +289,7 @@ class Entity(BaseModel):
         """
         :return: self as the third party biomedical nlp Brat format, (see docs on Brat)
         """
-        # TODO: update this to make use of discontiguous entities
+        # TODO: update this to make use of non-contiguous entities
         return f"{self.hash_val}\t{self.entity_class}\t{self.start()}\t{self.end()}\t{self.match}\n"
 
     def add_mapping(self, mapping: Mapping):
@@ -429,7 +428,7 @@ class Section(BaseModel):
     def entities_as_dataframe(self) -> Optional[pd.DataFrame]:
         """
         convert entities into a pandas dataframe. Useful for building annotation sets
-        discontiguoys entities currently not supported
+        non-contiguous entities currently not supported
         :return:
         """
         data = []
