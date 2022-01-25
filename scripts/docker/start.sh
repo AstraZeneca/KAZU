@@ -9,15 +9,13 @@ echo "unzipping models"
 cd model_pack
 unzip  model_pack.zip
 mv model_pack/* .
+export KAZU_MODEL_PACK=/home/ray/model_pack/
 cd ..
 echo "running ray deployment"
 RAY_SERVE_CONFIG="${RAY_SERVE_CONFIG:-local}"
 echo "ray config set to ${RAY_SERVE_CONFIG}"
 export TOKENIZERS_PARALLELISM=false
 python -m kazu.web.server \
-SapBertForEntityLinkingStep=docker \
 ray=${RAY_SERVE_CONFIG} \
-TransformersModelForTokenClassificationNerStep=docker \
-DictionaryEntityLinkingStep=docker \
 hydra.run.dir="."
 echo "ray deployment complete"
