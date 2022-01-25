@@ -295,6 +295,35 @@ class Entity(BaseModel):
     def add_mapping(self, mapping: Mapping):
         self.metadata.mappings.append(mapping)
 
+    @classmethod
+    def from_spans(cls, spans: List[Tuple[int, int]], text: str, **kwargs):
+        """
+        create an instance of Entity from a list of character indices. A text string of underlying doc is
+        also required to produce a representative match
+        :param spans:
+        :param text:
+        :param kwargs:
+        :return:
+        """
+        spans = frozenset([CharSpan(start=x[0], end=x[1]) for x in spans])
+        match = " ".join([text[x.start : x.end] for x in spans])
+        return cls(spans=spans, match=match, **kwargs)
+
+
+class ContiguousEntity(Entity):
+    """
+    Simple subclass of Entity for convenience, consisting of only one span
+    """
+
+    def __init__(
+        self,
+        start: int,
+        end: int,
+        **kwargs,
+    ):
+        single_span = frozenset([CharSpan(start=start, end=end)])
+        super().__init__(spans=single_span, _start=start, _end=end, **kwargs)
+
 
 class Section(BaseModel):
     text: str  # the text to be processed
