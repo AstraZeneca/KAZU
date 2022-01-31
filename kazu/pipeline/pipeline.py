@@ -1,10 +1,13 @@
+import json
 import logging
 import os.path
+from os import PathLike
 from typing import List, Dict, Optional
-import json
+
+from fastapi.encoders import jsonable_encoder
 from hydra.utils import instantiate
 from omegaconf import DictConfig
-from fastapi.encoders import jsonable_encoder
+
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import BaseStep
 from kazu.steps.base.step import StepMetadata
@@ -63,7 +66,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
     implementation logs docs to a directory, along with exception message
     """
 
-    def __init__(self, log_dir: str):
+    def __init__(self, log_dir: PathLike):
         self.log_dir = log_dir
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
@@ -73,7 +76,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
                 os.makedirs(step_logging_dir, exist_ok=True)
 
             for doc in docs:
-                serialisable_doc = doc.as_serialisable()
+                serialisable_doc = doc.json()
                 doc_id = doc.idx
                 doc_path = os.path.join(step_logging_dir, doc_id + ".json")
                 doc_error_path = os.path.join(step_logging_dir, doc_id + "_error.txt")
@@ -107,23 +110,6 @@ class Pipeline:
         # performance tracking
         self.stopwatch = Stopwatch()
 
-    def check_dependencies_have_run(self, step: BaseStep):
-        """
-        each step can have a list of dependencies - the namespace of other steps that must have run for a step to
-        be able to run. This method checks the dependencies of :param step against the pipeline_metadata, to ensure
-        the step is able to run. Raises RuntimeError if this check fails
-
-        :param step:
-        :return:
-        """
-        for dependency in step.depends_on:
-            if self.pipeline_metadata.get(dependency, False).get("has_run"):
-                logger.debug(f"step: {dependency} has run")
-            else:
-                raise RuntimeError(
-                    f"cannot run step: {step} as dependency {dependency} has not run"
-                )
-
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
         run the pipeline
@@ -133,7 +119,6 @@ class Pipeline:
         """
         succeeded_docs = docs
         for step in self.steps:
-            self.check_dependencies_have_run(step)
             self.stopwatch.start()
             succeeded_docs, failed_docs = step(succeeded_docs)
             self.stopwatch.message(
