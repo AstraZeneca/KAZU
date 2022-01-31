@@ -1,28 +1,15 @@
-from abc import ABC, abstractmethod
 import logging
-from pathlib import Path
-from typing import Type, Dict, Any, Iterable, Tuple, List, Set
-
-from cachetools import LFUCache
-
-from kazu.data.data import Entity, LINK_SCORE, NAMESPACE
-from kazu.modelling.ontology_preprocessing.base import OntologyParser, MAPPING_TYPE
-from kazu.utils.link_index import (
-    Index,
-    MatMulTensorEmbeddingIndex,
-    FaissEmbeddingIndex,
-    CDistTensorEmbeddingIndex,
-    DictionaryIndex,
-)
-from kazu.utils.utils import get_match_entity_class_hash
-
-
 import shutil
+from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Type, Dict, Any, Iterable, Tuple, List, Set, Generator
 
 import pandas as pd
 import torch
+from cachetools import LFUCache
 from pytorch_lightning import Trainer
 
+from kazu.data.data import Entity, LINK_SCORE, NAMESPACE
 from kazu.data.data import Mapping
 from kazu.modelling.linking.sapbert.train import (
     PLSapbertModel,
@@ -31,9 +18,18 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
     SOURCE,
 )
+from kazu.modelling.ontology_preprocessing.base import OntologyParser, MAPPING_TYPE
+from kazu.utils.link_index import (
+    Index,
+    MatMulTensorEmbeddingIndex,
+    FaissEmbeddingIndex,
+    CDistTensorEmbeddingIndex,
+    DictionaryIndex,
+)
 from kazu.utils.utils import (
     get_cache_dir,
 )
+from kazu.utils.utils import get_match_entity_class_hash
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +58,7 @@ class EntityLinkingLookupCache:
     """
 
     def __init__(self, lookup_cache_size: int = 5000):
-        self.lookup_cache = LFUCache(lookup_cache_size)
+        self.lookup_cache: LFUCache = LFUCache(lookup_cache_size)
 
     def update_lookup_cache(self, entity: Entity, mappings: List[Mapping]):
         hash_val = get_match_entity_class_hash(entity)
@@ -157,8 +153,8 @@ class DictionaryIndexCacheManager(IndexCacheManager):
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
         ontology_df = parser.get_ontology_metadata()
-        synonym_df = parser.synonym_table
-        index.add(synonym_df, ontology_df)
+        synonym_df = parser.get_ontology_synonyms()
+        index.add(synonym_df=synonym_df, metadata_df=ontology_df)
         index_path = index.save(str(cache_dir))
         logger.info(f"saved {index.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {index.name} is {len(index)}")
@@ -214,7 +210,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
             ontology_embeddings,
         ) in self.predict_ontology_embeddings(ontology_dataframe=ontology_df):
             logger.info(f"processing partition {partition_number} ")
-            index.add(ontology_embeddings, metadata_df)
+            index.add(embeddings=ontology_embeddings, metadata=metadata_df)
             logger.info(f"index size is now {len(index)}")
         index_path = index.save(cache_dir)
         logger.info(f"saved {parser.name} index to {index_path.absolute()}")
@@ -236,7 +232,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
 
     def predict_ontology_embeddings(
         self, ontology_dataframe: pd.DataFrame
-    ) -> Tuple[int, pd.DataFrame, torch.Tensor]:
+    ) -> Generator[Tuple[int, pd.DataFrame, torch.Tensor], None, None]:
         """
         since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
         and add them to the index sequentially
@@ -304,15 +300,17 @@ class CachedIndexGroup:
             if len_results == 1:
                 # results contains a single, already-sorted DataFrame
                 # so avoid sorting again
-                results = results[0]
+                results_df = results[0]
             else:
-                results = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
-            for ontology_id, row in results.iterrows():
-                row_dict = row.to_dict()
+                results_df = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
+            for ontology_id, row in results_df.iterrows():
+                row_dict: Dict = row.to_dict()
                 mapping_type = row_dict.pop(MAPPING_TYPE)
                 source = row_dict.pop(SOURCE)
+                default_label = row_dict.pop(DEFAULT_LABEL)
                 row_dict[NAMESPACE] = namespace
                 new_mapping = Mapping(
+                    default_label=default_label,
                     source=source,
                     idx=ontology_id,
                     mapping_type=mapping_type,
