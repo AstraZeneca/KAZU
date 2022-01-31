@@ -1,10 +1,12 @@
+import json
 import tempfile
 import uuid
 import webbrowser
+from dataclasses import dataclass, field
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, Union, FrozenSet
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet
+
 import pandas as pd
-from pydantic import BaseModel, Field, validator
 from spacy import displacy
 
 # BIO schema
@@ -23,7 +25,8 @@ LINK_SCORE = "link_score"
 LINK_CONFIDENCE = "link_confidence"
 
 
-class CharSpan(BaseModel):
+@dataclass
+class CharSpan:
     """A concept similar to a Spacy Span, except is character index based rather than token based"""
 
     start: int
@@ -55,25 +58,26 @@ class CharSpan(BaseModel):
         return hash((self.start, self.end))
 
 
-class TokenizedWord(BaseModel):
+@dataclass
+class TokenizedWord:
     """
     A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
     """
 
-    word_labels: List[int] = Field(default_factory=list, hash=False)  # label ids of the word
-    word_labels_strings: List[str] = Field(
+    word_labels: List[int] = field(default_factory=list, hash=False)  # label ids of the word
+    word_labels_strings: List[str] = field(
         default_factory=list, hash=False
     )  # optional strings associated with labels
-    word_confidences: List[float] = Field(
+    word_confidences: List[float] = field(
         default_factory=list, hash=False
     )  # confidence associated with each label
-    word_offsets: List[Tuple[int, int]] = Field(
+    word_offsets: List[Tuple[int, int]] = field(
         default_factory=list, hash=False
     )  # original offsets of each token
-    bio_labels: Optional[List[str]] = Field(
+    bio_labels: List[str] = field(
         default_factory=list, hash=False
     )  # BIO labels separated from class. Populate with parse_labels_to_bio_and_class
-    class_labels: Optional[List[str]] = Field(
+    class_labels: List[str] = field(
         default_factory=list, hash=False
     )  # class labels separated from BIO. Populate with parse_labels_to_bio_and_class
     modified_post_inference: bool = (
@@ -105,20 +109,21 @@ class TokenizedWord(BaseModel):
         return f"MODIFIED:{self.modified_post_inference}. {self.word_labels_strings}\n{self.word_offsets}"
 
 
-class NerProcessedSection(BaseModel):
+@dataclass
+class NerProcessedSection:
     """
     long Sections may need to be split into multiple frames when processing with a transformer. This class is a
     convenient container to reassemble the frames into a coherent object, post transformer
     """
 
-    all_frame_offsets: List[Tuple[int, int]] = Field(
+    all_frame_offsets: List[Tuple[int, int]] = field(
         default_factory=list, hash=False
     )  # offsets associated with each token
-    all_frame_word_ids: List[Optional[int]] = Field(
+    all_frame_word_ids: List[int] = field(
         default_factory=list, hash=False
     )  # word ids associated with each token
-    all_frame_labels: List[int] = Field(default_factory=list, hash=False)  # labels for each token
-    all_frame_confidences: List[float] = Field(
+    all_frame_labels: List[int] = field(default_factory=list, hash=False)  # labels for each token
+    all_frame_confidences: List[float] = field(
         default_factory=list, hash=False
     )  # confidence for each token
 
@@ -148,32 +153,43 @@ class NerProcessedSection(BaseModel):
         return all_words
 
 
-class Mapping(BaseModel):
+@dataclass
+class Mapping:
+    default_label: str  # default label from knowledgebase
     source: str  # the knowledgebase name
     idx: str  # the identifier within the KB
     mapping_type: List[str]  # the type of KB mapping
-    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
+
+    def __post_init__(self):
+        self.default_label = str(self.default_label)
+        self.source = str(self.source)
+        self.idx = str(self.idx)
+        self.mapping_type = [str(x) for x in self.mapping_type]
 
 
-class EntityMetadata(BaseModel):
-    mappings: List[Mapping] = Field(default_factory=list, hash=False)  # KB mappings
-    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
+# @dataclass
+# class EntityMetadata():
+#     mappings: List[Mapping] = field(default_factory=list, hash=False)  # KB mappings
+#     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
-class Entity(BaseModel):
+@dataclass
+class Entity:
     """
     Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
     we have to define the semantics of overlapping spans.
     """
 
-    namespace: str  # namespace of BaseStep that produced this instance
     match: str  # exact text representation
     entity_class: str  # entity class
     spans: FrozenSet[CharSpan]  # charspans
-    hash_val: Optional[str] = None  # not required. calculated based on above fields
-    metadata: EntityMetadata = Field(default_factory=EntityMetadata, hash=False)  # generic metadata
-    _start: Optional[int] = None
-    _end: Optional[int] = None
+    namespace: str  # namespace of BaseStep that produced this instance
+    hash_val: int = field(init=False)  # not required. calculated based on above fields
+    mappings: List[Mapping] = field(default_factory=list, hash=False)
+    metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
+    start: int = field(init=False)
+    end: int = field(init=False)
 
     def calc_starts_and_ends(self) -> Tuple[int, int]:
         earliest_start = inf
@@ -183,36 +199,13 @@ class Entity(BaseModel):
                 earliest_start = span.start
             if span.end > latest_end:
                 latest_end = span.end
-        return earliest_start, latest_end
+        if earliest_start is inf:
+            raise ValueError("spans are not valid")
+        return int(earliest_start), latest_end
 
-    def end(self):
-        """
-        get the last end char for this Entity
-        :return:
-        """
-        if self._end is None:
-            self._start, self._end = self.calc_starts_and_ends()
-        return self._end
-
-    def start(self):
-        """
-        get the first start char for this Entity
-        :return:
-        """
-        if self._start is None:
-            self._start, self._end = self.calc_starts_and_ends()
-        return self._start
-
-    @validator("hash_val", always=True)
-    def populate_hash(cls, v, values):
-        return hash(
-            (
-                values.get("namespace"),
-                values.get("match"),
-                values.get("entity_class"),
-                values.get("spans"),
-            )
-        )
+    def __post_init__(self):
+        self.hash_val = hash((self.namespace, self.match, self.entity_class, self.spans))
+        self._start, self._end = self.calc_starts_and_ends()
 
     def is_completely_overlapped(self, other):
         """
@@ -275,7 +268,7 @@ class Entity(BaseModel):
 
         :return: number of characters enclosed by span
         """
-        return self.end() - self.start()
+        return self.end - self.start
 
     def __repr__(self) -> str:
         """
@@ -283,17 +276,22 @@ class Entity(BaseModel):
 
         :return: tag match description
         """
-        return f"{self.namespace}:{self.match}:{self.entity_class}:{self.metadata}:{self.start()}:{self.end()}"
+        return f"{self.match}:{self.entity_class}:{self.namespace}:{self.start}:{self.end}"
 
     def as_brat(self):
         """
         :return: self as the third party biomedical nlp Brat format, (see docs on Brat)
         """
         # TODO: update this to make use of non-contiguous entities
-        return f"{self.hash_val}\t{self.entity_class}\t{self.start()}\t{self.end()}\t{self.match}\n"
+        return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
     def add_mapping(self, mapping: Mapping):
-        self.metadata.mappings.append(mapping)
+        """
+        deprecated
+        :param mapping:
+        :return:
+        """
+        self.mappings.append(mapping)
 
     @classmethod
     def from_spans(cls, spans: List[Tuple[int, int]], text: str, **kwargs):
@@ -305,9 +303,12 @@ class Entity(BaseModel):
         :param kwargs:
         :return:
         """
-        spans = frozenset([CharSpan(start=x[0], end=x[1]) for x in spans])
-        match = " ".join([text[x.start : x.end] for x in spans])
-        return cls(spans=spans, match=match, **kwargs)
+        match = ""
+        char_spans = []
+        for start, end in spans:
+            match = match + text[start:end] + " "
+            char_spans.append(CharSpan(start=start, end=end))
+        return cls(spans=frozenset(char_spans), match=match, **kwargs)
 
 
 class ContiguousEntity(Entity):
@@ -322,23 +323,24 @@ class ContiguousEntity(Entity):
         **kwargs,
     ):
         single_span = frozenset([CharSpan(start=start, end=end)])
-        super().__init__(spans=single_span, _start=start, _end=end, **kwargs)
+        super().__init__(spans=single_span, **kwargs)
 
 
-class Section(BaseModel):
+@dataclass
+class Section:
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
-    hash_val: Optional[str] = None  # not required. calculated based on above fields
+    hash_val: int = field(init=False)  # not required. calculated based on above fields
 
     preprocessed_text: Optional[
         str
     ] = None  # not required. a string representing text that has been preprocessed by e.g. abbreviation expansion
-    offset_map: Optional[
-        Union[Dict[CharSpan, CharSpan], Dict[int, List[CharSpan]]]
-    ] = None  # not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
+    offset_map: Dict[CharSpan, CharSpan] = field(
+        default_factory=dict, hash=False, init=False
+    )  # not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
 
-    metadata: Optional[Dict[Any, Any]] = Field(default_factory=dict, hash=False)  # generic metadata
-    entities: List[Entity] = Field(
+    metadata: Optional[Dict[Any, Any]] = field(default_factory=dict, hash=False)  # generic metadata
+    entities: List[Entity] = field(
         default_factory=list, hash=False
     )  # entities detected in this section
 
@@ -361,12 +363,16 @@ class Section(BaseModel):
         else:
             return self.preprocessed_text
 
-    @validator("hash_val", always=True)
-    def populate_hash(cls, v, values):
-        return hash((values.get("text"), values.get("name")))
+    def __post_init__(self):
+        self.hash_val = hash(
+            (
+                self.text,
+                self.name,
+            )
+        )
 
     def render(self):
-        ordered_ends = sorted(self.entities, key=lambda x: x.start())
+        ordered_ends = sorted(self.entities, key=lambda x: x.start)
         colors = {
             "gene_linked": "#00f518",
             "gene": "#84fa90",
@@ -383,7 +389,7 @@ class Section(BaseModel):
         }
 
         def label_colors(entity: Entity):
-            if len(entity.metadata.mappings) > 0:
+            if len(entity.mappings) > 0:
                 return linked[entity.entity_class]
             else:
                 return entity.entity_class
@@ -404,56 +410,6 @@ class Section(BaseModel):
             f.write(html)
         webbrowser.open(url, new=2)
 
-    def as_serialisable(self):
-        """
-        Since offset map is not json serialisable, we need to convert it something that can be jsonified when using
-        the web api. Generally speaking, it's easier to call Document.as_serialisable() which returns a serialisable
-        copy of the whole document.
-
-        :return:
-        """
-        offsets = self.offset_map
-        new_section = self.copy(deep=True)
-        if offsets is not None and len(offsets) > 0:
-            if isinstance(list(offsets.keys())[0], CharSpan):
-                serialiable_offsets = {}
-                for i, modified_char_span in enumerate(offsets):
-                    serialiable_offsets[i] = [modified_char_span, offsets[modified_char_span]]
-                new_section.offset_map = serialiable_offsets
-            elif isinstance(list(offsets.keys())[0], int):
-                # is already serialised
-                pass
-            else:
-                raise RuntimeError("offset map is in indeterminate state")
-        return new_section
-
-    def rehydrate(self):
-        """
-        the inverse of as_serialisable.
-
-        :return:
-        """
-        new_section = self.copy(deep=True)
-        offsets = self.offset_map
-        if offsets is not None and len(offsets) > 0:
-            if isinstance(list(offsets.keys())[0], int):
-                original_offsets = {}
-                for i, offsets_list in self.offset_map.items():
-                    modified_char_span = CharSpan(
-                        start=offsets_list[0]["start"], end=offsets_list[0]["end"]
-                    )
-                    original_char_span = CharSpan(
-                        start=offsets_list[1]["start"], end=offsets_list[1]["end"]
-                    )
-                    original_offsets[modified_char_span] = original_char_span
-                    new_section.offset_map = original_offsets
-            elif isinstance(list(offsets.keys())[0], CharSpan):
-                # doc is already in normal form
-                pass
-            else:
-                raise RuntimeError("offset map is in indeterminate state")
-        return new_section
-
     def entities_as_dataframe(self) -> Optional[pd.DataFrame]:
         """
         convert entities into a pandas dataframe. Useful for building annotation sets
@@ -462,11 +418,11 @@ class Section(BaseModel):
         """
         data = []
         for ent in self.entities:
-            if len(ent.metadata.mappings) > 0:
-                mapping_id = ent.metadata.mappings[0].idx
-                mapping_label = ent.metadata.mappings[0].metadata["default_label"]
-                mapping_conf = ent.metadata.mappings[0].metadata[LINK_CONFIDENCE]
-                metadata = ent.metadata.mappings[0].metadata
+            if len(ent.mappings) > 0:
+                mapping_id = ent.mappings[0].idx
+                mapping_label = ent.mappings[0].metadata["default_label"]
+                mapping_conf = ent.mappings[0].metadata[LINK_CONFIDENCE]
+                metadata = ent.mappings[0].metadata
             else:
                 mapping_id = None
                 mapping_label = None
@@ -481,13 +437,13 @@ class Section(BaseModel):
                     metadata,
                     mapping_id,
                     ent.entity_class,
-                    ent.start(),
-                    ent.end(),
+                    ent.start,
+                    ent.end,
                 )
             )
         if len(data) > 0:
-            data = pd.DataFrame.from_records(data)
-            data.columns = [
+            df: pd.DataFrame = pd.DataFrame.from_records(data)
+            df.columns = [
                 "namespace",
                 "match",
                 "mapping_label",
@@ -498,16 +454,46 @@ class Section(BaseModel):
                 "start",
                 "end",
             ]
-            return data
+            return df
         else:
             return None
 
 
-class Document(BaseModel):
+class DocumentEncoder(json.JSONEncoder):
+    """
+    Since the Document model can't be directly serialised to JSON, we need a custom encoder/decoder
+    """
+
+    def default(self, obj):
+        if isinstance(obj, Entity):
+            as_dict = obj.__dict__
+            # needed as Pydantic doesn't like sets
+            as_dict["spans"] = list(obj.spans)
+            return as_dict
+        elif isinstance(obj, Section):
+            as_dict = obj.__dict__
+            # needed as CharSpan object is not json serialisable
+            if "offset_map" in as_dict and as_dict["offset_map"] is not None:
+                as_dict["offset_map"] = {
+                    i: [x, y] for i, (x, y) in enumerate(as_dict["offset_map"].items())
+                }
+            return as_dict
+        elif isinstance(obj, CharSpan):
+            as_dict = obj.__dict__
+            return as_dict
+        elif isinstance(obj, Mapping):
+            as_dict = obj.__dict__
+            return as_dict
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+
+@dataclass
+class Document:
     idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
-    hash_val: Optional[str] = None  # calculated automatically based on above fields
+    hash_val: int = field(init=False)  # calculated automatically based on above fields
     sections: List[Section]  # sections comprising this document
-    metadata: Dict[Any, Any] = Field(default_factory=dict, hash=False)  # generic metadata
+    metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
     def __str__(self):
         return f"idx: {self.idx}"
@@ -515,9 +501,8 @@ class Document(BaseModel):
     def __hash__(self):
         return self.hash_val
 
-    @validator("hash_val", always=True)
-    def populate_hash(cls, v, values):
-        return hash(values.get("idx"))
+    def __post_init__(self):
+        self.hash_val = hash(self.idx)
 
     def get_entities(self) -> List[Entity]:
         """
@@ -530,28 +515,13 @@ class Document(BaseModel):
             entities.extend(section.entities)
         return entities
 
-    def as_serialisable(self):
+    def json(self, **kwargs):
         """
-        return a copy of the document, in a format that can be json serialised. Intended to be used
-
+        override needed to handle serialisation issues with our data model
+        :param kwargs:
         :return:
         """
-        new_doc = self.copy()
-        for i in range(len(new_doc.sections)):
-            new_doc.sections[i] = new_doc.sections[i].as_serialisable()
-        return new_doc
-
-    def rehydrate(self):
-        """
-        the inverse of as_serialisable
-        return a copy of the document, in a format that can be json serialised
-
-        :return:
-        """
-        new_doc = self.copy()
-        for i in range(len(new_doc.sections)):
-            new_doc.sections[i] = new_doc.sections[i].rehydrate()
-        return new_doc
+        return json.dumps(self.__dict__, cls=DocumentEncoder, **kwargs)
 
 
 class SimpleDocument(Document):
@@ -565,7 +535,3 @@ class SimpleDocument(Document):
         idx = uuid.uuid4().hex
         sections = [Section(text=text, name="na")]
         super().__init__(idx=idx, sections=sections)
-
-    @validator("hash_val", always=True)
-    def populate_hash(cls, v, values):
-        return hash(values.get("idx"))
