@@ -2,18 +2,17 @@ import itertools
 import json
 import os
 import re
+import sqlite3
+from abc import ABC
 from pathlib import Path
 from typing import List, Tuple
 
+import cachetools
+import en_core_web_sm
 import pandas as pd
 import rdflib
 from rdflib import URIRef
-import sqlite3
 from tqdm.auto import tqdm
-
-
-from abc import ABC
-import en_core_web_sm
 
 # dataframe column keys
 
@@ -63,15 +62,14 @@ class OntologyParser(ABC):
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         """
         self.in_path = in_path
-        self.synonym_table = None
 
-    def parse_and_cache(self):
+    @cachetools.cached(cache={})
+    def parse_and_cache(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        populate self.synonym_table, if not already done so
+        return a tuple of dataframes. First is the synonym table, second is the metadata table
         :return:
         """
-        if self.synonym_table is None or self.metadata_df is None:
-            self.synonym_table, self.metadata_df = self.generate_synonym_and_metadata_dataframes()
+        return self.generate_synonym_and_metadata_dataframes()
 
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
@@ -120,25 +118,23 @@ class OntologyParser(ABC):
         get a dataframe of metadata for an ontology
         :return:
         """
-        self.parse_and_cache()
-        return self.metadata_df
+        return self.parse_and_cache()[1]
 
     def get_ontology_synonyms(self) -> pd.DataFrame:
         """
         get a dataframe of synonyms for an ontology
         :return:
         """
-        self.parse_and_cache()
-        return self.synonym_table
+        return self.parse_and_cache()[0]
 
     def format_training_table(self) -> pd.DataFrame:
         """
         generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)
         :return:
         """
-        self.parse_and_cache()
+        synonym_table = self.parse_and_cache()[0]
         tqdm.pandas(desc=f"generating training pairs for {self.name}")
-        df = self.synonym_table.groupby(by=[IDX]).progress_apply(self.select_pos_pairs)
+        df = synonym_table.groupby(by=[IDX]).progress_apply(self.select_pos_pairs)
         df.index = [i for i in range(df.shape[0])]
         df = df[[0, 1, IDX]]
         df.columns = OntologyParser.training_col_names
@@ -372,7 +368,7 @@ class EnsemblOntologyParser(OntologyParser):
         ids = []
         default_label = []
         all_syns = []
-        all_mapping_type = []
+        all_mapping_type: List[str] = []
         docs = data["response"]["docs"]
         for doc in docs:
 
@@ -388,7 +384,7 @@ class EnsemblOntologyParser(OntologyParser):
                 continue
             else:
                 # find synonyms
-                synonyms = []
+                synonyms: List[Tuple[str, str]] = []
                 for hgnc_key in keys_to_check:
                     synonyms_this_entity = get_with_default_list(hgnc_key)
                     for potential_synonym in synonyms_this_entity:
@@ -401,11 +397,15 @@ class EnsemblOntologyParser(OntologyParser):
                 synonyms = list(set(synonyms))
                 # filter any very short matches
                 synonyms_and_mapping_type = [x for x in synonyms if len(x[0]) > 2]
-                synonyms = [x[0] for x in synonyms_and_mapping_type]
-                all_mapping_type.extend([x[1] for x in synonyms_and_mapping_type])
-                [ids.append(ensembl_gene_id) for _ in range(len(synonyms))]
-                [default_label.append(name) for _ in range(len(synonyms))]
-                all_syns.extend(synonyms)
+                synonyms_strings = []
+                for synonym_str, mapping_t in synonyms_and_mapping_type:
+                    all_mapping_type.append(mapping_t)
+                    synonyms_strings.append(synonym_str)
+
+                for _ in range(len(synonyms_strings)):
+                    ids.append(ensembl_gene_id)
+                    default_label.append(name)
+                all_syns.extend(synonyms_strings)
 
         df = pd.DataFrame.from_dict(
             {IDX: ids, DEFAULT_LABEL: default_label, SYN: all_syns, MAPPING_TYPE: all_mapping_type}
@@ -533,8 +533,8 @@ class CellosaurusOntologyParser(OntologyParser):
         all_syns = []
         mapping_type = []
         with open(self.in_path, "r") as f:
-            id = None
-            default_label = None
+            id = ""
+            default_label = ""
             for line in f:
                 text = line.rstrip()
                 if text.startswith("id:"):
