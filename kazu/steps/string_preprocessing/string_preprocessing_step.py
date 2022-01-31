@@ -60,7 +60,7 @@ class StringPreprocessorStep(BaseStep):
         # must be processed in reverse order
         modifications_sorted = sorted(modifications, key=lambda x: x[0].start, reverse=True)
         offset_map = {}
-        shifts: Dict[CharSpan:int] = {}
+        shifts: Dict[CharSpan, int] = {}
         result = section.get_text()
         for i, (char_span, new_text) in enumerate(modifications_sorted):
             before = result[0 : char_span.start]
