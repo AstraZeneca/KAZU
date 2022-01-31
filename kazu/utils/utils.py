@@ -2,11 +2,11 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Tuple, Union
 
+from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
 
 from kazu.data.data import Document, Entity, Section
-from transformers import AutoTokenizer, BatchEncoding
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
     :return:
     """
     return {
-        (doc.hash_val + section.hash_val): section.get_text()
+        f"{doc.hash_val}{section.hash_val}": section.get_text()
         for doc in docs
         for section in doc.sections
     }
@@ -62,7 +62,7 @@ def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entit
     :param entities:
     :return:
     """
-    return [x for x in entities if len(x.metadata.mappings) == 0]
+    return [x for x in entities if len(x.mappings) == 0]
 
 
 def documents_to_document_section_batch_encodings_map(
@@ -119,6 +119,6 @@ def get_cache_dir(path: PathLike, prefix: str = "", create_if_not_exist: bool = 
 def get_cache_path(path: PathLike, cache_id: str) -> Path:
     path = as_path(path)
     original_filename = path.name
-    cache_dir = get_cache_dir(path, False)
+    cache_dir = get_cache_dir(path, create_if_not_exist=False)
     new_path = cache_dir.joinpath(f"cached_{cache_id}_{original_filename}")
     return new_path
