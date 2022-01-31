@@ -65,7 +65,7 @@ class NerDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.call_count = 0
-        self.cache = LRUCache(5000)
+        self.cache: LRUCache = LRUCache(5000)
 
     def __getitem__(self, index) -> T_co:
         if index not in self.cache:
