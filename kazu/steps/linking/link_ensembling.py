@@ -1,7 +1,7 @@
 import itertools
 import traceback
 from enum import Enum
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict, Any
 
 import pandas as pd
 
@@ -14,8 +14,8 @@ from kazu.data.data import (
     Entity,
     PROCESSING_EXCEPTION,
 )
-from kazu.steps import BaseStep
 from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, IDX, SYN
+from kazu.steps import BaseStep
 
 
 class LinkRanks(Enum):
@@ -51,17 +51,16 @@ class MappingPostProcessing:
         """
         self.match = entity.match.lower()
         self.linker_score_thresholds = linker_score_thresholds
-        self.mappings = entity.metadata.mappings
+        self.mappings = entity.mappings
         columns = (NAMESPACE, IDX, SYN, DEFAULT_LABEL, "mapping", LINK_SCORE)
-        data = {column: [] for column in columns}
+        data: Dict[str, List[Any]] = {column: [] for column in columns}
         for mapping in self.mappings:
             data[NAMESPACE].append(mapping.metadata[NAMESPACE])
             data[IDX].append(mapping.idx)
             syn_lower = mapping.metadata.get(SYN)
             syn_lower = syn_lower.lower() if syn_lower is not None else None
             data[SYN].append(syn_lower)
-            label_lower = mapping.metadata.get(DEFAULT_LABEL)
-            label_lower = label_lower.lower() if label_lower is not None else None
+            label_lower = mapping.default_label.lower()
             data[DEFAULT_LABEL].append(label_lower)
             data["mapping"].append(mapping)
             data[LINK_SCORE].append(mapping.metadata[LINK_SCORE])
@@ -172,7 +171,7 @@ class EnsembleEntityLinkingStep(BaseStep):
             try:
                 entities = doc.get_entities()
                 for entity in entities:
-                    if len(entity.metadata.mappings) > 0:
+                    if len(entity.mappings) > 0:
                         processing = MappingPostProcessing(entity, self.linker_score_thresholds)
                         best_mappings = sorted(processing(), key=lambda x: x.source)
                         best_mappings_by_ontology = itertools.groupby(
@@ -181,7 +180,7 @@ class EnsembleEntityLinkingStep(BaseStep):
                         selected_mappings = []
                         for source, mapping_iter in best_mappings_by_ontology:
                             selected_mappings.extend(list(mapping_iter)[: self.keep_top_n])
-                        entity.metadata.mappings = selected_mappings
+                        entity.mappings = selected_mappings
             except Exception:
                 doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                 failed_docs.append(doc)
