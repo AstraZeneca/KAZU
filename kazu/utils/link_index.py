@@ -34,7 +34,8 @@ class Index(abc.ABC):
         :param name: the name of the index. default is unnamed_index
         """
         self.name = name
-        self.metadata = None
+        self.metadata: pd.DataFrame
+        self.index: Any
 
     def _search(self, query: Any, **kwargs) -> Tuple[pd.DataFrame, np.ndarray]:
         """
@@ -131,10 +132,9 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
-    def add(self, *args, **kwargs):
+    def add(self, **kwargs: Any):
         """
         add data to the index
-        :param args:
         :param kwargs:
         :return:
         """
@@ -151,7 +151,16 @@ class Index(abc.ABC):
         for column_name, _type in Index.column_type_dict.items():
             if column_name in df.columns:
                 df[column_name] = df[column_name].apply(_type)
+        # all df indices must be of type str
+        df.index = df.index.astype(str)
         return df
+
+    def __len__(self) -> int:
+        """
+        should return the size of the index
+        :return:
+        """
+        raise NotImplementedError()
 
 
 class DictionaryIndex(Index):
@@ -161,10 +170,10 @@ class DictionaryIndex(Index):
 
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
-        self.synonym_df = None
+        self.synonym_df: pd.DataFrame
 
     def _search(
-        self, query: str, score_cutoff: int = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
+        self, query: str, score_cutoff: float = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
     ) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         search the index
@@ -200,7 +209,7 @@ class DictionaryIndex(Index):
     def _save(self, path: PathLike):
         self.synonym_df.to_parquet(path, index=None)
 
-    def add(self, synonym_df: pd.DataFrame, metadata_df: pd.DataFrame):
+    def add(self, **kwargs: Any):
         """
         add data to the index. Two indices are required - synonyms and metadata. Metadata should have a primary key
         (IDX) and synonyms should use IDX as a foreign key
@@ -208,9 +217,12 @@ class DictionaryIndex(Index):
         :param metadata_df: metadata dataframe
         :return:
         """
+        synonym_df: pd.DataFrame = kwargs["synonym_df"]
+        metadata_df: pd.DataFrame = kwargs["metadata_df"]
+
         metadata_df = self.check_dataframe_types(metadata_df)
         synonym_df = self.check_dataframe_types(synonym_df)
-        if self.synonym_df is None and self.metadata is None:
+        if not hasattr(self, "synonym_df") and not hasattr(self, "metadata"):
             self.synonym_df = synonym_df
             self.metadata = metadata_df
         else:
@@ -229,7 +241,7 @@ class EmbeddingIndex(Index):
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
 
-    def add(self, embeddings: torch.Tensor, metadata: pd.DataFrame):
+    def add(self, **kwargs: Any):
         """
         add embeddings to the index
 
@@ -237,14 +249,17 @@ class EmbeddingIndex(Index):
         :param metadata: a pd.DataFrame of metadata
         :return:
         """
+
+        embeddings: torch.Tensor = kwargs["embeddings"]
+        metadata: pd.DataFrame = kwargs["metadata"]
         metadata = self.check_dataframe_types(metadata)
         if len(embeddings) != len(metadata):
             raise ValueError("embeddings length not equal to metadata length")
-        if self.index is None:
+        if not hasattr(self, "index"):
             self.index = self._create_index(embeddings)
             self.metadata = metadata
         else:
-            self.index = self._add(embeddings)
+            self._add(embeddings)
             self.metadata = pd.concat([self.metadata, metadata])
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
@@ -274,7 +289,7 @@ class EmbeddingIndex(Index):
         raise NotImplementedError()
 
     def _search_func(
-        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         should be implemented
@@ -287,12 +302,12 @@ class EmbeddingIndex(Index):
         raise NotImplementedError()
 
     def _search(
-        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[pd.DataFrame, np.ndarray]:
         distances, neighbours = self._search_func(
             query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
         )
-        hit_df = self.metadata.iloc[neighbours].copy()
+        hit_df = self.metadata.iloc[neighbours.astype(str)].copy()
         self.add_inferred_mapping_type_to_dataframe(hit_df)
         return hit_df, distances
 
@@ -311,8 +326,6 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         super().__init__(name)
         self.import_faiss()
 
-        self.index = None
-
     def import_faiss(self):
         try:
             import faiss
@@ -329,7 +342,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         self.faiss.write_index(self.index, str(path))
 
     def _search_func(
-        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         distances, neighbours = self.index.search(query.numpy(), top_n)
         return np.squeeze(distances), np.squeeze(neighbours)
@@ -355,7 +368,7 @@ class TensorEmbeddingIndex(EmbeddingIndex):
     def __init__(self, name: str):
 
         super().__init__(name)
-        self.index = None
+        self.index: torch.Tensor
 
     def _load(self, path: PathLike):
         self.index = torch.load(path, map_location="cpu")
@@ -379,7 +392,7 @@ class CDistTensorEmbeddingIndex(TensorEmbeddingIndex):
     """
 
     def _search_func(
-        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         score_matrix = torch.cdist(query, self.index)
 
@@ -395,7 +408,7 @@ class MatMulTensorEmbeddingIndex(TensorEmbeddingIndex):
     """
 
     def _search_func(
-        self, query: torch.Tensor, score_cutoff: int = 99.0, top_n: int = 20, **kwargs
+        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         score_matrix = torch.matmul(query, self.index.T)
 
