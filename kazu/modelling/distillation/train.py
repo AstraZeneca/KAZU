@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 import hydra
 import pytorch_lightning
@@ -6,7 +7,6 @@ import torch
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
-from typing import Union
 
 from kazu.modelling.distillation.models import (
     SequenceTaggingDistillationForFinalLayer,
