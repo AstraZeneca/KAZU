@@ -1,6 +1,7 @@
 import logging
 import statistics
 import time
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ class Stopwatch:
         """
         self.call_count_interval = call_count_interval
         self.call_count = 0
-        self.times = []
+        self.times: List[float] = []
 
     def start(self):
         self.mark = time.time()
