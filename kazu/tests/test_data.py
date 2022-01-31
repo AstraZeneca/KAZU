@@ -1,7 +1,4 @@
-import pytest
-
 from kazu.data.data import TokenizedWord, SimpleDocument, CharSpan, Entity
-from fastapi.encoders import jsonable_encoder
 
 
 def test_tokenized_word():
@@ -38,13 +35,15 @@ def test_tokenized_word():
 def test_serialisation():
     x = SimpleDocument("Hello")
     x.sections[0].offset_map = {CharSpan(start=1, end=2): CharSpan(start=1, end=2)}
-    # should raise a type error
-    with pytest.raises(TypeError):
-        jsonable_encoder(x)
-
-    # call to as_serialisable means we can encode it
-    y = x.as_serialisable()
-    jsonable_encoder(y)
+    x.sections[0].entities = [
+        Entity(
+            namespace="test",
+            match="metastatic liver cancer",
+            entity_class="test",
+            spans=frozenset([CharSpan(start=16, end=39)]),
+        )
+    ]
+    x.json()
 
 
 def test_overlap_logic():

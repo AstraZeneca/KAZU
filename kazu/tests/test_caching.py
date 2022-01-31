@@ -14,13 +14,13 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
 )
+from kazu.tests.utils import BERT_TEST_MODEL_PATH
 from kazu.utils.caching import (
     EmbeddingIndexCacheManager,
     DictionaryIndexCacheManager,
     CachedIndexGroup,
 )
 from kazu.utils.link_index import Index
-from kazu.tests.utils import BERT_TEST_MODEL_PATH
 
 DUMMY_SOURCE = "test_parser"
 DUMMY_DATA = {
@@ -57,7 +57,7 @@ def test_enumerate_dataframe_chunks():
 def test_embedding_cache_manager(tmp_path: Path, index_type: str):
     in_path = tmp_path.joinpath(DUMMY_SOURCE)
     in_path.mkdir()
-    model = PLSapbertModel(model_name_or_path=BERT_TEST_MODEL_PATH)
+    model = PLSapbertModel(model_name_or_path=str(BERT_TEST_MODEL_PATH))
     trainer = Trainer(logger=False)
     parser = DummyParser(in_path=str(in_path))
     manager = EmbeddingIndexCacheManager(
@@ -75,8 +75,8 @@ def test_embedding_cache_manager(tmp_path: Path, index_type: str):
     assert isinstance(index, Index)
     assert len(index) == len(set(DUMMY_DATA[IDX]))
     # there should now be a cached file at the parent of the target in_path
-    cache_dir = [x for x in os.listdir(tmp_path) if x.startswith("cached")][0]
-    cache_dir = tmp_path.joinpath(cache_dir)
+    cache_dir_item = [x for x in os.listdir(tmp_path) if x.startswith("cached")][0]
+    cache_dir = tmp_path.joinpath(cache_dir_item)
     assert cache_dir.exists()
     # now check the load cache method is called
     with patch(
@@ -107,8 +107,8 @@ def test_dictionary_cache_manager(tmp_path: Path):
     assert isinstance(index, Index)
     assert len(index) == len(set(DUMMY_DATA[IDX]))
     # there should now be a cached file at the parent of the target in_path
-    cache_dir = [x for x in os.listdir(tmp_path) if x.startswith("cached")][0]
-    cache_dir = tmp_path.joinpath(cache_dir)
+    cache_dir_item = [x for x in os.listdir(tmp_path) if x.startswith("cached")][0]
+    cache_dir = tmp_path.joinpath(cache_dir_item)
     assert cache_dir.exists()
     # now check the load cache method is called
     with patch(

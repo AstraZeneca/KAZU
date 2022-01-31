@@ -1,10 +1,10 @@
 import traceback
-from typing import List, Tuple
 from pathlib import Path
+from typing import List, Tuple
 
-from kazu.steps import BaseStep
 from kazu.data.data import Document, PROCESSING_EXCEPTION, SimpleDocument
 from kazu.pipeline import FailedDocsFileHandler, Pipeline
+from kazu.steps import BaseStep
 
 
 class BrokenStep(BaseStep):
@@ -24,7 +24,7 @@ def test_pipeline_error_handling(tmp_path: Path):
     step = BrokenStep([])
     pipeline = Pipeline([step], [FailedDocsFileHandler(tmp_path)])
 
-    docs = [SimpleDocument("hello") for _ in range(5)]
+    docs = [SimpleDocument("hello") for _ in range(5)]  # type: List[Document]
     pipeline(docs)
     error_files = list(tmp_path.joinpath(step.namespace()).iterdir())
     # should be two files per doc - one with exception, one with doc contents
@@ -33,7 +33,7 @@ def test_pipeline_error_handling(tmp_path: Path):
     # should flush docs between calls
     assert len(pipeline.failed_docs) == 0
 
-    more_docs = [SimpleDocument("hello") for _ in range(5)]
+    more_docs = [SimpleDocument("hello") for _ in range(5)]  # type: List[Document]
 
     pipeline(more_docs)
     error_files = list(tmp_path.joinpath(step.namespace()).iterdir())

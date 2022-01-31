@@ -1,7 +1,9 @@
 from typing import List, Tuple, Optional
 
-from kazu.steps.string_preprocessing.string_preprocessing_step import StringPreprocessorStep
+import pytest
+
 from kazu.data.data import Section, CharSpan, SimpleDocument
+from kazu.steps.string_preprocessing.string_preprocessing_step import StringPreprocessorStep
 
 
 class AddSomeCharsStep(StringPreprocessorStep):
@@ -72,9 +74,14 @@ def assert_section_is_correct(
     expanded_text = section.preprocessed_text
     assert expanded_text == expected_string
     abbreviations_mappings = section.offset_map
-    for i, (modified_char_span, original_char_span) in enumerate(abbreviations_mappings.items()):
-        assert expanded_text[modified_char_span.start : modified_char_span.end] == new_string
-        assert (
-            text[original_char_span.start : original_char_span.end]
-            == original_string_representation
-        )
+    if section.offset_map is not None:
+        for i, (modified_char_span, original_char_span) in enumerate(
+            abbreviations_mappings.items()
+        ):
+            assert expanded_text[modified_char_span.start : modified_char_span.end] == new_string
+            assert (
+                text[original_char_span.start : original_char_span.end]
+                == original_string_representation
+            )
+    else:
+        pytest.fail("offset map was not set")

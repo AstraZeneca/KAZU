@@ -5,7 +5,7 @@ from typing import List, Tuple
 import pandas as pd
 import pytest
 
-from kazu.data.data import SimpleDocument, Entity, Document, Mapping, CharSpan, ContiguousEntity
+from kazu.data.data import SimpleDocument, Entity, Mapping, CharSpan, ContiguousEntity
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -43,6 +43,7 @@ class MockedCachedIndexGroup:
                 source=self.sources[self.callcount],
                 idx=self.iris[self.callcount],
                 mapping_type=["test"],
+                default_label="n/a",
             )
         ]
         self.callcount += 1
@@ -91,7 +92,7 @@ def ner_long_document_test_cases():
     return texts
 
 
-def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
+def entity_linking_easy_cases() -> Tuple[List[SimpleDocument], List[str], List[str]]:
     docs, iris, sources = [], [], []
 
     doc = SimpleDocument("Baclofen is a muscle relaxant")
@@ -122,7 +123,7 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
     return docs, iris, sources
 
 
-def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
+def entity_linking_hard_cases() -> Tuple[List[SimpleDocument], List[str], List[str]]:
     docs, iris, sources = [], [], []
 
     doc = SimpleDocument("Lioresal")

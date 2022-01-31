@@ -1,4 +1,5 @@
 from hydra.utils import instantiate
+
 from kazu.data.data import SimpleDocument
 from kazu.tests.utils import (
     ner_simple_test_cases,

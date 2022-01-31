@@ -2,7 +2,6 @@ from typing import Optional, List
 
 import pytest
 
-from kazu.steps.linking.link_ensembling import EnsembleEntityLinkingStep, LinkRanks
 from kazu.data.data import (
     SimpleDocument,
     Entity,
@@ -13,6 +12,7 @@ from kazu.data.data import (
     PROCESSING_EXCEPTION,
     CharSpan,
 )
+from kazu.steps.linking.link_ensembling import EnsembleEntityLinkingStep, LinkRanks
 
 LINKING_THRESHOLDS = {
     "noisy_linker": 80.0,
@@ -39,12 +39,12 @@ def perform_test(request):
             match="hello",
             entity_class="test",
         )
-        entity.metadata.mappings = mappings
+        entity.mappings = mappings
         doc.sections[0].entities = [entity]
         result, _ = step([doc])
         assert result[0].metadata.get(PROCESSING_EXCEPTION, None) is None
         result_entities = result[0].get_entities()
-        result_mappings = result_entities[0].metadata.mappings
+        result_mappings = result_entities[0].mappings
         assert len(result_mappings) <= keep_top_n
         found_best_mapping = result_mappings[0]
         assert found_best_mapping.idx == target_best_mapping.idx
@@ -58,10 +58,10 @@ def make_mapping(
 ) -> Mapping:
     return Mapping(
         idx=idx,
+        default_label=default_label,
         mapping_type=["test"],
         source="test",
         metadata={
-            "default_label": default_label,
             LINK_SCORE: score,
             NAMESPACE: linker_namespace,
             "syn": syn,

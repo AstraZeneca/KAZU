@@ -1,6 +1,6 @@
 import pandas as pd
-import pytest
 import pydash
+import pytest
 from hydra.utils import instantiate
 
 from kazu.data.data import Entity
@@ -28,7 +28,7 @@ def test_sapbert_acceptance(kazu_test_config):
     successes, failures = step(easy_test_docs)
     entities = pydash.flatten([x.get_entities() for x in successes])
     for entity, iri, source in zip(entities, iris, sources):
-        if len(entity.metadata.mappings) > 0 and entity.metadata.mappings[0].idx == iri:
+        if len(entity.mappings) > 0 and entity.mappings[0].idx == iri:
             hits.append(entity)
         else:
             misses.append(
@@ -39,7 +39,7 @@ def test_sapbert_acceptance(kazu_test_config):
             )
 
     for entity, iri in misses:
-        print(f"missed {entity.match}: got {entity.metadata.mappings}, wanted {iri} ")
+        print(f"missed {entity.match}: got {entity.mappings}, wanted {iri} ")
     total = len(hits) + len(misses)
     score = len(hits) / total
     if score < minimum_pass_score:
@@ -61,14 +61,14 @@ def test_full_pipeline_acceptance_test(kazu_test_config):
 
 
 def query_annotations_df(annotations: pd.DataFrame, entity: Entity):
-    if len(entity.metadata.mappings) > 0:
-        mapping_id = entity.metadata.mappings[0].idx
+    if len(entity.mappings) > 0:
+        mapping_id = entity.mappings[0].idx
     else:
         mapping_id = None
 
     matches = annotations[
-        (annotations["start"] == entity.start())
-        & (annotations["end"] == entity.end())
+        (annotations["start"] == entity.start)
+        & (annotations["end"] == entity.end)
         & (annotations["match"] == entity.match)
         & (annotations["entity_class"] == entity.entity_class)
         & (
@@ -90,7 +90,7 @@ def test_dictionary_entity_linking(override_kazu_test_config):
     successes = pipeline(easy_test_docs)
     entities = pydash.flatten([x.get_entities() for x in successes])
     for entity, iri, source in zip(entities, iris, sources):
-        if iri in [x.idx for x in entity.metadata.mappings]:
+        if iri in [x.idx for x in entity.mappings]:
             hits.append(entity)
         else:
             misses.append(
@@ -101,8 +101,8 @@ def test_dictionary_entity_linking(override_kazu_test_config):
             )
 
     for entity, iri in misses:
-        if len(entity.metadata.mappings) > 0:
-            print(f"missed {entity.match}: got {entity.metadata.mappings[0].idx}, wanted {iri} ")
+        if len(entity.mappings) > 0:
+            print(f"missed {entity.match}: got {entity.mappings[0].idx}, wanted {iri} ")
         else:
             print(f"missed {entity.match}: got Nothing, wanted {iri} ")
     total = len(hits) + len(misses)
