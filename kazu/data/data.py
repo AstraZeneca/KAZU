@@ -299,7 +299,6 @@ class Entity:
 class Section:
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
-    hash_val: int = field(init=False)  # not required. calculated based on above fields
 
     preprocessed_text: Optional[
         str
@@ -316,29 +315,16 @@ class Section:
     def __str__(self):
         return f"name: {self.name}, text: {self.get_text()[:100]}"
 
-    def __hash__(self):
-        return self.hash_val
-
     def get_text(self) -> str:
         """
         rather than accessing text or preprocessed_text directly, this method provides a convenient wrapper to get
-        preprocessed_text if available, or text if not. We can't use property due to this issue:
-        https://github.com/samuelcolvin/pydantic/issues/935
-
+        preprocessed_text if available, or text if not.
         :return:
         """
         if self.preprocessed_text is None:
             return self.text
         else:
             return self.preprocessed_text
-
-    def __post_init__(self):
-        self.hash_val = hash(
-            (
-                self.text,
-                self.name,
-            )
-        )
 
     def render(self):
         ordered_ends = sorted(self.entities, key=lambda x: x.start)
