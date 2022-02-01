@@ -24,7 +24,7 @@ def test_pipeline_error_handling(tmp_path: Path):
     step = BrokenStep([])
     pipeline = Pipeline([step], [FailedDocsFileHandler(tmp_path)])
 
-    docs = [Document.create_simple_document("hello") for _ in range(5)]  # type: List[Document]
+    docs = [Document.create_simple_document("hello") for _ in range(5)]
     pipeline(docs)
     error_files = list(tmp_path.joinpath(step.namespace()).iterdir())
     # should be two files per doc - one with exception, one with doc contents
@@ -33,7 +33,7 @@ def test_pipeline_error_handling(tmp_path: Path):
     # should flush docs between calls
     assert len(pipeline.failed_docs) == 0
 
-    more_docs = [Document.create_simple_document("hello") for _ in range(5)]  # type: List[Document]
+    more_docs = [Document.create_simple_document("hello") for _ in range(5)]
 
     pipeline(more_docs)
     error_files = list(tmp_path.joinpath(step.namespace()).iterdir())
