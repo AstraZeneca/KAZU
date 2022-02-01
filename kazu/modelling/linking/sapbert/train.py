@@ -272,18 +272,22 @@ class PLSapbertModel(LightningModule):
         """
 
         super().__init__(*args, **kwargs)
-        self.sapbert_evaluation_manager = sapbert_evaluation_manager
+
         self.config = AutoConfig.from_pretrained(model_name_or_path)
         self.tokeniser = AutoTokenizer.from_pretrained(model_name_or_path, config=self.config)
         self.model = AutoModel.from_pretrained(model_name_or_path, config=self.config)
         if sapbert_training_params:
-            self.sapbert_training_params = sapbert_training_params
+            self.sapbert_training_params: SapbertTrainingParams = sapbert_training_params
             self.loss = losses.MultiSimilarityLoss(alpha=1, beta=60, base=0.5)
             self.miner = miners.TripletMarginMiner(
                 margin=sapbert_training_params.miner_margin,
                 type_of_triplets=sapbert_training_params.type_of_triplets,
             )
             self.ontology_embeddings = None
+        if sapbert_evaluation_manager:
+            self.sapbert_evaluation_manager: SapbertEvaluationDataManager = (
+                sapbert_evaluation_manager
+            )
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(
@@ -348,25 +352,23 @@ class PLSapbertModel(LightningModule):
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
         dataloaders = []
-        if self.sapbert_evaluation_manager is not None:
-            for query_source, ontology_source in self.sapbert_evaluation_manager.datasets.values():
-                query_dataloader = get_embedding_dataloader_from_strings(
-                    texts=query_source["default_label"].tolist(),
-                    tokenizer=self.tokeniser,
-                    batch_size=self.sapbert_training_params.train_batch_size,
-                    num_workers=self.sapbert_training_params.num_workers,
-                )
-                ontology_dataloader = get_embedding_dataloader_from_strings(
-                    texts=ontology_source["default_label"].tolist(),
-                    tokenizer=self.tokeniser,
-                    batch_size=self.sapbert_training_params.train_batch_size,
-                    num_workers=self.sapbert_training_params.num_workers,
-                )
-                dataloaders.append(query_dataloader)
-                dataloaders.append(ontology_dataloader)
-        else:
-            raise RuntimeError("no evaluation manager provided!")
-        return dataloaders
+        if self.potatoes > 6:
+            print()
+        for query_source, ontology_source in self.sapbert_evaluation_manager.datasets.values():
+            query_dataloader = get_embedding_dataloader_from_strings(
+                texts=query_source["default_label"].tolist(),
+                tokenizer=self.tokeniser,
+                batch_size=self.sapbert_training_params.train_batch_size,
+                num_workers=self.sapbert_training_params.num_workers,
+            )
+            ontology_dataloader = get_embedding_dataloader_from_strings(
+                texts=ontology_source["default_label"].tolist(),
+                tokenizer=self.tokeniser,
+                batch_size=self.sapbert_training_params.train_batch_size,
+                num_workers=self.sapbert_training_params.num_workers,
+            )
+            dataloaders.append(query_dataloader)
+            dataloaders.append(ontology_dataloader)
 
     def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
         return self(batch)
@@ -398,31 +400,26 @@ class PLSapbertModel(LightningModule):
         :param outputs:
         :return:
         """
-        if self.sapbert_evaluation_manager is not None:
-            outputs_all = self.all_gather(outputs)
-            if self.trainer.is_global_zero:
-                # stride 2 as each return from the validation step will have results for a query_output and
-                # an ontology_output
-                for dataset_index, output_index in enumerate(range(0, len(outputs_all), 2)):
-                    dataset_name = list(self.sapbert_evaluation_manager.datasets.keys())[
-                        dataset_index
-                    ]
-                    query_output, ontology_output = (
-                        outputs_all[output_index],
-                        outputs_all[output_index + 1],
-                    )
-                    ontology_embeddings = self.get_embeddings(ontology_output)
-                    index = MatMulTensorEmbeddingIndex(name=dataset_name)
-                    ontology_source = self.sapbert_evaluation_manager.datasets[
-                        dataset_name
-                    ].ontology_source
-                    index.add(embeddings=ontology_embeddings, metadata=ontology_source)
-                    query_embeddings = self.get_embeddings(query_output)
-                    queries = self.generate_evaluation_data(dataset_name, index, query_embeddings)
-                    metrics = self.evaluate_topk_acc(queries)
-                    self.log_results(dataset_name, metrics)
-        else:
-            raise RuntimeError("evaluation manager not provided!")
+        outputs_all = self.all_gather(outputs)
+        if self.trainer.is_global_zero:
+            # stride 2 as each return from the validation step will have results for a query_output and
+            # an ontology_output
+            for dataset_index, output_index in enumerate(range(0, len(outputs_all), 2)):
+                dataset_name = list(self.sapbert_evaluation_manager.datasets.keys())[dataset_index]
+                query_output, ontology_output = (
+                    outputs_all[output_index],
+                    outputs_all[output_index + 1],
+                )
+                ontology_embeddings = self.get_embeddings(ontology_output)
+                index = MatMulTensorEmbeddingIndex(name=dataset_name)
+                ontology_source = self.sapbert_evaluation_manager.datasets[
+                    dataset_name
+                ].ontology_source
+                index.add(embeddings=ontology_embeddings, metadata=ontology_source)
+                query_embeddings = self.get_embeddings(query_output)
+                queries = self.generate_evaluation_data(dataset_name, index, query_embeddings)
+                metrics = self.evaluate_topk_acc(queries)
+                self.log_results(dataset_name, metrics)
 
     def generate_evaluation_data(
         self, dataset_name: str, ontology_embeddings: EmbeddingIndex, query_embeddings: torch.Tensor
@@ -434,28 +431,25 @@ class PLSapbertModel(LightningModule):
         :param query_embeddings: to query with!
         :return:
         """
-        if self.sapbert_evaluation_manager is not None:
-            responses = []
-            for i in range(query_embeddings.shape[0]):
-                query_embedding = query_embeddings[[i], :]
-                ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
-                    dataset_name
-                ].query_source.iloc[i]
-                candidate_df_slice = ontology_embeddings.search(query_embedding)
-                default_label = ontology_entry["default_label"]
-                golden_iri = ontology_entry["iri"]
-                dict_candidates = self.get_candidate_dict(
-                    candidate_df_slice, golden_iri, self.sapbert_training_params.topk
-                )
-                gold_example = GoldStandardExample(
-                    gold_default_label=default_label,
-                    gold_iri=golden_iri,
-                    candidates=dict_candidates,
-                )
-                responses.append(gold_example)
-            return responses
-        else:
-            raise RuntimeError("evaluation manager not provided")
+        responses = []
+        for i in range(query_embeddings.shape[0]):
+            query_embedding = query_embeddings[[i], :]
+            ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
+                dataset_name
+            ].query_source.iloc[i]
+            candidate_df_slice = ontology_embeddings.search(query_embedding)
+            default_label = ontology_entry["default_label"]
+            golden_iri = ontology_entry["iri"]
+            dict_candidates = self.get_candidate_dict(
+                candidate_df_slice, golden_iri, self.sapbert_training_params.topk
+            )
+            gold_example = GoldStandardExample(
+                gold_default_label=default_label,
+                gold_iri=golden_iri,
+                candidates=dict_candidates,
+            )
+            responses.append(gold_example)
+        return responses
 
     def log_results(self, dataset_name, metrics):
         for key, val in metrics.items():
