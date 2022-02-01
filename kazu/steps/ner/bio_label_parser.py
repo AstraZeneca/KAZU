@@ -1,6 +1,6 @@
 import logging
 import statistics
-from typing import Optional, Dict, Tuple, List, Any
+from typing import Optional, Dict, Tuple, List
 
 import pydash
 
@@ -31,9 +31,9 @@ class BIOLabelParser:
             """
             self.namespace = namespace
             self.entity_class = entity_class
-            self.start: Any = None
-            self.end: Any = None
-            self.inside = False
+            self.start: Optional[int] = None
+            self.end: Optional[int] = None
+            self.inside: bool = False
             self.token_confidences: List[float] = []
             self.entities_found: List[Entity] = []
 
@@ -49,10 +49,10 @@ class BIOLabelParser:
             reset the status to its initial state
             :return:
             """
-            self.start: int = None
-            self.end = None
+            self.start: Optional[int] = None
+            self.end: Optional[int] = None
             self.inside = False
-            self.token_confidences = []
+            self.token_confidences: List[float] = []
 
         def get_confidence_info(self) -> Dict[str, float]:
             """
@@ -91,6 +91,7 @@ class BIOLabelParser:
                     f"Tried to complete {self.entity_class} but not properly formed. start: {self.start}, end: {self.end}, inside: {self.inside}, text: {text}"
                 )
             else:
+                assert self.start is not None and self.end is not None
                 entity = Entity(
                     spans=frozenset([CharSpan(start=self.start, end=self.end)]),
                     match=text[self.start : self.end],
@@ -163,9 +164,8 @@ class BIOLabelParser:
             BIOLabelParser.EntityParseState(entity_class, namespace)
             for entity_class in self.entity_classes
         ]
-        self.active_text: Any = (
-            None  # the last text string passed to update_parse_states. Required by finalise
-        )
+        # the last text string passed to update_parse_states. Required by finalise
+        self.active_text: Optional[str] = None
 
     def update_parse_states(
         self, label: str, offsets: Tuple[int, int], text: str, confidence: Optional[float]
