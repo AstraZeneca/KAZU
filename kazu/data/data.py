@@ -291,9 +291,10 @@ class Entity:
         return cls(spans=frozenset(char_spans), match=" ".join(text_pieces), **kwargs)
 
     @classmethod
-    def load_contiguous_entity(cls, start: int, end: int, **kwargs) -> 'Entity':
+    def load_contiguous_entity(cls, start: int, end: int, **kwargs) -> "Entity":
         single_span = frozenset([CharSpan(start=start, end=end)])
         return cls(spans=single_span, **kwargs)
+
 
 @dataclass
 class Section:
@@ -445,7 +446,9 @@ class DocumentEncoder(json.JSONEncoder):
 @dataclass
 class Document:
     idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
-    sections: List[Section] = field(default_factory=list, hash=False)# sections comprising this document
+    sections: List[Section] = field(
+        default_factory=list, hash=False
+    )  # sections comprising this document
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
     def __str__(self):
@@ -471,10 +474,11 @@ class Document:
         return json.dumps(self.__dict__, cls=DocumentEncoder, **kwargs)
 
     @classmethod
-    def create_simple_document(cls, text: str) -> 'Document':
+    def create_simple_document(cls, text: str) -> "Document":
         idx = uuid.uuid4().hex
         sections = [Section(text=text, name="na")]
         return cls(idx=idx, sections=sections)
+
 
 class SimpleDocument(Document):
     """

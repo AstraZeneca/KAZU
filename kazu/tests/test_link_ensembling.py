@@ -9,7 +9,8 @@ from kazu.data.data import (
     NAMESPACE,
     LINK_CONFIDENCE,
     PROCESSING_EXCEPTION,
-    CharSpan, Document,
+    CharSpan,
+    Document,
 )
 from kazu.steps.linking.link_ensembling import EnsembleEntityLinkingStep, LinkRanks
 
