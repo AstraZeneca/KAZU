@@ -25,7 +25,7 @@ def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     raise RuntimeError(f"Error! Entity {entity}is not attached to a document")
 
 
-def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, str]:
+def documents_to_document_section_text_map(docs: List[Document]) -> Dict[Tuple[int, int], str]:
     """
     convert documents into a dict of <dochash + sectionhash>: text
 
@@ -33,7 +33,10 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
     :return:
     """
     return {
-        f"{hash(doc)}{hash(section)}": section.get_text()
+        (
+            hash(doc),
+            hash(section),
+        ): section.get_text()
         for doc in docs
         for section in doc.sections
     }
