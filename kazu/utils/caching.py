@@ -25,6 +25,7 @@ from kazu.utils.link_index import (
     FaissEmbeddingIndex,
     CDistTensorEmbeddingIndex,
     DictionaryIndex,
+    EmbeddingIndex,
 )
 from kazu.utils.utils import (
     get_cache_dir,
@@ -32,24 +33,6 @@ from kazu.utils.utils import (
 from kazu.utils.utils import get_match_entity_class_hash
 
 logger = logging.getLogger(__name__)
-
-
-def select_index_type(index_class_name) -> Type[Index]:
-    """
-    select a index type based on its string name
-    :param index_class_name:
-    :return:
-    """
-    if index_class_name == MatMulTensorEmbeddingIndex.__name__:
-        return MatMulTensorEmbeddingIndex
-    elif index_class_name == FaissEmbeddingIndex.__name__:
-        return FaissEmbeddingIndex
-    elif index_class_name == CDistTensorEmbeddingIndex.__name__:
-        return CDistTensorEmbeddingIndex
-    elif index_class_name == DictionaryIndex.__name__:
-        return DictionaryIndex
-    else:
-        raise NotImplementedError(f"{index_class_name} not implemented in factory")
 
 
 class EntityLinkingLookupCache:
@@ -95,7 +78,7 @@ class IndexCacheManager(ABC):
 
     def __init__(self, index_type: str, parsers: List[OntologyParser], rebuild_cache: bool = False):
         self.parsers = parsers
-        self.index_type = select_index_type(index_type)
+        self.index_type = self.select_index_type(index_type)
         self.rebuild_cache = rebuild_cache
 
     def get_or_create_ontology_indices(self) -> List[Index]:
@@ -143,6 +126,15 @@ class IndexCacheManager(ABC):
         """
         return Index.load(str(cache_dir), parser.name)
 
+    def select_index_type(self, index_class_name: str) -> Type:
+        """
+        select a index type based on its string name. Note, this should return a type compatible with the concrete
+        implementation (e.g. EmbeddingIndexCacheManager -> EmbeddingIndex )
+        :param index_class_name:
+        :return:
+        """
+        raise NotImplementedError()
+
 
 class DictionaryIndexCacheManager(IndexCacheManager):
     """
@@ -152,6 +144,7 @@ class DictionaryIndexCacheManager(IndexCacheManager):
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
+        assert isinstance(index, DictionaryIndex)
         ontology_df = parser.get_ontology_metadata()
         synonym_df = parser.get_ontology_synonyms()
         index.add(synonym_df=synonym_df, metadata_df=ontology_df)
@@ -159,6 +152,18 @@ class DictionaryIndexCacheManager(IndexCacheManager):
         logger.info(f"saved {index.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {index.name} is {len(index)}")
         return index
+
+    def select_index_type(self, index_class_name: str) -> Type[DictionaryIndex]:
+        """
+        select a index type based on its string name. Note, this should return a type compatible with the concrete
+        implementation (e.g. EmbeddingIndexCacheManager -> EmbeddingIndex )
+        :param index_class_name:
+        :return:
+        """
+        if index_class_name == DictionaryIndex.__name__:
+            return DictionaryIndex
+        else:
+            raise NotImplementedError(f"{index_class_name} not implemented")
 
 
 class EmbeddingIndexCacheManager(IndexCacheManager):
@@ -198,11 +203,28 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         self.model = model
         self.trainer = trainer
 
+    def select_index_type(self, index_class_name: str) -> Type[EmbeddingIndex]:
+        """
+        select a index type based on its string name. Note, this should return a type compatible with the concrete
+        implementation (e.g. EmbeddingIndexCacheManager -> EmbeddingIndex )
+        :param index_class_name:
+        :return:
+        """
+        if index_class_name == MatMulTensorEmbeddingIndex.__name__:
+            return MatMulTensorEmbeddingIndex
+        elif index_class_name == FaissEmbeddingIndex.__name__:
+            return FaissEmbeddingIndex
+        elif index_class_name == CDistTensorEmbeddingIndex.__name__:
+            return CDistTensorEmbeddingIndex
+        else:
+            raise NotImplementedError(f"{index_class_name} not implemented")
+
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
 
         logger.info(f"creating index for {parser.in_path}")
 
-        index = self.index_type(parser.name)
+        index: EmbeddingIndex = self.index_type(parser.name)
+        assert issubclass(type(index), EmbeddingIndex)
         ontology_df = parser.get_ontology_metadata()
         for (
             partition_number,
@@ -210,7 +232,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
             ontology_embeddings,
         ) in self.predict_ontology_embeddings(ontology_dataframe=ontology_df):
             logger.info(f"processing partition {partition_number} ")
-            index.add(embeddings=ontology_embeddings, metadata=metadata_df)
+            index.add(embeddings=ontology_embeddings, metadata_df=metadata_df)
             logger.info(f"index size is now {len(index)}")
         index_path = index.save(cache_dir)
         logger.info(f"saved {parser.name} index to {index_path.absolute()}")

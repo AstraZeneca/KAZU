@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Type
+from typing import Type, Union
 
 import numpy as np
 import pandas as pd
@@ -48,16 +48,21 @@ except ImportError:
         CDistTensorEmbeddingIndex,
     ),
 )
-def test_embedding_index(tmp_path: Path, index_type: Type[Index]):
+def test_embedding_index(
+    tmp_path: Path,
+    index_type: Union[
+        Type[CDistTensorEmbeddingIndex], Type[MatMulTensorEmbeddingIndex], Type[FaissEmbeddingIndex]
+    ],
+):
     index_name = "test_index"
     index = index_type(name=index_name)
-    index.add(embeddings=index_embeddings, metadata=metadata)
+    index.add(embeddings=index_embeddings, metadata_df=metadata)
     df = index.search(query_embedding, top_n=3)
     assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
     assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
     metadata_copy = metadata.copy()
     metadata_copy[IDX] = metadata_copy[IDX] * 2
-    index.add(embeddings=index_embeddings * 2, metadata=metadata_copy)
+    index.add(embeddings=(index_embeddings * 2), metadata_df=metadata_copy)
     df = index.search(query_embedding, top_n=3)
     assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
     assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))

@@ -415,7 +415,7 @@ class PLSapbertModel(LightningModule):
                 ontology_source = self.sapbert_evaluation_manager.datasets[
                     dataset_name
                 ].ontology_source
-                index.add(embeddings=ontology_embeddings, metadata=ontology_source)
+                index.add(embeddings=ontology_embeddings, metadata_df=ontology_source)
                 query_embeddings = self.get_embeddings(query_output)
                 queries = self.generate_evaluation_data(dataset_name, index, query_embeddings)
                 metrics = self.evaluate_topk_acc(queries)

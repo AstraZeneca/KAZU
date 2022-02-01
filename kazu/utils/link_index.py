@@ -132,14 +132,6 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
-    def add(self, **kwargs: Any):
-        """
-        add data to the index
-        :param kwargs:
-        :return:
-        """
-        raise NotImplementedError()
-
     @staticmethod
     def check_dataframe_types(df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -209,7 +201,7 @@ class DictionaryIndex(Index):
     def _save(self, path: PathLike):
         self.synonym_df.to_parquet(path, index=None)
 
-    def add(self, **kwargs: Any):
+    def add(self, synonym_df: pd.DataFrame, metadata_df: pd.DataFrame):
         """
         add data to the index. Two indices are required - synonyms and metadata. Metadata should have a primary key
         (IDX) and synonyms should use IDX as a foreign key
@@ -217,9 +209,6 @@ class DictionaryIndex(Index):
         :param metadata_df: metadata dataframe
         :return:
         """
-        synonym_df: pd.DataFrame = kwargs["synonym_df"]
-        metadata_df: pd.DataFrame = kwargs["metadata_df"]
-
         metadata_df = self.check_dataframe_types(metadata_df)
         synonym_df = self.check_dataframe_types(synonym_df)
         if not hasattr(self, "synonym_df") and not hasattr(self, "metadata"):
@@ -241,26 +230,23 @@ class EmbeddingIndex(Index):
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
 
-    def add(self, **kwargs: Any):
+    def add(self, embeddings: torch.Tensor, metadata_df: pd.DataFrame):
         """
         add embeddings to the index
 
         :param embeddings: a 2d tensor of embeddings
-        :param metadata: a pd.DataFrame of metadata
+        :param metadata_df: a pd.DataFrame of metadata
         :return:
         """
-
-        embeddings: torch.Tensor = kwargs["embeddings"]
-        metadata: pd.DataFrame = kwargs["metadata"]
-        metadata = self.check_dataframe_types(metadata)
-        if len(embeddings) != len(metadata):
+        metadata_df = self.check_dataframe_types(metadata_df)
+        if len(embeddings) != len(metadata_df):
             raise ValueError("embeddings length not equal to metadata length")
         if not hasattr(self, "index"):
             self.index = self._create_index(embeddings)
-            self.metadata = metadata
+            self.metadata = metadata_df
         else:
             self._add(embeddings)
-            self.metadata = pd.concat([self.metadata, metadata])
+            self.metadata = pd.concat([self.metadata, metadata_df])
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
         """
