@@ -9,7 +9,7 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
 
-from kazu.data.data import SimpleDocument
+from kazu.data.data import Document
 from kazu.pipeline import Pipeline, load_steps
 from kazu.web.routes import KAZU
 
@@ -44,7 +44,7 @@ class KazuWebApp:
     @app.post(f"/{KAZU}")
     def ner(self, doc: WebDocument):
         logger.info(f"received request: {doc}")
-        result = self.pipeline([SimpleDocument(doc.text)])
+        result = self.pipeline([Document.create_simple_document(doc.text)])
         return result[0].json()
 
 

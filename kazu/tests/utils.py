@@ -5,7 +5,7 @@ from typing import List, Tuple
 import pandas as pd
 import pytest
 
-from kazu.data.data import SimpleDocument, Entity, Mapping, CharSpan
+from kazu.data.data import Document, Entity, Mapping, CharSpan
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -50,7 +50,7 @@ class MockedCachedIndexGroup:
         return mappings
 
 
-def full_pipeline_test_cases() -> Tuple[List[SimpleDocument], List[pd.DataFrame]]:
+def full_pipeline_test_cases() -> Tuple[List[Document], List[pd.DataFrame]]:
     docs = []
     dfs = []
     for test_text_path in FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.glob("*.txt"):
@@ -59,7 +59,7 @@ def full_pipeline_test_cases() -> Tuple[List[SimpleDocument], List[pd.DataFrame]
             # .read leaves a final newline if there is one at the end of the file
             # as is standard in a unix file
             assert text[-1] == "\n"
-        doc = SimpleDocument(text[:-1])
+        doc = Document.create_simple_document(text[:-1])
         test_results_path = test_text_path.with_suffix(".csv")
         df = pd.read_csv(test_results_path)
         docs.append(doc)
@@ -92,10 +92,10 @@ def ner_long_document_test_cases():
     return texts
 
 
-def entity_linking_easy_cases() -> Tuple[List[SimpleDocument], List[str], List[str]]:
+def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
     docs, iris, sources = [], [], []
 
-    doc = SimpleDocument("Baclofen is a muscle relaxant")
+    doc = Document.create_simple_document("Baclofen is a muscle relaxant")
     doc.sections[0].entities = [
         Entity(
             namespace="test",
@@ -108,7 +108,7 @@ def entity_linking_easy_cases() -> Tuple[List[SimpleDocument], List[str], List[s
     iris.append("CHEMBL701")
     sources.append("CHEMBL")
 
-    doc = SimpleDocument("Helium is a gas.")
+    doc = Document.create_simple_document("Helium is a gas.")
     doc.sections[0].entities = [
         Entity(
             namespace="test",
@@ -123,112 +123,112 @@ def entity_linking_easy_cases() -> Tuple[List[SimpleDocument], List[str], List[s
     return docs, iris, sources
 
 
-def entity_linking_hard_cases() -> Tuple[List[SimpleDocument], List[str], List[str]]:
+def entity_linking_hard_cases() -> Tuple[List[Document], List[str], List[str]]:
     docs, iris, sources = [], [], []
 
-    doc = SimpleDocument("Lioresal")
+    doc = Document.create_simple_document("Lioresal")
     add_whole_document_entity(doc, "drug")
     docs.append(doc)
     iris.append("CHEMBL701")
     sources.append("CHEMBL")
 
-    doc = SimpleDocument("Tagrisso")
+    doc = Document.create_simple_document("Tagrisso")
     add_whole_document_entity(doc, "drug")
     docs.append(doc)
     iris.append("CHEMBL3353410")
     sources.append("CHEMBL")
 
-    doc = SimpleDocument("Osimertinib")
+    doc = Document.create_simple_document("Osimertinib")
     add_whole_document_entity(doc, "drug")
     docs.append(doc)
     iris.append("CHEMBL3353410")
     sources.append("CHEMBL")
 
-    doc = SimpleDocument("Osimertinib Mesylate")
+    doc = Document.create_simple_document("Osimertinib Mesylate")
     add_whole_document_entity(doc, "drug")
     docs.append(doc)
     iris.append("CHEMBL3545063")
     sources.append("CHEMBL")
 
-    doc = SimpleDocument("pain in the head")
+    doc = Document.create_simple_document("pain in the head")
     add_whole_document_entity(doc, "disease")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/MONDO_0021146")
     sources.append("MONDO")
 
-    doc = SimpleDocument("triple-negative breast cancer")
+    doc = Document.create_simple_document("triple-negative breast cancer")
     add_whole_document_entity(doc, "disease")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/MONDO_0005494")
     sources.append("MONDO")
 
-    doc = SimpleDocument("triple negative cancer of the breast")
+    doc = Document.create_simple_document("triple negative cancer of the breast")
     add_whole_document_entity(doc, "disease")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/MONDO_0005494")
     sources.append("MONDO")
 
-    doc = SimpleDocument("HER2 negative breast cancer")
+    doc = Document.create_simple_document("HER2 negative breast cancer")
     add_whole_document_entity(doc, "disease")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/MONDO_0000618")
     sources.append("MONDO")
 
-    doc = SimpleDocument("HER2 negative cancer")
+    doc = Document.create_simple_document("HER2 negative cancer")
     add_whole_document_entity(doc, "disease")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/MONDO_0000618")
     sources.append("MONDO")
 
-    doc = SimpleDocument("bony part of hard palate")
+    doc = Document.create_simple_document("bony part of hard palate")
     add_whole_document_entity(doc, "anatomy")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/UBERON_0012074")
     sources.append("UBERON")
 
-    doc = SimpleDocument("liver")
+    doc = Document.create_simple_document("liver")
     add_whole_document_entity(doc, "anatomy")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/UBERON_0002107")
     sources.append("UBERON")
 
-    doc = SimpleDocument("stomach primordium")
+    doc = Document.create_simple_document("stomach primordium")
     add_whole_document_entity(doc, "anatomy")
     docs.append(doc)
     iris.append("http://purl.obolibrary.org/obo/UBERON_0012172")
     sources.append("UBERON")
 
-    doc = SimpleDocument("EGFR")
+    doc = Document.create_simple_document("EGFR")
     add_whole_document_entity(doc, "gene")
     docs.append(doc)
     iris.append("ENSG00000146648")
     sources.append("ENSEMBL")
 
-    doc = SimpleDocument("epidermal growth factor receptor")
+    doc = Document.create_simple_document("epidermal growth factor receptor")
     add_whole_document_entity(doc, "gene")
     docs.append(doc)
     iris.append("ENSG00000146648")
     sources.append("ENSEMBL")
 
-    doc = SimpleDocument("ERBB1")
+    doc = Document.create_simple_document("ERBB1")
     add_whole_document_entity(doc, "gene")
     docs.append(doc)
     iris.append("ENSG00000146648")
     sources.append("ENSEMBL")
 
-    doc = SimpleDocument("MAPK10")
+    doc = Document.create_simple_document("MAPK10")
     add_whole_document_entity(doc, "gene")
     docs.append(doc)
     iris.append("ENSG00000109339")
     sources.append("ENSEMBL")
 
-    doc = SimpleDocument("mitogen-activated protein kinase 10")
+    doc = Document.create_simple_document("mitogen-activated protein kinase 10")
     add_whole_document_entity(doc, "gene")
     docs.append(doc)
     iris.append("ENSG00000109339")
     sources.append("ENSEMBL")
 
-    doc = SimpleDocument("JNK3")
+    doc = Document.create_simple_document("JNK3")
     add_whole_document_entity(doc, "gene")
     docs.append(doc)
     iris.append("ENSG00000109339")
@@ -237,7 +237,7 @@ def entity_linking_hard_cases() -> Tuple[List[SimpleDocument], List[str], List[s
     return docs, iris, sources
 
 
-def add_whole_document_entity(doc: SimpleDocument, entity_class: str):
+def add_whole_document_entity(doc: Document, entity_class: str):
     doc.sections[0].entities = [
         Entity.load_contiguous_entity(
             namespace="test",

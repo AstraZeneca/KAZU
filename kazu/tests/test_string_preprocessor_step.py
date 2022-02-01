@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional
 
 import pytest
 
-from kazu.data.data import Section, CharSpan, SimpleDocument
+from kazu.data.data import Section, CharSpan, Document
 from kazu.steps.string_preprocessing.string_preprocessing_step import StringPreprocessorStep
 
 
@@ -26,7 +26,7 @@ class AddSomeCharsStep(StringPreprocessorStep):
 def test_multiple_string_preprocessing_steps():
 
     original_string_representation = "Hello"
-    doc = SimpleDocument(original_string_representation)
+    doc = Document.create_simple_document(original_string_representation)
 
     # case 1: overwrite original string with extra characters
     expansion_string_1 = "Hello look how I've grown! "

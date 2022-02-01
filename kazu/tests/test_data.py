@@ -1,4 +1,4 @@
-from kazu.data.data import TokenizedWord, SimpleDocument, CharSpan, Entity
+from kazu.data.data import TokenizedWord, CharSpan, Entity, Document
 
 
 def test_tokenized_word():
@@ -33,7 +33,7 @@ def test_tokenized_word():
 
 
 def test_serialisation():
-    x = SimpleDocument("Hello")
+    x = Document.create_simple_document("Hello")
     x.sections[0].offset_map = {CharSpan(start=1, end=2): CharSpan(start=1, end=2)}
     x.sections[0].entities = [
         Entity(

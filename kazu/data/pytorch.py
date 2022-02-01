@@ -1,6 +1,7 @@
 from typing import Iterator
-from torch.utils.data.dataset import T_co
+
 from torch.utils.data import IterableDataset
+from torch.utils.data.dataset import T_co
 from transformers import BatchEncoding
 
 

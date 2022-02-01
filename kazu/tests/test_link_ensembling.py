@@ -3,14 +3,13 @@ from typing import Optional, List
 import pytest
 
 from kazu.data.data import (
-    SimpleDocument,
     Entity,
     Mapping,
     LINK_SCORE,
     NAMESPACE,
     LINK_CONFIDENCE,
     PROCESSING_EXCEPTION,
-    CharSpan,
+    CharSpan, Document,
 )
 from kazu.steps.linking.link_ensembling import EnsembleEntityLinkingStep, LinkRanks
 
@@ -32,7 +31,7 @@ def perform_test(request):
         step = EnsembleEntityLinkingStep(
             [], keep_top_n=keep_top_n, linker_score_thresholds=LINKING_THRESHOLDS
         )
-        doc = SimpleDocument("hello")
+        doc = Document.create_simple_document("hello")
         entity = Entity(
             namespace="test",
             spans=frozenset([CharSpan(start=0, end=1)]),

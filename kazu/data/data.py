@@ -470,6 +470,11 @@ class Document:
         """
         return json.dumps(self.__dict__, cls=DocumentEncoder, **kwargs)
 
+    @classmethod
+    def create_simple_document(cls, text: str) -> 'Document':
+        idx = uuid.uuid4().hex
+        sections = [Section(text=text, name="na")]
+        return cls(idx=idx, sections=sections)
 
 class SimpleDocument(Document):
     """
