@@ -161,6 +161,7 @@ class Mapping:
     mapping_type: List[str]  # the type of KB mapping
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
+
 @dataclass
 class Entity:
     """
@@ -172,7 +173,6 @@ class Entity:
     entity_class: str  # entity class
     spans: FrozenSet[CharSpan]  # charspans
     namespace: str  # namespace of BaseStep that produced this instance
-    hash_val: int = field(init=False)  # not required. calculated based on above fields
     mappings: List[Mapping] = field(default_factory=list, hash=False)
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
     start: int = field(init=False)
@@ -191,8 +191,7 @@ class Entity:
         return int(earliest_start), latest_end
 
     def __post_init__(self):
-        self.hash_val = hash((self.namespace, self.match, self.entity_class, self.spans))
-        self._start, self._end = self.calc_starts_and_ends()
+        self.start, self.end = self.calc_starts_and_ends()
 
     def is_completely_overlapped(self, other):
         """
@@ -243,12 +242,6 @@ class Entity:
         else:
             return False
 
-    def __hash__(self):
-        return self.hash_val
-
-    def __eq__(self, other):
-        return other.hash_val == self.hash_val
-
     def __len__(self) -> int:
         """
         Span length
@@ -270,7 +263,7 @@ class Entity:
         :return: self as the third party biomedical nlp Brat format, (see docs on Brat)
         """
         # TODO: update this to make use of non-contiguous entities
-        return f"{self.hash_val}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
+        return f"{hash(self)}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
     def add_mapping(self, mapping: Mapping):
         """
@@ -385,8 +378,7 @@ class Section:
             {
                 "text": self.get_text(),
                 "ents": [
-                    {"start": x.start, "end": x.end, "label": label_colors(x)}
-                    for x in ordered_ends
+                    {"start": x.start, "end": x.end, "label": label_colors(x)} for x in ordered_ends
                 ],
                 "title": None,
             }
