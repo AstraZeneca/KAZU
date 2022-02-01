@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import tempfile
 import uuid
@@ -420,25 +421,18 @@ class DocumentEncoder(json.JSONEncoder):
     """
 
     def default(self, obj):
-        if isinstance(obj, Entity):
+        if isinstance(obj, Section):
             as_dict = obj.__dict__
-            # needed as sets are not json serialisable
-            as_dict["spans"] = list(obj.spans)
+            # needed as CharSpan keys in offset map are not json serialisable
+            if as_dict.get("offset_map"):
+                as_dict["offset_map"] = list(as_dict["offset_map"].items())
             return as_dict
-        elif isinstance(obj, Section):
-            as_dict = obj.__dict__
-            # needed as CharSpan object is not json serialisable
-            if "offset_map" in as_dict and as_dict["offset_map"] is not None:
-                as_dict["offset_map"] = {
-                    i: [x, y] for i, (x, y) in enumerate(as_dict["offset_map"].items())
-                }
-            return as_dict
-        elif isinstance(obj, CharSpan):
-            as_dict = obj.__dict__
-            return as_dict
-        elif isinstance(obj, Mapping):
-            as_dict = obj.__dict__
-            return as_dict
+        elif isinstance(obj, (set, frozenset)):
+            return list(obj)
+        elif dataclasses.is_dataclass(obj) and not isinstance(
+            obj, (str, int, float, bool, type(None))
+        ):
+            return dataclasses.asdict(obj)
         else:
             return json.JSONEncoder.default(self, obj)
 
