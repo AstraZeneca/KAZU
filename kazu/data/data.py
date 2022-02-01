@@ -161,19 +161,6 @@ class Mapping:
     mapping_type: List[str]  # the type of KB mapping
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
-    def __post_init__(self):
-        self.default_label = str(self.default_label)
-        self.source = str(self.source)
-        self.idx = str(self.idx)
-        self.mapping_type = [str(x) for x in self.mapping_type]
-
-
-# @dataclass
-# class EntityMetadata():
-#     mappings: List[Mapping] = field(default_factory=list, hash=False)  # KB mappings
-#     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
-
-
 @dataclass
 class Entity:
     """
@@ -398,7 +385,7 @@ class Section:
             {
                 "text": self.get_text(),
                 "ents": [
-                    {"start": x.start(), "end": x.end(), "label": label_colors(x)}
+                    {"start": x.start, "end": x.end, "label": label_colors(x)}
                     for x in ordered_ends
                 ],
                 "title": None,

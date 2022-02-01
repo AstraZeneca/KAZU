@@ -305,14 +305,14 @@ class CachedIndexGroup:
                 results_df = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
             for ontology_id, row in results_df.iterrows():
                 row_dict: Dict = row.to_dict()
-                mapping_type = row_dict.pop(MAPPING_TYPE)
+                mapping_type = [str(x) for x in row_dict.pop(MAPPING_TYPE)]
                 source = row_dict.pop(SOURCE)
                 default_label = row_dict.pop(DEFAULT_LABEL)
                 row_dict[NAMESPACE] = namespace
                 new_mapping = Mapping(
-                    default_label=default_label,
-                    source=source,
-                    idx=ontology_id,
+                    default_label=str(default_label),
+                    source=str(source),
+                    idx=str(ontology_id),
                     mapping_type=mapping_type,
                     metadata=row_dict,
                 )
