@@ -349,10 +349,7 @@ class PLSapbertModel(LightningModule):
     def val_dataloader(self) -> EVAL_DATALOADERS:
         dataloaders = []
         if self.sapbert_evaluation_manager is not None:
-            for dataset_name, (
-                query_source,
-                ontology_source,
-            ) in self.sapbert_evaluation_manager.datasets.items():
+            for query_source, ontology_source in self.sapbert_evaluation_manager.datasets.values():
                 query_dataloader = get_embedding_dataloader_from_strings(
                     texts=query_source["default_label"].tolist(),
                     tokenizer=self.tokeniser,
