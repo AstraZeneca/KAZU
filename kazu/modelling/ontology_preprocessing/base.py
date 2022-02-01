@@ -402,9 +402,9 @@ class EnsemblOntologyParser(OntologyParser):
                     all_mapping_type.append(mapping_t)
                     synonyms_strings.append(synonym_str)
 
-                for _ in range(len(synonyms_strings)):
-                    ids.append(ensembl_gene_id)
-                    default_label.append(name)
+                num_syns = len(synonyms_strings)
+                ids.extend([ensembl_gene_id] * num_syns)
+                default_label.extend([name] * num_syns)
                 all_syns.extend(synonyms_strings)
 
         df = pd.DataFrame.from_dict(
