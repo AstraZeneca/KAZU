@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Any, Optional, T_co, Union, Callable, NamedTuple
+from typing import List, Tuple, Dict, Any, Optional, Union, Callable, NamedTuple
 
 import hydra
 import numpy as np
@@ -28,6 +28,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
+
 from kazu.utils.link_index import (
     EmbeddingIndex,
     MatMulTensorEmbeddingIndex,
@@ -85,7 +86,7 @@ class HFSapbertInferenceDataset(Dataset):
     This is needed in a multi GPU environment
     """
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index) -> Dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings.data["input_ids"][index],
             "token_type_ids": self.encodings.data["token_type_ids"][index],
@@ -110,7 +111,7 @@ class HFSapbertPairwiseDataset(Dataset):
     Dataset used for training SapBert.
     """
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index) -> Dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings_1.data["input_ids"][index],
             "token_type_ids": self.encodings_1.data["token_type_ids"][index],
@@ -271,12 +272,13 @@ class PLSapbertModel(LightningModule):
         """
 
         super().__init__(*args, **kwargs)
-        self.sapbert_evaluation_manager = sapbert_evaluation_manager
+
         self.config = AutoConfig.from_pretrained(model_name_or_path)
         self.tokeniser = AutoTokenizer.from_pretrained(model_name_or_path, config=self.config)
         self.model = AutoModel.from_pretrained(model_name_or_path, config=self.config)
-        if sapbert_training_params:
-            self.sapbert_training_params = sapbert_training_params
+        self.sapbert_evaluation_manager = sapbert_evaluation_manager
+        self.sapbert_training_params = sapbert_training_params
+        if sapbert_training_params is not None:
             self.loss = losses.MultiSimilarityLoss(alpha=1, beta=60, base=0.5)
             self.miner = miners.TripletMarginMiner(
                 margin=sapbert_training_params.miner_margin,
@@ -324,6 +326,7 @@ class PLSapbertModel(LightningModule):
         return self.loss(query_embed, labels, hard_pairs)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
+        assert self.sapbert_training_params is not None
         training_df = pd.read_parquet(self.sapbert_training_params.train_file)
         labels = training_df["id"].astype("category").cat.codes.values
         encodings_1 = self.tokeniser(training_df["syn1"].tolist())
@@ -347,10 +350,9 @@ class PLSapbertModel(LightningModule):
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
         dataloaders = []
-        for dataset_name, (
-            query_source,
-            ontology_source,
-        ) in self.sapbert_evaluation_manager.datasets.items():
+        assert self.sapbert_evaluation_manager is not None
+        assert self.sapbert_training_params is not None
+        for query_source, ontology_source in self.sapbert_evaluation_manager.datasets.values():
             query_dataloader = get_embedding_dataloader_from_strings(
                 texts=query_source["default_label"].tolist(),
                 tokenizer=self.tokeniser,
@@ -365,7 +367,6 @@ class PLSapbertModel(LightningModule):
             )
             dataloaders.append(query_dataloader)
             dataloaders.append(ontology_dataloader)
-        return dataloaders
 
     def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
         return self(batch)
@@ -397,6 +398,7 @@ class PLSapbertModel(LightningModule):
         :param outputs:
         :return:
         """
+        assert self.sapbert_evaluation_manager is not None
         outputs_all = self.all_gather(outputs)
         if self.trainer.is_global_zero:
             # stride 2 as each return from the validation step will have results for a query_output and
@@ -408,13 +410,11 @@ class PLSapbertModel(LightningModule):
                     outputs_all[output_index + 1],
                 )
                 ontology_embeddings = self.get_embeddings(ontology_output)
-                index = MatMulTensorEmbeddingIndex(
-                    name=dataset_name, return_n_nearest_neighbours=self.sapbert_training_params.topk
-                )
+                index = MatMulTensorEmbeddingIndex(name=dataset_name)
                 ontology_source = self.sapbert_evaluation_manager.datasets[
                     dataset_name
                 ].ontology_source
-                index.add(ontology_embeddings, ontology_source)
+                index.add(embeddings=ontology_embeddings, metadata_df=ontology_source)
                 query_embeddings = self.get_embeddings(query_output)
                 queries = self.generate_evaluation_data(dataset_name, index, query_embeddings)
                 metrics = self.evaluate_topk_acc(queries)
@@ -430,18 +430,27 @@ class PLSapbertModel(LightningModule):
         :param query_embeddings: to query with!
         :return:
         """
+        assert self.sapbert_evaluation_manager is not None
+        assert self.sapbert_training_params is not None
         responses = []
         for i in range(query_embeddings.shape[0]):
             query_embedding = query_embeddings[[i], :]
             ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
                 dataset_name
             ].query_source.iloc[i]
-            candidate_df_slice = ontology_embeddings.search(query_embedding)
+            candidate_df_slice = ontology_embeddings.search(
+                query_embedding, top_n=self.sapbert_training_params.topk
+            )
             default_label = ontology_entry["default_label"]
             golden_iri = ontology_entry["iri"]
-            dict_candidates = self.get_candidate_dict(candidate_df_slice, golden_iri)
+            dict_candidates = self.get_candidate_dict(
+                candidate_df_slice,
+                golden_iri,
+            )
             gold_example = GoldStandardExample(
-                gold_default_label=default_label, gold_iri=golden_iri, candidates=dict_candidates
+                gold_default_label=default_label,
+                gold_iri=golden_iri,
+                candidates=dict_candidates,
             )
             responses.append(gold_example)
         return responses
@@ -459,16 +468,16 @@ class PLSapbertModel(LightningModule):
         :param golden_iri:
         :return:
         """
-        dict_candidates = []
+        candidates_filtered = []
         for i, np_candidate_row in np_candidates.iterrows():
-            dict_candidates.append(
+            candidates_filtered.append(
                 Candidate(
                     default_label=np_candidate_row["default_label"],
                     iri=np_candidate_row["iri"],
                     correct=np_candidate_row["iri"] == golden_iri,
                 )
             )
-        return dict_candidates
+        return candidates_filtered
 
     def evaluate_topk_acc(self, queries: List[GoldStandardExample]):
         """

@@ -1,6 +1,6 @@
 from hydra.utils import instantiate
 
-from kazu.data.data import SimpleDocument
+from kazu.data.data import Document
 from kazu.steps import SciSpacyAbbreviationExpansionStep
 
 
@@ -12,7 +12,7 @@ def test_abbreviation_expansion_non_destructive(kazu_test_config):
         "NSCLC (Non Small Cell Lung Cancer) is a form of cancer. EGFR (Epidermal Growth Factor Receptor) is "
         "a gene."
     )
-    doc = SimpleDocument(text)
+    doc = Document.create_simple_document(text)
     success, failures = step([doc])
     section = success[0].sections[0]
     expanded_text = section.preprocessed_text

@@ -1,17 +1,24 @@
 import logging
 import time
+from typing import Callable
 
 import hydra
 import ray
 from fastapi import FastAPI
 from omegaconf import DictConfig
+from pydantic import BaseModel
 from ray import serve
-from kazu.web.routes import KAZU
-from kazu.data.data import SimpleDocument
+
+from kazu.data.data import Document
 from kazu.pipeline import Pipeline, load_steps
+from kazu.web.routes import KAZU
 
 logger = logging.getLogger("ray")
 app = FastAPI()
+
+
+class WebDocument(BaseModel):
+    text: str
 
 
 @serve.deployment(route_prefix="/api")
@@ -20,6 +27,8 @@ class KazuWebApp:
     """
     Web app to serve results
     """
+
+    deploy: Callable
 
     def __init__(self, cfg: DictConfig):
         """
@@ -33,10 +42,10 @@ class KazuWebApp:
         return "Welcome to KAZU."
 
     @app.post(f"/{KAZU}")
-    def ner(self, doc: SimpleDocument):
+    def ner(self, doc: WebDocument):
         logger.info(f"received request: {doc}")
-        result = self.pipeline([doc])
-        return result[0].as_serialisable()
+        result = self.pipeline([Document.create_simple_document(doc.text)])
+        return result[0].json()
 
 
 @hydra.main(config_path="../conf", config_name="config")

@@ -68,10 +68,16 @@ class SapBertForEntityLinkingStep(BaseStep):
         self.index_group = index_group
         self.index_group.load()
         # we reuse the instance of the model associated with the cache manager, so we don't have to instantiate it twice
-        self.dl_workers = index_group.cache_managers[0].dl_workers
-        self.batch_size = index_group.cache_managers[0].batch_size
-        self.model = index_group.cache_managers[0].model
-        self.trainer = index_group.cache_managers[0].trainer
+        reusable_cache_manager = index_group.cache_managers[0]
+        if isinstance(reusable_cache_manager, EmbeddingIndexCacheManager):
+            self.dl_workers = reusable_cache_manager.dl_workers
+            self.batch_size = reusable_cache_manager.batch_size
+            self.model = reusable_cache_manager.model
+            self.trainer = reusable_cache_manager.trainer
+        else:
+            raise ValueError(
+                "the Sapbert step requires a CachedIndexGroup of type  EmbeddingIndexCacheManager"
+            )
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:

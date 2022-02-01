@@ -1,5 +1,5 @@
-from kazu.tests.utils import TEST_ASSETS_PATH, BERT_TEST_MODEL_PATH
 from kazu.modelling.distillation.train import start
+from kazu.tests.utils import TEST_ASSETS_PATH, BERT_TEST_MODEL_PATH
 
 DATA_DIR = TEST_ASSETS_PATH.joinpath("tinybern")
 

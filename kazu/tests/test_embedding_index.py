@@ -1,5 +1,5 @@
-from typing import Type
 from pathlib import Path
+from typing import Type, Union
 
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ index_embeddings = torch.tensor(
     ]
 )
 
-metadata = pd.DataFrame.from_dict({IDX: [3, 1, 0, 2, 4]})
+metadata = pd.DataFrame.from_dict({IDX: ["3", "1", "0", "2", "4"]})
 
 query_embedding = torch.tensor([index_embedding])
 
@@ -48,21 +48,26 @@ except ImportError:
         CDistTensorEmbeddingIndex,
     ),
 )
-def test_embedding_index(tmp_path: Path, index_type: Type[Index]):
+def test_embedding_index(
+    tmp_path: Path,
+    index_type: Union[
+        Type[CDistTensorEmbeddingIndex], Type[MatMulTensorEmbeddingIndex], Type[FaissEmbeddingIndex]
+    ],
+):
     index_name = "test_index"
     index = index_type(name=index_name)
-    index.add(index_embeddings, metadata)
+    index.add(embeddings=index_embeddings, metadata_df=metadata)
     df = index.search(query_embedding, top_n=3)
-    assert np.array_equal(df.index.to_numpy(), np.array([2, 1, 3]))
-    assert np.array_equal(df[IDX].astype(int).array.to_numpy(), np.array([0, 1, 2]))
+    assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
+    assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
     metadata_copy = metadata.copy()
     metadata_copy[IDX] = metadata_copy[IDX] * 2
-    index.add(index_embeddings * 2, metadata_copy)
+    index.add(embeddings=(index_embeddings * 2), metadata_df=metadata_copy)
     df = index.search(query_embedding, top_n=3)
-    assert np.array_equal(df.index.to_numpy(), np.array([2, 1, 3]))
-    assert np.array_equal(df[IDX].astype(int).array.to_numpy(), np.array([0, 1, 2]))
+    assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
+    assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
     index.save(tmp_path)
     Index.load(tmp_path, index_name)
     hit_info = index.search(query_embedding, top_n=3)
-    assert np.array_equal(hit_info.index.to_numpy(), np.array([2, 1, 3]))
-    assert np.array_equal(hit_info[IDX].astype(int).array.to_numpy(), np.array([0, 1, 2]))
+    assert np.array_equal(hit_info.index.to_numpy(), np.array(["2", "1", "3"]))
+    assert np.array_equal(hit_info[IDX].array.to_numpy(), np.array(["0", "1", "2"]))

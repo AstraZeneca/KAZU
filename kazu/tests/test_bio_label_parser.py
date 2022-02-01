@@ -1,4 +1,5 @@
 from typing import List
+
 from kazu.data.data import Entity
 from kazu.steps.ner.bio_label_parser import BIOLabelParser
 

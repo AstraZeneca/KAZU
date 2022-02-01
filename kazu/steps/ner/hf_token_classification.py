@@ -21,8 +21,8 @@ from kazu.data.pytorch import HFDataset
 from kazu.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from kazu.steps import BaseStep
 from kazu.steps.ner.bio_label_parser import BIOLabelParser
-from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 from kazu.steps.ner.bio_label_preprocessor import BioLabelPreProcessor
+from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
 

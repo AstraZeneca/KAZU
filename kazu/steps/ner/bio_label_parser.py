@@ -6,7 +6,6 @@ import pydash
 
 from kazu.data.data import (
     Entity,
-    EntityMetadata,
     ENTITY_INSIDE_SYMBOL,
     ENTITY_OUTSIDE_SYMBOL,
     ENTITY_START_SYMBOL,
@@ -32,11 +31,11 @@ class BIOLabelParser:
             """
             self.namespace = namespace
             self.entity_class = entity_class
-            self.start = None
-            self.end = None
-            self.inside = False
-            self.token_confidences = []
-            self.entities_found = []
+            self.start: Optional[int] = None
+            self.end: Optional[int] = None
+            self.inside: bool = False
+            self.token_confidences: List[float] = []
+            self.entities_found: List[Entity] = []
 
         def clear_entities_found_list(self):
             """
@@ -50,10 +49,10 @@ class BIOLabelParser:
             reset the status to its initial state
             :return:
             """
-            self.start = None
-            self.end = None
+            self.start: Optional[int] = None
+            self.end: Optional[int] = None
             self.inside = False
-            self.token_confidences = []
+            self.token_confidences: List[float] = []
 
         def get_confidence_info(self) -> Dict[str, float]:
             """
@@ -92,12 +91,13 @@ class BIOLabelParser:
                     f"Tried to complete {self.entity_class} but not properly formed. start: {self.start}, end: {self.end}, inside: {self.inside}, text: {text}"
                 )
             else:
+                assert self.start is not None and self.end is not None
                 entity = Entity(
                     spans=frozenset([CharSpan(start=self.start, end=self.end)]),
                     match=text[self.start : self.end],
                     namespace=self.namespace,
                     entity_class=self.entity_class,
-                    metadata=EntityMetadata(metadata=self.get_confidence_info()),
+                    metadata=self.get_confidence_info(),
                 )
 
                 self.entities_found.append(entity)
@@ -131,22 +131,20 @@ class BIOLabelParser:
                     self.inside = True
                     self.start = offsets[0]
                     self.end = offsets[1]
-                    if isinstance(confidence, float):
+                    if confidence is not None:
                         self.token_confidences.append(confidence)
                 # if entity is starting and not currently inside, change state to inside
                 elif bio_symbol == ENTITY_START_SYMBOL:
                     self.inside = True
                     self.start = offsets[0]
                     self.end = offsets[1]
-                    if isinstance(confidence, float):
+                    if confidence is not None:
                         self.token_confidences.append(confidence)
-                    self.token_confidences.append(confidence)
                 # if currently inside and next BIO symbol is still inside, update state accordingly
                 elif bio_symbol == ENTITY_INSIDE_SYMBOL:
                     self.end = offsets[1]
-                    if isinstance(confidence, float):
+                    if confidence is not None:
                         self.token_confidences.append(confidence)
-                    self.token_confidences.append(confidence)
                 # if currently inside and next BIO symbol is outside, complete the entity
                 elif bio_symbol == ENTITY_OUTSIDE_SYMBOL and self.inside:
                     self.complete_entity(text)
@@ -166,9 +164,8 @@ class BIOLabelParser:
             BIOLabelParser.EntityParseState(entity_class, namespace)
             for entity_class in self.entity_classes
         ]
-        self.active_text = (
-            None  # the last text string passed to update_parse_states. Required by finalise
-        )
+        # the last text string passed to update_parse_states. Required by finalise
+        self.active_text: Optional[str] = None
 
     def update_parse_states(
         self, label: str, offsets: Tuple[int, int], text: str, confidence: Optional[float]

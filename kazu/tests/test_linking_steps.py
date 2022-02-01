@@ -1,8 +1,11 @@
 from unittest import mock
+
 import pydash
 from pytorch_lightning import Trainer
+
 import kazu.utils.caching
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
+from kazu.steps import DictionaryEntityLinkingStep
 from kazu.steps import SapBertForEntityLinkingStep
 from kazu.tests.utils import (
     entity_linking_easy_cases,
@@ -14,7 +17,6 @@ from kazu.utils.caching import (
     EmbeddingIndexCacheManager,
     DictionaryIndexCacheManager,
 )
-from kazu.steps import DictionaryEntityLinkingStep
 
 
 def test_dictionary_step():
@@ -64,5 +66,5 @@ def assert_step_runs(easy_test_docs, iris, sources, step):
     successes, failures = step(easy_test_docs)
     entities = pydash.flatten([x.get_entities() for x in successes])
     for entity, iri, source in zip(entities, iris, sources):
-        assert entity.metadata.mappings[0].idx == iri
-        assert entity.metadata.mappings[0].source == source
+        assert entity.mappings[0].idx == iri
+        assert entity.mappings[0].source == source

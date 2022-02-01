@@ -187,8 +187,8 @@ class AbbreviationDetector:
         self.matcher = Matcher(nlp.vocab)
         self.matcher.add("parenthesis", [[{"ORTH": "("}, {"OP": "+"}, {"ORTH": ")"}]])
         self.global_matcher = Matcher(nlp.vocab)
-        self.rules = {}
-        self.to_remove = set()
+        self.rules: Dict[str, Span] = {}
+        self.to_remove: Set[str] = set()
 
     def find_abbreviations(self, doc: Doc) -> None:
         """

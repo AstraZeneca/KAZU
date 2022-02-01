@@ -79,7 +79,9 @@ class BioLabelPreProcessor:
         word.word_confidences = [b_confidence for _ in range(len(word.word_confidences))]
         word.modified_post_inference = True
 
-    def _test_for_missing_b_then_i(self, word: TokenizedWord, prev_word: TokenizedWord) -> bool:
+    def _test_for_missing_b_then_i(
+        self, word: TokenizedWord, prev_word: Optional[TokenizedWord]
+    ) -> bool:
         """
         sometimes, a B is missing from the start. Here, we need to check we're no inside a multi word entity
         i.e. last token of prev word is not I and class of last token of prev word is not same as word
@@ -109,7 +111,9 @@ class BioLabelPreProcessor:
         word.word_labels_strings[0] = f"{ENTITY_START_SYMBOL}-{word.class_labels[0]}"
         word.modified_post_inference = True
 
-    def _test_for_no_previous_word(self, word: TokenizedWord, prev_word: TokenizedWord) -> bool:
+    def _test_for_no_previous_word(
+        self, word: TokenizedWord, prev_word: Optional[TokenizedWord]
+    ) -> bool:
         """
         check if all I's should be converted to a BI as there is no previous word
         :param word:
@@ -123,7 +127,7 @@ class BioLabelPreProcessor:
         )
 
     def _test_for_previous_word_is_i_or_b(
-        self, word: TokenizedWord, prev_word: TokenizedWord
+        self, word: TokenizedWord, prev_word: Optional[TokenizedWord]
     ) -> bool:
         """
         check if should be all I's as previous word is I
