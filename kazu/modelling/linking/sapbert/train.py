@@ -276,18 +276,15 @@ class PLSapbertModel(LightningModule):
         self.config = AutoConfig.from_pretrained(model_name_or_path)
         self.tokeniser = AutoTokenizer.from_pretrained(model_name_or_path, config=self.config)
         self.model = AutoModel.from_pretrained(model_name_or_path, config=self.config)
-        if sapbert_training_params:
-            self.sapbert_training_params: SapbertTrainingParams = sapbert_training_params
+        self.sapbert_evaluation_manager = sapbert_evaluation_manager
+        self.sapbert_training_params = sapbert_training_params
+        if sapbert_training_params is not None:
             self.loss = losses.MultiSimilarityLoss(alpha=1, beta=60, base=0.5)
             self.miner = miners.TripletMarginMiner(
                 margin=sapbert_training_params.miner_margin,
                 type_of_triplets=sapbert_training_params.type_of_triplets,
             )
             self.ontology_embeddings = None
-        if sapbert_evaluation_manager:
-            self.sapbert_evaluation_manager: SapbertEvaluationDataManager = (
-                sapbert_evaluation_manager
-            )
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(
@@ -329,6 +326,7 @@ class PLSapbertModel(LightningModule):
         return self.loss(query_embed, labels, hard_pairs)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
+        assert self.sapbert_training_params is not None
         training_df = pd.read_parquet(self.sapbert_training_params.train_file)
         labels = training_df["id"].astype("category").cat.codes.values
         encodings_1 = self.tokeniser(training_df["syn1"].tolist())
@@ -352,8 +350,8 @@ class PLSapbertModel(LightningModule):
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
         dataloaders = []
-        if self.potatoes > 6:
-            print()
+        assert self.sapbert_evaluation_manager is not None
+        assert self.sapbert_training_params is not None
         for query_source, ontology_source in self.sapbert_evaluation_manager.datasets.values():
             query_dataloader = get_embedding_dataloader_from_strings(
                 texts=query_source["default_label"].tolist(),
@@ -400,6 +398,7 @@ class PLSapbertModel(LightningModule):
         :param outputs:
         :return:
         """
+        assert self.sapbert_evaluation_manager is not None
         outputs_all = self.all_gather(outputs)
         if self.trainer.is_global_zero:
             # stride 2 as each return from the validation step will have results for a query_output and
@@ -431,17 +430,22 @@ class PLSapbertModel(LightningModule):
         :param query_embeddings: to query with!
         :return:
         """
+        assert self.sapbert_evaluation_manager is not None
+        assert self.sapbert_training_params is not None
         responses = []
         for i in range(query_embeddings.shape[0]):
             query_embedding = query_embeddings[[i], :]
             ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
                 dataset_name
             ].query_source.iloc[i]
-            candidate_df_slice = ontology_embeddings.search(query_embedding)
+            candidate_df_slice = ontology_embeddings.search(
+                query_embedding, top_n=self.sapbert_training_params.topk
+            )
             default_label = ontology_entry["default_label"]
             golden_iri = ontology_entry["iri"]
             dict_candidates = self.get_candidate_dict(
-                candidate_df_slice, golden_iri, self.sapbert_training_params.topk
+                candidate_df_slice,
+                golden_iri,
             )
             gold_example = GoldStandardExample(
                 gold_default_label=default_label,
@@ -457,14 +461,11 @@ class PLSapbertModel(LightningModule):
                 self.log(key, value=val, rank_zero_only=True)
                 logger.info(f"{dataset_name}: {key}, {val}")
 
-    def get_candidate_dict(
-        self, np_candidates: pd.DataFrame, golden_iri: str, top_k
-    ) -> List[Candidate]:
+    def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
         """
         for a dataframe of candidates, return a List[Candidate]
         :param np_candidates:
         :param golden_iri:
-        :param: topk: only keep top k candidates
         :return:
         """
         candidates_filtered = []
@@ -476,7 +477,7 @@ class PLSapbertModel(LightningModule):
                     correct=np_candidate_row["iri"] == golden_iri,
                 )
             )
-        return candidates_filtered[:top_k]
+        return candidates_filtered
 
     def evaluate_topk_acc(self, queries: List[GoldStandardExample]):
         """
