@@ -5,7 +5,7 @@ from typing import List, Tuple
 import pandas as pd
 import pytest
 
-from kazu.data.data import SimpleDocument, Entity, Mapping, CharSpan, ContiguousEntity
+from kazu.data.data import SimpleDocument, Entity, Mapping, CharSpan
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -239,7 +239,7 @@ def entity_linking_hard_cases() -> Tuple[List[SimpleDocument], List[str], List[s
 
 def add_whole_document_entity(doc: SimpleDocument, entity_class: str):
     doc.sections[0].entities = [
-        ContiguousEntity(
+        Entity.load_contiguous_entity(
             namespace="test",
             match=doc.sections[0].get_text(),
             entity_class=entity_class,

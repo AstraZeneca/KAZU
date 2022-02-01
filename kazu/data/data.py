@@ -283,28 +283,17 @@ class Entity:
         :param kwargs:
         :return:
         """
-        match = ""
         char_spans = []
+        text_pieces = []
         for start, end in spans:
-            match = match + text[start:end] + " "
+            text_pieces.append(text[start:end])
             char_spans.append(CharSpan(start=start, end=end))
-        return cls(spans=frozenset(char_spans), match=match, **kwargs)
+        return cls(spans=frozenset(char_spans), match=" ".join(text_pieces), **kwargs)
 
-
-class ContiguousEntity(Entity):
-    """
-    Simple subclass of Entity for convenience, consisting of only one span
-    """
-
-    def __init__(
-        self,
-        start: int,
-        end: int,
-        **kwargs,
-    ):
+    @classmethod
+    def load_contiguous_entity(cls, start: int, end: int, **kwargs) -> 'Entity':
         single_span = frozenset([CharSpan(start=start, end=end)])
-        super().__init__(spans=single_span, **kwargs)
-
+        return cls(spans=single_span, **kwargs)
 
 @dataclass
 class Section:
