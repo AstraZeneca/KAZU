@@ -445,18 +445,11 @@ class DocumentEncoder(json.JSONEncoder):
 @dataclass
 class Document:
     idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
-    hash_val: int = field(init=False)  # calculated automatically based on above fields
-    sections: List[Section]  # sections comprising this document
+    sections: List[Section] = field(default_factory=list, hash=False)# sections comprising this document
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
     def __str__(self):
         return f"idx: {self.idx}"
-
-    def __hash__(self):
-        return self.hash_val
-
-    def __post_init__(self):
-        self.hash_val = hash(self.idx)
 
     def get_entities(self) -> List[Entity]:
         """

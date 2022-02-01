@@ -33,7 +33,7 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[str, st
     :return:
     """
     return {
-        f"{doc.hash_val}{hash(section)}": section.get_text()
+        f"{hash(doc)}{hash(section)}": section.get_text()
         for doc in docs
         for section in doc.sections
     }
