@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Any, Optional, T_co, Union, Callable, NamedTuple  # type: ignore
+from typing import List, Tuple, Dict, Any, Optional, Union, Callable, NamedTuple
 
 import hydra
 import numpy as np
@@ -86,7 +86,7 @@ class HFSapbertInferenceDataset(Dataset):
     This is needed in a multi GPU environment
     """
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index) -> Dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings.data["input_ids"][index],
             "token_type_ids": self.encodings.data["token_type_ids"][index],
@@ -111,7 +111,7 @@ class HFSapbertPairwiseDataset(Dataset):
     Dataset used for training SapBert.
     """
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index) -> Dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings_1.data["input_ids"][index],
             "token_type_ids": self.encodings_1.data["token_type_ids"][index],
