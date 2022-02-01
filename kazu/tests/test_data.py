@@ -1,3 +1,5 @@
+import json
+
 from kazu.data.data import TokenizedWord, CharSpan, Entity, Document
 
 
@@ -43,7 +45,9 @@ def test_serialisation():
             spans=frozenset([CharSpan(start=16, end=39)]),
         )
     ]
-    x.json()
+    json_str = x.json()
+    # ensure this is valid json
+    json.loads(json_str)
 
 
 def test_overlap_logic():
