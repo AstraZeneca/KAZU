@@ -444,7 +444,9 @@ class PLSapbertModel(LightningModule):
                 candidate_df_slice = ontology_embeddings.search(query_embedding)
                 default_label = ontology_entry["default_label"]
                 golden_iri = ontology_entry["iri"]
-                dict_candidates = self.get_candidate_dict(candidate_df_slice, golden_iri)
+                dict_candidates = self.get_candidate_dict(
+                    candidate_df_slice, golden_iri, self.sapbert_training_params.topk
+                )
                 gold_example = GoldStandardExample(
                     gold_default_label=default_label,
                     gold_iri=golden_iri,
@@ -461,23 +463,26 @@ class PLSapbertModel(LightningModule):
                 self.log(key, value=val, rank_zero_only=True)
                 logger.info(f"{dataset_name}: {key}, {val}")
 
-    def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
+    def get_candidate_dict(
+        self, np_candidates: pd.DataFrame, golden_iri: str, top_k
+    ) -> List[Candidate]:
         """
         for a dataframe of candidates, return a List[Candidate]
         :param np_candidates:
         :param golden_iri:
+        :param: topk: only keep top k candidates
         :return:
         """
-        dict_candidates = []
+        candidates_filtered = []
         for i, np_candidate_row in np_candidates.iterrows():
-            dict_candidates.append(
+            candidates_filtered.append(
                 Candidate(
                     default_label=np_candidate_row["default_label"],
                     iri=np_candidate_row["iri"],
                     correct=np_candidate_row["iri"] == golden_iri,
                 )
             )
-        return dict_candidates
+        return candidates_filtered[:top_k]
 
     def evaluate_topk_acc(self, queries: List[GoldStandardExample]):
         """
