@@ -421,7 +421,7 @@ class DocumentEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Entity):
             as_dict = obj.__dict__
-            # needed as Pydantic doesn't like sets
+            # needed as sets are not json serialisable
             as_dict["spans"] = list(obj.spans)
             return as_dict
         elif isinstance(obj, Section):
