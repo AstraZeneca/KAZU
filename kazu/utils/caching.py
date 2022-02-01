@@ -2,7 +2,7 @@ import logging
 import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Type, Dict, Any, Iterable, Tuple, List, Set, Generator
+from typing import Type, Dict, Any, Iterable, Tuple, List, Set, Iterator
 
 import pandas as pd
 import torch
@@ -254,7 +254,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
 
     def predict_ontology_embeddings(
         self, ontology_dataframe: pd.DataFrame
-    ) -> Generator[Tuple[int, pd.DataFrame, torch.Tensor], None, None]:
+    ) -> Iterator[Tuple[int, pd.DataFrame, torch.Tensor]]:
         """
         since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
         and add them to the index sequentially
