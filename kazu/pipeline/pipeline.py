@@ -1,10 +1,8 @@
-import json
 import logging
 import os.path
-from os import PathLike
+from pathlib import Path
 from typing import List, Dict, Optional
 
-from fastapi.encoders import jsonable_encoder
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
@@ -66,7 +64,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
     implementation logs docs to a directory, along with exception message
     """
 
-    def __init__(self, log_dir: PathLike):
+    def __init__(self, log_dir: Path):
         self.log_dir = log_dir
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
@@ -81,14 +79,14 @@ class FailedDocsFileHandler(FailedDocsHandler):
                 doc_path = os.path.join(step_logging_dir, doc_id + ".json")
                 doc_error_path = os.path.join(step_logging_dir, doc_id + "_error.txt")
                 with open(doc_path, "w") as f:
-                    f.write(json.dumps(jsonable_encoder(serialisable_doc)))
+                    f.write(serialisable_doc)
                 with open(doc_error_path, "w") as f:
-                    error_message = doc.metadata.get(PROCESSING_EXCEPTION, None)
+                    error_message = doc.metadata.get(PROCESSING_EXCEPTION)
                     if error_message is not None:
                         f.write(error_message)
                     else:
                         logger.warning(
-                            f"No error message found for doc: {doc}. Cannot write exception"
+                            f"No error message found for doc: {doc}. Cannot write exception to {doc_error_path}"
                         )
 
 
