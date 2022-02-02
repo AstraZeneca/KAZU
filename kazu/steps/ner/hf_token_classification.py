@@ -178,7 +178,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                         )
 
                 # at the end of the section, get the results
-                section.entities = self.entity_mapper.get_entities()
+                section.entities.extend(self.entity_mapper.get_entities())
                 # reset the entity mapper in preparation for the next section
                 self.entity_mapper.reset()
         except Exception:
