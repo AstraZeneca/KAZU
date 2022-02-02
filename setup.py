@@ -7,8 +7,8 @@ setup(
     author="AstraZeneca AI and Korea University",
     description="NER",
     install_requires=[
-        "spacy==3.0.7",
-        "en_core_web_sm@https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0-py3-none-any.whl#sha256=dfba97b3cb5c177f60c4087a5b4f5c9d7f5c0fce7150d8aa7c0aab4eb4811a07",
+        "spacy==3.2.1",
+        "en_core_web_sm@https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0-py3-none-any.whl#5e02939fb7fbae6dbcc9c5a1355f5e4e02939b649a1f0846ee844ac1d479bbeb",
         "torch==1.10.0",
         "torchvision==0.11.1",
         "torchaudio==0.10.0",
@@ -24,6 +24,7 @@ setup(
         "rapidfuzz==1.8.2",
         "seqeval==1.2.2",
         "py4j==0.10.9.3",
+        "fastparquet== 0.8.0",
     ],
     extras_require={
         "dev": [
