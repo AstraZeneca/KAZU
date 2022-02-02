@@ -102,8 +102,8 @@ class OntologyMatcher:
         """RETURNS (List[str]): The labels currently processed by this component."""
         return self.cfg["labels"]
 
-    def set_labels(self, labels: List[str]):
-        self.cfg["labels"] = labels
+    def set_labels(self, labels: Iterable[str]):
+        self.cfg["labels"] = list(labels)
         self.set_context_matchers()
 
     def set_context_matchers(self):
@@ -148,7 +148,7 @@ class OntologyMatcher:
             for example in get_examples():
                 for cat in example.y.cats:
                     ex_labels.add(cat)
-            self.set_labels(list(ex_labels))
+            self.set_labels(ex_labels)
             if len(self.labels) > 0:
                 logging.info(f"Inferred {len(self.labels)} labels from the data.")
             else:
