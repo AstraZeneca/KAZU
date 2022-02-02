@@ -4,7 +4,7 @@ from typing import Optional, List, Tuple
 
 from py4j.java_gateway import JavaGateway
 
-from kazu.data.data import Document, EntityMetadata, ContiguousEntity, PROCESSING_EXCEPTION
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
 from kazu.steps import BaseStep
 
 logger = logging.getLogger(__name__)
@@ -27,20 +27,19 @@ class SethStep(BaseStep):
                     entities = []
                     for mutation_dict in mutation_lst:
                         entities.append(
-                            ContiguousEntity(
+                            Entity.from_spans(
                                 start=mutation_dict["start"],
                                 end=mutation_dict["end"],
                                 match=mutation_dict["match"],
                                 entity_class=SethStep.entity_class,
-                                metadata=EntityMetadata(
-                                    metadata={
+                                metadata={
                                         "found_with": mutation_dict.get("found_with"),
                                         "protein_mutation": mutation_dict.get("protein_mutation"),
                                         "hgvs": mutation_dict["hgvs"],
                                     }
                                 ),
                             )
-                        )
+
                 except Exception:
                     doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                     failed_docs.append(doc)
