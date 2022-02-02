@@ -1,0 +1,4 @@
+_target_: kazu.steps.ner.seth.SethStep
+depends_on: ~
+entity_class: GENERAL_VARIANT
+seth_fatjar_path: ${oc.env:KAZU_MODEL_PACK}/seth/kazu-jvm-1.0-fatjar.jar

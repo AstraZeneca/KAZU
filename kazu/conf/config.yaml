@@ -8,3 +8,4 @@ defaults:
   - EnsembleEntityLinkingStep: default
   - pipeline: default
   - DistillationTraining: default
+  - SethStep: default
