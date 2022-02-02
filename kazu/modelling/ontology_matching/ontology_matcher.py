@@ -169,6 +169,9 @@ class OntologyMatcher:
                 "The matcher rules have not been set up properly. "
                 "Did you initialize the labels and the ontologies?"
             )
+
+        assert self.strict_matcher is not None
+        assert self.lowercase_matcher is not None
         strict_matches = self._set_span_labels(self.strict_matcher(doc, as_spans=True))
         lower_matches = self._set_span_labels(self.lowercase_matcher(doc, as_spans=True))
         final_spans = self.resolve_conflicts(strict_matches, lower_matches)
