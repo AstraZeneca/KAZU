@@ -1,10 +1,7 @@
 defaults:
   - ray: cluster
-  - SpacyPipeline: default
   - SciSpacyAbbreviationExpansionStep: default
-  - SpacyNerStep: default
   - TransformersModelForTokenClassificationNerStep: default
-  - NerDeDuplicationStep: default
   - SapBertForEntityLinkingStep: default
   - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
@@ -12,4 +9,4 @@ defaults:
   - pipeline: default
   - DistillationTraining: default
   - SethStep: default
-  - SynonymGeneration: default
+  - RuleBasedNerAndLinkingStep: default
