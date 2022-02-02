@@ -437,7 +437,7 @@ class DocumentEncoder(json.JSONEncoder):
 
 @dataclass
 class Document:
-    idx: str  # a document identifier. Note, if you only want to process text strings, use SimpleDocument
+    idx: str  # a document identifier
     sections: List[Section] = field(
         default_factory=list, hash=False
     )  # sections comprising this document
@@ -449,7 +449,6 @@ class Document:
     def get_entities(self) -> List[Entity]:
         """
         get all entities in this document
-
         :return:
         """
         entities = []
@@ -460,13 +459,18 @@ class Document:
     def json(self, **kwargs):
         """
         custom encoder needed to handle serialisation issues with our data model
-        :param kwargs:
+        :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
         return json.dumps(self, cls=DocumentEncoder, **kwargs)
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
+        """
+        create an instance of document from a text string. The idx field will be generated from uuid.uuid4().hex
+        :param text:
+        :return:
+        """
         idx = uuid.uuid4().hex
         sections = [Section(text=text, name="na")]
         return cls(idx=idx, sections=sections)
