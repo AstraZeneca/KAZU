@@ -1,5 +1,5 @@
 from functools import partial
-from typing import List, Dict, Union, Callable, Iterable, Optional
+from typing import List, Dict, Union, Callable, Iterable, Optional, TypedDict
 from pathlib import Path
 import pandas as pd
 import logging
@@ -43,6 +43,15 @@ def create_ontology_mather(
     )
 
 
+# TODO: this can probably be written as an actual dataclass,
+# but doing this for now until I get things working, and then I can try
+# converting it.
+class OntologyMatcherConfig(TypedDict):
+    span_key: str
+    labels: List[str]
+    parquet_files: List[str]
+
+
 class OntologyMatcher:
     def __init__(
         self,
@@ -64,7 +73,7 @@ class OntologyMatcher:
         self.name = name
         self.entry_filter = entry_filter
         self.variant_generator = variant_generator
-        self.cfg = {"span_key": span_key, "labels": [], "parquet_files": []}
+        self.cfg: OntologyMatcherConfig = {"span_key": span_key, "labels": [], "parquet_files": []}
         # These will be defined when calling initialize
         self.strict_matcher, self.lowercase_matcher = None, None
         self.tp_matchers, self.fp_matchers = None, None
