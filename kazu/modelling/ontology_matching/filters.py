@@ -64,5 +64,5 @@ def _is_number(value):
     try:
         float(value)
         return True
-    except:
+    except ValueError:
         return False
