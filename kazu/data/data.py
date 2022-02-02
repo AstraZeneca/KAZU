@@ -429,10 +429,8 @@ class DocumentEncoder(json.JSONEncoder):
             return as_dict
         elif isinstance(obj, (set, frozenset)):
             return list(obj)
-        elif dataclasses.is_dataclass(obj) and not isinstance(
-            obj, (str, int, float, bool, type(None))
-        ):
-            return dataclasses.asdict(obj)
+        elif dataclasses.is_dataclass(obj):
+            return obj.__dict__
         else:
             return json.JSONEncoder.default(self, obj)
 
@@ -461,27 +459,14 @@ class Document:
 
     def json(self, **kwargs):
         """
-        override needed to handle serialisation issues with our data model
+        custom encoder needed to handle serialisation issues with our data model
         :param kwargs:
         :return:
         """
-        return json.dumps(self.__dict__, cls=DocumentEncoder, **kwargs)
+        return json.dumps(self, cls=DocumentEncoder, **kwargs)
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
         idx = uuid.uuid4().hex
         sections = [Section(text=text, name="na")]
         return cls(idx=idx, sections=sections)
-
-
-class SimpleDocument(Document):
-    """
-    a simplified Document. Use this if you want to process a str of text.
-    idx is calculated by uuid.uuid4().hex
-    the instance will have a single section, composed of the argument to the constructor
-    """
-
-    def __init__(self, text: str):
-        idx = uuid.uuid4().hex
-        sections = [Section(text=text, name="na")]
-        super().__init__(idx=idx, sections=sections)
