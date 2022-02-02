@@ -274,8 +274,8 @@ class OntologyMatcher:
         final_spans = []
         if not labeled_tokens:
             labeled_tokens = set()
-        sort_spans = lambda s: (s.end - s.start, -s.start)
-        for span in sorted(orig_spans, key=sort_spans, reverse=True):
+
+        for span in sorted(orig_spans, key=self._span_sort_key, reverse=True):
             overlap = False
             for token_i in range(span.start, span.end):
                 if token_i in labeled_tokens:
@@ -286,13 +286,17 @@ class OntologyMatcher:
                     labeled_tokens.add(token_i)
         return final_spans, labeled_tokens
 
+    @staticmethod
+    def _span_sort_key(span):
+        return (span.end - span.start, -span.start)
+
     def _keep_longest_per_label(self, orig_spans, labeled_tokens=None):
         """Keep all longest spans per label - allowing one token to be part of different span types"""
         final_spans = []
         if not labeled_tokens:
             labeled_tokens = {}
-        sort_spans = lambda s: (s.end - s.start, -s.start)
-        for span in sorted(orig_spans, key=sort_spans, reverse=True):
+
+        for span in sorted(orig_spans, key=self._span_sort_key, reverse=True):
             overlap = False
             current_label = span.label_
             for token_i in range(span.start, span.end):
