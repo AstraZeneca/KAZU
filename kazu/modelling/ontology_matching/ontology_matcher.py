@@ -111,7 +111,7 @@ class OntologyMatcher:
         This method should not be run on an existing or deserialized pipeline.
         """
         if len(self.ontologies) > 0:
-            logging.warning(f"Ontologies are being redefined - is this by intention?")
+            logging.warning("Ontologies are being redefined - is this by intention?")
         paths = self._define_paths(parquet_files)
         dfs = {path.name: pd.read_parquet(path) for path in paths}
         self.strict_matcher = self._create_phrasematcher(dfs, lowercase=False)
