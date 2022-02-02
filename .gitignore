@@ -147,3 +147,6 @@ model_pack/
 
 # direnv config file
 .envrc
+
+# jvm gradle
+kazu-jvm/build/
