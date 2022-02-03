@@ -4,5 +4,5 @@ entity_class: GENERAL_VARIANT
 seth_fatjar_path: ${oc.env:KAZU_MODEL_PACK}/kazu-jvm/kazu-jvm-1.0-fatjar.jar
 condition:
   _target_: kazu.utils.utils.EntityClassFilter
-  required_entities:
+  required_entity_classes:
     - gene
