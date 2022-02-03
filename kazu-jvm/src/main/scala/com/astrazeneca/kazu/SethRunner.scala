@@ -17,9 +17,12 @@ class SethRunner {
         "text" -> mutationMention.getText,
         "hgvs" -> mutationMention.toHGVS,
         "wtResidue" -> mutationMention.getWtResidue,
+        "mutResidue" -> mutationMention.getMutResidue,
         "mutation_type" -> mutationMention.getType.toString,
         "found_with" -> mutationMention.getTool.toString,
-        "protein_mutation" -> mutationMention.isPsm
+        "protein_mutation" -> mutationMention.isPsm,
+        "nucleotide_mutation" -> mutationMention.isNsm,
+        "ambiguous"-> mutationMention.isAmbiguous
       ).asJava
     }.toList.asJava
   }
