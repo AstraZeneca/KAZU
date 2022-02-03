@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Iterable
 
 from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
@@ -132,14 +132,14 @@ class EntityClassFilter:
     A condition that returns True if a document has any entities that match the class of the required_entity_classes
     """
 
-    def __init__(self, required_entity_classes: List[str]):
+    def __init__(self, required_entity_classes: Iterable[str]):
         """
 
         :param required_entity_classes: list of str, specifying entity classes to assess
         """
-        self.required_entities = required_entity_classes
+        self.required_entities = set(required_entity_classes)
 
     def __call__(self, document: Document) -> bool:
-        for doc_ent in document.get_entities():
-            return any([doc_ent.entity_class in self.required_entities])
-        return False
+        return any(
+            (entity.entity_class in self.required_entities for entity in document.get_entities())
+        )
