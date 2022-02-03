@@ -125,3 +125,21 @@ def get_cache_path(path: PathLike, cache_id: str) -> Path:
     cache_dir = get_cache_dir(path, create_if_not_exist=False)
     new_path = cache_dir.joinpath(f"cached_{cache_id}_{original_filename}")
     return new_path
+
+
+class EntityClassFilter:
+    """
+    A condition that returns True if a document has any entities that match the class of the required_entity_classes
+    """
+
+    def __init__(self, required_entity_classes: List[str]):
+        """
+
+        :param required_entity_classes: list of str, specifying entity classes to assess
+        """
+        self.required_entities = required_entity_classes
+
+    def __call__(self, document: Document) -> bool:
+        for doc_ent in document.get_entities():
+            return any([doc_ent.entity_class in self.required_entities])
+        return False
