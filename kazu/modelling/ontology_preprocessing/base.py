@@ -5,7 +5,7 @@ import re
 import sqlite3
 from abc import ABC
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any, Iterable
 
 import cachetools
 import en_core_web_sm
@@ -171,6 +171,103 @@ class OntologyParser(ABC):
         self.format_training_table().to_parquet(
             path.joinpath(f"{self.name}_training_pairs.parquet"), index=None
         )
+
+
+class JsonLinesOntologyParser(OntologyParser):
+    """
+    A parser for a jsonlines dataset. Assumes one kb entry per line (i.e. json object)
+    implemetations should implement json_dict_to_parser_dict (see method notes for details
+    """
+
+    def read(self, path: str) -> Iterable[Dict[str, Any]]:
+        for file_str in os.listdir(path):
+            if file_str.endswith(".json"):
+                with open(os.path.join(path, file_str), "r") as f:
+                    for line in f:
+                        yield json.loads(line)
+
+    def parse_to_dataframe(self):
+        return pd.concat(self.json_dict_to_parser_dict(self.read(self.in_path)))
+
+    def json_dict_to_parser_dict(
+        self, jsons_gen: Iterable[Dict[str, Any]]
+    ) -> Iterable[pd.DataFrame]:
+        """
+        for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
+        strucutre of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
+        IDX. All other keys are used as mapping metadata
+        :param jsons_gen: iterator of python dict representing json objects
+        :return: pd.DataFrame
+        """
+        raise NotImplementedError()
+
+
+class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
+    name = "OPENTARGETS_DISEASE"
+
+    def json_dict_to_parser_dict(
+        self, jsons_gen: Iterable[Dict[str, Any]]
+    ) -> Iterable[pd.DataFrame]:
+        # we ignore related syns for now until we decide how the system should handle them
+        for json_dict in jsons_gen:
+            synonymns = json_dict.get("synonyms", {})
+            exact_syns = synonymns.get("hasExactSynonym", [])
+            exact_syns.append(json_dict["name"])
+            df = pd.DataFrame(exact_syns, columns=[SYN])
+            df[MAPPING_TYPE] = "hasExactSynonym"
+            df[DEFAULT_LABEL] = json_dict["name"]
+            df[IDX] = json_dict.get("code")
+            df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
+            yield df
+
+
+class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
+    name = "OPENTARGETS_TARGET"
+
+    def json_dict_to_parser_dict(
+        self, jsons_gen: Iterable[Dict[str, Any]]
+    ) -> Iterable[pd.DataFrame]:
+        for json_dict in jsons_gen:
+            records = []
+            for key in ["synonyms", "obsoleteSymbols", "obsoleteNames", "proteinIds"]:
+                synonyms_and_sources_lst = json_dict.get(key, [])
+                for record in synonyms_and_sources_lst:
+                    if "label" in record and "id" in record:
+                        raise RuntimeError(f"record: {record} has both id and label specified")
+                    elif "label" in record:
+                        record[SYN] = record.pop("label")
+                    elif "id" in record:
+                        record[SYN] = record.pop("id")
+                    record[MAPPING_TYPE] = record.pop("source")
+                    records.append(record)
+
+            records.append({SYN: json_dict["approvedSymbol"], MAPPING_TYPE: "approvedSymbol"})
+            records.append({SYN: json_dict["id"], MAPPING_TYPE: "opentargets_id"})
+            df = pd.DataFrame.from_records(records)
+            df.columns = [SYN, MAPPING_TYPE]
+
+            df[IDX] = json_dict["id"]
+            df[DEFAULT_LABEL] = json_dict["approvedSymbol"]
+            df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
+            yield df
+
+
+class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
+    name = "OPENTARGETS_MOLECULE"
+
+    def json_dict_to_parser_dict(
+        self, jsons_gen: Iterable[Dict[str, Any]]
+    ) -> Iterable[pd.DataFrame]:
+        for json_dict in jsons_gen:
+            syn_df = pd.DataFrame(json_dict.get("synonyms", []), columns=[SYN])
+            syn_df[MAPPING_TYPE] = "synonyms"
+            trade_df = pd.DataFrame(json_dict.get("tradeNames", []), columns=[SYN])
+            trade_df[MAPPING_TYPE] = "tradeNames"
+            df = pd.concat([syn_df, trade_df])
+            df[DEFAULT_LABEL] = json_dict["name"]
+            df[IDX] = json_dict["id"]
+            df["crossReferences"] = [json_dict.get("crossReferences", {})] * df.shape[0]
+            yield df
 
 
 class RDFGraphParser(OntologyParser):
