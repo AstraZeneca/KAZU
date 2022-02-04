@@ -1,6 +1,6 @@
 model:
   _target_: kazu.modelling.linking.sapbert.train.PLSapbertModel
-  model_name_or_path: cambridgeltl/SapBERT-from-PubMedBERT-fulltext
+  model_name_or_path: ${oc.env:KAZU_MODEL_PACK}/sapbert/SapBERT-from-PubMedBERT-fulltext
   sapbert_training_params:
     _target_: kazu.modelling.linking.sapbert.train.SapbertTrainingParams
     topk: 5
