@@ -524,6 +524,7 @@ class PLSapbertModel(LightningModule):
         :param trainer: the PL Trainer to use
         :return: 2d tensor of cls  output
         """
+        self.eval()
         results = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
         results = self.get_embeddings(results)
         return results
