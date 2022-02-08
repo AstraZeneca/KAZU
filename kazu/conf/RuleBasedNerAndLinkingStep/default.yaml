@@ -1,2 +1,27 @@
 _target_: kazu.steps.ner.RuleBasedNerAndLinkingStep
 depends_on: ~
+path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
+rebuild_pipeline: False
+labels:
+  - GGP
+  - Chemical
+  - Anatomy
+  - Disease
+  - Cell_line
+synonym_table_cache:
+  _target_: kazu.utils.caching.SynonymTableCache
+  parsers:
+    - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
+    - _target_: kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/hgnc.json
+    - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
+    - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+    - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+    - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
+    - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo

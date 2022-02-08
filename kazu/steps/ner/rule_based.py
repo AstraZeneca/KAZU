@@ -1,12 +1,18 @@
 from collections import defaultdict
+import logging
 import traceback
-from typing import Dict, Iterator, List, Set, Tuple
+from typing import Dict, Iterator, List, Optional, Set, Tuple
 
 import spacy
 
 from kazu.data.data import CharSpan, Document, Mapping, Section, Entity, PROCESSING_EXCEPTION
+from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.steps import BaseStep
-from kazu.utils.utils import PathLike
+from kazu.utils.caching import SynonymTableCache
+from kazu.utils.utils import as_path, PathLike
+
+
+logger = logging.getLogger(__name__)
 
 
 class RuleBasedNerAndLinkingStep(BaseStep):
@@ -18,6 +24,9 @@ class RuleBasedNerAndLinkingStep(BaseStep):
         self,
         depends_on: List[str],
         path: PathLike,
+        rebuild_pipeline: bool = False,
+        labels: Optional[List[str]] = None,
+        synonym_table_cache: Optional[SynonymTableCache] = None,
     ):
         """
         :param path: path to spacy pipeline including Ontology Matcher.
@@ -25,7 +34,49 @@ class RuleBasedNerAndLinkingStep(BaseStep):
         """
 
         super().__init__(depends_on=depends_on)
-        self.spacy_pipeline = spacy.load(path)
+
+        self.path = as_path(path)
+        self.synonym_table_cache = synonym_table_cache
+        self.labels = labels
+
+        if rebuild_pipeline or not self.path.exists():
+            if self.synonym_table_cache is None or self.labels is None:
+                # invalid - no way to get a spacy pipeline.
+                # gather the relevant information for the error message
+                if rebuild_pipeline:
+                    reason_for_trying_to_build_pipeline = (
+                        "rebuild_pipeline parameter was set to True"
+                    )
+                else:
+                    reason_for_trying_to_build_pipeline = (
+                        f"the path parameter {self.path} does not exist"
+                    )
+
+                none_param = "synonyn_table_cache" if synonym_table_cache is None else "labels"
+                raise ValueError(
+                    f"Cannot instantiate {self.__class__.__name__} as the {none_param} param was None and {reason_for_trying_to_build_pipeline}"
+                )
+
+            logger.info("forcing a rebuild of spacy 'arizona' NER and EL pipeline")
+            self.spacy_pipeline = self.build_pipeline(
+                self.path, self.synonym_table_cache, self.labels
+            )
+        else:
+            self.spacy_pipeline = spacy.load(self.path)
+
+    @staticmethod
+    def build_pipeline(
+        path: PathLike, synonym_table_cache: SynonymTableCache, labels: List[str]
+    ) -> spacy.language.Language:
+        synonym_table_paths = synonym_table_cache.get_synonym_table_paths()
+        return assemble_pipeline(
+            parquet_files=synonym_table_paths,
+            # TODO: just use the list all the way through
+            labels=",".join(labels),
+            # TODO: take this from config
+            span_key="span_key",
+            output_dir=path,
+        )
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         texts_and_sections = (
