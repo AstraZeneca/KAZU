@@ -2,11 +2,11 @@ import typer
 import spacy
 
 from modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.utils.utils import SinglePathLikeOrIterable
+from kazu.utils.utils import PathLike, SinglePathLikeOrIterable
 
 
 def main(
-    parquet_files: SinglePathLikeOrIterable, labels: str, span_key: str, output_dir: str
+    parquet_files: SinglePathLikeOrIterable, labels: str, span_key: str, output_dir: PathLike
 ) -> spacy.language.Language:
     nlp = spacy.blank("en")
     nlp.add_pipe("sentencizer")
