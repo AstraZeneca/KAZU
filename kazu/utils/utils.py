@@ -102,6 +102,8 @@ def get_match_entity_class_hash(ent: Entity) -> int:
 
 PathLike = Union[str, Path]
 
+SinglePathLikeOrIterable = Union[PathLike, Iterable[PathLike]]
+
 
 def as_path(p: PathLike) -> Path:
     return p if isinstance(p, Path) else Path(p)

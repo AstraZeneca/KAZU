@@ -12,6 +12,8 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
+from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
+
 
 STRICT_HITS = "spans_ORTH"
 LOWER_HITS = "spans_LOWER"
@@ -115,13 +117,20 @@ class OntologyMatcher:
         """RETURNS (List[str]): List of parquet files that were processed"""
         return self.cfg["parquet_files"]
 
-    def set_ontologies(self, parquet_files: Union[Path, str]):
+    def set_ontologies(self, parquet_files: SinglePathLikeOrIterable):
         """Initialize the ontologies when creating this component.
         This method should not be run on an existing or deserialized pipeline.
         """
         if len(self.ontologies) > 0:
             logging.warning("Ontologies are being redefined - is this by intention?")
-        paths = self._define_paths(parquet_files)
+        if isinstance(parquet_files, (Path, str)):
+            paths = self._define_paths(parquet_files)
+        else:
+            # TODO: refactor to make paths a Set[Path]
+            paths = []
+            for path in parquet_files:
+                paths.extend(self._define_paths(path))
+
         dfs = {path.name: pd.read_parquet(path) for path in paths}
         self.strict_matcher = self._create_phrasematcher(dfs, lowercase=False)
         self.lowercase_matcher = self._create_phrasematcher(dfs, lowercase=True)
@@ -132,7 +141,7 @@ class OntologyMatcher:
         get_examples: Callable,
         *,
         nlp: Optional[Language] = None,
-        parquet_files: Union[Path, str] = None,
+        parquet_files: SinglePathLikeOrIterable = None,
         labels: Optional[Iterable[str]] = None,
     ) -> None:
         """Initialize the labels and ontologies when creating this component.
@@ -322,8 +331,8 @@ class OntologyMatcher:
                     labeled_tokens[token_i] = new_set
         return final_spans, labeled_tokens
 
-    def _define_paths(self, in_loc) -> List[Path]:
-        in_path = Path(in_loc)
+    def _define_paths(self, in_loc: PathLike) -> List[Path]:
+        in_path = as_path(in_loc)
         if not in_path.exists():
             raise ValueError(f"Location {in_loc} is not an existing file or directory.")
         if in_path.is_file():
