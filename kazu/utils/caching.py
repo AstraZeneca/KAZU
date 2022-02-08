@@ -69,6 +69,52 @@ class EntityLinkingLookupCache:
         return cache_misses
 
 
+class SynonymTableCache:
+    def __init__(self, parsers: List[OntologyParser], rebuild_cache: bool = False):
+        self.parsers = parsers
+        self.rebuild_cache = rebuild_cache
+
+    def get_synonym_table_paths(self) -> List[Path]:
+        """
+        for each parser in self.parsers, create a synonym table. If a cached version is available, load it instead
+        :return:
+        """
+        synonym_table_paths: List[Path] = []
+        for parser in self.parsers:
+            cache_dir = get_cache_dir(
+                parser.in_path, prefix="synonym_table", create_if_not_exist=False
+            )
+            cache_path = self._get_synonym_cache_path(cache_dir, parser)
+
+            if self.rebuild_cache:
+                logger.info("forcing a rebuild of the synonym table cache")
+                if cache_dir.exists():
+                    shutil.rmtree(cache_dir)
+                cache_dir.mkdir()
+                self.build_synonym_table_cache(cache_path, parser)
+            elif cache_dir.exists() and cache_path.exists():
+                logger.info(f"using cached synonym table file from {cache_path}")
+            else:
+                logger.info("No synonym table cache file found. Building a new one")
+                cache_dir.mkdir(exist_ok=True)
+                self.build_synonym_table_cache(cache_dir, parser)
+
+            synonym_table_paths.append(cache_path)
+
+        return synonym_table_paths
+
+    @staticmethod
+    def build_synonym_table_cache(cache_path: Path, parser: OntologyParser) -> None:
+        logger.info(f"creating synonym table for {parser.in_path}")
+        syn_df, _ = parser.parse_and_cache()
+        syn_df.to_parquet(cache_path, index=None)
+        logger.info(f"saved {parser.name} synonym table to {cache_path.absolute()}")
+
+    @staticmethod
+    def _get_synonym_cache_path(cache_dir: Path, parser: OntologyParser) -> Path:
+        return cache_dir.joinpath(f"{parser.name}_synonyms.parquet")
+
+
 class IndexCacheManager(ABC):
     """
     An IndexCacheManager is responsible for creating, saving and loading a set of :class:`kazu.utils.caching.Index`.
