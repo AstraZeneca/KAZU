@@ -614,8 +614,6 @@ class ChemblOntologyParser(OntologyParser):
             FROM molecule_dictionary
         """  # noqa
         df = pd.read_sql(query, conn)
-        df[DEFAULT_LABEL] = df[DEFAULT_LABEL].str.lower()
-        df[SYN] = df[SYN].str.lower()
 
         df.drop_duplicates(inplace=True)
 
