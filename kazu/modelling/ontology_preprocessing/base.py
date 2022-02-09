@@ -545,13 +545,10 @@ class EnsemblOntologyParser(OntologyParser):
             # expand brackets
             matches = re.match(paren_re, syn)
             if matches is not None:
-                all_groups_no_brackets = []
                 for group in matches.groups():
                     group = group.strip()
                     if group not in self.EXCLUDED_PARENTHESIS:
                         to_add.add(group)
-                        all_groups_no_brackets.append(group)
-                to_add.add("".join(all_groups_no_brackets))
         # expand slashes
         for x in list(to_add):
             if "/" in x:
