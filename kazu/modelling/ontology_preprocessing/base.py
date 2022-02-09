@@ -348,7 +348,7 @@ class UberonOntologyParser(RDFGraphParser):
 class MondoOntologyParser(OntologyParser):
     name = "MONDO"
     """
-    input should be an MONDO owl file
+    input should be an MONDO json file
     e.g.
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
