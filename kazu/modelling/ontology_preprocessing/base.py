@@ -664,7 +664,7 @@ class CellosaurusOntologyParser(OntologyParser):
                 if text.startswith("id:"):
                     id = text.split(" ")[1]
                 elif text.startswith("name:"):
-                    default_label = text.split(" ")[1][1:]
+                    default_label = text.replace("name:", "").strip()
                     ids.append(id)
                     default_labels.append(default_label)
                     all_syns.append(default_label)
