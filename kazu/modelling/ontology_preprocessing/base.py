@@ -514,11 +514,7 @@ class EnsemblOntologyParser(OntologyParser):
                 for hgnc_key in keys_to_check:
                     synonyms_this_entity = get_with_default_list(hgnc_key)
                     for potential_synonym in synonyms_this_entity:
-                        generated_syns = self.post_process_synonym(potential_synonym)
-                        for syn in generated_syns:
-                            synonyms.append(
-                                (syn, hgnc_key),
-                            )
+                        synonyms.append((potential_synonym, hgnc_key))
 
                 synonyms = list(set(synonyms))
                 # filter any very short matches
