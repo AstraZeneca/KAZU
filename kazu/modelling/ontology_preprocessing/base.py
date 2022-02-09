@@ -309,17 +309,19 @@ class RDFGraphParser(OntologyParser):
         mapping_type = []
 
         for sub, obj in g.subject_objects(label_predicates):
-            if self.is_valid_iri(str(sub)):
-                default_labels.append(str(obj))
-                iris.append(str(sub))
-                syns.append(str(obj))
-                mapping_type.append(label_pred_str)
-                for syn_predicate in synonym_predicates:
-                    for other_syn_obj in g.objects(subject=sub, predicate=syn_predicate):
-                        default_labels.append(str(obj))
-                        iris.append(str(sub))
-                        syns.append(str(other_syn_obj))
-                        mapping_type.append(syn_predicate)
+            if not self.is_valid_iri(str(sub)):
+                continue
+
+            default_labels.append(str(obj))
+            iris.append(str(sub))
+            syns.append(str(obj))
+            mapping_type.append(label_pred_str)
+            for syn_predicate in synonym_predicates:
+                for other_syn_obj in g.objects(subject=sub, predicate=syn_predicate):
+                    default_labels.append(str(obj))
+                    iris.append(str(sub))
+                    syns.append(str(other_syn_obj))
+                    mapping_type.append(syn_predicate)
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
         )
@@ -383,19 +385,21 @@ class MondoOntologyParser(OntologyParser):
 
             syns = node.get("meta", {}).get("synonyms", [])
             for syn_dict in syns:
-                if self.is_valid_iri(node["id"]):
-                    pred = syn_dict["pred"]
-                    mapping_type.append(pred)
-                    syn = syn_dict["val"]
+                if not self.is_valid_iri(node["id"]):
+                    continue
+
+                pred = syn_dict["pred"]
+                mapping_type.append(pred)
+                syn = syn_dict["val"]
+                ids.append(idx)
+                default_label_list.append(default_label)
+                all_syns.append(syn)
+                no_stops_syn = self.sw_remover(syn)
+                if no_stops_syn != syn:
                     ids.append(idx)
                     default_label_list.append(default_label)
-                    all_syns.append(syn)
-                    no_stops_syn = self.sw_remover(syn)
-                    if no_stops_syn != syn:
-                        ids.append(idx)
-                        default_label_list.append(default_label)
-                        all_syns.append(no_stops_syn)
-                        mapping_type.append(pred)
+                    all_syns.append(no_stops_syn)
+                    mapping_type.append(pred)
 
         df = pd.DataFrame.from_dict(
             {IDX: ids, DEFAULT_LABEL: default_label_list, SYN: all_syns, MAPPING_TYPE: mapping_type}
