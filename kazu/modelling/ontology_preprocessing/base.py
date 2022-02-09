@@ -338,10 +338,10 @@ class UberonOntologyParser(RDFGraphParser):
         ]
 
     def get_valid_iri(self, text: str):
-        iri = text.replace("http://purl.obolibrary.org/obo/", "")
-        pattern = re.compile("^UBERON_[0-9]+$")
-        if pattern.match(iri):
-            return iri
+        pattern = re.compile("^http://purl.obolibrary.org/obo/(UBERON_[0-9]+)$")
+        match = pattern.match(text)
+        if match:
+            return match.group(1)
         return None
 
 
@@ -397,10 +397,10 @@ class MondoOntologyParser(OntologyParser):
         return df
 
     def get_valid_iri(self, text: str):
-        iri = text.replace("http://purl.obolibrary.org/obo/", "")
-        pattern = re.compile("^(MONDO|HP)_[0-9]+$")
-        if pattern.match(iri):
-            return iri
+        pattern = re.compile("^http://purl.obolibrary.org/obo/((MONDO|HP)_[0-9]+)$")
+        match = pattern.match(text)
+        if match:
+            return match.group(1)
         return None
 
 
@@ -635,10 +635,10 @@ class CLOOntologyParser(RDFGraphParser):
         ]
 
     def get_valid_iri(self, text: str):
-        iri = text.replace("http://purl.obolibrary.org/obo/", "")
-        pattern = re.compile("^CLO_[0-9]+$")
-        if pattern.match(iri):
-            return iri
+        pattern = re.compile("^http://purl.obolibrary.org/obo/(CLO_[0-9]+)$")
+        match = pattern.match(text)
+        if match:
+            return match.group(1)
         return None
 
 
