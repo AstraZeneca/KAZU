@@ -3,7 +3,7 @@ import json
 import os
 import re
 import sqlite3
-from abc import ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable
 
@@ -278,6 +278,17 @@ class RDFGraphParser(OntologyParser):
 
     name = "RDFGraphParser"
 
+    @property
+    @classmethod
+    @abstractmethod
+    def _uri_regex(cls):
+        """
+        subclasses should provide this as a class attribute.
+
+        It should be a compiled regex object that matches on valid URIs for the ontology
+        being parsed."""
+        pass
+
     def _get_synonym_predicates(self) -> List[str]:
         """
         subclasses should override this. Returns a List[str] of rdf predicates used to select synonyms from the owl
@@ -317,9 +328,11 @@ class RDFGraphParser(OntologyParser):
     def is_valid_iri(self, text: str) -> bool:
         """
         Check if input string is a valid IRI for the ontology being parsed.
-        Always returns True - override the method for custom behaviour.
+
+        Uses self._uri_regex to define valid IRIs
         """
-        return True
+        match = self._uri_regex.match(text)
+        return bool(match)
 
 
 class UberonOntologyParser(RDFGraphParser):
@@ -336,10 +349,6 @@ class UberonOntologyParser(RDFGraphParser):
             "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
             "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
         ]
-
-    def is_valid_iri(self, text: str) -> bool:
-        match = self._uri_regex.match(text)
-        return bool(match)
 
 
 class MondoOntologyParser(OntologyParser):
@@ -628,10 +637,6 @@ class CLOOntologyParser(RDFGraphParser):
             "http://purl.obolibrary.org/obo/hasExactSynonym",
             "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
         ]
-
-    def is_valid_iri(self, text: str):
-        match = self._uri_regex.match(text)
-        return bool(match)
 
 
 class CellosaurusOntologyParser(OntologyParser):
