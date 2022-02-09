@@ -298,8 +298,7 @@ class RDFGraphParser(OntologyParser):
         mapping_type = []
 
         for sub, obj in g.subject_objects(label_predicates):
-            iri = self.get_valid_iri(str(sub))
-            if iri is not None:
+            if self.is_valid_iri(str(sub)):
                 default_labels.append(str(obj))
                 iris.append(str(sub))
                 syns.append(str(obj))
@@ -315,17 +314,17 @@ class RDFGraphParser(OntologyParser):
         )
         return df
 
-    def get_valid_iri(self, text: str):
+    def is_valid_iri(self, text: str) -> bool:
         """
-        Process the input string to a proper, unique ID, or None if it is not a valid IRI for this ontology
-        Simply returns the input - override the method for custom behaviour.
+        Check if input string is a valid IRI for the ontology being parsed.
+        Always returns True - override the method for custom behaviour.
         """
-        return text
+        return True
 
 
 class UberonOntologyParser(RDFGraphParser):
     name = "UBERON"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(UBERON_[0-9]+)$")
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$")
     """
     input should be an UBERON owl file
     e.g.
@@ -338,16 +337,14 @@ class UberonOntologyParser(RDFGraphParser):
             "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
         ]
 
-    def get_valid_iri(self, text: str):
+    def is_valid_iri(self, text: str) -> bool:
         match = self._uri_regex.match(text)
-        if match:
-            return match.group(1)
-        return None
+        return bool(match)
 
 
 class MondoOntologyParser(OntologyParser):
     name = "MONDO"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/((MONDO|HP)_[0-9]+)$")
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(MONDO|HP)_[0-9]+$")
     """
     input should be an MONDO json file
     e.g.
@@ -377,8 +374,7 @@ class MondoOntologyParser(OntologyParser):
 
             syns = node.get("meta", {}).get("synonyms", [])
             for syn_dict in syns:
-                iri = self.get_valid_iri(node["id"])
-                if iri is not None:
+                if self.is_valid_iri(node["id"]):
                     pred = syn_dict["pred"]
                     mapping_type.append(pred)
                     syn = syn_dict["val"]
@@ -397,11 +393,9 @@ class MondoOntologyParser(OntologyParser):
         )
         return df
 
-    def get_valid_iri(self, text: str):
+    def is_valid_iri(self, text: str) -> bool:
         match = self._uri_regex.match(text)
-        if match:
-            return match.group(1)
-        return None
+        return bool(match)
 
 
 class EnsemblOntologyParser(OntologyParser):
@@ -622,7 +616,7 @@ class ChemblOntologyParser(OntologyParser):
 
 class CLOOntologyParser(RDFGraphParser):
     name = "CLO"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(CLO_[0-9]+)$")
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$")
     """
     input is a CLO Owl file
     https://www.ebi.ac.uk/ols/ontologies/clo
@@ -635,11 +629,9 @@ class CLOOntologyParser(RDFGraphParser):
             "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
         ]
 
-    def get_valid_iri(self, text: str):
+    def is_valid_iri(self, text: str):
         match = self._uri_regex.match(text)
-        if match:
-            return match.group(1)
-        return None
+        return bool(match)
 
 
 class CellosaurusOntologyParser(OntologyParser):
