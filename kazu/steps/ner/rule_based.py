@@ -71,8 +71,7 @@ class RuleBasedNerAndLinkingStep(BaseStep):
         synonym_table_paths = synonym_table_cache.get_synonym_table_paths()
         return assemble_pipeline(
             parquet_files=synonym_table_paths,
-            # TODO: just use the list all the way through
-            labels=",".join(labels),
+            labels=labels,
             # TODO: take this from config
             span_key="span_key",
             output_dir=path,
