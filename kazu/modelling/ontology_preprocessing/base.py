@@ -517,10 +517,8 @@ class EnsemblOntologyParser(OntologyParser):
                         synonyms.append((potential_synonym, hgnc_key))
 
                 synonyms = list(set(synonyms))
-                # filter any very short matches
-                synonyms_and_mapping_type = [x for x in synonyms if len(x[0]) > 2]
                 synonyms_strings = []
-                for synonym_str, mapping_t in synonyms_and_mapping_type:
+                for synonym_str, mapping_t in synonyms:
                     all_mapping_type.append(mapping_t)
                     synonyms_strings.append(synonym_str)
 
