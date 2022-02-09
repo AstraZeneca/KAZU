@@ -520,8 +520,9 @@ class EnsemblOntologyParser(OntologyParser):
                 synonyms: List[Tuple[str, str]] = []
                 for hgnc_key in keys_to_check:
                     synonyms_this_entity = get_with_default_list(hgnc_key)
-                    for potential_synonym in synonyms_this_entity:
-                        synonyms.append((potential_synonym, hgnc_key))
+                    synonyms.extend(
+                        (potential_synonym, hgnc_key) for potential_synonym in synonyms_this_entity
+                    )
 
                 synonyms = list(set(synonyms))
                 synonyms_strings = []
@@ -559,9 +560,7 @@ class EnsemblOntologyParser(OntologyParser):
         # expand slashes
         for x in to_add:
             if "/" in x:
-                splits = x.split("/")
-                for split in splits:
-                    to_add.add(split.strip())
+                to_add.update(split.strip() for split in x.split("/"))
 
         # sub greek
         for x in to_add:
