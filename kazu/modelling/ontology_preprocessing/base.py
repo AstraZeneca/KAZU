@@ -553,7 +553,8 @@ class EnsemblOntologyParser(OntologyParser):
         for x in list(to_add):
             if "/" in x:
                 splits = x.split("/")
-                to_add.update(splits)
+                for split in splits:
+                    to_add.add(split.strip())
 
         # sub greek
         for x in list(to_add):
