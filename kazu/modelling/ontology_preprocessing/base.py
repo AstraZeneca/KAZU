@@ -538,9 +538,9 @@ class EnsemblOntologyParser(OntologyParser):
         :param syn:
         :return:
         """
-        to_add = []
+        to_add = set()
         paren_re = r"(.*)\((.*)\)(.*)"
-        to_add.append(syn)
+        to_add.add(syn)
         if "(" in syn and ")" in syn:
             # expand brackets
             matches = re.match(paren_re, syn)
@@ -548,22 +548,22 @@ class EnsemblOntologyParser(OntologyParser):
                 all_groups_no_brackets = []
                 for group in matches.groups():
                     if group not in self.EXCLUDED_PARENTHESIS:
-                        to_add.append(group)
+                        to_add.add(group)
                         all_groups_no_brackets.append(group)
-                to_add.append("".join(all_groups_no_brackets))
+                to_add.add("".join(all_groups_no_brackets))
         # expand slashes
-        for x in range(len(to_add)):
-            if "/" in to_add[x]:
-                splits = to_add[x].split("/")
-                to_add.extend(splits)
+        for x in list(to_add):
+            if "/" in x:
+                splits = x.split("/")
+                to_add.update(splits)
 
         # sub greek
-        for x in range(len(to_add)):
-            to_add.append(self.substitute_greek_unicode(to_add[x]))
-            to_add.append(self.substitute_english_with_greek_unicode(to_add[x]))
-            to_add.append(self.substitute_greek_unicode_abbrvs(to_add[x]))
+        for x in list(to_add):
+            to_add.add(self.substitute_greek_unicode(x))
+            to_add.add(self.substitute_english_with_greek_unicode(x))
+            to_add.add(self.substitute_greek_unicode_abbrvs(x))
 
-        return to_add
+        return list(to_add)
 
     def substitute_greek_unicode(self, text: str) -> str:
         if any([x in text for x in self.GREEK_SUBS.keys()]):
