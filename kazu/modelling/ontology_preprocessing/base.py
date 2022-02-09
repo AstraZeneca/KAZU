@@ -5,7 +5,7 @@ import re
 import sqlite3
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable
+from typing import List, Set, Tuple, Dict, Any, Iterable
 
 import cachetools
 import en_core_web_sm
@@ -539,7 +539,7 @@ class EnsemblOntologyParser(OntologyParser):
         )
         return df
 
-    def post_process_synonym(self, syn: str) -> List[str]:
+    def post_process_synonym(self, syn: str) -> Set[str]:
         """
         need to also do some basic string processing on HGNC
         :param syn:
@@ -557,19 +557,19 @@ class EnsemblOntologyParser(OntologyParser):
                     if group not in self.EXCLUDED_PARENTHESIS:
                         to_add.add(group)
         # expand slashes
-        for x in list(to_add):
+        for x in to_add:
             if "/" in x:
                 splits = x.split("/")
                 for split in splits:
                     to_add.add(split.strip())
 
         # sub greek
-        for x in list(to_add):
+        for x in to_add:
             to_add.add(self.substitute_greek_unicode(x))
             to_add.add(self.substitute_english_with_greek_unicode(x))
             to_add.add(self.substitute_greek_unicode_abbrvs(x))
 
-        return list(to_add)
+        return to_add
 
     def substitute_greek_unicode(self, text: str) -> str:
         if any([x in text for x in self.GREEK_SUBS.keys()]):
