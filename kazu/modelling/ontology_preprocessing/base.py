@@ -547,6 +547,7 @@ class EnsemblOntologyParser(OntologyParser):
             if matches is not None:
                 all_groups_no_brackets = []
                 for group in matches.groups():
+                    group = group.strip()
                     if group not in self.EXCLUDED_PARENTHESIS:
                         to_add.add(group)
                         all_groups_no_brackets.append(group)
