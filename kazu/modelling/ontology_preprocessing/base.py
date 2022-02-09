@@ -325,6 +325,7 @@ class RDFGraphParser(OntologyParser):
 
 class UberonOntologyParser(RDFGraphParser):
     name = "UBERON"
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(UBERON_[0-9]+)$")
     """
     input should be an UBERON owl file
     e.g.
@@ -338,8 +339,7 @@ class UberonOntologyParser(RDFGraphParser):
         ]
 
     def get_valid_iri(self, text: str):
-        pattern = re.compile("^http://purl.obolibrary.org/obo/(UBERON_[0-9]+)$")
-        match = pattern.match(text)
+        match = self._uri_regex.match(text)
         if match:
             return match.group(1)
         return None
@@ -347,6 +347,7 @@ class UberonOntologyParser(RDFGraphParser):
 
 class MondoOntologyParser(OntologyParser):
     name = "MONDO"
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/((MONDO|HP)_[0-9]+)$")
     """
     input should be an MONDO json file
     e.g.
@@ -397,8 +398,7 @@ class MondoOntologyParser(OntologyParser):
         return df
 
     def get_valid_iri(self, text: str):
-        pattern = re.compile("^http://purl.obolibrary.org/obo/((MONDO|HP)_[0-9]+)$")
-        match = pattern.match(text)
+        match = self._uri_regex.match(text)
         if match:
             return match.group(1)
         return None
@@ -622,6 +622,7 @@ class ChemblOntologyParser(OntologyParser):
 
 class CLOOntologyParser(RDFGraphParser):
     name = "CLO"
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(CLO_[0-9]+)$")
     """
     input is a CLO Owl file
     https://www.ebi.ac.uk/ols/ontologies/clo
@@ -635,8 +636,7 @@ class CLOOntologyParser(RDFGraphParser):
         ]
 
     def get_valid_iri(self, text: str):
-        pattern = re.compile("^http://purl.obolibrary.org/obo/(CLO_[0-9]+)$")
-        match = pattern.match(text)
+        match = self._uri_regex.match(text)
         if match:
             return match.group(1)
         return None
