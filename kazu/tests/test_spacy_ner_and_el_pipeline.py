@@ -2,7 +2,7 @@ import spacy
 import pytest
 from pathlib import Path
 
-from ...az_ner.modelling.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 
 ONTOLOGIES_DIR = Path(__file__).parent.parent.parent.parent / "ontologies_processed/"
 DEFAULT_KEY = "test_spans"

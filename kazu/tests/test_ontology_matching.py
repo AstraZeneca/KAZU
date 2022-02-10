@@ -6,8 +6,8 @@ import spacy
 from spacy.lang.en import English
 from spacy.tests.util import make_tempdir
 
-from ...az_ner.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from ...az_ner.modelling.ontology_matching.ontology_matcher import DISEASE, ANATOMY
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.modelling.ontology_matching.ontology_matcher import DISEASE, ANATOMY
 
 
 @pytest.fixture(scope="session")
