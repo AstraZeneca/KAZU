@@ -3,15 +3,15 @@ from typing import Iterable, Union
 import typer
 import spacy
 
-from modelling.ontology_matching.ontology_matcher import OntologyMatcher
+from modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
 from kazu.utils.utils import PathLike, SinglePathLikeOrIterable
 
 
 def main(
     parquet_files: SinglePathLikeOrIterable,
     labels: Union[Iterable[str], str],
-    span_key: str,
     output_dir: PathLike,
+    span_key: str = SPAN_KEY,
 ) -> spacy.language.Language:
     nlp = spacy.blank("en")
     nlp.add_pipe("sentencizer")

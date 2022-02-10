@@ -7,6 +7,7 @@ import spacy
 
 from kazu.data.data import CharSpan, Document, Mapping, Section, Entity, PROCESSING_EXCEPTION
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
+from kazu.modelling.ontology_matching.ontology_matcher import SPAN_KEY
 from kazu.steps import BaseStep
 from kazu.utils.caching import SynonymTableCache
 from kazu.utils.utils import as_path, PathLike
@@ -25,6 +26,7 @@ class RuleBasedNerAndLinkingStep(BaseStep):
         depends_on: List[str],
         path: PathLike,
         rebuild_pipeline: bool = False,
+        span_key: Optional[str] = None,
         labels: Optional[List[str]] = None,
         synonym_table_cache: Optional[SynonymTableCache] = None,
     ):
@@ -37,6 +39,7 @@ class RuleBasedNerAndLinkingStep(BaseStep):
 
         self.path = as_path(path)
         self.synonym_table_cache = synonym_table_cache
+        self.span_key = span_key
         self.labels = labels
 
         if rebuild_pipeline or not self.path.exists():
@@ -58,22 +61,30 @@ class RuleBasedNerAndLinkingStep(BaseStep):
                 )
 
             logger.info("forcing a rebuild of spacy 'arizona' NER and EL pipeline")
+            if self.span_key is None:
+                self.span_key = SPAN_KEY
             self.spacy_pipeline = self.build_pipeline(
-                self.path, self.synonym_table_cache, self.labels
+                self.path, self.synonym_table_cache, self.span_key, self.labels
             )
         else:
             self.spacy_pipeline = spacy.load(self.path)
 
+            loaded_span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
+            if self.span_key != loaded_span_key:
+                logger.warning(
+                    f"span key {self.span_key} used to instantiate {self} does not match the actual span key used in the loaded spacy pipeline: {loaded_span_key}"
+                )
+                self.span_key = loaded_span_key
+
     @staticmethod
     def build_pipeline(
-        path: PathLike, synonym_table_cache: SynonymTableCache, labels: List[str]
+        path: PathLike, synonym_table_cache: SynonymTableCache, span_key: str, labels: List[str]
     ) -> spacy.language.Language:
         synonym_table_paths = synonym_table_cache.get_synonym_table_paths()
         return assemble_pipeline(
             parquet_files=synonym_table_paths,
             labels=labels,
-            # TODO: take this from config
-            span_key="span_key",
+            span_key=span_key,
             output_dir=path,
         )
 
@@ -89,15 +100,13 @@ class RuleBasedNerAndLinkingStep(BaseStep):
                 Tuple[spacy.tokens.Doc, Tuple[Section, Document]]
             ] = self.spacy_pipeline.pipe(texts_and_sections, as_tuples=True)
 
-            span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
-
             for processed_text, (section, doc) in spacy_result:
                 # TODO: not sure if spacy OntologyMatcher gives us multiple spans with
                 # the same positions if there are multiple linking options
 
                 entities = []
 
-                for span in processed_text.spans[span_key]:
+                for span in processed_text.spans[self.span_key]:
                     mappings = [
                         Mapping(
                             default_label="fix_this",

@@ -24,11 +24,13 @@ ANATOMY = "Anatomy"
 DISEASE = "Disease"
 CELL_LINE = "Cell_line"
 
+SPAN_KEY = "RAW_HITS"
+
 
 @Language.factory(
     "ontology_matcher",
     default_config={
-        "span_key": "RAW_HITS",
+        "span_key": SPAN_KEY,
         "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
         "variant_generator": {"@misc": "arizona.variant_generator.v1"},
     },
@@ -60,7 +62,7 @@ class OntologyMatcher:
         nlp: Language,
         name: str = "ontology_matcher",
         *,
-        span_key: str = "RAW_HITS",
+        span_key: str = SPAN_KEY,
         entry_filter: Callable,
         variant_generator: Callable,
     ):

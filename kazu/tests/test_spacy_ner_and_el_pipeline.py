@@ -2,10 +2,9 @@ import spacy
 import pytest
 from pathlib import Path
 
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
 
 ONTOLOGIES_DIR = Path(__file__).parent.parent.parent.parent / "ontologies_processed/"
-DEFAULT_KEY = "test_spans"
 LABELS = "GGP,Chemical,Anatomy,Disease,Cell_line"
 
 
@@ -13,7 +12,7 @@ LABELS = "GGP,Chemical,Anatomy,Disease,Cell_line"
 def nlp():
     nlp = spacy.blank("en")
     nlp.add_pipe("sentencizer")
-    config = {"span_key": DEFAULT_KEY}
+    config = {"span_key": SPAN_KEY}
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
     ontology_matcher.set_labels(LABELS.split(","))
@@ -56,7 +55,7 @@ def nlp():
 # fmt: on
 def test_ner_results(nlp, sentence, entities):
     doc = nlp(sentence)
-    pred_spans = list(doc.spans[DEFAULT_KEY])
+    pred_spans = list(doc.spans[SPAN_KEY])
     assert set([s.text for s in pred_spans]) == set(entities)
     assert len(pred_spans) == len(entities)
 
@@ -75,6 +74,6 @@ def test_ner_results(nlp, sentence, entities):
 # fmt: on
 def test_nel_results(nlp, sentence, entities):
     doc = nlp(sentence)
-    pred_spans = list(doc.spans[DEFAULT_KEY])
+    pred_spans = list(doc.spans[SPAN_KEY])
     assert set([s.kb_id_ for s in pred_spans]) == set(entities)
     assert len(pred_spans) == len(entities)
