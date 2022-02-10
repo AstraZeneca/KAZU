@@ -76,7 +76,7 @@ def test_initialize():
         Path(sub_dir / "file2.json").touch()
         _create_parquet_file(sub_dir / "file3.parquet")
         ontology_matcher.set_ontologies(sub_dir)
-        assert ontology_matcher.ontologies == ["file1.parquet", "file3.parquet"]
+        assert set(ontology_matcher.ontologies) == set(("file1.parquet", "file3.parquet"))
 
 
 def test_apply(example_text):
