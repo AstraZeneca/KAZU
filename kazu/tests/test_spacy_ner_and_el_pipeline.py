@@ -1,22 +1,25 @@
 import spacy
 import pytest
-from pathlib import Path
+
+from hydra.utils import instantiate
 
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
-
-ONTOLOGIES_DIR = Path(__file__).parent.parent.parent.parent / "ontologies_processed/"
-LABELS = "GGP,Chemical,Anatomy,Disease,Cell_line"
+from kazu.tests.utils import requires_model_pack
 
 
+@requires_model_pack
 @pytest.fixture(scope="module")
-def nlp():
+def nlp(kazu_test_config):
+    labels = kazu_test_config.RuleBasedNerAndLinkingStep.labels
+    syn_table_cache = instantiate(kazu_test_config.RuleBasedNerAndLinkingStep.synonym_table_cache)
+    ontologies = syn_table_cache.get_synonym_table_paths()
     nlp = spacy.blank("en")
     nlp.add_pipe("sentencizer")
     config = {"span_key": SPAN_KEY}
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
-    ontology_matcher.set_labels(LABELS.split(","))
-    ontology_matcher.set_ontologies(ONTOLOGIES_DIR)
+    ontology_matcher.set_labels(labels)
+    ontology_matcher.set_ontologies(ontologies)
     return nlp
 
 
