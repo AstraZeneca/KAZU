@@ -1,13 +1,12 @@
 import logging
 import os
 import traceback
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Callable
 
 from py4j.java_gateway import JavaGateway
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
 from kazu.steps import BaseStep
-from kazu.utils.utils import EntityClassFilter
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +34,14 @@ class SethStep(BaseStep):
         depends_on: Optional[List[str]],
         entity_class: str,
         seth_fatjar_path: str,
-        condition: Optional[EntityClassFilter] = None,
+        condition: Optional[Callable[[Document], bool]] = None,
     ):
         """
 
         :param depends_on:
         :param entity_class: the entity_class to assign to any Entities that emerge
         :param seth_fatjar_path: path to a py4j fatjar, containing SETH dependencies
-        :param condition: Since SETH can be slow, we can optionally specify an instance of EntityClassFilter, so that
+        :param condition: Since SETH can be slow, we can optionally specify a callable, so that
             any documents that don't contain pre-existing gene/protein entities are not processed
         """
         super().__init__(depends_on)
@@ -67,8 +66,8 @@ class SethStep(BaseStep):
                                 Entity.from_spans(
                                     spans=[
                                         (
-                                            int(python_dict.pop("start")),
-                                            int(python_dict.pop("end")),
+                                            python_dict.pop("start"),
+                                            python_dict.pop("end"),
                                         )
                                     ],
                                     text=section.get_text(),
