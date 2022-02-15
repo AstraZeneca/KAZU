@@ -31,6 +31,7 @@ def test_seth_step_no_condition(override_kazu_test_config):
     assert len(failed_docs) == 0
     check_step_has_found_entitites(success_docs[0], step.entity_class)
 
+
 @requires_model_pack
 def test_seth_step_with_condition(kazu_test_config):
     step = instantiate(kazu_test_config.SethStep)
