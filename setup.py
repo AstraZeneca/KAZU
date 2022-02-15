@@ -23,6 +23,7 @@ setup(
         "pytorch-metric-learning==0.9.99",
         "rapidfuzz==1.8.2",
         "seqeval==1.2.2",
+        "py4j==0.10.9.3",
     ],
     extras_require={
         "dev": [
