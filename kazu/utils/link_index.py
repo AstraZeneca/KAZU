@@ -1,101 +1,21 @@
 import abc
-import copy
 import logging
 import os
 import pickle
 import shutil
-from collections import defaultdict
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, DefaultDict, Optional
+from typing import Tuple, Any
 
 import numpy as np
+import pandas as pd
 import torch
 from rapidfuzz import process, fuzz
 
-from kazu.data.data import LINK_SCORE, Mapping
+from kazu.data.data import LINK_SCORE
 from kazu.modelling.ontology_preprocessing.base import SYN, IDX, MAPPING_TYPE, DEFAULT_LABEL
 from kazu.utils.utils import PathLike, as_path
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class SynonymData:
-    """
-    data class required by DictionaryIndex add method. See docs on :py:class:`kazu.utils.link_index.DictionaryIndex`
-    for usage
-    """
-
-    idx: str
-    mapping_type: List[str]
-
-
-class MetadataDatabase:
-    """
-    Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
-    and this singleton allows us to load it once/reduce memory usage
-    """
-
-    instance: Optional["__MetadataDatabase"] = None
-
-    class __MetadataDatabase:
-        database: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
-
-        def add(self, name: str, metadata: Dict[str, Any]):
-            self.database[name].update(metadata)
-
-        def get(self, name: str, idx: str) -> Any:
-            return self.database[name].get(idx)
-
-    def __init__(self):
-        if not MetadataDatabase.instance:
-            MetadataDatabase.instance = MetadataDatabase.__MetadataDatabase()
-
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
-
-    def get(self, name: str, idx: str) -> Any:
-        return copy.deepcopy(self.instance.get(name, idx))  # type: ignore
-
-    def get_all(self, name: str):
-        return self.instance.database[name]  # type: ignore
-
-    def add(self, name: str, metadata: Dict[str, Any]):
-        self.instance.add(name, metadata)  # type: ignore
-
-
-class SynonymDatabase:
-    """
-    Singleton of a database of synonyms.
-    """
-
-    instance: Optional["__SynonymDatabase"] = None
-
-    class __SynonymDatabase:
-        database: DefaultDict[str, Dict[str, List[SynonymData]]] = defaultdict(dict)
-
-        def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
-            self.database[name].update(synonyms)
-
-        def get(self, name: str, synonym: str) -> List[SynonymData]:
-            return self.database[name].get(synonym, [])
-
-    def __init__(self):
-        if not SynonymDatabase.instance:
-            SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
-
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
-
-    def get(self, name: str, synonym: str) -> List[SynonymData]:
-        return copy.copy(self.instance.get(name, synonym))  # type: ignore
-
-    def get_all(self, name: str):
-        return self.instance.database[name]  # type: ignore
-
-    def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
-        self.instance.add(name, synonyms)  # type: ignore
 
 
 class Index(abc.ABC):
@@ -114,39 +34,31 @@ class Index(abc.ABC):
         :param name: the name of the index. default is unnamed_index
         """
         self.name = name
-        self.metadata: MetadataDatabase = MetadataDatabase()
+        self.metadata: pd.DataFrame
         self.index: Any
-        self.namespace = self.__class__.__name__
 
-    def _search(self, query: Any, **kwargs) -> Iterable[Tuple[str, Dict[str, Any]]]:
+    def _search(self, query: Any, **kwargs) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         subclasses should implement this method, which describes the logic to actually perform the search
-        calls to search should return an iterable Tuple[str, Dict[str, Any]].
-        the tuple[0] should be the kb id and tuple[1] should be a dict of any additional metadata associated with the
-        hit
+        calls to search should return a tuple of  :py:class:`pandas.DataFrame` and numpy.ndarray.
+        the dataframe should be a slice of self.metadata, and the ndarray should be a 1 d array equal to the row count,
+        with the scores for each hit
         :param query: the query to use
         :param kwargs: any other arguments that are required
         :return:
         """
         raise NotImplementedError()
 
-    def search(self, query: Any, **kwargs) -> Iterable[Mapping]:
+    def search(self, query: Any, **kwargs) -> pd.DataFrame:
         """
         search the index
         :param query: the query to use
         :param kwargs: any other arguments to pass to self._search
-        :return: a iterable of :class:`kazu.data.data.Mapping` of hits
+        :return: a :class:`pandas.DataFrame` of hits, with a score column
         """
-        for ontology_id, metadata in self._search(query, **kwargs):
-            default_label = metadata.pop(DEFAULT_LABEL, "na")
-            mapping_type = [str(x) for x in metadata.pop(MAPPING_TYPE, ["na"])]
-            yield Mapping(
-                default_label=str(default_label),
-                source=self.name,
-                idx=str(ontology_id),
-                mapping_type=mapping_type,
-                metadata=metadata,
-            )
+        hit_df, scores = self._search(query, **kwargs)
+        hit_df[LINK_SCORE] = scores
+        return hit_df
 
     def save(self, path: PathLike) -> Path:
         """
@@ -161,8 +73,7 @@ class Index(abc.ABC):
         os.makedirs(directory)
         with open(self.get_index_path(directory), "wb") as f:
             pickle.dump(self, f)
-        with open(self.get_metadata_path(directory), "wb") as f:
-            pickle.dump(self.metadata.get_all(self.name), f)
+        self.metadata.to_parquet(self.get_dataframe_path(directory), index=None)
 
         self._save(self.get_index_data_path(directory))
         return directory
@@ -180,14 +91,13 @@ class Index(abc.ABC):
         path = root_path.joinpath(name)
         with open(cls.get_index_path(path), "rb") as f:
             index = pickle.load(f)
-        with open(cls.get_metadata_path(path), "rb") as f:
-            index.metadata.add(index.name, pickle.load(f))
+        index.metadata = cls.check_dataframe_types(pd.read_parquet(cls.get_dataframe_path(path)))
         index._load(cls.get_index_data_path(path))
         return index
 
     @staticmethod
-    def get_metadata_path(path: Path) -> Path:
-        return path.joinpath("ontology_metadata.pkl")
+    def get_dataframe_path(path: Path) -> Path:
+        return path.joinpath("ontology_metadata.parquet")
 
     @staticmethod
     def get_index_path(path: Path) -> Path:
@@ -211,7 +121,6 @@ class Index(abc.ABC):
 
     def __setstate__(self, state):
         self.name = state
-        self.metadata = MetadataDatabase()
 
     def _load(self, path: PathLike) -> None:
         """
@@ -223,48 +132,41 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
-    def _add(self, data: Any):
+    @staticmethod
+    def check_dataframe_types(df: pd.DataFrame) -> pd.DataFrame:
         """
-        concrete implementations should implement this to add data to the index - e.g. synonym or embedding info. This
-        method is called by self.add
-        :param data:
+        certain fields in the metadata dataframe must be of a certain type. This method modifies a df to ensure the
+        types are consistently used.
+        :param df:
         :return:
         """
-        raise NotImplementedError()
-
-    def add(self, data: Any, metadata: Dict[str, Any]):
-        """
-        add data to the index
-        :param data:
-        :return:
-        """
-        self.metadata.add(self.name, metadata)
-        self._add(data)
+        for column_name, _type in Index.column_type_dict.items():
+            if column_name in df.columns:
+                df.loc[:, column_name] = df[column_name].apply(_type)
+        # all df indices must be of type str
+        df.index = df.index.astype(str)
+        return df
 
     def __len__(self) -> int:
         """
         should return the size of the index
         :return:
         """
-        return len(self.metadata.get_all(self.name))
+        raise NotImplementedError()
 
 
 class DictionaryIndex(Index):
     """
-    a simple dictionary index for linking. Uses a Dict[str, List[SynonymData]] for matching synonyms,
-    with optional fuzzy matching. Note, since a given synonym can match to more than one metadata entry (even
-    within the same knowledgebase), we have a pathological situation in which 'true' synonyms can not be said to
-    exist. In such situations, we return multiple kb references for overloaded synonyms - i.e. the disambiguation is
-    delegated elsewhere
+    a simple dictionary index for linking
     """
 
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
-        self.synonym_db: SynonymDatabase = SynonymDatabase()
+        self.synonym_df: pd.DataFrame
 
     def _search(
         self, query: str, score_cutoff: float = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
-    ) -> Iterable[Tuple[str, Dict[str, Any]]]:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         """
         search the index
         :param query: a string of text
@@ -272,64 +174,52 @@ class DictionaryIndex(Index):
         :param top_n: return up to this many hits
         :param fuzzy: use rapidfuzz fuzzy matching
         :param kwargs:
-        :return: Iterable of Tuple [kb.id, metadata_dict]
+        :return:
         """
         query = query.lower()
         if not fuzzy:
-            yield from self.gather_match_result(query, 100.0)
+            idx_list = self.synonym_df[self.synonym_df[SYN] == query]
+            # score 100 for exact matches
+            scores = [100.0 for _ in range(len(idx_list))]
         else:
             hits = process.extract(
                 query,
-                self.synonym_db.get_all(self.name).keys(),
+                self.synonym_df[SYN].tolist(),
                 scorer=fuzz.WRatio,
                 limit=top_n,
                 score_cutoff=score_cutoff,
             )
-            for match_string, score, _ in hits:
-                yield from self.gather_match_result(match_string, score)
-
-    def gather_match_result(
-        self, match_string: str, score: float
-    ) -> Iterable[Tuple[str, Dict[str, Any]]]:
-        """
-        for a given match string and score, format the return dict of metadata.
-        :param match_string:
-        :param score:
-        :return:
-        """
-        synonym_data_lst = self.synonym_db.get(self.name, match_string)
-        for synonym_data in synonym_data_lst:
-            metadata_hits = self.metadata.get(self.name, synonym_data.idx)
-            metadata_hits[LINK_SCORE] = score
-            metadata_hits[SYN] = match_string
-            metadata_hits[MAPPING_TYPE] = synonym_data.mapping_type
-            if len(synonym_data_lst) > 1:
-                metadata_hits["ambiguous_synonyms"] = synonym_data_lst
-            yield synonym_data.idx, metadata_hits
+            locs = [x[2] for x in hits]
+            idx_list = self.synonym_df.iloc[locs]
+            scores = [x[1] for x in hits]
+        hit_df = idx_list.set_index(IDX).join(self.metadata, how="left")
+        return hit_df, np.array(scores)
 
     def _load(self, path: PathLike) -> Any:
-        with open(path, "rb") as f:
-            synonym_data = pickle.load(f)
-            self.synonym_db.add(self.name, synonym_data)
+        self.synonym_df = self.check_dataframe_types(pd.read_parquet(path))
 
     def _save(self, path: PathLike):
-        with open(path, "wb") as f:
-            pickle.dump(self.synonym_db.get_all(self.name), f)
+        self.synonym_df.to_parquet(path, index=None)
 
-    def _add(self, data: Dict[str, List[SynonymData]]):
+    def add(self, synonym_df: pd.DataFrame, metadata_df: pd.DataFrame):
         """
-        add data to the index. Two dicts are required - synonyms and metadata. Metadata should have a primary key
+        add data to the index. Two indices are required - synonyms and metadata. Metadata should have a primary key
         (IDX) and synonyms should use IDX as a foreign key
-        :param synonym_dict: synonyms dict of {synonym:List[SynonymData]}
-        :param metadata_dict: metadata dict
+        :param synonym_df: synonyms dataframe
+        :param metadata_df: metadata dataframe
         :return:
         """
-        self.synonym_db.add(self.name, data)
+        metadata_df = self.check_dataframe_types(metadata_df)
+        synonym_df = self.check_dataframe_types(synonym_df)
+        if not hasattr(self, "synonym_df") and not hasattr(self, "metadata"):
+            self.synonym_df = synonym_df
+            self.metadata = metadata_df
+        else:
+            self.synonym_df = pd.concat([self.synonym_df, synonym_df])
+            self.metadata = pd.concat([self.metadata, metadata_df])
 
-    def __setstate__(self, state):
-        self.name = state
-        self.metadata = MetadataDatabase()
-        self.synonym_db = SynonymDatabase()
+    def __len__(self):
+        return len(self.metadata)
 
 
 class EmbeddingIndex(Index):
@@ -340,28 +230,23 @@ class EmbeddingIndex(Index):
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
 
-    def _add(self, embeddings: torch.Tensor):
+    def add(self, embeddings: torch.Tensor, metadata_df: pd.DataFrame):
         """
         add embeddings to the index
 
         :param embeddings: a 2d tensor of embeddings
-        :param metadata_df: an ordered dict of metadata, with the order of each key corresponding to the embedding of
-        the first dimension of embeddings
+        :param metadata_df: a pd.DataFrame of metadata
         :return:
         """
+        metadata_df = self.check_dataframe_types(metadata_df)
+        if len(embeddings) != len(metadata_df):
+            raise ValueError("embeddings length not equal to metadata length")
         if not hasattr(self, "index"):
             self.index = self._create_index(embeddings)
+            self.metadata = metadata_df
         else:
-            self._add_embeddings(embeddings)
-        self.keys_lst = list(self.metadata.get_all(self.name).keys())
-
-    def _add_embeddings(self, embeddings: torch.Tensor):
-        """
-        concrete implementations should implement this method to add embeddings to the index
-        :param embeddings:
-        :return:
-        """
-        raise NotImplementedError()
+            self._add(embeddings)
+            self.metadata = pd.concat([self.metadata, metadata_df])
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
         """
@@ -373,13 +258,29 @@ class EmbeddingIndex(Index):
         """
         raise NotImplementedError()
 
+    def _add(self, embeddings: torch.Tensor) -> None:
+        """
+        concrete implementations should implement this to add embeddings to the index
+
+        :return:
+        """
+        raise NotImplementedError()
+
+    def __len__(self):
+        """
+        the number of embeddings in the index
+
+        :return:
+        """
+        raise NotImplementedError()
+
     def _search_func(
         self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         should be implemented
         :param query: a string of text
-        :param score_cutoff:
+        :param score_cutoff: minimum rapidfuzz match score
         :param top_n: return up to this many hits
         :param kwargs:
         :return:
@@ -388,17 +289,18 @@ class EmbeddingIndex(Index):
 
     def _search(
         self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
-    ) -> Iterable[Tuple[str, Any]]:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         distances, neighbours = self._search_func(
             query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
         )
-        for score, n in zip(distances, neighbours):
-            key = self.keys_lst[n]
-            hit_metadata = self.metadata.get(self.name, key)
-            # the mapping type is always inferred for embedding based indices
-            hit_metadata[MAPPING_TYPE] = ["inferred"]
-            hit_metadata[LINK_SCORE] = score
-            yield key, hit_metadata
+        hit_df = self.metadata.iloc[neighbours.astype(str)].copy()
+        self.add_inferred_mapping_type_to_dataframe(hit_df)
+        return hit_df, distances
+
+    @staticmethod
+    def add_inferred_mapping_type_to_dataframe(df: pd.DataFrame):
+        # all mapping types are inferred for embedding based matches
+        df[MAPPING_TYPE] = [["inferred"] for _ in range(df.shape[0])]
 
 
 class FaissEmbeddingIndex(EmbeddingIndex):
@@ -421,7 +323,6 @@ class FaissEmbeddingIndex(EmbeddingIndex):
     def _load(self, path: PathLike):
         self.import_faiss()
         self.index = self.faiss.read_index(str(path))
-        self.keys_lst = list(self.metadata.get_all(self.name).keys())
 
     def _save(self, path: PathLike):
         self.faiss.write_index(self.index, str(path))
@@ -437,7 +338,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         index.add(embeddings.numpy())
         return index
 
-    def _add_embeddings(self, embeddings: torch.Tensor):
+    def _add(self, embeddings: torch.Tensor):
         self.index.add(embeddings.numpy())
         return self.index
 
@@ -457,14 +358,12 @@ class TensorEmbeddingIndex(EmbeddingIndex):
 
     def _load(self, path: PathLike):
         self.index = torch.load(path, map_location="cpu")
-        self.keys_lst = list(self.metadata.get_all(self.name).keys())
 
     def _save(self, path: PathLike):
         torch.save(self.index, path)
 
-    def _add_embeddings(self, embeddings: torch.Tensor):
-        self.index = torch.cat([self.index, embeddings])
-        return self.index
+    def _add(self, embeddings: torch.Tensor):
+        return torch.cat([self.index, embeddings])
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
         return embeddings
