@@ -8,17 +8,14 @@ test_text = (
     "L90P (c.269T>C), accounted for 72.1% and 9.8% of GJB2 disease alleles."
 )
 
+unfound_correct_hgvs_strings = {"p.Leu90Pro", "c.269T>C", "c.35delG"}
 
-def check_step_has_found_entitites(doc, step):
-    success_docs, failed_docs = step([doc])
-    assert len(failed_docs) == 0
-    expected_hgvs_strings = ["p.Leu90Pro", "c.269T>C", "c.35delG"]
-    found_hgvs_strings = [
-        ent.metadata["hgvs"]
-        for ent in success_docs[0].get_entities()
-        if ent.entity_class == step.entity_class
-    ]
-    assert all([expected_str in found_hgvs_strings for expected_str in expected_hgvs_strings])
+
+def check_step_has_found_entitites(doc, step_entity_class):
+    for ent in doc.get_entities():
+        if ent.entity_class == step_entity_class:
+            unfound_correct_hgvs_strings.discard(ent.metadata["hgvs"])
+    assert not unfound_correct_hgvs_strings
 
 
 @requires_model_pack
@@ -30,7 +27,9 @@ def test_seth_step_no_condition(override_kazu_test_config):
 
     step = instantiate(cfg.SethStep)
     doc = Document.create_simple_document(test_text)
-    check_step_has_found_entitites(doc, step)
+    success_docs, failed_docs = step([doc])
+    assert len(failed_docs) == 0
+    check_step_has_found_entitites(success_docs[0], step.entity_class)
 
 
 def test_seth_step_with_condition(kazu_test_config):
@@ -39,14 +38,15 @@ def test_seth_step_with_condition(kazu_test_config):
     doc = Document.create_simple_document(test_text)
     success_docs, failed_docs = step([doc])
     assert len(failed_docs) == 0
-    assert all([x.entity_class != step.entity_class for x in doc.get_entities()])
+    assert all((x.entity_class != step.entity_class for x in doc.get_entities()))
     doc = Document.create_simple_document(test_text)
     doc.sections[0].entities.append(
         Entity.from_spans(
             text=test_text,
             spans=[(0, 5)],
             namespace="test",
-            entity_class=step.condition.required_entities[0],
+            entity_class=next(iter(step.condition.required_entities)),
         )
     )
-    check_step_has_found_entitites(doc, step)
+    success_docs, failed_docs = step([doc])
+    check_step_has_found_entitites(success_docs[0], step.entity_class)
