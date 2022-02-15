@@ -140,3 +140,4 @@ init.sh
 kubernetes
 model_pack/
 no_vc/
+*.iml
