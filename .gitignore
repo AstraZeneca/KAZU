@@ -151,3 +151,4 @@ model_pack/
 # jvm gradle
 kazu-jvm/build/
 /kazu-jvm/.gradle/
+*.iml
