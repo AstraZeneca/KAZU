@@ -1,4 +1,4 @@
-_target_: kazu.steps.ner.RuleBasedNerAndLinkingStep
+_target_: kazu.steps.ner.rule_based.RuleBasedNerAndLinkingStep
 depends_on: ~
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 rebuild_pipeline: False
