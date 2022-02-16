@@ -692,31 +692,47 @@ class MeddraOntologyParser(OntologyParser):
     :return:
     """
 
+    _mdhier_asc_col_names = (
+        "pt_code",
+        "hlt_code",
+        "hlgt_code",
+        "soc_code",
+        "pt_name",
+        "hlt_name",
+        "hlgt_name",
+        "soc_name",
+        "soc_abbrev",
+        "null_field",
+        "pt_soc_code",
+        "primary_soc_fg",
+        "NULL",
+    )
+
+    _llt_asc_column_names = ("llt_code", "llt_name", "pt_code", "llt_currency")
+
     def parse_to_dataframe(self) -> pd.DataFrame:
         # hierarchy path
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
         llt_path = os.path.join(self.in_path, "llt.asc")
-        hier_df = pd.read_csv(mdheir_path, sep="$", header=None)
-        hier_df.columns = [
-            "pt_code",
-            "hlt_code",
-            "hlgt_code",
-            "soc_code",
-            "pt_name",
-            "hlt_name",
-            "hlgt_name",
-            "soc_name",
-            "soc_abbrev",
-            "null_field",
-            "pt_soc_code",
-            "primary_soc_fg",
-            "NULL",
-        ]
+        hier_df = pd.read_csv(
+            mdheir_path,
+            sep="$",
+            header=None,
+            names=self._mdhier_asc_col_names,
+            usecols=("pt_code", "pt_name"),
+            dtype="string",
+        )
 
-        llt_df = pd.read_csv(llt_path, sep="$", header=None)
+        llt_df = pd.read_csv(
+            llt_path,
+            sep="$",
+            header=None,
+            names=self._llt_asc_column_names,
+            usecols=("llt_name", "pt_code"),
+            dtype="string",
+        )
         llt_df = llt_df.T.dropna().T
-        llt_df.columns = ["llt_code", "llt_name", "pt_code", "llt_currency"]
 
         ids = []
         default_labels = []
