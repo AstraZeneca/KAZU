@@ -732,7 +732,7 @@ class MeddraOntologyParser(OntologyParser):
             usecols=("llt_name", "pt_code"),
             dtype="string",
         )
-        llt_df = llt_df.T.dropna().T
+        llt_df = llt_df.dropna(axis=1)
 
         ids = []
         default_labels = []
