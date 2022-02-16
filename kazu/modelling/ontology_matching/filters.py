@@ -2,6 +2,8 @@ from typing import Callable
 
 import spacy
 
+from kazu.modelling.ontology_preprocessing.base import IDX, SYN
+
 
 BLACKLIST_EXACT = {
     "CHEMBL1201112": ["MAY"],
@@ -33,8 +35,8 @@ def create_filter() -> Callable:
 
 
 def is_valid_ontology_entry(row, lowercase):
-    syn = row["syn"]
-    iri = row["iri"]
+    syn = row[SYN]
+    iri = row[IDX]
     if len(syn) < 3:
         return False
     # we avoid case-invariant matching for some types of ontologies

@@ -8,6 +8,7 @@ from spacy.tests.util import make_tempdir
 
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_matching.ontology_matcher import DISEASE, ANATOMY
+from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, IDX, SYN
 
 
 @pytest.fixture(scope="session")
@@ -18,9 +19,9 @@ def example_text():
 def _create_parquet_file(file_loc):
     df = pd.DataFrame.from_dict(
         {
-            "iri": ["UBERON_042", "MONDO_08"],
-            "default_label": ["Q42_label", "Q8_label"],
-            "syn": ["Q42_syn", "Q8_syn"],
+            IDX: ["UBERON_042", "MONDO_08"],
+            DEFAULT_LABEL: ["Q42_label", "Q8_label"],
+            SYN: ["Q42_syn", "Q8_syn"],
         }
     )
     df.to_parquet(file_loc)

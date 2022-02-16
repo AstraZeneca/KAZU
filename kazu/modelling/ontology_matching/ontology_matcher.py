@@ -12,6 +12,7 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
+from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 
 
@@ -375,8 +376,8 @@ class OntologyMatcher:
         matcher = PhraseMatcher(self.nlp.vocab, attr=attr)
         for name, df in dfs.items():
             df = df[df.apply((lambda x: self.entry_filter(x, lowercase=lowercase)), axis=1)]
-            terms = list([syn for syn in df["syn"]])
-            iris = list(df["iri"])
+            terms = list([syn for syn in df[SYN]])
+            iris = list(df[IDX])
             assert len(list(terms)) == len(list(iris))
             for iri, term in zip(iris, terms):
                 if lowercase:
