@@ -6,8 +6,7 @@ import spacy
 from spacy.lang.en import English
 from spacy.tests.util import make_tempdir
 
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.modelling.ontology_matching.ontology_matcher import DISEASE, ANATOMY
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, DISEASE, ANATOMY
 from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, IDX, SYN
 
 
