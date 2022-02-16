@@ -3,7 +3,7 @@ from typing import Iterable, Union
 import typer
 import spacy
 
-from modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
 from kazu.utils.utils import PathLike, SinglePathLikeOrIterable
 
 
