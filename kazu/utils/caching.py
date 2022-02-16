@@ -97,7 +97,7 @@ class SynonymTableCache:
             else:
                 logger.info("No synonym table cache file found. Building a new one")
                 cache_dir.mkdir(exist_ok=True)
-                self.build_synonym_table_cache(cache_dir, parser)
+                self.build_synonym_table_cache(cache_path, parser)
 
             synonym_table_paths.append(cache_path)
 
