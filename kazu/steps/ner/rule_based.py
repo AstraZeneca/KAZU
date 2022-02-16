@@ -39,7 +39,6 @@ class RuleBasedNerAndLinkingStep(BaseStep):
 
         self.path = as_path(path)
         self.synonym_table_cache = synonym_table_cache
-        self.span_key = span_key
         self.labels = labels
 
         if rebuild_pipeline or not self.path.exists():
@@ -61,20 +60,18 @@ class RuleBasedNerAndLinkingStep(BaseStep):
                 )
 
             logger.info("forcing a rebuild of spacy 'arizona' NER and EL pipeline")
-            if self.span_key is None:
-                self.span_key = SPAN_KEY
+            self.span_key = span_key if span_key is not None else SPAN_KEY
             self.spacy_pipeline = self.build_pipeline(
                 self.path, self.synonym_table_cache, self.span_key, self.labels
             )
         else:
             self.spacy_pipeline = spacy.load(self.path)
 
-            loaded_span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
-            if self.span_key != loaded_span_key:
+            self.span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
+            if span_key is not None and span_key != self.span_key:
                 logger.warning(
-                    f"span key {self.span_key} used to instantiate {self} does not match the actual span key used in the loaded spacy pipeline: {loaded_span_key}"
+                    f"span key {span_key} used to instantiate {self} does not match the actual span key used in the loaded spacy pipeline: {self.span_key}"
                 )
-                self.span_key = loaded_span_key
 
     @staticmethod
     def build_pipeline(
