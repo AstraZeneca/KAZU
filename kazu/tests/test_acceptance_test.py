@@ -3,12 +3,14 @@ import pydash
 import pytest
 from hydra.utils import instantiate
 
-from kazu.data.data import Entity
+from kazu.data.data import Entity, Document
 from kazu.pipeline import Pipeline, load_steps
 from kazu.tests.utils import (
     entity_linking_hard_cases,
     requires_model_pack,
     full_pipeline_test_cases,
+    ner_simple_test_cases,
+    ner_long_document_test_cases,
 )
 
 # TODO: we need a much better/consistent evaluation dataset for acceptance tests. Currently these all fail until we have
@@ -111,3 +113,25 @@ def test_dictionary_entity_linking(override_kazu_test_config):
         pytest.fail(
             f"sapbert scored {score}, which did not reach minimum pass score of {minimum_pass_score}"
         )
+
+
+def test_TransformersModelForTokenClassificationNerStep(kazu_test_config):
+    step = instantiate(kazu_test_config.TransformersModelForTokenClassificationNerStep)
+    docs = [Document.create_simple_document(x[0]) for x in ner_simple_test_cases()]
+    classes = [x[1] for x in ner_simple_test_cases()]
+    successes, failures = step(docs)
+    assert len(successes) == len(docs)
+    for doc, target_class in zip(successes, classes):
+        assert doc.sections[0].entities[0].entity_class == target_class
+
+    docs = [Document.create_simple_document(x[0]) for x in ner_long_document_test_cases()]
+    target_entity_counts = [x[1] for x in ner_long_document_test_cases()]
+    target_classes = [x[2] for x in ner_long_document_test_cases()]
+    successes, failures = step(docs)
+    assert len(successes) == len(docs)
+    for doc, target_entity_count, target_class in zip(
+        successes, target_entity_counts, target_classes
+    ):
+        assert len(doc.sections[0].entities) == target_entity_count
+        for ent in doc.sections[0].entities:
+            assert ent.entity_class == target_class
