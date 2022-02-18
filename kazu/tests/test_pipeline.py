@@ -1,10 +1,12 @@
+import tempfile
 import traceback
 from pathlib import Path
 from typing import List, Tuple
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-from kazu.pipeline import FailedDocsFileHandler, Pipeline
+from kazu.pipeline import FailedDocsFileHandler, Pipeline, load_steps
 from kazu.steps import BaseStep
+from kazu.tests.utils import requires_model_pack
 
 
 class BrokenStep(BaseStep):
@@ -39,3 +41,13 @@ def test_pipeline_error_handling(tmp_path: Path):
     error_files = list(tmp_path.joinpath(step.namespace()).iterdir())
     # should be two files per doc - one with exception, one with doc contents
     assert len(error_files) == 2 * (len(docs) + len(more_docs))
+
+
+@requires_model_pack
+def test_full_pipeline_and_serialisation(kazu_test_config):
+    # test the default pipeline can load/configs are all correct
+    pipeline = Pipeline(steps=load_steps(kazu_test_config))
+    doc = Document.create_simple_document("EGFR is an important gene in breast cancer")
+    doc: Document = pipeline([doc])[0]
+    with tempfile.TemporaryFile(mode="w") as f:
+        f.write(doc.json())
