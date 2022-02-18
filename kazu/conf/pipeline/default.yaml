@@ -6,3 +6,4 @@ pipeline:
     - SethStep
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
+    - EnsembleEntityLinkingStep
