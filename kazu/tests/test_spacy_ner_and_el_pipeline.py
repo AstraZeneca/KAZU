@@ -69,9 +69,9 @@ def test_ner_results(nlp, sentence, entities):
     [
         ("We aimed to confirm these findings in patients with a BRCA1 or BRCA2 mutation", ["ENSG00000012048", "ENSG00000139618"]),
         ("These patients were treated with abemaciclib.", ["CHEMBL3301610"]),
-        ("Blood was sampled pre- and post-dose on Day 32.", ["UBERON_0000178"]),
+        ("Blood was sampled pre- and post-dose on Day 32.", ["http://purl.obolibrary.org/obo/UBERON_0000178"]),
         ("TIME cells express readily detectable telomerase activity", ["CVCL_0047"]),
-        ("Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.", ["CHEMBL3137343", "MONDO_0007254"]),
+        ("Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.", ["CHEMBL3137343", "http://purl.obolibrary.org/obo/MONDO_0007254"]),
     ]
 )
 # fmt: on

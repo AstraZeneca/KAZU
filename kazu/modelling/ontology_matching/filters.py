@@ -7,24 +7,24 @@ from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 
 BLACKLIST_EXACT = {
     "CHEMBL1201112": ["MAY"],
-    "CLO_0054406": ["positive"],
+    "http://purl.obolibrary.org/obo/CLO_0054406": ["positive"],
     "CVCL_E025": ["Cancer"],
     "ENSG00000140254": ["mol"],
-    "MONDO_0010518": ["WAS"],
-    "MONDO_0000001": ["*"],
-    "MONDO_0002254": ["*"],
-    "MONDO_0009994": ["arms"],
-    "MONDO_0021137": ["*"],
-    "UBERON_0000105": ["stage"],
-    "UBERON_0004529": ["*"],
-    "UBERON_0006611": ["test"],
-    "UBERON_0007023": ["*"],
+    "http://purl.obolibrary.org/obo/MONDO_0010518": ["WAS"],
+    "http://purl.obolibrary.org/obo/MONDO_0000001": ["*"],
+    "http://purl.obolibrary.org/obo/MONDO_0002254": ["*"],
+    "http://purl.obolibrary.org/obo/MONDO_0009994": ["arms"],
+    "http://purl.obolibrary.org/obo/MONDO_0021137": ["*"],
+    "http://purl.obolibrary.org/obo/UBERON_0000105": ["stage"],
+    "http://purl.obolibrary.org/obo/UBERON_0004529": ["*"],
+    "http://purl.obolibrary.org/obo/UBERON_0006611": ["test"],
+    "http://purl.obolibrary.org/obo/UBERON_0007023": ["*"],
     "*": ["was", "for"],
 }
 
 BLACKLIST_LOWER = {
     "CHEMBL2272076": ["impact"],
-    "MONDO_0012268": ["aids"],
+    "http://purl.obolibrary.org/obo/MONDO_0012268": ["aids"],
     "*": ["all", "was"],
 }
 
@@ -40,7 +40,11 @@ def is_valid_ontology_entry(row, lowercase):
     if len(syn) < 3:
         return False
     # we avoid case-invariant matching for some types of ontologies
-    if lowercase and (iri.startswith("ENS") or iri.startswith("CVCL") or iri.startswith("CLO")):
+    if lowercase and (
+        iri.startswith("ENS")
+        or iri.startswith("CVCL")
+        or iri.startswith("http://purl.obolibrary.org/obo/CLO_")
+    ):
         return False
     if _is_number(syn):
         return False

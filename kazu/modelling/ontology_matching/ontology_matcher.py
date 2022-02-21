@@ -357,15 +357,17 @@ class OntologyMatcher:
         """Return the correct span type, according to the given iri.
         Return an empty span if a certain ontology is not covered by the
         current set of labels."""
-        if iri.startswith("ENS"):
+        if iri.startswith("ENS") or iri.startswith("http://identifiers.org/hgnc/"):
             return GENE if GENE in self.labels else ""
         if iri.startswith("CHEMBL"):
             return CHEMICAL if CHEMICAL in self.labels else ""
-        if iri.startswith("UBERON"):
+        if iri.startswith("http://purl.obolibrary.org/obo/UBERON_"):
             return ANATOMY if ANATOMY in self.labels else ""
-        if iri.startswith("MONDO") or iri.startswith("HP"):
+        if iri.startswith("http://purl.obolibrary.org/obo/MONDO_") or iri.startswith(
+            "http://purl.obolibrary.org/obo/HP_"
+        ):
             return DISEASE if DISEASE in self.labels else ""
-        if iri.startswith("CLO") or iri.startswith("CVCL"):
+        if iri.startswith("http://purl.obolibrary.org/obo/CLO_") or iri.startswith("CVCL_"):
             return CELL_LINE if CELL_LINE in self.labels else ""
         raise ValueError(f"Can not deduce Ontology from IRI {iri}")
 
