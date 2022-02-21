@@ -369,6 +369,13 @@ class OntologyMatcher:
             return DISEASE if DISEASE in self.labels else ""
         if iri.startswith("http://purl.obolibrary.org/obo/CLO_") or iri.startswith("CVCL_"):
             return CELL_LINE if CELL_LINE in self.labels else ""
+
+        try:
+            int(iri)  # MEDDRA IDs are just INTs
+            return DISEASE if DISEASE in self.labels else ""
+        except ValueError:
+            pass
+
         raise ValueError(f"Can not deduce Ontology from IRI {iri}")
 
     def _create_phrasematcher(self, dfs, lowercase=False):
