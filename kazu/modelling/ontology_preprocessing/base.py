@@ -708,7 +708,20 @@ class MeddraOntologyParser(OntologyParser):
         "NULL",
     )
 
-    _llt_asc_column_names = ("llt_code", "llt_name", "pt_code", "llt_currency")
+    _llt_asc_column_names = (
+        "llt_code",
+        "llt_name",
+        "pt_code",
+        "llt_whoart_code",
+        "llt_harts_code",
+        "llt_costart_sym",
+        "llt_icd9_code",
+        "llt_icd9cm_code",
+        "llt_icd10_code",
+        "llt_currency",
+        "llt_jart_code",
+        "NULL",
+    )
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         # hierarchy path
