@@ -375,6 +375,9 @@ class MondoOntologyParser(OntologyParser):
         all_syns = []
         mapping_type = []
         for i, node in enumerate(nodes):
+            if not self.is_valid_iri(node["id"]):
+                continue
+
             idx = node["id"]
             default_label = node.get("lbl")
             # add default_label to syn type
@@ -385,9 +388,6 @@ class MondoOntologyParser(OntologyParser):
 
             syns = node.get("meta", {}).get("synonyms", [])
             for syn_dict in syns:
-                if not self.is_valid_iri(node["id"]):
-                    continue
-
                 pred = syn_dict["pred"]
                 mapping_type.append(pred)
                 syn = syn_dict["val"]
