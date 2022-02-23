@@ -397,16 +397,19 @@ class OntologyMatcher:
             fp_coocc_dict[DISEASE] = self._create_disease_fp_dict()
         return tp_coocc_dict, fp_coocc_dict
 
+    _ivf_fertility_treatment_cooccurrence = ["ICSI", "cycle", "treatment"]
+
     def _create_gene_fp_dict(self):
         """Define cooccurrence links that determine likely FP gene hits"""
         gene_dict = {}
-        gene_dict["IVF"] = ["ICSI", "cycle", "treatment"]
+        gene_dict["IVF"] = self._ivf_fertility_treatment_cooccurrence
         return gene_dict
 
     def _create_disease_fp_dict(self):
         """Define cooccurrence links that determine likely FP disease hits"""
         disease_dict = {}
         disease_dict["MFS"] = ["endpoint"]
+        disease_dict["IVF"] = self._ivf_fertility_treatment_cooccurrence
         return disease_dict
 
     def to_disk(
