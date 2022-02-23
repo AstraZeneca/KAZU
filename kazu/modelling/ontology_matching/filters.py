@@ -20,13 +20,17 @@ BLACKLIST_EXACT = {
     "http://purl.obolibrary.org/obo/UBERON_0006611": ["test"],
     "http://purl.obolibrary.org/obo/UBERON_0007023": ["*"],
     "http://purl.obolibrary.org/obo/HP_0000001": ["All"],
-    "*": ["was", "for"],
+    # a fair few entities have synonyms 'X disease' or 'X syndrome' where
+    # x happens to also be a stopword. Getting rid of these here - we
+    # may be able to use StopWordRemover more intelligently instead
+    "*": ["was", "for", "disease", "Disease", "syndrome", "Syndrome"],
 }
 
 BLACKLIST_LOWER = {
     "CHEMBL2272076": ["impact"],
     "http://purl.obolibrary.org/obo/MONDO_0012268": ["aids"],
-    "*": ["all", "was"],
+    # as above in BLACKLIST_EXACT
+    "*": ["all", "was", "disease", "syndrome"],
 }
 
 
