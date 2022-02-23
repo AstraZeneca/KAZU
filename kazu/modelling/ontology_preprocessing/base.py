@@ -32,6 +32,10 @@ class StopWordRemover:
     def __init__(self):
         self.nlp = en_core_web_sm.load()
         self.all_stopwords = self.nlp.Defaults.stop_words
+        # treating "i" as a stop word means stripping trailing roman numeral 1
+        # e.g. in 'grade I' which gives the incorrect synonym 'grade' when using this
+        # for NER
+        self.all_stopwords.remove("i")
 
     def __call__(self, text: str) -> str:
         lst = []
