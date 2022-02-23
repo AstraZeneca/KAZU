@@ -9,7 +9,7 @@ import pickle
 import spacy
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
-from spacy.tokens import SpanGroup, Doc, Token
+from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
@@ -184,10 +184,14 @@ class OntologyMatcher:
 
         assert self.strict_matcher is not None
         assert self.lowercase_matcher is not None
-        strict_matches = self._set_span_labels(self.strict_matcher(doc, as_spans=True))
-        lower_matches = self._set_span_labels(self.lowercase_matcher(doc, as_spans=True))
-        final_spans = self.resolve_conflicts(strict_matches, lower_matches)
-        final_spans = self.filter_by_contexts(doc, final_spans)
+        strict_matches = set(self.strict_matcher(doc))
+        lower_matches = set(self.lowercase_matcher(doc))
+        combined_matches = strict_matches.union(lower_matches)
+        combined_spans = set(
+            Span(doc, start, end, label=key) for key, start, end in combined_matches
+        )
+        combined_spans = self._set_span_labels(combined_spans)
+        final_spans = self.filter_by_contexts(doc, combined_spans)
         self.set_annotations(doc, final_spans)
         return doc
 
@@ -195,20 +199,6 @@ class OntologyMatcher:
         span_key = self.span_key
         span_group = SpanGroup(doc, name=span_key, spans=spans)
         doc.spans[span_key] = span_group
-
-    def resolve_conflicts(self, strict_matches, lower_matches):
-        # Alternative 1: add all strings together and filter on longest
-        clean_spans, labeled_tokens = self._keep_longest(strict_matches + lower_matches)
-        return clean_spans
-
-        # Alternative 2: give preference over STRICT matching
-        # Note that this will prefer "stroke" over "ischemic stroke" if the latter is matched lower-case
-        # clean_spans, labeled_tokens = self._keep_longest(strict_matches)
-        # clean_lower_spans, labeled_tokens = self._keep_longest(
-        #     lower_matches, labeled_tokens
-        # )
-        # clean_spans.extend(clean_lower_spans)
-        # return clean_spans
 
     def filter_by_contexts(self, doc, spans):
         """These filters work best when there is sentence segmentation available."""
@@ -292,47 +282,6 @@ class OntologyMatcher:
                     return True
             return False
         return False
-
-    def _keep_longest(self, orig_spans, labeled_tokens=None):
-        """Keep only the longest non-overlapping spans"""
-        final_spans = []
-        if not labeled_tokens:
-            labeled_tokens = set()
-
-        for span in sorted(orig_spans, key=self._span_sort_key, reverse=True):
-            overlap = False
-            for token_i in range(span.start, span.end):
-                if token_i in labeled_tokens:
-                    overlap = True
-            if not overlap:
-                final_spans.append(span)
-                for token_i in range(span.start, span.end):
-                    labeled_tokens.add(token_i)
-        return final_spans, labeled_tokens
-
-    @staticmethod
-    def _span_sort_key(span):
-        return (span.end - span.start, -span.start)
-
-    def _keep_longest_per_label(self, orig_spans, labeled_tokens=None):
-        """Keep all longest spans per label - allowing one token to be part of different span types"""
-        final_spans = []
-        if not labeled_tokens:
-            labeled_tokens = {}
-
-        for span in sorted(orig_spans, key=self._span_sort_key, reverse=True):
-            overlap = False
-            current_label = span.label_
-            for token_i in range(span.start, span.end):
-                if current_label in labeled_tokens.get(token_i, set()):
-                    overlap = True
-            if not overlap:
-                final_spans.append(span)
-                for token_i in range(span.start, span.end):
-                    new_set = labeled_tokens.get(token_i, set())
-                    new_set.add(current_label)
-                    labeled_tokens[token_i] = new_set
-        return final_spans, labeled_tokens
 
     def _define_paths(self, in_loc: PathLike) -> List[Path]:
         in_path = as_path(in_loc)

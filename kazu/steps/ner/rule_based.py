@@ -1,9 +1,11 @@
 from collections import defaultdict
+from itertools import groupby
 import logging
 import traceback
 from typing import Dict, Iterator, List, Optional, Set, Tuple
 
 import spacy
+from spacy.tokens import Span as spacy_span
 
 from kazu.data.data import CharSpan, Document, Mapping, Section, Entity, PROCESSING_EXCEPTION
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
@@ -98,36 +100,32 @@ class RuleBasedNerAndLinkingStep(BaseStep):
             ] = self.spacy_pipeline.pipe(texts_and_sections, as_tuples=True)
 
             for processed_text, (section, doc) in spacy_result:
-                # TODO: not sure if spacy OntologyMatcher gives us multiple spans with
-                # the same positions if there are multiple linking options
-
                 entities = []
 
-                for span in processed_text.spans[self.span_key]:
-                    mappings = [
-                        Mapping(
+                spans = processed_text.spans[self.span_key]
+                sorted_spans = sorted(spans, key=self._mapping_invariant_span)
+                grouped_spans = groupby(sorted_spans, key=self._mapping_invariant_span)
+                for mapping_invariant_span, span_group in grouped_spans:
+                    span_start, span_end, span_text, span_label_ = mapping_invariant_span
+                    e = Entity(
+                        match=span_text,
+                        # not quite true, this is spacy's entity classes, not Kazu's
+                        entity_class=span_label_,
+                        # the end might be off by one here due to how spacy defined
+                        # ends vs kazu - not sure
+                        spans=frozenset((CharSpan(start=span_start, end=span_end),)),
+                        namespace=self.namespace(),
+                    )
+                    entities.append(e)
+
+                    for span in span_group:
+                        mapping = Mapping(
                             default_label="fix_this",
                             source="fix_this",
                             idx=span.kb_id,
                             mapping_type=["fix_this"],
                         )
-                    ]
-
-                    entities.append(
-                        Entity(
-                            match=span.text,
-                            # not quite true, this is spacy's entity classes, not Kazu's
-                            entity_class=span.label_,
-                            # the end might be off by one here due to how spacy defined
-                            # ends vs kazu - not sure
-                            spans=frozenset((CharSpan(start=span.start, end=span.end),)),
-                            namespace=self.namespace(),
-                            mappings=mappings,
-                        )
-                    )
-
-                # TODO: merge with potentially existing entities from the Transformer steps (or other steps)
-                # should the transformer method also do this so that they can be run in either order?
+                        e.add_mapping(mapping)
 
                 # if one section of a doc fails after others have succeeded, this will leave failed docs
                 # in a partially processed state. It's actually unclear to me whether this is desireable or not.
@@ -160,3 +158,11 @@ class RuleBasedNerAndLinkingStep(BaseStep):
                 doc.metadata[PROCESSING_EXCEPTION] = message
 
             return [], failed_docs
+
+    @staticmethod
+    def _mapping_invariant_span(span: spacy_span) -> Tuple[int, int, str, str]:
+        """Return key information about a span excluding mapping information.
+
+        This still includes the class of the recognised entity (span.label_) since
+        the entity_class is stored on Kazu's Entity concept rather than Mapping."""
+        return (span.start, span.end, span.text, span.label_)
