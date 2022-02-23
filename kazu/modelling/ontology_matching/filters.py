@@ -19,6 +19,7 @@ BLACKLIST_EXACT = {
     "http://purl.obolibrary.org/obo/UBERON_0004529": ["*"],
     "http://purl.obolibrary.org/obo/UBERON_0006611": ["test"],
     "http://purl.obolibrary.org/obo/UBERON_0007023": ["*"],
+    "http://purl.obolibrary.org/obo/HP_0000001": ["All"],
     "*": ["was", "for"],
 }
 
