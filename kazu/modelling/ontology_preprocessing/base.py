@@ -670,18 +670,35 @@ class CellosaurusOntologyParser(OntologyParser):
                     all_syns.append(default_label)
                     mapping_type.append("name")
                 elif text.startswith("synonym:"):
-                    syn = text.split(" ")[1][1:-1]
-                    mapping = text.split(" ")[2]
+                    match = self._synonym_regex.match(text)
+                    if match is None:
+                        raise ValueError(
+                            """synonym line does not match our synonym regex.
+                            Either something is wrong with the file, or it has updated
+                            and our regex is not correct/general enough."""
+                        )
                     ids.append(id)
                     default_labels.append(default_label)
-                    all_syns.append(syn)
-                    mapping_type.append(mapping)
+                    all_syns.append(match.group("syn"))
+                    mapping_type.append(match.group("mapping"))
                 else:
                     pass
         df = pd.DataFrame.from_dict(
             {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
         return df
+
+    _synonym_regex = re.compile(
+        r"""^synonym:      # line that begins synonyms
+        \s*                # any amount of whitespace (standardly a single space)
+        "(?P<syn>[^"]*)"   # a quoted string - capture this as a named match group 'syn'
+        \s*                # any amount of separating whitespace (standardly a single space)
+        (?P<mapping>\w*)   # a sequence of word characters representing the mapping type
+        \s*                # any amount of separating whitespace (standardly a single space)
+        \[\]               # an open and close bracket at the end of the string
+        $""",
+        re.VERBOSE,
+    )
 
 
 class MeddraOntologyParser(OntologyParser):
