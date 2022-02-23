@@ -126,13 +126,8 @@ class OntologyMatcher:
         """
         if len(self.ontologies) > 0:
             logging.warning("Ontologies are being redefined - is this by intention?")
-        if isinstance(parquet_files, (Path, str)):
-            paths = self._define_paths(parquet_files)
-        else:
-            # TODO: refactor to make paths a Set[Path]
-            paths = []
-            for path in parquet_files:
-                paths.extend(self._define_paths(path))
+
+        paths = self._define_paths(parquet_files)
 
         dfs = {path.name: pd.read_parquet(path) for path in paths}
         self.strict_matcher = self._create_phrasematcher(dfs, lowercase=False)
@@ -283,17 +278,25 @@ class OntologyMatcher:
             return False
         return False
 
-    def _define_paths(self, in_loc: PathLike) -> List[Path]:
-        in_path = as_path(in_loc)
-        if not in_path.exists():
-            raise ValueError(f"Location {in_loc} is not an existing file or directory.")
-        if in_path.is_file():
-            if in_path.suffix != ".parquet":
-                raise ValueError(f"Provided file {in_loc} is not a Parquet file.")
-            return [in_path]
-        if in_path.is_dir():
-            return [f for f in in_path.glob("**/*") if f.suffix == ".parquet"]
-        return []
+    def _define_paths(self, in_loc: SinglePathLikeOrIterable) -> List[Path]:
+        if isinstance(in_loc, (str, Path)):
+            in_locs: Iterable[PathLike] = (in_loc,)
+        else:
+            in_locs = in_loc
+
+        # TODO: refactor to make all_paths a Set[Path]
+        all_paths = []
+        for path in in_locs:
+            path = as_path(path)
+            if not path.exists():
+                raise ValueError(f"Location {path} is not an existing file or directory.")
+            if path.is_file():
+                if path.suffix != ".parquet":
+                    raise ValueError(f"Provided file {path} is not a Parquet file.")
+                all_paths.append(path)
+            if path.is_dir():
+                all_paths.extend(path.glob("**/*.parquet"))
+        return all_paths
 
     def _set_span_labels(self, spans):
         for span in spans:
