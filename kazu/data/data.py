@@ -4,14 +4,19 @@ import tempfile
 import uuid
 import webbrowser
 from dataclasses import dataclass, field
+from datetime import datetime, date
+from itertools import cycle, chain
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable
 
 import pandas as pd
-from numpy import ndarray, float32, float16
+import torch
+from numpy import ndarray
 from spacy import displacy
 
 # BIO schema
+from torch import Tensor
+
 ENTITY_START_SYMBOL = "B"
 ENTITY_INSIDE_SYMBOL = "I"
 ENTITY_OUTSIDE_SYMBOL = "O"
@@ -60,101 +65,81 @@ class CharSpan:
         return hash((self.start, self.end))
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class TokenizedWord:
     """
     A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
     """
 
-    word_labels: List[int] = field(default_factory=list, hash=False)  # label ids of the word
-    word_labels_strings: List[str] = field(
+    decoded: str = field(default_factory=str, hash=False)  # label ids of the word
+    token_ids: List[int] = field(
         default_factory=list, hash=False
     )  # optional strings associated with labels
-    word_confidences: List[float] = field(
+    tokens: List[str] = field(
+        default_factory=list, hash=False
+    )  # optional strings associated with labels
+    word_confidences: List[Tensor] = field(
         default_factory=list, hash=False
     )  # confidence associated with each label
     word_offsets: List[Tuple[int, int]] = field(
         default_factory=list, hash=False
     )  # original offsets of each token
-    bio_labels: List[str] = field(
-        default_factory=list, hash=False
-    )  # BIO labels separated from class. Populate with parse_labels_to_bio_and_class
-    class_labels: List[str] = field(
-        default_factory=list, hash=False
-    )  # class labels separated from BIO. Populate with parse_labels_to_bio_and_class
-    modified_post_inference: bool = (
-        False  # has the word been modified poost inference by e.g. BioLabelPreProcessor?
-    )
+    start: int = field(default_factory=int)
+    end: int = field(default_factory=int)
+    classes: Set[str] = field(default_factory=set)
+    id2label: Dict[int, str] = field(default_factory=dict)
 
-    def parse_labels_to_bio_and_class(self):
-        """
-        since the BIO schema actually encodes two pieces of info, it's often useful to handle them separately.
-        This method parses the BIO labels in self.word_labels_strings and add the fields bio_labels and class labels
-        :return:
-        """
-        self.bio_labels, self.class_labels = map(
-            list,
-            zip(
-                *[
-                    x.split("-")  # split for BIO schema - i.e. B-gene, I-gene -> (B,gene), (I,gene)
-                    if x is not ENTITY_OUTSIDE_SYMBOL
-                    else (
-                        ENTITY_OUTSIDE_SYMBOL,
-                        None,
-                    )
-                    for x in self.word_labels_strings
-                ]
-            ),
+    def render(self):
+        msg = ""
+        for i, token in enumerate(self.tokens):
+            msg = f"{msg}{token}:\t"
+            for bio_label, class_label, confidence_val in self.get_labels_under_threshold(
+                threshold=0.0, label_index=i
+            ):
+                msg = f"{msg}{bio_label}-{class_label} ({confidence_val}) |"
+            msg = f"{msg}+\n"
+
+        return msg
+
+    def resolve(self, threshold):
+        starts = []
+        ends = []
+        classes = []
+        confidences = []
+
+        for i, (start, end) in enumerate(self.word_offsets):
+            starts.append(start)
+            ends.append(end)
+            for bio_label, class_label, confidence_val in self.get_labels_under_threshold(
+                label_index=i, threshold=threshold
+            ):
+                classes.append(class_label)
+                confidences.append(confidence_val)
+
+        self.start = min(starts) if starts else None
+        self.end = max(ends) if ends else None
+        self.classes = set(classes)
+
+    def get_labels_under_threshold(
+        self, label_index: int, threshold: float
+    ) -> Iterable[Tuple[str, Optional[str], float]]:
+        confidences_indices_sorted = torch.argsort(
+            self.word_confidences[label_index], dim=-1, descending=True
         )
-
-    def __repr__(self) -> str:
-        return f"MODIFIED:{self.modified_post_inference}. {self.word_labels_strings}\n{self.word_offsets}"
+        for confidence_index in confidences_indices_sorted:
+            confidence_val: float = self.word_confidences[label_index][confidence_index].item()
+            if confidence_val > threshold:
+                bio_label = self.id2label[confidence_index.item()]
+                if bio_label == ENTITY_OUTSIDE_SYMBOL:
+                    yield bio_label, None, confidence_val
+                else:
+                    bio_label, class_label = bio_label.split("-")
+                    yield bio_label, class_label, confidence_val
+            else:
+                break
 
 
 @dataclass
-class NerProcessedSection:
-    """
-    long Sections may need to be split into multiple frames when processing with a transformer. This class is a
-    convenient container to reassemble the frames into a coherent object, post transformer. Not hashable due to
-    all properties being lists (and therefore mutable)
-    """
-
-    all_frame_offsets: List[Tuple[int, int]] = field(
-        default_factory=list
-    )  # offsets associated with each token
-    all_frame_word_ids: List[int] = field(
-        default_factory=list
-    )  # word ids associated with each token
-    all_frame_labels: List[int] = field(default_factory=list)  # labels for each token
-    all_frame_confidences: List[float] = field(default_factory=list)  # confidence for each token
-
-    def to_tokenized_words(self, id2label: Dict[int, str]) -> List[TokenizedWord]:
-        """
-        return a List[TokenizedWord]
-
-        :param id2label: Dict mapping labels to strings
-        :return:
-        """
-        prev_word_id = 0
-        word = TokenizedWord()
-        all_words = []
-        for i, word_id in enumerate(self.all_frame_word_ids):
-            if word_id is not None:
-                if word_id != prev_word_id:
-                    # new word
-                    all_words.append(word)
-                    word = TokenizedWord()
-                word.word_labels.append(self.all_frame_labels[i])
-                word.word_labels_strings = [id2label[x] for x in word.word_labels]
-                word.word_confidences.append(self.all_frame_confidences[i])
-                word.word_offsets.append(self.all_frame_offsets[i])
-                prev_word_id = word_id
-
-        all_words.append(word)
-        return all_words
-
-
-@dataclass(unsafe_hash=True)
 class Mapping:
     default_label: str  # default label from knowledgebase
     source: str  # the knowledgebase name
@@ -163,7 +148,7 @@ class Mapping:
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class Entity:
     """
     Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
@@ -178,6 +163,9 @@ class Entity:
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
     start: int = field(init=False)
     end: int = field(init=False)
+
+    def __hash__(self):
+        return hash((self.entity_class, self.spans))
 
     def calc_starts_and_ends(self) -> Tuple[int, int]:
         earliest_start = inf
@@ -275,12 +263,13 @@ class Entity:
         self.mappings.append(mapping)
 
     @classmethod
-    def from_spans(cls, spans: List[Tuple[int, int]], text: str, **kwargs):
+    def from_spans(cls, spans: List[Tuple[int, int]], text: str, join_str: str = "", **kwargs):
         """
         create an instance of Entity from a list of character indices. A text string of underlying doc is
         also required to produce a representative match
         :param spans:
         :param text:
+        :param join_str: a string used to join the spans together
         :param kwargs:
         :return:
         """
@@ -289,7 +278,7 @@ class Entity:
         for start, end in spans:
             text_pieces.append(text[start:end])
             char_spans.append(CharSpan(start=start, end=end))
-        return cls(spans=frozenset(char_spans), match=" ".join(text_pieces), **kwargs)
+        return cls(spans=frozenset(char_spans), match=join_str.join(text_pieces), **kwargs)
 
     @classmethod
     def load_contiguous_entity(cls, start: int, end: int, **kwargs) -> "Entity":
@@ -297,7 +286,7 @@ class Entity:
         return cls(spans=single_span, **kwargs)
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class Section:
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
@@ -360,7 +349,7 @@ class Section:
                 "title": None,
             }
         ]
-        html = displacy.render(ex, style="ent", options={"colors": colors}, manual=True)
+        html = displacy.render(ex, style="ent", options={"colors": colour_map}, manual=True)
         with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as f:
             url = "file://" + f.name
             f.write(html)
@@ -429,19 +418,17 @@ class DocumentEncoder(json.JSONEncoder):
             return as_dict
         elif isinstance(obj, (set, frozenset)):
             return list(obj)
+        elif isinstance(obj, (datetime, date)):
+            return obj.isoformat()
         elif isinstance(obj, ndarray):
             return obj.tolist()
-        elif isinstance(obj, float32):
-            return obj.item()
-        elif isinstance(obj, float16):
-            return obj.item()
         elif dataclasses.is_dataclass(obj):
             return obj.__dict__
         else:
             return json.JSONEncoder.default(self, obj)
 
 
-@dataclass(unsafe_hash=True)
+@dataclass
 class Document:
     idx: str  # a document identifier
     sections: List[Section] = field(

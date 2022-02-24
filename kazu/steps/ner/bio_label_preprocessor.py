@@ -1,17 +1,65 @@
 import logging
-from typing import List, Optional
+import traceback
+from collections import defaultdict
+from typing import List, Tuple, Dict
+
+import pydash
 
 from kazu.data.data import (
     TokenizedWord,
-    ENTITY_START_SYMBOL,
-    ENTITY_INSIDE_SYMBOL,
-    ENTITY_OUTSIDE_SYMBOL,
+    Entity,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class BioLabelPreProcessor:
+class SpanFinder:
+    def __init__(self, threshold: float, text: str):
+        self.text = text
+        self.threshold = threshold
+        self.class_word_map: Dict[str, List[TokenizedWord]] = defaultdict(list)
+        self.words: List[TokenizedWord] = []
+        self.span_breaking_chars = set("() ")
+        self.span_contiguation_chars = set("-")
+        self.spans: List[Dict[str, List[TokenizedWord]]] = []
+
+    def span_end_condition(self, word: TokenizedWord):
+        return all(clazz is None for clazz in word.classes)
+
+    def span_continue_condition(self, word: TokenizedWord):
+        class_count = len([x for x in word.classes if x is not None])
+        prev_char = self.text[self.words[-1].end] if self.words[-1].end is not None else ""
+        return (
+            class_count > 0
+            or prev_char not in self.span_breaking_chars
+            or prev_char in self.span_contiguation_chars
+        )
+
+    def _update_span(self, word: TokenizedWord):
+        for clazz in word.classes:
+            if clazz is not None:
+                self.class_word_map[clazz].append(word)
+        self.words.append(word)
+
+    def update(self, word: TokenizedWord):
+        word.resolve(self.threshold)
+        if self.words:
+            if self.span_continue_condition(word):
+                self._update_span(word)
+            elif self.span_end_condition(word):
+                self.spans.append(self.class_word_map)
+                self.words.append(word)
+                self.reset()
+            else:
+                print(word.render())
+        else:
+            self._update_span(word)
+
+    def reset(self):
+        self.class_word_map = defaultdict(list)
+
+
+class TokenizedWordProcessor:
     """
     Because of the inherent obscurity of the inner workings of transformers, sometimes they produce BIO tags that
     don't correctly align to whole words. So what do we do? Fix it with rules :~Z
@@ -21,166 +69,40 @@ class BioLabelPreProcessor:
 
     """
 
-    def test_for_single_token(self, word: TokenizedWord) -> bool:
-        """
-        single token word - do nothing
-        :param word:
-        :return:
-        """
-        return len(word.word_labels) == 1
+    def __init__(self, confidence_threshold: float):
+        self.confidence_threshold = confidence_threshold
 
-    def _test_for_perfectly_formed_bio_word(self, word: TokenizedWord) -> bool:
-        """
-        ideal scenario = BIO is perfectly formed, or all labels are outside
-        :param word:
-        :return:
-        """
-        maybe_begin = word.bio_labels[0]
-        maybe_insides = word.bio_labels[1:]
-        return (
-            maybe_begin == ENTITY_START_SYMBOL
-            and len(set(maybe_insides)) == 1
-            and maybe_insides[0] == ENTITY_INSIDE_SYMBOL
-        ) or all([x == ENTITY_OUTSIDE_SYMBOL for x in word.bio_labels])
-
-    def _test_for_b_then_mixed_bio(self, word: TokenizedWord) -> bool:
-        """
-        does the word start with a B, but contain a mix of other bio instead of I's?
-        :param word:
-        :return:
-        """
-        maybe_begin = word.bio_labels[0]
-        maybe_insides = word.bio_labels[1:]
-        if maybe_begin == ENTITY_START_SYMBOL and (
-            (len(set(maybe_insides)) > 1) or (ENTITY_INSIDE_SYMBOL not in maybe_insides)
-        ):
-            logger.debug(f"result is malformed - reformatting labels to class of B: {maybe_begin}")
-            return True
-        else:
-            return False
-
-    def _fix_b_then_mixed_bio(self, word: TokenizedWord) -> None:
-        """
-        begin symbol detected, but I labels are broken. Convert everything after B to I's
-        also:
-
-        Since we're missing the I labels for this word, the confidences are probably off too.
-        Therefore, we simply propagate the confidence from B label across all tokens, to give a consistent
-        measure of confidence
-        :param word:
-        :return:
-        """
-        word.word_labels_strings = [f"{ENTITY_START_SYMBOL}-{word.class_labels[0]}"] + [
-            f"{ENTITY_INSIDE_SYMBOL}-{word.class_labels[0]}"
-            for _ in range(len(word.word_labels) - 1)
-        ]
-
-        b_confidence = word.word_confidences[0]
-        word.word_confidences = [b_confidence for _ in range(len(word.word_confidences))]
-        word.modified_post_inference = True
-
-    def _test_for_missing_b_then_i(
-        self, word: TokenizedWord, prev_word: Optional[TokenizedWord]
-    ) -> bool:
-        """
-        sometimes, a B is missing from the start. Here, we need to check we're no inside a multi word entity
-        i.e. last token of prev word is not I and class of last token of prev word is not same as word
-        :param word:
-        :return:
-        """
-
-        return (
-            all([x == ENTITY_INSIDE_SYMBOL for x in word.bio_labels])
-            and len(set(word.class_labels)) == 1
-            and (
-                (prev_word is None)
-                or (prev_word.class_labels[-1] != word.class_labels[0])
-                or (
-                    prev_word.bio_labels[-1] != ENTITY_INSIDE_SYMBOL
-                    and prev_word.class_labels[-1] != word.class_labels[0]
-                )
+    def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
+        ents = []
+        span_finder = SpanFinder(threshold=self.confidence_threshold, text=text)
+        try:
+            for word in words:
+                span_finder.update(word)
+            ents = pydash.flatten(
+                [self.spans_to_entities(x, text, namespace) for x in span_finder.spans]
             )
-        )
+        except Exception:
+            print(traceback.format_exc())
 
-    def _fix_missing_b_then_i(self, word: TokenizedWord) -> None:
-        """
-        convert first label to B-<class>
-        :param word:
-        :return:
-        """
-        word.word_labels_strings[0] = f"{ENTITY_START_SYMBOL}-{word.class_labels[0]}"
-        word.modified_post_inference = True
+        return ents
 
-    def _test_for_no_previous_word(
-        self, word: TokenizedWord, prev_word: Optional[TokenizedWord]
-    ) -> bool:
-        """
-        check if all I's should be converted to a BI as there is no previous word
-        :param word:
-        :param prev_word:
-        :return:
-        """
-        return (
-            all([x == ENTITY_INSIDE_SYMBOL for x in word.bio_labels])
-            and len(set(word.class_labels)) == 1
-            and ((prev_word is None))
-        )
-
-    def _test_for_previous_word_is_i_or_b(
-        self, word: TokenizedWord, prev_word: Optional[TokenizedWord]
-    ) -> bool:
-        """
-        check if should be all I's as previous word is I
-        :param word:
-        :return:
-        """
-
-        return (
-            all([x == ENTITY_INSIDE_SYMBOL for x in word.bio_labels])
-            and len(set(word.class_labels)) == 1
-            and (
-                (prev_word is None)
-                or (
-                    (
-                        prev_word.bio_labels[-1] == ENTITY_INSIDE_SYMBOL
-                        or prev_word.bio_labels[-1] == ENTITY_START_SYMBOL
-                    )
-                    and prev_word.class_labels[-1] == word.class_labels[0]
-                )
+    def spans_to_entities(self, span_dict: Dict, text: str, namespace: str) -> List[Entity]:
+        entities = []
+        for class_label, offsets in span_dict.items():
+            start, end = self.merge_offsets(offsets)
+            entity = Entity.load_contiguous_entity(
+                start=start,
+                end=end,
+                match=text[start:end],
+                namespace=namespace,
+                entity_class=class_label,
             )
-        )
+            entities.append(entity)
+        return entities
 
-    def fix_words(
-        self, word: TokenizedWord, previous_word: Optional[TokenizedWord]
-    ) -> TokenizedWord:
-        """
-        check if a word needs modification:
-        :param word:
-        :param state:
-        :return:
-        """
-        if self.test_for_single_token(word):
-            pass
-        elif self._test_for_perfectly_formed_bio_word(word):
-            pass
-        elif self._test_for_no_previous_word(word, prev_word=previous_word):
-            self._fix_missing_b_then_i(word)
-        elif self._test_for_previous_word_is_i_or_b(word, prev_word=previous_word):
-            pass
-        elif self._test_for_b_then_mixed_bio(word):
-            self._fix_b_then_mixed_bio(word)
-        elif self._test_for_missing_b_then_i(word, prev_word=previous_word):
-            self._fix_missing_b_then_i(word)
-        else:
-            logger.warning(f"result is malformed for {word} - needs further postprocessing ideas")
-        return word
-
-    def __call__(self, words: List[TokenizedWord]) -> List[TokenizedWord]:
-        [word.parse_labels_to_bio_and_class() for word in words]
-        result = []
-        for i, word in enumerate(words):
-            if i == 0:
-                result.append(self.fix_words(word, None))
-            else:
-                result.append(self.fix_words(word, words[i - 1]))
-        return result
+    def merge_offsets(self, words: List[TokenizedWord]) -> Tuple[int, int]:
+        starts, ends = [], []
+        for word in words:
+            starts.append(word.start)
+            ends.append(word.end)
+        return min(starts), max(ends)
