@@ -197,6 +197,8 @@ class DictionaryIndex(Index):
 
     def _load(self, path: PathLike) -> Any:
         self.synonym_df = self.check_dataframe_types(pd.read_parquet(path))
+        # syns should always be lower case
+        self.synonym_df[SYN] = self.synonym_df[SYN].str.lower()
 
     def _save(self, path: PathLike):
         self.synonym_df.to_parquet(path, index=None)
