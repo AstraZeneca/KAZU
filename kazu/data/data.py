@@ -319,20 +319,12 @@ class Section:
 
     def render(self):
         ordered_ends = sorted(self.entities, key=lambda x: x.start)
-        colors = {
-            "gene_linked": "#00f518",
-            "gene": "#84fa90",
-            "disease_linked": "#ff0000",
-            "disease": "#fc7979",
-            "drug": "#7d81ff",
-            "drug_linked": "#384cff",
-            "mutation": "#ff96f5",
-        }
-        linked = {
-            "gene": "gene_linked",
-            "disease": "disease_linked",
-            "drug": "drug_linked",
-        }
+        colours = cycle(
+            ["#00f518", "#84fa90", "#ff0000", "#fc7979", "#7d81ff", "#384cff", "#ff96f5", "#ff96f3"]
+        )
+        classes = set(chain(*[[x.entity_class, f"{x.entity_class}_linked"] for x in self.entities]))
+        colour_map = {k: next(colours) for k in classes}
+        linked = {k: f"{k}_linked" for k in classes}
 
         def label_colors(entity: Entity):
             if len(entity.mappings) > 0:
