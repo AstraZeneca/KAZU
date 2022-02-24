@@ -1,3 +1,4 @@
+import copy
 import logging
 import shutil
 from abc import ABC, abstractmethod
@@ -69,7 +70,7 @@ class EntityLinkingLookupCache:
                 cache_misses.append(ent)
             else:
                 for mapping in cache_hits:
-                    ent.add_mapping(mapping)
+                    ent.add_mapping(copy.deepcopy(mapping))
         return cache_misses
 
 
