@@ -120,7 +120,7 @@ class Pipeline:
             self.stopwatch.start()
             succeeded_docs, failed_docs = step(succeeded_docs)
             self.stopwatch.message(
-                f"{step.namespace} finished. Successful: {len(succeeded_docs)}, failed: {len(failed_docs)}"
+                f"{step.namespace()} finished. Successful: {len(succeeded_docs)}, failed: {len(failed_docs)}"
             )
             self.update_failed_docs(step, failed_docs)
         self.reset()
