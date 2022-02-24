@@ -72,7 +72,7 @@ class SethStep(BaseStep):
                                     ],
                                     text=section.get_text(),
                                     entity_class=self.entity_class,
-                                    namespace=self.namespace,
+                                    namespace=self.namespace(),
                                     metadata=python_dict,
                                 ),
                             )
