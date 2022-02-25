@@ -180,9 +180,8 @@ class JsonLinesOntologyParser(OntologyParser):
     """
 
     def read(self, path: str) -> Iterable[Dict[str, Any]]:
-        for file_str in os.listdir(path):
-            if file_str.endswith(".json"):
-                with open(os.path.join(path, file_str), "r") as f:
+        for json_path in Path(p).glob("*.json"):
+            with json_path.open(mode="r") as f:
                     for line in f:
                         yield json.loads(line)
 
