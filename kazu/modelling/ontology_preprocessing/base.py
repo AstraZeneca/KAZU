@@ -180,15 +180,15 @@ class JsonLinesOntologyParser(OntologyParser):
     """
 
     def read(self, path: str) -> Iterable[Dict[str, Any]]:
-        for json_path in Path(p).glob("*.json"):
+        for json_path in Path(path).glob("*.json"):
             with json_path.open(mode="r") as f:
-                    for line in f:
-                        yield json.loads(line)
+                for line in f:
+                    yield json.loads(line)
 
     def parse_to_dataframe(self):
-        return pd.concat(self.json_dict_to_parser_dict(self.read(self.in_path)))
+        return pd.concat(self.json_dict_to_parser_dataframe(self.read(self.in_path)))
 
-    def json_dict_to_parser_dict(
+    def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         """
@@ -204,13 +204,13 @@ class JsonLinesOntologyParser(OntologyParser):
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_DISEASE"
 
-    def json_dict_to_parser_dict(
+    def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
-            synonymns = json_dict.get("synonyms", {})
-            exact_syns = synonymns.get("hasExactSynonym", [])
+            synonyms = json_dict.get("synonyms", {})
+            exact_syns = synonyms.get("hasExactSynonym", [])
             exact_syns.append(json_dict["name"])
             df = pd.DataFrame(exact_syns, columns=[SYN])
             df[MAPPING_TYPE] = "hasExactSynonym"
@@ -223,7 +223,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_TARGET"
 
-    def json_dict_to_parser_dict(
+    def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         for json_dict in jsons_gen:
@@ -242,9 +242,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
             records.append({SYN: json_dict["approvedSymbol"], MAPPING_TYPE: "approvedSymbol"})
             records.append({SYN: json_dict["id"], MAPPING_TYPE: "opentargets_id"})
-            df = pd.DataFrame.from_records(records)
-            df.columns = [SYN, MAPPING_TYPE]
-
+            df = pd.DataFrame.from_records(records, columns=[SYN, MAPPING_TYPE])
             df[IDX] = json_dict["id"]
             df[DEFAULT_LABEL] = json_dict["approvedSymbol"]
             df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
@@ -254,18 +252,25 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_MOLECULE"
 
-    def json_dict_to_parser_dict(
+    def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         for json_dict in jsons_gen:
-            syn_df = pd.DataFrame(json_dict.get("synonyms", []), columns=[SYN])
-            syn_df[MAPPING_TYPE] = "synonyms"
-            trade_df = pd.DataFrame(json_dict.get("tradeNames", []), columns=[SYN])
-            trade_df[MAPPING_TYPE] = "tradeNames"
-            df = pd.concat([syn_df, trade_df])
-            df[DEFAULT_LABEL] = json_dict["name"]
-            df[IDX] = json_dict["id"]
-            df["crossReferences"] = [json_dict.get("crossReferences", {})] * df.shape[0]
+            synonyms = json_dict.get("synonyms", [])
+            mapping_types = ["synonyms"] * len(synonyms)
+            trade_names = json_dict.get("tradeNames", [])
+            synonyms.extend(trade_names)
+            mapping_types.extend(["tradeNames"] * len(trade_names))
+            cross_references = [json_dict.get("crossReferences", {})] * len(synonyms)
+            df = pd.DataFrame(
+                {
+                    SYN: synonyms,
+                    MAPPING_TYPE: mapping_types,
+                    "crossReferences": cross_references,
+                    DEFAULT_LABEL: json_dict["name"],
+                    IDX: json_dict["id"],
+                }
+            )
             yield df
 
 
