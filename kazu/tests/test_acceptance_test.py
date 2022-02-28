@@ -117,21 +117,33 @@ def test_dictionary_entity_linking(override_kazu_test_config):
 
 def test_TransformersModelForTokenClassificationNerStep(kazu_test_config):
     step = instantiate(kazu_test_config.TransformersModelForTokenClassificationNerStep)
-    docs = [Document.create_simple_document(x[0]) for x in ner_simple_test_cases()]
-    classes = [x[1] for x in ner_simple_test_cases()]
+    simple_test_cases = ner_simple_test_cases()
+    docs, classes = [], []
+    for text, expected_class in simple_test_cases:
+        docs.append(Document.create_simple_document(text))
+        classes.append(expected_class)
+
     successes, failures = step(docs)
     assert len(successes) == len(docs)
     for doc, target_class in zip(successes, classes):
         assert doc.sections[0].entities[0].entity_class == target_class
+        assert len(doc.sections[0].entities) == 1, (
+            f"there should be a single entity of class {target_class} "
+            f"recognised for the text {doc.sections[0]}"
+        )
+    long_doc_test_cases = ner_long_document_test_cases()
+    docs, expected_ent_count, classes = [], [], []
+    for text, target_entity_count, expected_class in long_doc_test_cases:
+        docs.append(Document.create_simple_document(text))
+        classes.append(expected_class)
 
-    docs = [Document.create_simple_document(x[0]) for x in ner_long_document_test_cases()]
-    target_entity_counts = [x[1] for x in ner_long_document_test_cases()]
-    target_classes = [x[2] for x in ner_long_document_test_cases()]
     successes, failures = step(docs)
     assert len(successes) == len(docs)
-    for doc, target_entity_count, target_class in zip(
-        successes, target_entity_counts, target_classes
-    ):
-        assert len(doc.sections[0].entities) == target_entity_count
+    for doc, target_entity_count, target_class in zip(successes, expected_ent_count, classes):
+        assert len(doc.sections[0].entities) == target_entity_count, (
+            f"there should be n:{target_entity_count} "
+            f"entities recognised for the text "
+            f"{doc.sections[0]}"
+        )
         for ent in doc.sections[0].entities:
             assert ent.entity_class == target_class

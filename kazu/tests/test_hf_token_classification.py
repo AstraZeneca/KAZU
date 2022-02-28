@@ -9,7 +9,7 @@ from kazu.tests.utils import (
 
 @requires_model_pack
 def test_TransformersModelForTokenClassificationNerStep(kazu_test_config):
-    # note, here we just test that the step is fucnctional. Model performance should be handled via an acceptance test
+    # note, here we just test that the step is functional. Model performance is tested via an acceptance test
     step = instantiate(kazu_test_config.TransformersModelForTokenClassificationNerStep)
     docs = [Document.create_simple_document(x[0]) for x in ner_simple_test_cases()]
     successes, failures = step(docs)
