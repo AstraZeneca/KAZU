@@ -72,13 +72,15 @@ class DictionaryEntityLinkingStep(BaseStep):
                     continue
                 else:
                     try:
-                        mappings = self.index_group.search(
-                            query=entity.match,
-                            entity_class=entity.entity_class,
-                            fuzzy=self.fuzzy,
-                            top_n=self.top_n,
-                            namespace=self.namespace(),
-                            score_cutoff=self.score_cutoff,
+                        mappings = list(
+                            self.index_group.search(
+                                query=entity.match,
+                                entity_class=entity.entity_class,
+                                fuzzy=self.fuzzy,
+                                top_n=self.top_n,
+                                namespace=self.namespace(),
+                                score_cutoff=self.score_cutoff,
+                            )
                         )
                         for mapping in mappings:
                             entity.add_mapping(mapping)

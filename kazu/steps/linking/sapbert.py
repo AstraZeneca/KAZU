@@ -114,12 +114,14 @@ class SapBertForEntityLinkingStep(BaseStep):
                     for entity in entities_grouped:
                         cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
                         if not len(cache_missed_entities) == 0:
-                            mappings = self.index_group.search(
-                                query=result,
-                                entity_class=entity.entity_class,
-                                namespace=self.namespace(),
-                                top_n=self.top_n,
-                                score_cutoff=self.score_cutoff,
+                            mappings = list(
+                                self.index_group.search(
+                                    query=result,
+                                    entity_class=entity.entity_class,
+                                    namespace=self.namespace(),
+                                    top_n=self.top_n,
+                                    score_cutoff=self.score_cutoff,
+                                )
                             )
                             for mapping in mappings:
                                 entity.add_mapping(mapping)
