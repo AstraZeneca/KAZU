@@ -241,10 +241,12 @@ class DictionaryIndex(Index):
             self.metadata = metadata_dict
         else:
             for k, v in synonym_dict.items():
-                if k in self.synonym_dict:
-                    self.synonym_dict[k].extend(v)
+                # syn keys must always be lower case
+                k_lower = k.lower()
+                if k_lower in self.synonym_dict:
+                    self.synonym_dict[k_lower].extend(v)
                 else:
-                    self.synonym_dict[k] = v
+                    self.synonym_dict[k_lower] = v
             self.metadata.update(metadata_dict)
 
     def __len__(self):
