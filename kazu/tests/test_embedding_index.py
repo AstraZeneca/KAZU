@@ -1,12 +1,12 @@
+import copy
 from pathlib import Path
-from typing import Type, Union
+from typing import Type, Union, Iterable, Dict
 
 import numpy as np
-import pandas as pd
 import pytest
 import torch
 
-from kazu.modelling.ontology_preprocessing.base import IDX
+from kazu.data.data import Mapping
 from kazu.utils.link_index import (
     MatMulTensorEmbeddingIndex,
     CDistTensorEmbeddingIndex,
@@ -25,7 +25,7 @@ index_embeddings = torch.tensor(
     ]
 )
 
-metadata = pd.DataFrame.from_dict({IDX: ["3", "1", "0", "2", "4"]})
+metadata: Dict[str, Dict] = {"3": {}, "1": {}, "0": {}, "2": {}, "4": {}}
 
 query_embedding = torch.tensor([index_embedding])
 
@@ -56,18 +56,20 @@ def test_embedding_index(
 ):
     index_name = "test_index"
     index = index_type(name=index_name)
-    index.add(embeddings=index_embeddings, metadata_df=metadata)
-    df = index.search(query_embedding, top_n=3)
-    assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
-    assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
-    metadata_copy = metadata.copy()
-    metadata_copy[IDX] = metadata_copy[IDX] * 2
-    index.add(embeddings=(index_embeddings * 2), metadata_df=metadata_copy)
-    df = index.search(query_embedding, top_n=3)
-    assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
-    assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
+    index.add(embeddings=index_embeddings, metadata_dict=copy.deepcopy(metadata))
+    mappings: Iterable[Mapping] = list(index.search(query_embedding, top_n=3))
+    for mapping, idx in zip(mappings, np.array(["0", "1", "2"])):
+        assert mapping.idx == idx
+    # assert np.array_equal(df.index.to_numpy(), np.array(["2", "1", "3"]))
+    # assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
+    metadata_copy = copy.deepcopy(metadata)
+    metadata_copy = {k * 2: v for k, v in metadata_copy.items()}
+    index.add(embeddings=(index_embeddings * 2), metadata_dict=metadata_copy)
+    mappings = index.search(query_embedding, top_n=3)
+    for mapping, idx in zip(mappings, np.array(["0", "1", "2"])):
+        assert mapping.idx == idx
     index.save(tmp_path)
     Index.load(tmp_path, index_name)
-    hit_info = index.search(query_embedding, top_n=3)
-    assert np.array_equal(hit_info.index.to_numpy(), np.array(["2", "1", "3"]))
-    assert np.array_equal(hit_info[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
+    mappings = index.search(query_embedding, top_n=3)
+    for mapping, idx in zip(mappings, np.array(["0", "1", "2"])):
+        assert mapping.idx == idx

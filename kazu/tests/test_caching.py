@@ -24,10 +24,10 @@ from kazu.utils.link_index import Index
 
 DUMMY_SOURCE = "test_parser"
 DUMMY_DATA = {
-    IDX: ["first", "first", "second", "second", "third"],
-    DEFAULT_LABEL: ["1", "1", "2", "2", "3"],
-    SYN: ["1", "one", "2", "two", "3"],
-    MAPPING_TYPE: ["int", "text", "int", "text", "int"],
+    IDX: ["first", "first", "second", "second", "third", "alpha"],
+    DEFAULT_LABEL: ["1", "1", "2", "2", "3", "4"],
+    SYN: ["1", "one", "2", "two", "3", "1"],
+    MAPPING_TYPE: ["int", "text", "int", "text", "int", "text"],
 }
 
 
@@ -144,14 +144,14 @@ def test_cached_index_group(tmp_path: Path):
         entity_class_to_ontology_mappings=entity_ontology_mappings,
     )
     cached_index_group.load()
-    ontology_1_mappings = cached_index_group.search(
-        query="two", entity_class="entity_class_1", namespace="test"
+    ontology_1_mappings = list(
+        cached_index_group.search(query="two", entity_class="entity_class_1", namespace="test")
     )
     assert ontology_1_mappings[0].idx == "second"
     assert ontology_1_mappings[0].source == parser1.name
 
-    ontology_2_mappings = cached_index_group.search(
-        query="3", entity_class="entity_class_2", namespace="test2"
+    ontology_2_mappings = list(
+        cached_index_group.search(query="3", entity_class="entity_class_2", namespace="test2")
     )
     assert ontology_2_mappings[0].idx == "third"
     assert ontology_2_mappings[0].source == parser2.name

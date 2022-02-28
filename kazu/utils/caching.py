@@ -1,6 +1,7 @@
 import logging
 import shutil
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from pathlib import Path
 from typing import Type, Dict, Any, Iterable, Tuple, List, Set, Iterator
 
@@ -9,16 +10,18 @@ import torch
 from cachetools import LFUCache
 from pytorch_lightning import Trainer
 
-from kazu.data.data import Entity, LINK_SCORE, NAMESPACE
+from kazu.data.data import Entity, NAMESPACE
 from kazu.data.data import Mapping
 from kazu.modelling.linking.sapbert.train import (
     PLSapbertModel,
 )
 from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
-    SOURCE,
+    SYN,
+    IDX,
+    MAPPING_TYPE,
 )
-from kazu.modelling.ontology_preprocessing.base import OntologyParser, MAPPING_TYPE
+from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.link_index import (
     Index,
     MatMulTensorEmbeddingIndex,
@@ -26,6 +29,7 @@ from kazu.utils.link_index import (
     CDistTensorEmbeddingIndex,
     DictionaryIndex,
     EmbeddingIndex,
+    SynonymData,
 )
 from kazu.utils.utils import (
     get_cache_dir,
@@ -141,13 +145,25 @@ class DictionaryIndexCacheManager(IndexCacheManager):
     implementation for use with :class:`kazu.steps.linking.dictionary.DictionaryEntityLinkingStep`
     """
 
+    def dataframe_to_syndata_dict(self, df: pd.DataFrame) -> Dict[str, List[SynonymData]]:
+        df_as_dict = df.groupby(SYN).agg(list).to_dict(orient="index")
+        result = defaultdict(list)
+        for synonym, metadata_dict in df_as_dict.items():
+            for idx, mapping_type_lst in zip(metadata_dict[IDX], metadata_dict[MAPPING_TYPE]):
+                result[synonym].append(SynonymData(idx=idx, mapping_type=mapping_type_lst))
+        return result
+
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
         assert isinstance(index, DictionaryIndex)
         ontology_df = parser.get_ontology_metadata()
         synonym_df = parser.get_ontology_synonyms()
-        index.add(synonym_df=synonym_df, metadata_df=ontology_df)
+
+        index.add(
+            synonym_dict=self.dataframe_to_syndata_dict(synonym_df),
+            metadata_dict=ontology_df.to_dict(orient="index"),
+        )
         index_path = index.save(str(cache_dir))
         logger.info(f"saved {index.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {index.name} is {len(index)}")
@@ -232,7 +248,9 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
             ontology_embeddings,
         ) in self.predict_ontology_embeddings(ontology_dataframe=ontology_df):
             logger.info(f"processing partition {partition_number} ")
-            index.add(embeddings=ontology_embeddings, metadata_df=metadata_df)
+            index.add(
+                embeddings=ontology_embeddings, metadata_dict=metadata_df.to_dict(orient="index")
+            )
             logger.info(f"index size is now {len(index)}")
         index_path = index.save(cache_dir)
         logger.info(f"saved {parser.name} index to {index_path.absolute()}")
@@ -298,7 +316,7 @@ class CachedIndexGroup:
         self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
         self.entity_class_to_indices: Dict[str, Set[Index]] = {}
 
-    def search(self, query: Any, entity_class: str, namespace: str, **kwargs) -> List[Mapping]:
+    def search(self, query: Any, entity_class: str, namespace: str, **kwargs) -> Iterable[Mapping]:
         """
         search across all indices.
 
@@ -310,36 +328,11 @@ class CachedIndexGroup:
         :return:
         """
         indices_to_use = self.entity_class_to_indices.get(entity_class, set())
-        results = []
         for index in indices_to_use:
-            index_results = index.search(query=query, **kwargs)
-            index_results[SOURCE] = index.name
-            results.append(index_results)
-
-        mappings = []
-        len_results = len(results)
-        if len_results > 0:
-            if len_results == 1:
-                # results contains a single, already-sorted DataFrame
-                # so avoid sorting again
-                results_df = results[0]
-            else:
-                results_df = pd.concat(results).sort_values(by=LINK_SCORE, ascending=False)
-            for ontology_id, row in results_df.iterrows():
-                row_dict: Dict = row.to_dict()
-                mapping_type = [str(x) for x in row_dict.pop(MAPPING_TYPE)]
-                source = row_dict.pop(SOURCE)
-                default_label = row_dict.pop(DEFAULT_LABEL)
-                row_dict[NAMESPACE] = namespace
-                new_mapping = Mapping(
-                    default_label=str(default_label),
-                    source=str(source),
-                    idx=str(ontology_id),
-                    mapping_type=mapping_type,
-                    metadata=row_dict,
-                )
-                mappings.append(new_mapping)
-        return mappings
+            mappings = index.search(query=query, **kwargs)
+            for mapping in mappings:
+                mapping.metadata[NAMESPACE] = namespace
+                yield mapping
 
     def load(self):
         """
