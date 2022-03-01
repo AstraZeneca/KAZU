@@ -1,8 +1,7 @@
 import logging
 import traceback
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict
 
-import pydash
 import torch
 from pytorch_lightning import Trainer
 from torch import Tensor
@@ -17,12 +16,11 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from kazu.data.data import Document, Section, PROCESSING_EXCEPTION, TokenizedWord
+from kazu.data.data import Document, Section, PROCESSING_EXCEPTION
 from kazu.data.pytorch import HFDataset
 from kazu.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from kazu.steps import BaseStep
-from kazu.steps.ner.bio_label_preprocessor import TokenizedWordProcessor
-from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
+from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
@@ -30,10 +28,10 @@ logger = logging.getLogger(__name__)
 
 class TransformersModelForTokenClassificationNerStep(BaseStep):
     """
-    An wrapper for :class:`transformers.AutoModelForTokenClassification' and
-    :class:`kazu.steps.ner.bio_label_preprocessor.BioLabelPreProcessor`. This implementation uses a sliding
+    An wrapper for :class:`transformers.AutoModelForTokenClassification'. This implementation uses a sliding
     window concept to process large documents that don't fit into the maximum sequence length allowed by a model.
-
+    Resulting token labels are then post processed by
+    :py:class:`kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor`.
     """
 
     def __init__(
@@ -44,18 +42,21 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         stride: int,
         max_sequence_length: int,
         trainer: Trainer,
-        entity_splitter: Optional[NonContiguousEntitySplitter] = None,
+        threshold: float,
     ):
         """
-        :param stride: passed to HF tokenizers (for splitting long docs)
-        :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
+
         :param path: path to HF model, config and tokenizer. Passed to HF .from_pretrained()
         :param depends_on:
         :param batch_size: batch size for dataloader
-        :param debug: print extra logging info
+        :param stride: passed to HF tokenizers (for splitting long docs)
+        :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
+        :param trainer: an instance of :py:class:`pytorch_lightning.Trainer`
+        :param threshold: the confidence threshold that the token softmax value should consider to classify a given
+            token (i.e. if set to 0, every token will be classed as an instance of every label
         """
+
         super().__init__(depends_on=depends_on)
-        self.entity_splitter = entity_splitter
         if max_sequence_length % 2 != 0:
             raise RuntimeError(
                 "max_sequence_length must %2 ==0 in order for correct document windowing"
@@ -71,7 +72,9 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         self.model = PLAutoModelForTokenClassification(self.model).eval()
         self.trainer = trainer
         self.softmax = Softmax(dim=-1)
-        self.bio_preprocessor = TokenizedWordProcessor(confidence_threshold=0.03)
+        self.tokenized_word_processor = TokenizedWordProcessor(
+            confidence_threshold=threshold, id2label=self.config.id2label
+        )
 
     def get_dataloader(self, docs: List[Document]) -> Tuple[DataLoader, Dict[int, Section]]:
         """
@@ -128,35 +131,56 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         frame_word_ids = batch_encoding.encodings[section_frame_index].word_ids[
             start_index:end_index
         ]
-        frame_input_ids = batch_encoding.encodings[section_frame_index].ids[start_index:end_index]
+        frame_token_ids = batch_encoding.encodings[section_frame_index].ids[start_index:end_index]
         frame_tokens = batch_encoding.encodings[section_frame_index].tokens[start_index:end_index]
         predictions = predictions[section_frame_index][start_index:end_index]
-
-        prev_word_id = 0
-        word = TokenizedWord()
-        word.id2label = self.config.id2label
+        prev_word_id = None
         all_words = []
-        for i, word_id in enumerate(frame_word_ids):
-            if word_id is not None:
-                if word_id != prev_word_id:
-                    word.decoded = self.tokeniser.decode(word.token_ids)
-                    # new word
-                    all_words.append(word)
-                    word = TokenizedWord()
-                    word.id2label = self.config.id2label
-                word.token_ids.append(frame_input_ids[i])
-                word.word_offsets.append(frame_offsets[i])
-                word.word_confidences.append(predictions[i])
-                word.tokens.append(frame_tokens[i])
-                prev_word_id = word_id
 
-        word.decoded = self.tokeniser.decode(word.token_ids)
-        all_words.append(word)
+        word_id_index_start, offset_start, offset_end = 0, 0, 0
+
+        for i, word_id in enumerate(frame_word_ids):
+            if word_id != prev_word_id:
+                # start a new word, and add the previous
+                if prev_word_id is not None:
+                    all_words.append(
+                        TokenizedWord(
+                            token_offsets=frame_offsets[word_id_index_start:i],
+                            token_confidences=predictions[word_id_index_start:i],
+                            token_ids=frame_token_ids[word_id_index_start:i],
+                            tokens=frame_tokens[word_id_index_start:i],
+                            word_offset_start=offset_start,
+                            word_offset_end=offset_end,
+                            word_id=prev_word_id,
+                        )
+                    )
+                word_id_index_start = i
+                offset_start, offset_end = frame_offsets[i]
+            if i == len(frame_word_ids) - 1 and word_id is not None:
+                # if checking the last word in a frame, if word_id is not None, add it
+                all_words.append(
+                    TokenizedWord(
+                        token_offsets=frame_offsets[word_id_index_start : i + 1],
+                        token_confidences=predictions[word_id_index_start : i + 1],
+                        token_ids=frame_token_ids[word_id_index_start : i + 1],
+                        tokens=frame_tokens[word_id_index_start : i + 1],
+                        word_offset_start=offset_start,
+                        word_offset_end=offset_end,
+                        word_id=word_id,
+                    )
+                )
+
+            _, offset_end = frame_offsets[i]
+            prev_word_id = word_id
+
+        frame_word_ids_excluding_nones = set(frame_word_ids)
+        frame_word_ids_excluding_nones.discard(None)
+        assert len(set(frame_word_ids_excluding_nones)) == len(all_words)
 
         logger.debug(
-            f"inputs this frame: {self.tokeniser.decode(frame_input_ids[:start_index])}<-IGNORED "
-            f"START->{self.tokeniser.decode(frame_input_ids[start_index:end_index])}"
-            f"<-END IGNORED->{self.tokeniser.decode(frame_input_ids[end_index:])}"
+            f"inputs this frame: {self.tokeniser.decode(frame_token_ids[:start_index])}<-IGNORED "
+            f"START->{self.tokeniser.decode(frame_token_ids[start_index:end_index])}"
+            f"<-END IGNORED->{self.tokeniser.decode(frame_token_ids[end_index:])}"
         )
         return all_words
 
@@ -194,15 +218,11 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                     batch_encoding=loader.dataset.encodings,
                     predictions=softmax,
                 )
-                entities = self.bio_preprocessor(
+                entities = self.tokenized_word_processor(
                     words, text=section.get_text(), namespace=self.namespace()
                 )
                 section.entities.extend(entities)
-                if self.entity_splitter:
-                    split_ents = pydash.flatten(
-                        [self.entity_splitter(x, section.get_text()) for x in entities]
-                    )
-                    section.entities.extend(split_ents)
+
         except Exception:
             affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
