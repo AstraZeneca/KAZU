@@ -7,15 +7,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from itertools import cycle, chain
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet
 
 import pandas as pd
-import torch
 from numpy import ndarray
 from spacy import displacy
 
 # BIO schema
-from torch import Tensor
 
 ENTITY_START_SYMBOL = "B"
 ENTITY_INSIDE_SYMBOL = "I"
@@ -63,80 +61,6 @@ class CharSpan:
 
     def __hash__(self):
         return hash((self.start, self.end))
-
-
-@dataclass
-class TokenizedWord:
-    """
-    A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
-    """
-
-    decoded: str = field(default_factory=str, hash=False)  # label ids of the word
-    token_ids: List[int] = field(
-        default_factory=list, hash=False
-    )  # optional strings associated with labels
-    tokens: List[str] = field(
-        default_factory=list, hash=False
-    )  # optional strings associated with labels
-    word_confidences: List[Tensor] = field(
-        default_factory=list, hash=False
-    )  # confidence associated with each label
-    word_offsets: List[Tuple[int, int]] = field(
-        default_factory=list, hash=False
-    )  # original offsets of each token
-    start: int = field(default_factory=int)
-    end: int = field(default_factory=int)
-    classes: Set[str] = field(default_factory=set)
-    id2label: Dict[int, str] = field(default_factory=dict)
-
-    def render(self):
-        msg = ""
-        for i, token in enumerate(self.tokens):
-            msg = f"{msg}{token}:\t"
-            for bio_label, class_label, confidence_val in self.get_labels_under_threshold(
-                threshold=0.0, label_index=i
-            ):
-                msg = f"{msg}{bio_label}-{class_label} ({confidence_val}) |"
-            msg = f"{msg}+\n"
-
-        return msg
-
-    def resolve(self, threshold):
-        starts = []
-        ends = []
-        classes = []
-        confidences = []
-
-        for i, (start, end) in enumerate(self.word_offsets):
-            starts.append(start)
-            ends.append(end)
-            for bio_label, class_label, confidence_val in self.get_labels_under_threshold(
-                label_index=i, threshold=threshold
-            ):
-                classes.append(class_label)
-                confidences.append(confidence_val)
-
-        self.start = min(starts) if starts else None
-        self.end = max(ends) if ends else None
-        self.classes = set(classes)
-
-    def get_labels_under_threshold(
-        self, label_index: int, threshold: float
-    ) -> Iterable[Tuple[str, Optional[str], float]]:
-        confidences_indices_sorted = torch.argsort(
-            self.word_confidences[label_index], dim=-1, descending=True
-        )
-        for confidence_index in confidences_indices_sorted:
-            confidence_val: float = self.word_confidences[label_index][confidence_index].item()
-            if confidence_val > threshold:
-                bio_label = self.id2label[confidence_index.item()]
-                if bio_label == ENTITY_OUTSIDE_SYMBOL:
-                    yield bio_label, None, confidence_val
-                else:
-                    bio_label, class_label = bio_label.split("-")
-                    yield bio_label, class_label, confidence_val
-            else:
-                break
 
 
 @dataclass
