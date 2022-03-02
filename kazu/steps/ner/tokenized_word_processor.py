@@ -98,12 +98,14 @@ class SpanFinder:
         :param word:
         :return:
         """
-        span_broken_char = self.text[self.words[-1].word_offset_end] not in self.span_breaking_chars
-        span_continue_char = (
-            self.text[self.words[-1].word_offset_end] in self.non_breaking_span_chars
-        )
-        class_found = len(classes) > 0
-        return any([span_broken_char, span_continue_char, class_found])
+        if (
+            self.text[self.words[-1].word_offset_end] not in self.span_breaking_chars
+            or self.text[self.words[-1].word_offset_end] in self.non_breaking_span_chars
+            or len(classes) > 0
+        ):
+            return True
+        else:
+            return False
 
     def _update_class_word_map(self, classes: Set[str], word: TokenizedWord):
         for clazz in classes:
