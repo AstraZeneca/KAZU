@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import shutil
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Tuple, Any, Dict, List, Iterable
@@ -237,17 +238,14 @@ class DictionaryIndex(Index):
         :return:
         """
         if not hasattr(self, "synonym_dict") and not hasattr(self, "metadata"):
-            self.synonym_dict = synonym_dict
+            self.synonym_dict = defaultdict(list)
             self.metadata = metadata_dict
         else:
-            for k, v in synonym_dict.items():
-                # syn keys must always be lower case
-                k_lower = k.lower()
-                if k_lower in self.synonym_dict:
-                    self.synonym_dict[k_lower].extend(v)
-                else:
-                    self.synonym_dict[k_lower] = v
             self.metadata.update(metadata_dict)
+
+        for k, v in synonym_dict.items():
+            # syn keys must always be lower case
+            self.synonym_dict[k.lower()].extend(v)
 
     def __len__(self):
         return len(self.metadata)
