@@ -1,26 +1,25 @@
-import spacy
 import pytest
 
 from hydra.utils import instantiate
 
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
+from kazu.modelling.ontology_matching.ontology_matcher import SPAN_KEY
+from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.tests.utils import requires_model_pack
 
 
 @requires_model_pack
 @pytest.fixture(scope="module")
-def nlp(kazu_test_config):
+def nlp(kazu_test_config, tmp_path):
     labels = kazu_test_config.RuleBasedNerAndLinkingStep.labels
     syn_table_cache = instantiate(kazu_test_config.RuleBasedNerAndLinkingStep.synonym_table_cache)
-    ontologies = syn_table_cache.get_synonym_table_paths()
-    nlp = spacy.blank("en")
-    nlp.add_pipe("sentencizer")
-    config = {"span_key": SPAN_KEY}
-    ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
-    assert isinstance(ontology_matcher, OntologyMatcher)
-    ontology_matcher.set_labels(labels)
-    ontology_matcher.set_ontologies(ontologies)
-    return nlp
+    parquet_files = syn_table_cache.get_synonym_table_paths()
+    return assemble_pipeline(
+        parquet_files=parquet_files,
+        labels=labels,
+        # we don't want this to overwrite the pipeline in the actual model pack
+        output_dir=tmp_path,
+        span_key=SPAN_KEY,
+    )
 
 
 # fmt: off
