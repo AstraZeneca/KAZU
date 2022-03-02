@@ -45,7 +45,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         max_sequence_length: int,
         trainer: Trainer,
         debug=False,
-        entity_splitter:Optional[NonContiguousEntitySplitter] = None
+        entity_splitter: Optional[NonContiguousEntitySplitter] = None,
     ):
         """
         :param stride: passed to HF tokenizers (for splitting long docs)
@@ -185,7 +185,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 section.entities.extend(ents)
                 if self.entity_splitter:
                     for ent in ents:
-                        section.entities.extend(self.entity_splitter(ent,section.get_text()))
+                        section.entities.extend(self.entity_splitter(ent, section.get_text()))
                 # reset the entity mapper in preparation for the next section
                 self.entity_mapper.reset()
         except Exception:

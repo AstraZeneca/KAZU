@@ -1,7 +1,5 @@
-import abc
 import copy
 import logging
-import re
 from typing import List, Callable, Tuple, Dict, Optional
 
 import spacy
@@ -30,7 +28,8 @@ def _copy_ent_with_new_spans(
         ent.metadata["split_rule"] = rule_name
     return ent
 
-class SplitOnConjunctionPattern():
+
+class SplitOnConjunctionPattern:
     def __init__(self, spacy_model: str = "en_core_sci_md"):
         """
         analyse
@@ -149,7 +148,7 @@ class SplitOnConjunctionPattern():
         return ents
 
 
-class SplitOnNumericalListPatternWithPrefix():
+class SplitOnNumericalListPatternWithPrefix:
     """
     split a string of numerically incrementing parts, e.g.
     BRACA1/2 ->
