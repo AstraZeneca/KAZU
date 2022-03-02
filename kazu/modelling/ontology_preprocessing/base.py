@@ -78,8 +78,11 @@ class OntologyParser(ABC):
         :return: a 2-tuple - first is synonym dataframe, second is metadata
         """
         df = self.parse_to_dataframe()
+        # in case the default lable isn't populated, just use the IDX
+        df.loc[pd.isnull(df[DEFAULT_LABEL]), DEFAULT_LABEL] = df[IDX]
         # ensure correct order
         syn_df = df[self.all_synonym_column_names]
+        syn_df.drop_duplicates(subset=self.all_synonym_column_names)
         # group mapping types of same synonym together
         syn_df = syn_df.groupby(by=[IDX, SYN]).agg(set).reset_index()
         syn_df = syn_df.dropna(axis=0)
@@ -495,9 +498,6 @@ class ChemblOntologyParser(OntologyParser):
             FROM molecule_dictionary
         """  # noqa
         df = pd.read_sql(query, conn)
-        df[DEFAULT_LABEL] = df[DEFAULT_LABEL].str.lower()
-        df[SYN] = df[SYN].str.lower()
-
         df.drop_duplicates(inplace=True)
 
         return df
