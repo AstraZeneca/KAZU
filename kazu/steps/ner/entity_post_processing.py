@@ -30,76 +30,7 @@ def _copy_ent_with_new_spans(
         ent.metadata["split_rule"] = rule_name
     return ent
 
-
-class EntitySplitter(abc.ABC):
-    def __call__(self, entity: Entity, text: str) -> List[Entity]:
-        raise NotImplementedError()
-
-
-class SplitOnPattern(EntitySplitter):
-    """
-    split a string based on a pattern into sub-entities, e.g.
-    RAS-MAPK-ERK ->
-    RAS
-    MAPK
-    ERK
-    """
-
-    def __init__(self, pattern: str):
-        self.pattern = pattern
-
-    def __call__(self, entity: Entity, text: str) -> List[Entity]:
-        input_ent_start, input_ent_end = entity.start, entity.end
-        iter = re.finditer(self.pattern, entity.match)
-        indices = [(m.start(0), m.end(0)) for m in iter]
-        new_ents = []
-        prev_last = -1
-        for i, (s, e) in enumerate(indices):
-            if i == 0:
-                new_ents.append(
-                    _copy_ent_with_new_spans(
-                        entity=entity,
-                        spans=[(input_ent_start, s)],
-                        text=text,
-                        join_str="",
-                        rule_name=self.__class__.__name__,
-                    )
-                )
-                prev_last = e
-            elif i == len(indices) - 1:
-                new_ents.append(
-                    _copy_ent_with_new_spans(
-                        entity=entity,
-                        spans=[(prev_last, s)],
-                        text=text,
-                        join_str="",
-                        rule_name=self.__class__.__name__,
-                    )
-                )
-                new_ents.append(
-                    _copy_ent_with_new_spans(
-                        entity=entity,
-                        spans=[(e, input_ent_end)],
-                        text=text,
-                        join_str="",
-                        rule_name=self.__class__.__name__,
-                    )
-                )
-            else:
-                new_ents.append(
-                    _copy_ent_with_new_spans(
-                        entity=entity,
-                        spans=[(prev_last, s)],
-                        text=text,
-                        join_str="",
-                        rule_name=self.__class__.__name__,
-                    )
-                )
-                prev_last = e
-        return new_ents
-
-
-class SplitOnConjunctionPattern(EntitySplitter):
+class SplitOnConjunctionPattern():
     def __init__(self, spacy_model: str = "en_core_sci_md"):
         """
         analyse
@@ -152,9 +83,7 @@ class SplitOnConjunctionPattern(EntitySplitter):
             ents = self.run_conjunction_rules(doc, entity, text)
         if doc.ents:
             ents.extend(self.process_ents(entity=entity, doc=doc, text=text))
-        # drop dups
-        dedup_ents = list(set(ents))
-        return dedup_ents
+        return ents
 
     def run_conjunction_rules(self, doc, entity, text):
         # high precision rules for splitting conjunctions
@@ -220,7 +149,7 @@ class SplitOnConjunctionPattern(EntitySplitter):
         return ents
 
 
-class SplitOnNumericalListPatternWithPrefix(EntitySplitter):
+class SplitOnNumericalListPatternWithPrefix():
     """
     split a string of numerically incrementing parts, e.g.
     BRACA1/2 ->
