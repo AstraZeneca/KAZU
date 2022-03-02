@@ -9,7 +9,7 @@ from kazu.tests.utils import requires_model_pack
 
 @requires_model_pack
 @pytest.fixture(scope="module")
-def nlp(kazu_test_config, tmp_path):
+def nlp(kazu_test_config, tmp_path_factory):
     labels = kazu_test_config.ExplosionNERStep.labels
     syn_table_cache = instantiate(kazu_test_config.ExplosionNERStep.synonym_table_cache)
     parquet_files = syn_table_cache.get_synonym_table_paths()
@@ -17,7 +17,7 @@ def nlp(kazu_test_config, tmp_path):
         parquet_files=parquet_files,
         labels=labels,
         # we don't want this to overwrite the pipeline in the actual model pack
-        output_dir=tmp_path,
+        output_dir=tmp_path_factory.mktemp("pipeline"),
         span_key=SPAN_KEY,
     )
 
