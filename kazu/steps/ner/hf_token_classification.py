@@ -149,8 +149,8 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                             token_confidences=predictions[word_id_index_start:i],
                             token_ids=frame_token_ids[word_id_index_start:i],
                             tokens=frame_tokens[word_id_index_start:i],
-                            word_offset_start=offset_start,
-                            word_offset_end=offset_end,
+                            word_char_start=offset_start,
+                            word_char_end=offset_end - 1,
                             word_id=prev_word_id,
                         )
                     )
@@ -164,8 +164,8 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                         token_confidences=predictions[word_id_index_start : i + 1],
                         token_ids=frame_token_ids[word_id_index_start : i + 1],
                         tokens=frame_tokens[word_id_index_start : i + 1],
-                        word_offset_start=offset_start,
-                        word_offset_end=offset_end,
+                        word_char_start=offset_start,
+                        word_char_end=offset_end,
                         word_id=word_id,
                     )
                 )
