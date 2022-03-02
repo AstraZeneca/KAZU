@@ -1,6 +1,5 @@
 from typing import Iterable, Union
 
-import typer
 import spacy
 
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
@@ -24,7 +23,3 @@ def main(
     ontology_matcher.set_ontologies(parquet_files)
     nlp.to_disk(output_dir)
     return nlp
-
-
-if __name__ == "__main__":
-    typer.run(main)
