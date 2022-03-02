@@ -7,7 +7,7 @@ from typing import Dict, Iterator, List, Optional, Set, Tuple
 import spacy
 from spacy.tokens import Span as spacy_span
 
-from kazu.data.data import CharSpan, Document, Mapping, Section, Entity, PROCESSING_EXCEPTION
+from kazu.data.data import CharSpan, Document, Section, Entity, PROCESSING_EXCEPTION
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.modelling.ontology_matching.ontology_matcher import SPAN_KEY
 from kazu.steps import BaseStep
@@ -117,15 +117,6 @@ class RuleBasedNerAndLinkingStep(BaseStep):
                         namespace=self.namespace(),
                     )
                     entities.append(e)
-
-                    for span in span_group:
-                        mapping = Mapping(
-                            default_label="fix_this",
-                            source="fix_this",
-                            idx=span.kb_id,
-                            mapping_type=["fix_this"],
-                        )
-                        e.add_mapping(mapping)
 
                 # if one section of a doc fails after others have succeeded, this will leave failed docs
                 # in a partially processed state. It's actually unclear to me whether this is desireable or not.
