@@ -9,5 +9,5 @@ Additional files not in this folder, but in the same situation (i.e. originally 
 
 Finally, some elements of the below files are taken from the same Explosion.AI codebase, but have been futher modified, and the larger file is originally authored by the Kazu authors:
 
-* steps/ner/rule_based.py
+* steps/ner/explosion.py
 * ontology_preprocessing/base.py

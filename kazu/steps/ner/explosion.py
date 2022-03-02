@@ -18,7 +18,7 @@ from kazu.utils.utils import as_path, PathLike
 logger = logging.getLogger(__name__)
 
 
-class RuleBasedNerAndLinkingStep(BaseStep):
+class ExplosionNERStep(BaseStep):
     """
     A wrapper for the explosion ontology-based entity matcher and linker
     """

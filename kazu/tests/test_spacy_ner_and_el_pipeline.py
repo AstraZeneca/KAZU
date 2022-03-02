@@ -10,8 +10,8 @@ from kazu.tests.utils import requires_model_pack
 @requires_model_pack
 @pytest.fixture(scope="module")
 def nlp(kazu_test_config, tmp_path):
-    labels = kazu_test_config.RuleBasedNerAndLinkingStep.labels
-    syn_table_cache = instantiate(kazu_test_config.RuleBasedNerAndLinkingStep.synonym_table_cache)
+    labels = kazu_test_config.ExplosionNERStep.labels
+    syn_table_cache = instantiate(kazu_test_config.ExplosionNERStep.synonym_table_cache)
     parquet_files = syn_table_cache.get_synonym_table_paths()
     return assemble_pipeline(
         parquet_files=parquet_files,

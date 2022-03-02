@@ -5,7 +5,7 @@ pipeline:
     - SpacyNerStep
     - TransformersModelForTokenClassificationNerStep
     - SethStep
-    - RuleBasedNerAndLinkingStep
+    - ExplosionNERStep
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
     - EnsembleEntityLinkingStep

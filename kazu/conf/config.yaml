@@ -9,4 +9,4 @@ defaults:
   - pipeline: default
   - DistillationTraining: default
   - SethStep: default
-  - RuleBasedNerAndLinkingStep: default
+  - ExplosionNERStep: default
