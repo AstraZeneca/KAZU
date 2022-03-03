@@ -394,7 +394,8 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         torch.save(self.index, path)
 
     def _add(self, embeddings: torch.Tensor):
-        return torch.cat([self.index, embeddings])
+        self.index = torch.cat([self.index, embeddings])
+        return self.index
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
         return embeddings
