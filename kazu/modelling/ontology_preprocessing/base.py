@@ -498,6 +498,8 @@ class ChemblOntologyParser(OntologyParser):
             FROM molecule_dictionary
         """  # noqa
         df = pd.read_sql(query, conn)
+        # eliminate anything without a pref_name, as will be too big otherwise
+        df = df[~pd.isnull(df[DEFAULT_LABEL])]
         df.drop_duplicates(inplace=True)
 
         return df
