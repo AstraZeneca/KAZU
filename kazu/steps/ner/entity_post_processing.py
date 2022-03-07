@@ -2,11 +2,11 @@ import copy
 import logging
 from typing import List, Callable, Tuple, Dict, Optional
 
-import spacy
 from spacy.matcher import Matcher
 from spacy.tokens import Token, Span, Doc
 
 from kazu.data.data import Entity
+from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +30,12 @@ def _copy_ent_with_new_spans(
 
 
 class SplitOnConjunctionPattern:
-    def __init__(self, spacy_model: str = "en_core_sci_md"):
+    def __init__(self, spacy_pipeline: SpacyPipeline):
         """
         analyse
         :param pattern:
         """
-        self.nlp = spacy.load(spacy_model)
+        self.nlp = spacy_pipeline.nlp
         self.matcher = Matcher(self.nlp.vocab)
         patterns = [
             [
