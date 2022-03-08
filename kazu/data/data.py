@@ -60,7 +60,7 @@ class CharSpan:
         return hash((self.start, self.end))
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class TokenizedWord:
     """
     A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
@@ -155,7 +155,7 @@ class NerProcessedSection:
         return all_words
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Mapping:
     default_label: str  # default label from knowledgebase
     source: str  # the knowledgebase name
@@ -164,7 +164,7 @@ class Mapping:
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Entity:
     """
     Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
@@ -298,7 +298,7 @@ class Entity:
         return cls(spans=single_span, **kwargs)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Section:
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
@@ -438,7 +438,7 @@ class DocumentEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Document:
     idx: str  # a document identifier
     sections: List[Section] = field(
