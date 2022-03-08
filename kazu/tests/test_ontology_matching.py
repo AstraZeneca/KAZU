@@ -141,12 +141,12 @@ def test_serialization(example_text):
         ontology_matcher.set_labels([ANATOMY, DISEASE])
         ontology_matcher.set_ontologies(parquet_file)
         doc1 = nlp1(example_text)
-        spans1 = set((s.start, s.end, s.text) for s in doc1.spans["my_hits"])
+        spans1 = set((s.start_char, s.end_char, s.text) for s in doc1.spans["my_hits"])
         nlp_loc = d / "ontology_pipeline"
         nlp1.to_disk(nlp_loc)
         nlp2 = spacy.load(nlp_loc)
         doc2 = nlp2(example_text)
-        spans2 = set((s.start, s.end, s.text) for s in doc2.spans["my_hits"])
+        spans2 = set((s.start_char, s.end_char, s.text) for s in doc2.spans["my_hits"])
         assert len(spans1) == 3
         assert len(spans2) == 3
         assert spans1 == spans2

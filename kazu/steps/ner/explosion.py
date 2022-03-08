@@ -110,8 +110,6 @@ class ExplosionNERStep(BaseStep):
                     e = Entity(
                         match=span_text,
                         entity_class=span_label_,
-                        # the end might be off by one here due to how spacy defined
-                        # ends vs kazu - not sure
                         spans=frozenset((CharSpan(start=span_start, end=span_end),)),
                         namespace=self.namespace(),
                     )
@@ -155,4 +153,4 @@ class ExplosionNERStep(BaseStep):
 
         This still includes the class of the recognised entity (span.label_) since
         the entity_class is stored on Kazu's Entity concept rather than Mapping."""
-        return (span.start, span.end, span.text, span.label_)
+        return (span.start_char, span.end_char, span.text, span.label_)
