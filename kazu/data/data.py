@@ -115,19 +115,18 @@ class TokenizedWord:
 class NerProcessedSection:
     """
     long Sections may need to be split into multiple frames when processing with a transformer. This class is a
-    convenient container to reassemble the frames into a coherent object, post transformer
+    convenient container to reassemble the frames into a coherent object, post transformer. Not hashable due to
+    all properties being lists (and therefore mutable)
     """
 
     all_frame_offsets: List[Tuple[int, int]] = field(
-        default_factory=list, hash=False
+        default_factory=list
     )  # offsets associated with each token
     all_frame_word_ids: List[int] = field(
-        default_factory=list, hash=False
+        default_factory=list
     )  # word ids associated with each token
-    all_frame_labels: List[int] = field(default_factory=list, hash=False)  # labels for each token
-    all_frame_confidences: List[float] = field(
-        default_factory=list, hash=False
-    )  # confidence for each token
+    all_frame_labels: List[int] = field(default_factory=list)  # labels for each token
+    all_frame_confidences: List[float] = field(default_factory=list)  # confidence for each token
 
     def to_tokenized_words(self, id2label: Dict[int, str]) -> List[TokenizedWord]:
         """
