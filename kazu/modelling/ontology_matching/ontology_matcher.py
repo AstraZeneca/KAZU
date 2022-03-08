@@ -15,10 +15,6 @@ from spacy.util import SimpleFrozenList
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 
-
-STRICT_HITS = "spans_ORTH"
-LOWER_HITS = "spans_LOWER"
-
 GENE = "GGP"
 CHEMICAL = "Chemical"
 ANATOMY = "Anatomy"
