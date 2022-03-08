@@ -18,7 +18,10 @@ def example_text():
 def _create_parquet_file(file_loc):
     df = pd.DataFrame.from_dict(
         {
-            IDX: ["UBERON_042", "MONDO_08"],
+            IDX: [
+                "http://purl.obolibrary.org/obo/UBERON_042",
+                "http://purl.obolibrary.org/obo/MONDO_08",
+            ],
             DEFAULT_LABEL: ["Q42_label", "Q8_label"],
             SYN: ["Q42_syn", "Q8_syn"],
         }
@@ -94,7 +97,10 @@ def test_apply(example_text):
         assert len(matches) == 3
         assert set([m.text for m in matches]) == {"Q42_syn", "Q8_syn"}
         assert set([m.label_ for m in matches]) == {"Anatomy", "Disease"}
-        assert set([m.kb_id_ for m in matches]) == {"UBERON_042", "MONDO_08"}
+        assert set([m.kb_id_ for m in matches]) == {
+            "http://purl.obolibrary.org/obo/UBERON_042",
+            "http://purl.obolibrary.org/obo/MONDO_08",
+        }
 
 
 # fmt: off
