@@ -15,11 +15,12 @@ from spacy.util import SimpleFrozenList
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 
-GENE = "GGP"
-CHEMICAL = "Chemical"
-ANATOMY = "Anatomy"
-DISEASE = "Disease"
-CELL_LINE = "Cell_line"
+GENE = "gene"
+DRUG = "drug"
+ANATOMY = "anatomy"
+DISEASE = "disease"
+CELL_LINE = "cell_line"
+ENTITY = "entity"
 
 SPAN_KEY = "RAW_HITS"
 
@@ -155,7 +156,7 @@ class OntologyMatcher:
             if len(self.labels) > 0:
                 logging.info(f"Inferred {len(self.labels)} labels from the data.")
             else:
-                self.set_labels([GENE, CHEMICAL, ANATOMY, DISEASE, CELL_LINE])
+                self.set_labels([GENE, DRUG, ANATOMY, DISEASE, CELL_LINE, ENTITY])
                 logging.info(f"Used the {len(self.labels)} default labels.")
 
         else:
@@ -308,7 +309,7 @@ class OntologyMatcher:
         if iri.startswith("ENS") or iri.startswith("http://identifiers.org/hgnc/"):
             return GENE if GENE in self.labels else ""
         if iri.startswith("CHEMBL"):
-            return CHEMICAL if CHEMICAL in self.labels else ""
+            return DRUG if DRUG in self.labels else ""
         if iri.startswith("http://purl.obolibrary.org/obo/UBERON_"):
             return ANATOMY if ANATOMY in self.labels else ""
         if iri.startswith("http://purl.obolibrary.org/obo/MONDO_") or iri.startswith(
@@ -320,7 +321,7 @@ class OntologyMatcher:
 
         try:
             int(iri)  # MEDDRA IDs are just INTs
-            return DISEASE if DISEASE in self.labels else ""
+            return ENTITY if ENTITY in self.labels else ""
         except ValueError:
             pass
 
@@ -367,8 +368,8 @@ class OntologyMatcher:
         """Define patterns where an atanomy entity appears and it's likely a false positive"""
         matcher = Matcher(self.nlp.vocab)
         patterns = []
-        if CHEMICAL in self.labels:
-            p = [{"_": {CHEMICAL: True}}, {"_": {ANATOMY: True}, "LOWER": "arm"}]
+        if DRUG in self.labels:
+            p = [{"_": {DRUG: True}}, {"_": {ANATOMY: True}, "LOWER": "arm"}]
             patterns.append(p)
         p2 = [
             {"LOWER": "single"},

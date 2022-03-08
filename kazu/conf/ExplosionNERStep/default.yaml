@@ -3,11 +3,12 @@ depends_on: ~
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 rebuild_pipeline: False
 labels:
-  - GGP
-  - Chemical
-  - Anatomy
-  - Disease
-  - Cell_line
+  - gene
+  - drug
+  - anatomy
+  - disease
+  - cell_line
+  - entity
 synonym_table_cache:
   _target_: kazu.utils.caching.SynonymTableCache
   parsers:

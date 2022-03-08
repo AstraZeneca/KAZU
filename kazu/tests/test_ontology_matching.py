@@ -96,7 +96,7 @@ def test_apply(example_text):
         matches = doc.spans["my_hits"]
         assert len(matches) == 3
         assert set([m.text for m in matches]) == {"Q42_syn", "Q8_syn"}
-        assert set([m.label_ for m in matches]) == {"Anatomy", "Disease"}
+        assert set([m.label_ for m in matches]) == {ANATOMY, DISEASE}
         assert set([m.kb_id_ for m in matches]) == {
             "http://purl.obolibrary.org/obo/UBERON_042",
             "http://purl.obolibrary.org/obo/MONDO_08",

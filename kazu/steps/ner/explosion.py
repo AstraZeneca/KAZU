@@ -109,7 +109,6 @@ class ExplosionNERStep(BaseStep):
                     span_start, span_end, span_text, span_label_ = mapping_invariant_span
                     e = Entity(
                         match=span_text,
-                        # not quite true, this is spacy's entity classes, not Kazu's
                         entity_class=span_label_,
                         # the end might be off by one here due to how spacy defined
                         # ends vs kazu - not sure
