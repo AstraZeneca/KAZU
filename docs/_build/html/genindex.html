@@ -52,7 +52,6 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
- | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -84,11 +83,11 @@
       <ul>
         <li><a href="apidocs.html#kazu.utils.link_index.EmbeddingIndex.add">(kazu.utils.link_index.EmbeddingIndex method)</a>
 </li>
-        <li><a href="apidocs.html#kazu.utils.link_index.Index.add">(kazu.utils.link_index.Index method)</a>
-</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs.html#kazu.data.data.Entity.add_mapping">add_mapping() (kazu.data.data.Entity method)</a>
+</li>
       <li><a href="apidocs.html#kazu.data.data.Entity.as_brat">as_brat() (kazu.data.data.Entity method)</a>
 </li>
   </ul></td>
@@ -118,6 +117,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#kazu.data.data.CharSpan">CharSpan (class in kazu.data.data)</a>
+</li>
+      <li><a href="apidocs.html#kazu.utils.link_index.Index.check_dataframe_types">check_dataframe_types() (kazu.utils.link_index.Index static method)</a>
 </li>
       <li><a href="apidocs.html#kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache">check_lookup_cache() (kazu.utils.caching.EntityLinkingLookupCache method)</a>
 </li>
@@ -157,13 +158,13 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs.html#kazu.utils.utils.EntityClassFilter">EntityClassFilter (class in kazu.utils.utils)</a>
+</li>
       <li><a href="apidocs.html#kazu.utils.caching.EntityLinkingLookupCache">EntityLinkingLookupCache (class in kazu.utils.caching)</a>
 </li>
       <li><a href="apidocs.html#kazu.utils.caching.EmbeddingIndexCacheManager.enumerate_dataframe_chunks">enumerate_dataframe_chunks() (kazu.utils.caching.EmbeddingIndexCacheManager static method)</a>
 </li>
       <li><a href="apidocs.html#kazu.steps.linking.link_ensembling.MappingPostProcessing.exact_hits">exact_hits() (kazu.steps.linking.link_ensembling.MappingPostProcessing method)</a>
-</li>
-      <li><a href="apidocs.html#kazu.data.data.Entity.exact_overlap">exact_overlap() (kazu.data.data.Entity method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -177,15 +178,17 @@
 </li>
       <li><a href="apidocs.html#kazu.pipeline.pipeline.FailedDocsLogHandler">FailedDocsLogHandler (class in kazu.pipeline.pipeline)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#kazu.utils.link_index.FaissEmbeddingIndex">FaissEmbeddingIndex (class in kazu.utils.link_index)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#kazu.utils.utils.filter_entities_with_ontology_mappings">filter_entities_with_ontology_mappings() (in module kazu.utils.utils)</a>
 </li>
       <li><a href="apidocs.html#kazu.steps.linking.link_ensembling.MappingPostProcessing.filter_scores">filter_scores() (kazu.steps.linking.link_ensembling.MappingPostProcessing method)</a>
 </li>
       <li><a href="apidocs.html#kazu.utils.utils.find_document_from_entity">find_document_from_entity() (in module kazu.utils.utils)</a>
+</li>
+      <li><a href="apidocs.html#kazu.data.data.Entity.from_spans">from_spans() (kazu.data.data.Entity class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -221,10 +224,22 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#kazu.utils.link_index.Index">Index (class in kazu.utils.link_index)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#kazu.utils.caching.IndexCacheManager">IndexCacheManager (class in kazu.utils.caching)</a>
 </li>
+      <li><a href="apidocs.html#kazu.data.data.CharSpan.is_completely_overlapped">is_completely_overlapped() (kazu.data.data.CharSpan method)</a>
+
+      <ul>
+        <li><a href="apidocs.html#kazu.data.data.Entity.is_completely_overlapped">(kazu.data.data.Entity method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs.html#kazu.data.data.CharSpan.is_partially_overlapped">is_partially_overlapped() (kazu.data.data.CharSpan method)</a>
+
+      <ul>
+        <li><a href="apidocs.html#kazu.data.data.Entity.is_partially_overlapped">(kazu.data.data.Entity method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -334,6 +349,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs.html#kazu.data.data.Mapping">Mapping (class in kazu.data.data)</a>
+</li>
       <li><a href="apidocs.html#kazu.steps.linking.link_ensembling.MappingPostProcessing">MappingPostProcessing (class in kazu.steps.linking.link_ensembling)</a>
 </li>
       <li><a href="apidocs.html#kazu.utils.link_index.MatMulTensorEmbeddingIndex">MatMulTensorEmbeddingIndex (class in kazu.utils.link_index)</a>
@@ -374,14 +391,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs.html#kazu.data.data.NerProcessedSection">NerProcessedSection (class in kazu.data.data)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="O">O</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs.html#kazu.data.data.Entity.overlapped">overlapped() (kazu.data.data.Entity method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -441,8 +450,14 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs.html#kazu.utils.caching.select_index_type">select_index_type() (in module kazu.utils.caching)</a>
+      <li><a href="apidocs.html#kazu.utils.caching.DictionaryIndexCacheManager.select_index_type">select_index_type() (kazu.utils.caching.DictionaryIndexCacheManager method)</a>
+
+      <ul>
+        <li><a href="apidocs.html#kazu.utils.caching.EmbeddingIndexCacheManager.select_index_type">(kazu.utils.caching.EmbeddingIndexCacheManager method)</a>
 </li>
+        <li><a href="apidocs.html#kazu.utils.caching.IndexCacheManager.select_index_type">(kazu.utils.caching.IndexCacheManager method)</a>
+</li>
+      </ul></li>
       <li><a href="apidocs.html#kazu.steps.linking.link_ensembling.MappingPostProcessing.similarly_ranked">similarly_ranked() (kazu.steps.linking.link_ensembling.MappingPostProcessing method)</a>
 </li>
       <li><a href="apidocs.html#kazu.web.server.start">start() (in module kazu.web.server)</a>
@@ -505,7 +520,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Korea University, AstraZeneca.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>
