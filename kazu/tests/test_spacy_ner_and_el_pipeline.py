@@ -27,7 +27,7 @@ def nlp(kazu_test_config, tmp_path_factory):
     "sentence,entities",
     [
         ("The mean (SD) HAVOC score was 2.6.", []),
-        ("Diseases associated with WAS include Wiskott Syndrome and Thrombocytopenia 1.", ["WAS", "Wiskott Syndrome", "Thrombocytopenia 1"]),
+        ("Diseases associated with WAS include Wiskott Syndrome and Thrombocytopenia 1.", ["WAS", "Wiskott Syndrome", "Thrombocytopenia", "Thrombocytopenia 1"]),
         ("MEDI8897 is a recombinant human RSV monoclonal antibody", ["MEDI8897"]),
         ("We aimed to confirm these findings in patients with a BRCA1 or BRCA2 mutation", ["BRCA1", "BRCA2"]),
         ("Gastrointestinal AEs were typically low-grade.", []),
@@ -35,7 +35,7 @@ def nlp(kazu_test_config, tmp_path_factory):
         ("These patients were treated with abemaciclib.", ["abemaciclib"]),
         ("Blood was sampled pre- and post-dose on Day 32.", ["Blood"]),
         ("TIME cells express readily detectable telomerase activity. There is TIME !", ["TIME"]),
-        ("Subjects with prevalent kidney disease were randomized to linagliptin or placebo added to usual care.", ["kidney disease", "linagliptin"]),
+        ("Subjects with prevalent kidney disease were randomized to linagliptin or placebo added to usual care.", ["kidney", "kidney disease", "linagliptin"]),
         ("The increase in lifespan is matched by time free from incident cardiovascular disease.", ["cardiovascular disease", "lifespan"]),
         ("The necuparanib arm had a higher incidence of haematologic toxicity.", ["necuparanib"]),
         ("This was a single-arm trial. My arm hurts.", ["arm"]),
@@ -45,11 +45,11 @@ def nlp(kazu_test_config, tmp_path_factory):
         ("IVF, with or without ICSI, was received in all 500 patients.", []),
         ("All three decontamination processes reduced bacteria counts similarly.", []),
         ("The primary endpoint was MFS.", []),
-        ("Mean glycated haemoglobin concentration was 66 mmol/mol (8.2%).", []),
-        ("Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.", ["pembrolizumab", "breast cancer"]),
         ("Vandetanib plus docetaxel led to a significant improvement in PFS versus placebo plus docetaxel.", ["Vandetanib", "docetaxel", "docetaxel"]),
+        ("Mean glycated haemoglobin concentration was 66 mmol/mol (8.2%).", ["haemoglobin"]),
+        ("Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.", ["pembrolizumab", "breast cancer", "breast", "cancer", "chemotherapy"]),
         ("Anifrolumab dose-dependently suppressed the IFN gene signature.", ["IFN", "Anifrolumab"]),
-        ("Antiplatelet effects of citalopram in patients with ischemic stroke", ["citalopram", "ischemic stroke"]),
+        ("Antiplatelet effects of citalopram in patients with ischemic stroke", ["citalopram", "ischemic stroke", "stroke"]),
         ("We reviewed 19 patients with the Dandy-Walker syndrome", ["Dandy-Walker syndrome"]),
         ("We reviewed 19 patients with the Dandy Walker syndrome", ["Dandy Walker syndrome"]),
     ]
@@ -69,7 +69,24 @@ def test_ner_results(nlp, sentence, entities):
         ("These patients were treated with abemaciclib.", ["CHEMBL3301610"]),
         ("Blood was sampled pre- and post-dose on Day 32.", ["http://purl.obolibrary.org/obo/UBERON_0000178"]),
         ("TIME cells express readily detectable telomerase activity", ["CVCL_0047"]),
-        ("Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.", ["CHEMBL3137343", "http://purl.obolibrary.org/obo/MONDO_0007254"]),
+        (
+            "Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.",
+            [
+                "CHEMBL3137343",  # pembrolizumab
+                "http://purl.obolibrary.org/obo/MONDO_0007254",  # MONDO breast cancer
+                "http://purl.obolibrary.org/obo/UBERON_0000310",  # UBERON breaset
+                "http://purl.obolibrary.org/obo/MONDO_0004992",  # MONDO cancer
+                "http://purl.obolibrary.org/obo/HP_0002664",  # HP neoplasm (~= cancer)
+                # this is 'breast carcinoma' - this one is a bit questionable as http://purl.obolibrary.org/obo/MONDO_0007254 'breast cancer' is better -
+                # ideally we would use the synonym type to prefer 'breast cancer' since the link for 'breast carcinoma' is 'has broad synonym'.
+                # However, we're not using the entity linking for now, so not worth it.
+                "http://purl.obolibrary.org/obo/MONDO_0004989",
+                "10006187",  # Meddra breast cancer
+                "10028997",  # Meddra Neoplasm malignant (~=cancer)
+                "10061758",  # Meddra Chemotherapy
+
+            ],
+        ),
     ]
 )
 # fmt: on
