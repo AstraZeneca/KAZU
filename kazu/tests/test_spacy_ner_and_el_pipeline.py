@@ -7,7 +7,6 @@ from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_
 from kazu.tests.utils import requires_model_pack
 
 
-@requires_model_pack
 @pytest.fixture(scope="module")
 def nlp(kazu_test_config, tmp_path_factory):
     labels = kazu_test_config.ExplosionNERStep.labels
@@ -55,6 +54,7 @@ def nlp(kazu_test_config, tmp_path_factory):
     ]
 )
 # fmt: on
+@requires_model_pack
 def test_ner_results(nlp, sentence, entities):
     doc = nlp(sentence)
     pred_spans = list(doc.spans[SPAN_KEY])
@@ -90,6 +90,7 @@ def test_ner_results(nlp, sentence, entities):
     ]
 )
 # fmt: on
+@requires_model_pack
 def test_nel_results(nlp, sentence, entities):
     doc = nlp(sentence)
     pred_spans = list(doc.spans[SPAN_KEY])
