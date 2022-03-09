@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 from functools import partial
-from typing import List, Dict, Union, Callable, Iterable, Optional
+from typing import List, Dict, Union, Callable, Iterable, Optional, Set
 from pathlib import Path
 import pandas as pd
 import logging
@@ -274,14 +274,13 @@ class OntologyMatcher:
             return False
         return False
 
-    def _define_paths(self, in_loc: SinglePathLikeOrIterable) -> List[Path]:
+    def _define_paths(self, in_loc: SinglePathLikeOrIterable) -> Set[Path]:
         if isinstance(in_loc, (str, Path)):
             in_locs: Iterable[PathLike] = (in_loc,)
         else:
             in_locs = in_loc
 
-        # TODO: refactor to make all_paths a Set[Path]
-        all_paths = []
+        all_paths = set()
         for path in in_locs:
             path = as_path(path)
             if not path.exists():
@@ -289,9 +288,9 @@ class OntologyMatcher:
             if path.is_file():
                 if path.suffix != ".parquet":
                     raise ValueError(f"Provided file {path} is not a Parquet file.")
-                all_paths.append(path)
+                all_paths.add(path)
             if path.is_dir():
-                all_paths.extend(path.glob("**/*.parquet"))
+                all_paths.update(path.glob("**/*.parquet"))
         return all_paths
 
     def _set_span_labels(self, spans):
