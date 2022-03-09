@@ -59,7 +59,6 @@ def test_ner_results(nlp, sentence, entities):
     doc = nlp(sentence)
     pred_spans = list(doc.spans[SPAN_KEY])
     assert set([s.text for s in pred_spans]) == set(entities)
-    assert len(pred_spans) == len(entities)
 
 
 # fmt: off
