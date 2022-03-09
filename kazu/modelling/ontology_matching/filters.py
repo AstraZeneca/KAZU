@@ -30,7 +30,7 @@ BLACKLIST_LOWER = {
     "CHEMBL2272076": ["impact"],
     "http://purl.obolibrary.org/obo/MONDO_0012268": ["aids"],
     # as above in BLACKLIST_EXACT
-    "*": ["all", "was", "disease", "syndrome"],
+    "*": ["all", "was", "disease", "syndrome", "cat", "mat"],
 }
 
 
