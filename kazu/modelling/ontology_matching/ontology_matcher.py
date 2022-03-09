@@ -1,5 +1,6 @@
+from dataclasses import dataclass, asdict
 from functools import partial
-from typing import List, Dict, Union, Callable, Iterable, Optional, TypedDict
+from typing import List, Dict, Union, Callable, Iterable, Optional
 from pathlib import Path
 import pandas as pd
 import logging
@@ -45,10 +46,8 @@ def create_ontology_mather(
     )
 
 
-# TODO: this can probably be written as an actual dataclass,
-# but doing this for now until I get things working, and then I can try
-# converting it.
-class OntologyMatcherConfig(TypedDict):
+@dataclass
+class OntologyMatcherConfig:
     span_key: str
     labels: List[str]
     parquet_files: List[str]
@@ -75,7 +74,7 @@ class OntologyMatcher:
         self.name = name
         self.entry_filter = entry_filter
         self.variant_generator = variant_generator
-        self.cfg: OntologyMatcherConfig = {"span_key": span_key, "labels": [], "parquet_files": []}
+        self.cfg = OntologyMatcherConfig(span_key=span_key, labels=[], parquet_files=[])
         # These will be defined when calling initialize
         self.strict_matcher, self.lowercase_matcher = None, None
         self.tp_matchers, self.fp_matchers = None, None
@@ -97,15 +96,15 @@ class OntologyMatcher:
 
     @property
     def span_key(self) -> str:
-        return self.cfg["span_key"]
+        return self.cfg.span_key
 
     @property
     def labels(self) -> List[str]:
         """RETURNS (List[str]): The labels currently processed by this component."""
-        return self.cfg["labels"]
+        return self.cfg.labels
 
     def set_labels(self, labels: Iterable[str]):
-        self.cfg["labels"] = list(labels)
+        self.cfg.labels = list(labels)
         self.set_context_matchers()
 
     def set_context_matchers(self):
@@ -115,7 +114,7 @@ class OntologyMatcher:
     @property
     def ontologies(self) -> List[str]:
         """RETURNS (List[str]): List of parquet files that were processed"""
-        return self.cfg["parquet_files"]
+        return self.cfg.parquet_files
 
     def set_ontologies(self, parquet_files: SinglePathLikeOrIterable):
         """Initialize the ontologies when creating this component.
@@ -129,7 +128,7 @@ class OntologyMatcher:
         dfs = {path.name: pd.read_parquet(path) for path in paths}
         self.strict_matcher = self._create_phrasematcher(dfs, lowercase=False)
         self.lowercase_matcher = self._create_phrasematcher(dfs, lowercase=True)
-        self.cfg["parquet_files"] = [path.name for path in paths]
+        self.cfg.parquet_files = [path.name for path in paths]
 
     def initialize(
         self,
@@ -429,7 +428,7 @@ class OntologyMatcher:
                     pickle.dump(self.lowercase_matcher, outfile)
 
         serialize = {}
-        serialize["cfg"] = lambda p: srsly.write_json(p, self.cfg)
+        serialize["cfg"] = lambda p: srsly.write_json(p, asdict(self.cfg))
         serialize["strict_matcher"] = partial(pickle_matcher, strict=True)
         serialize["lowercase_matcher"] = partial(pickle_matcher, strict=False)
         spacy.util.to_disk(path, serialize, exclude)
@@ -448,7 +447,12 @@ class OntologyMatcher:
                     self.lowercase_matcher = matcher
 
         deserialize = {}
-        deserialize["cfg"] = lambda p: self.cfg.update(srsly.read_json(p))
+
+        def deserialize_cfg(path: str) -> None:
+            loaded_conf = srsly.read_json(path)
+            self.cfg = OntologyMatcherConfig(**loaded_conf)
+
+        deserialize["cfg"] = deserialize_cfg
         deserialize["strict_matcher"] = partial(unpickle_matcher, strict=True)
         deserialize["lowercase_matcher"] = partial(unpickle_matcher, strict=False)
         spacy.util.from_disk(path, deserialize, exclude)
