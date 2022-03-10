@@ -1,7 +1,3 @@
-from typing import Callable
-
-import spacy
-
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 
 
@@ -32,11 +28,6 @@ BLACKLIST_LOWER = {
     # as above in BLACKLIST_EXACT
     "*": ["all", "was", "disease", "syndrome", "cat", "mat"],
 }
-
-
-@spacy.registry.misc("arizona.entry_filter_blacklist.v1")
-def create_filter() -> Callable:
-    return is_valid_ontology_entry
 
 
 def is_valid_ontology_entry(row, lowercase):

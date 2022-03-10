@@ -13,6 +13,8 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
+from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
+from kazu.modelling.ontology_matching.variants import create_variants
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 
@@ -44,6 +46,16 @@ def create_ontology_mather(
         entry_filter=entry_filter,
         variant_generator=variant_generator,
     )
+
+
+@spacy.registry.misc("arizona.variant_generator.v1")
+def create_generator() -> Callable:
+    return create_variants
+
+
+@spacy.registry.misc("arizona.entry_filter_blacklist.v1")
+def create_filter() -> Callable:
+    return is_valid_ontology_entry
 
 
 @dataclass
