@@ -1,0 +1,5 @@
+_target_: kazu.steps.other.entity_dedup.NerDeDuplicationStep
+depends_on: ~
+namespace_preferred_order:
+  - TransformersModelForTokenClassificationNerStep
+  - SpacyNerStep

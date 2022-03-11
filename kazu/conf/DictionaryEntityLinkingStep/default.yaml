@@ -1,6 +1,6 @@
 _target_: kazu.steps.linking.dictionary.DictionaryEntityLinkingStep
 depends_on: ~
-lookup_cache_size: 50000
+lookup_cache_size: 5000
 fuzzy: False
 top_n: 20
 score_cutoff: 90.0
@@ -28,9 +28,6 @@ index_group:
       - MONDO
       - MEDDRA
       - ENSEMBL
-      - OPENTARGETS_MOLECULE
-      - OPENTARGETS_DISEASE
-      - OPENTARGETS_TARGET
   cache_managers:
     - _target_: kazu.utils.caching.DictionaryIndexCacheManager
       rebuild_cache: False

@@ -2,6 +2,7 @@
 pipeline:
   steps:
     - SciSpacyAbbreviationExpansionStep
+    - SpacyNerStep
     - TransformersModelForTokenClassificationNerStep
     - SethStep
     - DictionaryEntityLinkingStep
