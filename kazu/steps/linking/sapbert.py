@@ -37,6 +37,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         lookup_cache_size: int = 5000,
         top_n: int = 20,
         score_cutoff: float = 99.0,
+        skip_if_already_linked: bool = True,
     ):
         """
 
@@ -45,10 +46,12 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
         :param top_n: keep up to the top_n hits of the query
         :param score_cutoff: min score for a hit to be considered
+        :param skip_if_already_linked: since sapbert is expensive, skip it if an entity already has mappings
         """
 
         super().__init__(depends_on=depends_on)
 
+        self.skip_if_already_linked = skip_if_already_linked
         self.score_cutoff = score_cutoff
         if not all([isinstance(x, EmbeddingIndexCacheManager) for x in index_group.cache_managers]):
             raise RuntimeError(
@@ -95,6 +98,13 @@ class SapBertForEntityLinkingStep(BaseStep):
         failed_docs = []
         try:
             entities = pydash.flatten([x.get_entities() for x in docs])
+            # filter entities that have no mapping in cache manager
+            entities = filter(
+                lambda x: x.entity_class in self.index_group.entity_class_to_indices.keys(),
+                entities,
+            )
+            if self.skip_if_already_linked:
+                entities = filter(lambda x: len(x.mappings) == 0, entities)
             entities = self.lookup_cache.check_lookup_cache(entities)
             entity_string_to_ent_list = defaultdict(list)
             # group entities by their match string, so we only need to process one string for all matches in a set
