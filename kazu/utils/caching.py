@@ -5,8 +5,6 @@ import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Type, Dict, Any, Iterable, Tuple, List, Set, Iterator
-
-import pandas as pd
 import torch
 from cachetools import LFUCache
 from pytorch_lightning import Trainer
@@ -247,7 +245,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
     ) -> Iterable[Tuple[int, Dict[str, Any]]]:
         """
         generator to split up a dataframe into partitions
-        :param df:
+        :param name: ontology name to query the metadata database with
         :param chunk_size: size of partittions to create
         :return:
         """
@@ -258,12 +256,12 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
 
     def predict_ontology_embeddings(
         self, name: str
-    ) -> Iterator[Tuple[int, pd.DataFrame, torch.Tensor]]:
+    ) -> Iterator[Tuple[int, Dict[str, Any], torch.Tensor]]:
         """
         since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
         and add them to the index sequentially
         :param name: name of ontology
-        :return: partition number, metadata dataframe and embeddings
+        :return: partition number, metadata and embeddings
         """
 
         for partition_number, metadata in self.enumerate_database_chunks(
