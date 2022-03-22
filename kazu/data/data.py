@@ -8,7 +8,7 @@ from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet
 
 import pandas as pd
-from numpy import ndarray
+from numpy import ndarray, float32, float16
 from spacy import displacy
 
 # BIO schema
@@ -431,6 +431,10 @@ class DocumentEncoder(json.JSONEncoder):
             return list(obj)
         elif isinstance(obj, ndarray):
             return obj.tolist()
+        elif isinstance(obj, float32):
+            return obj.item()
+        elif isinstance(obj, float16):
+            return obj.item()
         elif dataclasses.is_dataclass(obj):
             return obj.__dict__
         else:
