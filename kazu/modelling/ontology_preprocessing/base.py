@@ -63,12 +63,30 @@ class MetadataDatabase:
         return getattr(self.instance, name)
 
     def get(self, name: str, idx: str) -> Any:
+        """
+        get the metadata associated with an ontology and id
+        :param name: name of ontology to query
+        :param idx: idx to query
+        :return:
+        """
         return copy.deepcopy(self.instance.get(name, idx))  # type: ignore
 
     def get_all(self, name: str) -> Dict[str, Any]:
+        """
+        get all metadata associated with an ontology
+        :param name: name of ontology
+        :return:
+        """
         return self.instance.database[name]  # type: ignore
 
     def add(self, name: str, metadata: Dict[str, Any]):
+        """
+        add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
+        override any existing entries with associated with the keys in the metadata dict
+        :param name: name of ontology to add to
+        :param metadata: dict in format {idx:metadata}
+        :return:
+        """
         self.instance.add(name, metadata)  # type: ignore
 
 
@@ -83,7 +101,11 @@ class SynonymDatabase:
         database: DefaultDict[str, Dict[str, List[SynonymData]]] = defaultdict(dict)
 
         def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
-            self.database[name].update(synonyms)
+            for syn_string, syn_data in synonyms.items():
+                existing_data = self.database[name].get(syn_string, [])
+                for x in filter(lambda x: x not in existing_data, syn_data):
+                    existing_data.append(x)
+                self.database[name][syn_string] = existing_data
 
         def get(self, name: str, synonym: str) -> List[SynonymData]:
             return self.database[name].get(synonym, [])
@@ -96,12 +118,29 @@ class SynonymDatabase:
         return getattr(self.instance, name)
 
     def get(self, name: str, synonym: str) -> List[SynonymData]:
+        """
+        get a list of SynonymData associated with an ontology and synonym string
+        :param name: name of ontology to query
+        :param synonym: idx to query
+        :return:
+        """
         return copy.copy(self.instance.get(name, synonym))  # type: ignore
 
-    def get_all(self, name: str):
+    def get_all(self, name: str) -> Dict[str, List[SynonymData]]:
+        """
+        get all synonyms associated with an ontology
+        :param name: name of ontology
+        :return:
+        """
         return self.instance.database[name]  # type: ignore
 
     def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
+        """
+        add SynonymData to the database.
+        :param name: name of ontology to add to
+        :param synonyms: dict in format {synonym string:List[SynonymData]}
+        :return:
+        """
         self.instance.add(name, synonyms)  # type: ignore
 
 
