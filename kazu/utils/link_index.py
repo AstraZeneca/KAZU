@@ -7,7 +7,7 @@ import shutil
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable
+from typing import Tuple, Any, Dict, List, Iterable, DefaultDict, Optional
 
 import numpy as np
 import torch
@@ -20,16 +20,27 @@ from kazu.utils.utils import PathLike, as_path
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class SynonymData:
+    """
+    data class required by DictionaryIndex add method. See docs on :py:class:`kazu.utils.link_index.DictionaryIndex`
+    for usage
+    """
+
+    idx: str
+    mapping_type: List[str]
+
+
 class MetadataDatabase:
     """
-    Singleton of a spacy pipeline, so we can reuse it across steps without needing to load the model
-    multiple times
+    Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
+    and this singleton allows us to load it once/reduce memory usage
     """
 
-    instance: "__MetadataDatabase"
+    instance: Optional["__MetadataDatabase"] = None
 
     class __MetadataDatabase:
-        database: Dict[str, Dict[str, Any]] = defaultdict(dict)
+        database: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
 
         def add(self, name: str, metadata: Dict[str, Any]):
             self.database[name].update(metadata)
@@ -45,13 +56,46 @@ class MetadataDatabase:
         return getattr(self.instance, name)
 
     def get(self, name: str, idx: str) -> Any:
-        return copy.deepcopy(self.instance.database[name].get(idx))
+        return copy.deepcopy(self.instance.get(name, idx))  # type: ignore
 
     def get_all(self, name: str):
-        return self.instance.database[name]
+        return self.instance.database[name]  # type: ignore
 
     def add(self, name: str, metadata: Dict[str, Any]):
-        self.instance.add(name, metadata)
+        self.instance.add(name, metadata)  # type: ignore
+
+
+class SynonymDatabase:
+    """
+    Singleton of a database of synonyms.
+    """
+
+    instance: Optional["__SynonymDatabase"] = None
+
+    class __SynonymDatabase:
+        database: DefaultDict[str, Dict[str, List[SynonymData]]] = defaultdict(dict)
+
+        def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
+            self.database[name].update(synonyms)
+
+        def get(self, name: str, synonym: str) -> List[SynonymData]:
+            return self.database[name].get(synonym, [])
+
+    def __init__(self):
+        if not SynonymDatabase.instance:
+            SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
+
+    def get(self, name: str, synonym: str) -> List[SynonymData]:
+        return copy.copy(self.instance.get(name, synonym))  # type: ignore
+
+    def get_all(self, name: str):
+        return self.instance.database[name]  # type: ignore
+
+    def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
+        self.instance.add(name, synonyms)  # type: ignore
 
 
 class Index(abc.ABC):
@@ -167,6 +211,7 @@ class Index(abc.ABC):
 
     def __setstate__(self, state):
         self.name = state
+        self.metadata = MetadataDatabase()
 
     def _load(self, path: PathLike) -> None:
         """
@@ -204,17 +249,6 @@ class Index(abc.ABC):
         return len(self.metadata.get_all(self.name))
 
 
-@dataclass
-class SynonymData:
-    """
-    data class required by DictionaryIndex add method. See docs on :py:class:`kazu.utils.link_index.DictionaryIndex`
-    for usage
-    """
-
-    idx: str
-    mapping_type: List[str]
-
-
 class DictionaryIndex(Index):
     """
     a simple dictionary index for linking. Uses a Dict[str, List[SynonymData]] for matching synonyms,
@@ -226,7 +260,7 @@ class DictionaryIndex(Index):
 
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
-        self.synonym_dict: Dict[str, List[SynonymData]]
+        self.synonym_db: SynonymDatabase = SynonymDatabase()
 
     def _search(
         self, query: str, score_cutoff: float = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
@@ -246,7 +280,7 @@ class DictionaryIndex(Index):
         else:
             hits = process.extract(
                 query,
-                self.synonym_dict.keys(),
+                self.synonym_db.get_all(self.name).keys(),
                 scorer=fuzz.WRatio,
                 limit=top_n,
                 score_cutoff=score_cutoff,
@@ -263,7 +297,7 @@ class DictionaryIndex(Index):
         :param score:
         :return:
         """
-        synonym_data_lst = self.synonym_dict.get(match_string, [])
+        synonym_data_lst = self.synonym_db.get(self.name, match_string)
         for synonym_data in synonym_data_lst:
             metadata_hits = self.metadata.get(self.name, synonym_data.idx)
             metadata_hits[LINK_SCORE] = score
@@ -275,11 +309,12 @@ class DictionaryIndex(Index):
 
     def _load(self, path: PathLike) -> Any:
         with open(path, "rb") as f:
-            self.synonym_dict = pickle.load(f)
+            synonym_data = pickle.load(f)
+            self.synonym_db.add(self.name, synonym_data)
 
     def _save(self, path: PathLike):
         with open(path, "wb") as f:
-            pickle.dump(self.synonym_dict, f)
+            pickle.dump(self.synonym_db.get_all(self.name), f)
 
     def _add(self, data: Dict[str, List[SynonymData]]):
         """
@@ -289,12 +324,12 @@ class DictionaryIndex(Index):
         :param metadata_dict: metadata dict
         :return:
         """
-        if not hasattr(self, "synonym_dict"):
-            self.synonym_dict = defaultdict(list)
+        self.synonym_db.add(self.name, data)
 
-        for k, v in data.items():
-            # syn keys must always be lower case
-            self.synonym_dict[k.lower()].extend(v)
+    def __setstate__(self, state):
+        self.name = state
+        self.metadata = MetadataDatabase()
+        self.synonym_db = SynonymDatabase()
 
 
 class EmbeddingIndex(Index):
@@ -317,8 +352,16 @@ class EmbeddingIndex(Index):
         if not hasattr(self, "index"):
             self.index = self._create_index(embeddings)
         else:
-            self._add(embeddings)
+            self._add_embeddings(embeddings)
         self.keys_lst = list(self.metadata.get_all(self.name).keys())
+
+    def _add_embeddings(self, embeddings: torch.Tensor):
+        """
+        concrete implementations should implement this method to add embeddings to the index
+        :param embeddings:
+        :return:
+        """
+        raise NotImplementedError()
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
         """
@@ -378,7 +421,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
     def _load(self, path: PathLike):
         self.import_faiss()
         self.index = self.faiss.read_index(str(path))
-        self.keys_lst = list(self.metadata.keys())
+        self.keys_lst = list(self.metadata.get_all(self.name).keys())
 
     def _save(self, path: PathLike):
         self.faiss.write_index(self.index, str(path))
@@ -394,7 +437,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
         index.add(embeddings.numpy())
         return index
 
-    def _add(self, embeddings: torch.Tensor):
+    def _add_embeddings(self, embeddings: torch.Tensor):
         self.index.add(embeddings.numpy())
         return self.index
 
@@ -414,12 +457,12 @@ class TensorEmbeddingIndex(EmbeddingIndex):
 
     def _load(self, path: PathLike):
         self.index = torch.load(path, map_location="cpu")
-        self.keys_lst = list(self.metadata.keys())
+        self.keys_lst = list(self.metadata.get_all(self.name).keys())
 
     def _save(self, path: PathLike):
         torch.save(self.index, path)
 
-    def _add(self, embeddings: torch.Tensor):
+    def _add_embeddings(self, embeddings: torch.Tensor):
         self.index = torch.cat([self.index, embeddings])
         return self.index
 
