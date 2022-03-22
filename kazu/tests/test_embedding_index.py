@@ -56,7 +56,7 @@ def test_embedding_index(
 ):
     index_name = "test_index"
     index = index_type(name=index_name)
-    index.add(embeddings=index_embeddings, metadata_dict=copy.deepcopy(metadata))
+    index.add(data=index_embeddings, metadata=copy.deepcopy(metadata))
     mappings: Iterable[Mapping] = list(index.search(query_embedding, top_n=3))
     for mapping, idx in zip(mappings, np.array(["0", "1", "2"])):
         assert mapping.idx == idx
@@ -64,7 +64,7 @@ def test_embedding_index(
     # assert np.array_equal(df[IDX].array.to_numpy(), np.array(["0", "1", "2"]))
     metadata_copy = copy.deepcopy(metadata)
     metadata_copy = {k * 2: v for k, v in metadata_copy.items()}
-    index.add(embeddings=(index_embeddings * 2), metadata_dict=metadata_copy)
+    index.add(data=(index_embeddings * 2), metadata=metadata_copy)
     mappings = index.search(query_embedding, top_n=3)
     for mapping, idx in zip(mappings, np.array(["0", "1", "2"])):
         assert mapping.idx == idx

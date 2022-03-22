@@ -161,8 +161,8 @@ class DictionaryIndexCacheManager(IndexCacheManager):
         synonym_df = parser.get_ontology_synonyms()
 
         index.add(
-            synonym_dict=self.dataframe_to_syndata_dict(synonym_df),
-            metadata_dict=ontology_df.to_dict(orient="index"),
+            data=self.dataframe_to_syndata_dict(synonym_df),
+            metadata=ontology_df.to_dict(orient="index"),
         )
         index_path = index.save(str(cache_dir))
         logger.info(f"saved {index.name} index to {index_path.absolute()}")
@@ -248,9 +248,7 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
             ontology_embeddings,
         ) in self.predict_ontology_embeddings(ontology_dataframe=ontology_df):
             logger.info(f"processing partition {partition_number} ")
-            index.add(
-                embeddings=ontology_embeddings, metadata_dict=metadata_df.to_dict(orient="index")
-            )
+            index.add(data=ontology_embeddings, metadata=metadata_df.to_dict(orient="index"))
             logger.info(f"index size is now {len(index)}")
         index_path = index.save(cache_dir)
         logger.info(f"saved {parser.name} index to {index_path.absolute()}")

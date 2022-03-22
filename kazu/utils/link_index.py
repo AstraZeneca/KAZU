@@ -21,13 +21,37 @@ logger = logging.getLogger(__name__)
 
 
 class MetadataDatabase:
-    database: Dict[str, Dict[str, Any]]
+    """
+    Singleton of a spacy pipeline, so we can reuse it across steps without needing to load the model
+    multiple times
+    """
 
-    def update(self, name: str, metadata: Dict[str, Any]):
-        pass
+    instance: "__MetadataDatabase"
+
+    class __MetadataDatabase:
+        database: Dict[str, Dict[str, Any]] = defaultdict(dict)
+
+        def add(self, name: str, metadata: Dict[str, Any]):
+            self.database[name].update(metadata)
+
+        def get(self, name: str, idx: str) -> Any:
+            return self.database[name].get(idx)
+
+    def __init__(self):
+        if not MetadataDatabase.instance:
+            MetadataDatabase.instance = MetadataDatabase.__MetadataDatabase()
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
 
     def get(self, name: str, idx: str) -> Any:
-        self.database[name].get(idx)
+        return copy.deepcopy(self.instance.database[name].get(idx))
+
+    def get_all(self, name: str):
+        return self.instance.database[name]
+
+    def add(self, name: str, metadata: Dict[str, Any]):
+        self.instance.add(name, metadata)
 
 
 class Index(abc.ABC):
@@ -46,7 +70,7 @@ class Index(abc.ABC):
         :param name: the name of the index. default is unnamed_index
         """
         self.name = name
-        self.metadata: Dict[str, Any]
+        self.metadata: MetadataDatabase = MetadataDatabase()
         self.index: Any
         self.namespace = self.__class__.__name__
 
@@ -94,7 +118,7 @@ class Index(abc.ABC):
         with open(self.get_index_path(directory), "wb") as f:
             pickle.dump(self, f)
         with open(self.get_metadata_path(directory), "wb") as f:
-            pickle.dump(self.metadata, f)
+            pickle.dump(self.metadata.get_all(self.name), f)
 
         self._save(self.get_index_data_path(directory))
         return directory
@@ -113,13 +137,13 @@ class Index(abc.ABC):
         with open(cls.get_index_path(path), "rb") as f:
             index = pickle.load(f)
         with open(cls.get_metadata_path(path), "rb") as f:
-            index.metadata = pickle.load(f)
+            index.metadata.add(index.name, pickle.load(f))
         index._load(cls.get_index_data_path(path))
         return index
 
     @staticmethod
     def get_metadata_path(path: Path) -> Path:
-        return path.joinpath("ontology_metadata.parquet")
+        return path.joinpath("ontology_metadata.pkl")
 
     @staticmethod
     def get_index_path(path: Path) -> Path:
@@ -154,12 +178,30 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
+    def _add(self, data: Any):
+        """
+        concrete implementations should implement this to add data to the index - e.g. synonym or embedding info. This
+        method is called by self.add
+        :param data:
+        :return:
+        """
+        raise NotImplementedError()
+
+    def add(self, data: Any, metadata: Dict[str, Any]):
+        """
+        add data to the index
+        :param data:
+        :return:
+        """
+        self.metadata.add(self.name, metadata)
+        self._add(data)
+
     def __len__(self) -> int:
         """
         should return the size of the index
         :return:
         """
-        raise NotImplementedError()
+        return len(self.metadata.get_all(self.name))
 
 
 @dataclass
@@ -223,7 +265,7 @@ class DictionaryIndex(Index):
         """
         synonym_data_lst = self.synonym_dict.get(match_string, [])
         for synonym_data in synonym_data_lst:
-            metadata_hits = copy.deepcopy(self.metadata[synonym_data.idx])
+            metadata_hits = self.metadata.get(self.name, synonym_data.idx)
             metadata_hits[LINK_SCORE] = score
             metadata_hits[SYN] = match_string
             metadata_hits[MAPPING_TYPE] = synonym_data.mapping_type
@@ -239,7 +281,7 @@ class DictionaryIndex(Index):
         with open(path, "wb") as f:
             pickle.dump(self.synonym_dict, f)
 
-    def add(self, synonym_dict: Dict[str, List[SynonymData]], metadata_dict: Dict[str, Any]):
+    def _add(self, data: Dict[str, List[SynonymData]]):
         """
         add data to the index. Two dicts are required - synonyms and metadata. Metadata should have a primary key
         (IDX) and synonyms should use IDX as a foreign key
@@ -247,18 +289,12 @@ class DictionaryIndex(Index):
         :param metadata_dict: metadata dict
         :return:
         """
-        if not hasattr(self, "synonym_dict") and not hasattr(self, "metadata"):
+        if not hasattr(self, "synonym_dict"):
             self.synonym_dict = defaultdict(list)
-            self.metadata = metadata_dict
-        else:
-            self.metadata.update(metadata_dict)
 
-        for k, v in synonym_dict.items():
+        for k, v in data.items():
             # syn keys must always be lower case
             self.synonym_dict[k.lower()].extend(v)
-
-    def __len__(self):
-        return len(self.metadata)
 
 
 class EmbeddingIndex(Index):
@@ -269,7 +305,7 @@ class EmbeddingIndex(Index):
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
 
-    def add(self, embeddings: torch.Tensor, metadata_dict: Dict[str, Any]):
+    def _add(self, embeddings: torch.Tensor):
         """
         add embeddings to the index
 
@@ -278,15 +314,11 @@ class EmbeddingIndex(Index):
         the first dimension of embeddings
         :return:
         """
-        if len(embeddings) != len(metadata_dict):
-            raise ValueError("embeddings length not equal to metadata length")
         if not hasattr(self, "index"):
             self.index = self._create_index(embeddings)
-            self.metadata = metadata_dict
         else:
             self._add(embeddings)
-            self.metadata.update(metadata_dict)
-        self.keys_lst = list(self.metadata.keys())
+        self.keys_lst = list(self.metadata.get_all(self.name).keys())
 
     def _create_index(self, embeddings: torch.Tensor) -> Any:
         """
@@ -294,22 +326,6 @@ class EmbeddingIndex(Index):
         after the index is created
 
         :param embeddings:
-        :return:
-        """
-        raise NotImplementedError()
-
-    def _add(self, embeddings: torch.Tensor) -> None:
-        """
-        concrete implementations should implement this to add embeddings to the index
-
-        :return:
-        """
-        raise NotImplementedError()
-
-    def __len__(self):
-        """
-        the number of embeddings in the index
-
         :return:
         """
         raise NotImplementedError()
@@ -335,7 +351,7 @@ class EmbeddingIndex(Index):
         )
         for score, n in zip(distances, neighbours):
             key = self.keys_lst[n]
-            hit_metadata = copy.deepcopy(self.metadata[key])
+            hit_metadata = self.metadata.get(self.name, key)
             # the mapping type is always inferred for embedding based indices
             hit_metadata[MAPPING_TYPE] = ["inferred"]
             hit_metadata[LINK_SCORE] = score
