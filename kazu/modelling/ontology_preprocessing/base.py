@@ -1,11 +1,14 @@
+import copy
 import itertools
 import json
 import os
 import re
 import sqlite3
 from abc import ABC
+from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable
+from typing import List, Tuple, Dict, Any, Iterable, Optional, DefaultDict
 
 import cachetools
 import en_core_web_sm
@@ -22,6 +25,84 @@ IDX = "idx"
 SYN = "syn"
 MAPPING_TYPE = "mapping_type"
 SOURCE = "source"
+
+
+@dataclass
+class SynonymData:
+    """
+    data class required by DictionaryIndex add method. See docs on :py:class:`kazu.utils.link_index.DictionaryIndex`
+    for usage
+    """
+
+    idx: str
+    mapping_type: List[str]
+
+
+class MetadataDatabase:
+    """
+    Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
+    and this singleton allows us to load it once/reduce memory usage
+    """
+
+    instance: Optional["__MetadataDatabase"] = None
+
+    class __MetadataDatabase:
+        database: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
+
+        def add(self, name: str, metadata: Dict[str, Any]):
+            self.database[name].update(metadata)
+
+        def get(self, name: str, idx: str) -> Any:
+            return self.database[name].get(idx)
+
+    def __init__(self):
+        if not MetadataDatabase.instance:
+            MetadataDatabase.instance = MetadataDatabase.__MetadataDatabase()
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
+
+    def get(self, name: str, idx: str) -> Any:
+        return copy.deepcopy(self.instance.get(name, idx))  # type: ignore
+
+    def get_all(self, name: str) -> Dict[str, Any]:
+        return self.instance.database[name]  # type: ignore
+
+    def add(self, name: str, metadata: Dict[str, Any]):
+        self.instance.add(name, metadata)  # type: ignore
+
+
+class SynonymDatabase:
+    """
+    Singleton of a database of synonyms.
+    """
+
+    instance: Optional["__SynonymDatabase"] = None
+
+    class __SynonymDatabase:
+        database: DefaultDict[str, Dict[str, List[SynonymData]]] = defaultdict(dict)
+
+        def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
+            self.database[name].update(synonyms)
+
+        def get(self, name: str, synonym: str) -> List[SynonymData]:
+            return self.database[name].get(synonym, [])
+
+    def __init__(self):
+        if not SynonymDatabase.instance:
+            SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
+
+    def get(self, name: str, synonym: str) -> List[SynonymData]:
+        return copy.copy(self.instance.get(name, synonym))  # type: ignore
+
+    def get_all(self, name: str):
+        return self.instance.database[name]  # type: ignore
+
+    def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
+        self.instance.add(name, synonyms)  # type: ignore
 
 
 class StopWordRemover:
@@ -63,14 +144,33 @@ class OntologyParser(ABC):
         """
         self.in_path = in_path
 
-    @cachetools.cached(cache={})
-    def parse_and_cache(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def dataframe_to_syndata_dict(self, df: pd.DataFrame) -> Dict[str, List[SynonymData]]:
+        df_as_dict = df.groupby(SYN).agg(list).to_dict(orient="index")
+        result = defaultdict(list)
+        for synonym, metadata_dict in df_as_dict.items():
+            for idx, mapping_type_lst in zip(metadata_dict[IDX], metadata_dict[MAPPING_TYPE]):
+                result[synonym].append(SynonymData(idx=idx, mapping_type=mapping_type_lst))
+        return result
+
+    def populate_metadata_database(self):
         """
         return a tuple of dataframes. First is the synonym table, second is the metadata table
         :return:
         """
-        return self.generate_synonym_and_metadata_dataframes()
+        _, metadata_df = self.generate_synonym_and_metadata_dataframes()
+        metadata = metadata_df.to_dict(orient="index")
+        MetadataDatabase().add(self.name, metadata)
 
+    def populate_synonym_database(self):
+        """
+        return a tuple of dataframes. First is the synonym table, second is the metadata table
+        :return:
+        """
+        synonym_df, _ = self.generate_synonym_and_metadata_dataframes()
+        synonym_data = self.dataframe_to_syndata_dict(synonym_df)
+        SynonymDatabase().add(self.name, synonym_data)
+
+    @cachetools.cached(cache={})
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         splits a table of ontology information into a synonym table and a metadata table, deduplicating and grouping
@@ -78,7 +178,7 @@ class OntologyParser(ABC):
         :return: a 2-tuple - first is synonym dataframe, second is metadata
         """
         df = self.parse_to_dataframe()
-        # in case the default lable isn't populated, just use the IDX
+        # in case the default label isn't populated, just use the IDX
         df.loc[pd.isnull(df[DEFAULT_LABEL]), DEFAULT_LABEL] = df[IDX]
         # ensure correct order
         syn_df = df[self.all_synonym_column_names]
@@ -116,26 +216,12 @@ class OntologyParser(ABC):
         """
         raise NotImplementedError()
 
-    def get_ontology_metadata(self) -> pd.DataFrame:
-        """
-        get a dataframe of metadata for an ontology
-        :return:
-        """
-        return self.parse_and_cache()[1]
-
-    def get_ontology_synonyms(self) -> pd.DataFrame:
-        """
-        get a dataframe of synonyms for an ontology
-        :return:
-        """
-        return self.parse_and_cache()[0]
-
     def format_training_table(self) -> pd.DataFrame:
         """
         generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)
         :return:
         """
-        synonym_table = self.parse_and_cache()[0]
+        synonym_table = self.generate_synonym_and_metadata_dataframes()[0]
         tqdm.pandas(desc=f"generating training pairs for {self.name}")
         df = synonym_table.groupby(by=[IDX]).progress_apply(self.select_pos_pairs)
         df.index = [i for i in range(df.shape[0])]

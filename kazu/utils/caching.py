@@ -1,8 +1,8 @@
 import copy
+import itertools
 import logging
 import shutil
 from abc import ABC, abstractmethod
-from collections import defaultdict
 from pathlib import Path
 from typing import Type, Dict, Any, Iterable, Tuple, List, Set, Iterator
 
@@ -18,9 +18,7 @@ from kazu.modelling.linking.sapbert.train import (
 )
 from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
-    SYN,
-    IDX,
-    MAPPING_TYPE,
+    MetadataDatabase,
 )
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.link_index import (
@@ -30,7 +28,6 @@ from kazu.utils.link_index import (
     CDistTensorEmbeddingIndex,
     DictionaryIndex,
     EmbeddingIndex,
-    SynonymData,
 )
 from kazu.utils.utils import (
     get_cache_dir,
@@ -146,25 +143,13 @@ class DictionaryIndexCacheManager(IndexCacheManager):
     implementation for use with :class:`kazu.steps.linking.dictionary.DictionaryEntityLinkingStep`
     """
 
-    def dataframe_to_syndata_dict(self, df: pd.DataFrame) -> Dict[str, List[SynonymData]]:
-        df_as_dict = df.groupby(SYN).agg(list).to_dict(orient="index")
-        result = defaultdict(list)
-        for synonym, metadata_dict in df_as_dict.items():
-            for idx, mapping_type_lst in zip(metadata_dict[IDX], metadata_dict[MAPPING_TYPE]):
-                result[synonym].append(SynonymData(idx=idx, mapping_type=mapping_type_lst))
-        return result
-
     def build_ontology_cache(self, cache_dir: Path, parser: OntologyParser) -> Index:
         logger.info(f"creating index for {parser.in_path}")
         index = self.index_type(name=parser.name)
         assert isinstance(index, DictionaryIndex)
-        ontology_df = parser.get_ontology_metadata()
-        synonym_df = parser.get_ontology_synonyms()
-
-        index.add(
-            data=self.dataframe_to_syndata_dict(synonym_df),
-            metadata=ontology_df.to_dict(orient="index"),
-        )
+        parser.populate_synonym_database()
+        parser.populate_metadata_database()
+        # the indices read directly from the database singletons, so no need to add the data directly
         index_path = index.save(str(cache_dir))
         logger.info(f"saved {index.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {index.name} is {len(index)}")
@@ -242,14 +227,14 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
 
         index: EmbeddingIndex = self.index_type(parser.name)
         assert issubclass(type(index), EmbeddingIndex)
-        ontology_df = parser.get_ontology_metadata()
+        parser.populate_metadata_database()
         for (
             partition_number,
-            metadata_df,
+            metadata,
             ontology_embeddings,
-        ) in self.predict_ontology_embeddings(ontology_dataframe=ontology_df):
+        ) in self.predict_ontology_embeddings(parser.name):
             logger.info(f"processing partition {partition_number} ")
-            index.add(data=ontology_embeddings, metadata=metadata_df.to_dict(orient="index"))
+            index.add(data=ontology_embeddings, metadata=metadata)
             logger.info(f"index size is now {len(index)}")
         index_path = index.save(cache_dir)
         logger.info(f"saved {parser.name} index to {index_path.absolute()}")
@@ -257,42 +242,44 @@ class EmbeddingIndexCacheManager(IndexCacheManager):
         return index
 
     @staticmethod
-    def enumerate_dataframe_chunks(
-        df: pd.DataFrame, chunk_size: int = 100000
-    ) -> Iterable[Tuple[int, pd.DataFrame]]:
+    def enumerate_database_chunks(
+        name: str, chunk_size: int = 100000
+    ) -> Iterable[Tuple[int, Dict[str, Any]]]:
         """
         generator to split up a dataframe into partitions
         :param df:
         :param chunk_size: size of partittions to create
         :return:
         """
-        for i in range(0, len(df), chunk_size):
-            yield i, df[i : i + chunk_size]
+
+        data: Dict[str, Any] = MetadataDatabase().get_all(name)
+        for i in range(0, len(data), chunk_size):
+            yield i, dict(itertools.islice(data.items(), i, i + chunk_size))
 
     def predict_ontology_embeddings(
-        self, ontology_dataframe: pd.DataFrame
+        self, name: str
     ) -> Iterator[Tuple[int, pd.DataFrame, torch.Tensor]]:
         """
         since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
         and add them to the index sequentially
-        :param ontology_dataframe:
+        :param name: name of ontology
         :return: partition number, metadata dataframe and embeddings
         """
 
-        for partition_number, df in self.enumerate_dataframe_chunks(
-            ontology_dataframe, self.ontology_partition_size
+        for partition_number, metadata in self.enumerate_database_chunks(
+            name, self.ontology_partition_size
         ):
-            len_df = len(df)
+            len_df = len(metadata)
             if len_df == 0:
                 return
             logger.info(f"creating partitions for partition {partition_number}")
             logger.info(f"read {len_df} rows from ontology")
-            default_labels = df[DEFAULT_LABEL].tolist()
+            default_labels = [x[DEFAULT_LABEL] for x in metadata.values()]
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
             results = self.model.get_embeddings_for_strings(
                 texts=default_labels, trainer=self.trainer, batch_size=self.batch_size
             )
-            yield partition_number, df, results
+            yield partition_number, metadata, results
 
 
 class CachedIndexGroup:

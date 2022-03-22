@@ -45,9 +45,11 @@ class DummyParser(OntologyParser):
 
 def test_enumerate_dataframe_chunks():
     # + 1 to check we can handle chunk sizes larger than the df
+    parser = DummyParser("")
+    parser.populate_metadata_database()
     for chunk_size in range(1, len(DUMMY_DATA[IDX]) + 1):
         print(f"chunk size: {chunk_size}")
-        res = list(EmbeddingIndexCacheManager.enumerate_dataframe_chunks(dummy_df(), chunk_size))
+        res = list(EmbeddingIndexCacheManager.enumerate_database_chunks(parser.name, chunk_size))
         for _, split_df in res[:-1]:
             assert len(split_df) == chunk_size
         assert 0 < len(res[-1][1]) <= chunk_size
