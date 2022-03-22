@@ -20,6 +20,16 @@ from kazu.utils.utils import PathLike, as_path
 logger = logging.getLogger(__name__)
 
 
+class MetadataDatabase:
+    database: Dict[str, Dict[str, Any]]
+
+    def update(self, name: str, metadata: Dict[str, Any]):
+        pass
+
+    def get(self, name: str, idx: str) -> Any:
+        self.database[name].get(idx)
+
+
 class Index(abc.ABC):
     """
     base class for all indices.
