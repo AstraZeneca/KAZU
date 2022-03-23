@@ -185,10 +185,12 @@ class SpanFinder:
 class TokenizedWordProcessor:
     """
     Because of the inherent obscurity of the inner workings of transformers, sometimes they produce BIO tags that
-    don't correctly align to whole words. So what do we do? Fix it with rules :~Z
+    don't correctly align to whole words, or maybe the classic BIO format gets confused by nested entities.
 
     This class is designed to work when an entire sequence of NER labels is known and therefore we can apply some
-    post-processing logic - i.e. a hack until we have time to debug the model
+    post-processing logic. Namely, we use the SpanFinder class to assign soft labels based upon some threshold, rather
+    hard labels as per softmax. Additionally, we define some conditions in which an entity must always break, or
+    must always continue
 
     """
 
@@ -234,4 +236,4 @@ class TokenizedWordProcessor:
         for word in words:
             starts.append(word.word_char_start)
             ends.append(word.word_char_end)
-        return min(starts), max(ends) + 1
+        return min(starts), max(ends)
