@@ -54,11 +54,18 @@ def test_sapbert_step():
             rebuild_cache=False,
             parsers=[],
         )
+        entity_classes = []
+        for doc in easy_test_docs:
+            ents = doc.get_entities()
+            entity_classes.extend([x.entity_class for x in ents])
+
         cached_index_group = CachedIndexGroup(
             cache_managers=[manager],
-            entity_class_to_ontology_mappings={},
+            entity_class_to_ontology_mappings={x: [] for x in entity_classes},
         )
-        step = SapBertForEntityLinkingStep(depends_on=[], index_group=cached_index_group)
+        step = SapBertForEntityLinkingStep(
+            depends_on=[], index_group=cached_index_group, skip_if_already_linked=False
+        )
         assert_step_runs(easy_test_docs, iris, sources, step)
 
 
