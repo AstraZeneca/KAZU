@@ -1,11 +1,14 @@
 from typing import List, Set
 
+from hydra.utils import instantiate
+
 from kazu.data.data import Entity
 from kazu.steps.ner.entity_post_processing import (
     NonContiguousEntitySplitter,
     SplitOnNumericalListPatternWithPrefix,
     SplitOnConjunctionPattern,
 )
+from kazu.tests.utils import requires_model_pack
 
 simple_conjunction_example = "skin, lung and breast cancer are common forms."
 complex_conjunction_example = "skin, lung and triple negative breast cancer are common forms."
@@ -20,11 +23,14 @@ def check_expected_matches_are_in_entities(entities: List[Entity], expected_matc
     assert not expected_matches
 
 
-def test_non_contiguous_entity_splitter():
+@requires_model_pack
+def test_non_contiguous_entity_splitter(kazu_test_config):
+    spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
+
     splitter = NonContiguousEntitySplitter(
         entity_conditions={
             "gene": [SplitOnNumericalListPatternWithPrefix("/")],
-            "disease": [SplitOnConjunctionPattern()],
+            "disease": [SplitOnConjunctionPattern(spacy_pipeline)],
         }
     )
 
