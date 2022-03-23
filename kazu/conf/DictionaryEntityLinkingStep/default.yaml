@@ -35,21 +35,41 @@ index_group:
       parsers:
         - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
         - _target_: kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/hgnc.json
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.SeperatorExpansion
         - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover
+              spacy_pipeline: ${SpacyPipeline}
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
         - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
         - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
         - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
         - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
+          synonym_generators:
+            - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier

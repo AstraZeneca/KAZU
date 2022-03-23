@@ -1,239 +1,30 @@
 import copy
-import functools
 import itertools
 import json
 import logging
 import os
-import re
 import sqlite3
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, FrozenSet
-from typing import Optional, DefaultDict
-from urllib import parse
+from typing import List, Tuple, Dict, Any, Iterable, Optional, DefaultDict
+
+import cachetools
 import pandas as pd
 import rdflib
 from rdflib import URIRef
 from tqdm.auto import tqdm
 
 # dataframe column keys
-from kazu.modelling.ontology_preprocessing.synonym_generation import (
-    CombinatorialSynonymGenerator,
-    GreekSymbolSubstitution,
-)
-from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy, Mapping, LinkRanks
+from kazu.modelling.ontology_preprocessing.synonym_generation import SynonymData, SynonymGenerator
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
 SYN = "syn"
 MAPPING_TYPE = "mapping_type"
 SOURCE = "source"
-DATA_ORIGIN = "data_origin"
-
 
 logger = logging.getLogger(__name__)
-
-
-class StringNormalizer:
-    """
-    normalise a biomedical string for search
-    TODO: make configurable
-    """
-
-    allowed_additional_chars = {" ", "(", ")", "+", "-", "‐"}
-    greek_subs = GreekSymbolSubstitution.GREEK_SUBS
-    greek_subs_upper = {x: f" {y.upper()} " for x, y in greek_subs.items()}
-    other_subs = {
-        "(": " (",
-        ")": ") ",
-        ",": " ",
-        "/": " ",
-        "VIII": " 8 ",
-        "VII": " 7 ",
-        "XII": " 12 ",
-        "III": " 3 ",
-        "VI": " 6 ",
-        "IV": " 4 ",
-        "IX": " 9 ",
-        "XI": " 11 ",
-        "II": " 2 ",
-    }
-    re_subs = {
-        re.compile(r"(?<!\()-(?!\))"): " ",  # minus not in brackets
-        re.compile(r"(?<!\()‐(?!\))"): " ",  # hyphen not in brackets
-        re.compile(r"\sI\s|\sI$"): " 1 ",
-        re.compile(r"\sV\s|\sV$"): " 5 ",
-        re.compile(r"\sX\s|\sX$"): " 10 ",
-    }
-    re_subs_2 = {
-        re.compile(r"\sA\s|\sA$|^A\s"): " ALPHA ",
-        re.compile(r"\sB\s|\sB$|^B\s"): " BETA ",
-    }
-
-    number_split_pattern = re.compile(r"(\d+)")
-
-    symbol_number_split = re.compile(r"(\d+)$")
-    trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
-
-    @staticmethod
-    def unigram_bigram_tokenize(norm_string: str):
-        return StringNormalizer.tokenize(norm_string, {1, 2})
-
-    @staticmethod
-    def tokenize(norm_string: str, n_set: Set[int]) -> List[str]:
-        parts = norm_string.split(" ")
-        num_parts = len(parts)
-        result: List[str] = []
-        for n in n_set:
-            for i in range(num_parts):
-                ngram_end_index = i + n
-                if ngram_end_index > num_parts:
-                    # ngram would extend beyond end of parts
-                    # it's ok for it to be the same number though as otherwise
-                    # we don't get the final word of ngrams at the right of parts
-                    break
-
-                result.append(" ".join(parts[i : i + n]))
-
-        return result
-
-    @staticmethod
-    def is_symbol_like(debug, original_string) -> Optional[str]:
-        # TODO: rename method
-        # True if all upper, all alphanum, no spaces,
-
-        for char in original_string:
-            if char.islower() or not char.isalnum():
-                return None
-        else:
-            splits = [
-                x.strip() for x in re.split(StringNormalizer.symbol_number_split, original_string)
-            ]
-            string = " ".join(splits).strip()
-            if debug:
-                print(string)
-            return string
-
-    @staticmethod
-    def split_on_trailing_s_prefix(debug, string):
-        splits = [x.strip() for x in re.split(StringNormalizer.trailing_lowercase_s_split, string)]
-        string = " ".join(splits).strip()
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def normalize(original_string: str, debug: bool = False):
-        original_string = original_string.strip()
-        symbol_like = StringNormalizer.is_symbol_like(debug, original_string)
-        if symbol_like:
-            return symbol_like
-        else:
-            string = StringNormalizer.replace_substrings(debug, original_string)
-
-            # split up numbers
-            string = StringNormalizer.split_on_numbers(debug, string)
-            # replace greek
-            string = StringNormalizer.replace_greek(debug, string)
-
-            # strip non alphanum
-            string = StringNormalizer.replace_non_alphanum(debug, string)
-
-            string = StringNormalizer.split_on_trailing_s_prefix(debug, string)
-            # strip modifying lowercase prefixes
-            string = StringNormalizer.handle_lower_case_prefixes(debug, string)
-
-            string = StringNormalizer.sub_greek_char_abbreviations(debug, string)
-
-            string = string.strip()
-            if debug:
-                print(string)
-            return string
-
-    @staticmethod
-    def sub_greek_char_abbreviations(debug, string):
-        for re_sub, replace in StringNormalizer.re_subs_2.items():
-            string = re.sub(re_sub, replace, string)
-            if debug:
-                print(string)
-        return string
-
-    @staticmethod
-    def to_upper(debug, string):
-        string = string.upper()
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def handle_lower_case_prefixes(debug, string):
-        """
-        preserve case only if first char of contiguous subsequence is lower case, and is alphanum, and upper
-        case detected in rest of part
-        :param debug:
-        :param string:
-        :return:
-        """
-        parts = string.split(" ")
-        new_parts = []
-        for part in parts:
-            if part != "":
-                if part.islower() and not len(part) == 1:
-                    new_parts.append(part.upper())
-                else:
-                    first_char_case = part[0].islower()
-                    if (first_char_case and part[0].isalnum()) or (
-                        first_char_case and len(part) == 1
-                    ):
-                        new_parts.append(part)
-                    else:
-                        new_parts.append(part.upper())
-        string = " ".join(new_parts)
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def replace_non_alphanum(debug, string):
-        string = "".join(
-            [x for x in string if (x.isalnum() or x in StringNormalizer.allowed_additional_chars)]
-        )
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def replace_greek(debug, string):
-        for substr, replace in StringNormalizer.greek_subs_upper.items():
-            if substr in string:
-                string = string.replace(substr, replace)
-                if debug:
-                    print(string)
-        return string
-
-    @staticmethod
-    def split_on_numbers(debug, string):
-        splits = [x.strip() for x in re.split(StringNormalizer.number_split_pattern, string)]
-        string = " ".join(splits)
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def replace_substrings(debug, original_string):
-        string = original_string
-        # replace substrings
-        for substr, replace in StringNormalizer.other_subs.items():
-            if substr in string:
-                string = string.replace(substr, replace)
-                if debug:
-                    print(string)
-        for re_sub, replace in StringNormalizer.re_subs.items():
-            string = re.sub(re_sub, replace, string)
-            if debug:
-                print(string)
-        return string
 
 
 class MetadataDatabase:
@@ -246,27 +37,12 @@ class MetadataDatabase:
 
     class __MetadataDatabase:
         database: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
-        database_defaultlabel: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
-        keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
 
-        def add(self, name: str, metadata: Dict[str, Dict[str, Any]]):
+        def add(self, name: str, metadata: Dict[str, Any]):
             self.database[name].update(metadata)
-            for k, v in metadata.items():
-                if v[DEFAULT_LABEL] in self.database_defaultlabel[name]:
-                    self.database_defaultlabel[name][v[DEFAULT_LABEL]].append(k)
-                else:
-                    self.database_defaultlabel[name][v[DEFAULT_LABEL]] = [k]
-            self.keys_lst[name] = list(self.database[name].keys())
 
-        def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
-            return self.database[name][idx]
-
-        def get_by_default_label(self, name: str, default_label: str) -> List[str]:
-            return self.database_defaultlabel[name].get(default_label, [])
-
-        def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, Any]]:
-            idx = self.keys_lst[name][i]
-            return idx, self.database[name][idx]
+        def get(self, name: str, idx: str) -> Any:
+            return self.database[name].get(idx)
 
     def __init__(self):
         if not MetadataDatabase.instance:
@@ -275,27 +51,14 @@ class MetadataDatabase:
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
-    def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
+    def get(self, name: str, idx: str) -> Any:
         """
         get the metadata associated with an ontology and id
         :param name: name of ontology to query
         :param idx: idx to query
         :return:
         """
-        return copy.deepcopy(self.instance.get_by_idx(name, idx))  # type: ignore
-
-    def get_by_default_label(self, name: str, default_label: str) -> List[str]:
-        """
-        get the metadata associated with an ontology and id
-        :param name: name of ontology to query
-        :param idx: idx to query
-        :return:
-        """
-        return copy.deepcopy(self.instance.get_by_default_label(name, default_label))  # type: ignore
-
-    def get_by_index(self, name: str, i: int) -> Dict:
-
-        return copy.deepcopy(self.instance.get_by_index(name, i))  # type: ignore
+        return copy.deepcopy(self.instance.get(name, idx))  # type: ignore
 
     def get_all(self, name: str) -> Dict[str, Any]:
         """
@@ -304,15 +67,6 @@ class MetadataDatabase:
         :return:
         """
         return self.instance.database[name]  # type: ignore
-
-    def get_loaded_parsers(self) -> Set[str]:
-        """
-        get the names of all loaded parsers
-        :param name: name of ontology
-        :return:
-        """
-        assert self.instance is not None
-        return set(self.instance.database.keys())
 
     def add(self, name: str, metadata: Dict[str, Any]):
         """
@@ -324,34 +78,6 @@ class MetadataDatabase:
         """
         self.instance.add(name, metadata)  # type: ignore
 
-    def create_mapping(
-        self,
-        parser_name: str,
-        source: str,
-        idx: str,
-        mapping_type: FrozenSet[str],
-        confidence: LinkRanks,
-        additional_metadata: Optional[Dict],
-        strip_url: bool = True,
-    ) -> Mapping:
-        metadata = self.get_by_idx(name=parser_name, idx=idx)
-        metadata[DATA_ORIGIN] = parser_name
-        if additional_metadata:
-            metadata.update(additional_metadata)
-        if strip_url and "/" in idx:
-            new_idx = idx.split("/")[-1]
-        else:
-            new_idx = idx
-        return Mapping(
-            default_label=metadata.pop(DEFAULT_LABEL),
-            idx=new_idx,
-            source=source,
-            confidence=confidence,
-            parser_name=metadata.pop(DATA_ORIGIN),
-            mapping_type=mapping_type,
-            metadata=metadata,
-        )
-
 
 class SynonymDatabase:
     """
@@ -361,36 +87,17 @@ class SynonymDatabase:
     instance: Optional["__SynonymDatabase"] = None
 
     class __SynonymDatabase:
-        syns_database_by_syn: DefaultDict[str, Dict[str, Set[SynonymData]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        syns_database_by_syn_global: DefaultDict[str, Set[SynonymData]] = defaultdict(set)
-        kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
-        loaded_kbs: Set[str] = set()
+        database: DefaultDict[str, Dict[str, List[SynonymData]]] = defaultdict(dict)
 
-        def add(self, name: str, synonyms: Dict[str, FrozenSet[SynonymData]], norm: bool):
-            self.loaded_kbs.add(name)
-            for syn_string, syn_data_set in synonyms.items():
-                if norm:
-                    syn_string_norm = StringNormalizer.normalize(syn_string)
-                else:
-                    syn_string_norm = syn_string
-                self.syns_database_by_syn[name][syn_string_norm].update(syn_data_set)
-                self.syns_database_by_syn_global[syn_string_norm].update(syn_data_set)
-                self.kb_database_by_syn_global[syn_string_norm].add(name)
+        def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
+            for syn_string, syn_data in synonyms.items():
+                existing_data = self.database[name].get(syn_string, [])
+                for x in filter(lambda x: x not in existing_data, syn_data):
+                    existing_data.append(x)
+                self.database[name][syn_string] = existing_data
 
-                for syn_data in syn_data_set:
-                    for idx in syn_data.ids:
-                        self.syns_database_by_idx[name][idx].add(syn_string_norm)
-
-        def get(self, name: str, synonym: str) -> Set[SynonymData]:
-            return self.syns_database_by_syn[name][synonym]
-
-        def get_syns_for_id(self, name: str, idx: str) -> Set[str]:
-            return self.syns_database_by_idx[name][idx]
+        def get(self, name: str, synonym: str) -> List[SynonymData]:
+            return self.database[name].get(synonym, [])
 
     def __init__(self):
         if not SynonymDatabase.instance:
@@ -399,83 +106,31 @@ class SynonymDatabase:
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
-    def get(self, name: str, synonym: str) -> Set[SynonymData]:
+    def get(self, name: str, synonym: str) -> List[SynonymData]:
         """
         get a list of SynonymData associated with an ontology and synonym string
         :param name: name of ontology to query
         :param synonym: idx to query
         :return:
         """
-        return self.instance.get(name, synonym)  # type: ignore
+        return copy.copy(self.instance.get(name, synonym))  # type: ignore
 
-    def get_syns_for_id(self, name: str, idx: str) -> Set[str]:
-        return self.instance.get_syns_for_id(name, idx)  # type: ignore
-
-    def get_syns_for_synonym(self, name: str, synonym: str) -> Set[str]:
-        """
-        get all other syns for a synonym in a kb
-        :param name:
-        :param idx:
-        :return:
-        """
-        result = set()
-        for syn_data in self.get(name, synonym):
-            for idx in syn_data.ids:
-                result.update(self.get_syns_for_id(name, idx))
-        return result
-
-    def get_all(self, name: str) -> Dict[str, Set[SynonymData]]:
+    def get_all(self, name: str) -> Dict[str, List[SynonymData]]:
         """
         get all synonyms associated with an ontology
         :param name: name of ontology
         :return:
         """
-        return self.instance.syns_database_by_syn[name]  # type: ignore
+        return self.instance.database[name]  # type: ignore
 
-    def get_syns_global(self, synonym: str) -> Set[SynonymData]:
-        """
-        return a global view of synonym data across all dbs, for a specific synonym
-        :return:
-        """
-        assert self.instance is not None
-        return self.instance.syns_database_by_syn_global.get(synonym, set())
-
-    def get_kbs_for_syn_global(self, synonym: str) -> Set[str]:
-        """
-        return a global list ok kbs across all dbs, for a specific synonym
-        :return:
-        """
-        assert self.instance is not None
-        return self.instance.kb_database_by_syn_global.get(synonym, set())
-
-    def get_loaded_kbs(self) -> Set[str]:
-        """
-        return a global view of all ambiguous synonyms data across all dbs
-        :return:
-        """
-        assert self.instance is not None
-        return self.instance.loaded_kbs
-
-    def get_database(self) -> DefaultDict[str, Dict[str, Set[SynonymData]]]:
-        return self.instance.syns_database_by_syn  # type: ignore
-
-    def add(self, name: str, synonyms: Dict[str, Set[SynonymData]]):
+    def add(self, name: str, synonyms: Dict[str, List[SynonymData]]):
         """
         add SynonymData to the database.
         :param name: name of ontology to add to
         :param synonyms: dict in format {synonym string:List[SynonymData]}
         :return:
         """
-        self.instance.add(name, synonyms, norm=False)  # type: ignore
-
-    def normalise_and_add(self, name: str, synonyms: Dict[str, Set[SynonymData]]):
-        """
-        add SynonymData to the database.
-        :param name: name of ontology to add to
-        :param synonyms: dict in format {synonym string:List[SynonymData]}
-        :return:
-        """
-        self.instance.add(name, synonyms, norm=True)  # type: ignore
+        self.instance.add(name, synonyms)  # type: ignore
 
 
 class OntologyParser(ABC):
@@ -486,145 +141,32 @@ class OntologyParser(ABC):
     Implementations should have a class attribute 'name' to something suitably representative
     """
 
-    name = "unnamed"  # a label for his parser
+    name = "unnamed"
     training_col_names = ["id", "syn1", "syn2"]
     # the synonym table should have these (and only these columns)
     all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
-    # the metadata table should have at least these columns (note, IDX will become the index
-    minimum_metadata_column_names = [DEFAULT_LABEL, DATA_ORIGIN]
+    # the metadata table should have at least these columns
+    minimum_metadata_column_names = [IDX, DEFAULT_LABEL]
 
-    def __init__(
-        self,
-        in_path: str,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        min_syn_length_to_merge: int = 4,
-    ):
+    def __init__(self, in_path: str, synonym_generators: Optional[List[SynonymGenerator]] = None):
         """
+
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
-        :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
-            parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generators: list of synonym generators to apply to this parser
-        :param min_syn_length_to_merge: synonyms of this length or greater will be merged into the same SynonymData object,
-            set higher for highly symbolic sources (e.g. Gene symbols), and lower for more natural language sources (e.g. anatomy)
         """
-        self.data_origin = data_origin
-        self.synonym_generator = synonym_generator
+        self.synonym_generator_permutations = (
+            self.get_synonym_generator_permutations(synonym_generators)
+            if synonym_generators
+            else None
+        )
         self.in_path = in_path
-        self.min_syn_length_to_merge = min_syn_length_to_merge
 
-    def find_kb(self, string: str) -> str:
-        """
-        split an IDX somehow to find the ontology SOURCE reference
-        :param df:
-        :return:
-        """
-        raise NotImplementedError()
-
-    def dataframe_to_syndata_dict(
-        self, synonym_df: pd.DataFrame, normalise_original_syns: bool
-    ) -> Dict[str, Set[SynonymData]]:
-        result = self.resolve_composite_synonym_dataframe(synonym_df, normalise_original_syns)
-        return dict(result)
-
-    def resolve_composite_synonym_dataframe(
-        self, synonym_df: pd.DataFrame, normalise_original_syns: bool
-    ):
-        result = defaultdict(set)
-        for i, row in synonym_df[[SYN, IDX]].groupby([SYN]).agg(set).reset_index().iterrows():
-
-            syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
-            ids = row[IDX]
-            id_to_source = {}
-            ontologies = set()
-            for idx in ids:
-                source = self.find_kb(idx)
-                ontologies.add(source)
-                id_to_source[idx] = source
-
-            if len(ontologies) == 1:
-                # most common - one or more ids and one kb per syn
-                if len(ids) == 1:
-                    strategy = EquivalentIdAggregationStrategy.UNAMBIGUOUS
-                elif len(syn) >= self.min_syn_length_to_merge:
-                    strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE
-                else:
-                    strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT
-
-                if len(syn) >= self.min_syn_length_to_merge:
-                    result[syn].add(
-                        SynonymData(
-                            ids=frozenset(ids),
-                            mapping_type=frozenset(),
-                            aggregated_by=strategy,
-                            ids_to_source=id_to_source,
-                        )
-                    )
-                else:
-                    for idx in ids:
-                        result[syn].add(
-                            SynonymData(
-                                ids=frozenset([idx]),
-                                mapping_type=frozenset(),
-                                aggregated_by=strategy,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                        )
-            elif len(ontologies) == len(ids):
-                if len(syn) >= self.min_syn_length_to_merge:
-                    result[syn].add(
-                        SynonymData(
-                            ids=frozenset(ids),
-                            mapping_type=frozenset(),
-                            aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
-                            ids_to_source=id_to_source,
-                        )
-                    )
-                else:
-                    for idx in ids:
-                        result[syn].add(
-                            SynonymData(
-                                ids=frozenset([idx]),
-                                mapping_type=frozenset(),
-                                aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                        )
-                # pathological scenario - multiple kb ids, one syn. Syn may refer to different concepts (although probably not)
-                logger.warning(
-                    f"found independent identifiers for {syn}: {ids}. This may cause disambiguation problems "
-                    f"if the identifiers are not cross references"
-                )
-            else:
-                # pathological scenario - one synonym maps to multiple KBs and multiple ids within those KBs,
-                # within the same composite KB
-                if len(syn) >= self.min_syn_length_to_merge:
-                    result[syn].add(
-                        SynonymData(
-                            ids=frozenset(ids),
-                            mapping_type=frozenset(),
-                            aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
-                            ids_to_source=id_to_source,
-                        )
-                    )
-                    logger.warning(
-                        f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn} is more than 4 chars, parser has aggregated - i.e. assumed they refer to the same concepts"
-                    )
-                else:
-                    for idx in ids:
-                        result[syn].add(
-                            SynonymData(
-                                ids=frozenset([idx]),
-                                mapping_type=frozenset(),
-                                aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                        )
-                    logger.warning(
-                        f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn} is les than 4 chars, parser has split - i.e. assumed they refer to different concepts"
-                    )
+    def dataframe_to_syndata_dict(self, df: pd.DataFrame) -> Dict[str, List[SynonymData]]:
+        df_as_dict = df.groupby(SYN).agg(list).to_dict(orient="index")
+        result = defaultdict(list)
+        for synonym, metadata_dict in df_as_dict.items():
+            for idx, mapping_type_lst in zip(metadata_dict[IDX], metadata_dict[MAPPING_TYPE]):
+                result[synonym].append(SynonymData(idx=idx, mapping_type=mapping_type_lst))
         return result
 
     def populate_metadata_database(self):
@@ -636,41 +178,39 @@ class OntologyParser(ABC):
         metadata = metadata_df.to_dict(orient="index")
         MetadataDatabase().add(self.name, metadata)
 
-    def collect_aggregate_synonym_data(
-        self, normalise_original_syns: bool
-    ) -> Dict[str, Set[SynonymData]]:
-        synonym_df, _ = self.generate_synonym_and_metadata_dataframes()
-        # strip trailing whitespace from syns
-        synonym_df[SYN] = synonym_df[SYN].apply(str.strip)
-        synonym_data = self.dataframe_to_syndata_dict(synonym_df, normalise_original_syns)
-        return synonym_data
-
-    def generate_synonyms(self):
-        """
-
-        :param normalise_original_syns: should the string normaliser be used before aggregating synonym data
-        :return:
-        """
-        synonym_data = self.collect_aggregate_synonym_data(False)
-        generated_synonym_data = {}
-        if self.synonym_generator:
-            generated_synonym_data = self.synonym_generator(synonym_data)
-        logger.info(
-            f"{len(synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
-        )
-        return generated_synonym_data
-
     def populate_synonym_database(self):
         """
-        deprecated
         call synonym generators and populate the synonym database
         :return:
         """
-        synonym_data = self.collect_aggregate_synonym_data(True)
-        # SynonymDatabase().add(self.name, generated_synonym_data)
-        SynonymDatabase().add(self.name, synonym_data)
+        synonym_df, _ = self.generate_synonym_and_metadata_dataframes()
+        synonym_data = self.dataframe_to_syndata_dict(synonym_df)
+        generated_synonym_data = self.run_synonym_generators(synonym_data)
+        logger.info(
+            f"{len(synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
+        )
 
-    @functools.lru_cache
+        SynonymDatabase().add(self.name, synonym_data)
+        SynonymDatabase().add(self.name, generated_synonym_data)
+
+    def run_synonym_generators(
+        self, synonym_data: Dict[str, List[SynonymData]]
+    ) -> Dict[str, List[SynonymData]]:
+        """
+        for every perumation of modifiers, generate a list of syns, then aggregate at the end
+        :param synonym_data:
+        :return:
+        """
+        final = {}
+        if self.synonym_generator_permutations:
+            for permutation_list in self.synonym_generator_permutations:
+                generated_synonym_data = copy.deepcopy(synonym_data)
+                for generator in permutation_list:
+                    generated_synonym_data = generator(generated_synonym_data)
+                final.update(generated_synonym_data)
+        return final
+
+    @cachetools.cached(cache={})
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         splits a table of ontology information into a synonym table and a metadata table, deduplicating and grouping
@@ -678,9 +218,6 @@ class OntologyParser(ABC):
         :return: a 2-tuple - first is synonym dataframe, second is metadata
         """
         df = self.parse_to_dataframe()
-        df[DATA_ORIGIN] = self.data_origin
-        df[IDX] = df[IDX].astype(str)
-
         # in case the default label isn't populated, just use the IDX
         df.loc[pd.isnull(df[DEFAULT_LABEL]), DEFAULT_LABEL] = df[IDX]
         # ensure correct order
@@ -700,7 +237,6 @@ class OntologyParser(ABC):
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-        assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         return syn_df, metadata_df
 
     def parse_to_dataframe(self) -> pd.DataFrame:
@@ -709,7 +245,7 @@ class OntologyParser(ABC):
         columns:
 
 
-        [IDX, DEFAULT_LABEL,DATA_ORIGIN, SYN, MAPPING_TYPE]
+        [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
 
         IDX: the ontology id
         DEFAULT_LABEL: the preferred label
@@ -762,6 +298,15 @@ class OntologyParser(ABC):
             path.joinpath(f"{self.name}_training_pairs.parquet"), index=None
         )
 
+    def get_synonym_generator_permutations(
+        self, synonym_generators: List[SynonymGenerator]
+    ) -> List[Iterable[SynonymGenerator]]:
+        result: List[Iterable[SynonymGenerator]] = []
+        for i in range(len(synonym_generators)):
+            result.extend(itertools.permutations(synonym_generators, i + 1))
+
+        return result
+
 
 class JsonLinesOntologyParser(OntologyParser):
     """
@@ -793,50 +338,30 @@ class JsonLinesOntologyParser(OntologyParser):
 
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_DISEASE"
-    allowed_sources = {"OGMS", "FBbt", "MONDO", "Orphanet", "EFO", "OTAR", "HP"}
-
-    def find_kb(self, string: str) -> str:
-        return string.split("_")[0]
 
     def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
-            idx = self.look_for_mondo(json_dict["id"], json_dict.get("dbXRefs", []))
-            if any(allowed_source in idx for allowed_source in self.allowed_sources):
-                synonyms = json_dict.get("synonyms", {})
-                exact_syns = synonyms.get("hasExactSynonym", [])
-                exact_syns.append(json_dict["name"])
-                df = pd.DataFrame(exact_syns, columns=[SYN])
-                df[MAPPING_TYPE] = "hasExactSynonym"
-                df[DEFAULT_LABEL] = json_dict["name"]
-                df[IDX] = idx
-                df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
-                yield df
-
-    def look_for_mondo(self, ot_id: str, db_xrefs: List[str]):
-        if "MONDO" in ot_id:
-            return ot_id
-        for x in db_xrefs:
-            if "MONDO" in x:
-                return x.replace(":", "_")
-        return ot_id
+            synonyms = json_dict.get("synonyms", {})
+            exact_syns = synonyms.get("hasExactSynonym", [])
+            exact_syns.append(json_dict["name"])
+            df = pd.DataFrame(exact_syns, columns=[SYN])
+            df[MAPPING_TYPE] = "hasExactSynonym"
+            df[DEFAULT_LABEL] = json_dict["name"]
+            df[IDX] = json_dict.get("code")
+            df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
+            yield df
 
 
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_TARGET"
 
-    def find_kb(self, string: str) -> str:
-        return "ENSEMBL"
-
     def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         for json_dict in jsons_gen:
-            biotype = json_dict.get("biotype")
-            if biotype == "" or biotype == "tec" or json_dict["id"] == json_dict["approvedSymbol"]:
-                continue
             records = []
             for key in ["synonyms", "obsoleteSymbols", "obsoleteNames", "proteinIds"]:
                 synonyms_and_sources_lst = json_dict.get(key, [])
@@ -851,20 +376,16 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
                     records.append(record)
 
             records.append({SYN: json_dict["approvedSymbol"], MAPPING_TYPE: "approvedSymbol"})
-            records.append({SYN: json_dict["approvedName"], MAPPING_TYPE: "approvedName"})
             records.append({SYN: json_dict["id"], MAPPING_TYPE: "opentargets_id"})
             df = pd.DataFrame.from_records(records, columns=[SYN, MAPPING_TYPE])
             df[IDX] = json_dict["id"]
-            df[DEFAULT_LABEL] = json_dict["approvedName"]
+            df[DEFAULT_LABEL] = json_dict["approvedSymbol"]
             df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
             yield df
 
 
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_MOLECULE"
-
-    def find_kb(self, string: str) -> str:
-        return "CHEMBL"
 
     def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
@@ -895,17 +416,6 @@ class RDFGraphParser(OntologyParser):
 
     name = "RDFGraphParser"
 
-    @property
-    @classmethod
-    @abstractmethod
-    def _uri_regex(cls):
-        """
-        subclasses should provide this as a class attribute.
-
-        It should be a compiled regex object that matches on valid URIs for the ontology
-        being parsed."""
-        pass
-
     def _get_synonym_predicates(self) -> List[str]:
         """
         subclasses should override this. Returns a List[str] of rdf predicates used to select synonyms from the owl
@@ -926,9 +436,6 @@ class RDFGraphParser(OntologyParser):
         mapping_type = []
 
         for sub, obj in g.subject_objects(label_predicates):
-            if not self.is_valid_iri(str(sub)):
-                continue
-
             default_labels.append(str(obj))
             iris.append(str(sub))
             syns.append(str(obj))
@@ -944,116 +451,9 @@ class RDFGraphParser(OntologyParser):
         )
         return df
 
-    def is_valid_iri(self, text: str) -> bool:
-        """
-        Check if input string is a valid IRI for the ontology being parsed.
-
-        Uses self._uri_regex to define valid IRIs
-        """
-        match = self._uri_regex.match(text)
-        return bool(match)
-
-
-class GeneOntologyParser(OntologyParser):
-    name = "UNDEFINED"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
-    query = """UNDEFINED"""
-
-    @functools.lru_cache
-    def load_go(self):
-        g = rdflib.Graph()
-        g.parse(self.in_path)
-        return g
-
-    def find_kb(self, string: str) -> str:
-        return self.name
-
-    def parse_to_dataframe(self) -> pd.DataFrame:
-        g = rdflib.Graph()
-        g.parse(self.in_path)
-        result = g.query(self.query)
-        default_labels = []
-        iris = []
-        syns = []
-        mapping_type = []
-
-        for row in result:
-            idx = row.goid
-            if "obsolete" in row.label:
-                logger.info(f"skipping obsolete id: {row.goid}, {row.label}")
-                continue
-            if self._uri_regex.match(idx):
-                default_labels.append(row.label)
-                iris.append(row.goid)
-                syns.append(row.synonym)
-                mapping_type.append("hasExactSynonym")
-        df = pd.DataFrame.from_dict(
-            {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
-        )
-        default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
-        default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
-        default_labels_df[MAPPING_TYPE] = "label"
-
-        return pd.concat([df, default_labels_df])
-
-
-class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
-    name = "BP_GENE_ONTOLOGY"
-    query = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                SELECT DISTINCT ?goid ?label ?synonym
-                        WHERE {
-
-                            ?goid oboinowl:hasExactSynonym ?synonym .
-                            ?goid rdfs:label ?label .
-                            ?goid oboinowl:hasOBONamespace "biological_process" .
-
-                  }
-        """
-
-
-class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
-    name = "MF_GENE_ONTOLOGY"
-    query = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                SELECT DISTINCT ?goid ?label ?synonym
-                        WHERE {
-
-                            ?goid oboinowl:hasExactSynonym ?synonym .
-                            ?goid rdfs:label ?label .
-                            ?goid oboinowl:hasOBONamespace "molecular_function".
-
-                  }
-        """
-
-
-class CellularComponentGeneOntologyParser(GeneOntologyParser):
-    name = "CC_GENE_ONTOLOGY"
-    query = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                SELECT DISTINCT ?goid ?label ?synonym
-                        WHERE {
-
-                            ?goid oboinowl:hasExactSynonym ?synonym .
-                            ?goid rdfs:label ?label .
-                            ?goid oboinowl:hasOBONamespace "cellular_component" .
-
-                  }
-        """
-
 
 class UberonOntologyParser(RDFGraphParser):
     name = "UBERON"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$")
     """
     input should be an UBERON owl file
     e.g.
@@ -1062,25 +462,18 @@ class UberonOntologyParser(RDFGraphParser):
 
     def _get_synonym_predicates(self) -> List[str]:
         return [
-            # "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+            "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
             "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
         ]
-
-    def find_kb(self, string: str) -> str:
-        return "UBERON"
 
 
 class MondoOntologyParser(OntologyParser):
     name = "MONDO"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(MONDO|HP)_[0-9]+$")
     """
-    input should be an MONDO json file
+    input should be an MONDO owl file
     e.g.
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
-
-    def find_kb(self, string: str):
-        return parse.urlparse(string).path.split("_")[0]
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         x = json.load(open(self.in_path, "r"))
@@ -1091,9 +484,6 @@ class MondoOntologyParser(OntologyParser):
         all_syns = []
         mapping_type = []
         for i, node in enumerate(nodes):
-            if not self.is_valid_iri(node["id"]):
-                continue
-
             idx = node["id"]
             default_label = node.get("lbl")
             # add default_label to syn type
@@ -1104,23 +494,17 @@ class MondoOntologyParser(OntologyParser):
 
             syns = node.get("meta", {}).get("synonyms", [])
             for syn_dict in syns:
-
                 pred = syn_dict["pred"]
-                if pred in {"hasExactSynonym"}:
-                    mapping_type.append(pred)
-                    syn = syn_dict["val"]
-                    ids.append(idx)
-                    default_label_list.append(default_label)
-                    all_syns.append(syn)
+                mapping_type.append(pred)
+                syn = syn_dict["val"]
+                ids.append(idx)
+                default_label_list.append(default_label)
+                all_syns.append(syn)
 
         df = pd.DataFrame.from_dict(
             {IDX: ids, DEFAULT_LABEL: default_label_list, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
         return df
-
-    def is_valid_iri(self, text: str) -> bool:
-        match = self._uri_regex.match(text)
-        return bool(match)
 
 
 class EnsemblOntologyParser(OntologyParser):
@@ -1130,16 +514,6 @@ class EnsemblOntologyParser(OntologyParser):
      e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
     :return:
     """
-
-    def find_kb(self, string: str) -> str:
-        return "ENSEMBL"
-
-    def __init__(self, in_path: str, additional_syns_path: str):
-
-        super().__init__(in_path)
-        with open(additional_syns_path, "r") as f:
-
-            self.additional_syns = json.load(f)
 
     def parse_to_dataframe(self) -> pd.DataFrame:
 
@@ -1186,22 +560,17 @@ class EnsemblOntologyParser(OntologyParser):
                 for hgnc_key in keys_to_check:
                     synonyms_this_entity = get_with_default_list(hgnc_key)
                     for potential_synonym in synonyms_this_entity:
-                        synonyms.extend(
-                            (potential_synonym, hgnc_key)
-                            for potential_synonym in synonyms_this_entity
+                        synonyms.append(
+                            (potential_synonym, hgnc_key),
                         )
 
                 synonyms = list(set(synonyms))
+                # filter any very short matches
+                synonyms_and_mapping_type = [x for x in synonyms if len(x[0]) > 2]
                 synonyms_strings = []
-                for synonym_str, mapping_t in synonyms:
+                for synonym_str, mapping_t in synonyms_and_mapping_type:
                     all_mapping_type.append(mapping_t)
                     synonyms_strings.append(synonym_str)
-
-                # also include any additional synonyms we've defined
-                additional_syns = self.additional_syns["additional_syns"].get(ensembl_gene_id, [])
-                for additional_syn in additional_syns:
-                    synonyms_strings.append(additional_syn)
-                    all_mapping_type.append("kazu_curated")
 
                 num_syns = len(synonyms_strings)
                 ids.extend([ensembl_gene_id] * num_syns)
@@ -1222,9 +591,6 @@ class ChemblOntologyParser(OntologyParser):
     :return:
     """
 
-    def find_kb(self, string: str) -> str:
-        return "CHEMBL"
-
     def parse_to_dataframe(self) -> pd.DataFrame:
         conn = sqlite3.connect(self.in_path)
         query = f"""
@@ -1238,7 +604,6 @@ class ChemblOntologyParser(OntologyParser):
         df = pd.read_sql(query, conn)
         # eliminate anything without a pref_name, as will be too big otherwise
         df = df.dropna(subset=[DEFAULT_LABEL])
-
         df.drop_duplicates(inplace=True)
 
         return df
@@ -1246,20 +611,16 @@ class ChemblOntologyParser(OntologyParser):
 
 class CLOOntologyParser(RDFGraphParser):
     name = "CLO"
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$")
     """
     input is a CLO Owl file
     https://www.ebi.ac.uk/ols/ontologies/clo
     """
 
-    def find_kb(self, string: str) -> str:
-        return "CLO"
-
     def _get_synonym_predicates(self) -> List[str]:
         return [
-            # "http://purl.obolibrary.org/obo/hasNarrowSynonym",
+            "http://purl.obolibrary.org/obo/hasNarrowSynonym",
             "http://purl.obolibrary.org/obo/hasExactSynonym",
-            # "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+            "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
         ]
 
 
@@ -1270,9 +631,6 @@ class CellosaurusOntologyParser(OntologyParser):
     https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo
     :return:
     """
-
-    def find_kb(self, string: str) -> str:
-        return "CELLOSAURUS"
 
     def parse_to_dataframe(self) -> pd.DataFrame:
 
@@ -1288,23 +646,18 @@ class CellosaurusOntologyParser(OntologyParser):
                 if text.startswith("id:"):
                     id = text.split(" ")[1]
                 elif text.startswith("name:"):
-                    default_label = text[5:].strip()
+                    default_label = text.split(" ")[1][1:]
                     ids.append(id)
                     default_labels.append(default_label)
                     all_syns.append(default_label)
                     mapping_type.append("name")
                 elif text.startswith("synonym:"):
-                    match = self._synonym_regex.match(text)
-                    if match is None:
-                        raise ValueError(
-                            """synonym line does not match our synonym regex.
-                            Either something is wrong with the file, or it has updated
-                            and our regex is not correct/general enough."""
-                        )
+                    syn = text.split(" ")[1][1:-1]
+                    mapping = text.split(" ")[2]
                     ids.append(id)
                     default_labels.append(default_label)
-                    all_syns.append(match.group("syn"))
-                    mapping_type.append(match.group("mapping"))
+                    all_syns.append(syn)
+                    mapping_type.append(mapping)
                 else:
                     pass
         df = pd.DataFrame.from_dict(
@@ -1312,86 +665,40 @@ class CellosaurusOntologyParser(OntologyParser):
         )
         return df
 
-    _synonym_regex = re.compile(
-        r"""^synonym:      # line that begins synonyms
-        \s*                # any amount of whitespace (standardly a single space)
-        "(?P<syn>[^"]*)"   # a quoted string - capture this as a named match group 'syn'
-        \s*                # any amount of separating whitespace (standardly a single space)
-        (?P<mapping>\w*)   # a sequence of word characters representing the mapping type
-        \s*                # any amount of separating whitespace (standardly a single space)
-        \[\]               # an open and close bracket at the end of the string
-        $""",
-        re.VERBOSE,
-    )
-
 
 class MeddraOntologyParser(OntologyParser):
-    name = "MEDDRA_DISEASE"
+    name = "MEDDRA"
     """
     input is an unzipped directory to a MEddra release (Note, requires licence). This
     should contain the files 'mdhier.asc' and 'llt.asc'
     :return:
     """
 
-    _mdhier_asc_col_names = (
-        "pt_code",
-        "hlt_code",
-        "hlgt_code",
-        "soc_code",
-        "pt_name",
-        "hlt_name",
-        "hlgt_name",
-        "soc_name",
-        "soc_abbrev",
-        "null_field",
-        "pt_soc_code",
-        "primary_soc_fg",
-        "NULL",
-    )
-
-    _llt_asc_column_names = (
-        "llt_code",
-        "llt_name",
-        "pt_code",
-        "llt_whoart_code",
-        "llt_harts_code",
-        "llt_costart_sym",
-        "llt_icd9_code",
-        "llt_icd9cm_code",
-        "llt_icd10_code",
-        "llt_currency",
-        "llt_jart_code",
-        "NULL",
-    )
-
-    _exclude_soc = ["Surgical and medical procedures", "Social circumstances", "Investigations"]
-
-    def find_kb(self, string: str) -> str:
-        return "MEDDRA"
-
     def parse_to_dataframe(self) -> pd.DataFrame:
         # hierarchy path
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
         llt_path = os.path.join(self.in_path, "llt.asc")
-        hier_df = pd.read_csv(
-            mdheir_path,
-            sep="$",
-            header=None,
-            names=self._mdhier_asc_col_names,
-            dtype="string",
-        )
-        hier_df = hier_df[~hier_df["soc_name"].isin(self._exclude_soc)]
+        hier_df = pd.read_csv(mdheir_path, sep="$", header=None)
+        hier_df.columns = [
+            "pt_code",
+            "hlt_code",
+            "hlgt_code",
+            "soc_code",
+            "pt_name",
+            "hlt_name",
+            "hlgt_name",
+            "soc_name",
+            "soc_abbrev",
+            "null_field",
+            "pt_soc_code",
+            "primary_soc_fg",
+            "NULL",
+        ]
 
-        llt_df = pd.read_csv(
-            llt_path,
-            sep="$",
-            header=None,
-            names=self._llt_asc_column_names,
-            usecols=("llt_name", "pt_code"),
-            dtype="string",
-        )
-        llt_df = llt_df.dropna(axis=1)
+        llt_df = pd.read_csv(llt_path, sep="$", header=None)
+        llt_df = llt_df.T.dropna().T
+        llt_df.columns = ["llt_code", "llt_name", "pt_code", "llt_currency"]
 
         ids = []
         default_labels = []
@@ -1411,17 +718,6 @@ class MeddraOntologyParser(OntologyParser):
                 default_labels.append(pt_name)
                 all_syns.append(llt_row["llt_name"])
                 mapping_type.append("meddra_link")
-
-        for i, row in hier_df[["hlt_code", "hlt_name"]].drop_duplicates().iterrows():
-            ids.append(row["hlt_code"])
-            default_labels.append(row["hlt_name"])
-            all_syns.append(row["hlt_name"])
-            mapping_type.append("meddra_link")
-        for i, row in hier_df[["hlgt_code", "hlgt_name"]].drop_duplicates().iterrows():
-            ids.append(row["hlgt_code"])
-            default_labels.append(row["hlgt_name"])
-            all_syns.append(row["hlgt_name"])
-            mapping_type.append("meddra_link")
         df = pd.DataFrame.from_dict(
             {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
