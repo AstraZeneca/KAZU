@@ -1,9 +1,10 @@
 import copy
+import itertools
 import logging
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Iterable
 
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
@@ -19,8 +20,6 @@ class SynonymData:
 
     idx: str
     mapping_type: List[str]
-    is_symbol: bool = False
-    ner_blacklist: bool = False
     generated_from: List[str] = field(default_factory=list, hash=False)
 
 
@@ -54,6 +53,38 @@ class SynonymGenerator(ABC):
                 for syn_info in metadata_copy:
                     syn_info.generated_from.append(self.__class__.__name__)
         return result
+
+
+class CombinatorialSynonymGenerator:
+    def __init__(self, synonym_generators: List[SynonymGenerator]):
+        self.synonym_generator_permutations = self.get_synonym_generator_permutations(
+            synonym_generators
+        )
+
+    def get_synonym_generator_permutations(
+        self, synonym_generators: List[SynonymGenerator]
+    ) -> List[Iterable[SynonymGenerator]]:
+        result: List[Iterable[SynonymGenerator]] = []
+        for i in range(len(synonym_generators)):
+            result.extend(itertools.permutations(synonym_generators, i + 1))
+
+        return result
+
+    def __call__(self, synonym_data: Dict[str, List[SynonymData]]) -> Dict[str, List[SynonymData]]:
+        """
+        for every perumation of modifiers, generate a list of syns, then aggregate at the end
+        :param synonym_data:
+        :return:
+        """
+        final = {}
+        if self.synonym_generator_permutations:
+            for i, permutation_list in enumerate(self.synonym_generator_permutations):
+                logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
+                generated_synonym_data = copy.deepcopy(synonym_data)
+                for generator in permutation_list:
+                    generated_synonym_data = generator(generated_synonym_data)
+                final.update(generated_synonym_data)
+        return final
 
 
 class SeparatorExpansion(SynonymGenerator):
@@ -151,7 +182,7 @@ class StringReplacement(SynonymGenerator):
         for to_replace, replacement_list in self.replacement_dict.items():
             if to_replace in text:
                 for replace_with in replacement_list:
-                    results[text.replace(to_replace, replace_with)] = syn_data
+                    results[text.replace(to_replace, replace_with).strip()] = syn_data
         if len(results) > 0:
             return results
         else:
