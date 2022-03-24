@@ -12,3 +12,4 @@ defaults:
   - pipeline: default
   - DistillationTraining: default
   - SethStep: default
+  - SynonymGeneration: default

@@ -1,0 +1,39 @@
+default:
+  _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  synonym_generators:
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover
+      spacy_pipeline: ${SpacyPipeline}
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
+      lower: true
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
+      replacement_dict:
+        "-":
+          - " "
+          - "_"
+        "_":
+          - " "
+          - "-"
+gene:
+  _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  synonym_generators:
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
+      lower: true
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion
+      spacy_pipeline: ${SpacyPipeline}
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
+      replacement_dict:
+        "-":
+          - " "
+          - "_"
+        "_":
+          - " "
+          - "-"
+chemical:
+  _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  synonym_generators:
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
+      lower: true
+    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution
+
