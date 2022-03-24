@@ -16,7 +16,10 @@ from rdflib import URIRef
 from tqdm.auto import tqdm
 
 # dataframe column keys
-from kazu.modelling.ontology_preprocessing.synonym_generation import SynonymData, SynonymGenerator
+from kazu.modelling.ontology_preprocessing.synonym_generation import (
+    SynonymData,
+    CombinatorialSynonymGenerator,
+)
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -148,17 +151,15 @@ class OntologyParser(ABC):
     # the metadata table should have at least these columns
     minimum_metadata_column_names = [IDX, DEFAULT_LABEL]
 
-    def __init__(self, in_path: str, synonym_generators: Optional[List[SynonymGenerator]] = None):
+    def __init__(
+        self, in_path: str, synonym_generator: Optional[CombinatorialSynonymGenerator] = None
+    ):
         """
 
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         :param synonym_generators: list of synonym generators to apply to this parser
         """
-        self.synonym_generator_permutations = (
-            self.get_synonym_generator_permutations(synonym_generators)
-            if synonym_generators
-            else None
-        )
+        self.synonym_generator = synonym_generator
         self.in_path = in_path
 
     def dataframe_to_syndata_dict(self, df: pd.DataFrame) -> Dict[str, List[SynonymData]]:
@@ -185,33 +186,14 @@ class OntologyParser(ABC):
         """
         synonym_df, _ = self.generate_synonym_and_metadata_dataframes()
         synonym_data = self.dataframe_to_syndata_dict(synonym_df)
-        generated_synonym_data = self.run_synonym_generators(synonym_data)
-        logger.info(
-            f"{len(synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
-        )
-
+        if self.synonym_generator:
+            generated_synonym_data = self.synonym_generator(synonym_data)
+            logger.info(
+                f"{len(synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
+            )
+            SynonymDatabase().add(self.name, generated_synonym_data)
         SynonymDatabase().add(self.name, synonym_data)
-        SynonymDatabase().add(self.name, generated_synonym_data)
 
-    def run_synonym_generators(
-        self, synonym_data: Dict[str, List[SynonymData]]
-    ) -> Dict[str, List[SynonymData]]:
-        """
-        for every perumation of modifiers, generate a list of syns, then aggregate at the end
-        :param synonym_data:
-        :return:
-        """
-        final = {}
-        if self.synonym_generator_permutations:
-            for i, permutation_list in enumerate(self.synonym_generator_permutations):
-                logger.info(
-                    f"running permutation set {i} on {self.name}. Permutations: {permutation_list}"
-                )
-                generated_synonym_data = copy.deepcopy(synonym_data)
-                for generator in permutation_list:
-                    generated_synonym_data = generator(generated_synonym_data)
-                final.update(generated_synonym_data)
-        return final
 
     @cachetools.cached(cache={})
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -300,15 +282,6 @@ class OntologyParser(ABC):
         self.format_training_table().to_parquet(
             path.joinpath(f"{self.name}_training_pairs.parquet"), index=None
         )
-
-    def get_synonym_generator_permutations(
-        self, synonym_generators: List[SynonymGenerator]
-    ) -> List[Iterable[SynonymGenerator]]:
-        result: List[Iterable[SynonymGenerator]] = []
-        for i in range(len(synonym_generators)):
-            result.extend(itertools.permutations(synonym_generators, i + 1))
-
-        return result
 
 
 class JsonLinesOntologyParser(OntologyParser):
