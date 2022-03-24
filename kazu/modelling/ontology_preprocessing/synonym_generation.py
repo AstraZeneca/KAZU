@@ -35,12 +35,12 @@ class SynonymGenerator(ABC):
 
         result: Dict[str, List[SynonymData]] = {}
         for synonym, metadata in syn_data.items():
-            metadata = copy.copy(metadata)
+            metadata_copy = copy.copy(metadata)
             generated_syn_dict: Optional[Dict[str, List[SynonymData]]] = self.call(
-                synonym, metadata
+                synonym, metadata_copy
             )
             if generated_syn_dict:
-                for generated_syn, generated_metadata in generated_syn_dict.items():
+                for generated_syn in generated_syn_dict:
                     if generated_syn in syn_data:
                         logger.debug(
                             f"generated synonym '{generated_syn}' matches existing synonym {syn_data[generated_syn]} "
@@ -50,50 +50,70 @@ class SynonymGenerator(ABC):
                             f"generated synonym '{generated_syn}' matches another generated synonym {result[generated_syn]} "
                         )
                     else:
-                        for y in generated_metadata:
-                            y.generated_from.append(self.__class__.__name__)
-                        result[generated_syn] = generated_metadata
+                        result[generated_syn] = metadata_copy
+                for syn_info in metadata_copy:
+                    syn_info.generated_from.append(self.__class__.__name__)
         return result
 
 
-class SeperatorExpansion(SynonymGenerator):
-    def __init__(self):
+class SeparatorExpansion(SynonymGenerator):
+    def __init__(self, spacy_pipeline: SpacyPipeline):
+        self.all_stopwords = spacy_pipeline.nlp.Defaults.stop_words
         self.paren_re = r"(.*)\((.*)\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
 
     def call(
         self, text: str, syn_data: List[SynonymData]
     ) -> Optional[Dict[str, List[SynonymData]]]:
-        results = {}
+        bracket_results = {}
+        all_group_results = {}
         if "(" in text and ")" in text:
             # expand brackets
             matches = re.match(self.paren_re, text)
             if matches is not None:
                 all_groups_no_brackets = []
                 for group in matches.groups():
-                    if group not in self.excluded_parenthesis:
-                        results[group] = syn_data
+                    if (
+                        group not in self.excluded_parenthesis
+                        and group.lower() not in self.all_stopwords
+                    ):
+                        bracket_results[group.strip()] = syn_data
                         all_groups_no_brackets.append(group)
-                results["".join(all_groups_no_brackets)] = syn_data
+                all_group_results["".join(all_groups_no_brackets)] = syn_data
 
         # expand slashes
-        for x in list(results.keys()):
+        for x in list(bracket_results.keys()):
             if "/" in x:
                 splits = x.split("/")
                 for split in splits:
-                    results[split] = syn_data
-        return results
+                    bracket_results[split] = syn_data
+        bracket_results.update(all_group_results)
+        if len(bracket_results) > 0:
+            return bracket_results
+        else:
+            return None
 
 
 class CaseModifier(SynonymGenerator):
+    def __init__(self, upper: bool = False, lower: bool = False, title: bool = False):
+        self.title = title
+        self.lower = lower
+        self.upper = upper
+
     def call(
         self, text: str, syn_data: List[SynonymData]
     ) -> Optional[Dict[str, List[SynonymData]]]:
         results = {}
-        results[text.lower()] = syn_data
-        results[text.upper()] = syn_data
-        results[text.title()] = syn_data
-        return results
+        if self.upper and not text.isupper():
+            results[text.upper()] = syn_data
+        if self.lower and not text.islower():
+            results[text.lower()] = syn_data
+        if self.title and not text.istitle():
+            results[text.title()] = syn_data
+        if len(results) > 0:
+            return results
+        else:
+            return None
 
 
 class StopWordRemover(SynonymGenerator):
@@ -116,6 +136,24 @@ class StopWordRemover(SynonymGenerator):
                 lst.append(token)
         if detected:
             return {" ".join(lst): syn_data}
+        else:
+            return None
+
+
+class StringReplacement(SynonymGenerator):
+    def __init__(self, replacement_dict: Dict[str, List[str]]):
+        self.replacement_dict = replacement_dict
+
+    def call(
+        self, text: str, syn_data: List[SynonymData]
+    ) -> Optional[Dict[str, List[SynonymData]]]:
+        results = {}
+        for to_replace, replacement_list in self.replacement_dict.items():
+            if to_replace in text:
+                for replace_with in replacement_list:
+                    results[text.replace(to_replace, replace_with)] = syn_data
+        if len(results) > 0:
+            return results
         else:
             return None
 
@@ -183,7 +221,10 @@ class GreekSymbolSubstitution(SynonymGenerator):
         results[self.substitute(text, self.GREEK_SUBS)] = syn_data
         results[self.substitute(text, self.GREEK_SUBS_REVERSED)] = syn_data
         results[self.substitute(text, self.GREEK_SUBS_ABBRV)] = syn_data
-        return results
+        if len(results) > 0:
+            return results
+        else:
+            return None
 
     def substitute(self, text: str, replace_dict: Dict[str, str]) -> str:
         chars_found = filter(lambda x: x in text, replace_dict.keys())
