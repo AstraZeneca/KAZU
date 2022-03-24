@@ -203,7 +203,10 @@ class OntologyParser(ABC):
         """
         final = {}
         if self.synonym_generator_permutations:
-            for permutation_list in self.synonym_generator_permutations:
+            for i, permutation_list in enumerate(self.synonym_generator_permutations):
+                logger.info(
+                    f"running permutation set {i} on {self.name}. Permutations: {permutation_list}"
+                )
                 generated_synonym_data = copy.deepcopy(synonym_data)
                 for generator in permutation_list:
                     generated_synonym_data = generator(generated_synonym_data)
