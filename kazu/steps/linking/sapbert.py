@@ -1,18 +1,19 @@
 import logging
+import sys
 import traceback
 from collections import defaultdict
-from typing import List, Tuple
+from typing import List, Tuple, Iterable, Optional, Dict
 
 import pydash
 import torch
-
-from kazu.data.data import Document, PROCESSING_EXCEPTION
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, LINK_CONFIDENCE, LinkRanks
 from kazu.steps import BaseStep
 from kazu.utils.caching import (
     EntityLinkingLookupCache,
     CachedIndexGroup,
     EmbeddingIndexCacheManager,
 )
+from kazu.utils.utils import HitResolver
 
 logger = logging.getLogger(__name__)
 
@@ -34,25 +35,26 @@ class SapBertForEntityLinkingStep(BaseStep):
         self,
         depends_on: List[str],
         index_group: CachedIndexGroup,
+        min_string_length_to_trigger: Optional[Dict[str, int]] = None,
         lookup_cache_size: int = 5000,
         top_n: int = 20,
-        score_cutoff: float = 99.0,
-        skip_if_already_linked: bool = True,
+        score_cutoffs: Tuple[float, float] = (99.9940, 99.995),
     ):
         """
 
         :param depends_on:
         :param index_group: an instance of CachedIndexGroup constructed with a list of EmbeddingIndexCacheManager
+        :param min_string_length_to_trigger: a per entity class mapping that signals sapbert will not run on matches
+            shorter than this. (sapbert is less good at symbolic matching than string processing techniques)
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
         :param top_n: keep up to the top_n hits of the query
-        :param score_cutoff: min score for a hit to be considered
-        :param skip_if_already_linked: since sapbert is expensive, skip it if an entity already has mappings
+        :param score_cutoffs: min score for a hit to be considered. first is lower bound for medium confidence,
+            second is upper bound for med high confidence
         """
 
         super().__init__(depends_on=depends_on)
-
-        self.skip_if_already_linked = skip_if_already_linked
-        self.score_cutoff = score_cutoff
+        self.min_string_length_to_trigger = min_string_length_to_trigger
+        self.score_cutoffs = score_cutoffs
         if not all([isinstance(x, EmbeddingIndexCacheManager) for x in index_group.cache_managers]):
             raise RuntimeError(
                 "The CachedIndexGroup must be configured with an EmbeddingIndexCacheManager to work"
@@ -103,16 +105,33 @@ class SapBertForEntityLinkingStep(BaseStep):
                 lambda x: x.entity_class in self.index_group.entity_class_to_indices.keys(),
                 entities,
             )
-            if self.skip_if_already_linked:
-                entities = filter(lambda x: len(x.mappings) == 0, entities)
-            entities = self.lookup_cache.check_lookup_cache(entities)
+            self.process_entities(entities)
+        except Exception:
+            affected_doc_ids = [doc.idx for doc in docs]
+            for doc in docs:
+                message = (
+                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
+                )
+                doc.metadata[PROCESSING_EXCEPTION] = message
+                failed_docs.append(doc)
+
+        return docs, failed_docs
+
+    def process_entities(self, entities: Iterable[Entity]):
+        entities = self.lookup_cache.check_lookup_cache(entities)
+
+        if len(entities) > 0:
             entity_string_to_ent_list = defaultdict(list)
             # group entities by their match string, so we only need to process one string for all matches in a set
             # of documents
             for x in entities:
+                if self.min_string_length_to_trigger and self.min_string_length_to_trigger.get(
+                    x.entity_class, sys.maxsize
+                ) > len(x.match):
+                    continue
                 entity_string_to_ent_list[x.match].append(x)
+            if len(entity_string_to_ent_list) > 0:
 
-            if len(entities) > 0:
                 results = self.model.get_embeddings_for_strings(
                     list(entity_string_to_ent_list.keys()),
                     trainer=self.trainer,
@@ -124,25 +143,15 @@ class SapBertForEntityLinkingStep(BaseStep):
                     for entity in entities_grouped:
                         cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
                         if not len(cache_missed_entities) == 0:
-                            mappings = list(
+                            hits = list(
                                 self.index_group.search(
                                     query=result,
                                     entity_class=entity.entity_class,
                                     namespace=self.namespace(),
                                     top_n=self.top_n,
-                                    score_cutoff=self.score_cutoff,
+                                    score_cutoffs=self.score_cutoffs,
+                                    original_string=entity.match,
                                 )
                             )
-                            for mapping in mappings:
-                                entity.add_mapping(mapping)
-                            self.lookup_cache.update_lookup_cache(entity, mappings)
-        except Exception:
-            affected_doc_ids = [doc.idx for doc in docs]
-            for doc in docs:
-                message = (
-                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
-                )
-                doc.metadata[PROCESSING_EXCEPTION] = message
-                failed_docs.append(doc)
-
-        return docs, failed_docs
+                            entity.hits.extend(hits)
+                            self.lookup_cache.update_hits_lookup_cache(entity, hits)

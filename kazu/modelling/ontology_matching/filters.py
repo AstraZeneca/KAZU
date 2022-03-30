@@ -1,5 +1,6 @@
-from kazu.modelling.ontology_preprocessing.base import IDX, SYN
+import re
 
+from kazu.data.data import SynonymData
 
 BLACKLIST_EXACT = {
     "CHEMBL1201112": ["MAY"],
@@ -26,28 +27,35 @@ BLACKLIST_LOWER = {
     "CHEMBL2272076": ["impact"],
     "http://purl.obolibrary.org/obo/MONDO_0012268": ["aids"],
     # as above in BLACKLIST_EXACT
-    "*": ["all", "was", "disease", "syndrome", "cat", "mat"],
+    "*": ["all", "was", "disease", "syndrome", "cat", "mat", "has", "may", "can", "same", "read"],
 }
+# a set of gene names that are often used to mean 'actual genes' but also other things (such as page numbers, in the
+# case of p27, p53 etc). We match on them, and disambiguate later
+PROBLEMATIC_GENE_NAMES = {r"p[0-9][0-9]"}
+PROBLEMATIC_GENE_NAMES_RE = [re.compile(x) for x in PROBLEMATIC_GENE_NAMES]
 
 
-def is_valid_ontology_entry(row, lowercase):
-    syn = row[SYN]
-    iri = row[IDX]
+def is_valid_ontology_entry(syn: str, idx_str: str, lowercase):
     if len(syn) < 3:
         return False
     # we avoid case-invariant matching for some types of ontologies
-    if lowercase and (
-        iri.startswith("ENS")
-        or iri.startswith("CVCL")
-        or iri.startswith("http://purl.obolibrary.org/obo/CLO_")
+    # rj update - unless they have a digit in them e.g. p27
+    if (
+        lowercase
+        and (
+            idx_str.startswith("ENS")
+            or idx_str.startswith("CVCL")
+            or idx_str.startswith("http://purl.obolibrary.org/obo/CLO_")
+        )
+        and not any(regex.search(idx_str) for regex in PROBLEMATIC_GENE_NAMES_RE)
     ):
         return False
     if _is_number(syn):
         return False
-    if _hits_blacklist(BLACKLIST_EXACT, syn, iri):
+    if _hits_blacklist(BLACKLIST_EXACT, syn, idx_str):
         return False
     if lowercase:
-        if _hits_blacklist(BLACKLIST_LOWER, syn.lower(), iri):
+        if _hits_blacklist(BLACKLIST_LOWER, syn.lower(), idx_str):
             return False
     return True
 

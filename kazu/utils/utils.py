@@ -1,14 +1,68 @@
 import logging
+import re
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Dict, Tuple, Union, Iterable
 
+from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, MAPPING_TYPE, MetadataDatabase
 from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
 
-from kazu.data.data import Document, Entity, Section
+from kazu.data.data import (
+    Document,
+    Entity,
+    Section,
+    Hit,
+    Mapping,
+    LINK_CONFIDENCE,
+    LinkRanks,
+    AMBIGUOUS_IDX,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class ParseSourceFromId:
+    def __init__(self, regex_to_source: Dict[str, Dict[str, str]]):
+        self.regex_to_source = defaultdict(dict)
+        for source, re_dict in regex_to_source.items():
+            for k, v in re_dict.items():
+                self.regex_to_source[source][re.compile(k)] = v
+
+    def __call__(self, parser_name: str, idx: str):
+        for regex, target_source in self.regex_to_source.get(parser_name, {}).items():
+            if re.search(regex, idx):
+                return target_source
+        else:
+            return parser_name
+
+
+class HitResolver:
+    """
+    if a hit isn't ambiguous, convert to a mapping
+    """
+
+    def __init__(self, id_parser: ParseSourceFromId):
+        self.id_parser = id_parser
+        self.metadata_db = MetadataDatabase()
+
+    def __call__(self, hit: Hit) -> Iterable[Mapping]:
+
+        if len(hit.syn_data) == 1:
+            syn_data = next(iter(hit.syn_data))
+            for idx in syn_data.ids:
+                metadata = self.metadata_db.get_by_idx(hit.source, idx)
+                default_label = metadata.pop(DEFAULT_LABEL, "na")
+                mapping_type = frozenset([str(x) for x in metadata.pop(MAPPING_TYPE, ["na"])])
+                metadata[LINK_CONFIDENCE] = hit.confidence
+                yield Mapping(
+                    default_label=str(default_label),
+                    source=self.id_parser(hit.source, idx),
+                    idx=idx,
+                    mapping_type=mapping_type,
+                    metadata=metadata,
+                )
 
 
 def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:

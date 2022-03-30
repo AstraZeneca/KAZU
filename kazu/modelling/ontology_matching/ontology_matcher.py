@@ -1,22 +1,20 @@
+import logging
+import pickle
 from dataclasses import dataclass, asdict
 from functools import partial
-from typing import List, Dict, Union, Callable, Iterable, Optional, Set
 from pathlib import Path
-import pandas as pd
-import logging
-import srsly
-import pickle
+from typing import List, Dict, Union, Callable, Iterable, Set
 
 import spacy
+import srsly
+from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
+from kazu.modelling.ontology_matching.variants import create_variants
+from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
-
-from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
-from kazu.modelling.ontology_matching.variants import create_variants
-from kazu.modelling.ontology_preprocessing.base import IDX, SYN
-from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 
 GENE = "gene"
 DRUG = "drug"
@@ -128,55 +126,55 @@ class OntologyMatcher:
         """RETURNS (List[str]): List of parquet files that were processed"""
         return self.cfg.parquet_files
 
-    def set_ontologies(self, parquet_files: SinglePathLikeOrIterable):
+    def set_ontologies(self, parsers: List[OntologyParser]):
         """Initialize the ontologies when creating this component.
         This method should not be run on an existing or deserialized pipeline.
         """
         if len(self.ontologies) > 0:
             logging.warning("Ontologies are being redefined - is this by intention?")
 
-        paths = self._define_paths(parquet_files)
+        # paths = self._define_paths(parquet_files)
 
-        dfs = {path.name: pd.read_parquet(path) for path in paths}
-        self.strict_matcher = self._create_phrasematcher(dfs, lowercase=False)
-        self.lowercase_matcher = self._create_phrasematcher(dfs, lowercase=True)
-        self.cfg.parquet_files = [path.name for path in paths]
+        # dfs = {path.name: pd.read_parquet(path) for path in paths}
+        self.strict_matcher, self.lowercase_matcher = self._create_phrasematcher(parsers)
+        # self.cfg.parquet_files = [path.name for path in paths]
 
-    def initialize(
-        self,
-        get_examples: Callable,
-        *,
-        nlp: Optional[Language] = None,
-        parquet_files: SinglePathLikeOrIterable = None,
-        labels: Optional[Iterable[str]] = None,
-    ) -> None:
-        """Initialize the labels and ontologies when creating this component.
-        This method is not called when reading the pipeline from disk.
-
-        nlp (Language): The current nlp object the component is part of.
-        parquet_files (str or Path): location to parquet file or directory of parquet files
-        labels (Optional[Iterable[str]]): The labels to add to the component
-        """
-        # Define the labels
-        if not labels:
-            ex_labels = set()
-            for example in get_examples():
-                for cat in example.y.cats:
-                    ex_labels.add(cat)
-            self.set_labels(ex_labels)
-            if len(self.labels) > 0:
-                logging.info(f"Inferred {len(self.labels)} labels from the data.")
-            else:
-                self.set_labels([GENE, DRUG, ANATOMY, DISEASE, CELL_LINE, ENTITY])
-                logging.info(f"Used the {len(self.labels)} default labels.")
-
-        else:
-            self.set_labels(labels)
-            logging.info(f"Used the {len(self.labels)} given labels.")
-
-        # Define the ontologies
-        if parquet_files:
-            self.set_ontologies(parquet_files)
+    # dead code?
+    # def initialize(
+    #     self,
+    #     get_examples: Callable,
+    #     *,
+    #     nlp: Optional[Language] = None,
+    #     parquet_files: SinglePathLikeOrIterable = None,
+    #     labels: Optional[Iterable[str]] = None,
+    # ) -> None:
+    #     """Initialize the labels and ontologies when creating this component.
+    #     This method is not called when reading the pipeline from disk.
+    #
+    #     nlp (Language): The current nlp object the component is part of.
+    #     parquet_files (str or Path): location to parquet file or directory of parquet files
+    #     labels (Optional[Iterable[str]]): The labels to add to the component
+    #     """
+    #     # Define the labels
+    #     if not labels:
+    #         ex_labels = set()
+    #         for example in get_examples():
+    #             for cat in example.y.cats:
+    #                 ex_labels.add(cat)
+    #         self.set_labels(ex_labels)
+    #         if len(self.labels) > 0:
+    #             logging.info(f"Inferred {len(self.labels)} labels from the data.")
+    #         else:
+    #             self.set_labels([GENE, DRUG, ANATOMY, DISEASE, CELL_LINE, ENTITY])
+    #             logging.info(f"Used the {len(self.labels)} default labels.")
+    #
+    #     else:
+    #         self.set_labels(labels)
+    #         logging.info(f"Used the {len(self.labels)} given labels.")
+    #
+    #     # Define the ontologies
+    #     if parquet_files:
+    #         self.set_ontologies(parquet_files)
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 or self.nr_lowercase_rules == 0:
@@ -335,25 +333,37 @@ class OntologyMatcher:
         except ValueError:
             pass
 
-        raise ValueError(f"Can not deduce Ontology from IRI {iri}")
+        logging.debug(f"Can not deduce Ontology from IRI {iri}")
+        return "entity"
 
-    def _create_phrasematcher(self, dfs, lowercase=False):
-        attr = "ORTH"
-        if lowercase:
-            attr = "NORM"
-        matcher = PhraseMatcher(self.nlp.vocab, attr=attr)
-        for name, df in dfs.items():
-            df = df[df.apply((lambda x: self.entry_filter(x, lowercase=lowercase)), axis=1)]
-            terms = list([syn for syn in df[SYN]])
-            iris = list(df[IDX])
-            assert len(list(terms)) == len(list(iris))
-            for iri, term in zip(iris, terms):
-                if lowercase:
-                    term = term.lower()
-                variant_terms = list(self.variant_generator(term))
-                patterns = list(self.nlp.tokenizer.pipe(variant_terms))
-                matcher.add(iri, patterns)
-        return matcher
+    def _create_phrasematcher(self, parsers: List[OntologyParser]):
+        orth_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
+        lower_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
+        for parser in parsers:
+            # TODO: fix api call
+            synonym_data = parser.collect_aggregate_synonym_data(False)
+            generated_synonym_data = parser.generate_synonyms()
+            generated_synonym_data.update(synonym_data)
+
+            logging.info(f"generating {len(generated_synonym_data)} patterns for {parser.name}")
+            patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
+            for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
+                is_lower = syn.islower()
+                for syn_data in syn_data_list:
+                    for idx in syn_data.ids:
+                        # if self.entry_filter(syn,syn_data,lowercase) and len(syn_data.generated_from)==0:
+                        if self.entry_filter(syn, idx, is_lower):
+                            try:
+                                if is_lower:
+                                    lower_matcher.add(str(idx), [patterns[i]])
+                                else:
+                                    orth_matcher.add(str(idx), [patterns[i]])
+                            except KeyError as e:
+                                logging.warning(
+                                    f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
+                                    e,
+                                )
+        return orth_matcher, lower_matcher
 
     def _create_token_matchers(self):
         tp_matchers = {}

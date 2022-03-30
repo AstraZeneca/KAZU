@@ -2,27 +2,187 @@ import abc
 import logging
 import os
 import pickle
+import re
 import shutil
+from collections import defaultdict, Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable
+from typing import Tuple, Any, Dict, List, Iterable, Optional, FrozenSet, Set
 
 import numpy as np
 import torch
-from rapidfuzz import process, fuzz
-
-from kazu.data.data import LINK_SCORE, Mapping
+from kazu.data.data import LinkRanks, SynonymData, Hit
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     IDX,
     MAPPING_TYPE,
     DEFAULT_LABEL,
     MetadataDatabase,
+    StringNormalizer,
     SynonymDatabase,
-    SynonymData,
 )
 from kazu.utils.utils import PathLike, as_path
+from rapidfuzz import fuzz, process
+from sklearn.feature_extraction.text import TfidfVectorizer
+from strsimpy import NGram
 
 logger = logging.getLogger(__name__)
+
+SAPBERT_SCORE = "sapbert_score"
+MATCHED_NUMBER_SCORE = "matched_number_score"
+NGRAM_SCORE = "ngram_score"
+FUZZ_SCORE = "fuzz_score"
+SEARCH_SCORE = "search_score"
+EXACT_MATCH = "exact_match"
+DICTIONARY_HITS = "dictionary_hits"
+
+
+class HitPostProcessor:
+    def __init__(
+        self,
+        ngram_score_threshold: float = 0.2,
+    ):
+        self.ngram_score_threshold = ngram_score_threshold
+        self.ngram = NGram(2)
+        self.numeric_class_phrase_disambiguation = ["TYPE"]
+        self.numeric_class_phrase_disambiguation_re = [
+            re.compile(x + " [0-9]+") for x in self.numeric_class_phrase_disambiguation
+        ]
+        self.modifier_phrase_disambiguation = ["LIKE"]
+
+    def phrase_disambiguation(self, hits, text):
+        new_hits = []
+        for numeric_phrase_re in self.numeric_class_phrase_disambiguation_re:
+            match = re.search(numeric_phrase_re, text)
+            if match:
+                found_string = match.group()
+                for hit in hits:
+                    if found_string in hit.matched_str:
+                        hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
+                        new_hits.append(hit)
+        if not new_hits:
+            for modifier_phrase in self.modifier_phrase_disambiguation:
+                in_text = modifier_phrase in text
+                if in_text:
+                    for hit in filter(lambda x: modifier_phrase in x.matched_str, hits):
+                        hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
+                        new_hits.append(hit)
+                else:
+                    for hit in filter(lambda x: modifier_phrase not in x.matched_str, hits):
+                        hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
+                        new_hits.append(hit)
+        if new_hits:
+            return new_hits
+        else:
+            return hits
+
+    def ngram_scorer(self, hits: List[Hit], text):
+        for hit in hits:
+            hit.metrics[NGRAM_SCORE] = self.ngram.distance(text, hit.matched_str)
+            if hit.metrics[NGRAM_SCORE] and hit.metrics[NGRAM_SCORE] > self.ngram_score_threshold:
+                hit.confidence = LinkRanks.LOW_CONFIDENCE
+            else:
+                hit.confidence = LinkRanks.MEDIUM_CONFIDENCE
+        return hits
+
+    def run_fuzz_algo(self, hits: List[Hit], text, fuzz_threshold=0.75, n=5):
+        choices = [x.matched_str for x in hits]
+        if len(text) > 10 and len(text.split(" ")) > 4:
+            scores = process.extract(
+                text, choices, scorer=fuzz.token_sort_ratio, limit=n, score_cutoff=fuzz_threshold
+            )
+        else:
+            scores = process.extract(
+                text, choices, scorer=fuzz.WRatio, limit=n, score_cutoff=fuzz_threshold
+            )
+        if scores:
+            new_hits = []
+            for score in scores:
+                hit = hits[score[2]]
+                hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
+                hit.metrics[FUZZ_SCORE] = score[1]
+                new_hits.append(hit)
+            return new_hits
+        else:
+            return hits
+
+    @staticmethod
+    def score_numbers(original: Counter, hit: Counter):
+        total = 0.0
+        for number, expected_count in original.items():
+            found_count = hit.get(number, 0)
+            if found_count == expected_count:
+                total += 1.0
+            elif found_count < expected_count and found_count > 0:
+                total += 0.5
+        return total
+
+    def run_number_algo(self, hits, text):
+        text_numbers = Counter(list(re.findall("[0-9]+", text)))
+        scores = []
+        for hit in hits:
+            hit_numbers = Counter(list(re.findall("[0-9]+", hit.matched_str)))
+            number_score = self.score_numbers(text_numbers, hit_numbers)
+            if number_score > 0.0:
+                hit.confidence = LinkRanks.HIGH_CONFIDENCE
+                hit.metrics[MATCHED_NUMBER_SCORE] = number_score
+                scores.append(
+                    (
+                        hit,
+                        number_score,
+                    )
+                )
+        if scores:
+            return [x[0] for x in sorted(scores, key=lambda x: x[1])]
+        else:
+            return hits
+
+    def __call__(self, hits: List[Hit], string_norm: str) -> List[Hit]:
+        def single_result_matched(hits, message):
+            if len(hits) == 1:
+                logger.debug(f"result found by {message}")
+                return True
+            elif len(hits) > 1:
+                # print(f"{message} result not conclusive. remaining hits ")
+                for x in hits:
+                    logger.debug(x)
+
+                return False
+
+        hits = self.run_number_algo(hits, string_norm)
+        if single_result_matched(hits, "numbers"):
+            return [hits[0]]
+        hits = self.run_fuzz_algo(hits, string_norm)
+        if single_result_matched(hits, "fuzz"):
+            return [hits[0]]
+        hits = self.phrase_disambiguation(hits, string_norm)
+        if single_result_matched(hits, "type_search"):
+            return [hits[0]]
+        hits = self.ngram_scorer(hits, string_norm)
+        if single_result_matched(hits, "ngram score"):
+            return [hits[0]]
+        return hits
+
+
+def to_torch(matrix):
+    """
+    convert a sparse CSR matrix to a sparse torch matrix
+    :param matrix:
+    :param shape:
+    :return:
+    """
+
+    Acoo = matrix.tocoo()
+    result = torch.sparse_coo_tensor(
+        torch.LongTensor([Acoo.row.tolist(), Acoo.col.tolist()]),
+        torch.FloatTensor(Acoo.data),
+        matrix.shape,
+    ).to_sparse_csr()
+    return result
+
+
+def create_char_ngrams(string, n=2):
+    ngrams = zip(*[string[i:] for i in range(n)])
+    return ["".join(ngram) for ngram in ngrams]
 
 
 class Index(abc.ABC):
@@ -41,75 +201,44 @@ class Index(abc.ABC):
         :param name: the name of the index. default is unnamed_index
         """
         self.name = name
-        self.metadata: MetadataDatabase = MetadataDatabase()
+        self.metadata_db: MetadataDatabase = MetadataDatabase()
         self.index: Any
         self.namespace = self.__class__.__name__
 
-    def _search(self, query: Any, **kwargs) -> Iterable[Tuple[str, Dict[str, Any]]]:
-        """
-        subclasses should implement this method, which describes the logic to actually perform the search
-        calls to search should return an iterable Tuple[str, Dict[str, Any]].
-        the tuple[0] should be the kb id and tuple[1] should be a dict of any additional metadata associated with the
-        hit
-        :param query: the query to use
-        :param kwargs: any other arguments that are required
-        :return:
-        """
-        raise NotImplementedError()
-
-    def search(self, query: Any, **kwargs) -> Iterable[Mapping]:
-        """
-        search the index
-        :param query: the query to use
-        :param kwargs: any other arguments to pass to self._search
-        :return: a iterable of :class:`kazu.data.data.Mapping` of hits
-        """
-        for ontology_id, metadata in self._search(query, **kwargs):
-            default_label = metadata.pop(DEFAULT_LABEL, "na")
-            mapping_type = [str(x) for x in metadata.pop(MAPPING_TYPE, ["na"])]
-            yield Mapping(
-                default_label=str(default_label),
-                source=self.name,
-                idx=str(ontology_id),
-                mapping_type=mapping_type,
-                metadata=metadata,
-            )
-
-    def save(self, path: PathLike) -> Path:
+    def save(self, path: PathLike, overwrite: bool = False) -> Path:
         """
         save to disk. Makes a directory at the path location with all the index assets
 
         :param path:
         :return: a Path to where the index was saved
         """
-        directory = as_path(path).joinpath(self.name)
-        if directory.exists():
+        directory = as_path(path)
+        if directory.exists() and overwrite:
             shutil.rmtree(directory)
-        os.makedirs(directory)
+        os.makedirs(directory, exist_ok=False)
         with open(self.get_index_path(directory), "wb") as f:
             pickle.dump(self, f)
         with open(self.get_metadata_path(directory), "wb") as f:
-            pickle.dump(self.metadata.get_all(self.name), f)
+            pickle.dump(self.metadata_db.get_all(self.name), f)
 
         self._save(self.get_index_data_path(directory))
         return directory
 
     @classmethod
-    def load(cls, path: PathLike, name: str):
+    def load(cls, path: PathLike):
         """
         load from disk
         :param path: the parent path of the index
-        :param name: the name of the index within the parent path
         :return:
         """
 
         root_path = as_path(path)
-        path = root_path.joinpath(name)
-        with open(cls.get_index_path(path), "rb") as f:
+        with open(cls.get_index_path(root_path), "rb") as f:
             index = pickle.load(f)
-        with open(cls.get_metadata_path(path), "rb") as f:
-            index.metadata.add(index.name, pickle.load(f))
-        index._load(cls.get_index_data_path(path))
+        index.metadata_db = MetadataDatabase()
+        with open(cls.get_metadata_path(root_path), "rb") as f:
+            index.metadata_db.add(index.name, pickle.load(f))
+        index._load(cls.get_index_data_path(root_path))
         return index
 
     @staticmethod
@@ -138,7 +267,7 @@ class Index(abc.ABC):
 
     def __setstate__(self, state):
         self.name = state
-        self.metadata = MetadataDatabase()
+        self.metadata_db = MetadataDatabase()
 
     def _load(self, path: PathLike) -> None:
         """
@@ -165,7 +294,7 @@ class Index(abc.ABC):
         :param data:
         :return:
         """
-        self.metadata.add(self.name, metadata)
+        self.metadata_db.add(self.name, metadata)
         self._add(data)
 
     def __len__(self) -> int:
@@ -173,7 +302,7 @@ class Index(abc.ABC):
         should return the size of the index
         :return:
         """
-        return len(self.metadata.get_all(self.name))
+        return len(self.metadata_db.get_all(self.name))
 
 
 class DictionaryIndex(Index):
@@ -185,78 +314,123 @@ class DictionaryIndex(Index):
     delegated elsewhere
     """
 
-    def __init__(self, name: str = "unnamed_index"):
+    def __init__(
+        self,
+        synonym_dict: Dict[str, Set[SynonymData]],
+        hit_post_processor: Optional[HitPostProcessor] = None,
+        requires_normalisation: bool = True,
+        name: str = "unnamed_index",
+    ):
         super().__init__(name)
-        self.synonym_db: SynonymDatabase = SynonymDatabase()
+        self.hit_post_processor = hit_post_processor if hit_post_processor else HitPostProcessor()
+        self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
+        if requires_normalisation:
+            self.normalised_syn_dict = self.gen_normalised(synonym_dict)
+        else:
+            self.normalised_syn_dict = synonym_dict
+        self.key_lst = list(self.normalised_syn_dict.keys())
+        self.tf_idf_matrix = self.vectorizer.fit_transform(self.key_lst)
+        self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
 
-    def _search(
-        self, query: str, score_cutoff: float = 99.0, top_n: int = 20, fuzzy: bool = True, **kwargs
-    ) -> Iterable[Tuple[str, Dict[str, Any]]]:
+    def gen_normalised(
+        self, synonym_dict: Dict[str, Set[SynonymData]]
+    ) -> Dict[str, Set[SynonymData]]:
+        norm_syn_dict: Dict[str, Set[SynonymData]] = defaultdict(set)
+        for syn, syn_set in synonym_dict.items():
+
+            new_syn = StringNormalizer.normalize(syn)
+            for syn_data in syn_set:
+                norm_syn_dict[new_syn].add(syn_data)
+        return norm_syn_dict
+
+    def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
+        if string_norm in self.normalised_syn_dict:
+            return [
+                Hit(
+                    matched_str=string_norm,
+                    source=self.name,
+                    metrics={EXACT_MATCH: True},
+                    syn_data=frozenset(self.normalised_syn_dict[string_norm]),
+                    confidence=LinkRanks.HIGH_CONFIDENCE,
+                )
+            ]
+        else:
+
+            query = self.vectorizer.transform([string_norm]).todense()
+            # minus to negate, so arg sort works in correct order
+            score_matrix = np.squeeze(-np.asarray(self.tf_idf_matrix.dot(query.T)))
+            neighbours = score_matrix.argsort()[:top_n]
+            # don't use torch for this - it's slow
+            # query = torch.FloatTensor(query)
+            # score_matrix = self.tf_idf_matrix_torch.matmul(query.T)
+            # score_matrix = torch.squeeze(score_matrix.T)
+            # neighbours = torch.argsort(score_matrix, descending=True)[:top_n]
+
+            distances = score_matrix[neighbours]
+            distances = 100 * -distances
+            hits = []
+            for neighbour, score in zip(neighbours, distances):
+                found = self.key_lst[neighbour]
+                hits.append(
+                    Hit(
+                        matched_str=found,
+                        source=self.name,
+                        syn_data=frozenset(self.normalised_syn_dict[found]),
+                        metrics={SEARCH_SCORE: score},
+                        confidence=LinkRanks.MEDIUM_CONFIDENCE,
+                    )
+                )
+
+        return sorted(hits, key=lambda x: x.metrics[SEARCH_SCORE], reverse=True)
+
+    def search(self, query: str, top_n: int = 15) -> Iterable[Hit]:
         """
         search the index
         :param query: a string of text
-        :param score_cutoff: minimum rapidfuzz match score. ignored if fuzzy-False
-        :param top_n: return up to this many hits
-        :param fuzzy: use rapidfuzz fuzzy matching
-        :param kwargs:
         :return: Iterable of Tuple [kb.id, metadata_dict]
         """
-        query = query.lower()
-        if not fuzzy:
-            yield from self.gather_match_result(query, 100.0)
-        else:
-            hits = process.extract(
-                query,
-                self.synonym_db.get_all(self.name).keys(),
-                scorer=fuzz.WRatio,
-                limit=top_n,
-                score_cutoff=score_cutoff,
-            )
-            for match_string, score, _ in hits:
-                yield from self.gather_match_result(match_string, score)
 
-    def gather_match_result(
-        self, match_string: str, score: float
-    ) -> Iterable[Tuple[str, Dict[str, Any]]]:
-        """
-        for a given match string and score, format the return dict of metadata.
-        :param match_string:
-        :param score:
-        :return:
-        """
-        synonym_data_lst = self.synonym_db.get(self.name, match_string)
-        for synonym_data in synonym_data_lst:
-            metadata_hits = self.metadata.get(self.name, synonym_data.idx)
-            metadata_hits[LINK_SCORE] = score
-            metadata_hits[SYN] = match_string
-            metadata_hits[MAPPING_TYPE] = synonym_data.mapping_type
-            if len(synonym_data_lst) > 1:
-                metadata_hits["ambiguous_synonyms"] = synonym_data_lst
-            yield synonym_data.idx, metadata_hits
+        string_norm = StringNormalizer.normalize(query)
+        hits = self._search_index(string_norm, top_n=top_n)
+        hits = self.hit_post_processor(hits, string_norm)
+        yield from hits
 
     def _load(self, path: PathLike) -> Any:
-        with open(path, "rb") as f:
-            synonym_data = pickle.load(f)
-            self.synonym_db.add(self.name, synonym_data)
+        if isinstance(path, str):
+            path = Path(path)
+        with open(path.joinpath("objects.pkl"), "rb") as f:
+            (
+                self.vectorizer,
+                self.normalised_syn_dict,
+                self.tf_idf_matrix,
+                self.hit_post_processor,
+            ) = pickle.load(f)
+        self.key_lst = list(self.normalised_syn_dict.keys())
+        self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
 
     def _save(self, path: PathLike):
-        with open(path, "wb") as f:
-            pickle.dump(self.synonym_db.get_all(self.name), f)
+        if isinstance(path, str):
+            path = Path(path)
+        path.mkdir()
+        pickleable = (
+            self.vectorizer,
+            self.normalised_syn_dict,
+            self.tf_idf_matrix,
+            self.hit_post_processor,
+        )
+        with open(path.joinpath("objects.pkl"), "wb") as f:
+            pickle.dump(pickleable, f)
 
     def _add(self, data: Dict[str, List[SynonymData]]):
         """
+        deprecated
         add data to the index. Two dicts are required - synonyms and metadata. Metadata should have a primary key
         (IDX) and synonyms should use IDX as a foreign key
         :param synonym_dict: synonyms dict of {synonym:List[SynonymData]}
         :param metadata_dict: metadata dict
         :return:
         """
-        self.synonym_db.add(self.name, data)
-
-    def __setstate__(self, state):
-        self.name = state
-        self.metadata = MetadataDatabase()
-        self.synonym_db = SynonymDatabase()
+        raise NotImplementedError()
 
 
 class EmbeddingIndex(Index):
@@ -266,6 +440,8 @@ class EmbeddingIndex(Index):
 
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
+        self.metadata_db = MetadataDatabase()
+        self.synonym_db = SynonymDatabase()
 
     def _add(self, embeddings: torch.Tensor):
         """
@@ -280,7 +456,6 @@ class EmbeddingIndex(Index):
             self.index = self._create_index(embeddings)
         else:
             self._add_embeddings(embeddings)
-        self.keys_lst = list(self.metadata.get_all(self.name).keys())
 
     def _add_embeddings(self, embeddings: torch.Tensor):
         """
@@ -308,24 +483,47 @@ class EmbeddingIndex(Index):
         :param query: a string of text
         :param score_cutoff:
         :param top_n: return up to this many hits
-        :param kwargs:
         :return:
         """
         raise NotImplementedError()
 
-    def _search(
-        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
-    ) -> Iterable[Tuple[str, Any]]:
-        distances, neighbours = self._search_func(
-            query=query, top_n=top_n, score_cutoff=score_cutoff, **kwargs
-        )
+    def search(
+        self,
+        query: torch.Tensor,
+        original_string: str,
+        score_cutoffs: Tuple[float, float] = (99.9945, 99.995),
+        top_n: int = 1,
+    ) -> Iterable[Hit]:
+        distances, neighbours = self._search_func(query=query, top_n=top_n)
         for score, n in zip(distances, neighbours):
-            key = self.keys_lst[n]
-            hit_metadata = self.metadata.get(self.name, key)
-            # the mapping type is always inferred for embedding based indices
-            hit_metadata[MAPPING_TYPE] = ["inferred"]
-            hit_metadata[LINK_SCORE] = score
-            yield key, hit_metadata
+            if score < score_cutoffs[0]:
+                break
+            else:
+                idx, metadata = self.metadata_db.get_by_index(self.name, n)
+                # the norm form of the default label should always be in the syn database
+                string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
+                try:
+                    syn_data = self.synonym_db.get(self.name, string_norm)
+                    hit = Hit(
+                        matched_str=string_norm,
+                        syn_data=frozenset(syn_data),
+                        source=self.name,
+                        confidence=LinkRanks.LOW_CONFIDENCE,
+                        metrics={SAPBERT_SCORE: score},
+                    )
+                    yield hit
+                except KeyError:
+                    logger.warning(
+                        f"{string_norm} is not in the synonym database! is the parser for {self.name} correctly configured?"
+                    )
+
+    def __getstate__(self):
+        return self.name
+
+    def __setstate__(self, state):
+        self.name = state
+        self.metadata_db = MetadataDatabase()
+        self.synonym_db = SynonymDatabase()
 
 
 class FaissEmbeddingIndex(EmbeddingIndex):
@@ -348,7 +546,7 @@ class FaissEmbeddingIndex(EmbeddingIndex):
     def _load(self, path: PathLike):
         self.import_faiss()
         self.index = self.faiss.read_index(str(path))
-        self.keys_lst = list(self.metadata.get_all(self.name).keys())
+        self.keys_lst = list(self.metadata_db.get_all(self.name).keys())
 
     def _save(self, path: PathLike):
         self.faiss.write_index(self.index, str(path))
@@ -384,7 +582,7 @@ class TensorEmbeddingIndex(EmbeddingIndex):
 
     def _load(self, path: PathLike):
         self.index = torch.load(path, map_location="cpu")
-        self.keys_lst = list(self.metadata.get_all(self.name).keys())
+        self.keys_lst = list(self.metadata_db.get_all(self.name).keys())
 
     def _save(self, path: PathLike):
         torch.save(self.index, path)

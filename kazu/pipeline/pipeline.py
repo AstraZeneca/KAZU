@@ -1,15 +1,16 @@
 import logging
 import os.path
+import time
 from pathlib import Path
 from typing import List, Dict, Optional
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
+from torch.utils.tensorboard import SummaryWriter
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import BaseStep
 from kazu.steps.base.step import StepMetadata
-from kazu.utils.stopwatch import Stopwatch
 
 logger = logging.getLogger(__name__)
 
@@ -92,13 +93,17 @@ class FailedDocsFileHandler(FailedDocsHandler):
 
 class Pipeline:
     def __init__(
-        self, steps: List[BaseStep], failure_handler: Optional[List[FailedDocsHandler]] = None
+        self,
+        steps: List[BaseStep],
+        failure_handler: Optional[List[FailedDocsHandler]] = None,
+        profile_steps_dir: Optional[str] = None,
     ):
         """
         A basic pipeline, used to help run a series of steps
 
         :param steps: list of steps to run
         :param failure_handler: optional list of handlers to process failed docs
+        :param profile_steps_dir: profile throughout of each step with tensorboard. path to log dir
         """
         self.failure_handlers = failure_handler
         self.pipeline_metadata: Dict[str, StepMetadata] = {}  # metadata about each step
@@ -106,7 +111,13 @@ class Pipeline:
         # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
         self.failed_docs: Dict[str, List[Document]] = {}
         # performance tracking
-        self.stopwatch = Stopwatch()
+        if profile_steps_dir:
+            logger.info(f"profiling configured. log dir is {profile_steps_dir}")
+            self.summary_writer = SummaryWriter(log_dir=profile_steps_dir)
+            self.call_count = 0
+        else:
+            logger.info("profiling not configured")
+            self.summary_writer = None
 
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
@@ -116,18 +127,27 @@ class Pipeline:
         :return: processed docs
         """
         succeeded_docs = docs
+        step_times = {}
         for step in self.steps:
-            self.stopwatch.start()
+            start = time.time()
             succeeded_docs, failed_docs = step(succeeded_docs)
-            self.stopwatch.message(
-                f"{step.namespace()} finished. Successful: {len(succeeded_docs)}, failed: {len(failed_docs)}"
-            )
+            end = time.time()
+            step_times[step.namespace()] = round(end - start, 4)
             self.update_failed_docs(step, failed_docs)
+        self.profile(step_times)
         self.reset()
         return succeeded_docs
 
+    def profile(self, data: Dict):
+        if self.summary_writer is not None:
+            self.summary_writer.add_scalars(
+                main_tag="", tag_scalar_dict=data, global_step=self.call_count
+            )
+            self.call_count += 1
+
     def update_failed_docs(self, step: BaseStep, failed_docs: List[Document]):
-        self.failed_docs[step.namespace()] = failed_docs
+        if self.failure_handlers is not None:
+            self.failed_docs[step.namespace()] = failed_docs
 
     def flush_failed_docs(self):
         if self.failure_handlers is not None:

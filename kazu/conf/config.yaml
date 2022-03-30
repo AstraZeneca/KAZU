@@ -10,3 +10,4 @@ defaults:
   - DistillationTraining: default
   - SethStep: default
   - ExplosionNERStep: default
+  - DocumentLevelDisambiguationStep: default

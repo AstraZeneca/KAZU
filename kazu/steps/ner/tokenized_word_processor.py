@@ -1,18 +1,16 @@
 import copy
 import logging
-from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Iterable, Optional
 
-import pydash
 import torch
-from torch import Tensor
-
 from kazu.data.data import (
     Entity,
     ENTITY_OUTSIDE_SYMBOL,
     ENTITY_START_SYMBOL,
+    USE_EXACT_MATCHING,
 )
+from torch import Tensor
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +30,13 @@ class TokenizedWord:
     word_id: int
 
 
+@dataclass
+class TokWordSpan:
+    clazz: str
+    subspan: bool
+    tok_words: List[TokenizedWord] = field(default_factory=list)
+
+
 class SpanFinder:
     """
     finds spans across a sequence of TokenizedWord, according to some rules. After being called, the spans can be
@@ -42,11 +47,11 @@ class SpanFinder:
     def __init__(self, threshold: float, text: str, id2label: Dict[int, str]):
         self.text = text
         self.threshold = threshold
-        self.active_spans: List[Dict[str, List[TokenizedWord]]] = []
+        self.active_spans: List[TokWordSpan] = []
         self.words: List[TokenizedWord] = []
         self.span_breaking_chars = set("() ")
         self.non_breaking_span_chars = set("-")
-        self.closed_spans: List[Dict[str, List[TokenizedWord]]] = []
+        self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label
 
     def resolve_word(
@@ -125,14 +130,20 @@ class SpanFinder:
         :param word:
         :return:
         """
-        for spandict in self.active_spans:
+        for span in self.active_spans:
             for bio, c in zip(bio_labels, classes):
-                if bio == ENTITY_START_SYMBOL and c in spandict:
-                    self.closed_spans.append({c: copy.deepcopy(spandict[c])})
-                if c is not None:
-                    spandict[c].append(word)
+                if bio == ENTITY_START_SYMBOL and c == span.clazz:
+                    self.closed_spans.append(copy.deepcopy(span))
+                if c == span.clazz:
+                    span.tok_words.append(word)
 
-    def start_span(self, bio_labels: List[str], classes: List[Optional[str]], word: TokenizedWord):
+    def start_span(
+        self,
+        bio_labels: List[str],
+        classes: List[Optional[str]],
+        word: TokenizedWord,
+        subspan: bool,
+    ):
         """
         start a new span if a B label is detected
         :param bio_labels:
@@ -140,12 +151,13 @@ class SpanFinder:
         :param word:
         :return:
         """
-        di = defaultdict(list)
+        lst = []
         for bio, clazz in zip(bio_labels, classes):
             if bio == ENTITY_START_SYMBOL and clazz is not None:
-                di[clazz].append(word)
-        if len(di) > 0:
-            self.active_spans.append(di)
+                span = TokWordSpan(clazz=clazz, subspan=subspan, tok_words=[word])
+                lst.append(span)
+        if len(lst) > 0:
+            self.active_spans.extend(lst)
 
     def close_spans(self):
         """
@@ -153,7 +165,7 @@ class SpanFinder:
         :return:
         """
         for active_span in self.active_spans:
-            if len(active_span) > 0:
+            if len(active_span.tok_words) > 0:
                 self.closed_spans.append(active_span)
         self.active_spans = []
 
@@ -168,12 +180,12 @@ class SpanFinder:
         if self.words:
             if self.span_continue_condition(word, classes):
                 self._update_active_spans(bio_labels, classes, word)
-                self.start_span(bio_labels=bio_labels, classes=classes, word=word)
+                self.start_span(bio_labels=bio_labels, classes=classes, word=word, subspan=True)
             else:
                 self.close_spans()
-                self.start_span(bio_labels=bio_labels, classes=classes, word=word)
+                self.start_span(bio_labels=bio_labels, classes=classes, word=word, subspan=False)
         else:
-            self.start_span(bio_labels=bio_labels, classes=classes, word=word)
+            self.start_span(bio_labels=bio_labels, classes=classes, word=word, subspan=False)
         self.words.append(word)
 
     def __call__(self, words: List[TokenizedWord]):
@@ -203,13 +215,11 @@ class TokenizedWordProcessor:
             threshold=self.confidence_threshold, text=text, id2label=self.id2label
         )
         span_finder(words)
-        ents = pydash.flatten(
-            [self.spans_to_entities(x, text, namespace) for x in span_finder.closed_spans]
-        )
+        ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)
         return ents
 
     def spans_to_entities(
-        self, span_dict: Dict[str, List[TokenizedWord]], text: str, namespace: str
+        self, spans: List[TokWordSpan], text: str, namespace: str
     ) -> List[Entity]:
         """
         convert spans to instances of Entity, adding in namespace info as appropriate
@@ -219,16 +229,27 @@ class TokenizedWordProcessor:
         :return:
         """
         entities = []
-        for class_label, offsets in span_dict.items():
-            start, end = self.calculate_span_offsets(offsets)
+        for span in spans:
+            start, end = self.calculate_span_offsets(span.tok_words)
+            # sometimes the tokenizer seems to mess up the offsets
+            match_str = text[start:end]
+            if (
+                len(match_str) > 1
+                and match_str[-1] == " "
+                and any(char.isalpha() for char in match_str)
+            ):
+                end = end - 1
+            match_str = text[start:end]
             entity = Entity.load_contiguous_entity(
                 start=start,
                 end=end,
-                match=text[start:end],
+                match=match_str,
                 namespace=namespace,
-                entity_class=class_label,
+                entity_class=span.clazz,
+                metadata={USE_EXACT_MATCHING: span.subspan},
             )
             entities.append(entity)
+
         return entities
 
     def calculate_span_offsets(self, words: List[TokenizedWord]) -> Tuple[int, int]:
@@ -236,4 +257,4 @@ class TokenizedWordProcessor:
         for word in words:
             starts.append(word.word_char_start)
             ends.append(word.word_char_end)
-        return min(starts), max(ends)
+        return min(starts), max(ends) + 1

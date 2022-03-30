@@ -1,10 +1,14 @@
+"""
+DEPRECATED
+
+"""
+
+
 import itertools
 import traceback
-from enum import Enum
 from typing import Optional, List, Tuple, Dict, Any
 
 import pandas as pd
-
 from kazu.data.data import (
     Document,
     Mapping,
@@ -14,16 +18,9 @@ from kazu.data.data import (
     Entity,
     PROCESSING_EXCEPTION,
 )
+from kazu.data.data import LinkRanks
 from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, IDX, SYN
 from kazu.steps import BaseStep
-
-
-class LinkRanks(Enum):
-    # labels for ranking
-    HIGH_CONFIDENCE = "high_confidence"
-    MEDIUM_HIGH_CONFIDENCE = "medium_high_confidence"
-    MEDIUM_CONFIDENCE = "medium_confidence"
-    LOW_CONFIDENCE = "low_confidence"
 
 
 def string_subsumes(target: str, query: str):

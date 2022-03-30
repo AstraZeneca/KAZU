@@ -1,5 +1,6 @@
 import logging
 import traceback
+from collections import defaultdict
 from typing import List, Tuple
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
@@ -42,9 +43,18 @@ class SpacyNerStep(BaseStep):
                                 namespace=self.namespace(),
                             )
                         )
+
+                    sent_metadata = defaultdict(list)
+                    for sent in spacy_doc.sents:
+                        sent_metadata["scispacy_sent_offsets"].append(
+                            [sent.start_char, sent.end_char]
+                        )
+                    if not section.metadata:
+                        section.metadata = {}
+                    section.metadata.update(sent_metadata)
             except Exception:
                 message = f"doc failed: affected ids: {doc.idx}\n" + traceback.format_exc()
                 doc.metadata[PROCESSING_EXCEPTION] = message
                 failed_docs.append(doc)
-                docs.remove(doc)
+                # docs.remove(doc)
         return docs, failed_docs

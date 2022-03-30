@@ -442,7 +442,7 @@ class PLSapbertModel(LightningModule):
                 dataset_name
             ].query_source.iloc[i]
             candidate_df_slice = ontology_embeddings.search(
-                query_embedding, top_n=self.sapbert_training_params.topk
+                query_embedding, original_string="", top_n=self.sapbert_training_params.topk
             )
             default_label = ontology_entry["default_label"]
             golden_iri = ontology_entry["iri"]

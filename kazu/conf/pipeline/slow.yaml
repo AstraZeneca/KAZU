@@ -1,0 +1,6 @@
+# @package _global_
+pipeline:
+  steps:
+    - SethStep
+    - SapBertForEntityLinkingStep
+    - DocumentLevelDisambiguationStep

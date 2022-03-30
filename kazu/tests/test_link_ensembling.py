@@ -59,7 +59,7 @@ def make_mapping(
     return Mapping(
         idx=idx,
         default_label=default_label,
-        mapping_type=["test"],
+        mapping_type=frozenset(["test"]),
         source="test",
         metadata={
             LINK_SCORE: score,

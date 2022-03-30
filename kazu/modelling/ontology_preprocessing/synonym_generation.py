@@ -3,39 +3,26 @@ import itertools
 import logging
 import re
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Iterable
+from collections import defaultdict
+from typing import List, Dict, Optional, Iterable, Set
 
+from kazu.data.data import SynonymData
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class SynonymData:
-    """
-    data class required by DictionaryIndex add method. See docs on :py:class:`kazu.utils.link_index.DictionaryIndex`
-    for usage
-    """
-
-    idx: str
-    mapping_type: List[str]
-    generated_from: List[str] = field(default_factory=list, hash=False)
-
-
 class SynonymGenerator(ABC):
     @abstractmethod
-    def call(
-        self, text: str, syn_data: List[SynonymData]
-    ) -> Optional[Dict[str, List[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
         pass
 
-    def __call__(self, syn_data: Dict[str, List[SynonymData]]) -> Dict[str, List[SynonymData]]:
+    def __call__(self, syn_data: Dict[str, Set[SynonymData]]) -> Dict[str, Set[SynonymData]]:
 
-        result: Dict[str, List[SynonymData]] = {}
+        result: Dict[str, Set[SynonymData]] = {}
         for synonym, metadata in syn_data.items():
             metadata_copy = copy.copy(metadata)
-            generated_syn_dict: Optional[Dict[str, List[SynonymData]]] = self.call(
+            generated_syn_dict: Optional[Dict[str, Set[SynonymData]]] = self.call(
                 synonym, metadata_copy
             )
             if generated_syn_dict:
@@ -50,8 +37,6 @@ class SynonymGenerator(ABC):
                         )
                     else:
                         result[generated_syn] = metadata_copy
-                for syn_info in metadata_copy:
-                    syn_info.generated_from.append(self.__class__.__name__)
         return result
 
 
@@ -70,37 +55,44 @@ class CombinatorialSynonymGenerator:
 
         return result
 
-    def __call__(self, synonym_data: Dict[str, List[SynonymData]]) -> Dict[str, List[SynonymData]]:
+    def __call__(self, synonym_data: Dict[str, Set[SynonymData]]) -> Dict[str, Set[SynonymData]]:
         """
         for every perumation of modifiers, generate a list of syns, then aggregate at the end
         :param synonym_data:
         :return:
         """
-        final = {}
+        # make a copy of the original synonyms
+        all_syns = copy.deepcopy(synonym_data)
+        results = defaultdict(set)
         if self.synonym_generator_permutations:
             for i, permutation_list in enumerate(self.synonym_generator_permutations):
                 logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
-                generated_synonym_data = copy.deepcopy(synonym_data)
                 for generator in permutation_list:
-                    generated_synonym_data = generator(generated_synonym_data)
-                final.update(generated_synonym_data)
+                    # run the generator
+                    new_syns = generator(all_syns)
+                    for new_syn, syn_data_list in new_syns.items():
+                        # don't add if it maps to a clean syn
+                        if new_syn not in synonym_data:
+                            for syn_data in syn_data_list:
+                                results[new_syn].add(syn_data)
+
+        final = {k: set(v) for k, v in results.items()}
         return final
 
 
 class SeparatorExpansion(SynonymGenerator):
     def __init__(self, spacy_pipeline: SpacyPipeline):
         self.all_stopwords = spacy_pipeline.nlp.Defaults.stop_words
-        self.paren_re = r"(.*)\((.*)\)(.*)"
+        self.end_expression_brackets = r"(.*)\((.*)\)$"
+        self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
 
-    def call(
-        self, text: str, syn_data: List[SynonymData]
-    ) -> Optional[Dict[str, List[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
         bracket_results = {}
         all_group_results = {}
         if "(" in text and ")" in text:
-            # expand brackets
-            matches = re.match(self.paren_re, text)
+            # expand end expression brackets
+            matches = re.match(self.end_expression_brackets, text)
             if matches is not None:
                 all_groups_no_brackets = []
                 for group in matches.groups():
@@ -111,13 +103,25 @@ class SeparatorExpansion(SynonymGenerator):
                         bracket_results[group.strip()] = syn_data
                         all_groups_no_brackets.append(group)
                 all_group_results["".join(all_groups_no_brackets)] = syn_data
+            else:
+                # remove mid expression  brackets
+                matches = re.match(self.mid_expression_brackets, text)
+                if matches is not None:
+                    all_groups_no_brackets = []
+                    for group in matches.groups():
+                        all_groups_no_brackets.append(group.strip())
+                    all_group_results[" ".join(all_groups_no_brackets)] = syn_data
 
         # expand slashes
         for x in list(bracket_results.keys()):
             if "/" in x:
                 splits = x.split("/")
                 for split in splits:
-                    bracket_results[split] = syn_data
+                    bracket_results[split.strip()] = syn_data
+            if "," in x:
+                splits = x.split(",")
+                for split in splits:
+                    bracket_results[split.strip()] = syn_data
         bracket_results.update(all_group_results)
         if len(bracket_results) > 0:
             return bracket_results
@@ -131,9 +135,7 @@ class CaseModifier(SynonymGenerator):
         self.lower = lower
         self.upper = upper
 
-    def call(
-        self, text: str, syn_data: List[SynonymData]
-    ) -> Optional[Dict[str, List[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
         results = {}
         if self.upper and not text.isupper():
             results[text.upper()] = syn_data
@@ -153,11 +155,13 @@ class StopWordRemover(SynonymGenerator):
     """
 
     def __init__(self, spacy_pipeline: SpacyPipeline):
-        self.all_stopwords = spacy_pipeline.nlp.Defaults.stop_words
+        self.all_stopwords = copy.deepcopy(spacy_pipeline.nlp.Defaults.stop_words)
+        # treating "i" as a stop word means stripping trailing roman numeral 1
+        # e.g. in 'grade I' which gives the incorrect synonym 'grade' when using this
+        # for NER
+        self.all_stopwords.remove("i")
 
-    def call(
-        self, text: str, syn_data: List[SynonymData]
-    ) -> Optional[Dict[str, List[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
         lst = []
         detected = False
         for token in text.split():
@@ -171,25 +175,7 @@ class StopWordRemover(SynonymGenerator):
             return None
 
 
-class StringReplacement(SynonymGenerator):
-    def __init__(self, replacement_dict: Dict[str, List[str]]):
-        self.replacement_dict = replacement_dict
-
-    def call(
-        self, text: str, syn_data: List[SynonymData]
-    ) -> Optional[Dict[str, List[SynonymData]]]:
-        results = {}
-        for to_replace, replacement_list in self.replacement_dict.items():
-            if to_replace in text:
-                for replace_with in replacement_list:
-                    results[text.replace(to_replace, replace_with).strip()] = syn_data
-        if len(results) > 0:
-            return results
-        else:
-            return None
-
-
-class GreekSymbolSubstitution(SynonymGenerator):
+class GreekSymbolSubstitution:
     GREEK_SUBS = {
         "\u0391": "alpha",
         "\u0392": "beta",
@@ -244,22 +230,122 @@ class GreekSymbolSubstitution(SynonymGenerator):
 
     GREEK_SUBS_ABBRV = {k: v[0] for k, v in GREEK_SUBS.items()}
     GREEK_SUBS_REVERSED = {v: k for k, v in GREEK_SUBS.items()}
+    ALL_SUBS = {}
+    ALL_SUBS.update(GREEK_SUBS)
+    ALL_SUBS.update(GREEK_SUBS_ABBRV)
+    ALL_SUBS.update(GREEK_SUBS_REVERSED)
 
-    def call(
-        self, text: str, syn_data: List[SynonymData]
-    ) -> Optional[Dict[str, List[SynonymData]]]:
+
+class StringReplacement(SynonymGenerator):
+    def __init__(
+        self,
+        replacement_dict: Optional[Dict[str, List[str]]] = None,
+        digit_aware_replacement_dict: Optional[Dict[str, List[str]]] = None,
+        include_greek: bool = True,
+    ):
+        self.include_greek = include_greek
+        self.replacement_dict = replacement_dict
+        self.digit_aware_replacement_dict = digit_aware_replacement_dict
+
+    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
         results = {}
-        results[self.substitute(text, self.GREEK_SUBS)] = syn_data
-        results[self.substitute(text, self.GREEK_SUBS_REVERSED)] = syn_data
-        results[self.substitute(text, self.GREEK_SUBS_ABBRV)] = syn_data
+        if self.replacement_dict:
+            for to_replace, replacement_list in self.replacement_dict.items():
+                if to_replace in text:
+                    for replace_with in replacement_list:
+                        results[text.replace(to_replace, replace_with).strip()] = syn_data
+        if self.digit_aware_replacement_dict:
+            for to_replace, replacement_list in self.digit_aware_replacement_dict.items():
+                matches = set(re.findall(to_replace + r"[0-9]+", text))
+                for match in matches:
+                    number = match.split(to_replace)[1]
+                    for sub_in in replacement_list:
+                        new_str = text.replace(match, f"{sub_in}{number}").strip()
+                        results[new_str] = syn_data
+
+        if self.include_greek:
+            for to_replace, replace_with in GreekSymbolSubstitution.ALL_SUBS.items():
+                if to_replace in text:
+                    results[text.replace(to_replace, replace_with).strip()] = syn_data
+
         if len(results) > 0:
             return results
         else:
             return None
 
-    def substitute(self, text: str, replace_dict: Dict[str, str]) -> str:
-        chars_found = filter(lambda x: x in text, replace_dict.keys())
-        for greek_unicode in chars_found:
-            text = text.replace(greek_unicode, replace_dict[greek_unicode])
-            text = self.substitute(text, replace_dict)
-        return text
+
+#
+# class GreekSymbolSubstitution():
+#     GREEK_SUBS = {
+#         "\u0391": "alpha",
+#         "\u0392": "beta",
+#         "\u0393": "gamma",
+#         "\u0394": "delta",
+#         "\u0395": "epsilon",
+#         "\u0396": "zeta",
+#         "\u0397": "eta",
+#         "\u0398": "theta",
+#         "\u0399": "iota",
+#         "\u039A": "kappa",
+#         "\u039B": "lamda",
+#         "\u039C": "mu",
+#         "\u039D": "nu",
+#         "\u039E": "xi",
+#         "\u039F": "omicron",
+#         "\u03A0": "pi",
+#         "\u03A1": "rho",
+#         "\u03A3": "sigma",
+#         "\u03A4": "tau",
+#         "\u03A5": "upsilon",
+#         "\u03A6": "phi",
+#         "\u03A7": "chi",
+#         "\u03A8": "psi",
+#         "\u03A9": "omega",
+#         "\u03F4": "theta",
+#         "\u03B1": "alpha",
+#         "\u03B2": "beta",
+#         "\u03B3": "gamma",
+#         "\u03B4": "delta",
+#         "\u03B5": "epsilon",
+#         "\u03B6": "zeta",
+#         "\u03B7": "eta",
+#         "\u03B8": "theta",
+#         "\u03B9": "iota",
+#         "\u03BA": "kappa",
+#         "\u03BC": "mu",
+#         "\u03BD": "nu",
+#         "\u03BE": "xi",
+#         "\u03BF": "omicron",
+#         "\u03C0": "pi",
+#         "\u03C1": "rho",
+#         "\u03C2": "final sigma",
+#         "\u03C3": "sigma",
+#         "\u03C4": "tau",
+#         "\u03C5": "upsilon",
+#         "\u03C6": "phi",
+#         "\u03C7": "chi",
+#         "\u03C8": "psi",
+#         "\u03C9": "omega",
+#     }
+#
+#     GREEK_SUBS_ABBRV = {k: v[0] for k, v in GREEK_SUBS.items()}
+#     GREEK_SUBS_REVERSED = {v: k for k, v in GREEK_SUBS.items()}
+#     #
+#     # def call(
+#     #     self, text: str, syn_data: List[SynonymData]
+#     # ) -> Optional[Dict[str, List[SynonymData]]]:
+#     #     results = {}
+#     #     results[self.substitute(text, self.GREEK_SUBS)] = syn_data
+#     #     results[self.substitute(text, self.GREEK_SUBS_REVERSED)] = syn_data
+#     #     results[self.substitute(text, self.GREEK_SUBS_ABBRV)] = syn_data
+#     #     if len(results) > 0:
+#     #         return results
+#     #     else:
+#     #         return None
+#     #
+#     # def substitute(self, text: str, replace_dict: Dict[str, str]) -> str:
+#     #     chars_found = filter(lambda x: x in text, replace_dict.keys())
+#     #     for greek_unicode in chars_found:
+#     #         text = text.replace(greek_unicode, replace_dict[greek_unicode])
+#     #         text = self.substitute(text, replace_dict)
+#     #     return text

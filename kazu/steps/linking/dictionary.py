@@ -10,6 +10,7 @@ from kazu.utils.caching import CachedIndexGroup, DictionaryIndexCacheManager
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.utils import (
     find_document_from_entity,
+    HitResolver,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,21 +26,16 @@ class DictionaryEntityLinkingStep(BaseStep):
         depends_on: List[str],
         index_group: CachedIndexGroup,
         lookup_cache_size: int = 5000,
-        fuzzy: bool = True,
         top_n: int = 20,
-        score_cutoff: float = 90.0,
     ):
         """
 
         :param depends_on:
         :param index_group: A CachedIndexGroup constructed with List[DictionaryIndexCacheManager]
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
-        :param fuzzy: query the CachedIndexGroup with fuzzy string matching
         :param top_n: keep the top_n hits of the query
-        :param score_cutoff: min score for a hit to be considered
         """
         super().__init__(depends_on=depends_on)
-        self.score_cutoff = score_cutoff
         if not all(
             [isinstance(x, DictionaryIndexCacheManager) for x in index_group.cache_managers]
         ):
@@ -48,7 +44,6 @@ class DictionaryEntityLinkingStep(BaseStep):
                 "correctly with the DictionaryEntityLinkingStep"
             )
         self.top_n = top_n
-        self.fuzzy = fuzzy
         self.index_group = index_group
         self.index_group.load()
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
@@ -72,19 +67,17 @@ class DictionaryEntityLinkingStep(BaseStep):
                     continue
                 else:
                     try:
-                        mappings = list(
+                        hits = list(
                             self.index_group.search(
                                 query=entity.match,
                                 entity_class=entity.entity_class,
-                                fuzzy=self.fuzzy,
                                 top_n=self.top_n,
                                 namespace=self.namespace(),
-                                score_cutoff=self.score_cutoff,
                             )
                         )
-                        for mapping in mappings:
-                            entity.add_mapping(mapping)
-                        self.lookup_cache.update_lookup_cache(entity, mappings)
+                        entity.hits.extend(hits)
+                        self.lookup_cache.update_hits_lookup_cache(entity, hits)
+
                     except Exception:
                         doc = find_document_from_entity(docs, entity)
                         doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()

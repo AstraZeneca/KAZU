@@ -1,15 +1,7 @@
-_target_: kazu.steps.linking.sapbert.SapBertForEntityLinkingStep
-top_n: 1
+_target_: kazu.steps.linking.dictionary.DictionaryEntityLinkingStep
 depends_on: ~
-lookup_cache_size: 20000
-score_cutoffs:
-  - 99.9945
-  - 99.9950
-min_string_length_to_trigger:
-  drug: 5
-  disease: 5
-  gene: 7
-  anatomy: 4
+lookup_cache_size: 50000
+top_n: 20
 index_group:
   _target_: kazu.utils.caching.CachedIndexGroup
   entity_class_to_ontology_mappings:
@@ -17,42 +9,32 @@ index_group:
       - CHEMBL
       - OPENTARGETS_MOLECULE
     disease:
-      - MONDO
       - MEDDRA
+      - MONDO
       - OPENTARGETS_DISEASE
     gene:
+      - ENSEMBL
       - OPENTARGETS_TARGET
     anatomy:
       - UBERON
   cache_managers:
-    - _target_: kazu.utils.caching.EmbeddingIndexCacheManager
+    - _target_: kazu.utils.caching.DictionaryIndexCacheManager
       rebuild_cache: False
-      model:
-        _target_: kazu.modelling.linking.sapbert.train.PLSapbertModel
-        model_name_or_path: ${oc.env:KAZU_MODEL_PACK}/sapbert/SapBERT-from-PubMedBERT-fulltext
-      batch_size: 16
-      trainer:
-        _target_: pytorch_lightning.Trainer
-        progress_bar_refresh_rate: 0
-        gpus: 0
-        logger: false
-      dl_workers: 0
-      ontology_partition_size: 10000
-      index_type: MatMulTensorEmbeddingIndex
+      index_type: DictionaryIndex
       parsers:
         - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
         - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
-        - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
-        - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
-        - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
+          is_composite: True
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
+          is_composite: True
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
+        - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+        - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl

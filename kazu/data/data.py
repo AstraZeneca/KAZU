@@ -5,6 +5,7 @@ import uuid
 import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, date
+from enum import IntEnum
 from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet
@@ -12,6 +13,12 @@ from typing import List, Any, Dict, Optional, Tuple, FrozenSet
 import pandas as pd
 from numpy import ndarray
 from spacy import displacy
+
+
+USE_EXACT_MATCHING = "use_exact_matching"
+# ambiguous_synonyms or confused mappings
+LINK_UNCERTAINTY = "for_disambiguation"
+AMBIGUOUS_IDX = "requires_disambiguation"
 
 # BIO schema
 
@@ -28,6 +35,15 @@ NAMESPACE = "namespace"
 # key for linking score
 LINK_SCORE = "link_score"
 LINK_CONFIDENCE = "link_confidence"
+
+
+class LinkRanks(IntEnum):
+    # labels for ranking. NOTE! ordering important, as used for iteration
+    HIGH_CONFIDENCE = 0
+    MEDIUM_HIGH_CONFIDENCE = 1
+    MEDIUM_CONFIDENCE = 2
+    AMBIGUOUS = 3
+    LOW_CONFIDENCE = 4
 
 
 @dataclass
@@ -63,13 +79,52 @@ class CharSpan:
         return hash((self.start, self.end))
 
 
-@dataclass
+@dataclass(frozen=True)
+class SynonymData:
+    """
+    Synonym data is a representation of a set of kb ID's that map to the same synonym and mean the same thing.
+    """
+
+    ids: FrozenSet[str] = field(
+        default_factory=frozenset, hash=True
+    )  # other ID's mapping to this syn, from different KBs
+    mapping_type: FrozenSet[str] = field(default_factory=frozenset, hash=False)
+
+
+@dataclass(frozen=True)
 class Mapping:
+    """
+    a mapping is a fully mapped and disambiguated kb concept
+    """
+
     default_label: str  # default label from knowledgebase
     source: str  # the knowledgebase name
     idx: str  # the identifier within the KB
-    mapping_type: List[str]  # the type of KB mapping
+    mapping_type: FrozenSet[str] = field(
+        default_factory=frozenset, hash=True
+    )  # the type of KB mapping
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
+
+
+@dataclass
+class Hit:
+    """
+    Hit is a precursor to a Mapping, meaning that a match has been detected and linked to a set of SynonymData, but
+    is not ready to become a fully fledged mapping yet, as it may require further disambiguation
+    """
+
+    matched_str: str
+    source: str
+    namespace: str = field(init=False)
+    syn_data: FrozenSet[SynonymData]
+    confidence: LinkRanks
+    metrics: Dict[str, Any] = field(default_factory=dict)
+
+    def __hash__(self):
+        return id(self)
+
+    def __eq__(self, other):
+        return id(self) == id(other)
 
 
 @dataclass
@@ -83,13 +138,19 @@ class Entity:
     entity_class: str  # entity class
     spans: FrozenSet[CharSpan]  # charspans
     namespace: str  # namespace of BaseStep that produced this instance
-    mappings: List[Mapping] = field(default_factory=list, hash=False)
-    metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
+    mappings: List[Mapping] = field(default_factory=list)
+    hits: List[Hit] = field(default_factory=list)
+    metadata: Dict[Any, Any] = field(default_factory=dict)  # generic metadata
     start: int = field(init=False)
     end: int = field(init=False)
 
     def __hash__(self):
-        return hash((self.entity_class, self.spans))
+        return id(self)
+
+    def __eq__(self, other):
+        return id(self) == id(other)
+        # raise NotImplementedError("entity cannot be compared")
+        # return hash((self.entity_class, self.spans))
 
     def calc_starts_and_ends(self) -> Tuple[int, int]:
         earliest_start = inf

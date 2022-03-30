@@ -1,9 +1,7 @@
 _target_: kazu.steps.linking.dictionary.DictionaryEntityLinkingStep
 depends_on: ~
-lookup_cache_size: 5000
-fuzzy: False
+lookup_cache_size: 50000
 top_n: 20
-score_cutoff: 90.0
 index_group:
   _target_: kazu.utils.caching.CachedIndexGroup
   entity_class_to_ontology_mappings:
@@ -15,7 +13,6 @@ index_group:
       - MEDDRA
       - OPENTARGETS_DISEASE
     gene:
-      - ENSEMBL
       - OPENTARGETS_TARGET
     anatomy:
       - UBERON
@@ -24,10 +21,7 @@ index_group:
     mutation:
       - NOT_IMPLEMENTED
     entity :
-      - CHEMBL
-      - MONDO
-      - MEDDRA
-      - ENSEMBL
+      - NOT_IMPLEMENTED
   cache_managers:
     - _target_: kazu.utils.caching.DictionaryIndexCacheManager
       rebuild_cache: False
@@ -35,29 +29,20 @@ index_group:
       parsers:
         - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
-          synonym_generator: ${SynonymGeneration.chemical}
-        - _target_: kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/hgnc.json
-          synonym_generator: ${SynonymGeneration.gene}
         - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
-          synonym_generator: ${SynonymGeneration.default}
+          is_composite: True
         - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
-          synonym_generator:
         - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
-          synonym_generator: ${SynonymGeneration.default}
         - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
         - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
-          synonym_generator: ${SynonymGeneration.default}
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
-          synonym_generator: ${SynonymGeneration.chemical}
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
-          synonym_generator: ${SynonymGeneration.gene}
