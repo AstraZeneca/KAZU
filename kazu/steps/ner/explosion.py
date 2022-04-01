@@ -24,7 +24,7 @@ class ExplosionNERStep(BaseStep):
 
     def __init__(
         self,
-        depends_on: List[str],
+        depends_on: Optional[List[str]],
         path: PathLike,
         parsers: List[OntologyParser],
         blacklisters: Dict[str, BlackLister],
