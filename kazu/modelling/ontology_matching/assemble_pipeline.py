@@ -23,6 +23,19 @@ def main(
     output_dir: PathLike,
     span_key: str = SPAN_KEY,
 ) -> spacy.language.Language:
+    """Generates, serializes and returns a Spacy pipeline with an OntologyMatcher.
+
+    Generates an English Spacy pipeline with a tokenizer, a sentencizer with default
+    config, and an OntologyMatcher based on the input parameters. The pipeline is
+    written to disk, and also returned to the caller.
+
+    :param parsers: OntologyParser instances used to build the spacy pipeline
+    :param blacklisters: a dictionary from parser names to BlackLister instances for determining which synonyms should be blacklisted.
+    :param parser_name_to_entity_type: a dictionary from parser names to the entity class we want to associate them with.
+    :param labels: the entity class labels that the NER step can recognise - this affects the matchers that are generated.
+    :param output_dir: the output directory to write the pipeline into.
+    :param span_key: the key to use within the generated Spacy Docs' 'spans' object to store and access the recognised spans.
+    """
     nlp = spacy.blank("en")
     custom_tokenizer(nlp)
     nlp.add_pipe("sentencizer")
