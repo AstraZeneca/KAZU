@@ -28,12 +28,12 @@ MATCH_ID_SEP = ":::"
 
 
 @spacy.registry.misc("arizona.variant_generator.v1")
-def create_generator() -> Callable[[str], Set[str]]:
+def create_variant_generator() -> Callable[[str], Set[str]]:
     return create_variants
 
 
 @spacy.registry.misc("arizona.entry_filter_blacklist.v1")
-def create_filter() -> Callable[[str, str], Tuple[bool, bool]]:
+def create_blacklist_filter() -> Callable[[str, str], Tuple[bool, bool]]:
     return is_valid_ontology_entry
 
 
