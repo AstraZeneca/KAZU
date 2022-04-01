@@ -71,9 +71,10 @@ def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
 
 
 def _hits_blacklist(blacklist: Mapping[str, Container[str]], syn: str, iri: str):
-    if syn in blacklist.get(iri, []):
+    blacklist_syns = blacklist.get(iri, [])
+    if syn in blacklist_syns:
         return True
-    if "*" in blacklist.get(iri, []):
+    if "*" in blacklist_syns:
         return True
     if syn in blacklist["*"]:
         return True
