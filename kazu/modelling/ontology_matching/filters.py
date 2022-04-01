@@ -1,5 +1,5 @@
 import re
-from typing import Tuple
+from typing import Container, Mapping, Tuple
 
 from kazu.modelling.ontology_preprocessing.base import StringNormalizer
 
@@ -70,7 +70,7 @@ def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
     return False, True
 
 
-def _hits_blacklist(blacklist, syn, iri):
+def _hits_blacklist(blacklist: Mapping[str, Container[str]], syn: str, iri: str):
     if syn in blacklist.get(iri, []):
         return True
     if "*" in blacklist.get(iri, []):
