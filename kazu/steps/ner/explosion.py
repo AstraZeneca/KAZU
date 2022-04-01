@@ -34,8 +34,15 @@ class ExplosionNERStep(BaseStep):
         span_key: Optional[str] = None,
     ):
         """
-        :param path: path to spacy pipeline including Ontology Matcher.
         :param depends_on:
+        :param path: path to spacy pipeline including Ontology Matcher.
+        :param parsers: OntologyParser instances used to build the spacy pipeline
+        :param blacklisters: a dictionary from parser names to BlackLister instances for determining which synonyms should be blacklisted.
+        :param entity_class_to_ontology_mappings: a dictionary from entity classes to the ontologies (i.e. parser names) we want to use for those entity classes.
+        :param rebuild_pipeline: whether to rebuild the pipeline.
+        :param include_sentence_offsets: whether to add sentence offsets to the metadata.
+        :param span_key: the key to use within the generated Spacy Docs' 'spans' object to store and access the recognised spans.
+
         """
 
         super().__init__(depends_on=depends_on)
