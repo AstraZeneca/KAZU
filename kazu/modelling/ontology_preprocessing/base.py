@@ -23,7 +23,7 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
     GreekSymbolSubstitution,
 )
-from kazu.data.data import SynonymData
+from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -437,6 +437,7 @@ class OntologyParser(ABC):
         self.is_composite = is_composite
         self.synonym_generator = synonym_generator
         self.in_path = in_path
+        self.min_syn_length_to_merge = 4
 
     def find_kb(self, string: str) -> str:
         """
@@ -449,31 +450,34 @@ class OntologyParser(ABC):
     def dataframe_to_syndata_dict(
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
     ) -> Dict[str, Set[SynonymData]]:
-        if self.is_composite:
-            result = self.resolve_composite_synonym_dataframe(synonym_df, normalise_original_syns)
-        else:
-            result = self.resolve_singular_synonym_dataframe(synonym_df, normalise_original_syns)
+        # if self.is_composite:
+        result = self.resolve_composite_synonym_dataframe(synonym_df, normalise_original_syns)
+        # else:
+        #     result = self.resolve_singular_synonym_dataframe(synonym_df, normalise_original_syns)
 
         return dict(result)
 
-    def resolve_singular_synonym_dataframe(self, df, normalise_original_syns: bool):
-        all_syn_data = {}
-        for idx, mapping_type_dict in (
-            df[[IDX, MAPPING_TYPE]].groupby(IDX).agg(list).to_dict(orient="index").items()
-        ):
-            unique_mappings = frozenset(pydash.flatten(mapping_type_dict[MAPPING_TYPE]))
-            all_syn_data[idx] = SynonymData(ids=frozenset([idx]), mapping_type=unique_mappings)
-        result = defaultdict(set)
-        for i, row in df[[SYN, IDX]].drop_duplicates().iterrows():
-            idx = row[IDX]
-            syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
-            result[syn].add(all_syn_data[idx])
-        return result
+    # def resolve_singular_synonym_dataframe(self, df, normalise_original_syns: bool):
+    #     all_syn_data = {}
+    #     for idx, mapping_type_dict in (
+    #         df[[IDX, MAPPING_TYPE]].groupby(IDX).agg(list).to_dict(orient="index").items()
+    #     ):
+    #         unique_mappings = frozenset(pydash.flatten(mapping_type_dict[MAPPING_TYPE]))
+    #         all_syn_data[idx] = SynonymData(ids=frozenset([idx]), mapping_type=unique_mappings)
+    #     result = defaultdict(set)
+    #     for i, row in df[[SYN, IDX]].drop_duplicates().iterrows():
+    #         idx = row[IDX]
+    #         syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
+    #         result[syn].add(all_syn_data[idx])
+    #     return result
 
     def resolve_composite_synonym_dataframe(
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
     ):
-        synonym_df["composed_ontologies"] = synonym_df[IDX].apply(self.find_kb)
+        if self.is_composite:
+            synonym_df["composed_ontologies"] = synonym_df[IDX].apply(self.find_kb)
+        else:
+            synonym_df["composed_ontologies"] = self.name
         result = defaultdict(set)
         for i, row in (
             synonym_df[["composed_ontologies", SYN, IDX]]
@@ -488,11 +492,47 @@ class OntologyParser(ABC):
             ids = row[IDX]
             if len(ontologies) == 1:
                 # most common - one or more ids and one kb per syn
-                for idx in ids:
-                    result[syn].add(SynonymData(ids=frozenset([idx]), mapping_type=frozenset()))
+                if len(ids) == 1:
+                    strategy = EquivalentIdAggregationStrategy.UNAMBIGUOUS
+                elif len(syn) > self.min_syn_length_to_merge:
+                    strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE
+                else:
+                    strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT
+
+                if len(syn) > self.min_syn_length_to_merge:
+                    result[syn].add(
+                        SynonymData(
+                            ids=frozenset(ids), mapping_type=frozenset(), aggregated_by=strategy
+                        )
+                    )
+                else:
+                    for idx in ids:
+                        result[syn].add(
+                            SynonymData(
+                                ids=frozenset([idx]),
+                                mapping_type=frozenset(),
+                                aggregated_by=strategy,
+                            )
+                        )
             elif len(ontologies) == len(ids):
+                if len(syn) > self.min_syn_length_to_merge:
+                    result[syn].add(
+                        SynonymData(
+                            ids=frozenset(ids),
+                            mapping_type=frozenset(),
+                            aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+                        )
+                    )
+                else:
+                    for idx in ids:
+                        result[syn].add(
+                            SynonymData(
+                                ids=frozenset([idx]),
+                                mapping_type=frozenset(),
+                                aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
+                            )
+                        )
                 # pathological scenario - multiple kb ids, one syn. Syn may refer to different concepts (although probably not)
-                result[syn].add(SynonymData(ids=frozenset(ids), mapping_type=frozenset()))
                 logger.warning(
                     f"found independent identifiers for {syn}: {ids}. This may cause disambiguation problems "
                     f"if the identifiers are not cross references"
@@ -500,17 +540,27 @@ class OntologyParser(ABC):
             else:
                 # pathological scenario - one synonym maps to multiple KBs and multiple ids within those KBs,
                 # within the same composite KB
-                if len(syn) > 4:
-                    # if it's more than 4 chars we'll take a punt that it's probably fine to agg in one id
-                    # TODO: how about not taking a punt?
-                    result[syn].add(SynonymData(ids=frozenset(ids), mapping_type=frozenset()))
+                if len(syn) > self.min_syn_length_to_merge:
+                    result[syn].add(
+                        SynonymData(
+                            ids=frozenset(ids),
+                            mapping_type=frozenset(),
+                            aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+                        )
+                    )
                     logger.warning(
                         f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
                         f"As {syn} is more than 4 chars, parser has aggregated - i.e. assumed they refer to the same concepts"
                     )
                 else:
                     for idx in ids:
-                        result[syn].add(SynonymData(ids=frozenset([idx]), mapping_type=frozenset()))
+                        result[syn].add(
+                            SynonymData(
+                                ids=frozenset([idx]),
+                                mapping_type=frozenset(),
+                                aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
+                            )
+                        )
                     logger.warning(
                         f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
                         f"As {syn} is les than 4 chars, parser has split - i.e. assumed they refer to different concepts"

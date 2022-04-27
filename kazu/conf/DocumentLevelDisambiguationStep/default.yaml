@@ -14,4 +14,4 @@ tfidf_disambiguator:
         "ENSG": "ENSEMBL"
       OPENTARGETS_DISEASE:
         "http://purl/obolibrary/org/obo/HP_": "HPO"
-        "http://purl.obolibrary.org/obo/MONDO": "MONDO"
+        "http://purl.obolibrary.org/obo/MONDO_": "MONDO"

@@ -5,7 +5,7 @@ import uuid
 import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, date
-from enum import IntEnum
+from enum import IntEnum, Enum, auto
 from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet
@@ -79,12 +79,23 @@ class CharSpan:
         return hash((self.start, self.end))
 
 
+class EquivalentIdAggregationStrategy(Enum):
+    UNAMBIGUOUS = 0
+    AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT = 1
+    AMBIGUOUS_WITHIN_SINGLE_KB_MERGE = 2
+    AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT = 3
+    AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE = 4
+    AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT = 5
+    AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE = 6
+
+
 @dataclass(frozen=True)
 class SynonymData:
     """
     Synonym data is a representation of a set of kb ID's that map to the same synonym and mean the same thing.
     """
 
+    aggregated_by: EquivalentIdAggregationStrategy  # how was this insatnce
     ids: FrozenSet[str] = field(
         default_factory=frozenset, hash=True
     )  # other ID's mapping to this syn, from different KBs
