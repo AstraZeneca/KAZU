@@ -38,3 +38,7 @@ index_group:
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
         - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo

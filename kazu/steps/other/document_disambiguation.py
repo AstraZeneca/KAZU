@@ -1,22 +1,17 @@
 import copy
-import functools
 import itertools
 import logging
 import pickle
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from enum import Enum
 from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Set, FrozenSet, KeysView, Iterable, Callable
 
-import cachetools
-import torch
-from cachetools import LRUCache
-from kazu.modelling.linking.sapbert.train import PLSapbertModel
-from numpy import diff
 import numpy as np
 import pandas as pd
 import pydash
+import torch
 from kazu.data.data import (
     Document,
     Mapping,
@@ -37,7 +32,6 @@ from kazu.modelling.ontology_preprocessing.base import (
 from kazu.steps import BaseStep
 from kazu.utils.link_index import Hit, DICTIONARY_HITS, create_char_ngrams, SAPBERT_SCORE
 from kazu.utils.utils import HitResolver, ParseSourceFromId
-from pytorch_lightning import Trainer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from strsimpy import NGram
 
@@ -53,10 +47,13 @@ SUGGEST_DROP = "suggest_drop"
 
 
 class SynonymDataDisambiguationStrategy:
-    def __init__(self, entity_match_string: str):
+    def __init__(self, entity_match_string: str, check_for_synonym_string_match: bool = False):
         self.entity_match_string = entity_match_string
         self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
         self.number_resolver = NumberResolver(self.ent_match_norm)
+        self.string_resolver = (
+            SubStringResolver(self.ent_match_norm) if check_for_synonym_string_match else None
+        )
         self.synonym_db = SynonymDatabase()
         self.metadata_db = MetadataDatabase()
         self.minimum_string_length_for_non_exact_mapping = 4
@@ -71,6 +68,10 @@ class SynonymDataDisambiguationStrategy:
         if not self.number_resolver(synonym):
             logger.debug(f"{synonym} still ambiguous: number mismatch: {self.ent_match_norm}")
             return None
+        if self.string_resolver and not self.string_resolver(synonym):
+            logger.debug(f"{synonym} still ambiguous: substring not found: {self.ent_match_norm}")
+            return None
+
         syn_data_set_this_hit: Set[SynonymData] = self.synonym_db.get(name=source, synonym=synonym)
         target_syn_data = None
         if len(syn_data_set_this_hit) > 1:
@@ -229,10 +230,14 @@ class TfIdfOntologyHitDisambiguationStrategy:
         query_mat = self.vectoriser.transform([query]).todense()
         return query_mat
 
-    def __call__(self, entity_string: str, entities: List[Entity], query_mat: np.ndarray):
-        # query_mat = self.get_query_mat(document_representation)
+    def get_synonym_data_disambiguating_strategy(self, entity_string: str):
+        return SynonymDataDisambiguationStrategy(entity_string)
+
+    def __call__(self, entity_string: str, entities: List[Entity], document_representation:List[str]):
+        query = " . ".join(document_representation)
+        query_mat = self.vectoriser.transform([query]).todense()
         disambuguated_mappings = []
-        synonym_data_disambiguator = SynonymDataDisambiguationStrategy(entity_string)
+        synonym_data_disambiguator = self.get_synonym_data_disambiguating_strategy(entity_string)
         ambig_hits = {hit for ent in entities for hit in ent.hits}
 
         # TODO: optimisation: don't repeat loop if score is the same as prev (i.e. is same string)
@@ -279,6 +284,17 @@ class TfIdfOntologyHitDisambiguationStrategy:
                 ent.mappings.extend(copy.deepcopy(disambuguated_mappings))
 
 
+class TfIdfOntologyHitDisambiguationStrategyWithSubStringMatching(
+    TfIdfOntologyHitDisambiguationStrategy
+):
+    """
+    same as superclass, but checks matched entity is a substring of synonym
+    """
+
+    def get_synonym_data_disambiguating_strategy(self, entity_string: str):
+        return SynonymDataDisambiguationStrategy(entity_string, check_for_synonym_string_match=True)
+
+
 class TfIdfGlobalDisambiguationStrategy:
     def __init__(self, vectoriser: TfidfVectorizer, kbs_are_compatible: Callable[[Set[str]], bool]):
         self.kbs_are_compatible = kbs_are_compatible
@@ -286,43 +302,66 @@ class TfIdfGlobalDisambiguationStrategy:
         self.vectoriser = vectoriser
         self.corpus_scorer = TfIdfCorpusScorer(vectoriser)
         self.threshold = 7.0
+        # if any entity string matches  are longer than this and have a high confidence hit, assume they're probably right
+
+        self.min_string_length_to_test_for_high_confidence = 5
+
 
     def __call__(
         self, entities: List[Entity], document_representation: List[str]
-    ) -> Tuple[List[Entity], np.ndarray]:
+    ) -> List[Entity]:
+        result = []
         query = " . ".join(document_representation)
         query_mat = self.vectoriser.transform([query]).todense()
 
         ents_by_match = itertools.groupby(
             sorted(entities, key=lambda x: x.match), key=lambda x: x.match
         )
-        result = []
         for match_str, ent_iter in ents_by_match:
-            # TODO: optimisation: don't repeat loop if score is the same as prev (i.e. is same string)
-            match_ents = list(ent_iter)
-            corpus = self.queries.collect_all_syns_from_ents(match_ents)
             resolved_ents_this_match = []
+            match_ents = list(ent_iter)
+
+            if len(match_str)>=self.min_string_length_to_test_for_high_confidence:
+                for ent in match_ents:
+                    if any(hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in ent.hits):
+                        resolved_ents_this_match.append(ent)
+
+            # we found high confidence hits, so don't go any further
+            if resolved_ents_this_match:
+                result.extend(resolved_ents_this_match)
+                continue
+
+            # group ents by hit source
+            hit_sources_to_ents = defaultdict(set)
+            for ent in match_ents:
+                for hit in ent.hits:
+                    hit_sources_to_ents[hit.source].add(ent)
+
+            # otherwise, test context for good hits...
+            corpus = list(set(self.queries.collect_all_syns_from_ents(match_ents)))
             for synonym, score in self.corpus_scorer(corpus, query_mat):
                 if score < self.threshold:
-                    continue
+                    # no ents could be resolved this match
+                    for ent in match_ents:
+                        ent.metadata[SUGGEST_DROP] = GLOBAL_DISAMBIGUATION_FAILURE
+                    break
                 kbs_this_hit = self.queries.synonym_db.get_kbs_for_syn_global(synonym)
                 if not self.kbs_are_compatible(kbs_this_hit):
                     logger.debug(f"class still ambiguous: {kbs_this_hit}")
                 else:
-                    for ent in match_ents:
-                        for hit in ent.hits:
-                            # for the first unambiguous kb hit,return the ent that has a hit with this kb.
-                            if hit.source in kbs_this_hit:
-                                resolved_ents_this_match.append(ent)
-                                break
-                    if len(resolved_ents_this_match) > 0:
-                        break
-            else:
-                # no ents could be resolved this match
-                for ent in match_ents:
-                    ent.metadata[SUGGEST_DROP] = GLOBAL_DISAMBIGUATION_FAILURE
-            result.extend(resolved_ents_this_match)
-        return result, query_mat
+                    # for the first unambiguous kb hit,return the ent that has a hit with this kb.
+                    for kb_hit in kbs_this_hit:
+                        ents_this_kb = hit_sources_to_ents.get(kb_hit)
+                        if ents_this_kb:
+                            resolved_ents_this_match.extend(list(ents_this_kb))
+                            break
+                    # we found a match via context
+                if resolved_ents_this_match:
+                    result.extend(resolved_ents_this_match)
+                    break
+
+
+        return result
 
 
 def create_char_3grams(string):
@@ -359,10 +398,16 @@ class Disambiguator:
         self.context_tfidf = TfIdfOntologyHitDisambiguationStrategy(
             vectoriser=self.vectoriser, id_parser=id_parser
         )
+        self.context_tfidf_with_string_matching = (
+            TfIdfOntologyHitDisambiguationStrategyWithSubStringMatching(
+                vectoriser=self.vectoriser, id_parser=id_parser
+            )
+        )
+
         self.disambiguation_strategy_lookup = {
             "gene": self.context_tfidf,
             "disease": self.context_tfidf,
-            "drug": self.context_tfidf,
+            "drug": self.context_tfidf_with_string_matching,
         }
         self.global_disambiguation_strategy = TfIdfGlobalDisambiguationStrategy(
             vectoriser=self.vectoriser, kbs_are_compatible=self.kbs_are_compatible
@@ -400,7 +445,7 @@ class Disambiguator:
             entities_not_needing_global_disamb,
         ) = self.find_entities_needing_global_disambiguation(entities)
 
-        globally_disambiguated_ents, query_mat = self.global_disambiguation_strategy(
+        globally_disambiguated_ents = self.global_disambiguation_strategy(
             entities_needing_global_disamb, document_representation
         )
 
@@ -409,7 +454,7 @@ class Disambiguator:
         )
 
         # TODO: add flag to run sapbert on anything that fails to disambig within kb
-        self.disambiguate_within_kb(remaining_ents, query_mat)
+        self.disambiguate_within_kb(remaining_ents, document_representation)
 
     def find_entities_needing_global_disambiguation(self, entities):
         entities_needing_global_disamb = []
@@ -422,7 +467,7 @@ class Disambiguator:
         return entities_needing_global_disamb, entities_not_needing_global_disamb
 
     def resolve_unambiguous_entities(
-        self, entities_not_needing_global_disamb, globally_disambiguated_ents
+        self, entities_not_needing_global_disamb:List[Entity], globally_disambiguated_ents:List[Entity]
     ):
         remaining_ents = entities_not_needing_global_disamb + globally_disambiguated_ents
         # the remainng ents should now be 'good' in terms of ner entity_class and therefore we know which kbs
@@ -443,7 +488,7 @@ class Disambiguator:
     def disambiguate_within_kb(
         self,
         ents_needing_disambig: List[Entity],
-        document_representation: np.ndarray,
+        document_representation: List[str],
     ):
         """
 
