@@ -27,6 +27,7 @@ class ExplosionNERStep(BaseStep):
         path: PathLike,
         parsers: List[OntologyParser],
         rebuild_pipeline: bool = False,
+        include_sentence_offsets:bool = True,
         span_key: Optional[str] = None,
         labels: Optional[List[str]] = None,
     ):
@@ -36,6 +37,7 @@ class ExplosionNERStep(BaseStep):
         """
 
         super().__init__(depends_on=depends_on)
+        self.include_sentence_offsets = include_sentence_offsets
         self.parsers = parsers
         self.path = as_path(path)
         self.labels = labels
@@ -112,6 +114,13 @@ class ExplosionNERStep(BaseStep):
                         namespace=self.namespace(),
                     )
                     entities.append(e)
+
+                # add sentence offsets
+                if self.include_sentence_offsets:
+                    sent_metadata = []
+                    for sent in processed_text.sents:
+                        sent_metadata.append([sent.start_char, sent.end_char])
+                    section.metadata["sentence_offsets"] = sent_metadata
 
                 # if one section of a doc fails after others have succeeded, this will leave failed docs
                 # in a partially processed state. It's actually unclear to me whether this is desireable or not.
