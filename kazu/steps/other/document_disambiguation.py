@@ -33,7 +33,7 @@ from kazu.steps import BaseStep
 from kazu.utils.link_index import Hit, DICTIONARY_HITS, create_char_ngrams, SAPBERT_SCORE
 from kazu.utils.utils import HitResolver, ParseSourceFromId
 from sklearn.feature_extraction.text import TfidfVectorizer
-from strsimpy import NGram
+from strsimpy import NGram, LongestCommonSubsequence
 
 logger = logging.getLogger(__name__)
 
@@ -186,9 +186,14 @@ class NumberResolver:
 class SubStringResolver:
     def __init__(self, query_string_norm):
         self.query_string_norm = query_string_norm
+        # require min 70% subsequence overlap
+        self.min_distance = float(len(query_string_norm)) *0.7
+        self.lcs = LongestCommonSubsequence()
+
 
     def __call__(self, synonym_string_norm: str):
-        return self.query_string_norm in synonym_string_norm
+        length = self.lcs.distance(self.query_string_norm,synonym_string_norm)
+        return length >=self.min_distance
 
 
 class TfIdfCorpusScorer:
