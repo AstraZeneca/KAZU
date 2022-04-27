@@ -27,7 +27,7 @@ class ExplosionNERStep(BaseStep):
         path: PathLike,
         parsers: List[OntologyParser],
         rebuild_pipeline: bool = False,
-        include_sentence_offsets:bool = True,
+        include_sentence_offsets: bool = True,
         span_key: Optional[str] = None,
         labels: Optional[List[str]] = None,
     ):
