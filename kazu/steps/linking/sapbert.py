@@ -36,6 +36,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         depends_on: List[str],
         index_group: CachedIndexGroup,
         min_string_length_to_trigger: Optional[Dict[str, int]] = None,
+        ignore_high_conf: bool = True,
         lookup_cache_size: int = 5000,
         top_n: int = 20,
         score_cutoffs: Tuple[float, float] = (99.9940, 99.995),
@@ -46,6 +47,8 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param index_group: an instance of CachedIndexGroup constructed with a list of EmbeddingIndexCacheManager
         :param min_string_length_to_trigger: a per entity class mapping that signals sapbert will not run on matches
             shorter than this. (sapbert is less good at symbolic matching than string processing techniques)
+        :param ignore_high_conf: don't process ents that already have at least one high confidence hit(a.k.a perfect match)
+            i.e. if we've scored a perfect match already, sapbert unlikely to improve
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
         :param top_n: keep up to the top_n hits of the query
         :param score_cutoffs: min score for a hit to be considered. first is lower bound for medium confidence,
@@ -53,6 +56,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
 
         super().__init__(depends_on=depends_on)
+        self.ignore_high_conf = ignore_high_conf
         self.min_string_length_to_trigger = min_string_length_to_trigger
         self.score_cutoffs = score_cutoffs
         if not all([isinstance(x, EmbeddingIndexCacheManager) for x in index_group.cache_managers]):
@@ -99,13 +103,17 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
         failed_docs = []
         try:
-            entities = pydash.flatten([x.get_entities() for x in docs])
-            # filter entities that have no mapping in cache manager
-            entities = filter(
-                lambda x: x.entity_class in self.index_group.entity_class_to_indices.keys(),
-                entities,
-            )
-            self.process_entities(entities)
+            entities_to_process = []
+            for ent in pydash.flatten([x.get_entities() for x in docs]):
+                if ent.entity_class not in self.index_group.entity_class_to_indices.keys():
+                    continue
+                if self.ignore_high_conf and any(
+                    hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in ent.hits
+                ):
+                    continue
+                entities_to_process.append(ent)
+
+            self.process_entities(entities_to_process)
         except Exception:
             affected_doc_ids = [doc.idx for doc in docs]
             for doc in docs:
