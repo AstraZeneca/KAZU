@@ -96,12 +96,12 @@ def test_GreekSymbolSubstitution():
     generator = StringReplacement(include_greek=True)
     check_generator_result(
         input_str="alpha-thalassaemia",
-        expected_syns=["α-thalassaemia"],
+        expected_syns=["α-thalassaemia", "Α-thalassaemia"],
         generator=generator,
     )
     check_generator_result(
         input_str="α-thalassaemia",
-        expected_syns=["alpha-thalassaemia", "a-thalassaemia"],
+        expected_syns=["alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"],
         generator=generator,
     )
     check_generator_result(input_str="A-thalassaemia", expected_syns=[], generator=generator)
@@ -118,14 +118,14 @@ def test_CombinatorialSynonymGenerator():
     check_generator_result(
         input_str="alpha-thalassaemia",
         expected_syns=[
-            "alpha-thalassaemia",
-            "Alpha thalassaemia",
-            "Alpha_thalassaemia",
-            "α-thalassaemia",
             "alpha thalassaemia",
             "alpha_thalassaemia",
+            "α-thalassaemia",
             "α thalassaemia",
             "α_thalassaemia",
+            "Α-thalassaemia",
+            "Α thalassaemia",
+            "Α_thalassaemia",
         ],
         generator=generator,
     )
