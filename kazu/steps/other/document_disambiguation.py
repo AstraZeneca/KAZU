@@ -187,13 +187,12 @@ class SubStringResolver:
     def __init__(self, query_string_norm):
         self.query_string_norm = query_string_norm
         # require min 70% subsequence overlap
-        self.min_distance = float(len(query_string_norm)) *0.7
+        self.min_distance = float(len(query_string_norm)) * 0.7
         self.lcs = LongestCommonSubsequence()
 
-
     def __call__(self, synonym_string_norm: str):
-        length = self.lcs.distance(self.query_string_norm,synonym_string_norm)
-        return length >=self.min_distance
+        length = self.lcs.distance(self.query_string_norm, synonym_string_norm)
+        return length >= self.min_distance
 
 
 class TfIdfCorpusScorer:
@@ -238,7 +237,9 @@ class TfIdfOntologyHitDisambiguationStrategy:
     def get_synonym_data_disambiguating_strategy(self, entity_string: str):
         return SynonymDataDisambiguationStrategy(entity_string)
 
-    def __call__(self, entity_string: str, entities: List[Entity], document_representation:List[str]):
+    def __call__(
+        self, entity_string: str, entities: List[Entity], document_representation: List[str]
+    ):
         query = " . ".join(document_representation)
         query_mat = self.vectoriser.transform([query]).todense()
         disambuguated_mappings = []
@@ -311,10 +312,7 @@ class TfIdfGlobalDisambiguationStrategy:
 
         self.min_string_length_to_test_for_high_confidence = 5
 
-
-    def __call__(
-        self, entities: List[Entity], document_representation: List[str]
-    ) -> List[Entity]:
+    def __call__(self, entities: List[Entity], document_representation: List[str]) -> List[Entity]:
         result = []
         query = " . ".join(document_representation)
         query_mat = self.vectoriser.transform([query]).todense()
@@ -326,7 +324,7 @@ class TfIdfGlobalDisambiguationStrategy:
             resolved_ents_this_match = []
             match_ents = list(ent_iter)
 
-            if len(match_str)>=self.min_string_length_to_test_for_high_confidence:
+            if len(match_str) >= self.min_string_length_to_test_for_high_confidence:
                 for ent in match_ents:
                     if any(hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in ent.hits):
                         resolved_ents_this_match.append(ent)
@@ -364,7 +362,6 @@ class TfIdfGlobalDisambiguationStrategy:
                 if resolved_ents_this_match:
                     result.extend(resolved_ents_this_match)
                     break
-
 
         return result
 
@@ -472,7 +469,9 @@ class Disambiguator:
         return entities_needing_global_disamb, entities_not_needing_global_disamb
 
     def resolve_unambiguous_entities(
-        self, entities_not_needing_global_disamb:List[Entity], globally_disambiguated_ents:List[Entity]
+        self,
+        entities_not_needing_global_disamb: List[Entity],
+        globally_disambiguated_ents: List[Entity],
     ):
         remaining_ents = entities_not_needing_global_disamb + globally_disambiguated_ents
         # the remainng ents should now be 'good' in terms of ner entity_class and therefore we know which kbs
