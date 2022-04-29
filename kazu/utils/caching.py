@@ -103,7 +103,9 @@ class IndexCacheManager(ABC):
         indices = []
         for parser in self.parsers:
             cache_dir = get_cache_dir(
-                parser.in_path, prefix=self.index_type.__name__, create_if_not_exist=False
+                parser.in_path,
+                prefix=f"{parser.name}_{self.index_type.__name__}",
+                create_if_not_exist=False,
             )
             if self.rebuild_cache:
                 logger.info("forcing a rebuild of the ontology cache")

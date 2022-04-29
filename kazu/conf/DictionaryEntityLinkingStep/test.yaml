@@ -17,6 +17,16 @@ index_group:
       - OPENTARGETS_TARGET
     anatomy:
       - UBERON
+    cell_line:
+      - CELLOSAURUS
+    cell_type:
+      - CLO
+    go_bp:
+      - BP_GENE_ONTOLOGY
+    go_mf:
+      - MF_GENE_ONTOLOGY
+    go_cc:
+      - CC_GENE_ONTOLOGY
   cache_managers:
     - _target_: kazu.utils.caching.DictionaryIndexCacheManager
       rebuild_cache: False
@@ -42,3 +52,9 @@ index_group:
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
         - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
+        - _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl

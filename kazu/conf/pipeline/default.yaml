@@ -4,6 +4,7 @@ pipeline:
     - SciSpacyAbbreviationExpansionStep
     - ExplosionNERStep
     - TransformersModelForTokenClassificationNerStep
+    - SethStep
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
     - DocumentLevelDisambiguationStep

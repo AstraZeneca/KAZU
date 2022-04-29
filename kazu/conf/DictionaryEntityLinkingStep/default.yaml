@@ -9,19 +9,24 @@ index_group:
       - CHEMBL
       - OPENTARGETS_MOLECULE
     disease:
-      - MONDO
       - MEDDRA
+      - MONDO
       - OPENTARGETS_DISEASE
     gene:
+      - ENSEMBL
       - OPENTARGETS_TARGET
     anatomy:
       - UBERON
-    species:
-      - NOT_IMPLEMENTED
-    mutation:
-      - NOT_IMPLEMENTED
-    entity :
-      - NOT_IMPLEMENTED
+    cell_line:
+      - CELLOSAURUS
+    cell_type:
+      - CLO
+    go_bp:
+      - BP_GENE_ONTOLOGY
+    go_mf:
+      - MF_GENE_ONTOLOGY
+    go_cc:
+      - CC_GENE_ONTOLOGY
   cache_managers:
     - _target_: kazu.utils.caching.DictionaryIndexCacheManager
       rebuild_cache: False
@@ -32,17 +37,24 @@ index_group:
         - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
           is_composite: True
-        - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
-        - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
-        - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
-        - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
+          is_composite: True
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
+        - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+        - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
+        - _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+        - _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl

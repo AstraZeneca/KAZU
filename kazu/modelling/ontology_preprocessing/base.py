@@ -1,4 +1,5 @@
 import copy
+import functools
 import itertools
 import json
 import logging
@@ -457,20 +458,6 @@ class OntologyParser(ABC):
 
         return dict(result)
 
-    # def resolve_singular_synonym_dataframe(self, df, normalise_original_syns: bool):
-    #     all_syn_data = {}
-    #     for idx, mapping_type_dict in (
-    #         df[[IDX, MAPPING_TYPE]].groupby(IDX).agg(list).to_dict(orient="index").items()
-    #     ):
-    #         unique_mappings = frozenset(pydash.flatten(mapping_type_dict[MAPPING_TYPE]))
-    #         all_syn_data[idx] = SynonymData(ids=frozenset([idx]), mapping_type=unique_mappings)
-    #     result = defaultdict(set)
-    #     for i, row in df[[SYN, IDX]].drop_duplicates().iterrows():
-    #         idx = row[IDX]
-    #         syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
-    #         result[syn].add(all_syn_data[idx])
-    #     return result
-
     def resolve_composite_synonym_dataframe(
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
     ):
@@ -610,7 +597,7 @@ class OntologyParser(ABC):
         # SynonymDatabase().add(self.name, generated_synonym_data)
         SynonymDatabase().add(self.name, synonym_data)
 
-    @cachetools.cached(cache={})
+    @functools.lru_cache
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         splits a table of ontology information into a synonym table and a metadata table, deduplicating and grouping
@@ -878,6 +865,97 @@ class RDFGraphParser(OntologyParser):
         """
         match = self._uri_regex.match(text)
         return bool(match)
+
+
+class GeneOntologyParser(OntologyParser):
+    name = "UNDEFINED"
+    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
+    query = """UNDEFINED"""
+
+    @functools.lru_cache
+    def load_go(self):
+        g = rdflib.Graph()
+        g.parse(self.in_path)
+        return g
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        g = rdflib.Graph()
+        g.parse(self.in_path)
+        result = g.query(self.query)
+        default_labels = []
+        iris = []
+        syns = []
+        mapping_type = []
+
+        for row in result:
+            idx = row.goid
+            if self._uri_regex.match(idx):
+                default_labels.append(row.label)
+                iris.append(row.goid)
+                syns.append(row.synonym)
+                mapping_type.append("hasExactSynonym")
+        df = pd.DataFrame.from_dict(
+            {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
+        )
+        default_labels = df[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
+        default_labels[SYN] = default_labels[DEFAULT_LABEL]
+        default_labels[MAPPING_TYPE] = "label"
+
+        return pd.concat([df, default_labels])
+
+
+class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
+    name = "BP_GENE_ONTOLOGY"
+    query = """    
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+                
+                SELECT DISTINCT ?goid ?label ?synonym 
+                        WHERE {
+                
+                            ?goid oboinowl:hasExactSynonym ?synonym .
+                            ?goid rdfs:label ?label .
+                            ?goid oboinowl:hasOBONamespace "biological_process" .
+                  
+                  }
+        """
+
+
+class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
+    name = "MF_GENE_ONTOLOGY"
+    query = """    
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+                
+                SELECT DISTINCT ?goid ?label ?synonym 
+                        WHERE {
+                
+                            ?goid oboinowl:hasExactSynonym ?synonym .
+                            ?goid rdfs:label ?label .
+                            ?goid oboinowl:hasOBONamespace "molecular_function".
+                  
+                  }
+        """
+
+
+class CellularComponentGeneOntologyParser(GeneOntologyParser):
+    name = "CC_GENE_ONTOLOGY"
+    query = """    
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+                
+                SELECT DISTINCT ?goid ?label ?synonym 
+                        WHERE {
+                
+                            ?goid oboinowl:hasExactSynonym ?synonym .
+                            ?goid rdfs:label ?label .
+                            ?goid oboinowl:hasOBONamespace "cellular_component" .
+                  
+                  }
+        """
 
 
 class UberonOntologyParser(RDFGraphParser):
