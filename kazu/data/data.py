@@ -15,7 +15,7 @@ from numpy import ndarray
 from spacy import displacy
 
 
-USE_EXACT_MATCHING = "use_exact_matching"
+IS_SUBSPAN = "is_subspan"
 # ambiguous_synonyms or confused mappings
 LINK_UNCERTAINTY = "for_disambiguation"
 AMBIGUOUS_IDX = "requires_disambiguation"

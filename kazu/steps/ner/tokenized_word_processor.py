@@ -8,7 +8,7 @@ from kazu.data.data import (
     Entity,
     ENTITY_OUTSIDE_SYMBOL,
     ENTITY_START_SYMBOL,
-    USE_EXACT_MATCHING,
+    IS_SUBSPAN,
 )
 from torch import Tensor
 
@@ -246,7 +246,7 @@ class TokenizedWordProcessor:
                 match=match_str,
                 namespace=namespace,
                 entity_class=span.clazz,
-                metadata={USE_EXACT_MATCHING: span.subspan},
+                metadata={IS_SUBSPAN: span.subspan},
             )
             entities.append(entity)
 
