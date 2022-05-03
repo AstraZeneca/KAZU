@@ -1,6 +1,7 @@
 from typing import List, Union
 
 from hydra.utils import instantiate
+import pytest
 
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
@@ -33,40 +34,49 @@ def check_generator_result(
     assert all([x in new_syns for x in expected_syns])
 
 
-@requires_model_pack
-def test_SeparatorExpansion(kazu_test_config):
+@pytest.fixture(scope="session")
+def separator_expansion_generator(kazu_test_config) -> SeparatorExpansion:
     spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
-    generator = SeparatorExpansion(spacy_pipeline)
+    return SeparatorExpansion(spacy_pipeline)
 
-    check_generator_result(
-        input_str="ABAC (ABAC1/ABAC2)",
-        expected_syns=["ABAC", "ABAC1", "ABAC2", "ABAC1/ABAC2", "ABAC ABAC1/ABAC2"],
-        generator=generator,
-    )
 
-    check_generator_result(
-        input_str="cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
-        expected_syns=[
-            "cyclin-dependent kinase inhibitor 1B",
-            "p27",
-            "Kip1",
-            "p27, Kip1",
-            "cyclin-dependent kinase inhibitor 1B p27, Kip1",
-        ],
-        generator=generator,
-    )
-
-    check_generator_result(
-        input_str="gonadotropin-releasing hormone (type 2) receptor 2",
-        expected_syns=["gonadotropin-releasing hormone receptor 2"],
-        generator=generator,
-    )
-
-    check_generator_result(
-        input_str="oxidase (cytochrome c) assembly 1-like",
-        expected_syns=["oxidase assembly 1-like"],
-        generator=generator,
-    )
+# fmt: off
+@pytest.mark.parametrize(
+    argnames=("input_str", "expected_syns"),
+    argvalues=(
+        (
+            "ABAC (ABAC1/ABAC2)",
+            [
+                "ABAC",
+                "ABAC1",
+                "ABAC2",
+                "ABAC1/ABAC2",
+                "ABAC ABAC1/ABAC2"],
+        ),
+        (
+            "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
+            [
+                "cyclin-dependent kinase inhibitor 1B",
+                "p27",
+                "Kip1",
+                "p27, Kip1",
+                "cyclin-dependent kinase inhibitor 1B p27, Kip1",
+            ],
+        ),
+        (
+            "gonadotropin-releasing hormone (type 2) receptor 2",
+            ["gonadotropin-releasing hormone receptor 2"],
+        ),
+        (
+            "oxidase (cytochrome c) assembly 1-like",
+            ["oxidase assembly 1-like"],
+        ),
+    ),
+)
+# fmt: on
+@requires_model_pack
+def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_generator):
+    check_generator_result(input_str, expected_syns, separator_expansion_generator)
 
 
 def test_CaseModifier():
@@ -92,19 +102,30 @@ def test_StringReplacement():
     )
 
 
-def test_GreekSymbolSubstitution():
-    generator = StringReplacement(include_greek=True)
-    check_generator_result(
-        input_str="alpha-thalassaemia",
-        expected_syns=["α-thalassaemia", "Α-thalassaemia"],
-        generator=generator,
-    )
-    check_generator_result(
-        input_str="α-thalassaemia",
-        expected_syns=["alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"],
-        generator=generator,
-    )
-    check_generator_result(input_str="A-thalassaemia", expected_syns=[], generator=generator)
+@pytest.fixture(scope="session")
+def greek_symbol_generator() -> StringReplacement:
+    return StringReplacement(include_greek=True)
+
+
+@pytest.mark.parametrize(
+    argnames=("input_str", "expected_syns"),
+    argvalues=(
+        (
+            "alpha-thalassaemia",
+            ["α-thalassaemia", "Α-thalassaemia"],
+        ),
+        (
+            "α-thalassaemia",
+            ["alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"],
+        ),
+        (
+            "A-thalassaemia",
+            [],
+        ),
+    ),
+)
+def test_GreekSymbolSubstitution(input_str, expected_syns, greek_symbol_generator):
+    check_generator_result(input_str, expected_syns, greek_symbol_generator)
 
 
 def test_CombinatorialSynonymGenerator():
