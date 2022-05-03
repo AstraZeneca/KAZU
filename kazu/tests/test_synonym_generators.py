@@ -136,15 +136,20 @@ def greek_symbol_generator() -> StringReplacement:
         pytest.param(
             "alpha beta test",
             {
+                "alpha β test",
+                "alpha ϐ test",
+                "alpha Β test",
+                "α beta test",
                 "α β test",
                 "α ϐ test",
                 "α Β test",
+                "Α beta test",
                 "Α β test",
                 "Α ϐ test",
                 "Α Β test",
             },
             marks=pytest.mark.xfail(
-                reason="above problem with beta/eta plus handling multiple different letters"
+                reason="above problem with beta/eta"
             ),
         ),
     ),

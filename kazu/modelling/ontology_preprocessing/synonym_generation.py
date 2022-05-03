@@ -285,10 +285,22 @@ class StringReplacement(SynonymGenerator):
             # will not introduce leading or trailing whitespace unlike the other
             # replacements above
             stripped_text = text.strip()
+            strings_to_substitute = {stripped_text}
             for to_replace, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
+                # if it's in the original text it should be in all previous substitutions, no
+                # need to check all of them
                 if to_replace in text:
-                    for replacement in replacement_set:
-                        results[stripped_text.replace(to_replace, replacement)] = syn_data
+                    # necessary so we don't modify strings_to_substitute while looping over it,
+                    # which throws an error
+                    outputs_this_step = set()
+                    for string_to_subsitute in strings_to_substitute:
+                        for replacement in replacement_set:
+                            single_unique_letter_substituted = string_to_subsitute.replace(
+                                to_replace, replacement
+                            )
+                            outputs_this_step.add(single_unique_letter_substituted)
+                            results[single_unique_letter_substituted] = syn_data
+                    strings_to_substitute.update(outputs_this_step)
 
         if len(results) > 0:
             return results
