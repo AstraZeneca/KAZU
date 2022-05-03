@@ -229,12 +229,19 @@ class GreekSymbolSubstitution:
         "\u03C9": "omega",
     }
 
-    GREEK_SUBS_ABBRV = {k: v[0] for k, v in GREEK_SUBS.items()}
-    GREEK_SUBS_REVERSED = {v: k for k, v in GREEK_SUBS.items()}
-    ALL_SUBS = {}
-    ALL_SUBS.update(GREEK_SUBS)
-    ALL_SUBS.update(GREEK_SUBS_ABBRV)
-    ALL_SUBS.update(GREEK_SUBS_REVERSED)
+    ALL_SUBS: Dict[str, Set[str]] = defaultdict(set)
+    for greek_letter, spelling in GREEK_SUBS.items():
+
+        ALL_SUBS[greek_letter].add(spelling)
+        # single letter abbreviation
+        ALL_SUBS[greek_letter].add(spelling[0])
+        # reversed
+        ALL_SUBS[spelling].add(greek_letter)
+
+    # we don't want this to have the semantics of a defaultdict for missing lookups
+    ALL_SUBS = dict(ALL_SUBS)
+    # none of these should have leading or trailing whitespace
+    assert all(val.strip() == val for vals in ALL_SUBS.values() for val in vals)
 
 
 class StringReplacement(SynonymGenerator):
@@ -265,9 +272,14 @@ class StringReplacement(SynonymGenerator):
                         results[new_str] = syn_data
 
         if self.include_greek:
-            for to_replace, replace_with in GreekSymbolSubstitution.ALL_SUBS.items():
+            # only strip text once initially - the greek character replacement
+            # will not introduce leading or trailing whitespace unlike the other
+            # replacements above
+            stripped_text = text.strip()
+            for to_replace, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
                 if to_replace in text:
-                    results[text.replace(to_replace, replace_with).strip()] = syn_data
+                    for replacement in replacement_set:
+                        results[stripped_text.replace(to_replace, replacement)] = syn_data
 
         if len(results) > 0:
             return results
