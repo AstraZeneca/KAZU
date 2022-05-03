@@ -199,7 +199,7 @@ def test_CombinatorialSynonymGenerator():
         [
             StringReplacement(include_greek=True),
             CaseModifier(lower=True),
-            StringReplacement(replacement_dict={"-": [" ", "_"]}),
+            StringReplacement(replacement_dict={"-": [" ", "_"]}, include_greek=False),
         ]
     )
     check_generator_result(

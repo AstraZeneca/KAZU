@@ -61,11 +61,11 @@ class CombinatorialSynonymGenerator:
         :param synonym_data:
         :return:
         """
-        # make a copy of the original synonyms
-        all_syns = copy.deepcopy(synonym_data)
         results = defaultdict(set)
         if self.synonym_generator_permutations:
             for i, permutation_list in enumerate(self.synonym_generator_permutations):
+                # make a copy of the original synonyms
+                all_syns = copy.deepcopy(synonym_data)
                 logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
                 for generator in permutation_list:
                     # run the generator
@@ -74,6 +74,14 @@ class CombinatorialSynonymGenerator:
                         # don't add if it maps to a clean syn
                         if new_syn not in synonym_data:
                             results[new_syn].update(syn_data_set)
+                            # let following generators operate on the output.
+                            # a synonym might be in all_syns but not synonym_data
+                            # since a previous generator might have already produced it
+                            existing_syn_set = all_syns.get(new_syn)
+                            if existing_syn_set:
+                                existing_syn_set.update(syn_data_set)
+                            else:
+                                all_syns[new_syn] = syn_data_set
 
         final = {k: set(v) for k, v in results.items()}
         return final
