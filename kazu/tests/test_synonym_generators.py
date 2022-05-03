@@ -124,6 +124,29 @@ def greek_symbol_generator() -> StringReplacement:
             "A-thalassaemia",
             set(),
         ),
+        pytest.param(
+            "beta test",
+            {
+                "β test",
+                "ϐ test",
+                "Β test",
+            },
+            marks=pytest.mark.xfail(reason="'beta' also gets substring 'eta' replaced"),
+        ),
+        pytest.param(
+            "alpha beta test",
+            {
+                "α β test",
+                "α ϐ test",
+                "α Β test",
+                "Α β test",
+                "Α ϐ test",
+                "Α Β test",
+            },
+            marks=pytest.mark.xfail(
+                reason="above problem with beta/eta plus handling multiple different letters"
+            ),
+        ),
     ),
 )
 def test_GreekSymbolSubstitution(input_str, expected_syns, greek_symbol_generator):
