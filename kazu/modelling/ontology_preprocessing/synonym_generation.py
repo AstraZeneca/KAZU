@@ -57,7 +57,7 @@ class CombinatorialSynonymGenerator:
 
     def __call__(self, synonym_data: Dict[str, Set[SynonymData]]) -> Dict[str, Set[SynonymData]]:
         """
-        for every perumation of modifiers, generate a list of syns, then aggregate at the end
+        for every permutation of modifiers, generate a list of syns, then aggregate at the end
         :param synonym_data:
         :return:
         """
