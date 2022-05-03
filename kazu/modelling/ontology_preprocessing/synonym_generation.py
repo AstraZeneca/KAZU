@@ -70,11 +70,10 @@ class CombinatorialSynonymGenerator:
                 for generator in permutation_list:
                     # run the generator
                     new_syns = generator(all_syns)
-                    for new_syn, syn_data_list in new_syns.items():
+                    for new_syn, syn_data_set in new_syns.items():
                         # don't add if it maps to a clean syn
                         if new_syn not in synonym_data:
-                            for syn_data in syn_data_list:
-                                results[new_syn].add(syn_data)
+                            results[new_syn].update(syn_data_set)
 
         final = {k: set(v) for k, v in results.items()}
         return final
