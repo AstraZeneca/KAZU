@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Set, Union
 
 from hydra.utils import instantiate
 import pytest
@@ -24,14 +24,13 @@ dummy_syn_data = SynonymData(
 
 def check_generator_result(
     input_str: str,
-    expected_syns: List[str],
+    expected_syns: Set[str],
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
     data = {input_str: set((dummy_syn_data,))}
     result = generator(data)
-    new_syns = list(result.keys())
-    assert len(new_syns) == len(expected_syns)
-    assert all([x in new_syns for x in expected_syns])
+    new_syns = set(result.keys())
+    assert new_syns == expected_syns
 
 
 @pytest.fixture(scope="session")
@@ -46,30 +45,30 @@ def separator_expansion_generator(kazu_test_config) -> SeparatorExpansion:
     argvalues=(
         (
             "ABAC (ABAC1/ABAC2)",
-            [
+            {
                 "ABAC",
                 "ABAC1",
                 "ABAC2",
                 "ABAC1/ABAC2",
-                "ABAC ABAC1/ABAC2"],
+                "ABAC ABAC1/ABAC2"},
         ),
         (
             "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
-            [
+            {
                 "cyclin-dependent kinase inhibitor 1B",
                 "p27",
                 "Kip1",
                 "p27, Kip1",
                 "cyclin-dependent kinase inhibitor 1B p27, Kip1",
-            ],
+            },
         ),
         (
             "gonadotropin-releasing hormone (type 2) receptor 2",
-            ["gonadotropin-releasing hormone receptor 2"],
+            {"gonadotropin-releasing hormone receptor 2"},
         ),
         (
             "oxidase (cytochrome c) assembly 1-like",
-            ["oxidase assembly 1-like"],
+            {"oxidase assembly 1-like"},
         ),
     ),
 )
@@ -81,7 +80,7 @@ def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_genera
 
 def test_CaseModifier():
     generator = CaseModifier(lower=True)
-    check_generator_result(input_str="ABAC", expected_syns=["abac"], generator=generator)
+    check_generator_result(input_str="ABAC", expected_syns={"abac"}, generator=generator)
 
 
 @requires_model_pack
@@ -89,7 +88,7 @@ def test_StopWordRemover(kazu_test_config):
     spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
     generator = StopWordRemover(spacy_pipeline=spacy_pipeline)
     check_generator_result(
-        input_str="The cat sat on the mat", expected_syns=["cat sat mat"], generator=generator
+        input_str="The cat sat on the mat", expected_syns={"cat sat mat"}, generator=generator
     )
 
 
@@ -97,7 +96,7 @@ def test_StringReplacement():
     generator = StringReplacement(replacement_dict={"cat": ["dog", "chicken"]})
     check_generator_result(
         input_str="The cat sat on the mat",
-        expected_syns=["The dog sat on the mat", "The chicken sat on the mat"],
+        expected_syns={"The dog sat on the mat", "The chicken sat on the mat"},
         generator=generator,
     )
 
@@ -112,15 +111,15 @@ def greek_symbol_generator() -> StringReplacement:
     argvalues=(
         (
             "alpha-thalassaemia",
-            ["α-thalassaemia", "Α-thalassaemia"],
+            {"α-thalassaemia", "Α-thalassaemia"},
         ),
         (
             "α-thalassaemia",
-            ["alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"],
+            {"alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"},
         ),
         (
             "A-thalassaemia",
-            [],
+            set(),
         ),
     ),
 )
@@ -138,7 +137,7 @@ def test_CombinatorialSynonymGenerator():
     )
     check_generator_result(
         input_str="alpha-thalassaemia",
-        expected_syns=[
+        expected_syns={
             "alpha thalassaemia",
             "alpha_thalassaemia",
             "α-thalassaemia",
@@ -147,6 +146,6 @@ def test_CombinatorialSynonymGenerator():
             "Α-thalassaemia",
             "Α thalassaemia",
             "Α_thalassaemia",
-        ],
+        },
         generator=generator,
     )
