@@ -240,10 +240,17 @@ class GreekSymbolSubstitution:
         # reversed
         ALL_SUBS[spelling].add(greek_letter)
 
+        # replace between lower and upper case
+        # to generate synonyms
+        if greek_letter.islower():
+            upper_greek_letter = greek_letter.upper()
+            ALL_SUBS[greek_letter].add(upper_greek_letter)
+        elif greek_letter.isupper():
+            lower_greek_letter = greek_letter.lower()
+            ALL_SUBS[greek_letter].add(lower_greek_letter)
+
     # we don't want this to have the semantics of a defaultdict for missing lookups
     ALL_SUBS = dict(ALL_SUBS)
-    # none of these should have leading or trailing whitespace
-    assert all(val.strip() == val for vals in ALL_SUBS.values() for val in vals)
 
 
 class StringReplacement(SynonymGenerator):

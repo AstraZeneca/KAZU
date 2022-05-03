@@ -1,3 +1,5 @@
+import unicodedata
+from sys import maxunicode
 from typing import Set, Union
 
 from hydra.utils import instantiate
@@ -9,6 +11,7 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CaseModifier,
     StopWordRemover,
     StringReplacement,
+    GreekSymbolSubstitution,
     CombinatorialSynonymGenerator,
 )
 from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy
@@ -125,6 +128,42 @@ def greek_symbol_generator() -> StringReplacement:
 )
 def test_GreekSymbolSubstitution(input_str, expected_syns, greek_symbol_generator):
     check_generator_result(input_str, expected_syns, greek_symbol_generator)
+
+
+def test_greek_substitution_is_stripped():
+    for k, val_set in GreekSymbolSubstitution.ALL_SUBS.items():
+        assert k.strip() == k
+        assert all(val.strip() == val for val in val_set)
+
+
+@pytest.mark.xfail(
+    reason="awkward casing behaviour where there are e.g. multiple uppercase theta's in unicode."
+)
+def test_greek_substitution_dict_casing():
+    for k, val_set in GreekSymbolSubstitution.ALL_SUBS.items():
+        for v in val_set:
+            # if we substitute to a greek letter, we should sub
+            # to both cases
+            if v in GreekSymbolSubstitution.GREEK_SUBS:
+                if v.islower():
+                    flipped_case_v = v.upper()
+                elif v.isupper():
+                    flipped_case_v = v.lower()
+                assert flipped_case_v in GreekSymbolSubstitution.GREEK_SUBS
+                assert flipped_case_v == k or flipped_case_v in val_set
+
+
+@pytest.mark.xfail(reason="haven't covered (or marked as exceptions) all unicode greek chars yet")
+def test_greek_substitution_dict_uncode_variants():
+    for i in range(maxunicode):
+        char = chr(i)
+        try:
+            char_name_lower = unicodedata.name(char).lower()
+            for greek_letter in GreekSymbolSubstitution.GREEK_SUBS.values():
+                assert greek_letter not in char_name_lower
+        except ValueError:
+            # character doesn't exist or has no name
+            pass
 
 
 def test_CombinatorialSynonymGenerator():
