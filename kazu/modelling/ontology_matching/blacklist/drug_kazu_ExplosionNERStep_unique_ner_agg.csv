@@ -1,0 +1,1345 @@
+entity_class,match,action,namespace,doc_ids
+drug,target,drop,ExplosionNERStep,7175
+drug,water,keep,ExplosionNERStep,5818
+drug,glucose,keep,ExplosionNERStep,5558
+drug,insulin,keep,ExplosionNERStep,5098
+drug,oxygen,keep,ExplosionNERStep,4138
+drug,calcium,keep,ExplosionNERStep,2820
+drug,thyroid,drop,ExplosionNERStep,2683
+drug,cholesterol,keep,ExplosionNERStep,2543
+drug,alcohol,keep,ExplosionNERStep,2298
+drug,nature,drop,ExplosionNERStep,2004
+drug,antibiotic,drop,ExplosionNERStep,1962
+drug,retinal,keep,ExplosionNERStep,1952
+drug,search,drop,ExplosionNERStep,1808
+drug,murine,keep,ExplosionNERStep,1614
+drug,amino acids,drop,ExplosionNERStep,1573
+drug,saline,keep,ExplosionNERStep,1567
+drug,nitrogen,keep,ExplosionNERStep,1364
+drug,p53,drop,ExplosionNERStep,1363
+drug,epidermal growth factor,keep,ExplosionNERStep,1329
+drug,carbon,keep,ExplosionNERStep,1287
+drug,protease,keep,ExplosionNERStep,1278
+drug,albumin,keep,ExplosionNERStep,1252
+drug,tyrosine,keep,ExplosionNERStep,1226
+drug,adenosine,keep,ExplosionNERStep,1120
+drug,interferon,keep,ExplosionNERStep,1083
+drug,ethanol,keep,ExplosionNERStep,1044
+drug,serine,keep,ExplosionNERStep,885
+drug,estrogen,keep,ExplosionNERStep,877
+drug,vehicle,drop,ExplosionNERStep,860
+drug,vitamin D,keep,ExplosionNERStep,821
+drug,testosterone,keep,ExplosionNERStep,797
+drug,preference,drop,ExplosionNERStep,785
+drug,salt,keep,ExplosionNERStep,776
+drug,IL-10,drop,ExplosionNERStep,775
+drug,Impact,drop,ExplosionNERStep,736
+drug,Sigma,drop,ExplosionNERStep,682
+drug,potassium,keep,ExplosionNERStep,645
+drug,alanine,keep,ExplosionNERStep,641
+drug,nicotine,keep,ExplosionNERStep,641
+drug,sucrose,keep,ExplosionNERStep,627
+drug,cysteine,keep,ExplosionNERStep,604
+drug,arginine,keep,ExplosionNERStep,563
+drug,Insulin,keep,ExplosionNERStep,542
+drug,acetylcholine,keep,ExplosionNERStep,529
+drug,integrin,keep,ExplosionNERStep,519
+drug,plasminogen,keep,ExplosionNERStep,519
+drug,platelets,drop,ExplosionNERStep,513
+drug,copper,keep,ExplosionNERStep,495
+drug,superoxide dismutase,keep,ExplosionNERStep,487
+drug,cadmium,keep,ExplosionNERStep,482
+drug,acetic acid,keep,ExplosionNERStep,481
+drug,lysine,keep,ExplosionNERStep,470
+drug,starch,keep,ExplosionNERStep,464
+drug,Roche,drop,ExplosionNERStep,456
+drug,creatinine,keep,ExplosionNERStep,439
+drug,lipase,keep,ExplosionNERStep,439
+drug,hydrogen,keep,ExplosionNERStep,436
+drug,optimum,keep,ExplosionNERStep,436
+drug,pyruvate,keep,ExplosionNERStep,435
+drug,paraffin,keep,ExplosionNERStep,393
+drug,today,drop,ExplosionNERStep,386
+drug,bilirubin,keep,ExplosionNERStep,372
+drug,norepinephrine,keep,ExplosionNERStep,369
+drug,luminal,keep,ExplosionNERStep,367
+drug,GM-CSF,keep,ExplosionNERStep,364
+drug,proline,keep,ExplosionNERStep,350
+drug,Thyroid,drop,ExplosionNERStep,349
+drug,fibrinogen,keep,ExplosionNERStep,346
+drug,guanine,keep,ExplosionNERStep,343
+drug,leucine,keep,ExplosionNERStep,342
+drug,Water,keep,ExplosionNERStep,331
+drug,urea,keep,ExplosionNERStep,325
+drug,ADP,keep,ExplosionNERStep,323
+drug,choline,keep,ExplosionNERStep,317
+drug,threonine,keep,ExplosionNERStep,317
+drug,GnRH,keep,ExplosionNERStep,311
+drug,red blood cells,drop,ExplosionNERStep,304
+drug,adenine,keep,ExplosionNERStep,300
+drug,Calcium,keep,ExplosionNERStep,288
+drug,triphosphate,drop,ExplosionNERStep,278
+drug,Fig 1,drop,ExplosionNERStep,273
+drug,phospholipids,keep,ExplosionNERStep,267
+drug,Alcohol,keep,ExplosionNERStep,265
+drug,thrombin,keep,ExplosionNERStep,264
+drug,corticosterone,keep,ExplosionNERStep,264
+drug,Medicaid,drop,ExplosionNERStep,263
+drug,ribose,keep,ExplosionNERStep,262
+drug,TNF-alpha,keep,ExplosionNERStep,258
+drug,ghrelin,keep,ExplosionNERStep,255
+drug,Glucose,keep,ExplosionNERStep,253
+drug,calcitonin,keep,ExplosionNERStep,251
+drug,Vitamin D,keep,ExplosionNERStep,249
+drug,fluoride,keep,ExplosionNERStep,248
+drug,fibrin,keep,ExplosionNERStep,247
+drug,NADPH,keep,ExplosionNERStep,243
+drug,eosin,keep,ExplosionNERStep,238
+drug,parathyroid hormone,keep,ExplosionNERStep,235
+drug,platinum,keep,ExplosionNERStep,234
+drug,inositol,keep,ExplosionNERStep,232
+drug,indole,keep,ExplosionNERStep,232
+drug,thymidine,keep,ExplosionNERStep,229
+drug,LPS,keep,ExplosionNERStep,228
+drug,biotin,keep,ExplosionNERStep,226
+drug,Leucine,keep,ExplosionNERStep,226
+drug,Target,drop,ExplosionNERStep,225
+drug,ADP-ribose,keep,ExplosionNERStep,224
+drug,Murine,keep,ExplosionNERStep,223
+drug,nerve growth factor,keep,ExplosionNERStep,218
+drug,Retinal,keep,ExplosionNERStep,217
+drug,Antibiotic,drop,ExplosionNERStep,216
+drug,homocysteine,keep,ExplosionNERStep,216
+drug,cellulose,keep,ExplosionNERStep,215
+drug,fluorescein,keep,ExplosionNERStep,215
+drug,silver,keep,ExplosionNERStep,214
+drug,bicarbonate,keep,ExplosionNERStep,213
+drug,histidine,keep,ExplosionNERStep,210
+drug,angiotensin,keep,ExplosionNERStep,208
+drug,purine,keep,ExplosionNERStep,207
+drug,HBsAg,drop,ExplosionNERStep,203
+drug,bromide,keep,ExplosionNERStep,203
+drug,Oxygen,keep,ExplosionNERStep,203
+drug,iodide,keep,ExplosionNERStep,200
+drug,COX-2,drop,ExplosionNERStep,199
+drug,arsenic,keep,ExplosionNERStep,189
+drug,carbon dioxide,keep,ExplosionNERStep,187
+drug,estradiol,keep,ExplosionNERStep,184
+drug,sulfur,keep,ExplosionNERStep,182
+drug,glutamic acid,keep,ExplosionNERStep,175
+drug,gadolinium,keep,ExplosionNERStep,172
+drug,dextran,keep,ExplosionNERStep,171
+drug,myeloperoxidase,keep,ExplosionNERStep,169
+drug,agar,keep,ExplosionNERStep,168
+drug,cofactor,drop,ExplosionNERStep,166
+drug,Cadmium,keep,ExplosionNERStep,166
+drug,galactosidase,keep,ExplosionNERStep,164
+drug,FSH,keep,ExplosionNERStep,163
+drug,flavonoid,keep,ExplosionNERStep,163
+drug,hydrogen peroxide,keep,ExplosionNERStep,163
+drug,carbon monoxide,keep,ExplosionNERStep,160
+drug,adenosine monophosphate,keep,ExplosionNERStep,156
+drug,Search,drop,ExplosionNERStep,155
+drug,propidium,keep,ExplosionNERStep,153
+drug,Carbon,keep,ExplosionNERStep,151
+drug,peel,drop,ExplosionNERStep,150
+drug,Today,drop,ExplosionNERStep,145
+drug,dopamine,keep,ExplosionNERStep,143
+drug,Cholesterol,keep,ExplosionNERStep,141
+drug,Nature,drop,ExplosionNERStep,139
+drug,May,drop,ExplosionNERStep,137
+drug,intercept,drop,ExplosionNERStep,136
+drug,Estrogen,keep,ExplosionNERStep,136
+drug,occlusal,keep,ExplosionNERStep,136
+drug,isoleucine,keep,ExplosionNERStep,134
+drug,chloroform,keep,ExplosionNERStep,133
+drug,NMDA,keep,ExplosionNERStep,133
+drug,vitamin A,keep,ExplosionNERStep,133
+drug,von Willebrand factor,keep,ExplosionNERStep,132
+drug,gelatin,keep,ExplosionNERStep,129
+drug,ozone,keep,ExplosionNERStep,129
+drug,Interferon,drop,ExplosionNERStep,127
+drug,apelin,keep,ExplosionNERStep,124
+drug,Tyrosine,keep,ExplosionNERStep,123
+drug,cobalamin,keep,ExplosionNERStep,122
+drug,elastase,keep,ExplosionNERStep,122
+drug,Adenosine,keep,ExplosionNERStep,120
+drug,phosphatidylserine,keep,ExplosionNERStep,120
+drug,glucagon,keep,ExplosionNERStep,120
+drug,gallate,keep,ExplosionNERStep,120
+drug,pas,drop,ExplosionNERStep,119
+drug,lambda,drop,ExplosionNERStep,114
+drug,Epidermal growth factor,keep,ExplosionNERStep,112
+drug,benzodiazepine,keep,ExplosionNERStep,111
+drug,EDTA,keep,ExplosionNERStep,111
+drug,Nicotine,keep,ExplosionNERStep,110
+drug,bile acid,keep,ExplosionNERStep,108
+drug,magnesium,keep,ExplosionNERStep,108
+drug,heparin,keep,ExplosionNERStep,107
+drug,Glucagon,keep,ExplosionNERStep,107
+drug,D-aspartate,keep,ExplosionNERStep,106
+drug,collagenase,keep,ExplosionNERStep,106
+drug,Von Willebrand Factor,keep,ExplosionNERStep,106
+drug,pyrimidine,keep,ExplosionNERStep,104
+drug,thyroxine,keep,ExplosionNERStep,104
+drug,Arsenic,keep,ExplosionNERStep,104
+drug,barium,keep,ExplosionNERStep,103
+drug,gold,keep,ExplosionNERStep,103
+drug,propolis,keep,ExplosionNERStep,102
+drug,acetone,keep,ExplosionNERStep,100
+drug,phorbol,keep,ExplosionNERStep,97
+drug,dimethyl sulfoxide,keep,ExplosionNERStep,96
+drug,Harris,drop,ExplosionNERStep,95
+drug,sialic acid,keep,ExplosionNERStep,95
+drug,C-peptide,keep,ExplosionNERStep,94
+drug,sigma,drop,ExplosionNERStep,93
+drug,tocotrienol,keep,ExplosionNERStep,93
+drug,IL-15,drop,ExplosionNERStep,91
+drug,Nitrogen,keep,ExplosionNERStep,91
+drug,vasoactive intestinal peptide,keep,ExplosionNERStep,90
+drug,nicotinamide,keep,ExplosionNERStep,90
+drug,Protease,keep,ExplosionNERStep,88
+drug,thrive,drop,ExplosionNERStep,86
+drug,acetaldehyde,keep,ExplosionNERStep,86
+drug,guanosine,keep,ExplosionNERStep,86
+drug,nitroprusside,keep,ExplosionNERStep,85
+drug,methylguanine,keep,ExplosionNERStep,84
+drug,saline solution,keep,ExplosionNERStep,84
+drug,ACTH,keep,ExplosionNERStep,83
+drug,amylase,keep,ExplosionNERStep,83
+drug,atrial natriuretic peptide,keep,ExplosionNERStep,83
+drug,cholecystokinin,keep,ExplosionNERStep,79
+drug,bifidobacteria,keep,ExplosionNERStep,78
+drug,lumefantrine,keep,ExplosionNERStep,78
+drug,Silver,keep,ExplosionNERStep,77
+drug,uracil,keep,ExplosionNERStep,77
+drug,Testosterone,keep,ExplosionNERStep,76
+drug,Edinburgh,drop,ExplosionNERStep,75
+drug,Albumin,keep,ExplosionNERStep,73
+drug,stop,drop,ExplosionNERStep,71
+drug,d-aspartate,keep,ExplosionNERStep,71
+drug,Parathyroid hormone,keep,ExplosionNERStep,71
+drug,interferon gamma,keep,ExplosionNERStep,70
+drug,benzene,keep,ExplosionNERStep,69
+drug,hepatocyte growth factor,keep,ExplosionNERStep,69
+drug,LCL161,keep,ExplosionNERStep,68
+drug,Ethanol,keep,ExplosionNERStep,68
+drug,ethylene,keep,ExplosionNERStep,67
+drug,interleukin 2,keep,ExplosionNERStep,67
+drug,sphingosine,keep,ExplosionNERStep,67
+drug,acetonitrile,keep,ExplosionNERStep,66
+drug,Imatinib mesylate,keep,ExplosionNERStep,65
+drug,first choice,drop,ExplosionNERStep,64
+drug,thiamine,keep,ExplosionNERStep,64
+drug,ionophore,keep,ExplosionNERStep,64
+drug,Compound A,keep,ExplosionNERStep,64
+drug,Choline,keep,ExplosionNERStep,64
+drug,coenzyme A,keep,ExplosionNERStep,64
+drug,penicillin,keep,ExplosionNERStep,64
+drug,EPO,keep,ExplosionNERStep,63
+drug,Gold,keep,ExplosionNERStep,63
+drug,honey,keep,ExplosionNERStep,62
+drug,Parathyroid Hormone,keep,ExplosionNERStep,62
+drug,cocoa,keep,ExplosionNERStep,62
+drug,Hepatocyte growth factor,keep,ExplosionNERStep,61
+drug,Nerve growth factor,keep,ExplosionNERStep,61
+drug,tocopherol,keep,ExplosionNERStep,61
+drug,Vehicle,drop,ExplosionNERStep,60
+drug,naphthalene,keep,ExplosionNERStep,60
+drug,IMPACT,drop,ExplosionNERStep,59
+drug,L-NAME,keep,ExplosionNERStep,59
+drug,cyanide,keep,ExplosionNERStep,59
+drug,hexane,keep,ExplosionNERStep,59
+drug,Resolvin E1,keep,ExplosionNERStep,59
+drug,homoserine lactone,keep,ExplosionNERStep,58
+drug,Ghrelin,keep,ExplosionNERStep,58
+drug,NAD,keep,ExplosionNERStep,58
+drug,methionine,keep,ExplosionNERStep,57
+drug,galactose,keep,ExplosionNERStep,56
+drug,PDB,drop,ExplosionNERStep,55
+drug,imidazole,keep,ExplosionNERStep,55
+drug,Pyruvate,keep,ExplosionNERStep,55
+drug,DMSO,keep,ExplosionNERStep,55
+drug,tartrate,keep,ExplosionNERStep,55
+drug,pyrimethamine,keep,ExplosionNERStep,54
+drug,trimethoprim,keep,ExplosionNERStep,54
+drug,syrup,keep,ExplosionNERStep,54
+drug,good health,drop,ExplosionNERStep,53
+drug,uridine,keep,ExplosionNERStep,53
+drug,glycerol,keep,ExplosionNERStep,52
+drug,Copper,keep,ExplosionNERStep,51
+drug,isotonic,keep,ExplosionNERStep,51
+drug,Superoxide dismutase,keep,ExplosionNERStep,50
+drug,Saline,keep,ExplosionNERStep,50
+drug,Aloe,keep,ExplosionNERStep,49
+drug,sulfamethoxazole,keep,ExplosionNERStep,49
+drug,Serine,keep,ExplosionNERStep,49
+drug,Alanine,keep,ExplosionNERStep,49
+drug,cannabinoids,keep,ExplosionNERStep,48
+drug,Thrombin,keep,ExplosionNERStep,48
+drug,Salt,keep,ExplosionNERStep,48
+drug,SARS-CoV,keep,ExplosionNERStep,48
+drug,Epidermal Growth Factor,keep,ExplosionNERStep,48
+drug,Carbon monoxide,keep,ExplosionNERStep,47
+drug,DOTA,keep,ExplosionNERStep,47
+drug,GTP,keep,ExplosionNERStep,47
+drug,tazobactam,keep,ExplosionNERStep,47
+drug,cytosine,keep,ExplosionNERStep,47
+drug,lithium,keep,ExplosionNERStep,47
+drug,Alliance,drop,ExplosionNERStep,46
+drug,antimony,keep,ExplosionNERStep,46
+drug,clozapine,keep,ExplosionNERStep,46
+drug,pertussis vaccine,keep,ExplosionNERStep,46
+drug,Platelets,drop,ExplosionNERStep,45
+drug,Nicotinamide,keep,ExplosionNERStep,45
+drug,Bifidobacteria,keep,ExplosionNERStep,45
+drug,gonadotropin releasing hormone,keep,ExplosionNERStep,45
+drug,charcoal,keep,ExplosionNERStep,44
+drug,peptide A,keep,ExplosionNERStep,44
+drug,Arginine,keep,ExplosionNERStep,44
+drug,UDP,keep,ExplosionNERStep,44
+drug,avidin,keep,ExplosionNERStep,43
+drug,201Tl,keep,ExplosionNERStep,43
+drug,nitrate,keep,ExplosionNERStep,43
+drug,Calcitonin,keep,ExplosionNERStep,43
+drug,Cysteine,keep,ExplosionNERStep,42
+drug,HMG,keep,ExplosionNERStep,41
+drug,Surg,keep,ExplosionNERStep,41
+drug,neprilysin,keep,ExplosionNERStep,41
+drug,DTPA,keep,ExplosionNERStep,41
+drug,endostatin,keep,ExplosionNERStep,41
+drug,thank,drop,ExplosionNERStep,40
+drug,OCT,drop,ExplosionNERStep,40
+drug,omega-3 fatty acids,keep,ExplosionNERStep,40
+drug,longum,keep,ExplosionNERStep,40
+drug,lime,keep,ExplosionNERStep,40
+drug,L-arginine,keep,ExplosionNERStep,39
+drug,Vitamin A,keep,ExplosionNERStep,39
+drug,Fibrinogen,keep,ExplosionNERStep,39
+drug,MRA,keep,ExplosionNERStep,39
+drug,pyridine,keep,ExplosionNERStep,39
+drug,camp,drop,ExplosionNERStep,38
+drug,alliance,drop,ExplosionNERStep,38
+drug,legend,drop,ExplosionNERStep,38
+drug,balanced salt,keep,ExplosionNERStep,38
+drug,Angiotensin,keep,ExplosionNERStep,38
+drug,coumarin,keep,ExplosionNERStep,38
+drug,ciliary neurotrophic factor,keep,ExplosionNERStep,38
+drug,linolenic acid,keep,ExplosionNERStep,38
+drug,benzoate,keep,ExplosionNERStep,38
+drug,Lysine,keep,ExplosionNERStep,37
+drug,Nicotinamide adenine dinucleotide,keep,ExplosionNERStep,37
+drug,Ringer's,drop,ExplosionNERStep,36
+drug,Paraffin,keep,ExplosionNERStep,36
+drug,fluorouracil,keep,ExplosionNERStep,36
+drug,CSF-1,keep,ExplosionNERStep,36
+drug,Potassium,keep,ExplosionNERStep,36
+drug,Thymidine,keep,ExplosionNERStep,36
+drug,palmitoyl,keep,ExplosionNERStep,36
+drug,Acetylcholine,keep,ExplosionNERStep,36
+drug,follicle stimulating hormone,keep,ExplosionNERStep,36
+drug,Phillips,drop,ExplosionNERStep,35
+drug,Inc.,drop,ExplosionNERStep,35
+drug,sea water,keep,ExplosionNERStep,35
+drug,glucosamine,keep,ExplosionNERStep,35
+drug,Dextran,keep,ExplosionNERStep,35
+drug,Optimum,keep,ExplosionNERStep,35
+drug,diamine,keep,ExplosionNERStep,35
+drug,caryophyllene,keep,ExplosionNERStep,35
+drug,triamcinolone,keep,ExplosionNERStep,34
+drug,oestrogen,keep,ExplosionNERStep,34
+drug,Luminal,keep,ExplosionNERStep,34
+drug,proinsulin,keep,ExplosionNERStep,34
+drug,Atrial natriuretic peptide,keep,ExplosionNERStep,34
+drug,Sucrose,keep,ExplosionNERStep,33
+drug,Lipase,keep,ExplosionNERStep,33
+drug,Hydrogen,keep,ExplosionNERStep,33
+drug,calcium carbonate,keep,ExplosionNERStep,33
+drug,Platinum,keep,ExplosionNERStep,33
+drug,WATER,keep,ExplosionNERStep,33
+drug,interleukin-10,drop,ExplosionNERStep,32
+drug,cis-diamminedichloroplatinum (II),keep,ExplosionNERStep,32
+drug,INSULIN,keep,ExplosionNERStep,32
+drug,NADP,keep,ExplosionNERStep,32
+drug,l-1,keep,ExplosionNERStep,32
+drug,GLP-1,keep,ExplosionNERStep,32
+drug,Integrin,keep,ExplosionNERStep,32
+drug,Preference,keep,ExplosionNERStep,32
+drug,aldosterone,keep,ExplosionNERStep,32
+drug,hepatitis B vaccine,keep,ExplosionNERStep,32
+drug,quest,drop,ExplosionNERStep,31
+drug,cresol,keep,ExplosionNERStep,31
+drug,Echinacea,keep,ExplosionNERStep,31
+drug,Eosin,keep,ExplosionNERStep,31
+drug,mannose,keep,ExplosionNERStep,31
+drug,DDT,keep,ExplosionNERStep,31
+drug,Quest,drop,ExplosionNERStep,30
+drug,Starch,drop,ExplosionNERStep,30
+drug,epoch,drop,ExplosionNERStep,30
+drug,PDX,keep,ExplosionNERStep,30
+drug,cellulase,keep,ExplosionNERStep,30
+drug,Interleukin-7,keep,ExplosionNERStep,30
+drug,theanine,keep,ExplosionNERStep,30
+drug,Methylguanine,keep,ExplosionNERStep,30
+drug,pertechnetate,keep,ExplosionNERStep,30
+drug,clomiphene citrate,keep,ExplosionNERStep,30
+drug,aspartic acid,keep,ExplosionNERStep,29
+drug,acridine,keep,ExplosionNERStep,29
+drug,minnelide,keep,ExplosionNERStep,29
+drug,prostaglandin E1,keep,ExplosionNERStep,29
+drug,carnitine,keep,ExplosionNERStep,29
+drug,L-theanine,keep,ExplosionNERStep,29
+drug,epoetin,keep,ExplosionNERStep,29
+drug,atorvastatin calcium,keep,ExplosionNERStep,28
+drug,phosphocreatine,keep,ExplosionNERStep,28
+drug,5-FU,keep,ExplosionNERStep,28
+drug,carboplatin,keep,ExplosionNERStep,28
+drug,Intrinsic Factor,keep,ExplosionNERStep,28
+drug,AZT,keep,ExplosionNERStep,28
+drug,thymosin,keep,ExplosionNERStep,28
+drug,glucagon-like peptide 1,keep,ExplosionNERStep,28
+drug,zeaxanthin,keep,ExplosionNERStep,28
+drug,lactate,keep,ExplosionNERStep,28
+drug,nicotinamide adenine dinucleotide,keep,ExplosionNERStep,28
+drug,deoxyglucose,keep,ExplosionNERStep,28
+drug,EPOCH,drop,ExplosionNERStep,27
+drug,deoxyuridine,keep,ExplosionNERStep,27
+drug,estrone,keep,ExplosionNERStep,27
+drug,L-cysteine,keep,ExplosionNERStep,27
+drug,commit,keep,ExplosionNERStep,27
+drug,Norepinephrine,keep,ExplosionNERStep,27
+drug,Fluorescein,keep,ExplosionNERStep,27
+drug,E200,keep,ExplosionNERStep,27
+drug,Vasoactive intestinal peptide,keep,ExplosionNERStep,27
+drug,interleukin-3,drop,ExplosionNERStep,26
+drug,momentum,drop,ExplosionNERStep,26
+drug,pyrrolidine,keep,ExplosionNERStep,26
+drug,fentanyl,keep,ExplosionNERStep,26
+drug,styrene,keep,ExplosionNERStep,26
+drug,MDP,keep,ExplosionNERStep,26
+drug,RelA,keep,ExplosionNERStep,26
+drug,CD40 ligand,keep,ExplosionNERStep,26
+drug,phenol,keep,ExplosionNERStep,26
+drug,avert,drop,ExplosionNERStep,25
+drug,Fluoride,keep,ExplosionNERStep,25
+drug,Thyroxine,keep,ExplosionNERStep,25
+drug,isoxazole,keep,ExplosionNERStep,25
+drug,5-HT,keep,ExplosionNERStep,25
+drug,hyaluronate,keep,ExplosionNERStep,25
+drug,Indole,keep,ExplosionNERStep,25
+drug,lactic acid,keep,ExplosionNERStep,25
+drug,iodine,keep,ExplosionNERStep,25
+drug,beta-2,drop,ExplosionNERStep,24
+drug,Plasminogen,keep,ExplosionNERStep,24
+drug,BPN,keep,ExplosionNERStep,24
+drug,botulinum neurotoxin,keep,ExplosionNERStep,24
+drug,ATB-346,keep,ExplosionNERStep,24
+drug,sitosterol,keep,ExplosionNERStep,24
+drug,glycine,keep,ExplosionNERStep,24
+drug,TCC,keep,ExplosionNERStep,24
+drug,Apelin,keep,ExplosionNERStep,24
+drug,Sulfur,keep,ExplosionNERStep,24
+drug,cytochrome C,keep,ExplosionNERStep,23
+drug,nitroanilide,keep,ExplosionNERStep,23
+drug,Urea,keep,ExplosionNERStep,23
+drug,Lambda,keep,ExplosionNERStep,23
+drug,"ICI 182,780",keep,ExplosionNERStep,23
+drug,imatinib mesylate,keep,ExplosionNERStep,23
+drug,GLUCOSE,keep,ExplosionNERStep,23
+drug,Interleukin-10,drop,ExplosionNERStep,22
+drug,docosahexaenoic acid,keep,ExplosionNERStep,22
+drug,Inositol,keep,ExplosionNERStep,22
+drug,Rhodamine,keep,ExplosionNERStep,22
+drug,BAFF,keep,ExplosionNERStep,22
+drug,DOCA,keep,ExplosionNERStep,22
+drug,UTP,keep,ExplosionNERStep,22
+drug,VP-16,keep,ExplosionNERStep,22
+drug,apomorphine,keep,ExplosionNERStep,22
+drug,Deazaneplanocin A,keep,ExplosionNERStep,21
+drug,rhodamine,keep,ExplosionNERStep,21
+drug,N-acetylneuraminic acid,keep,ExplosionNERStep,21
+drug,E391,keep,ExplosionNERStep,21
+drug,pregnane,keep,ExplosionNERStep,21
+drug,Purine,keep,ExplosionNERStep,21
+drug,Sialic acid,keep,ExplosionNERStep,21
+drug,biguanide,keep,ExplosionNERStep,21
+drug,P53,drop,ExplosionNERStep,20
+drug,51Cr,drop,ExplosionNERStep,20
+drug,LAG-3,drop,ExplosionNERStep,20
+drug,Bordetella pertussis,keep,ExplosionNERStep,20
+drug,ritonavir,keep,ExplosionNERStep,20
+drug,butadiene,keep,ExplosionNERStep,20
+drug,fructose,keep,ExplosionNERStep,20
+drug,glycolic acid,keep,ExplosionNERStep,20
+drug,thiourea,keep,ExplosionNERStep,20
+drug,Cholecystokinin,keep,ExplosionNERStep,20
+drug,intrinsic factor,keep,ExplosionNERStep,20
+drug,borate,keep,ExplosionNERStep,20
+drug,phenylalanine,keep,ExplosionNERStep,20
+drug,Threonine,keep,ExplosionNERStep,19
+drug,Collagenase,keep,ExplosionNERStep,19
+drug,alpha 1-antitrypsin,keep,ExplosionNERStep,19
+drug,alpha-1-antitrypsin,keep,ExplosionNERStep,19
+drug,Acridine,keep,ExplosionNERStep,19
+drug,thyrotropin,keep,ExplosionNERStep,19
+drug,Guanine,keep,ExplosionNERStep,19
+drug,ALCOHOL,keep,ExplosionNERStep,19
+drug,piperacillin,keep,ExplosionNERStep,19
+drug,MDMA,keep,ExplosionNERStep,19
+drug,Ginkgo,keep,ExplosionNERStep,19
+drug,Bilirubin,keep,ExplosionNERStep,19
+drug,Hypericum,keep,ExplosionNERStep,19
+drug,cisplatin,keep,ExplosionNERStep,19
+drug,pyrazine,keep,ExplosionNERStep,19
+drug,Epigallocatechin,keep,ExplosionNERStep,19
+drug,TALc,keep,ExplosionNERStep,19
+drug,Richmond,drop,ExplosionNERStep,18
+drug,OKT3,keep,ExplosionNERStep,18
+drug,OXYGEN,keep,ExplosionNERStep,18
+drug,sodium pentobarbital,keep,ExplosionNERStep,18
+drug,Gallate,keep,ExplosionNERStep,18
+drug,streptomycin,keep,ExplosionNERStep,18
+drug,IPM,keep,ExplosionNERStep,18
+drug,Ozone,keep,ExplosionNERStep,18
+drug,kisspeptin,keep,ExplosionNERStep,18
+drug,67Ga,keep,ExplosionNERStep,18
+drug,Rhodamine B,keep,ExplosionNERStep,18
+drug,dTTP,keep,ExplosionNERStep,18
+drug,soy isoflavones,keep,ExplosionNERStep,18
+drug,decorin,keep,ExplosionNERStep,18
+drug,EGb 761,keep,ExplosionNERStep,18
+drug,Gadolinium,keep,ExplosionNERStep,18
+drug,Carbon dioxide,keep,ExplosionNERStep,18
+drug,aloe,keep,ExplosionNERStep,18
+drug,Homocysteine,keep,ExplosionNERStep,18
+drug,povidone,keep,ExplosionNERStep,18
+drug,HbsAg,keep,ExplosionNERStep,17
+drug,carvone,keep,ExplosionNERStep,17
+drug,Superoxide Dismutase,keep,ExplosionNERStep,17
+drug,L-methionine,keep,ExplosionNERStep,17
+drug,Cardiovasc,keep,ExplosionNERStep,17
+drug,chlorhexidine gluconate,keep,ExplosionNERStep,17
+drug,silicate,keep,ExplosionNERStep,17
+drug,Cannabinoids,keep,ExplosionNERStep,17
+drug,insulin-like growth factor I,drop,ExplosionNERStep,16
+drug,quality health,drop,ExplosionNERStep,16
+drug,Dundee,drop,ExplosionNERStep,16
+drug,Apomorphine,keep,ExplosionNERStep,16
+drug,radium,keep,ExplosionNERStep,16
+drug,isosorbide,keep,ExplosionNERStep,16
+drug,pyridoxal,keep,ExplosionNERStep,16
+drug,Sacituzumab,keep,ExplosionNERStep,16
+drug,Allium sativum,keep,ExplosionNERStep,16
+drug,PAC-1,keep,ExplosionNERStep,16
+drug,BENZODIAZEPINE,keep,ExplosionNERStep,16
+drug,Andrews,keep,ExplosionNERStep,16
+drug,Depo,keep,ExplosionNERStep,16
+drug,Proline,keep,ExplosionNERStep,16
+drug,PS-341,keep,ExplosionNERStep,16
+drug,Occlusal,keep,ExplosionNERStep,16
+drug,nedaplatin,keep,ExplosionNERStep,16
+drug,VP16,keep,ExplosionNERStep,16
+drug,THYROID,drop,ExplosionNERStep,15
+drug,nostril,drop,ExplosionNERStep,15
+drug,Von Willebrand factor,keep,ExplosionNERStep,15
+drug,APAP,keep,ExplosionNERStep,15
+drug,IDU,keep,ExplosionNERStep,15
+drug,amoxicillin,keep,ExplosionNERStep,15
+drug,teicoplanin,keep,ExplosionNERStep,15
+drug,puromycin,keep,ExplosionNERStep,15
+drug,Isothiocyanate,keep,ExplosionNERStep,15
+drug,indigo,keep,ExplosionNERStep,15
+drug,Zingiber officinale,keep,ExplosionNERStep,15
+drug,D-aspartic acid,keep,ExplosionNERStep,15
+drug,pentobarbital sodium,keep,ExplosionNERStep,15
+drug,butanol,keep,ExplosionNERStep,15
+drug,alisol B,keep,ExplosionNERStep,15
+drug,Cox-2,drop,ExplosionNERStep,14
+drug,glutathione,keep,ExplosionNERStep,14
+drug,Endostatin,keep,ExplosionNERStep,14
+drug,Benzene,keep,ExplosionNERStep,14
+drug,NAD+,keep,ExplosionNERStep,14
+drug,yttrium,keep,ExplosionNERStep,14
+drug,fluoromisonidazole,keep,ExplosionNERStep,14
+drug,isothiocyanate,keep,ExplosionNERStep,14
+drug,Agar,keep,ExplosionNERStep,14
+drug,sodium salt,keep,ExplosionNERStep,14
+drug,Theobroma cacao,keep,ExplosionNERStep,14
+drug,botulinum toxin,keep,ExplosionNERStep,14
+drug,Barium,keep,ExplosionNERStep,14
+drug,technetium,keep,ExplosionNERStep,14
+drug,soma,keep,ExplosionNERStep,14
+drug,enkephalin,keep,ExplosionNERStep,14
+drug,Histidine,keep,ExplosionNERStep,14
+drug,amylopectin,keep,ExplosionNERStep,14
+drug,PGE1,keep,ExplosionNERStep,14
+drug,Phorbol,keep,ExplosionNERStep,14
+drug,dextrose,keep,ExplosionNERStep,14
+drug,propanol,keep,ExplosionNERStep,14
+drug,Amino Acids,keep,ExplosionNERStep,14
+drug,uridine diphosphate,keep,ExplosionNERStep,14
+drug,TARGET,drop,ExplosionNERStep,13
+drug,PARP-1,drop,ExplosionNERStep,13
+drug,naphthoquinone,keep,ExplosionNERStep,13
+drug,eicosapentaenoic acid,keep,ExplosionNERStep,13
+drug,tazemetostat,keep,ExplosionNERStep,13
+drug,curcuminoids,keep,ExplosionNERStep,13
+drug,Chloroform,keep,ExplosionNERStep,13
+drug,sulbactam,keep,ExplosionNERStep,13
+drug,prelude,keep,ExplosionNERStep,13
+drug,anhydrous,keep,ExplosionNERStep,13
+drug,sofosbuvir,keep,ExplosionNERStep,13
+drug,DAC,keep,ExplosionNERStep,13
+drug,DHEA,keep,ExplosionNERStep,13
+drug,dehydroepiandrosterone,keep,ExplosionNERStep,13
+drug,RETINAL,keep,ExplosionNERStep,13
+drug,Y-27632,keep,ExplosionNERStep,13
+drug,methane,keep,ExplosionNERStep,13
+drug,Magnesium,keep,ExplosionNERStep,13
+drug,rhein,keep,ExplosionNERStep,13
+drug,Imatinib Mesylate,keep,ExplosionNERStep,13
+drug,ether,keep,ExplosionNERStep,13
+drug,Epoetin,keep,ExplosionNERStep,13
+drug,Elastase,keep,ExplosionNERStep,13
+drug,pyrene,keep,ExplosionNERStep,13
+drug,Biotin,keep,ExplosionNERStep,13
+drug,Beta-2,keep,ExplosionNERStep,13
+drug,Bicarbonate,keep,ExplosionNERStep,13
+drug,Estradiol,keep,ExplosionNERStep,13
+drug,talc,keep,ExplosionNERStep,13
+drug,tarloxotinib,keep,ExplosionNERStep,13
+drug,lovastatin,keep,ExplosionNERStep,13
+drug,Ciliary neurotrophic factor,keep,ExplosionNERStep,13
+drug,Same,drop,ExplosionNERStep,12
+drug,SAME,drop,ExplosionNERStep,12
+drug,urate oxidase,keep,ExplosionNERStep,12
+drug,Thymosin,keep,ExplosionNERStep,12
+drug,sodium sulfate,keep,ExplosionNERStep,12
+drug,oleoyl,keep,ExplosionNERStep,12
+drug,deoxycholate,keep,ExplosionNERStep,12
+drug,cyclic AMP,keep,ExplosionNERStep,12
+drug,acetylcysteine,keep,ExplosionNERStep,12
+drug,Chlorhexidine Gluconate,keep,ExplosionNERStep,12
+drug,catechin,keep,ExplosionNERStep,12
+drug,Myeloperoxidase,keep,ExplosionNERStep,12
+drug,Aspartame,keep,ExplosionNERStep,12
+drug,nandrolone,keep,ExplosionNERStep,12
+drug,GOLD,keep,ExplosionNERStep,12
+drug,cedazuridine,keep,ExplosionNERStep,12
+drug,bas,keep,ExplosionNERStep,12
+drug,R-848,keep,ExplosionNERStep,12
+drug,Fibrin,keep,ExplosionNERStep,12
+drug,Hypericum perforatum,keep,ExplosionNERStep,12
+drug,OX40L,keep,ExplosionNERStep,12
+drug,cyanoacrylate,keep,ExplosionNERStep,12
+drug,icariin,keep,ExplosionNERStep,12
+drug,methicillin,keep,ExplosionNERStep,12
+drug,NY-ESO-1,keep,ExplosionNERStep,12
+drug,Bromide,keep,ExplosionNERStep,12
+drug,prednisolone,keep,ExplosionNERStep,12
+drug,tenofovir disoproxil fumarate,keep,ExplosionNERStep,12
+drug,tenofovir,keep,ExplosionNERStep,12
+drug,TACE,keep,ExplosionNERStep,12
+drug,pre-op,drop,ExplosionNERStep,11
+drug,NATURE,drop,ExplosionNERStep,11
+drug,Benzodiazepine,keep,ExplosionNERStep,11
+drug,von Willebrand Factor,keep,ExplosionNERStep,11
+drug,Coumarin,keep,ExplosionNERStep,11
+drug,pegvaliase,keep,ExplosionNERStep,11
+drug,cis-diamminedichloroplatinum(II),keep,ExplosionNERStep,11
+drug,Heparin,keep,ExplosionNERStep,11
+drug,ondansetron hydrochloride,keep,ExplosionNERStep,11
+drug,olmesartan,keep,ExplosionNERStep,11
+drug,Amino acids,keep,ExplosionNERStep,11
+drug,Interleukin 2,keep,ExplosionNERStep,11
+drug,DAP,keep,ExplosionNERStep,11
+drug,protease 1,keep,ExplosionNERStep,11
+drug,dinitrochlorobenzene,keep,ExplosionNERStep,11
+drug,protoporphyrin,keep,ExplosionNERStep,11
+drug,aminocaproic,keep,ExplosionNERStep,11
+drug,emend,keep,ExplosionNERStep,11
+drug,salicylic acid,keep,ExplosionNERStep,11
+drug,Cesium,keep,ExplosionNERStep,11
+drug,Balanced Salt,keep,ExplosionNERStep,11
+drug,artesunate,keep,ExplosionNERStep,11
+drug,benzalkonium chloride,keep,ExplosionNERStep,11
+drug,tetrahydrofolate,keep,ExplosionNERStep,11
+drug,Hydrogen peroxide,keep,ExplosionNERStep,11
+drug,tetrahydrouridine,keep,ExplosionNERStep,11
+drug,Creatinine,keep,ExplosionNERStep,11
+drug,CALCIUM,keep,ExplosionNERStep,11
+drug,Gelatin,keep,ExplosionNERStep,11
+drug,amphetamine,keep,ExplosionNERStep,11
+drug,fluticasone,keep,ExplosionNERStep,11
+drug,EGb-761,keep,ExplosionNERStep,11
+drug,soluble epoxide hydrolase,keep,ExplosionNERStep,11
+drug,L-lactic acid,keep,ExplosionNERStep,11
+drug,sildenafil citrate,keep,ExplosionNERStep,11
+drug,menaquinone,keep,ExplosionNERStep,11
+drug,PX-478,keep,ExplosionNERStep,11
+drug,glucose injection,keep,ExplosionNERStep,11
+drug,gentamicin,keep,ExplosionNERStep,11
+drug,acidic fibroblast growth factor,keep,ExplosionNERStep,11
+drug,SEARCH,drop,ExplosionNERStep,10
+drug,paliperidone,keep,ExplosionNERStep,10
+drug,NITROGEN,keep,ExplosionNERStep,10
+drug,tromethamine,keep,ExplosionNERStep,10
+drug,tissue kallikrein,keep,ExplosionNERStep,10
+drug,hydrocortisone,keep,ExplosionNERStep,10
+drug,strontium,keep,ExplosionNERStep,10
+drug,Carbon Dioxide,keep,ExplosionNERStep,10
+drug,hygromycin,keep,ExplosionNERStep,10
+drug,ampicillin,keep,ExplosionNERStep,10
+drug,VX15/2503,keep,ExplosionNERStep,10
+drug,Nerve Growth Factor,keep,ExplosionNERStep,10
+drug,cesium,keep,ExplosionNERStep,10
+drug,clavulanic acid,keep,ExplosionNERStep,10
+drug,sodium thiosulfate,keep,ExplosionNERStep,10
+drug,alizarin red S,keep,ExplosionNERStep,10
+drug,dragonamide,keep,ExplosionNERStep,10
+drug,phosphocholine,keep,ExplosionNERStep,10
+drug,androstane,keep,ExplosionNERStep,10
+drug,clindamycin,keep,ExplosionNERStep,10
+drug,RELA,keep,ExplosionNERStep,10
+drug,Certolizumab,keep,ExplosionNERStep,10
+drug,Styrene,keep,ExplosionNERStep,10
+drug,sodium hydroxide,keep,ExplosionNERStep,10
+drug,VX15,keep,ExplosionNERStep,10
+drug,erythromycin,keep,ExplosionNERStep,10
+drug,LCZ696,keep,ExplosionNERStep,10
+drug,Bendavia,keep,ExplosionNERStep,10
+drug,ornithine,keep,ExplosionNERStep,10
+drug,DEC,keep,ExplosionNERStep,10
+drug,ANTIBIOTIC,keep,ExplosionNERStep,10
+drug,Bifidobacterium spp.,keep,ExplosionNERStep,10
+drug,epigallocatechin,keep,ExplosionNERStep,10
+drug,Radium,keep,ExplosionNERStep,10
+drug,Corticosterone,keep,ExplosionNERStep,10
+drug,POTASSIUM,keep,ExplosionNERStep,10
+drug,N-acetylglucosamine,keep,ExplosionNERStep,10
+drug,Fresenius,keep,ExplosionNERStep,10
+drug,versed,keep,ExplosionNERStep,10
+drug,mercaptopurine,keep,ExplosionNERStep,10
+drug,Phospholipids,keep,ExplosionNERStep,10
+drug,NADP+,keep,ExplosionNERStep,10
+drug,Prostaglandin E1,keep,ExplosionNERStep,10
+drug,Thank,drop,ExplosionNERStep,9
+drug,sodium hyaluronate,keep,ExplosionNERStep,9
+drug,lactose,keep,ExplosionNERStep,9
+drug,2-deoxy-D-glucose,keep,ExplosionNERStep,9
+drug,vitamin K,keep,ExplosionNERStep,9
+drug,propionic acid,keep,ExplosionNERStep,9
+drug,metoprolol tartrate,keep,ExplosionNERStep,9
+drug,Galactosidase,keep,ExplosionNERStep,9
+drug,carmine,keep,ExplosionNERStep,9
+drug,GBT440,keep,ExplosionNERStep,9
+drug,ZGN-440,keep,ExplosionNERStep,9
+drug,terpineol,keep,ExplosionNERStep,9
+drug,Follicle stimulating hormone,keep,ExplosionNERStep,9
+drug,silver diamine fluoride,keep,ExplosionNERStep,9
+drug,parathion,keep,ExplosionNERStep,9
+drug,parecoxib sodium,keep,ExplosionNERStep,9
+drug,Adenine,keep,ExplosionNERStep,9
+drug,Flavonoid,keep,ExplosionNERStep,9
+drug,Tocotrienol,keep,ExplosionNERStep,9
+drug,retinoic acid,keep,ExplosionNERStep,9
+drug,bromopyruvate,keep,ExplosionNERStep,9
+drug,CD137,keep,ExplosionNERStep,9
+drug,kanamycin,keep,ExplosionNERStep,9
+drug,Carbon Monoxide,keep,ExplosionNERStep,9
+drug,Morin,keep,ExplosionNERStep,9
+drug,CAMP,keep,ExplosionNERStep,9
+drug,butorphanol tartrate,keep,ExplosionNERStep,9
+drug,hydroxyprogesterone,keep,ExplosionNERStep,9
+drug,Amylase,keep,ExplosionNERStep,9
+drug,tocopheryl acetate,keep,ExplosionNERStep,9
+drug,catechin Gallate,keep,ExplosionNERStep,9
+drug,belladonna,keep,ExplosionNERStep,9
+drug,neomycin,keep,ExplosionNERStep,9
+drug,tetrofosmin,keep,ExplosionNERStep,9
+drug,Propidium,keep,ExplosionNERStep,9
+drug,caustic,keep,ExplosionNERStep,9
+drug,ioxaglate,keep,ExplosionNERStep,9
+drug,cortisone,keep,ExplosionNERStep,9
+drug,ginkgo,keep,ExplosionNERStep,9
+drug,meglumine,keep,ExplosionNERStep,9
+drug,B72.3,keep,ExplosionNERStep,9
+drug,Saline Solution,keep,ExplosionNERStep,9
+drug,tryptophan,keep,ExplosionNERStep,9
+drug,Peel,drop,ExplosionNERStep,8
+drug,Orion,drop,ExplosionNERStep,8
+drug,Indigo,keep,ExplosionNERStep,8
+drug,potassium phosphate,keep,ExplosionNERStep,8
+drug,ketorolac tromethamine,keep,ExplosionNERStep,8
+drug,Hepatitis B vaccine,keep,ExplosionNERStep,8
+drug,Sphingosine,keep,ExplosionNERStep,8
+drug,Bas,keep,ExplosionNERStep,8
+drug,Ozogamicin,keep,ExplosionNERStep,8
+drug,CBD,keep,ExplosionNERStep,8
+drug,CC49,keep,ExplosionNERStep,8
+drug,Belladonna,keep,ExplosionNERStep,8
+drug,D-Aspartate,keep,ExplosionNERStep,8
+drug,dexamethasone,keep,ExplosionNERStep,8
+drug,ASTX660,keep,ExplosionNERStep,8
+drug,D-alanine,keep,ExplosionNERStep,8
+drug,PGx,keep,ExplosionNERStep,8
+drug,thiouracil,keep,ExplosionNERStep,8
+drug,methylcellulose,keep,ExplosionNERStep,8
+drug,PARATHYROID HORMONE,keep,ExplosionNERStep,8
+drug,clavulanate,keep,ExplosionNERStep,8
+drug,carbidopa,keep,ExplosionNERStep,8
+drug,inosine,keep,ExplosionNERStep,8
+drug,trypsin,keep,ExplosionNERStep,8
+drug,sodium selenite,keep,ExplosionNERStep,8
+drug,calcium carbimide,keep,ExplosionNERStep,8
+drug,carbogen,keep,ExplosionNERStep,8
+drug,Dopamine,keep,ExplosionNERStep,8
+drug,EMLA,keep,ExplosionNERStep,8
+drug,sodium orthovanadate,keep,ExplosionNERStep,8
+drug,Leu-Leu,keep,ExplosionNERStep,8
+drug,pyrrole,keep,ExplosionNERStep,8
+drug,Carbonyl cyanide,keep,ExplosionNERStep,8
+drug,MPO,keep,ExplosionNERStep,8
+drug,Cantor,keep,ExplosionNERStep,8
+drug,glutamine,keep,ExplosionNERStep,8
+drug,Dimethyl sulfoxide,keep,ExplosionNERStep,8
+drug,UREA,keep,ExplosionNERStep,8
+drug,creatine,keep,ExplosionNERStep,8
+drug,somatostatin analogue,keep,ExplosionNERStep,8
+drug,aflatoxin B1,keep,ExplosionNERStep,8
+drug,n-Butylphthalide,keep,ExplosionNERStep,8
+drug,Saroglitazar,keep,ExplosionNERStep,8
+drug,rhodopsin,keep,ExplosionNERStep,8
+drug,Cocoa,keep,ExplosionNERStep,8
+drug,Toluene,keep,ExplosionNERStep,8
+drug,DPN,keep,ExplosionNERStep,8
+drug,baloxavir,keep,ExplosionNERStep,8
+drug,aminoquinoline,keep,ExplosionNERStep,8
+drug,OMDS,keep,ExplosionNERStep,8
+drug,nitrosoguanidine,keep,ExplosionNERStep,8
+drug,QS21,keep,ExplosionNERStep,8
+drug,LMCA,keep,ExplosionNERStep,8
+drug,paracetamol,keep,ExplosionNERStep,8
+drug,L-alanine,keep,ExplosionNERStep,8
+drug,L-NMMA,keep,ExplosionNERStep,8
+drug,Stop,drop,ExplosionNERStep,7
+drug,Legend,drop,ExplosionNERStep,7
+drug,Ringer’s,drop,ExplosionNERStep,7
+drug,Propolis,keep,ExplosionNERStep,7
+drug,AL101,keep,ExplosionNERStep,7
+drug,creosote,keep,ExplosionNERStep,7
+drug,triptan,keep,ExplosionNERStep,7
+drug,levamlodipine,keep,ExplosionNERStep,7
+drug,Pyrrolidine,keep,ExplosionNERStep,7
+drug,sulphamethoxazole,keep,ExplosionNERStep,7
+drug,sulfur compounds,keep,ExplosionNERStep,7
+drug,dichromate,keep,ExplosionNERStep,7
+drug,ET 1,keep,ExplosionNERStep,7
+drug,berberine hydrochloride,keep,ExplosionNERStep,7
+drug,triiodothyronine,keep,ExplosionNERStep,7
+drug,cytidine,keep,ExplosionNERStep,7
+drug,RTx,keep,ExplosionNERStep,7
+drug,dabigatran,keep,ExplosionNERStep,7
+drug,benzethonium chloride,keep,ExplosionNERStep,7
+drug,chlorpyrifos,keep,ExplosionNERStep,7
+drug,tamoxifen citrate,keep,ExplosionNERStep,7
+drug,DCA,keep,ExplosionNERStep,7
+drug,tamoxifen,keep,ExplosionNERStep,7
+drug,polydimethylsiloxane,keep,ExplosionNERStep,7
+drug,mannitol,keep,ExplosionNERStep,7
+drug,fluazifop,keep,ExplosionNERStep,7
+drug,MURINE,keep,ExplosionNERStep,7
+drug,Kisspeptin,keep,ExplosionNERStep,7
+drug,naproxen sodium,keep,ExplosionNERStep,7
+drug,cloprostenol,keep,ExplosionNERStep,7
+drug,fludeoxyglucose,keep,ExplosionNERStep,7
+drug,SIGMA,keep,ExplosionNERStep,7
+drug,ONC201,keep,ExplosionNERStep,7
+drug,ketamine,keep,ExplosionNERStep,7
+drug,Isoprinosine,keep,ExplosionNERStep,7
+drug,COPPER,keep,ExplosionNERStep,7
+drug,almonertinib,keep,ExplosionNERStep,7
+drug,morphine sulfate,keep,ExplosionNERStep,7
+drug,BAs,keep,ExplosionNERStep,7
+drug,BCNU,keep,ExplosionNERStep,7
+drug,Aflatoxin B1,keep,ExplosionNERStep,7
+drug,tpi,keep,ExplosionNERStep,7
+drug,Cellulose,keep,ExplosionNERStep,7
+drug,sodium tetradecyl sulfate,keep,ExplosionNERStep,7
+drug,cisplatinum,keep,ExplosionNERStep,7
+drug,certolizumab,keep,ExplosionNERStep,7
+drug,BHT,keep,ExplosionNERStep,7
+drug,Alisol B,keep,ExplosionNERStep,7
+drug,alpha-tocopherol,keep,ExplosionNERStep,7
+drug,cetylpyridinium chloride,keep,ExplosionNERStep,7
+drug,alendronate sodium,keep,ExplosionNERStep,7
+drug,xanthophyll,keep,ExplosionNERStep,7
+drug,HR3,keep,ExplosionNERStep,7
+drug,THRIVE,keep,ExplosionNERStep,7
+drug,60Co,keep,ExplosionNERStep,7
+drug,caffeic acid,keep,ExplosionNERStep,7
+drug,CARBON,keep,ExplosionNERStep,7
+drug,HF10,keep,ExplosionNERStep,7
+drug,follitropin,keep,ExplosionNERStep,7
+drug,pivmecillinam,keep,ExplosionNERStep,7
+drug,Hypaque,keep,ExplosionNERStep,7
+drug,Methicillin,keep,ExplosionNERStep,7
+drug,fluoxetine,keep,ExplosionNERStep,7
+drug,Honey,keep,ExplosionNERStep,7
+drug,Camp,drop,ExplosionNERStep,6
+drug,VIP,drop,ExplosionNERStep,6
+drug,SSD,drop,ExplosionNERStep,6
+drug,patrol,drop,ExplosionNERStep,6
+drug,INTERFERON,drop,ExplosionNERStep,6
+drug,Epo,drop,ExplosionNERStep,6
+drug,merlin,drop,ExplosionNERStep,6
+drug,d4T,drop,ExplosionNERStep,6
+drug,guanidine hydrochloride,keep,ExplosionNERStep,6
+drug,ipratropium bromide,keep,ExplosionNERStep,6
+drug,R428,keep,ExplosionNERStep,6
+drug,recombinant activated factor VII,keep,ExplosionNERStep,6
+drug,butanone,keep,ExplosionNERStep,6
+drug,diclofenac sodium,keep,ExplosionNERStep,6
+drug,echinacea,keep,ExplosionNERStep,6
+drug,Reg1,keep,ExplosionNERStep,6
+drug,trastuzumab,keep,ExplosionNERStep,6
+drug,CEM-102,keep,ExplosionNERStep,6
+drug,betaine,keep,ExplosionNERStep,6
+drug,calyculin,keep,ExplosionNERStep,6
+drug,cromolyn sodium,keep,ExplosionNERStep,6
+drug,Cytochrome C,keep,ExplosionNERStep,6
+drug,tramadol,keep,ExplosionNERStep,6
+drug,timolol maleate,keep,ExplosionNERStep,6
+drug,botulinum toxin type A,keep,ExplosionNERStep,6
+drug,chloro-benzene,keep,ExplosionNERStep,6
+drug,penicillamine,keep,ExplosionNERStep,6
+drug,dermatan,keep,ExplosionNERStep,6
+drug,paclitaxel,keep,ExplosionNERStep,6
+drug,anacetrapib,keep,ExplosionNERStep,6
+drug,IPA,keep,ExplosionNERStep,6
+drug,phosphatidylcholine,keep,ExplosionNERStep,6
+drug,phosphatidylethanolamine,keep,ExplosionNERStep,6
+drug,Isosorbide,keep,ExplosionNERStep,6
+drug,aminosalicylic acid,keep,ExplosionNERStep,6
+drug,methylprednisolone acetate,keep,ExplosionNERStep,6
+drug,gastrin,keep,ExplosionNERStep,6
+drug,phenanthroline,keep,ExplosionNERStep,6
+drug,naphthol,keep,ExplosionNERStep,6
+drug,Methionine,keep,ExplosionNERStep,6
+drug,adriamycin,keep,ExplosionNERStep,6
+drug,novobiocin,keep,ExplosionNERStep,6
+drug,Matricaria recutita,keep,ExplosionNERStep,6
+drug,adefovir,keep,ExplosionNERStep,6
+drug,nicarbazin,keep,ExplosionNERStep,6
+drug,N-acetyl penicillamine,keep,ExplosionNERStep,6
+drug,flavin adenine dinucleotide,keep,ExplosionNERStep,6
+drug,ferulate,keep,ExplosionNERStep,6
+drug,Neut,keep,ExplosionNERStep,6
+drug,BAL,keep,ExplosionNERStep,6
+drug,castor oil,keep,ExplosionNERStep,6
+drug,pregnenolone,keep,ExplosionNERStep,6
+drug,Fludarabine,keep,ExplosionNERStep,6
+drug,azithromycin,keep,ExplosionNERStep,6
+drug,Botulinum neurotoxin,keep,ExplosionNERStep,6
+drug,Penicillin,keep,ExplosionNERStep,6
+drug,ultralente,keep,ExplosionNERStep,6
+drug,"14,18",keep,ExplosionNERStep,6
+drug,atropine,keep,ExplosionNERStep,6
+drug,Fibroblast growth factor-1,keep,ExplosionNERStep,6
+drug,progestin,keep,ExplosionNERStep,6
+drug,Betaine,keep,ExplosionNERStep,6
+drug,piperaquine,keep,ExplosionNERStep,6
+drug,polaprezinc,keep,ExplosionNERStep,6
+drug,mephedrone,keep,ExplosionNERStep,6
+drug,valacyclovir hydrochloride,keep,ExplosionNERStep,6
+drug,E7080,keep,ExplosionNERStep,6
+drug,EPOC,keep,ExplosionNERStep,6
+drug,glucomannan,keep,ExplosionNERStep,6
+drug,glacial acetic acid,keep,ExplosionNERStep,6
+drug,Glutamic acid,keep,ExplosionNERStep,6
+drug,Triamcinolone,keep,ExplosionNERStep,6
+drug,chloroquine,keep,ExplosionNERStep,6
+drug,Cofactor,drop,ExplosionNERStep,5
+drug,ROCHE,drop,ExplosionNERStep,5
+drug,Am80,drop,ExplosionNERStep,5
+drug,Atropa belladonna,keep,ExplosionNERStep,5
+drug,TESTOSTERONE,keep,ExplosionNERStep,5
+drug,CADMIUM,keep,ExplosionNERStep,5
+drug,Bepridil hydrochloride,keep,ExplosionNERStep,5
+drug,insulin degludec,keep,ExplosionNERStep,5
+drug,insulin aspart,keep,ExplosionNERStep,5
+drug,homoserine,keep,ExplosionNERStep,5
+drug,calcium phosphate,keep,ExplosionNERStep,5
+drug,Trimethoprim,keep,ExplosionNERStep,5
+drug,tetracycline,keep,ExplosionNERStep,5
+drug,human C-peptide,keep,ExplosionNERStep,5
+drug,Hydrogen Peroxide,keep,ExplosionNERStep,5
+drug,androstenol,keep,ExplosionNERStep,5
+drug,phosphatidyl serine,keep,ExplosionNERStep,5
+drug,gentamicin sulfate,keep,ExplosionNERStep,5
+drug,ammonia,keep,ExplosionNERStep,5
+drug,metronidazole,keep,ExplosionNERStep,5
+drug,Iodide,keep,ExplosionNERStep,5
+drug,ethyl pyruvate,keep,ExplosionNERStep,5
+drug,HYDROGEN,keep,ExplosionNERStep,5
+drug,gallium,keep,ExplosionNERStep,5
+drug,fluazifop-p,keep,ExplosionNERStep,5
+drug,MAP0004,keep,ExplosionNERStep,5
+drug,orcinol,keep,ExplosionNERStep,5
+drug,abecarnil,keep,ExplosionNERStep,5
+drug,MK-8591,keep,ExplosionNERStep,5
+drug,formoterol,keep,ExplosionNERStep,5
+drug,noradrenaline,keep,ExplosionNERStep,5
+drug,nedocromil sodium,keep,ExplosionNERStep,5
+drug,Mirin,keep,ExplosionNERStep,5
+drug,ferric gluconate,keep,ExplosionNERStep,5
+drug,alternariol,keep,ExplosionNERStep,5
+drug,alisol A,keep,ExplosionNERStep,5
+drug,morphine,keep,ExplosionNERStep,5
+drug,montmorillonite,keep,ExplosionNERStep,5
+drug,Neprilysin,keep,ExplosionNERStep,5
+drug,SALT,keep,ExplosionNERStep,5
+drug,sevelamer,keep,ExplosionNERStep,5
+drug,VITAMIN D,keep,ExplosionNERStep,5
+drug,Ribose,keep,ExplosionNERStep,5
+drug,Vasoactive Intestinal Peptide,keep,ExplosionNERStep,5
+drug,l-arginine,keep,ExplosionNERStep,5
+drug,doxorubicin,keep,ExplosionNERStep,5
+drug,Carmen,keep,ExplosionNERStep,5
+drug,STARCH,keep,ExplosionNERStep,5
+drug,Cefmetazole Sodium,keep,ExplosionNERStep,5
+drug,buprenorphine,keep,ExplosionNERStep,5
+drug,FMI,keep,ExplosionNERStep,5
+drug,FMISO,keep,ExplosionNERStep,5
+drug,propiolactone,keep,ExplosionNERStep,5
+drug,Povidone,keep,ExplosionNERStep,5
+drug,progesterone,keep,ExplosionNERStep,5
+drug,mangafodipir,keep,ExplosionNERStep,5
+drug,DT-3,keep,ExplosionNERStep,5
+drug,reno,keep,ExplosionNERStep,5
+drug,DMI,keep,ExplosionNERStep,5
+drug,lamivudine,keep,ExplosionNERStep,5
+drug,benzimidazole,keep,ExplosionNERStep,5
+drug,glutarate,keep,ExplosionNERStep,5
+drug,Endura,keep,ExplosionNERStep,5
+drug,Dotarem,keep,ExplosionNERStep,5
+drug,levofloxacin hydrochloride,keep,ExplosionNERStep,5
+drug,Pyridine,keep,ExplosionNERStep,5
+drug,vitamin C,keep,ExplosionNERStep,5
+drug,ADP-Ribose,keep,ExplosionNERStep,5
+drug,citrulline,keep,ExplosionNERStep,5
+drug,vasopressin,keep,ExplosionNERStep,5
+drug,dantrolene sodium,keep,ExplosionNERStep,5
+drug,cyclosporin A,keep,ExplosionNERStep,5
+drug,cyhalothrin,keep,ExplosionNERStep,5
+drug,yttrium-90,keep,ExplosionNERStep,5
+drug,ACETYLCHOLINE,keep,ExplosionNERStep,5
+drug,ACT-132577,keep,ExplosionNERStep,5
+drug,deoxygalactonojirimycin,keep,ExplosionNERStep,5
+drug,Acetic Acid,keep,ExplosionNERStep,5
+drug,ALBUMIN,keep,ExplosionNERStep,5
+drug,vedotin,keep,ExplosionNERStep,5
+drug,vantage,keep,ExplosionNERStep,5
+drug,chalk,keep,ExplosionNERStep,5
+drug,dATP,keep,ExplosionNERStep,5
+drug,citalopram,keep,ExplosionNERStep,5
+drug,68Ga-FAPI,keep,ExplosionNERStep,5
+drug,Alpha 1-antitrypsin,keep,ExplosionNERStep,5
+drug,Oct,drop,ExplosionNERStep,4
+drug,FTC,drop,ExplosionNERStep,4
+drug,Heather,drop,ExplosionNERStep,4
+drug,C-1,drop,ExplosionNERStep,4
+drug,nad,drop,ExplosionNERStep,4
+drug,Red blood cells,drop,ExplosionNERStep,4
+drug,QUEST,drop,ExplosionNERStep,4
+drug,R.B.C.,drop,ExplosionNERStep,4
+drug,HuMAb,keep,ExplosionNERStep,4
+drug,Tocopherol,keep,ExplosionNERStep,4
+drug,hyaluronidases,keep,ExplosionNERStep,4
+drug,2-deoxy-d-glucose,keep,ExplosionNERStep,4
+drug,cinnamon,keep,ExplosionNERStep,4
+drug,cetirizine,keep,ExplosionNERStep,4
+drug,Hygromycin,keep,ExplosionNERStep,4
+drug,toluene,keep,ExplosionNERStep,4
+drug,compound A,keep,ExplosionNERStep,4
+drug,metoprolol succinate,keep,ExplosionNERStep,4
+drug,Kato,keep,ExplosionNERStep,4
+drug,penehyclidine,keep,ExplosionNERStep,4
+drug,glucuronic acid,keep,ExplosionNERStep,4
+drug,Cellulase,keep,ExplosionNERStep,4
+drug,lysophosphatidylcholine,keep,ExplosionNERStep,4
+drug,budesonide,keep,ExplosionNERStep,4
+drug,tritiated water,keep,ExplosionNERStep,4
+drug,sojourn,keep,ExplosionNERStep,4
+drug,soman,keep,ExplosionNERStep,4
+drug,Pinus pinaster,keep,ExplosionNERStep,4
+drug,Hepatitis B Vaccine,keep,ExplosionNERStep,4
+drug,grazoprevir,keep,ExplosionNERStep,4
+drug,amikacin sulfate,keep,ExplosionNERStep,4
+drug,Hepatocyte Growth Factor,keep,ExplosionNERStep,4
+drug,streptomycin sulfate,keep,ExplosionNERStep,4
+drug,L-proline,keep,ExplosionNERStep,4
+drug,streptozotocin,keep,ExplosionNERStep,4
+drug,2-propanol,keep,ExplosionNERStep,4
+drug,Progesterone,keep,ExplosionNERStep,4
+drug,ST10,keep,ExplosionNERStep,4
+drug,stibogluconate,keep,ExplosionNERStep,4
+drug,dihydrocoumarin,keep,ExplosionNERStep,4
+drug,deoxymannojirimycin,keep,ExplosionNERStep,4
+drug,propylene glycol,keep,ExplosionNERStep,4
+drug,L-homocysteine,keep,ExplosionNERStep,4
+drug,CHOLINE,keep,ExplosionNERStep,4
+drug,CHOLESTEROL,keep,ExplosionNERStep,4
+drug,coumaric acid,keep,ExplosionNERStep,4
+drug,L-1,keep,ExplosionNERStep,4
+drug,avermectin,keep,ExplosionNERStep,4
+drug,ceramide,keep,ExplosionNERStep,4
+drug,Tazemetostat,keep,ExplosionNERStep,4
+drug,lobaplatin,keep,ExplosionNERStep,4
+drug,Technegas,keep,ExplosionNERStep,4
+drug,Hexane,keep,ExplosionNERStep,4
+drug,FIAU,keep,ExplosionNERStep,4
+drug,fenoxaprop,keep,ExplosionNERStep,4
+drug,tocainide,keep,ExplosionNERStep,4
+drug,molybdate,keep,ExplosionNERStep,4
+drug,withanolide,keep,ExplosionNERStep,4
+drug,Mirabilite,keep,ExplosionNERStep,4
+drug,hepatitis B virus vaccine,keep,ExplosionNERStep,4
+drug,Icariin,keep,ExplosionNERStep,4
+drug,redux,keep,ExplosionNERStep,4
+drug,edetate,keep,ExplosionNERStep,4
+drug,PV-10,keep,ExplosionNERStep,4
+drug,Curcuminoids,keep,ExplosionNERStep,4
+drug,benzoic acid,keep,ExplosionNERStep,4
+drug,PABA,keep,ExplosionNERStep,4
+drug,"2,3,5-triiodobenzoic acid",keep,ExplosionNERStep,4
+drug,emtricitabine,keep,ExplosionNERStep,4
+drug,phalloidin,keep,ExplosionNERStep,4
+drug,metam sodium,keep,ExplosionNERStep,4
+drug,emamectin benzoate,keep,ExplosionNERStep,4
+drug,emepronium bromide,keep,ExplosionNERStep,4
+drug,menthol,keep,ExplosionNERStep,4
+drug,D-arginine,keep,ExplosionNERStep,4
+drug,retinol,keep,ExplosionNERStep,4
+drug,dasiglucagon,keep,ExplosionNERStep,4
+drug,incomplete Freund's adjuvant,keep,ExplosionNERStep,4
+drug,DOTANOC,keep,ExplosionNERStep,4
+drug,Organon,keep,ExplosionNERStep,4
+drug,AdP,keep,ExplosionNERStep,4
+drug,methylprednisolone,keep,ExplosionNERStep,4
+drug,Montelukast sodium,keep,ExplosionNERStep,4
+drug,penicillin G sodium,keep,ExplosionNERStep,4
+drug,Omega-3 fatty acids,keep,ExplosionNERStep,4
+drug,Omega-3 Fatty Acids,keep,ExplosionNERStep,4
+drug,oestradiol,keep,ExplosionNERStep,4
+drug,hypochlorous acid,keep,ExplosionNERStep,4
+drug,3-carene,keep,ExplosionNERStep,4
+drug,benzathine penicillin,keep,ExplosionNERStep,4
+drug,Zingiber Officinale,keep,ExplosionNERStep,4
+drug,adenosine diphosphate,keep,ExplosionNERStep,4
+drug,benzo[a]pyrene,keep,ExplosionNERStep,4
+drug,radicicol,keep,ExplosionNERStep,4
+drug,ocimene,keep,ExplosionNERStep,4
+drug,phenytoin sodium,keep,ExplosionNERStep,4
+drug,Toll-like receptor 9,keep,ExplosionNERStep,4
+drug,maltose,keep,ExplosionNERStep,4
+drug,pepstatin,keep,ExplosionNERStep,4
+drug,Serenoa repens,keep,ExplosionNERStep,4
+drug,chorionic gonadotropin,keep,ExplosionNERStep,4
+drug,diminazene aceturate,keep,ExplosionNERStep,4
+drug,potassium cyanide,keep,ExplosionNERStep,4
+drug,BEZ235,keep,ExplosionNERStep,4
+drug,Botulinum toxin type A,keep,ExplosionNERStep,4
+drug,Botulinum Toxin,keep,ExplosionNERStep,4
+drug,Botulinum Toxin Type A,keep,ExplosionNERStep,4
+drug,Lincomycin hydrochloride,keep,ExplosionNERStep,4
+drug,onvansertib,keep,ExplosionNERStep,4
+drug,thiocyanate,keep,ExplosionNERStep,4
+drug,Sulla,keep,ExplosionNERStep,4
+drug,oxycodone,keep,ExplosionNERStep,4
+drug,thiobarbituric,keep,ExplosionNERStep,4
+drug,carrageenan,keep,ExplosionNERStep,4
+drug,Galactose,keep,ExplosionNERStep,4
+drug,thiorphan,keep,ExplosionNERStep,4
+drug,urokinase,keep,ExplosionNERStep,4
+drug,Berberine Hydrochloride,keep,ExplosionNERStep,4
+drug,histamine,keep,ExplosionNERStep,4
+drug,NICOTINE,keep,ExplosionNERStep,4
+drug,6-mercaptopurine,keep,ExplosionNERStep,4
+drug,allium sativum,keep,ExplosionNERStep,4
+drug,antithrombin III,keep,ExplosionNERStep,4
+drug,GL1001,keep,ExplosionNERStep,4
+drug,tagatose,keep,ExplosionNERStep,4
+drug,fig 1,keep,ExplosionNERStep,4
+drug,pirlimycin hydrochloride,keep,ExplosionNERStep,4
+drug,Bile acid,keep,ExplosionNERStep,4
+drug,vitamin D3,keep,ExplosionNERStep,4
+drug,sulfadiazine,keep,ExplosionNERStep,4
+drug,procaine,keep,ExplosionNERStep,4
+drug,Lumefantrine,keep,ExplosionNERStep,4
+drug,esomeprazole magnesium,keep,ExplosionNERStep,4
+drug,Fluorouracil,keep,ExplosionNERStep,4
+drug,VITAMIN A,keep,ExplosionNERStep,4
+drug,chymotrypsin,keep,ExplosionNERStep,4
+drug,CD40 Ligand,keep,ExplosionNERStep,4
+drug,Pyrimidine,keep,ExplosionNERStep,4
+drug,sulbactam sodium,keep,ExplosionNERStep,4
+drug,Pycnogenol,keep,ExplosionNERStep,4
+drug,Guanosine,keep,ExplosionNERStep,4
+drug,CARBON DIOXIDE,keep,ExplosionNERStep,4
+drug,Glycine,keep,ExplosionNERStep,4
+drug,caproic acid,keep,ExplosionNERStep,4
+drug,Syrup,drop,ExplosionNERStep,3
+drug,fresh look,drop,ExplosionNERStep,3
+drug,harris,drop,ExplosionNERStep,3
+drug,rela,drop,ExplosionNERStep,3
+drug,PAs,drop,ExplosionNERStep,3
+drug,Nostril,drop,ExplosionNERStep,3
+drug,et 1,drop,ExplosionNERStep,3
+drug,Epoch,drop,ExplosionNERStep,3
+drug,32p,drop,ExplosionNERStep,3
+drug,13N,drop,ExplosionNERStep,3
+drug,interleukin 7,drop,ExplosionNERStep,3
+drug,Red Blood Cells,drop,ExplosionNERStep,3
+drug,Bam,drop,ExplosionNERStep,3
+drug,tcc,drop,ExplosionNERStep,3
+drug,Cu-7,drop,ExplosionNERStep,3
+drug,Interleukin-3,drop,ExplosionNERStep,3
+drug,Johnson's,drop,ExplosionNERStep,3
+drug,gemcitabine,keep,ExplosionNERStep,3
+drug,phenylglycine,keep,ExplosionNERStep,3
+drug,Modufolin,keep,ExplosionNERStep,3
+drug,Dabigatran,keep,ExplosionNERStep,3
+drug,rifampicin,keep,ExplosionNERStep,3
+drug,benzathine benzylpenicillin,keep,ExplosionNERStep,3
+drug,endothelin 1,keep,ExplosionNERStep,3
+drug,endothelin,keep,ExplosionNERStep,3
+drug,rabies vaccine,keep,ExplosionNERStep,3
+drug,polyglactin,keep,ExplosionNERStep,3
+drug,APR-246,keep,ExplosionNERStep,3
+drug,Diammonium glycyrrhizinate,keep,ExplosionNERStep,3
+drug,phendimetrazine,keep,ExplosionNERStep,3
+drug,amphotericin,keep,ExplosionNERStep,3
+drug,benzydamine hydrochloride,keep,ExplosionNERStep,3
+drug,fluvastatin,keep,ExplosionNERStep,3
+drug,Diastase,keep,ExplosionNERStep,3
+drug,Diane,keep,ExplosionNERStep,3
+drug,hydroxyl radical,keep,ExplosionNERStep,3
+drug,recombinant activated Factor VII,keep,ExplosionNERStep,3
+drug,PEG 4000,keep,ExplosionNERStep,3
+drug,berberine,keep,ExplosionNERStep,3
+drug,epinephrine,keep,ExplosionNERStep,3
+drug,pseudoephedrine,keep,ExplosionNERStep,3
+drug,asparagine,keep,ExplosionNERStep,3
+drug,ACEA,keep,ExplosionNERStep,3
+drug,Follicle Stimulating Hormone,keep,ExplosionNERStep,3
+drug,xylazine,keep,ExplosionNERStep,3
+drug,morphine hydrochloride,keep,ExplosionNERStep,3
+drug,protoporphyrin IX,keep,ExplosionNERStep,3
+drug,minocycline hydrochloride,keep,ExplosionNERStep,3
+drug,Naphthalene,keep,ExplosionNERStep,3
+drug,psilocybin,keep,ExplosionNERStep,3
+drug,miramistin,keep,ExplosionNERStep,3
+drug,Nandrolone,keep,ExplosionNERStep,3
+drug,iomazenil,keep,ExplosionNERStep,3
+drug,colloidal bismuth subcitrate,keep,ExplosionNERStep,3
+drug,cilexetil,keep,ExplosionNERStep,3
+drug,proguanil,keep,ExplosionNERStep,3
+drug,acridine orange,keep,ExplosionNERStep,3
+drug,Fluoxetine,keep,ExplosionNERStep,3
+drug,FIBRINOGEN,keep,ExplosionNERStep,3
+drug,FIBRIN,keep,ExplosionNERStep,3
+drug,escitalopram oxalate,keep,ExplosionNERStep,3
+drug,FTY720,keep,ExplosionNERStep,3
+drug,montelukast sodium,keep,ExplosionNERStep,3
+drug,dichlorobenzene,keep,ExplosionNERStep,3
+drug,AGAR,keep,ExplosionNERStep,3
+drug,abiraterone,keep,ExplosionNERStep,3
+drug,quercetin,keep,ExplosionNERStep,3
+drug,pioglitazone hydrochloride,keep,ExplosionNERStep,3
+drug,ciprofloxacin,keep,ExplosionNERStep,3
+drug,Omegaven,keep,ExplosionNERStep,3
+drug,zidovudine,keep,ExplosionNERStep,3
+drug,HBSAG,keep,ExplosionNERStep,3
+drug,hypericum,keep,ExplosionNERStep,3
+drug,E251,keep,ExplosionNERStep,3
+drug,abscisic acid,keep,ExplosionNERStep,3
+drug,antihistamine,keep,ExplosionNERStep,3
+drug,hematin,keep,ExplosionNERStep,3
+drug,microcrystalline cellulose,keep,ExplosionNERStep,3
+drug,pyropheophorbide,keep,ExplosionNERStep,3
+drug,ESTROGEN,keep,ExplosionNERStep,3
+drug,vanillin,keep,ExplosionNERStep,3
+drug,Oestrogen,keep,ExplosionNERStep,3
+drug,pyridoxine hydrochloride,keep,ExplosionNERStep,3
+drug,EPZ-5676,keep,ExplosionNERStep,3
+drug,ORE1001,keep,ExplosionNERStep,3
+drug,miconazole nitrate,keep,ExplosionNERStep,3
+drug,Hyaluronate,keep,ExplosionNERStep,3
+drug,interleukin-7,keep,ExplosionNERStep,3
+drug,Reno,keep,ExplosionNERStep,3
+drug,taurodeoxycholic acid,keep,ExplosionNERStep,3
+drug,Polaprezinc,keep,ExplosionNERStep,3
+drug,butyrolactone,keep,ExplosionNERStep,3
+drug,fludarabine,keep,ExplosionNERStep,3
+drug,thonzonium bromide,keep,ExplosionNERStep,3
+drug,pancuronium bromide,keep,ExplosionNERStep,3
+drug,Technetium,keep,ExplosionNERStep,3
+drug,CTX,keep,ExplosionNERStep,3
+drug,Sonata,keep,ExplosionNERStep,3
+drug,Teicoplanin,keep,ExplosionNERStep,3
+drug,CPT-11,keep,ExplosionNERStep,3
+drug,L-Lactic Acid,keep,ExplosionNERStep,3
+drug,alpha tocopherol,keep,ExplosionNERStep,3
+drug,SILVER,keep,ExplosionNERStep,3
+drug,tedizolid,keep,ExplosionNERStep,3
+drug,Mannose,keep,ExplosionNERStep,3
+drug,Phosphatidylserine,keep,ExplosionNERStep,3
+drug,Lysophosphatidic acid,keep,ExplosionNERStep,3
+drug,Carnitine,keep,ExplosionNERStep,3
+drug,somatostatin,keep,ExplosionNERStep,3
+drug,Caryophyllene,keep,ExplosionNERStep,3
+drug,SURG,keep,ExplosionNERStep,3
+drug,allylanisole,keep,ExplosionNERStep,3
+drug,human chorionic gonadotropin,keep,ExplosionNERStep,3
+drug,dihydroxycholecalciferol,keep,ExplosionNERStep,3
+drug,Tetracycline Hydrochloride,keep,ExplosionNERStep,3
+drug,canrenoate,keep,ExplosionNERStep,3
+drug,LSD,keep,ExplosionNERStep,3
+drug,leucovorin,keep,ExplosionNERStep,3
+drug,RTX,keep,ExplosionNERStep,3
+drug,levulinic acid,keep,ExplosionNERStep,3
+drug,lente,keep,ExplosionNERStep,3
+drug,Buserelin acetate,keep,ExplosionNERStep,3
+drug,Lactic Acid,keep,ExplosionNERStep,3
+drug,sulla,keep,ExplosionNERStep,3
+drug,thyroglobulin,keep,ExplosionNERStep,3
+drug,L-phenylalanine,keep,ExplosionNERStep,3
+drug,streptodornase,keep,ExplosionNERStep,3
+drug,Procaine,keep,ExplosionNERStep,3
+drug,fibroblast growth factor-1,keep,ExplosionNERStep,3
+drug,amiloride,keep,ExplosionNERStep,3
+drug,stilbazium iodide,keep,ExplosionNERStep,3
+drug,dodecanoic acid,keep,ExplosionNERStep,3
+drug,dodecane,keep,ExplosionNERStep,3
+drug,cypermethrin,keep,ExplosionNERStep,3
+drug,laminin,keep,ExplosionNERStep,3
+drug,COMMIT,keep,ExplosionNERStep,3
+drug,CCA,keep,ExplosionNERStep,3
+drug,flecainide acetate,keep,ExplosionNERStep,3
+drug,pac-1,keep,ExplosionNERStep,3
+drug,Tenofovir,keep,ExplosionNERStep,3
+drug,Tenofovir disoproxil fumarate,keep,ExplosionNERStep,3
+drug,CHLOROFORM,keep,ExplosionNERStep,3
+drug,albuterol,keep,ExplosionNERStep,3
+drug,CI-930,keep,ExplosionNERStep,3
+drug,DA-3002,keep,ExplosionNERStep,3
+drug,cis-DDP,keep,ExplosionNERStep,3
+drug,dihydroxyvitamin D 3,keep,ExplosionNERStep,3
+drug,Trp-NH2,keep,ExplosionNERStep,3
+drug,Arjun,keep,ExplosionNERStep,3
+drug,isopropanol,keep,ExplosionNERStep,3
+drug,Linolenic acid,keep,ExplosionNERStep,3
+drug,aminoethane,keep,ExplosionNERStep,3
+drug,Zeaxanthin,keep,ExplosionNERStep,3
+drug,tetracycline hydrochloride,keep,ExplosionNERStep,3
