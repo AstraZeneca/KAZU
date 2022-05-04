@@ -71,9 +71,7 @@ class CombinatorialSynonymGenerator:
                             existing_syn_set.update(syn_data_set)
                         else:
                             all_syns[new_syn] = syn_data_set
-
-        final = {k: set(v) for k, v in results.items()}
-        return final
+        return results
 
 
 class SeparatorExpansion(SynonymGenerator):
