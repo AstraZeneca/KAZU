@@ -41,19 +41,8 @@ class SynonymGenerator(ABC):
 
 
 class CombinatorialSynonymGenerator:
-    def __init__(self, synonym_generators: List[SynonymGenerator]):
-        self.synonym_generator_permutations = self.get_synonym_generator_permutations(
-            synonym_generators
-        )
-
-    def get_synonym_generator_permutations(
-        self, synonym_generators: List[SynonymGenerator]
-    ) -> List[Iterable[SynonymGenerator]]:
-        result: List[Iterable[SynonymGenerator]] = []
-        for i in range(len(synonym_generators)):
-            result.extend(itertools.permutations(synonym_generators, i + 1))
-
-        return result
+    def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
+        self.synonym_generators: Set[SynonymGenerator] = set(synonym_generators)
 
     def __call__(self, synonym_data: Dict[str, Set[SynonymData]]) -> Dict[str, Set[SynonymData]]:
         """
@@ -62,26 +51,26 @@ class CombinatorialSynonymGenerator:
         :return:
         """
         results = defaultdict(set)
-        if self.synonym_generator_permutations:
-            for i, permutation_list in enumerate(self.synonym_generator_permutations):
-                # make a copy of the original synonyms
-                all_syns = copy.deepcopy(synonym_data)
-                logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
-                for generator in permutation_list:
-                    # run the generator
-                    new_syns = generator(all_syns)
-                    for new_syn, syn_data_set in new_syns.items():
-                        # don't add if it maps to a clean syn
-                        if new_syn not in synonym_data:
-                            results[new_syn].update(syn_data_set)
-                            # let following generators operate on the output.
-                            # a synonym might be in all_syns but not synonym_data
-                            # since a previous generator might have already produced it
-                            existing_syn_set = all_syns.get(new_syn)
-                            if existing_syn_set:
-                                existing_syn_set.update(syn_data_set)
-                            else:
-                                all_syns[new_syn] = syn_data_set
+        synonym_gen_permutations = itertools.permutations(self.synonym_generators)
+        for i, permutation_list in enumerate(synonym_gen_permutations):
+            # make a copy of the original synonyms
+            all_syns = copy.deepcopy(synonym_data)
+            logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
+            for generator in permutation_list:
+                # run the generator
+                new_syns = generator(all_syns)
+                for new_syn, syn_data_set in new_syns.items():
+                    # don't add if it maps to a clean syn
+                    if new_syn not in synonym_data:
+                        results[new_syn].update(syn_data_set)
+                        # let following generators operate on the output.
+                        # a synonym might be in all_syns but not synonym_data
+                        # since a previous generator might have already produced it
+                        existing_syn_set = all_syns.get(new_syn)
+                        if existing_syn_set:
+                            existing_syn_set.update(syn_data_set)
+                        else:
+                            all_syns[new_syn] = syn_data_set
 
         final = {k: set(v) for k, v in results.items()}
         return final
