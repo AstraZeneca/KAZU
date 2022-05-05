@@ -35,3 +35,12 @@ parsers:
   - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
     synonym_generator: ${SynonymGeneration.gene}
+  - _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+    synonym_generator: ${SynonymGeneration.default}
+  - _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+    synonym_generator: ${SynonymGeneration.default}
+  - _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+    synonym_generator: ${SynonymGeneration.default}
