@@ -8,7 +8,6 @@ import pytest
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
     SynonymGenerator,
-    CaseModifier,
     StopWordRemover,
     StringReplacement,
     GreekSymbolSubstitution,
@@ -79,11 +78,6 @@ def separator_expansion_generator(kazu_test_config) -> SeparatorExpansion:
 @requires_model_pack
 def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_generator):
     check_generator_result(input_str, expected_syns, separator_expansion_generator)
-
-
-def test_CaseModifier():
-    generator = CaseModifier(lower=True)
-    check_generator_result(input_str="ABAC", expected_syns={"abac"}, generator=generator)
 
 
 @requires_model_pack
@@ -198,7 +192,6 @@ def test_CombinatorialSynonymGenerator():
     generator = CombinatorialSynonymGenerator(
         [
             StringReplacement(include_greek=True),
-            CaseModifier(lower=True),
             StringReplacement(replacement_dict={"-": [" ", "_"]}, include_greek=False),
         ]
     )

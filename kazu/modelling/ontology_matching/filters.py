@@ -1,4 +1,5 @@
 import re
+from typing import Tuple
 
 from kazu.data.data import SynonymData
 
@@ -35,29 +36,34 @@ PROBLEMATIC_GENE_NAMES = {r"p[0-9][0-9]"}
 PROBLEMATIC_GENE_NAMES_RE = [re.compile(x) for x in PROBLEMATIC_GENE_NAMES]
 
 
-def is_valid_ontology_entry(syn: str, idx_str: str, lowercase):
+def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
+    """Returns a tuple of two bools:
+    whether to add an case-sensitive match and whether to add a case-invariant match.
+    We don't need a case-sensitive match rule if there's a case-invariant one,
+    so returning (True, True) is an invalid input
+    """
     if len(syn) < 3:
-        return False
+        return False, False
+    if _is_number(syn):
+        return False, False
+    if _hits_blacklist(BLACKLIST_EXACT, syn, idx_str):
+        return False, False
+
+    if _hits_blacklist(BLACKLIST_LOWER, syn.lower(), idx_str):
+        return True, False
+
     # we avoid case-invariant matching for some types of ontologies
     # rj update - unless they have a digit in them e.g. p27
     if (
-        lowercase
-        and (
-            idx_str.startswith("ENS")
-            or idx_str.startswith("CVCL")
-            or idx_str.startswith("http://purl.obolibrary.org/obo/CLO_")
-        )
-        and not any(regex.search(idx_str) for regex in PROBLEMATIC_GENE_NAMES_RE)
-    ):
-        return False
-    if _is_number(syn):
-        return False
-    if _hits_blacklist(BLACKLIST_EXACT, syn, idx_str):
-        return False
-    if lowercase:
-        if _hits_blacklist(BLACKLIST_LOWER, syn.lower(), idx_str):
-            return False
-    return True
+        idx_str.startswith("ENS")
+        or idx_str.startswith("CVCL")
+        or idx_str.startswith("http://purl.obolibrary.org/obo/CLO_")
+    ) and not any(regex.search(idx_str) for regex in PROBLEMATIC_GENE_NAMES_RE):
+        return True, False
+
+    # if it doesn't hit any other conditions, it should match
+    # case-insensitively
+    return False, True
 
 
 def _hits_blacklist(blacklist, syn, iri):

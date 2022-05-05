@@ -3,10 +3,6 @@ default:
   synonym_generators:
     - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover
       spacy_pipeline: ${SpacyPipeline}
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
-      lower: true
-      upper: true
-      title: true
     - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
       replacement_dict:
         "-":
@@ -22,10 +18,6 @@ default:
 gene:
   _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
   synonym_generators:
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
-      lower: true
-      upper: true
-      title: true
     - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion
       spacy_pipeline: ${SpacyPipeline}
     - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
@@ -43,9 +35,5 @@ gene:
 chemical:
   _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
   synonym_generators:
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CaseModifier
-      lower: true
-      upper: true
-      title: true
     - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
       include_greek: true

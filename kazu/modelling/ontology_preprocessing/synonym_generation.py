@@ -123,26 +123,6 @@ class SeparatorExpansion(SynonymGenerator):
             return None
 
 
-class CaseModifier(SynonymGenerator):
-    def __init__(self, upper: bool = False, lower: bool = False, title: bool = False):
-        self.title = title
-        self.lower = lower
-        self.upper = upper
-
-    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
-        results = {}
-        if self.upper and not text.isupper():
-            results[text.upper()] = syn_data
-        if self.lower and not text.islower():
-            results[text.lower()] = syn_data
-        if self.title and not text.istitle():
-            results[text.title()] = syn_data
-        if len(results) > 0:
-            return results
-        else:
-            return None
-
-
 class StopWordRemover(SynonymGenerator):
     """
     remove stopwords from a string

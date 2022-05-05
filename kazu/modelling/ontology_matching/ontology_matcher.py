@@ -355,28 +355,30 @@ class OntologyMatcher:
 
             blacklister = blacklisters.get(parser.name)
             for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
-                is_lower = syn.islower()
                 for syn_data in syn_data_list:
                     for idx in syn_data.ids:
-                        # if self.entry_filter(syn,syn_data,lowercase) and len(syn_data.generated_from)==0:
                         # TODO: combine entry_filter and blacklisters
-
                         if blacklister is None:
                             passes_blacklist = True
                         else:
                             passes_blacklist = blacklister(syn)[0]
 
-                        if self.entry_filter(syn, idx, is_lower) and passes_blacklist:
+                        if passes_blacklist:
+                            add_case_sens_pat, add_case_insens_pat = self.entry_filter(syn, idx)
+                            # should not both be true - we only need to add the pattern
+                            # in a single matcher
+                            assert not (add_case_sens_pat and add_case_insens_pat)
                             try:
-                                if is_lower:
-                                    lower_matcher.add(str(idx), [patterns[i]])
-                                else:
+                                if add_case_sens_pat:
                                     orth_matcher.add(str(idx), [patterns[i]])
+                                elif add_case_insens_pat:
+                                    lower_matcher.add(str(idx), [patterns[i]])
                             except KeyError as e:
                                 logging.warning(
                                     f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
                                     e,
                                 )
+
         return orth_matcher, lower_matcher
 
     def _create_token_matchers(self):
