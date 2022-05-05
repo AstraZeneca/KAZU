@@ -7,6 +7,7 @@ from typing import Dict, Iterator, List, Optional, Set, Tuple
 import spacy
 from kazu.data.data import CharSpan, Document, Section, Entity, PROCESSING_EXCEPTION
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
+from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.ontology_matcher import SPAN_KEY
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.steps import BaseStep
@@ -26,6 +27,7 @@ class ExplosionNERStep(BaseStep):
         depends_on: List[str],
         path: PathLike,
         parsers: List[OntologyParser],
+        blacklisters: Dict[str, BlackLister],
         rebuild_pipeline: bool = False,
         include_sentence_offsets: bool = True,
         span_key: Optional[str] = None,
@@ -39,6 +41,7 @@ class ExplosionNERStep(BaseStep):
         super().__init__(depends_on=depends_on)
         self.include_sentence_offsets = include_sentence_offsets
         self.parsers = parsers
+        self.blacklisters = blacklisters
         self.path = as_path(path)
         self.labels = labels
 
@@ -63,7 +66,7 @@ class ExplosionNERStep(BaseStep):
             logger.info("forcing a rebuild of spacy 'arizona' NER and EL pipeline")
             self.span_key = span_key if span_key is not None else SPAN_KEY
             self.spacy_pipeline = self.build_pipeline(
-                self.path, self.parsers, self.span_key, self.labels
+                self.path, self.parsers, self.blacklisters, self.span_key, self.labels
             )
         else:
             self.spacy_pipeline = spacy.load(self.path)
@@ -76,10 +79,15 @@ class ExplosionNERStep(BaseStep):
 
     @staticmethod
     def build_pipeline(
-        path: PathLike, parsers: List[OntologyParser], span_key: str, labels: List[str]
+        path: PathLike,
+        parsers: List[OntologyParser],
+        blacklisters: Dict[str, BlackLister],
+        span_key: str,
+        labels: List[str],
     ) -> spacy.language.Language:
         return assemble_pipeline(
             parsers=parsers,
+            blacklisters=blacklisters,
             labels=labels,
             span_key=span_key,
             output_dir=path,

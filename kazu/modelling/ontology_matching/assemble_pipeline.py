@@ -1,6 +1,7 @@
-from typing import Iterable, Union, List
+from typing import Dict, Iterable, Union, List
 
 import spacy
+from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.utils import PathLike
@@ -16,6 +17,7 @@ def custom_tokenizer(nlp):
 
 def main(
     parsers: List[OntologyParser],
+    blacklisters: Dict[str, BlackLister],
     labels: Union[Iterable[str], str],
     output_dir: PathLike,
     span_key: str = SPAN_KEY,
@@ -29,6 +31,6 @@ def main(
     if isinstance(labels, str):
         labels = labels.split(",")
     ontology_matcher.set_labels(labels)
-    ontology_matcher.set_ontologies(parsers)
+    ontology_matcher.set_ontologies(parsers, blacklisters)
     nlp.to_disk(output_dir)
     return nlp

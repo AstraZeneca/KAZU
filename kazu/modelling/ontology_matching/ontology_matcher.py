@@ -7,6 +7,7 @@ from typing import List, Dict, Union, Callable, Iterable, Set
 
 import spacy
 import srsly
+from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
 from kazu.modelling.ontology_matching.variants import create_variants
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
@@ -126,7 +127,7 @@ class OntologyMatcher:
         """RETURNS (List[str]): List of parquet files that were processed"""
         return self.cfg.parquet_files
 
-    def set_ontologies(self, parsers: List[OntologyParser]):
+    def set_ontologies(self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]):
         """Initialize the ontologies when creating this component.
         This method should not be run on an existing or deserialized pipeline.
         """
@@ -136,7 +137,9 @@ class OntologyMatcher:
         # paths = self._define_paths(parquet_files)
 
         # dfs = {path.name: pd.read_parquet(path) for path in paths}
-        self.strict_matcher, self.lowercase_matcher = self._create_phrasematcher(parsers)
+        self.strict_matcher, self.lowercase_matcher = self._create_phrasematcher(
+            parsers, blacklisters
+        )
         # self.cfg.parquet_files = [path.name for path in paths]
 
     # dead code?
@@ -336,7 +339,9 @@ class OntologyMatcher:
         logging.debug(f"Can not deduce Ontology from IRI {iri}")
         return "entity"
 
-    def _create_phrasematcher(self, parsers: List[OntologyParser]):
+    def _create_phrasematcher(
+        self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]
+    ):
         orth_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lower_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         for parser in parsers:
@@ -347,12 +352,21 @@ class OntologyMatcher:
 
             logging.info(f"generating {len(generated_synonym_data)} patterns for {parser.name}")
             patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
+
+            blacklister = blacklisters.get(parser.name)
             for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
                 is_lower = syn.islower()
                 for syn_data in syn_data_list:
                     for idx in syn_data.ids:
                         # if self.entry_filter(syn,syn_data,lowercase) and len(syn_data.generated_from)==0:
-                        if self.entry_filter(syn, idx, is_lower):
+                        # TODO: combine entry_filter and blacklisters
+
+                        if blacklister is None:
+                            passes_blacklist = True
+                        else:
+                            passes_blacklist = blacklister(syn)[0]
+
+                        if self.entry_filter(syn, idx, is_lower) and passes_blacklist:
                             try:
                                 if is_lower:
                                     lower_matcher.add(str(idx), [patterns[i]])

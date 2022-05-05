@@ -44,3 +44,16 @@ parsers:
   - _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
     synonym_generator: ${SynonymGeneration.default}
+blacklisters:
+  # keys are parser 'names' so we can decide what blacklister to use
+  # as we loop over parsers while creating the phrase matchers
+  # this should all really depend on the entity_class_to_ontology_mappings
+  # part of the DictionaryEntityLinking step and use the entity class
+  # to decide the blacklister.
+  CHEMBL: ${BlackListers.DrugBlackLister}
+  OPENTARGETS_MOLECULE: ${BlackListers.DrugBlackLister}
+  MEDDRA: ${BlackListers.DiseaseBlackLister}
+  MONDO: ${BlackListers.DiseaseBlackLister}
+  OPENTARGETS_DISEASE: ${BlackListers.DiseaseBlackLister}
+  ENSEMBL: ${BlackListers.GeneBlackLister}
+  OPENTARGETS_TARGET: ${BlackListers.GeneBlackLister}
