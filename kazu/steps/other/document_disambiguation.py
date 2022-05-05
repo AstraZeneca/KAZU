@@ -59,14 +59,24 @@ class SynonymDataDisambiguationStrategy:
         else:
             return ambig_hits
 
-    def check_resolved_mappings(self,syn_data_set_this_hit: Set[SynonymData],source:str,already_resolved_mappings:Set[Tuple[str,str]])->Optional[SynonymData]:
+    def check_resolved_mappings(
+        self,
+        syn_data_set_this_hit: Set[SynonymData],
+        source: str,
+        already_resolved_mappings: Set[Tuple[str, str]],
+    ) -> Optional[SynonymData]:
         for syn_data in syn_data_set_this_hit:
             for idx in syn_data.ids:
-                if (source,idx,) in already_resolved_mappings:
+                if (
+                    source,
+                    idx,
+                ) in already_resolved_mappings:
                     return syn_data
         return None
 
-    def resolve_synonym_and_source(self, synonym: str, source: str,already_resolved_mappings:Set[Tuple[str,str]]) -> Optional[SynonymData]:
+    def resolve_synonym_and_source(
+        self, synonym: str, source: str, already_resolved_mappings: Set[Tuple[str, str]]
+    ) -> Optional[SynonymData]:
         if not self.number_resolver(synonym):
             logger.debug(f"{synonym} still ambiguous: number mismatch: {self.ent_match_norm}")
             return None
@@ -77,13 +87,17 @@ class SynonymDataDisambiguationStrategy:
         syn_data_set_this_hit: Set[SynonymData] = self.synonym_db.get(name=source, synonym=synonym)
         target_syn_data = None
         if len(syn_data_set_this_hit) > 1:
-            maybe_syndata_defined_elsewhere = self.check_resolved_mappings(syn_data_set_this_hit=syn_data_set_this_hit,source=source,already_resolved_mappings=already_resolved_mappings)
+            maybe_syndata_defined_elsewhere = self.check_resolved_mappings(
+                syn_data_set_this_hit=syn_data_set_this_hit,
+                source=source,
+                already_resolved_mappings=already_resolved_mappings,
+            )
             if maybe_syndata_defined_elsewhere:
                 logger.info(f"found good id defined elsewhere! {maybe_syndata_defined_elsewhere}")
-            #     TODO: this is a total hack and needs to be fixed properly
+                #     TODO: this is a total hack and needs to be fixed properly
                 target_syn_data = maybe_syndata_defined_elsewhere
             else:
-            # if synonym is a short string, continue search. if synonym is long, chances are we can get a match with Sapbert
+                # if synonym is a short string, continue search. if synonym is long, chances are we can get a match with Sapbert
                 if len(synonym) < 5:
                     logger.debug(f"{synonym} still ambiguous: {syn_data_set_this_hit}")
                 else:
@@ -170,6 +184,7 @@ class SynonymDbQueryExtensions:
                             )
         return result
 
+
 class NumberResolver:
     number_finder = re.compile("[0-9]+")
 
@@ -181,6 +196,7 @@ class NumberResolver:
             re.findall(self.number_finder, synonym_string_norm)
         )
         return synonym_string_norm_match_number_count == self.ent_match_number_count
+
 
 class SubStringResolver:
     def __init__(self, query_string_norm):
@@ -236,7 +252,11 @@ class TfIdfOntologyHitDisambiguationStrategy:
         return SynonymDataDisambiguationStrategy(entity_string)
 
     def __call__(
-        self, entity_string: str, entities: List[Entity], document_representation: List[str], already_resolved_mappings:Set[Tuple[str,str]]
+        self,
+        entity_string: str,
+        entities: List[Entity],
+        document_representation: List[str],
+        already_resolved_mappings: Set[Tuple[str, str]],
     ):
         query = " . ".join(document_representation)
         query_mat = self.vectoriser.transform([query]).todense()
@@ -262,7 +282,9 @@ class TfIdfOntologyHitDisambiguationStrategy:
 
             for synonym, score in syns_and_scores:
                 target_syn_data = synonym_data_disambiguator.resolve_synonym_and_source(
-                    source=source, synonym=synonym,already_resolved_mappings=already_resolved_mappings
+                    source=source,
+                    synonym=synonym,
+                    already_resolved_mappings=already_resolved_mappings,
                 )
                 if target_syn_data:
                     for idx in target_syn_data.ids:
@@ -392,13 +414,9 @@ class Disambiguator:
         self.always_disambiguate = {"ExplosionNERStep"}
         self.hit_resolver = HitResolver()
 
-        self.context_tfidf = TfIdfOntologyHitDisambiguationStrategy(
-            vectoriser=self.vectoriser
-        )
+        self.context_tfidf = TfIdfOntologyHitDisambiguationStrategy(vectoriser=self.vectoriser)
         self.context_tfidf_with_string_matching = (
-            TfIdfOntologyHitDisambiguationStrategyWithSubStringMatching(
-                vectoriser=self.vectoriser
-            )
+            TfIdfOntologyHitDisambiguationStrategyWithSubStringMatching(vectoriser=self.vectoriser)
         )
 
         self.disambiguation_strategy_lookup = {
@@ -450,15 +468,20 @@ class Disambiguator:
             entities_not_needing_global_disamb, globally_disambiguated_ents
         )
 
-
         # TODO: add flag to run sapbert on anything that fails to disambig within kb
-        self.disambiguate_within_kb(remaining_ents, document_representation,self.disambiguated_entities_to_souce_and_idx_tuples(globally_disambiguated_ents))
+        self.disambiguate_within_kb(
+            remaining_ents,
+            document_representation,
+            self.disambiguated_entities_to_souce_and_idx_tuples(globally_disambiguated_ents),
+        )
 
-    def disambiguated_entities_to_souce_and_idx_tuples(self,ents:List[Entity])->Set[Tuple[str,str]]:
+    def disambiguated_entities_to_souce_and_idx_tuples(
+        self, ents: List[Entity]
+    ) -> Set[Tuple[str, str]]:
         result = set()
         for ent in ents:
             for mapping in ent.mappings:
-                result.add((mapping.source,mapping.idx))
+                result.add((mapping.source, mapping.idx))
         return result
 
     def find_entities_needing_global_disambiguation(self, entities):
@@ -496,7 +519,7 @@ class Disambiguator:
         self,
         ents_needing_disambig: List[Entity],
         document_representation: List[str],
-            already_disambiguated_mappings:Set[Tuple[str,str]]
+        already_disambiguated_mappings: Set[Tuple[str, str]],
     ):
         """
 
@@ -535,8 +558,12 @@ class Disambiguator:
             ent_class = ent_match_and_class[1]
             ents_this_match = list(ent_iter)
             self.disambiguation_strategy_lookup.get(ent_class, self.context_tfidf)(
-                ent_match, ents_this_match, document_representation,already_disambiguated_mappings=already_disambiguated_mappings
+                ent_match,
+                ents_this_match,
+                document_representation,
+                already_resolved_mappings=already_disambiguated_mappings,
             )
+
 
 def ent_match_group_key(ent: Entity):
     return ent.match, ent.entity_class
@@ -572,12 +599,8 @@ class DocumentLevelDisambiguationStep(BaseStep):
         super().__init__(depends_on)
         self.tfidf_disambiguator = tfidf_disambiguator
 
-
-
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs: List[Document] = []
         for doc in docs:
             self.tfidf_disambiguator.run(doc)
         return docs, failed_docs
-
-

@@ -7,6 +7,7 @@ from kazu.data.data import (
 )
 import pandas as pd
 
+
 class ReactomeDb:
 
     # reactome:
@@ -29,9 +30,9 @@ class ReactomeDb:
         return results
 
     def rank_pathways(
-            self,
-            document_unambiguous_ids: KeysView[Tuple[str, str, LinkRanks]],
-            query: FrozenSet[SynonymData],
+        self,
+        document_unambiguous_ids: KeysView[Tuple[str, str, LinkRanks]],
+        query: FrozenSet[SynonymData],
     ) -> Optional[str]:
         ranks = []
 
@@ -54,7 +55,7 @@ class ReactomeDb:
             return None
 
     def score_pathways(
-            self, document_unambiguous_ids: KeysView[Tuple[str, str, LinkRanks]], ambiguous_id: str
+        self, document_unambiguous_ids: KeysView[Tuple[str, str, LinkRanks]], ambiguous_id: str
     ) -> float:
         pathway_sets = sorted(self.get_ids_by_pathway_association(ambiguous_id), reverse=True)
         score = 0.0
@@ -73,6 +74,7 @@ class ReactomeDb:
             if score > 0.0:
                 break
         return score
+
 
 def load_kb(path: str) -> ReactomeDb:
     df = pd.read_csv(path, sep="\t")

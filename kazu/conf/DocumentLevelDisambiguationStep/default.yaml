@@ -1,7 +1,5 @@
 _target_: kazu.steps.other.document_disambiguation.DocumentLevelDisambiguationStep
 depends_on: ~
-kb_disambiguation_map:
-  ENSEMBL: ${oc.env:KAZU_MODEL_PACK}/ontologies/reactome/Ensembl2Reactome.txt
 tfidf_disambiguator:
   _target_: kazu.steps.other.document_disambiguation.Disambiguator
   path: ${oc.env:KAZU_MODEL_PACK}/disambiguation/tfidf_vec.pkl
