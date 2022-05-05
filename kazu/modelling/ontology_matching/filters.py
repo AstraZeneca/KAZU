@@ -1,6 +1,8 @@
 import re
 from typing import Tuple
 
+from kazu.modelling.ontology_preprocessing.base import StringNormalizer
+
 BLACKLIST_EXACT = {
     "CHEMBL1201112": ["MAY"],
     "http://purl.obolibrary.org/obo/CLO_0054406": ["positive"],
@@ -57,6 +59,10 @@ def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
         or idx_str.startswith("CVCL")
         or idx_str.startswith("http://purl.obolibrary.org/obo/CLO_")
     ) and not any(regex.search(idx_str) for regex in PROBLEMATIC_GENE_NAMES_RE):
+        return True, False
+
+    # don't match case-invariantly for (gene) symbols
+    if StringNormalizer.is_symbol_like(False, syn):
         return True, False
 
     # if it doesn't hit any other conditions, it should match
