@@ -13,7 +13,6 @@ index_group:
       - MONDO
       - OPENTARGETS_DISEASE
     gene:
-      - ENSEMBL
       - OPENTARGETS_TARGET
     anatomy:
       - UBERON
