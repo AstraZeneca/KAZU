@@ -1,8 +1,6 @@
 import re
 from typing import Tuple
 
-from kazu.data.data import SynonymData
-
 BLACKLIST_EXACT = {
     "CHEMBL1201112": ["MAY"],
     "http://purl.obolibrary.org/obo/CLO_0054406": ["positive"],
