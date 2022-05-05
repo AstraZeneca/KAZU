@@ -36,6 +36,11 @@ class BlackLister(abc.ABC):
 
     @abstractmethod
     def __call__(self, synonym: str) -> Tuple[bool, str]:
+        """
+
+        :param synonym: synonym to test
+        :return: tuple of whether synoym is good True|False, and the reason for the decision
+        """
         raise NotImplementedError()
 
 
