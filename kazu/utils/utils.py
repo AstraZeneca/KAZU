@@ -2,7 +2,7 @@ import logging
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Dict, Tuple, Union, Iterable
+from typing import List, Dict, Tuple, Union, Iterable, Optional
 
 from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, MAPPING_TYPE, MetadataDatabase
 from transformers import AutoTokenizer, BatchEncoding
@@ -43,8 +43,7 @@ class HitResolver:
     if a hit isn't ambiguous, convert to a mapping
     """
 
-    def __init__(self, id_parser: ParseSourceFromId):
-        self.id_parser = id_parser
+    def __init__(self):
         self.metadata_db = MetadataDatabase()
 
     def __call__(self, hit: Hit) -> Iterable[Mapping]:
@@ -52,16 +51,12 @@ class HitResolver:
         if len(hit.syn_data) == 1:
             syn_data = next(iter(hit.syn_data))
             for idx in syn_data.ids:
-                metadata = self.metadata_db.get_by_idx(hit.source, idx)
-                default_label = metadata.pop(DEFAULT_LABEL, "na")
-                mapping_type = frozenset([str(x) for x in metadata.pop(MAPPING_TYPE, ["na"])])
-                metadata[LINK_CONFIDENCE] = hit.confidence
-                yield Mapping(
-                    default_label=str(default_label),
-                    source=self.id_parser(hit.source, idx),
+                yield self.metadata_db.create_mapping(
+                    source=hit.source,
                     idx=idx,
-                    mapping_type=mapping_type,
-                    metadata=metadata,
+                    mapping_type=syn_data.mapping_type,
+                    confidence=hit.confidence,
+                    additional_metadata=None,
                 )
 
 

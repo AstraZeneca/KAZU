@@ -24,13 +24,15 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
     GreekSymbolSubstitution,
 )
-from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy
+from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy, Mapping, LinkRanks
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
 SYN = "syn"
 MAPPING_TYPE = "mapping_type"
 SOURCE = "source"
+DATA_ORIGIN = "data_origin"
+
 
 logger = logging.getLogger(__name__)
 
@@ -286,6 +288,27 @@ class MetadataDatabase:
         """
         self.instance.add(name, metadata)  # type: ignore
 
+    def create_mapping(
+        self,
+        source: str,
+        idx: str,
+        mapping_type: FrozenSet[str],
+        confidence: LinkRanks,
+        additional_metadata: Optional[Dict],
+    ) -> Mapping:
+        metadata = self.get_by_idx(name=source, idx=idx)
+        if additional_metadata:
+            metadata.update(additional_metadata)
+        return Mapping(
+            default_label=metadata.pop(DEFAULT_LABEL),
+            idx=idx,
+            source=source,
+            confidence=confidence,
+            data_origin=metadata.pop(DATA_ORIGIN),
+            mapping_type=mapping_type,
+            metadata=metadata,
+        )
+
 
 class SynonymDatabase:
     """
@@ -417,32 +440,33 @@ class OntologyParser(ABC):
     Implementations should have a class attribute 'name' to something suitably representative
     """
 
-    name = "unnamed"
+    name = "unnamed"  # a label for his parser
     training_col_names = ["id", "syn1", "syn2"]
     # the synonym table should have these (and only these columns)
-    all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
-    # the metadata table should have at least these columns
-    minimum_metadata_column_names = [IDX, DEFAULT_LABEL]
+    all_synonym_column_names = [IDX, SYN, MAPPING_TYPE, SOURCE]
+    # the metadata table should have at least these columns (note, IDX will become the index
+    minimum_metadata_column_names = [DEFAULT_LABEL, DATA_ORIGIN]
 
     def __init__(
         self,
         in_path: str,
-        is_composite: bool = False,
+        data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
-        :param is_composite: does the source contain mappings to other ontologies? if so, this affects how we aggregate synonyms
+        :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
+            parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generators: list of synonym generators to apply to this parser
         """
-        self.is_composite = is_composite
+        self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
         self.min_syn_length_to_merge = 4
 
     def find_kb(self, string: str) -> str:
         """
-        split an IDX somehow to find the KB reference. only required if self.is_composite
+        split an IDX somehow to find the ontology SOURCE reference
         :param df:
         :return:
         """
@@ -451,31 +475,19 @@ class OntologyParser(ABC):
     def dataframe_to_syndata_dict(
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
     ) -> Dict[str, Set[SynonymData]]:
-        # if self.is_composite:
         result = self.resolve_composite_synonym_dataframe(synonym_df, normalise_original_syns)
-        # else:
-        #     result = self.resolve_singular_synonym_dataframe(synonym_df, normalise_original_syns)
-
         return dict(result)
 
     def resolve_composite_synonym_dataframe(
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
     ):
-        if self.is_composite:
-            synonym_df["composed_ontologies"] = synonym_df[IDX].apply(self.find_kb)
-        else:
-            synonym_df["composed_ontologies"] = self.name
         result = defaultdict(set)
         for i, row in (
-            synonym_df[["composed_ontologies", SYN, IDX]]
-            .groupby([SYN])
-            .agg(set)
-            .reset_index()
-            .iterrows()
+            synonym_df[[SOURCE, SYN, IDX]].groupby([SYN]).agg(set).reset_index().iterrows()
         ):
 
             syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
-            ontologies = row["composed_ontologies"]
+            ontologies = row[SOURCE]
             ids = row[IDX]
             if len(ontologies) == 1:
                 # most common - one or more ids and one kb per syn
@@ -605,6 +617,8 @@ class OntologyParser(ABC):
         :return: a 2-tuple - first is synonym dataframe, second is metadata
         """
         df = self.parse_to_dataframe()
+        df[SOURCE] = df[IDX].apply(self.find_kb)
+        df[DATA_ORIGIN] = self.data_origin
         df[IDX] = df[IDX].astype(str)
 
         # in case the default label isn't populated, just use the IDX
@@ -613,19 +627,21 @@ class OntologyParser(ABC):
         syn_df = df[self.all_synonym_column_names]
         syn_df.drop_duplicates(subset=self.all_synonym_column_names)
         # group mapping types of same synonym together
-        syn_df = syn_df.groupby(by=[IDX, SYN]).agg(set).reset_index()
+        syn_df = syn_df.groupby(by=[IDX, SYN, SOURCE]).agg(set).reset_index()
         syn_df = syn_df.dropna(axis=0)
-        syn_df.sort_values(by=[IDX, SYN], inplace=True)
+        syn_df.sort_values(by=[IDX, SYN, SOURCE], inplace=True)
         # needs to be a list so can be serialised
         syn_df[MAPPING_TYPE] = syn_df[MAPPING_TYPE].apply(list)
         syn_df.reset_index(inplace=True, drop=True)
         metadata_columns = df.columns.tolist()
         metadata_columns.remove(MAPPING_TYPE)
         metadata_columns.remove(SYN)
+        metadata_columns.remove(SOURCE)
         metadata_df = df[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
+        assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         return syn_df, metadata_df
 
     def parse_to_dataframe(self) -> pd.DataFrame:
@@ -634,7 +650,7 @@ class OntologyParser(ABC):
         columns:
 
 
-        [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
+        [IDX, DEFAULT_LABEL,DATA_ORIGIN, SYN, MAPPING_TYPE]
 
         IDX: the ontology id
         DEFAULT_LABEL: the preferred label
@@ -718,6 +734,7 @@ class JsonLinesOntologyParser(OntologyParser):
 
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_DISEASE"
+    allowed_sources = {"OGMS", "FBbt", "MONDO", "Orphanet", "EFO", "OTAR", "HP"}
 
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
@@ -727,15 +744,17 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     ) -> Iterable[pd.DataFrame]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
-            synonyms = json_dict.get("synonyms", {})
-            exact_syns = synonyms.get("hasExactSynonym", [])
-            exact_syns.append(json_dict["name"])
-            df = pd.DataFrame(exact_syns, columns=[SYN])
-            df[MAPPING_TYPE] = "hasExactSynonym"
-            df[DEFAULT_LABEL] = json_dict["name"]
-            df[IDX] = self.look_for_mondo(json_dict["id"], json_dict.get("dbXRefs", []))
-            df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
-            yield df
+            idx = self.look_for_mondo(json_dict["id"], json_dict.get("dbXRefs", []))
+            if any(allowed_source in idx for allowed_source in self.allowed_sources):
+                synonyms = json_dict.get("synonyms", {})
+                exact_syns = synonyms.get("hasExactSynonym", [])
+                exact_syns.append(json_dict["name"])
+                df = pd.DataFrame(exact_syns, columns=[SYN])
+                df[MAPPING_TYPE] = "hasExactSynonym"
+                df[DEFAULT_LABEL] = json_dict["name"]
+                df[IDX] = idx
+                df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
+                yield df
 
     def look_for_mondo(self, ot_id: str, db_xrefs: List[str]):
         if "MONDO" in ot_id:
@@ -748,6 +767,9 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_TARGET"
+
+    def find_kb(self, string: str) -> str:
+        return "ENSEMBL"
 
     def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
@@ -778,6 +800,9 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_MOLECULE"
+
+    def find_kb(self, string: str) -> str:
+        return "CHEMBL"
 
     def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
@@ -878,6 +903,9 @@ class GeneOntologyParser(OntologyParser):
         g.parse(self.in_path)
         return g
 
+    def find_kb(self, string: str) -> str:
+        return self.name
+
     def parse_to_dataframe(self) -> pd.DataFrame:
         g = rdflib.Graph()
         g.parse(self.in_path)
@@ -973,6 +1001,9 @@ class UberonOntologyParser(RDFGraphParser):
             "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
         ]
 
+    def find_kb(self, string: str) -> str:
+        return "UBERON"
+
 
 class MondoOntologyParser(OntologyParser):
     name = "MONDO"
@@ -1034,6 +1065,9 @@ class EnsemblOntologyParser(OntologyParser):
      e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
     :return:
     """
+
+    def find_kb(self, string: str) -> str:
+        return "ENSEMBL"
 
     def __init__(self, in_path: str, additional_syns_path: str):
 
@@ -1123,6 +1157,9 @@ class ChemblOntologyParser(OntologyParser):
     :return:
     """
 
+    def find_kb(self, string: str) -> str:
+        return "CHEMBL"
+
     def parse_to_dataframe(self) -> pd.DataFrame:
         conn = sqlite3.connect(self.in_path)
         query = f"""
@@ -1150,6 +1187,9 @@ class CLOOntologyParser(RDFGraphParser):
     https://www.ebi.ac.uk/ols/ontologies/clo
     """
 
+    def find_kb(self, string: str) -> str:
+        return "CLO"
+
     def _get_synonym_predicates(self) -> List[str]:
         return [
             # "http://purl.obolibrary.org/obo/hasNarrowSynonym",
@@ -1165,6 +1205,9 @@ class CellosaurusOntologyParser(OntologyParser):
     https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo
     :return:
     """
+
+    def find_kb(self, string: str) -> str:
+        return "CELLOSAURUS"
 
     def parse_to_dataframe(self) -> pd.DataFrame:
 
@@ -1255,6 +1298,9 @@ class MeddraOntologyParser(OntologyParser):
         "llt_jart_code",
         "NULL",
     )
+
+    def find_kb(self, string: str) -> str:
+        return "MEDDRA"
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         # hierarchy path

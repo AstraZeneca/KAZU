@@ -109,8 +109,10 @@ class Mapping:
     """
 
     default_label: str  # default label from knowledgebase
-    source: str  # the knowledgebase name
+    source: str  # the knowledgebase/database/ontology name
+    data_origin: str  # the origin of this mapping
     idx: str  # the identifier within the KB
+    confidence: LinkRanks
     mapping_type: FrozenSet[str] = field(
         default_factory=frozenset, hash=True
     )  # the type of KB mapping

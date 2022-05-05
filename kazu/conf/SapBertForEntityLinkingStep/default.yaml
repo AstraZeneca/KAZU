@@ -42,15 +42,22 @@ index_group:
       parsers:
         - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
+          data_origin: 'chembl_29_sqlite'
         - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
-        - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
-        - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
-          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+          data_origin: 'MONDO-2022-04-04'
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
+          data_origin: 'OPENTARGETS-DISEASE'
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
+          data_origin: 'OPENTARGETS-MOLECULE'
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
+          data_origin: 'OPENTARGETS-TARGET'
+        - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
+          data_origin: 'MEDDRA-24.1'
+        - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
+          in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
+          data_origin: 'UBERON'

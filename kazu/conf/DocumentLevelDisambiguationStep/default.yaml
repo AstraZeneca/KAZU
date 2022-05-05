@@ -5,13 +5,3 @@ kb_disambiguation_map:
 tfidf_disambiguator:
   _target_: kazu.steps.other.document_disambiguation.Disambiguator
   path: ${oc.env:KAZU_MODEL_PACK}/disambiguation/tfidf_vec.pkl
-  id_parser:
-    _target_: kazu.utils.utils.ParseSourceFromId
-    regex_to_source:
-      OPENTARGETS_MOLECULE:
-        "CHEMBL": "CHEMBL"
-      OPENTARGETS_TARGET:
-        "ENSG": "ENSEMBL"
-      OPENTARGETS_DISEASE:
-        "http://purl/obolibrary/org/obo/HP_": "HPO"
-        "http://purl.obolibrary.org/obo/MONDO_": "MONDO"

@@ -28,6 +28,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     MetadataDatabase,
     SynonymDatabase,
     StringNormalizer,
+    DATA_ORIGIN,
 )
 from kazu.steps import BaseStep
 from kazu.utils.link_index import Hit, DICTIONARY_HITS, create_char_ngrams, SAPBERT_SCORE
@@ -222,8 +223,7 @@ class TfIdfCorpusScorer:
 
 
 class TfIdfOntologyHitDisambiguationStrategy:
-    def __init__(self, vectoriser: TfidfVectorizer, id_parser: ParseSourceFromId):
-        self.id_parser = id_parser
+    def __init__(self, vectoriser: TfidfVectorizer):
         self.metadata_db = MetadataDatabase()
         self.vectoriser = vectoriser
         self.corpus_scorer = TfIdfCorpusScorer(vectoriser)
@@ -268,18 +268,16 @@ class TfIdfOntologyHitDisambiguationStrategy:
                 )
                 if target_syn_data:
                     for idx in target_syn_data.ids:
-                        metadata = self.metadata_db.get_by_idx(name=source, idx=idx)
-                        metadata[DISAMBIGUATED_BY] = DISAMBIGUATED_BY_CONTEXT
-                        metadata[LINK_CONFIDENCE] = LinkRanks.MEDIUM_HIGH_CONFIDENCE
-                        disambuguated_mappings.append(
-                            Mapping(
-                                default_label=metadata[DEFAULT_LABEL],
-                                idx=idx,
-                                source=self.id_parser(source, idx),
-                                mapping_type=target_syn_data.mapping_type,
-                                metadata=metadata,
-                            )
+                        additional_metadata = {DISAMBIGUATED_BY: DISAMBIGUATED_BY_CONTEXT}
+                        # todo - calculate disambiguated conf better!
+                        mapping = self.metadata_db.create_mapping(
+                            source=source,
+                            idx=idx,
+                            mapping_type=target_syn_data.mapping_type,
+                            confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE,
+                            additional_metadata=additional_metadata,
                         )
+                        disambuguated_mappings.append(mapping)
                         logger.debug(f"{synonym} disambiguated. id: {idx}, score: {score}")
                     break
             else:
@@ -385,8 +383,7 @@ class Disambiguator:
 
     """
 
-    def __init__(self, path: str, id_parser: ParseSourceFromId):
-        self.id_parser = id_parser
+    def __init__(self, path: str):
         self.vectoriser: TfidfVectorizer = self.build_or_load_vectoriser(path)
         self.syn_db = SynonymDatabase()
         self.metadata_db = MetadataDatabase()
@@ -395,14 +392,14 @@ class Disambiguator:
             frozenset({"CHEMBL", "OPENTARGETS_MOLECULE", "OPENTARGETS_TARGET"}),
         }
         self.always_disambiguate = {"ExplosionNERStep"}
-        self.hit_resolver = HitResolver(id_parser)
+        self.hit_resolver = HitResolver()
 
         self.context_tfidf = TfIdfOntologyHitDisambiguationStrategy(
-            vectoriser=self.vectoriser, id_parser=id_parser
+            vectoriser=self.vectoriser
         )
         self.context_tfidf_with_string_matching = (
             TfIdfOntologyHitDisambiguationStrategyWithSubStringMatching(
-                vectoriser=self.vectoriser, id_parser=id_parser
+                vectoriser=self.vectoriser
             )
         )
 
