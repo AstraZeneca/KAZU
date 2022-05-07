@@ -1,7 +1,7 @@
 import copy
 import logging
 from dataclasses import dataclass, field
-from typing import List, Tuple, Dict, Iterable, Optional
+from typing import List, Tuple, Dict, Iterable, Optional, Set
 
 import torch
 from kazu.data.data import (
@@ -54,25 +54,24 @@ class SpanFinder:
         self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label
 
-    def resolve_word(
-        self, word: TokenizedWord
-    ) -> Tuple[List[str], List[Optional[str]], List[float]]:
+    def resolve_word(self, word: TokenizedWord) -> Set[Tuple[str, str]]:
         """
         get a set of classes and a list of token confidences associated with a token within a word
         :param word:
         :return:
         """
-        bio_labels = []
-        class_labels = []
-        confidences = []
+        bio_and_class_labels = set()
         for i in range(len(word.token_confidences)):
             for bio_label, class_label, confidence_val in self.get_labels_under_threshold(
                 word=word, label_index=i
             ):
-                bio_labels.append(bio_label)
-                class_labels.append(class_label)
-                confidences.append(confidence_val)
-        return bio_labels, class_labels, confidences
+                bio_and_class_labels.add(
+                    (
+                        bio_label,
+                        class_label,
+                    )
+                )
+        return bio_and_class_labels
 
     def get_labels_under_threshold(
         self, word: TokenizedWord, label_index: int
@@ -99,7 +98,9 @@ class SpanFinder:
             else:
                 break
 
-    def span_continue_condition(self, word: TokenizedWord, classes: List[Optional[str]]):
+    def span_continue_condition(
+        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, str]]
+    ):
         """
         A potential entity span must continue if any of the following conditions are met:
         1. There are any class assignments in any of the tokens in the next word.
@@ -108,7 +109,7 @@ class SpanFinder:
         :param word:
         :return:
         """
-        classes_set = set(classes)
+        classes_set = set([x[1] for x in bio_and_class_labels])
         classes_set.discard(None)
         if (
             self.text[word.word_char_start - 1] not in self.span_breaking_chars
@@ -119,9 +120,7 @@ class SpanFinder:
         else:
             return False
 
-    def _update_active_spans(
-        self, bio_labels: List[str], classes: List[Optional[str]], word: TokenizedWord
-    ):
+    def _update_active_spans(self, bio_and_class_labels: Set[Tuple[str, str]], word: TokenizedWord):
         """
         updates any active spans. If a B label is detected in an active span, make a copy and add to closed spans,
         as it's likely the start of another entity of the same class (but we still want to keep the original span open)
@@ -131,16 +130,18 @@ class SpanFinder:
         :return:
         """
         for span in self.active_spans:
-            for bio, c in zip(bio_labels, classes):
+            for bio, c in bio_and_class_labels:
                 if bio == ENTITY_START_SYMBOL and c == span.clazz:
+                    # a new word of the same class is beginning, so add a copy of the currently open span to the
+                    # closed spans
                     self.closed_spans.append(copy.deepcopy(span))
                 if c == span.clazz:
+                    # the word is the same class as the active span, so extend it
                     span.tok_words.append(word)
 
     def start_span(
         self,
-        bio_labels: List[str],
-        classes: List[Optional[str]],
+        bio_and_class_labels: Set[Tuple[str, str]],
         word: TokenizedWord,
         subspan: bool,
     ):
@@ -152,7 +153,7 @@ class SpanFinder:
         :return:
         """
         lst = []
-        for bio, clazz in zip(bio_labels, classes):
+        for bio, clazz in bio_and_class_labels:
             if bio == ENTITY_START_SYMBOL and clazz is not None:
                 span = TokWordSpan(clazz=clazz, subspan=subspan, tok_words=[word])
                 lst.append(span)
@@ -176,16 +177,18 @@ class SpanFinder:
         :return:
         """
 
-        bio_labels, classes, confidences = self.resolve_word(word)
+        bio_and_class_labels = self.resolve_word(word)
         if self.words:
-            if self.span_continue_condition(word, classes):
-                self._update_active_spans(bio_labels, classes, word)
-                self.start_span(bio_labels=bio_labels, classes=classes, word=word, subspan=True)
+            if len(self.active_spans) == 0:
+                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
+            elif self.span_continue_condition(word, bio_and_class_labels):
+                self._update_active_spans(bio_and_class_labels, word)
+                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
             else:
                 self.close_spans()
-                self.start_span(bio_labels=bio_labels, classes=classes, word=word, subspan=False)
+                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
         else:
-            self.start_span(bio_labels=bio_labels, classes=classes, word=word, subspan=False)
+            self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
         self.words.append(word)
 
     def __call__(self, words: List[TokenizedWord]):
