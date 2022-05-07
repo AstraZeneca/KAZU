@@ -239,7 +239,10 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
                 )
                 if target_syn_data:
                     hits_found = hit_lookup[synonym]
-                    assert len(hits_found) == 1
+                    if len(hits_found) > 1:
+                        logger.warning(
+                            "multiple hits found for same synonym! Will return first hit only. fix this bug!"
+                        )
                     # TODO: return a confidence based on original hit (i.e. improve confidence)
                     yield hits_found[0], target_syn_data, LinkRanks.MEDIUM_CONFIDENCE
                     # we break the loop after the first successful hit is found in this strategy, so as to not
@@ -374,7 +377,8 @@ class DisambiguationStrategyList:
                         additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
                         # todo - calculate disambiguated conf better!
                         mapping = self.metadata_db.create_mapping(
-                            source=hit.source,
+                            data_origin=hit.source,
+                            source=target_syn_data.ids_to_source[idx],
                             idx=idx,
                             mapping_type=target_syn_data.mapping_type,
                             confidence=confidence,
@@ -445,6 +449,9 @@ class Disambiguator:
         self.default_strategy = DisambiguationStrategyList(
             [RequireFullDefinitionKnowledgeBaseDisambiguationStrategy()]
         )
+
+        # strategies to implement:
+        # found exact unambiguous match
 
         self.symbolic_disambiguation_strategy_lookup = {
             "gene": DisambiguationStrategyList(
