@@ -213,45 +213,6 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         query = " . ".join(self.manipulator.get_document_representation(document))
         self.query_mat = self.vectoriser.transform([query]).todense()
 
-    def resolve_synonym_and_source(
-        self, synonym: str, source: str, already_resolved_mappings: Set[Tuple[str, str]]
-    ) -> Optional[SynonymData]:
-        if not self.number_resolver(synonym):
-            logger.debug(f"{synonym} still ambiguous: number mismatch: {self.ent_match_norm}")
-            return None
-        if self.string_resolver and not self.string_resolver(synonym):
-            logger.debug(f"{synonym} still ambiguous: substring not found: {self.ent_match_norm}")
-            return None
-
-        syn_data_set_this_hit: Set[SynonymData] = self.synonym_db.get(name=source, synonym=synonym)
-        target_syn_data = None
-        if len(syn_data_set_this_hit) > 1:
-            maybe_syndata_defined_elsewhere = self.check_resolved_mappings(
-                syn_data_set_this_hit=syn_data_set_this_hit,
-                source=source,
-                already_resolved_mappings=already_resolved_mappings,
-            )
-            if maybe_syndata_defined_elsewhere:
-                logger.info(f"found good id defined elsewhere! {maybe_syndata_defined_elsewhere}")
-                #     TODO: this is a total hack and needs to be fixed properly
-                target_syn_data = maybe_syndata_defined_elsewhere
-            else:
-                # if synonym is a short string, continue search. if synonym is long, chances are we can get a match with Sapbert
-                if len(synonym) < 5:
-                    logger.debug(f"{synonym} still ambiguous: {syn_data_set_this_hit}")
-                else:
-                    logger.debug(
-                        f"{synonym} is ambiguous, but string is long. Attempting ngram disambiguation"
-                    )
-                    target_syn_data = self.ngram_disambiguation(
-                        source=source,
-                        synonym=synonym,
-                        syn_data_set_this_hit=syn_data_set_this_hit,
-                    )
-        elif len(syn_data_set_this_hit) == 1:
-            target_syn_data = next(iter(syn_data_set_this_hit))
-        return target_syn_data
-
     def get_synonym_data_disambiguating_strategy(self, entity_string: str):
         return SynonymDataDisambiguationStrategy(entity_string)
 
@@ -279,7 +240,11 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
                 if target_syn_data:
                     hits_found = hit_lookup[synonym]
                     assert len(hits_found) == 1
+                    # TODO: return a confidence based on original hit (i.e. improve confidence)
                     yield hits_found[0], target_syn_data, LinkRanks.MEDIUM_CONFIDENCE
+                    # we break the loop after the first successful hit is found in this strategy, so as to not
+                    # produce less good mappings than the best found
+                    break
 
 
 class GlobalDisambiguationStrategy:
@@ -373,7 +338,7 @@ class GlobalDisambiguationStrategyList:
 
     def __call__(
         self, entity_string: str, entities: List[Entity], document: Document
-    ) -> [Tuple[str, List[Entity], List[Entity]]]:
+    ) -> Tuple[str, List[Entity], List[Entity]]:
 
         for strategy in self.strategies:
             ents_to_keep, still_ambiguous_ents = strategy(
@@ -398,31 +363,27 @@ class DisambiguationStrategyList:
         :param already_resolved_mappings: source idx of good mappings so far
         :return:
         """
-
-        target_syn_data = None
-        hit = None
-        successful_strategy = None
-        confidence = None
         mappings = []
         for strategy in self.strategies:
-            hit, target_syn_data, confidence = strategy(
+            for hit, target_syn_data, confidence in strategy(
                 ent_match=entity_string, entities=entities, document=document
-            )
-            if target_syn_data is not None:
-                successful_strategy = strategy.__class__.__name__
+            ):
+                if target_syn_data is not None:
+                    successful_strategy = strategy.__class__.__name__
+                    for idx in target_syn_data.ids:
+                        additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
+                        # todo - calculate disambiguated conf better!
+                        mapping = self.metadata_db.create_mapping(
+                            source=hit.source,
+                            idx=idx,
+                            mapping_type=target_syn_data.mapping_type,
+                            confidence=confidence,
+                            additional_metadata=additional_metadata,
+                        )
+                        mappings.append(mapping)
+            # if a strategy was successful, don't attempt any further strategies
+            if len(mappings) > 0:
                 break
-        if target_syn_data is not None:
-            for idx in target_syn_data.ids:
-                additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
-                # todo - calculate disambiguated conf better!
-                mapping = self.metadata_db.create_mapping(
-                    source=hit.source,
-                    idx=idx,
-                    mapping_type=target_syn_data.mapping_type,
-                    confidence=confidence,
-                    additional_metadata=additional_metadata,
-                )
-                mappings.append(mapping)
 
         for ent in entities:
             ent.mappings.extend(copy.deepcopy(mappings))
