@@ -98,6 +98,9 @@ class SynonymData:
     ids: FrozenSet[str] = field(
         default_factory=frozenset, hash=True
     )  # other ID's mapping to this syn, from different KBs
+    ids_to_source: Dict[str, str] = field(
+        default_factory=dict, hash=False
+    )  # needed to lookup the original source of a given id
     mapping_type: FrozenSet[str] = field(default_factory=frozenset, hash=False)
 
 
@@ -126,7 +129,7 @@ class Hit:
     """
 
     matched_str: str
-    source: str
+    source: str  # NOTE: this is the datasource name, not the kb name. TODO: rename to data_source for consistency
     namespace: str = field(init=False)
     syn_data: FrozenSet[SynonymData]
     confidence: LinkRanks
