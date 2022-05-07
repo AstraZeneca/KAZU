@@ -305,13 +305,15 @@ class MetadataDatabase:
 
     def create_mapping(
         self,
+        data_origin: str,
         source: str,
         idx: str,
         mapping_type: FrozenSet[str],
         confidence: LinkRanks,
         additional_metadata: Optional[Dict],
     ) -> Mapping:
-        metadata = self.get_by_idx(name=source, idx=idx)
+        metadata = self.get_by_idx(name=data_origin, idx=idx)
+        metadata[DATA_ORIGIN] = data_origin
         if additional_metadata:
             metadata.update(additional_metadata)
         return Mapping(
@@ -458,7 +460,7 @@ class OntologyParser(ABC):
     name = "unnamed"  # a label for his parser
     training_col_names = ["id", "syn1", "syn2"]
     # the synonym table should have these (and only these columns)
-    all_synonym_column_names = [IDX, SYN, MAPPING_TYPE, SOURCE]
+    all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
     # the metadata table should have at least these columns (note, IDX will become the index
     minimum_metadata_column_names = [DEFAULT_LABEL, DATA_ORIGIN]
 
@@ -497,13 +499,17 @@ class OntologyParser(ABC):
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
     ):
         result = defaultdict(set)
-        for i, row in (
-            synonym_df[[SOURCE, SYN, IDX]].groupby([SYN]).agg(set).reset_index().iterrows()
-        ):
+        for i, row in synonym_df[[SYN, IDX]].groupby([SYN]).agg(set).reset_index().iterrows():
 
             syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
-            ontologies = row[SOURCE]
             ids = row[IDX]
+            id_to_source = {}
+            ontologies = set()
+            for idx in ids:
+                source = self.find_kb(idx)
+                ontologies.add(source)
+                id_to_source[idx] = source
+
             if len(ontologies) == 1:
                 # most common - one or more ids and one kb per syn
                 if len(ids) == 1:
@@ -516,7 +522,10 @@ class OntologyParser(ABC):
                 if len(syn) > self.min_syn_length_to_merge:
                     result[syn].add(
                         SynonymData(
-                            ids=frozenset(ids), mapping_type=frozenset(), aggregated_by=strategy
+                            ids=frozenset(ids),
+                            mapping_type=frozenset(),
+                            aggregated_by=strategy,
+                            ids_to_source=id_to_source,
                         )
                     )
                 else:
@@ -526,6 +535,7 @@ class OntologyParser(ABC):
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=strategy,
+                                ids_to_source=id_to_source,
                             )
                         )
             elif len(ontologies) == len(ids):
@@ -535,6 +545,7 @@ class OntologyParser(ABC):
                             ids=frozenset(ids),
                             mapping_type=frozenset(),
                             aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+                            ids_to_source=id_to_source,
                         )
                     )
                 else:
@@ -544,6 +555,7 @@ class OntologyParser(ABC):
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
+                                ids_to_source=id_to_source,
                             )
                         )
                 # pathological scenario - multiple kb ids, one syn. Syn may refer to different concepts (although probably not)
@@ -560,6 +572,7 @@ class OntologyParser(ABC):
                             ids=frozenset(ids),
                             mapping_type=frozenset(),
                             aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+                            ids_to_source=id_to_source,
                         )
                     )
                     logger.warning(
@@ -573,6 +586,7 @@ class OntologyParser(ABC):
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
+                                ids_to_source=id_to_source,
                             )
                         )
                     logger.warning(
@@ -632,7 +646,6 @@ class OntologyParser(ABC):
         :return: a 2-tuple - first is synonym dataframe, second is metadata
         """
         df = self.parse_to_dataframe()
-        df[SOURCE] = df[IDX].apply(self.find_kb)
         df[DATA_ORIGIN] = self.data_origin
         df[IDX] = df[IDX].astype(str)
 
@@ -642,16 +655,15 @@ class OntologyParser(ABC):
         syn_df = df[self.all_synonym_column_names]
         syn_df.drop_duplicates(subset=self.all_synonym_column_names)
         # group mapping types of same synonym together
-        syn_df = syn_df.groupby(by=[IDX, SYN, SOURCE]).agg(set).reset_index()
+        syn_df = syn_df.groupby(by=[IDX, SYN]).agg(set).reset_index()
         syn_df = syn_df.dropna(axis=0)
-        syn_df.sort_values(by=[IDX, SYN, SOURCE], inplace=True)
+        syn_df.sort_values(by=[IDX, SYN], inplace=True)
         # needs to be a list so can be serialised
         syn_df[MAPPING_TYPE] = syn_df[MAPPING_TYPE].apply(list)
         syn_df.reset_index(inplace=True, drop=True)
         metadata_columns = df.columns.tolist()
         metadata_columns.remove(MAPPING_TYPE)
         metadata_columns.remove(SYN)
-        metadata_columns.remove(SOURCE)
         metadata_df = df[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
