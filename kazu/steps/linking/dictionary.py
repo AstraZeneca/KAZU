@@ -10,7 +10,6 @@ from kazu.utils.caching import CachedIndexGroup, DictionaryIndexCacheManager
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.utils import (
     find_document_from_entity,
-    HitResolver,
 )
 
 logger = logging.getLogger(__name__)

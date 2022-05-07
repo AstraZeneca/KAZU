@@ -91,7 +91,22 @@ class StringNormalizer:
         return [" ".join(ngram) for ngram in result]
 
     @staticmethod
+    def is_probably_symbol_like(original_string: str) -> bool:
+        # a more forgiving version of is_symbol_like, designed to improve symbol recall on natural text
+
+        if " " in original_string:
+            return False
+        elif original_string.isupper():
+            return True
+        elif original_string.islower():
+            return False
+        else:
+            return True
+        # TODO: improve
+
+    @staticmethod
     def is_symbol_like(debug, original_string) -> Optional[str]:
+        # TODO: rename method
         # True if all upper, all alphanum, no spaces,
 
         for char in original_string:

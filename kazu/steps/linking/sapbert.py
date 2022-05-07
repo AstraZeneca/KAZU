@@ -6,14 +6,14 @@ from typing import List, Tuple, Iterable, Optional, Dict
 
 import pydash
 import torch
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, LINK_CONFIDENCE, LinkRanks
+
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, LinkRanks
 from kazu.steps import BaseStep
 from kazu.utils.caching import (
     EntityLinkingLookupCache,
     CachedIndexGroup,
     EmbeddingIndexCacheManager,
 )
-from kazu.utils.utils import HitResolver
 
 logger = logging.getLogger(__name__)
 

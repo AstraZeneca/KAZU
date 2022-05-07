@@ -4,17 +4,18 @@ import logging
 import pickle
 import re
 from collections import Counter, defaultdict
-from enum import Enum
 from pathlib import Path
 from typing import List, Tuple, Optional, Set, Iterable, Callable
 
 import numpy as np
 import pydash
+from sklearn.feature_extraction.text import TfidfVectorizer
+from strsimpy import NGram, LongestCommonSubsequence
+
 from kazu.data.data import (
     Document,
     Mapping,
     Entity,
-    LINK_CONFIDENCE,
     SynonymData,
 )
 from kazu.data.data import LinkRanks
@@ -25,10 +26,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     StringNormalizer,
 )
 from kazu.steps import BaseStep
-from kazu.utils.link_index import Hit, create_char_ngrams, SAPBERT_SCORE
-from kazu.utils.utils import HitResolver
-from sklearn.feature_extraction.text import TfidfVectorizer
-from strsimpy import NGram, LongestCommonSubsequence
+from kazu.utils.link_index import Hit, create_char_ngrams
 
 logger = logging.getLogger(__name__)
 
@@ -288,7 +286,10 @@ class TfIdfOntologyHitDisambiguationStrategy:
                 )
                 if target_syn_data:
                     for idx in target_syn_data.ids:
-                        additional_metadata = {DISAMBIGUATED_BY: DISAMBIGUATED_BY_CONTEXT}
+                        additional_metadata = {
+                            DISAMBIGUATED_BY: DISAMBIGUATED_BY_CONTEXT,
+                        }
+
                         # todo - calculate disambiguated conf better!
                         mapping = self.metadata_db.create_mapping(
                             source=source,
@@ -388,31 +389,54 @@ def create_char_3grams(string):
     return create_char_ngrams(string, n=3)
 
 
+def create_word_ngrams(string: str, n=2):
+    words = string.split(" ")
+    ngrams = zip(*[words[i:] for i in range(n)])
+    return [" ".join(ngram) for ngram in ngrams]
+
+
+def create_word_unigram_bigram_and_char_3grams(string):
+    result = []
+    unigrams = create_word_ngrams(string, 1)
+    result.extend(unigrams)
+    bigrams = create_word_ngrams(string, 2)
+    result.extend(bigrams)
+    char_trigrams = create_char_3grams(string)
+    result.extend(char_trigrams)
+    return result
+
+
 class Disambiguator:
     """
+    global:
+    prefer any ent with an exact hit (disregard others if exact hit found)
+
+    per class symbol strategy:
+    disease: require full definition
+    drug: require full definition
+
+
+
     needs to
-    a) discover ents needing_global_disambiguation, and disambiguate-> discover entity class from Explosion
-    b) resolve any 'clean' hits (via HitResolver)
-    c) group remaining ents by string
-    d) group further into ent class
-    e) select disambig strategy ranker based on entity class -> Set SynonymData
-    f) for resulting ranks,
-    f) if len(syndata)>1, decide whether to attempt disambiguation within syndata set
-    g)
+    a) resolve all unambiguous non symbol like (e.g. noun phrases) via exact match no magic number
+    b) resolve all ambiguous non symbol like (e.g. noun phrases) magic number
+    b) identify all symbol like ents -> always disambiguate
+    c) resolve all amb symbol like via unamb like no magic number
+    d) resolve all remaining symbol like via TFIDF magic numbers
+
 
 
     """
 
     def __init__(self, path: str):
-        self.vectoriser: TfidfVectorizer = self.build_or_load_vectoriser(path)
         self.syn_db = SynonymDatabase()
         self.metadata_db = MetadataDatabase()
+        self.vectoriser: TfidfVectorizer = self.build_or_load_vectoriser(path)
         self.allowed_overlaps = {
             frozenset({"MONDO", "MEDDRA", "OPENTARGETS_DISEASE"}),
             frozenset({"CHEMBL", "OPENTARGETS_MOLECULE", "OPENTARGETS_TARGET"}),
         }
         self.always_disambiguate = {"ExplosionNERStep"}
-        self.hit_resolver = HitResolver()
 
         self.context_tfidf = TfIdfOntologyHitDisambiguationStrategy(vectoriser=self.vectoriser)
         self.context_tfidf_with_string_matching = (
@@ -433,7 +457,9 @@ class Disambiguator:
         if path.exists():
             return pickle.load(open(path, "rb"))
         else:
-            vec = TfidfVectorizer(lowercase=False, analyzer=create_char_3grams)
+            vec = TfidfVectorizer(
+                lowercase=False, analyzer=create_word_unigram_bigram_and_char_3grams
+            )
             x = []
             for kb in self.syn_db.get_loaded_kbs():
                 x.extend(list(self.syn_db.get_all(kb).keys()))
@@ -506,7 +532,7 @@ class Disambiguator:
         for ent in list(remaining_ents):
             for hit in list(ent.hits):
                 if hit.confidence != LinkRanks.LOW_CONFIDENCE:
-                    mappings = list(self.hit_resolver(hit))
+                    mappings = list(self.unamiguous_hit_to_mapping(hit))
                     if mappings:
                         ent.mappings.extend(mappings)
                         # since the hit is now resolved, we no longer need the original hit
@@ -514,6 +540,19 @@ class Disambiguator:
             if ent.mappings:
                 remaining_ents.remove(ent)
         return remaining_ents
+
+    def unamiguous_hit_to_mapping(self, hit: Hit) -> Iterable[Mapping]:
+        # TODO: use UMABIGUOUS flag
+        if len(hit.syn_data) == 1:
+            syn_data = next(iter(hit.syn_data))
+            for idx in syn_data.ids:
+                yield self.metadata_db.create_mapping(
+                    source=hit.source,
+                    idx=idx,
+                    mapping_type=syn_data.mapping_type,
+                    confidence=hit.confidence,
+                    additional_metadata=None,
+                )
 
     def disambiguate_within_kb(
         self,

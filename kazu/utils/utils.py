@@ -38,28 +38,6 @@ class ParseSourceFromId:
             return parser_name
 
 
-class HitResolver:
-    """
-    if a hit isn't ambiguous, convert to a mapping
-    """
-
-    def __init__(self):
-        self.metadata_db = MetadataDatabase()
-
-    def __call__(self, hit: Hit) -> Iterable[Mapping]:
-
-        if len(hit.syn_data) == 1:
-            syn_data = next(iter(hit.syn_data))
-            for idx in syn_data.ids:
-                yield self.metadata_db.create_mapping(
-                    source=hit.source,
-                    idx=idx,
-                    mapping_type=syn_data.mapping_type,
-                    confidence=hit.confidence,
-                    additional_metadata=None,
-                )
-
-
 def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     """
     for a given entity and a list of docs, find the doc the entity belongs to

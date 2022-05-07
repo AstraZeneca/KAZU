@@ -11,7 +11,7 @@ from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet
 
 import pandas as pd
-from numpy import ndarray
+from numpy import ndarray, float32, float16
 from spacy import displacy
 
 
@@ -21,7 +21,6 @@ LINK_UNCERTAINTY = "for_disambiguation"
 AMBIGUOUS_IDX = "requires_disambiguation"
 
 # BIO schema
-
 ENTITY_START_SYMBOL = "B"
 ENTITY_INSIDE_SYMBOL = "I"
 ENTITY_OUTSIDE_SYMBOL = "O"
@@ -284,7 +283,7 @@ class Entity:
         return cls(spans=single_span, **kwargs)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Section:
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
@@ -412,13 +411,19 @@ class DocumentEncoder(json.JSONEncoder):
             return obj.isoformat()
         elif isinstance(obj, ndarray):
             return obj.tolist()
+        elif isinstance(obj, float32):
+            return obj.item()
+        elif isinstance(obj, float16):
+            return obj.item()
+        elif isinstance(obj, Enum):
+            return obj.name
         elif dataclasses.is_dataclass(obj):
             return obj.__dict__
         else:
             return json.JSONEncoder.default(self, obj)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Document:
     idx: str  # a document identifier
     sections: List[Section] = field(
