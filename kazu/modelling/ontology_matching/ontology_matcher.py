@@ -25,25 +25,35 @@ CELL_LINE = "cell_line"
 ENTITY = "entity"
 
 SPAN_KEY = "RAW_HITS"
+MATCH_ID_SEP = ":::"
 
 
 @Language.factory(
     "ontology_matcher",
     default_config={
         "span_key": SPAN_KEY,
+        "match_id_sep": MATCH_ID_SEP,
         "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
         "variant_generator": {"@misc": "arizona.variant_generator.v1"},
     },
 )
 def create_ontology_mather(
-    nlp, name, span_key: str, entry_filter: Callable, variant_generator: Callable
+    nlp,
+    name,
+    span_key: str,
+    match_id_sep: str,
+    entry_filter: Callable,
+    variant_generator: Callable,
+    parser_name_to_entity_type: Dict[str, str],
 ):
     return OntologyMatcher(
         nlp,
         name,
         span_key=span_key,
+        match_id_sep=match_id_sep,
         entry_filter=entry_filter,
         variant_generator=variant_generator,
+        parser_name_to_entity_type=parser_name_to_entity_type,
     )
 
 
@@ -60,8 +70,10 @@ def create_filter() -> Callable:
 @dataclass
 class OntologyMatcherConfig:
     span_key: str
+    match_id_sep: str
     labels: List[str]
     parquet_files: List[str]
+    parser_name_to_entity_type: Dict[str, str]
 
 
 class OntologyMatcher:
@@ -71,8 +83,10 @@ class OntologyMatcher:
         name: str = "ontology_matcher",
         *,
         span_key: str = SPAN_KEY,
+        match_id_sep: str = MATCH_ID_SEP,
         entry_filter: Callable,
         variant_generator: Callable,
+        parser_name_to_entity_type: Dict[str, str],
     ):
         """
         Create an OntologyMatcher.
@@ -85,7 +99,13 @@ class OntologyMatcher:
         self.name = name
         self.entry_filter = entry_filter
         self.variant_generator = variant_generator
-        self.cfg = OntologyMatcherConfig(span_key=span_key, labels=[], parquet_files=[])
+        self.cfg = OntologyMatcherConfig(
+            span_key=span_key,
+            match_id_sep=match_id_sep,
+            labels=[],
+            parquet_files=[],
+            parser_name_to_entity_type=parser_name_to_entity_type,
+        )
         # These will be defined when calling initialize
         self.strict_matcher, self.lowercase_matcher = None, None
         self.tp_matchers, self.fp_matchers = None, None
@@ -110,9 +130,17 @@ class OntologyMatcher:
         return self.cfg.span_key
 
     @property
+    def match_id_sep(self) -> str:
+        return self.cfg.match_id_sep
+
+    @property
     def labels(self) -> List[str]:
         """RETURNS (List[str]): The labels currently processed by this component."""
         return self.cfg.labels
+
+    @property
+    def parser_name_to_entity_type(self) -> Dict[str, str]:
+        return self.cfg.parser_name_to_entity_type
 
     def set_labels(self, labels: Iterable[str]):
         self.cfg.labels = list(labels)
@@ -194,7 +222,7 @@ class OntologyMatcher:
         combined_spans = set(
             Span(doc, start, end, label=key) for key, start, end in combined_matches
         )
-        combined_spans = self._set_span_labels(combined_spans)
+        combined_spans = self._set_span_attributes(combined_spans)
         final_spans = self.filter_by_contexts(doc, combined_spans)
         self.set_annotations(doc, final_spans)
         return doc
@@ -306,38 +334,12 @@ class OntologyMatcher:
                 all_paths.update(path.glob("**/*.parquet"))
         return all_paths
 
-    def _set_span_labels(self, spans):
+    def _set_span_attributes(self, spans):
         for span in spans:
-            iri = span.label
-            span.label_ = self._label_from_IRI(span.label_)
-            span.kb_id = iri
+            # would this be better as the 'source' of the synonyms rather than parser name?
+            parser_name, span.kb_id_ = span.label_.split(self.match_id_sep, maxsplit=1)
+            span.label_ = self.parser_name_to_entity_type[parser_name]
         return spans
-
-    def _label_from_IRI(self, iri):
-        """Return the correct span type, according to the given iri.
-        Return an empty span if a certain ontology is not covered by the
-        current set of labels."""
-        if iri.startswith("ENS") or iri.startswith("http://identifiers.org/hgnc/"):
-            return GENE if GENE in self.labels else ""
-        if iri.startswith("CHEMBL"):
-            return DRUG if DRUG in self.labels else ""
-        if iri.startswith("http://purl.obolibrary.org/obo/UBERON_"):
-            return ANATOMY if ANATOMY in self.labels else ""
-        if iri.startswith("http://purl.obolibrary.org/obo/MONDO_") or iri.startswith(
-            "http://purl.obolibrary.org/obo/HP_"
-        ):
-            return DISEASE if DISEASE in self.labels else ""
-        if iri.startswith("http://purl.obolibrary.org/obo/CLO_") or iri.startswith("CVCL_"):
-            return CELL_LINE if CELL_LINE in self.labels else ""
-
-        try:
-            int(iri)  # MEDDRA IDs are just INTs
-            return ENTITY if ENTITY in self.labels else ""
-        except ValueError:
-            pass
-
-        logging.debug(f"Can not deduce Ontology from IRI {iri}")
-        return "entity"
 
     def _create_phrasematcher(
         self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]
@@ -350,10 +352,11 @@ class OntologyMatcher:
             generated_synonym_data = parser.generate_synonyms()
             generated_synonym_data.update(synonym_data)
 
-            logging.info(f"generating {len(generated_synonym_data)} patterns for {parser.name}")
+            parser_name = parser.name
+            logging.info(f"generating {len(generated_synonym_data)} patterns for {parser_name}")
             patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
 
-            blacklister = blacklisters.get(parser.name)
+            blacklister = blacklisters.get(parser_name)
             for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
                 for syn_data in syn_data_list:
                     for idx in syn_data.ids:
@@ -369,10 +372,11 @@ class OntologyMatcher:
                             # in a single matcher
                             assert not (add_case_sens_pat and add_case_insens_pat)
                             try:
+                                match_id = parser_name + self.match_id_sep + str(idx)
                                 if add_case_sens_pat:
-                                    orth_matcher.add(str(idx), [patterns[i]])
+                                    orth_matcher.add(match_id, [patterns[i]])
                                 elif add_case_insens_pat:
-                                    lower_matcher.add(str(idx), [patterns[i]])
+                                    lower_matcher.add(match_id, [patterns[i]])
                             except KeyError as e:
                                 logging.warning(
                                     f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",

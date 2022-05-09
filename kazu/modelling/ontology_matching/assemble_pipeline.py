@@ -18,6 +18,7 @@ def custom_tokenizer(nlp):
 def main(
     parsers: List[OntologyParser],
     blacklisters: Dict[str, BlackLister],
+    parser_name_to_entity_type: Dict[str, str],
     labels: Union[Iterable[str], str],
     output_dir: PathLike,
     span_key: str = SPAN_KEY,
@@ -25,7 +26,7 @@ def main(
     nlp = spacy.blank("en")
     custom_tokenizer(nlp)
     nlp.add_pipe("sentencizer")
-    config = {"span_key": span_key}
+    config = {"span_key": span_key, "parser_name_to_entity_type": parser_name_to_entity_type}
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
     if isinstance(labels, str):

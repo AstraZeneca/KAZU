@@ -2,13 +2,6 @@ _target_: kazu.steps.ner.explosion.ExplosionNERStep
 depends_on: ~
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 rebuild_pipeline: False
-labels:
-  - gene
-  - drug
-  - anatomy
-  - disease
-  - cell_line
-  - entity
 parsers:
   - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
@@ -69,3 +62,4 @@ blacklisters:
   OPENTARGETS_DISEASE: ${BlackListers.DiseaseBlackLister}
   ENSEMBL: ${BlackListers.GeneBlackLister}
   OPENTARGETS_TARGET: ${BlackListers.GeneBlackLister}
+entity_class_to_ontology_mappings: ${DictionaryEntityLinkingStep.index_group.entity_class_to_ontology_mappings}

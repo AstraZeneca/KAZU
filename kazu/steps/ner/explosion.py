@@ -2,7 +2,7 @@ import logging
 import traceback
 from collections import defaultdict
 from itertools import groupby
-from typing import Dict, Iterator, List, Optional, Set, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
 import spacy
 from kazu.data.data import CharSpan, Document, Section, Entity, PROCESSING_EXCEPTION
@@ -28,10 +28,10 @@ class ExplosionNERStep(BaseStep):
         path: PathLike,
         parsers: List[OntologyParser],
         blacklisters: Dict[str, BlackLister],
+        entity_class_to_ontology_mappings: Dict[str, List[str]],
         rebuild_pipeline: bool = False,
         include_sentence_offsets: bool = True,
         span_key: Optional[str] = None,
-        labels: Optional[List[str]] = None,
     ):
         """
         :param path: path to spacy pipeline including Ontology Matcher.
@@ -43,7 +43,21 @@ class ExplosionNERStep(BaseStep):
         self.parsers = parsers
         self.blacklisters = blacklisters
         self.path = as_path(path)
-        self.labels = labels
+        self.labels = set(entity_class_to_ontology_mappings)
+
+        # __init__ param is entity_class_to_ontology_mappings is
+        # the reverse of mapping direction we actually want so that we can take it
+        # from DictionaryEntityStep hydra config rather than repeating ourselves.
+
+        self.parser_name_to_entity_type: Dict[str, str] = {}
+        for entity_class, parser_names in entity_class_to_ontology_mappings.items():
+            for parser_name in parser_names:
+                # assume each parser only maps to one entity type.
+                # relaxing this makes the code much trickier, since we assign
+                # the entity class to spacy Span's label_ property, which
+                # is just a string, and can't be an iterable of strings.
+                assert parser_name not in self.parser_name_to_entity_type
+                self.parser_name_to_entity_type[parser_name] = entity_class
 
         if rebuild_pipeline or not self.path.exists():
             if not self.parsers or self.labels is None:
@@ -66,9 +80,17 @@ class ExplosionNERStep(BaseStep):
             logger.info("forcing a rebuild of spacy 'arizona' NER and EL pipeline")
             self.span_key = span_key if span_key is not None else SPAN_KEY
             self.spacy_pipeline = self.build_pipeline(
-                self.path, self.parsers, self.blacklisters, self.span_key, self.labels
+                self.path,
+                self.parsers,
+                self.blacklisters,
+                self.parser_name_to_entity_type,
+                self.span_key,
+                self.labels,
             )
         else:
+            # TODO: config override for when entity_class_to_ontology_mappings has changed since the last rebuild
+            # think about how this affects OntologyMatcher._set_span_attributes lookup of parser names in case they
+            # are not there in the new config.
             self.spacy_pipeline = spacy.load(self.path)
 
             self.span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
@@ -82,12 +104,14 @@ class ExplosionNERStep(BaseStep):
         path: PathLike,
         parsers: List[OntologyParser],
         blacklisters: Dict[str, BlackLister],
+        parser_name_to_entity_type: Dict[str, str],
         span_key: str,
-        labels: List[str],
+        labels: Iterable[str],
     ) -> spacy.language.Language:
         return assemble_pipeline(
             parsers=parsers,
             blacklisters=blacklisters,
+            parser_name_to_entity_type=parser_name_to_entity_type,
             labels=labels,
             span_key=span_key,
             output_dir=path,
@@ -114,10 +138,10 @@ class ExplosionNERStep(BaseStep):
                 sorted_spans = sorted(spans, key=self._mapping_invariant_span)
                 grouped_spans = groupby(sorted_spans, key=self._mapping_invariant_span)
                 for mapping_invariant_span, span_group in grouped_spans:
-                    span_start, span_end, span_text, span_label_ = mapping_invariant_span
+                    span_start, span_end, span_text, entity_type = mapping_invariant_span
                     e = Entity(
                         match=span_text,
-                        entity_class=span_label_,
+                        entity_class=entity_type,
                         spans=frozenset((CharSpan(start=span_start, end=span_end),)),
                         namespace=self.namespace(),
                     )
@@ -151,6 +175,6 @@ class ExplosionNERStep(BaseStep):
     def _mapping_invariant_span(span: spacy_span) -> Tuple[int, int, str, str]:
         """Return key information about a span excluding mapping information.
 
-        This still includes the class of the recognised entity (span.label_) since
-        the entity_class is stored on Kazu's Entity concept rather than Mapping."""
+        This includes the entity_class (stored in span.label_) since this is
+        stored on Kazu's Entity concept rather than Mapping."""
         return (span.start_char, span.end_char, span.text, span.label_)
