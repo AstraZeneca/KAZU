@@ -9,5 +9,14 @@ trainer:
   progress_bar_refresh_rate: 0
   gpus: 0
   logger: false
-entity_splitter: ~
+entity_splitter:
+  _target_: kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter
+  entity_conditions:
+    gene:
+      - _target_: kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix
+      - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
+        spacy_pipeline: ${......SpacyPipeline}
+    disease:
+      - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
+        spacy_pipeline: ${......SpacyPipeline}
 threshold: 0.03

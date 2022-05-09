@@ -55,6 +55,7 @@ index_group:
         - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
           data_origin: 'OPENTARGETS-TARGET'
+          min_syn_length_to_merge: 50
         - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
           in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
           data_origin: 'MEDDRA-24.1'
