@@ -91,20 +91,6 @@ class StringNormalizer:
         return [" ".join(ngram) for ngram in result]
 
     @staticmethod
-    def is_probably_symbol_like(original_string: str) -> bool:
-        # a more forgiving version of is_symbol_like, designed to improve symbol recall on natural text
-
-        if " " in original_string:
-            return False
-        elif original_string.isupper():
-            return True
-        elif original_string.islower():
-            return False
-        else:
-            return True
-        # TODO: improve
-
-    @staticmethod
     def is_symbol_like(debug, original_string) -> Optional[str]:
         # TODO: rename method
         # True if all upper, all alphanum, no spaces,
@@ -252,14 +238,23 @@ class MetadataDatabase:
 
     class __MetadataDatabase:
         database: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
+        database_defaultlabel: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
         keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
 
         def add(self, name: str, metadata: Dict[str, Dict[str, Any]]):
             self.database[name].update(metadata)
+            for k, v in metadata.items():
+                if v[DEFAULT_LABEL] in self.database_defaultlabel[name]:
+                    self.database_defaultlabel[name][v[DEFAULT_LABEL]].append(k)
+                else:
+                    self.database_defaultlabel[name][v[DEFAULT_LABEL]] = [k]
             self.keys_lst[name] = list(self.database[name].keys())
 
         def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
             return self.database[name][idx]
+
+        def get_by_default_label(self, name: str, default_label: str) -> List[str]:
+            return self.database_defaultlabel[name].get(default_label, [])
 
         def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, Any]]:
             idx = self.keys_lst[name][i]
@@ -280,6 +275,15 @@ class MetadataDatabase:
         :return:
         """
         return copy.deepcopy(self.instance.get_by_idx(name, idx))  # type: ignore
+
+    def get_by_default_label(self, name: str, default_label: str) -> List[str]:
+        """
+        get the metadata associated with an ontology and id
+        :param name: name of ontology to query
+        :param idx: idx to query
+        :return:
+        """
+        return copy.deepcopy(self.instance.get_by_default_label(name, default_label))  # type: ignore
 
     def get_by_index(self, name: str, i: int) -> Dict:
 
@@ -305,15 +309,15 @@ class MetadataDatabase:
 
     def create_mapping(
         self,
-        data_origin: str,
+        parser_name: str,
         source: str,
         idx: str,
         mapping_type: FrozenSet[str],
         confidence: LinkRanks,
         additional_metadata: Optional[Dict],
     ) -> Mapping:
-        metadata = self.get_by_idx(name=data_origin, idx=idx)
-        metadata[DATA_ORIGIN] = data_origin
+        metadata = self.get_by_idx(name=parser_name, idx=idx)
+        metadata[DATA_ORIGIN] = parser_name
         if additional_metadata:
             metadata.update(additional_metadata)
         return Mapping(
@@ -321,7 +325,7 @@ class MetadataDatabase:
             idx=idx,
             source=source,
             confidence=confidence,
-            data_origin=metadata.pop(DATA_ORIGIN),
+            parser_name=metadata.pop(DATA_ORIGIN),
             mapping_type=mapping_type,
             metadata=metadata,
         )
@@ -469,17 +473,20 @@ class OntologyParser(ABC):
         in_path: str,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        min_syn_length_to_merge: int = 4,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
             parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generators: list of synonym generators to apply to this parser
+        :param min_syn_length_to_merge: synonyms of this length or greater will be merged into the same SynonymData object,
+            set higher for highly symbolic sources (e.g. Gene symbols), and lower for more natural language sources (e.g. anatomy)
         """
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
-        self.min_syn_length_to_merge = 4
+        self.min_syn_length_to_merge = min_syn_length_to_merge
 
     def find_kb(self, string: str) -> str:
         """
@@ -514,12 +521,12 @@ class OntologyParser(ABC):
                 # most common - one or more ids and one kb per syn
                 if len(ids) == 1:
                     strategy = EquivalentIdAggregationStrategy.UNAMBIGUOUS
-                elif len(syn) > self.min_syn_length_to_merge:
+                elif len(syn) >= self.min_syn_length_to_merge:
                     strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE
                 else:
                     strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT
 
-                if len(syn) > self.min_syn_length_to_merge:
+                if len(syn) >= self.min_syn_length_to_merge:
                     result[syn].add(
                         SynonymData(
                             ids=frozenset(ids),
@@ -535,11 +542,11 @@ class OntologyParser(ABC):
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=strategy,
-                                ids_to_source=id_to_source,
+                                ids_to_source={idx: id_to_source[idx]},
                             )
                         )
             elif len(ontologies) == len(ids):
-                if len(syn) > self.min_syn_length_to_merge:
+                if len(syn) >= self.min_syn_length_to_merge:
                     result[syn].add(
                         SynonymData(
                             ids=frozenset(ids),
@@ -555,7 +562,7 @@ class OntologyParser(ABC):
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
-                                ids_to_source=id_to_source,
+                                ids_to_source={idx: id_to_source[idx]},
                             )
                         )
                 # pathological scenario - multiple kb ids, one syn. Syn may refer to different concepts (although probably not)
@@ -566,7 +573,7 @@ class OntologyParser(ABC):
             else:
                 # pathological scenario - one synonym maps to multiple KBs and multiple ids within those KBs,
                 # within the same composite KB
-                if len(syn) > self.min_syn_length_to_merge:
+                if len(syn) >= self.min_syn_length_to_merge:
                     result[syn].add(
                         SynonymData(
                             ids=frozenset(ids),
@@ -586,7 +593,7 @@ class OntologyParser(ABC):
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
-                                ids_to_source=id_to_source,
+                                ids_to_source={idx: id_to_source[idx]},
                             )
                         )
                     logger.warning(
