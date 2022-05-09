@@ -112,7 +112,7 @@ class Mapping:
 
     default_label: str  # default label from knowledgebase
     source: str  # the knowledgebase/database/ontology name
-    data_origin: str  # the origin of this mapping
+    parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
     confidence: LinkRanks
     mapping_type: FrozenSet[str] = field(
@@ -129,7 +129,7 @@ class Hit:
     """
 
     matched_str: str
-    source: str  # NOTE: this is the datasource name, not the kb name. TODO: rename to data_source for consistency
+    parser_name: str  # NOTE: this is the parser name, not the kb name. TODO: rename to data_source for consistency
     namespace: str = field(init=False)
     syn_data: FrozenSet[SynonymData]
     confidence: LinkRanks

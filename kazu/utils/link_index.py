@@ -348,7 +348,7 @@ class DictionaryIndex(Index):
             return [
                 Hit(
                     matched_str=string_norm,
-                    source=self.name,
+                    parser_name=self.name,
                     metrics={EXACT_MATCH: True},
                     syn_data=frozenset(self.normalised_syn_dict[string_norm]),
                     confidence=LinkRanks.HIGH_CONFIDENCE,
@@ -374,7 +374,7 @@ class DictionaryIndex(Index):
                 hits.append(
                     Hit(
                         matched_str=found,
-                        source=self.name,
+                        parser_name=self.name,
                         syn_data=frozenset(self.normalised_syn_dict[found]),
                         metrics={SEARCH_SCORE: score},
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
@@ -507,8 +507,10 @@ class EmbeddingIndex(Index):
                     hit = Hit(
                         matched_str=string_norm,
                         syn_data=frozenset(syn_data),
-                        source=self.name,
-                        confidence=LinkRanks.LOW_CONFIDENCE,
+                        parser_name=self.name,
+                        confidence=LinkRanks.LOW_CONFIDENCE
+                        if score < score_cutoffs[1]
+                        else LinkRanks.MEDIUM_CONFIDENCE,
                         metrics={SAPBERT_SCORE: score},
                     )
                     yield hit
