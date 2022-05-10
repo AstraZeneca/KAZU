@@ -17,21 +17,6 @@ from kazu.data.data import (
 logger = logging.getLogger(__name__)
 
 
-class ParseSourceFromId:
-    def __init__(self, regex_to_source: Dict[str, Dict[str, str]]):
-        self.regex_to_source: Dict[str, Dict[re.Pattern, str]] = defaultdict(dict)
-        for source, re_dict in regex_to_source.items():
-            for k, v in re_dict.items():
-                self.regex_to_source[source][re.compile(k)] = v
-
-    def __call__(self, parser_name: str, idx: str):
-        for regex, target_source in self.regex_to_source.get(parser_name, {}).items():
-            if re.search(regex, idx):
-                return target_source
-        else:
-            return parser_name
-
-
 def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     """
     for a given entity and a list of docs, find the doc the entity belongs to
