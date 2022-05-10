@@ -297,6 +297,14 @@ class MetadataDatabase:
         """
         return self.instance.database[name]  # type: ignore
 
+    def get_loaded_parsers(self) -> Set[str]:
+        """
+        get the names of all loaded parsers
+        :param name: name of ontology
+        :return:
+        """
+        return set(self.instance.database.keys())
+
     def add(self, name: str, metadata: Dict[str, Any]):
         """
         add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
