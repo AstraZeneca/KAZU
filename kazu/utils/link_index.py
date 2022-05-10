@@ -56,18 +56,18 @@ class HitPostProcessor:
             if match:
                 found_string = match.group()
                 for hit in hits:
-                    if found_string in hit.matched_str:
+                    if found_string in hit.string_norm:
                         hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
                         new_hits.append(hit)
         if not new_hits:
             for modifier_phrase in self.modifier_phrase_disambiguation:
                 in_text = modifier_phrase in text
                 if in_text:
-                    for hit in filter(lambda x: modifier_phrase in x.matched_str, hits):
+                    for hit in filter(lambda x: modifier_phrase in x.string_norm, hits):
                         hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
                         new_hits.append(hit)
                 else:
-                    for hit in filter(lambda x: modifier_phrase not in x.matched_str, hits):
+                    for hit in filter(lambda x: modifier_phrase not in x.string_norm, hits):
                         hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
                         new_hits.append(hit)
         if new_hits:
@@ -77,7 +77,7 @@ class HitPostProcessor:
 
     def ngram_scorer(self, hits: List[Hit], text):
         for hit in hits:
-            hit.metrics[NGRAM_SCORE] = self.ngram.distance(text, hit.matched_str)
+            hit.metrics[NGRAM_SCORE] = self.ngram.distance(text, hit.string_norm)
             if hit.metrics[NGRAM_SCORE] and hit.metrics[NGRAM_SCORE] > self.ngram_score_threshold:
                 hit.confidence = LinkRanks.LOW_CONFIDENCE
             else:
@@ -85,7 +85,7 @@ class HitPostProcessor:
         return hits
 
     def run_fuzz_algo(self, hits: List[Hit], text, fuzz_threshold=0.75, n=5):
-        choices = [x.matched_str for x in hits]
+        choices = [x.string_norm for x in hits]
         if len(text) > 10 and len(text.split(" ")) > 4:
             scores = process.extract(
                 text, choices, scorer=fuzz.token_sort_ratio, limit=n, score_cutoff=fuzz_threshold
@@ -120,7 +120,7 @@ class HitPostProcessor:
         text_numbers = Counter(list(re.findall("[0-9]+", text)))
         scores = []
         for hit in hits:
-            hit_numbers = Counter(list(re.findall("[0-9]+", hit.matched_str)))
+            hit_numbers = Counter(list(re.findall("[0-9]+", hit.string_norm)))
             number_score = self.score_numbers(text_numbers, hit_numbers)
             if number_score > 0.0:
                 hit.confidence = LinkRanks.HIGH_CONFIDENCE
@@ -347,7 +347,7 @@ class DictionaryIndex(Index):
         if string_norm in self.normalised_syn_dict:
             return [
                 Hit(
-                    matched_str=string_norm,
+                    string_norm=string_norm,
                     parser_name=self.name,
                     metrics={EXACT_MATCH: True},
                     syn_data=frozenset(self.normalised_syn_dict[string_norm]),
@@ -370,12 +370,12 @@ class DictionaryIndex(Index):
             distances = 100 * -distances
             hits = []
             for neighbour, score in zip(neighbours, distances):
-                found = self.key_lst[neighbour]
+                found_norm = self.key_lst[neighbour]
                 hits.append(
                     Hit(
-                        matched_str=found,
+                        string_norm=found_norm,
                         parser_name=self.name,
-                        syn_data=frozenset(self.normalised_syn_dict[found]),
+                        syn_data=frozenset(self.normalised_syn_dict[found_norm]),
                         metrics={SEARCH_SCORE: score},
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                     )
@@ -504,13 +504,12 @@ class EmbeddingIndex(Index):
                 string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
                 try:
                     syn_data = self.synonym_db.get(self.name, string_norm)
+                    # confidence is always low, dso can be later disambiguated
                     hit = Hit(
-                        matched_str=string_norm,
+                        string_norm=string_norm,
                         syn_data=frozenset(syn_data),
                         parser_name=self.name,
-                        confidence=LinkRanks.LOW_CONFIDENCE
-                        if score < score_cutoffs[1]
-                        else LinkRanks.MEDIUM_CONFIDENCE,
+                        confidence=LinkRanks.LOW_CONFIDENCE,
                         metrics={SAPBERT_SCORE: score},
                     )
                     yield hit
