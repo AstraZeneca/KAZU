@@ -7,13 +7,10 @@ import pickle
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import List, Tuple, Optional, Set, Iterable, Callable, Dict, FrozenSet
+from typing import List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict
 
 import numpy as np
 import pydash
-from sklearn.feature_extraction.text import TfidfVectorizer
-from strsimpy import NGram, LongestCommonSubsequence
-
 from kazu.data.data import (
     Document,
     Mapping,
@@ -30,6 +27,10 @@ from kazu.modelling.ontology_preprocessing.base import (
 )
 from kazu.steps import BaseStep
 from kazu.utils.link_index import Hit, create_char_ngrams
+from kazu.utils.spacy_pipeline import SpacyPipeline
+from sklearn.feature_extraction.text import TfidfVectorizer
+from spacy.tokens import Doc
+from strsimpy import NGram, LongestCommonSubsequence
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
 }
 
 
-class SynonymDataDisambiguationStrategy:
+class StringMatchingSynonymDataDisambiguationStrategy:
     def __init__(self, entity_match_string: str, check_for_synonym_string_match: bool = False):
         self.entity_match_string = entity_match_string
         self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
@@ -121,8 +122,156 @@ class SynonymDataDisambiguationStrategy:
                 )
             )
         result = sorted(scores, key=lambda x: x[1], reverse=False)[0]
-        logger.debug(f"ngram disambiguated {synonym} to {result[1]} with score: {result[2]}")
+        logger.info(f"ngram disambiguated {synonym} to {result[1]} with score: {result[2]}")
         return result[0]
+
+
+class EmbeddingSynonymDataDisambiguationStrategy:
+    def __init__(self, entity_match_string: str, spacy_pipeline: SpacyPipeline):
+        self.entity_match_string = entity_match_string
+        self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
+        self.number_resolver = NumberResolver(self.ent_match_norm)
+        self.synonym_db = SynonymDatabase()
+        self.metadata_db = MetadataDatabase()
+        self.minimum_string_length_for_non_exact_mapping = 4
+        self.spacy_pipeline = spacy_pipeline
+
+    def resolve_synonym_and_source(self, synonym: str, source: str) -> Optional[SynonymData]:
+        if not self.number_resolver(synonym):
+            logger.debug(f"{synonym} still ambiguous: number mismatch: {self.ent_match_norm}")
+            return None
+        else:
+            syn_data_set_this_hit: Set[SynonymData] = self.synonym_db.get(
+                name=source, synonym=synonym
+            )
+            target_syn_data = None
+            if len(syn_data_set_this_hit) > 1:
+                # if synonym is short, continue search. if synonym is long, chances are we can get a match with an embedding search
+                if len(synonym) < 8:
+                    logger.info(f"{synonym} still ambiguous: {syn_data_set_this_hit}")
+                else:
+                    logger.info(
+                        f"{synonym} is ambiguous, but string is long. Attempting ngram disambiguation"
+                    )
+                    target_syn_data = self.embedding_disambiguation(
+                        source=source,
+                        synonym=synonym,
+                        syn_data_set_this_hit=syn_data_set_this_hit,
+                    )
+            elif len(syn_data_set_this_hit) == 1:
+                target_syn_data = next(iter(syn_data_set_this_hit))
+            return target_syn_data
+
+    def embedding_disambiguation(
+        self, source: str, synonym: str, syn_data_set_this_hit: Set[SynonymData]
+    ) -> SynonymData:
+        """
+        may be replaced with Sapbert
+        :param source:
+        :param synonym:
+        :param syn_data_set_this_hit:
+        :return:
+        """
+        # TODO: needs threshold
+        synonym_doc: Doc = self.spacy_pipeline.instance.nlp(synonym)
+        idx_and_default_labels = []
+        for syn_data in syn_data_set_this_hit:
+            for idx in syn_data.ids:
+                metadata = self.metadata_db.get_by_idx(name=source, idx=idx)
+                idx_and_default_labels.append(
+                    (
+                        syn_data,
+                        StringNormalizer.normalize(metadata[DEFAULT_LABEL]),
+                    )
+                )
+        scores = []
+        for syn_data, default_label in idx_and_default_labels:
+            default_label_doc = self.spacy_pipeline.instance.nlp(default_label)
+            score = synonym_doc.similarity(default_label_doc)
+            scores.append(
+                (
+                    syn_data,
+                    default_label,
+                    score,
+                )
+            )
+        result = sorted(scores, key=lambda x: x[1], reverse=True)[0]
+        logger.debug(f"w2v disambiguated {synonym} to {result[1]} with score: {result[2]}")
+        return result[0]
+
+
+class NgramEmbeddingStringSimilarityResolver:
+    """
+    attempt to score NON symbolic alternative names to an entity match string
+    """
+
+    def __init__(self, min_similarity_score: float = 0.85, min_lcs_length: float = 0.7):
+        self.min_lcs_length = min_lcs_length
+        self.min_similarity_score = min_similarity_score
+        self.entity_match_string = None
+        self.entity_match_string_spacy = None
+        self.ent_match_norm = None
+        self.number_resolver = None
+        self.spacy_pipeline = SpacyPipeline(
+            "/Users/test/PycharmProjects/azner/model_pack/scispacy/en_core_sci_md-0.4.0/en_core_sci_md/en_core_sci_md-0.4.0"
+        )
+        self.lcs = LongestCommonSubsequence()
+
+    def clean_norm_string_for_embedding(self, norm_string: str):
+        parts = [x for x in norm_string.lower().split(" ") if x != "s"]
+        return " ".join(parts)
+
+    @functools.lru_cache(maxsize=1)
+    def prepare(self, entity_match_string: str):
+        self.entity_match_string = entity_match_string
+        self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
+        self.entity_match_string_spacy = self.spacy_pipeline.instance.nlp(
+            self.clean_norm_string_for_embedding(self.ent_match_norm)
+        )
+        self.number_resolver = NumberResolver(self.ent_match_norm)
+        self.min_lcs_score = float(len(self.ent_match_norm)) * self.min_lcs_length
+
+    def score_alternative_name(self, entity_match_string: str, alternative_name_norm: str) -> bool:
+        self.prepare(entity_match_string)
+        if not self.number_resolver(alternative_name_norm):
+            logger.debug(
+                f"{alternative_name_norm} still ambiguous: number mismatch: {self.ent_match_norm}"
+            )
+            return False
+
+        alternative_name_doc: Doc = self.spacy_pipeline.instance.nlp(
+            self.clean_norm_string_for_embedding(alternative_name_norm)
+        )
+        if any(not token.has_vector for token in alternative_name_doc):
+            logger.info(
+                f"cannot perform embedding similarity due to OOV for {alternative_name_norm}"
+            )
+            score = self.lcs.length(alternative_name_norm, self.ent_match_norm)
+            logger.info(f"lcs score: {score}: {self.ent_match_norm} -> {alternative_name_norm}")
+            return score >= self.min_lcs_score
+        else:
+            score = self.entity_match_string_spacy.similarity(alternative_name_doc)
+            logger.info(
+                f"embedding score: {score}: {self.entity_match_string_spacy.text} -> {alternative_name_doc.text}"
+            )
+            return score >= self.min_similarity_score
+
+
+class NumberCheckStringSimilarityResolver:
+    @functools.lru_cache(maxsize=1)
+    def prepare(self, entity_match_string: str):
+        self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
+        self.number_resolver = NumberResolver(self.ent_match_norm)
+
+    def score_alternative_name(self, entity_match_string: str, alternative_name_norm: str) -> bool:
+        self.prepare(entity_match_string)
+        if not self.number_resolver(alternative_name_norm):
+            logger.debug(
+                f"{alternative_name_norm} still ambiguous: number mismatch: {self.ent_match_norm}"
+            )
+            return False
+        else:
+            return True
 
 
 def is_probably_symbol_like(original_string: str) -> bool:
@@ -130,6 +279,7 @@ def is_probably_symbol_like(original_string: str) -> bool:
     # 1 to prevent div zero
     upper_count = 1
     lower_count = 1
+    int_count = 1
 
     for char in original_string:
         if char.isalpha():
@@ -137,8 +287,12 @@ def is_probably_symbol_like(original_string: str) -> bool:
                 upper_count += 1
             else:
                 lower_count += 1
-    ratio = float(upper_count) / float(lower_count)
-    if ratio >= 1.0:
+        elif char.isnumeric():
+            int_count += 1
+
+    upper_lower_ratio = float(upper_count) / float(lower_count)
+    int_alpha_ration = float(int_count) / (float(upper_count + lower_count - 1))
+    if upper_lower_ratio >= 1.0 or int_alpha_ration >= 1.0:
         return True
     else:
         return False
@@ -149,25 +303,23 @@ class SynonymDbQueryExtensions:
         self.synonym_db = SynonymDatabase()
 
     def create_corpus_for_source(
-        self, ambig_hits_this_source: List[Hit], source
-    ) -> Tuple[List[str], Dict[str, List[Hit]]]:
-        ambig_ids_this_source = {
-            (
-                idx,
-                hit,
-            )
-            for hit in ambig_hits_this_source
-            for syn_data in hit.syn_data
-            for idx in syn_data.ids
-        }
-        # build the corpus for all hits in this list
+        self, ambig_hits_this_source: List[Hit]
+    ) -> Tuple[List[str], DefaultDict[str, List[SynonymData]]]:
         corpus = []
-        hit_lookup = defaultdict(list)
-        for idx, hit in ambig_ids_this_source:
-            for syn in self.synonym_db.get_syns_for_id(name=source, idx=idx):
-                corpus.append(syn)
-                hit_lookup[syn].append(hit)
-        return corpus, hit_lookup
+        unambiguous_syn_to_syn_data = defaultdict(list)
+        for hit in ambig_hits_this_source:
+            for syn_data in hit.syn_data:
+                for idx in syn_data.ids:
+                    syns_this_id = self.synonym_db.get_syns_for_id(hit.parser_name, idx)
+                    for syn_this_id in syns_this_id:
+                        syn_data_this_syn = self.synonym_db.get(hit.parser_name, syn_this_id)
+                        # ignore any ambiguous synonyms
+                        if len(syn_data_this_syn) == 1:
+                            corpus.append(syn_this_id)
+                            unambiguous_syn_to_syn_data[syn_this_id].append(
+                                next(iter(syn_data_this_syn))
+                            )
+        return corpus, unambiguous_syn_to_syn_data
 
     def collect_all_syns_from_ents(self, ents: List[Entity]) -> List[str]:
         result = []
@@ -237,40 +389,55 @@ class KnowledgeBaseDisambiguationStrategy:
 
 
 class PreferDefaultLabelKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
+    """
+    assumptions: default label is unambiguous within KB
+    """
+
     def __init__(self):
         self.metadata_db = MetadataDatabase()
+        self.default_label_norm_to_id = self._build_default_label_norm_lookup()
+
+    def _build_default_label_norm_lookup(self):
+        parser_names = self.metadata_db.get_loaded_parsers()
+        default_label_norm_to_id = defaultdict(lambda: defaultdict(set))
+        for parser_name in parser_names:
+            all_metadata_this_parser = self.metadata_db.get_all(parser_name)
+            for idx, metadata in all_metadata_this_parser.items():
+                default_label_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
+                default_label_norm_to_id[parser_name][default_label_norm].add(idx)
+        return default_label_norm_to_id
 
     def __call__(
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Iterable[DisambiguatedHit]:
         hits_by_parser_name = defaultdict(set)
+        ent_match_norm = StringNormalizer.normalize(ent_match)
         for ent in entities:
             for hit in ent.hits:
                 hits_by_parser_name[hit.parser_name].add(hit)
 
         for parser_name, hits in hits_by_parser_name.items():
-            maybe_default_label_ids = set(
-                self.metadata_db.get_by_default_label(parser_name, ent_match)
-            )
-            if maybe_default_label_ids:
-                found = False
-                for hit in hits:
-                    for syn_data in hit.syn_data:
-                        found_ids = maybe_default_label_ids.intersection(syn_data.ids)
-                        for idx in found_ids:
-                            yield DisambiguatedHit(
-                                original_hit=hit,
-                                idx=idx,
-                                source=syn_data.ids_to_source[idx],
-                                confidence=hit.confidence,
-                                parser_name=hit.parser_name,
-                                mapping_type=syn_data.mapping_type,
-                            )
-                            found = True
-                        if found:
-                            break
+            found = False
+            for hit in hits:
+                default_label_ids = self.default_label_norm_to_id[hit.parser_name].get(
+                    ent_match_norm, set()
+                )
+                for syn_data in hit.syn_data:
+                    found_ids = default_label_ids.intersection(syn_data.ids)
+                    for idx in found_ids:
+                        yield DisambiguatedHit(
+                            original_hit=hit,
+                            idx=idx,
+                            source=syn_data.ids_to_source[idx],
+                            confidence=hit.confidence,
+                            parser_name=hit.parser_name,
+                            mapping_type=syn_data.mapping_type,
+                        )
+                        found = True
                     if found:
                         break
+                if found:
+                    break
 
 
 class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
@@ -278,7 +445,7 @@ class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisa
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Iterable[DisambiguatedHit]:
 
-        hits = {hit for ent in entities for hit in ent.hits}
+        hits = entities[0].hits
         for hit in hits:
             if hit.confidence == LinkRanks.HIGH_CONFIDENCE:
                 for syn_data in hit.syn_data:
@@ -295,6 +462,8 @@ class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisa
 
 
 class PreferEmbeddingKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
+    """ not used """
+
     def __init__(self, embedding_namespaces: Set[str]):
         self.embedding_namespaces = embedding_namespaces
 
@@ -302,12 +471,7 @@ class PreferEmbeddingKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambigua
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Iterable[DisambiguatedHit]:
 
-        hits = {
-            hit
-            for ent in entities
-            for hit in ent.hits
-            if hit.namespace in self.embedding_namespaces
-        }
+        hits = {hit for hit in entities[0].hits if hit.namespace in self.embedding_namespaces}
         for hit in hits:
             for syn_data in hit.syn_data:
                 if syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
@@ -330,7 +494,7 @@ class RequireFullDefinitionKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisa
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Iterable[DisambiguatedHit]:
         already_resolved_mappings_tup = self.manipulator.mappings_to_source_and_idx_tuples(document)
-        hits = {hit for ent in entities for hit in ent.hits}
+        hits = entities[0].hits
         for hit in hits:
             for syn_data in hit.syn_data:
                 for idx in syn_data.ids:
@@ -361,17 +525,98 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
     def prepare(self, document: Document):
         self.query_mat = build_query_matrix_cacheable(document, self.vectoriser, self.manipulator)
 
-    def get_synonym_data_disambiguating_strategy(self, entity_string: str):
-        return SynonymDataDisambiguationStrategy(entity_string)
+    def get_string_resolver_strategy(self):
+        raise NotImplementedError()
 
     def __call__(
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Iterable[DisambiguatedHit]:
         # todo: move to caching step
 
+        string_resolver = self.get_string_resolver_strategy()
+        # group hits by confidence (process high first)
+        ambig_hits = entities[0].hits
+        hits_by_parser_name = itertools.groupby(
+            sorted(ambig_hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
+        )
+
+        for parser_name, hits_iter in hits_by_parser_name:
+            hits_this_source = list(hits_iter)
+            hits_by_confidence = itertools.groupby(
+                sorted(hits_this_source, key=lambda x: x.confidence), key=lambda x: x.confidence
+            )
+            for confidence, hits_iter2 in hits_by_confidence:
+                hit_found = False
+
+                hits_this_confidence = list(hits_iter2)
+                hit_corpus, unambiguous_syn_to_syn_data = self.queries.create_corpus_for_source(
+                    hits_this_confidence
+                )
+                syns_and_scores = list(self.corpus_scorer(hit_corpus, self.query_mat))
+                syns_and_scores = sorted(syns_and_scores, key=lambda x: x[1], reverse=True)
+                for synonym, score in syns_and_scores:
+                    if string_resolver.score_alternative_name(
+                        alternative_name_norm=synonym, entity_match_string=ent_match
+                    ):
+                        target_syn_data_lst = unambiguous_syn_to_syn_data[synonym]
+                        if len(target_syn_data_lst) != 1:
+                            logger.warning("target syndata is too long!")
+                        target_syn_data = target_syn_data_lst[0]
+                        hit_found = True
+                        for idx in target_syn_data.ids:
+                            yield DisambiguatedHit(
+                                original_hit=None,
+                                idx=idx,
+                                source=target_syn_data.ids_to_source[idx],
+                                confidence=confidence,
+                                parser_name=parser_name,
+                                mapping_type=target_syn_data.mapping_type,
+                            )
+                        # we break the loop after the first successful hit is found in this strategy, so as to not
+                        # produce less good mappings than the best found
+                        break
+                if hit_found:
+                    logger.info(f"hit found at {confidence}. Stopping search")
+                    break
+
+
+class IntegerValidationTfIdfKnowledgeBaseDisambiguationStrategy(
+    TfIdfKnowledgeBaseDisambiguationStrategy
+):
+    def get_string_resolver_strategy(self):
+        return NumberCheckStringSimilarityResolver()
+
+
+class NgramEmbeddingValidationTfIdfKnowledgeBaseDisambiguationStrategy(
+    TfIdfKnowledgeBaseDisambiguationStrategy
+):
+    def get_string_resolver_strategy(self):
+        return NgramEmbeddingStringSimilarityResolver()
+
+
+class EmbeddingKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
+    def __init__(self):
+        self.metadata_db = MetadataDatabase()
+        self.nlp = SpacyPipeline(
+            "/Users/test/PycharmProjects/azner/model_pack/scispacy/en_core_sci_md-0.4.0/en_core_sci_md/en_core_sci_md-0.4.0"
+        )
+        self.corpus_scorer = EmbeddingCorpusScorer(self.nlp)
+        self.queries = SynonymDbQueryExtensions()
+        self.manipulator = DocumentManipulator()
+        self.query = None
+
+    def get_synonym_data_disambiguating_strategy(self, entity_string: str):
+        return EmbeddingSynonymDataDisambiguationStrategy(entity_string, self.nlp)
+
+    def __call__(
+        self, ent_match: str, entities: List[Entity], document: Document
+    ) -> Iterable[DisambiguatedHit]:
+        # todo: move to caching step
+        ent_match_norm = StringNormalizer.normalize(ent_match)
+        query = self.nlp.instance.nlp(ent_match_norm)
         disambiguator = self.get_synonym_data_disambiguating_strategy(ent_match)
         # group hits by confidence (process high first)
-        ambig_hits = {hit for ent in entities for hit in ent.hits}
+        ambig_hits = entities[0].hits
         hits_by_source = itertools.groupby(
             sorted(ambig_hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
         )
@@ -384,22 +629,14 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
             for confidence, hits_iter2 in hits_by_confidence:
                 hit_found = False
                 hits_this_confidence = list(hits_iter2)
-                corpus, hit_lookup = self.queries.create_corpus_for_source(
-                    hits_this_confidence, source
-                )
-                syns_and_scores = list(self.corpus_scorer(corpus, self.query_mat))
-                syns_and_scores = sorted(syns_and_scores, key=lambda x: x[1], reverse=True)
-                for synonym, score in syns_and_scores:
+                hit_corpus, hit_lookup = self.queries.create_corpus_for_source(hits_this_confidence)
+                hit_corpus = list(set(hit_corpus))
+                for synonym, score in self.corpus_scorer(hit_corpus, query):
                     target_syn_data = disambiguator.resolve_synonym_and_source(
                         source=source, synonym=synonym
                     )
                     if target_syn_data:
                         hits_found = hit_lookup[synonym]
-                        if len(hits_found) > 1:
-                            logger.warning(
-                                "multiple hits found for same synonym! Will return first hit only. fix this bug!"
-                            )
-                        # TODO: return a confidence based on original hit (i.e. improve confidence)
                         hit_found = True
                         for idx in target_syn_data.ids:
                             yield DisambiguatedHit(
@@ -645,7 +882,12 @@ class Disambiguator:
 
         # strategies to implement:
         # found exact unambiguous match
-        tfidf_kb_strategy = TfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
+        tfidf_symbolic_kb_strategy = IntegerValidationTfIdfKnowledgeBaseDisambiguationStrategy(
+            self.vectoriser
+        )
+        tfidf_non_symbolic_kb_strategy = (
+            NgramEmbeddingValidationTfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
+        )
         required_full_definition_strategy = (
             RequireFullDefinitionKnowledgeBaseDisambiguationStrategy()
         )
@@ -656,78 +898,63 @@ class Disambiguator:
         tfidf_global_strategy = TfIdfGlobalDisambiguationStrategy(
             self.vectoriser, self.kbs_are_compatible
         )
-        embedding_kb_strategy = PreferEmbeddingKnowledgeBaseDisambiguationStrategy(
-            set("SapBertForEntityLinkingStep")
-        )
+        # embedding_kb_strategy = PreferEmbeddingKnowledgeBaseDisambiguationStrategy(
+        #     set("SapBertForEntityLinkingStep")
+        # )
+        # embedding_kb_strategy = EmbeddingKnowledgeBaseDisambiguationStrategy()
 
-        self.default_strategy = DisambiguationStrategyList([required_high_confidence])
+        self.default_strategy = [required_high_confidence]
         self.symbolic_disambiguation_strategy_lookup = {
-            "gene": DisambiguationStrategyList(
-                [
-                    required_full_definition_strategy,
-                    required_high_confidence,
-                    prefer_default_label,
-                    tfidf_kb_strategy,
-                ]
-            ),
-            "disease": DisambiguationStrategyList(
-                [
-                    required_full_definition_strategy,
-                    required_high_confidence,
-                    prefer_default_label,
-                    embedding_kb_strategy,
-                ]
-            ),
-            "drug": DisambiguationStrategyList(
-                [
-                    required_full_definition_strategy,
-                    required_high_confidence,
-                    prefer_default_label,
-                    embedding_kb_strategy,
-                ]
-            ),
-            "anatomy": DisambiguationStrategyList(
-                [
-                    required_high_confidence,
-                    prefer_default_label,
-                    tfidf_kb_strategy,
-                    embedding_kb_strategy,
-                ]
-            ),
+            "gene": [
+                required_full_definition_strategy,
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_symbolic_kb_strategy,
+            ],
+            "disease": [
+                required_full_definition_strategy,
+                required_high_confidence,
+                prefer_default_label,
+            ],
+            "drug": [
+                required_full_definition_strategy,
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_symbolic_kb_strategy,
+                # embedding_kb_strategy
+            ],
+            "anatomy": [
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_symbolic_kb_strategy,
+                # embedding_kb_strategy,
+            ],
         }
         self.non_symbolic_disambiguation_strategy_lookup = {
-            "gene": DisambiguationStrategyList(
-                [
-                    required_high_confidence,
-                    prefer_default_label,
-                    tfidf_kb_strategy,
-                    embedding_kb_strategy,
-                ]
-            ),
-            "disease": DisambiguationStrategyList(
-                [
-                    required_high_confidence,
-                    prefer_default_label,
-                    tfidf_kb_strategy,
-                    embedding_kb_strategy,
-                ]
-            ),
-            "drug": DisambiguationStrategyList(
-                [
-                    required_high_confidence,
-                    prefer_default_label,
-                    tfidf_kb_strategy,
-                    embedding_kb_strategy,
-                ]
-            ),
-            "anatomy": DisambiguationStrategyList(
-                [
-                    required_high_confidence,
-                    prefer_default_label,
-                    tfidf_kb_strategy,
-                    embedding_kb_strategy,
-                ]
-            ),
+            "gene": [
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_non_symbolic_kb_strategy,
+                # embedding_kb_strategy,
+            ],
+            "disease": [
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_non_symbolic_kb_strategy,
+                # embedding_kb_strategy,
+            ],
+            "drug": [
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_non_symbolic_kb_strategy,
+                # embedding_kb_strategy,
+            ],
+            "anatomy": [
+                required_high_confidence,
+                prefer_default_label,
+                tfidf_non_symbolic_kb_strategy,
+                # embedding_kb_strategy,
+            ],
         }
 
         self.global_non_symbolic_disambiguation_strategy = GlobalDisambiguationStrategyList(
@@ -740,13 +967,14 @@ class Disambiguator:
         )
 
         self.all_strategies = [
-            tfidf_kb_strategy,
+            tfidf_symbolic_kb_strategy,
+            tfidf_non_symbolic_kb_strategy,
             required_full_definition_strategy,
             keep_high_conf_global_strategy,
             tfidf_global_strategy,
             required_full_definition_global,
             required_high_confidence,
-            embedding_kb_strategy,
+            # embedding_kb_strategy,
             prefer_default_label,
         ]
 
@@ -858,32 +1086,68 @@ class Disambiguator:
         :param query_mat:
         :return:
         """
-        grouped_by_match = itertools.groupby(
-            sorted(
-                ents_needing_disambig,
-                key=lambda x: (
-                    x.match,
-                    x.entity_class,
-                ),
-            ),
-            key=lambda x: (
-                x.match,
-                x.entity_class,
-            ),
-        )
+        if symbolic:
+            strategy_map = self.symbolic_disambiguation_strategy_lookup
+        else:
+            strategy_map = self.non_symbolic_disambiguation_strategy_lookup
+        strategy_max_index = max(len(strategies) for strategies in strategy_map.values())
+        entities_without_mappings = set(ents_needing_disambig)
+        for i in range(0, strategy_max_index):
 
-        for ent_match_and_class, ent_iter in grouped_by_match:
-            ent_match = ent_match_and_class[0]
-            ent_class = ent_match_and_class[1]
-            ents_this_match = list(ent_iter)
-            if symbolic:
-                self.symbolic_disambiguation_strategy_lookup.get(ent_class, self.default_strategy)(
-                    ent_match, ents_this_match, document
-                )
-            else:
-                self.non_symbolic_disambiguation_strategy_lookup.get(
-                    ent_class, self.default_strategy
-                )(ent_match, ents_this_match, document)
+            grouped_by_class_and_match = itertools.groupby(
+                sorted(
+                    entities_without_mappings,
+                    key=lambda x: (
+                        x.entity_class,
+                        x.match,
+                    ),
+                ),
+                key=lambda x: (x.entity_class, x.match),
+            )
+            for entity_class_and_match, entities_iter in grouped_by_class_and_match:
+                entity_class = entity_class_and_match[0]
+                entity_match = entity_class_and_match[1]
+                strategy_list = strategy_map.get(entity_class, self.default_strategy)
+                if i > len(strategy_list) - 1:
+                    logger.debug("no more strategies this class")
+                    continue
+                else:
+                    strategy = strategy_list[i]
+                    # only run strategy on entities without mappings assigned by previous strategy
+                    entities_without_mappings_this_class_and_match = list(
+                        filter(lambda x: x in entities_without_mappings, entities_iter)
+                    )
+                    if len(entities_without_mappings_this_class_and_match) == 0:
+                        continue
+
+                    logger.info(
+                        f"running strategy {strategy.__class__.__name__} on class :<{entity_class}>, match: <{entity_match}>. remaining: {len(entities_without_mappings_this_class_and_match)}"
+                    )
+                    new_mappings = []
+                    for disambiguate_hit in strategy(
+                        ent_match=entity_match,
+                        entities=entities_without_mappings_this_class_and_match,
+                        document=document,
+                    ):
+                        successful_strategy = strategy.__class__.__name__
+                        additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
+                        # todo - calculate disambiguated conf better!
+                        mapping = self.metadata_db.create_mapping(
+                            parser_name=disambiguate_hit.parser_name,
+                            source=disambiguate_hit.source,
+                            idx=disambiguate_hit.idx,
+                            mapping_type=disambiguate_hit.mapping_type,
+                            confidence=disambiguate_hit.confidence,
+                            additional_metadata=additional_metadata,
+                        )
+                        logger.info(
+                            f"mapping created: original string: {entity_match}, mapping: {mapping}"
+                        )
+                        new_mappings.append(mapping)
+                    if len(new_mappings) > 0:
+                        for ent in entities_without_mappings_this_class_and_match:
+                            ent.mappings.extend(copy.deepcopy(new_mappings))
+                            entities_without_mappings.remove(ent)
 
 
 def ent_match_group_key(ent: Entity):
@@ -976,3 +1240,26 @@ class TfIdfCorpusScorer:
             distances = score_matrix[neighbours]
             distances = 100 * -distances
         return neighbours, distances
+
+
+class EmbeddingCorpusScorer:
+    def __init__(self, spacy_pipeline: SpacyPipeline):
+        self.spacy_pipeline = spacy_pipeline
+
+    def __call__(self, corpus: List[str], query: Doc) -> Iterable[Tuple[str, float]]:
+        if len(corpus) == 0:
+            return None
+        else:
+            for doc, score in self.find_neighbours_and_scores(corpus=corpus, query=query):
+                yield doc.text, score
+
+    def find_neighbours_and_scores(self, corpus: List[str], query: Doc):
+        corpus_docs = self.spacy_pipeline.instance.nlp.pipe(corpus)
+        corpus_docs_and_score = [
+            (
+                doc,
+                query.similarity(doc),
+            )
+            for doc in corpus_docs
+        ]
+        return sorted(corpus_docs_and_score, key=lambda x: x[1], reverse=True)
