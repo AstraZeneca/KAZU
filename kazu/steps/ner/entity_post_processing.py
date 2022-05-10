@@ -218,7 +218,12 @@ class NonContiguousEntitySplitter:
         self.entity_conditions = entity_conditions
 
     def __call__(self, entity: Entity, text: str) -> List[Entity]:
+
         new_ents = []
         for rule in self.entity_conditions.get(entity.entity_class, []):
-            new_ents.extend(rule(entity, text))
+            found_ents = rule(entity, text)
+            for found_ent in found_ents:
+                # only add new ent if offsets have changed
+                if found_ent.start != entity.start or found_ent.end != entity.end:
+                    new_ents.append(found_ent)
         return new_ents
