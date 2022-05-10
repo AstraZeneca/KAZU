@@ -128,7 +128,7 @@ class Hit:
     is not ready to become a fully fledged mapping yet, as it may require further disambiguation
     """
 
-    matched_str: str
+    string_norm: str
     parser_name: str  # NOTE: this is the parser name, not the kb name. TODO: rename to data_source for consistency
     namespace: str = field(init=False)
     syn_data: FrozenSet[SynonymData]
