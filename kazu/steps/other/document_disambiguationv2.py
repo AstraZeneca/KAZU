@@ -7,7 +7,7 @@ import pickle
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict
+from typing import List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict, Dict
 
 import numpy as np
 import pydash
@@ -31,6 +31,7 @@ from kazu.utils.spacy_pipeline import SpacyPipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy.tokens import Doc
 from strsimpy import NGram, LongestCommonSubsequence
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -48,156 +49,6 @@ UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
     EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
     EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
 }
-
-
-class StringMatchingSynonymDataDisambiguationStrategy:
-    def __init__(self, entity_match_string: str, check_for_synonym_string_match: bool = False):
-        self.entity_match_string = entity_match_string
-        self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
-        self.number_resolver = NumberResolver(self.ent_match_norm)
-        self.string_resolver = (
-            SubStringResolver(self.ent_match_norm) if check_for_synonym_string_match else None
-        )
-        self.synonym_db = SynonymDatabase()
-        self.metadata_db = MetadataDatabase()
-        self.minimum_string_length_for_non_exact_mapping = 4
-
-    def resolve_synonym_and_source(self, synonym: str, source: str) -> Optional[SynonymData]:
-        if not self.number_resolver(synonym):
-            logger.debug(f"{synonym} still ambiguous: number mismatch: {self.ent_match_norm}")
-            return None
-        if self.string_resolver and not self.string_resolver(synonym):
-            logger.debug(f"{synonym} still ambiguous: substring not found: {self.ent_match_norm}")
-            return None
-
-        syn_data_set_this_hit: Set[SynonymData] = self.synonym_db.get(name=source, synonym=synonym)
-        target_syn_data = None
-        if len(syn_data_set_this_hit) > 1:
-            # if synonym is short, continue search. if synonym is long, chances are we can get a match with an ngram match
-            if len(synonym) < 8:
-                logger.info(f"{synonym} still ambiguous: {syn_data_set_this_hit}")
-            else:
-                logger.info(
-                    f"{synonym} is ambiguous, but string is long. Attempting ngram disambiguation"
-                )
-                target_syn_data = self.ngram_disambiguation(
-                    source=source,
-                    synonym=synonym,
-                    syn_data_set_this_hit=syn_data_set_this_hit,
-                )
-        elif len(syn_data_set_this_hit) == 1:
-            target_syn_data = next(iter(syn_data_set_this_hit))
-        return target_syn_data
-
-    def ngram_disambiguation(
-        self, source: str, synonym: str, syn_data_set_this_hit: Set[SynonymData]
-    ) -> SynonymData:
-        """
-        may be replaced with Sapbert
-        :param source:
-        :param synonym:
-        :param syn_data_set_this_hit:
-        :return:
-        """
-        # TODO: needs threshold
-        ngram = NGram(2)
-        idx_and_default_labels = []
-        for syn_data in syn_data_set_this_hit:
-            for idx in syn_data.ids:
-                metadata = self.metadata_db.get_by_idx(name=source, idx=idx)
-                idx_and_default_labels.append(
-                    (
-                        syn_data,
-                        StringNormalizer.normalize(metadata[DEFAULT_LABEL]),
-                    )
-                )
-        scores = []
-        for syn_data, default_label in idx_and_default_labels:
-            score = ngram.distance(synonym, default_label)
-            scores.append(
-                (
-                    syn_data,
-                    default_label,
-                    score,
-                )
-            )
-        result = sorted(scores, key=lambda x: x[1], reverse=False)[0]
-        logger.info(f"ngram disambiguated {synonym} to {result[1]} with score: {result[2]}")
-        return result[0]
-
-
-class EmbeddingSynonymDataDisambiguationStrategy:
-    def __init__(self, entity_match_string: str, spacy_pipeline: SpacyPipeline):
-        self.entity_match_string = entity_match_string
-        self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
-        self.number_resolver = NumberResolver(self.ent_match_norm)
-        self.synonym_db = SynonymDatabase()
-        self.metadata_db = MetadataDatabase()
-        self.minimum_string_length_for_non_exact_mapping = 4
-        self.spacy_pipeline = spacy_pipeline
-
-    def resolve_synonym_and_source(self, synonym: str, source: str) -> Optional[SynonymData]:
-        if not self.number_resolver(synonym):
-            logger.debug(f"{synonym} still ambiguous: number mismatch: {self.ent_match_norm}")
-            return None
-        else:
-            syn_data_set_this_hit: Set[SynonymData] = self.synonym_db.get(
-                name=source, synonym=synonym
-            )
-            target_syn_data = None
-            if len(syn_data_set_this_hit) > 1:
-                # if synonym is short, continue search. if synonym is long, chances are we can get a match with an embedding search
-                if len(synonym) < 8:
-                    logger.info(f"{synonym} still ambiguous: {syn_data_set_this_hit}")
-                else:
-                    logger.info(
-                        f"{synonym} is ambiguous, but string is long. Attempting ngram disambiguation"
-                    )
-                    target_syn_data = self.embedding_disambiguation(
-                        source=source,
-                        synonym=synonym,
-                        syn_data_set_this_hit=syn_data_set_this_hit,
-                    )
-            elif len(syn_data_set_this_hit) == 1:
-                target_syn_data = next(iter(syn_data_set_this_hit))
-            return target_syn_data
-
-    def embedding_disambiguation(
-        self, source: str, synonym: str, syn_data_set_this_hit: Set[SynonymData]
-    ) -> SynonymData:
-        """
-        may be replaced with Sapbert
-        :param source:
-        :param synonym:
-        :param syn_data_set_this_hit:
-        :return:
-        """
-        # TODO: needs threshold
-        synonym_doc: Doc = self.spacy_pipeline.instance.nlp(synonym)
-        idx_and_default_labels = []
-        for syn_data in syn_data_set_this_hit:
-            for idx in syn_data.ids:
-                metadata = self.metadata_db.get_by_idx(name=source, idx=idx)
-                idx_and_default_labels.append(
-                    (
-                        syn_data,
-                        StringNormalizer.normalize(metadata[DEFAULT_LABEL]),
-                    )
-                )
-        scores = []
-        for syn_data, default_label in idx_and_default_labels:
-            default_label_doc = self.spacy_pipeline.instance.nlp(default_label)
-            score = synonym_doc.similarity(default_label_doc)
-            scores.append(
-                (
-                    syn_data,
-                    default_label,
-                    score,
-                )
-            )
-        result = sorted(scores, key=lambda x: x[1], reverse=True)[0]
-        logger.debug(f"w2v disambiguated {synonym} to {result[1]} with score: {result[2]}")
-        return result[0]
 
 
 class NgramEmbeddingStringSimilarityResolver:
@@ -231,30 +82,46 @@ class NgramEmbeddingStringSimilarityResolver:
         self.number_resolver = NumberResolver(self.ent_match_norm)
         self.min_lcs_score = float(len(self.ent_match_norm)) * self.min_lcs_length
 
-    def score_alternative_name(self, entity_match_string: str, alternative_name_norm: str) -> bool:
+    def score_alternative_name(
+        self, entity_match_string: str, alternative_name_norm: str
+    ) -> Dict[str, bool]:
         self.prepare(entity_match_string)
+
         if not self.number_resolver(alternative_name_norm):
             logger.debug(
                 f"{alternative_name_norm} still ambiguous: number mismatch: {self.ent_match_norm}"
             )
-            return False
+            return {"number_correct": False}
 
-        alternative_name_doc: Doc = self.spacy_pipeline.instance.nlp(
-            self.clean_norm_string_for_embedding(alternative_name_norm)
-        )
-        if any(not token.has_vector for token in alternative_name_doc):
-            logger.info(
-                f"cannot perform embedding similarity due to OOV for {alternative_name_norm}"
-            )
-            score = self.lcs.length(alternative_name_norm, self.ent_match_norm)
-            logger.info(f"lcs score: {score}: {self.ent_match_norm} -> {alternative_name_norm}")
-            return score >= self.min_lcs_score
         else:
-            score = self.entity_match_string_spacy.similarity(alternative_name_doc)
-            logger.info(
-                f"embedding score: {score}: {self.entity_match_string_spacy.text} -> {alternative_name_doc.text}"
+            result = {"number_correct": True}
+
+            lcs_score = self.lcs.length(alternative_name_norm, self.ent_match_norm)
+            logger.info(f"lcs score: {lcs_score}: {self.ent_match_norm} -> {alternative_name_norm}")
+            if lcs_score >= self.min_lcs_score:
+                result["lcs_score"] = True
+            else:
+                result["lcs_score"] = False
+
+            alternative_name_doc: Doc = self.spacy_pipeline.instance.nlp(
+                self.clean_norm_string_for_embedding(alternative_name_norm)
             )
-            return score >= self.min_similarity_score
+
+            if any(not token.has_vector for token in alternative_name_doc):
+                logger.info(
+                    f"cannot perform embedding similarity due to OOV for {alternative_name_norm}"
+                )
+                result["embedding_score"] = False
+            else:
+                simscore = self.entity_match_string_spacy.similarity(alternative_name_doc)
+                logger.info(
+                    f"embedding score: {simscore}: {self.entity_match_string_spacy.text} -> {alternative_name_doc.text}"
+                )
+                if simscore >= self.min_similarity_score:
+                    result["embedding_score"] = True
+                else:
+                    result["embedding_score"] = False
+        return result
 
 
 class NumberCheckStringSimilarityResolver:
@@ -263,15 +130,15 @@ class NumberCheckStringSimilarityResolver:
         self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
         self.number_resolver = NumberResolver(self.ent_match_norm)
 
-    def score_alternative_name(self, entity_match_string: str, alternative_name_norm: str) -> bool:
+    def score_alternative_name(self, entity_match_string: str, alternative_name_norm: str) -> Dict[str,bool]:
         self.prepare(entity_match_string)
         if not self.number_resolver(alternative_name_norm):
             logger.debug(
                 f"{alternative_name_norm} still ambiguous: number mismatch: {self.ent_match_norm}"
             )
-            return False
+            return {"number_correct": False}
         else:
-            return True
+            return {"number_correct": True}
 
 
 def is_probably_symbol_like(original_string: str) -> bool:
@@ -304,9 +171,9 @@ class SynonymDbQueryExtensions:
 
     def create_corpus_for_source(
         self, ambig_hits_this_source: List[Hit]
-    ) -> Tuple[List[str], DefaultDict[str, List[SynonymData]]]:
+    ) -> Tuple[List[str], DefaultDict[str, Set[SynonymData]]]:
         corpus = []
-        unambiguous_syn_to_syn_data = defaultdict(list)
+        unambiguous_syn_to_syn_data = defaultdict(set)
         for hit in ambig_hits_this_source:
             for syn_data in hit.syn_data:
                 for idx in syn_data.ids:
@@ -316,9 +183,11 @@ class SynonymDbQueryExtensions:
                         # ignore any ambiguous synonyms
                         if len(syn_data_this_syn) == 1:
                             corpus.append(syn_this_id)
-                            unambiguous_syn_to_syn_data[syn_this_id].append(
+                            unambiguous_syn_to_syn_data[syn_this_id].add(
                                 next(iter(syn_data_this_syn))
                             )
+        assert all(len(x) == 1 for x in unambiguous_syn_to_syn_data.values())
+        # assert all(len(x)==1 for x in unambiguous_syn_to_original_string_norm.values())
         return corpus, unambiguous_syn_to_syn_data
 
     def collect_all_syns_from_ents(self, ents: List[Entity]) -> List[str]:
@@ -343,7 +212,7 @@ class SynonymDbQueryExtensions:
 
 
 class DocumentManipulator:
-    def mappings_to_source_and_idx_tuples(self, document: Document) -> Set[Tuple[str, str]]:
+    def mappings_to_parser_name_and_idx_tuples(self, document: Document) -> Set[Tuple[str, str]]:
         ents = document.get_entities()
         result = set()
         for ent in ents:
@@ -383,7 +252,7 @@ class KnowledgeBaseDisambiguationStrategy:
         pass
 
     def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
+        self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
         raise NotImplementedError()
 
@@ -408,44 +277,36 @@ class PreferDefaultLabelKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambi
         return default_label_norm_to_id
 
     def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
+        self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
-        hits_by_parser_name = defaultdict(set)
         ent_match_norm = StringNormalizer.normalize(ent_match)
-        for ent in entities:
-            for hit in ent.hits:
-                hits_by_parser_name[hit.parser_name].add(hit)
-
-        for parser_name, hits in hits_by_parser_name.items():
-            found = False
-            for hit in hits:
-                default_label_ids = self.default_label_norm_to_id[hit.parser_name].get(
-                    ent_match_norm, set()
-                )
-                for syn_data in hit.syn_data:
-                    found_ids = default_label_ids.intersection(syn_data.ids)
-                    for idx in found_ids:
-                        yield DisambiguatedHit(
-                            original_hit=hit,
-                            idx=idx,
-                            source=syn_data.ids_to_source[idx],
-                            confidence=hit.confidence,
-                            parser_name=hit.parser_name,
-                            mapping_type=syn_data.mapping_type,
-                        )
-                        found = True
-                    if found:
-                        break
+        found = False
+        for hit in hits:
+            default_label_ids = self.default_label_norm_to_id[hit.parser_name].get(
+                ent_match_norm, set()
+            )
+            for syn_data in hit.syn_data:
+                found_ids = default_label_ids.intersection(syn_data.ids)
+                for idx in found_ids:
+                    yield DisambiguatedHit(
+                        original_hit=hit,
+                        idx=idx,
+                        source=syn_data.ids_to_source[idx],
+                        confidence=hit.confidence,
+                        parser_name=hit.parser_name,
+                        mapping_type=syn_data.mapping_type,
+                    )
+                    found = True
                 if found:
                     break
+            if found:
+                break
 
 
 class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
     def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
+        self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
-
-        hits = entities[0].hits
         for hit in hits:
             if hit.confidence == LinkRanks.HIGH_CONFIDENCE:
                 for syn_data in hit.syn_data:
@@ -461,40 +322,16 @@ class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisa
                             )
 
 
-class PreferEmbeddingKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
-    """ not used """
-
-    def __init__(self, embedding_namespaces: Set[str]):
-        self.embedding_namespaces = embedding_namespaces
-
-    def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
-    ) -> Iterable[DisambiguatedHit]:
-
-        hits = {hit for hit in entities[0].hits if hit.namespace in self.embedding_namespaces}
-        for hit in hits:
-            for syn_data in hit.syn_data:
-                if syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                    for idx in syn_data.ids:
-                        yield DisambiguatedHit(
-                            original_hit=hit,
-                            idx=idx,
-                            source=syn_data.ids_to_source[idx],
-                            confidence=hit.confidence,
-                            parser_name=hit.parser_name,
-                            mapping_type=syn_data.mapping_type,
-                        )
-
-
 class RequireFullDefinitionKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
     def __init__(self):
         self.manipulator = DocumentManipulator()
 
     def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
+        self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
-        already_resolved_mappings_tup = self.manipulator.mappings_to_source_and_idx_tuples(document)
-        hits = entities[0].hits
+        already_resolved_mappings_tup = self.manipulator.mappings_to_parser_name_and_idx_tuples(
+            document
+        )
         for hit in hits:
             for syn_data in hit.syn_data:
                 for idx in syn_data.ids:
@@ -521,63 +358,93 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         self.queries = SynonymDbQueryExtensions()
         self.manipulator = DocumentManipulator()
         self.query_mat = None
+        self.manipulator = DocumentManipulator()
+        self.good_tuples = set()
 
     def prepare(self, document: Document):
         self.query_mat = build_query_matrix_cacheable(document, self.vectoriser, self.manipulator)
 
+    @functools.lru_cache(maxsize=1)
+    def find_good_tuples(self, document: Document):
+        self.good_tuples = self.manipulator.mappings_to_parser_name_and_idx_tuples(document)
+
     def get_string_resolver_strategy(self):
         raise NotImplementedError()
 
-    def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
-    ) -> Iterable[DisambiguatedHit]:
-        # todo: move to caching step
-
-        string_resolver = self.get_string_resolver_strategy()
-        # group hits by confidence (process high first)
-        ambig_hits = entities[0].hits
-        hits_by_parser_name = itertools.groupby(
-            sorted(ambig_hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
+    def previously_found(self, parser_name, syn_data: SynonymData):
+        return any(
+            (
+                parser_name,
+                idx,
+            )
+            in self.good_tuples
+            for idx in syn_data.ids
         )
 
-        for parser_name, hits_iter in hits_by_parser_name:
-            hits_this_source = list(hits_iter)
-            hits_by_confidence = itertools.groupby(
-                sorted(hits_this_source, key=lambda x: x.confidence), key=lambda x: x.confidence
-            )
-            for confidence, hits_iter2 in hits_by_confidence:
-                hit_found = False
+    def __call__(
+        self, ent_match: str, document: Document, hits: List[Hit]
+    ) -> Iterable[DisambiguatedHit]:
+        parser_name = hits[0].parser_name
+        # todo: move to caching step
+        self.find_good_tuples(document)
+        string_resolver = self.get_string_resolver_strategy()
+        # group hits by confidence (process high first)
+        hits_by_confidence = itertools.groupby(
+            sorted(hits, key=lambda x: x.confidence), key=lambda x: x.confidence
+        )
+        hit_found = False
+        for confidence, hits_iter in hits_by_confidence:
+            if hit_found:
+                break
 
-                hits_this_confidence = list(hits_iter2)
-                hit_corpus, unambiguous_syn_to_syn_data = self.queries.create_corpus_for_source(
-                    hits_this_confidence
-                )
-                syns_and_scores = list(self.corpus_scorer(hit_corpus, self.query_mat))
-                syns_and_scores = sorted(syns_and_scores, key=lambda x: x[1], reverse=True)
-                for synonym, score in syns_and_scores:
-                    if string_resolver.score_alternative_name(
-                        alternative_name_norm=synonym, entity_match_string=ent_match
-                    ):
-                        target_syn_data_lst = unambiguous_syn_to_syn_data[synonym]
-                        if len(target_syn_data_lst) != 1:
-                            logger.warning("target syndata is too long!")
-                        target_syn_data = target_syn_data_lst[0]
-                        hit_found = True
-                        for idx in target_syn_data.ids:
-                            yield DisambiguatedHit(
-                                original_hit=None,
-                                idx=idx,
-                                source=target_syn_data.ids_to_source[idx],
-                                confidence=confidence,
-                                parser_name=parser_name,
-                                mapping_type=target_syn_data.mapping_type,
-                            )
-                        # we break the loop after the first successful hit is found in this strategy, so as to not
-                        # produce less good mappings than the best found
-                        break
-                if hit_found:
-                    logger.info(f"hit found at {confidence}. Stopping search")
+            hits_this_confidence = list(hits_iter)
+
+            (
+                unambiguous_synonym_corpus,
+                unambiguous_syn_to_syn_data,
+            ) = self.queries.create_corpus_for_source(hits_this_confidence)
+            unambiguous_syns_and_scores = list(
+                self.corpus_scorer(unambiguous_synonym_corpus, self.query_mat)
+            )
+            unambiguous_syns_and_scores = sorted(
+                unambiguous_syns_and_scores, key=lambda x: x[1], reverse=True
+            )
+            for unambiguous_syn, score in unambiguous_syns_and_scores:
+                # TODO: set his correctly
+                if score <= 7.0:
                     break
+
+                target_syn_data_set = unambiguous_syn_to_syn_data[unambiguous_syn]
+                if len(target_syn_data_set) != 1:
+                    logger.warning("target syndata is too long!")
+                target_syn_data = next(iter(target_syn_data_set))
+                previously_found = self.previously_found(parser_name, target_syn_data)
+                if not previously_found:
+                    string_score_results = string_resolver.score_alternative_name(
+                        alternative_name_norm=unambiguous_syn, entity_match_string=ent_match
+                    )
+                else:
+                    string_score_results = {}
+
+                logger.info(
+                    f"original: <{ent_match}>, matched: <{unambiguous_syn}>, previously found: <{previously_found}>, context: {score}, string score {string_score_results}"
+                )
+                if previously_found or all(x for x in string_score_results.values()):
+                    hit_found = True
+                    for idx in target_syn_data.ids:
+                        yield DisambiguatedHit(
+                            original_hit=None,
+                            idx=idx,
+                            source=target_syn_data.ids_to_source[idx],
+                            confidence=LinkRanks.MEDIUM_CONFIDENCE, #set to medium, since we got to this strategy without finding a hit...
+                            parser_name=parser_name,
+                            mapping_type=target_syn_data.mapping_type,
+                        )
+                    # we break the loop after the first successful hit is found in this strategy, so as to not
+                    # produce less good mappings than the best found
+                    if hit_found:
+                        logger.info(f"hit found at {confidence.name}. Stopping search")
+                        break
 
 
 class IntegerValidationTfIdfKnowledgeBaseDisambiguationStrategy(
@@ -592,67 +459,6 @@ class NgramEmbeddingValidationTfIdfKnowledgeBaseDisambiguationStrategy(
 ):
     def get_string_resolver_strategy(self):
         return NgramEmbeddingStringSimilarityResolver()
-
-
-class EmbeddingKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
-    def __init__(self):
-        self.metadata_db = MetadataDatabase()
-        self.nlp = SpacyPipeline(
-            "/Users/test/PycharmProjects/azner/model_pack/scispacy/en_core_sci_md-0.4.0/en_core_sci_md/en_core_sci_md-0.4.0"
-        )
-        self.corpus_scorer = EmbeddingCorpusScorer(self.nlp)
-        self.queries = SynonymDbQueryExtensions()
-        self.manipulator = DocumentManipulator()
-        self.query = None
-
-    def get_synonym_data_disambiguating_strategy(self, entity_string: str):
-        return EmbeddingSynonymDataDisambiguationStrategy(entity_string, self.nlp)
-
-    def __call__(
-        self, ent_match: str, entities: List[Entity], document: Document
-    ) -> Iterable[DisambiguatedHit]:
-        # todo: move to caching step
-        ent_match_norm = StringNormalizer.normalize(ent_match)
-        query = self.nlp.instance.nlp(ent_match_norm)
-        disambiguator = self.get_synonym_data_disambiguating_strategy(ent_match)
-        # group hits by confidence (process high first)
-        ambig_hits = entities[0].hits
-        hits_by_source = itertools.groupby(
-            sorted(ambig_hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
-        )
-
-        for source, hits_iter in hits_by_source:
-            hits_this_source = list(hits_iter)
-            hits_by_confidence = itertools.groupby(
-                sorted(hits_this_source, key=lambda x: x.confidence), key=lambda x: x.confidence
-            )
-            for confidence, hits_iter2 in hits_by_confidence:
-                hit_found = False
-                hits_this_confidence = list(hits_iter2)
-                hit_corpus, hit_lookup = self.queries.create_corpus_for_source(hits_this_confidence)
-                hit_corpus = list(set(hit_corpus))
-                for synonym, score in self.corpus_scorer(hit_corpus, query):
-                    target_syn_data = disambiguator.resolve_synonym_and_source(
-                        source=source, synonym=synonym
-                    )
-                    if target_syn_data:
-                        hits_found = hit_lookup[synonym]
-                        hit_found = True
-                        for idx in target_syn_data.ids:
-                            yield DisambiguatedHit(
-                                original_hit=hits_found[0],
-                                idx=idx,
-                                source=target_syn_data.ids_to_source[idx],
-                                confidence=confidence,
-                                parser_name=hits_found[0].parser_name,
-                                mapping_type=target_syn_data.mapping_type,
-                            )
-                        # we break the loop after the first successful hit is found in this strategy, so as to not
-                        # produce less good mappings than the best found
-                        break
-                if hit_found:
-                    logger.info(f"hit found at {confidence}. Stopping search")
-                    break
 
 
 class GlobalDisambiguationStrategy:
@@ -672,7 +478,9 @@ class RequireFullDefinitionGlobalDisambiguationStrategy(GlobalDisambiguationStra
     def __call__(
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Tuple[List[Entity], List[Entity]]:
-        already_resolved_mappings_tup = self.manipulator.mappings_to_source_and_idx_tuples(document)
+        already_resolved_mappings_tup = self.manipulator.mappings_to_parser_name_and_idx_tuples(
+            document
+        )
         ents_defined_elsewhere = []
         ents_not_defined_elsewhere = []
         for ent in entities:
@@ -788,45 +596,6 @@ class GlobalDisambiguationStrategyList:
         return "no_successful_strategy", [], entities
 
 
-class DisambiguationStrategyList:
-    def __init__(self, strategies: List[KnowledgeBaseDisambiguationStrategy]):
-        self.strategies = strategies
-        self.metadata_db = MetadataDatabase()
-
-    def __call__(self, entity_string: str, entities: List[Entity], document: Document):
-        """
-
-        :param entity_string: the matched string this entity
-        :param entities: entities sharinf this match
-        :param document_representation: set of strings for all ents this doc
-        :param already_resolved_mappings: source idx of good mappings so far
-        :return:
-        """
-        mappings = []
-        for strategy in self.strategies:
-            for disambiguate_hit in strategy(
-                ent_match=entity_string, entities=entities, document=document
-            ):
-                successful_strategy = strategy.__class__.__name__
-                additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
-                # todo - calculate disambiguated conf better!
-                mapping = self.metadata_db.create_mapping(
-                    parser_name=disambiguate_hit.parser_name,
-                    source=disambiguate_hit.source,
-                    idx=disambiguate_hit.idx,
-                    mapping_type=disambiguate_hit.mapping_type,
-                    confidence=disambiguate_hit.confidence,
-                    additional_metadata=additional_metadata,
-                )
-                mappings.append(mapping)
-            # if a strategy was successful, don't attempt any further strategies
-            if len(mappings) > 0:
-                break
-
-        for ent in entities:
-            ent.mappings.extend(copy.deepcopy(mappings))
-
-
 def create_char_3grams(string):
     return create_char_ngrams(string, n=3)
 
@@ -921,13 +690,11 @@ class Disambiguator:
                 required_high_confidence,
                 prefer_default_label,
                 tfidf_symbolic_kb_strategy,
-                # embedding_kb_strategy
             ],
             "anatomy": [
                 required_high_confidence,
                 prefer_default_label,
                 tfidf_symbolic_kb_strategy,
-                # embedding_kb_strategy,
             ],
         }
         self.non_symbolic_disambiguation_strategy_lookup = {
@@ -935,25 +702,21 @@ class Disambiguator:
                 required_high_confidence,
                 prefer_default_label,
                 tfidf_non_symbolic_kb_strategy,
-                # embedding_kb_strategy,
             ],
             "disease": [
                 required_high_confidence,
                 prefer_default_label,
                 tfidf_non_symbolic_kb_strategy,
-                # embedding_kb_strategy,
             ],
             "drug": [
                 required_high_confidence,
                 prefer_default_label,
                 tfidf_non_symbolic_kb_strategy,
-                # embedding_kb_strategy,
             ],
             "anatomy": [
                 required_high_confidence,
                 prefer_default_label,
                 tfidf_non_symbolic_kb_strategy,
-                # embedding_kb_strategy,
             ],
         }
 
@@ -1090,13 +853,13 @@ class Disambiguator:
             strategy_map = self.symbolic_disambiguation_strategy_lookup
         else:
             strategy_map = self.non_symbolic_disambiguation_strategy_lookup
-        strategy_max_index = max(len(strategies) for strategies in strategy_map.values())
-        entities_without_mappings = set(ents_needing_disambig)
-        for i in range(0, strategy_max_index):
 
-            grouped_by_class_and_match = itertools.groupby(
+        def group_ents(
+            ents: List[Entity],
+        ) -> Iterable[Tuple[str, str, str, List[Entity], List[Hit]]]:
+            ents_grouped_by_class_and_match = itertools.groupby(
                 sorted(
-                    entities_without_mappings,
+                    ents,
                     key=lambda x: (
                         x.entity_class,
                         x.match,
@@ -1104,50 +867,77 @@ class Disambiguator:
                 ),
                 key=lambda x: (x.entity_class, x.match),
             )
-            for entity_class_and_match, entities_iter in grouped_by_class_and_match:
-                entity_class = entity_class_and_match[0]
-                entity_match = entity_class_and_match[1]
-                strategy_list = strategy_map.get(entity_class, self.default_strategy)
-                if i > len(strategy_list) - 1:
-                    logger.debug("no more strategies this class")
-                    continue
-                else:
-                    strategy = strategy_list[i]
-                    # only run strategy on entities without mappings assigned by previous strategy
-                    entities_without_mappings_this_class_and_match = list(
-                        filter(lambda x: x in entities_without_mappings, entities_iter)
+            for (entity_class, entity_match), ents_iter in ents_grouped_by_class_and_match:
+                entities_this_class_and_match = list(ents_iter)
+                # note,assume all ents with same match have same hits!
+                hits = entities_this_class_and_match[0].hits
+                hits_by_parser = itertools.groupby(
+                    sorted(hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
+                )
+                for parser_name, hits_iter in hits_by_parser:
+                    yield entity_class, entity_match, parser_name, entities_this_class_and_match, list(
+                        hits_iter
                     )
-                    if len(entities_without_mappings_this_class_and_match) == 0:
-                        continue
 
-                    logger.info(
-                        f"running strategy {strategy.__class__.__name__} on class :<{entity_class}>, match: <{entity_match}>. remaining: {len(entities_without_mappings_this_class_and_match)}"
-                    )
-                    new_mappings = []
-                    for disambiguate_hit in strategy(
-                        ent_match=entity_match,
-                        entities=entities_without_mappings_this_class_and_match,
-                        document=document,
-                    ):
-                        successful_strategy = strategy.__class__.__name__
-                        additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
-                        # todo - calculate disambiguated conf better!
-                        mapping = self.metadata_db.create_mapping(
-                            parser_name=disambiguate_hit.parser_name,
-                            source=disambiguate_hit.source,
-                            idx=disambiguate_hit.idx,
-                            mapping_type=disambiguate_hit.mapping_type,
-                            confidence=disambiguate_hit.confidence,
-                            additional_metadata=additional_metadata,
-                        )
+        # entity_class, entity_match, parser_name,hits
+        tuples: List[Tuple[str, str, str, List[Entity], List[Hit]]] = list(
+            group_ents(ents_needing_disambig)
+        )
+        strategy_max_index = max(len(strategies) for strategies in strategy_map.values())
+        match_and_parser_resolved = set()
+
+        for i in range(0, strategy_max_index):
+            for (
+                entity_class,
+                entity_match,
+                parser_name,
+                entities_this_group,
+                hits_by_parser,
+            ) in tuples:
+                if (
+                    entity_match,
+                    parser_name,
+                ) not in match_and_parser_resolved:
+
+                    strategy_list = strategy_map.get(entity_class, self.default_strategy)
+                    if i > len(strategy_list) - 1:
+                        logger.debug("no more strategies this class")
+                        continue
+                    else:
+                        strategy = strategy_list[i]
                         logger.info(
-                            f"mapping created: original string: {entity_match}, mapping: {mapping}"
+                            f"running strategy {strategy.__class__.__name__} on class :<{entity_class}>, match: <{entity_match}> for parser: {parser_name} remaining: {len(entities_this_group)}"
                         )
-                        new_mappings.append(mapping)
-                    if len(new_mappings) > 0:
-                        for ent in entities_without_mappings_this_class_and_match:
-                            ent.mappings.extend(copy.deepcopy(new_mappings))
-                            entities_without_mappings.remove(ent)
+                        new_mappings = []
+                        for disambiguate_hit in strategy(
+                            ent_match=entity_match,
+                            hits=hits_by_parser,
+                            document=document,
+                        ):
+                            successful_strategy = strategy.__class__.__name__
+                            additional_metadata = {DISAMBIGUATED_BY: successful_strategy}
+                            # todo - calculate disambiguated conf better!
+                            mapping = self.metadata_db.create_mapping(
+                                parser_name=disambiguate_hit.parser_name,
+                                source=disambiguate_hit.source,
+                                idx=disambiguate_hit.idx,
+                                mapping_type=disambiguate_hit.mapping_type,
+                                confidence=disambiguate_hit.confidence,
+                                additional_metadata=additional_metadata,
+                            )
+                            logger.info(
+                                f"mapping created: original string: {entity_match}, mapping: {mapping}"
+                            )
+                            new_mappings.append(mapping)
+                        if len(new_mappings) > 0:
+                            for ent in entities_this_group:
+                                ent.mappings.extend(copy.deepcopy(new_mappings))
+                            match_and_parser_resolved.add(
+                                (
+                                    entity_match,
+                                    parser_name,
+                                )
+                            )
 
 
 def ent_match_group_key(ent: Entity):
