@@ -28,11 +28,7 @@ from strsimpy import NGram
 logger = logging.getLogger(__name__)
 
 SAPBERT_SCORE = "sapbert_score"
-MATCHED_NUMBER_SCORE = "matched_number_score"
-NGRAM_SCORE = "ngram_score"
-FUZZ_SCORE = "fuzz_score"
 SEARCH_SCORE = "search_score"
-EXACT_MATCH = "exact_match"
 DICTIONARY_HITS = "dictionary_hits"
 
 
@@ -47,72 +43,6 @@ class NumberResolver:
             re.findall(self.number_finder, synonym_string_norm)
         )
         return synonym_string_norm_match_number_count == self.ent_match_number_count
-
-
-class HitPostProcessor:
-    def __init__(self):
-        self.ngram = NGram(2)
-        self.numeric_class_phrase_disambiguation = ["TYPE"]
-        self.numeric_class_phrase_disambiguation_re = [
-            re.compile(x + " [0-9]+") for x in self.numeric_class_phrase_disambiguation
-        ]
-        self.modifier_phrase_disambiguation = ["LIKE"]
-
-    def phrase_disambiguation_filter(self, hits, text):
-        new_hits = []
-        for numeric_phrase_re in self.numeric_class_phrase_disambiguation_re:
-            match = re.search(numeric_phrase_re, text)
-            if match:
-                found_string = match.group()
-                for hit in hits:
-                    if found_string in hit.string_norm:
-                        new_hits.append(hit)
-        if not new_hits:
-            for modifier_phrase in self.modifier_phrase_disambiguation:
-                in_text = modifier_phrase in text
-                if in_text:
-                    for hit in filter(lambda x: modifier_phrase in x.string_norm, hits):
-                        new_hits.append(hit)
-                else:
-                    for hit in filter(lambda x: modifier_phrase not in x.string_norm, hits):
-                        new_hits.append(hit)
-        if new_hits:
-            return new_hits
-        else:
-            return hits
-
-    def ngram_scorer(self, hits: List[Hit], text):
-        # low conf
-        for hit in hits:
-            hit.metrics[NGRAM_SCORE] = 2 / (self.ngram.distance(text, hit.string_norm) + 1.0)
-        return hits
-
-    def run_fuzz_algo(self, hits: List[Hit], text):
-        # low conf
-        choices = [x.string_norm for x in hits]
-        if len(text) > 10 and len(text.split(" ")) > 4:
-            scores = process.extract(text, choices, scorer=fuzz.token_sort_ratio)
-        else:
-            scores = process.extract(text, choices, scorer=fuzz.WRatio)
-        for score in scores:
-            hit = hits[score[2]]
-            hit.metrics[FUZZ_SCORE] = score[1]
-        return hits
-
-    def run_number_algo(self, hits, text):
-        number_resolver = NumberResolver(text)
-        for hit in hits:
-            numbers_matched = number_resolver(hit.string_norm)
-            hit.metrics[MATCHED_NUMBER_SCORE] = numbers_matched
-        return hits
-
-    def __call__(self, hits: List[Hit], string_norm: str) -> List[Hit]:
-
-        hits = self.phrase_disambiguation_filter(hits, string_norm)
-        hits = self.run_number_algo(hits, string_norm)
-        hits = self.run_fuzz_algo(hits, string_norm)
-        hits = self.ngram_scorer(hits, string_norm)
-        return hits
 
 
 def to_torch(matrix):
@@ -269,12 +199,10 @@ class DictionaryIndex(Index):
     def __init__(
         self,
         synonym_dict: Dict[str, Set[SynonymData]],
-        hit_post_processor: Optional[HitPostProcessor] = None,
         requires_normalisation: bool = True,
         name: str = "unnamed_index",
     ):
         super().__init__(name)
-        self.hit_post_processor = hit_post_processor if hit_post_processor else HitPostProcessor()
         self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
         if requires_normalisation:
             self.normalised_syn_dict = self.gen_normalised(synonym_dict)
@@ -301,7 +229,7 @@ class DictionaryIndex(Index):
                 Hit(
                     string_norm=string_norm,
                     parser_name=self.name,
-                    metrics={EXACT_MATCH: True, SEARCH_SCORE: 100.0},
+                    metrics={SEARCH_SCORE: 100.0},
                     syn_data=frozenset(self.normalised_syn_dict[string_norm]),
                     confidence=SearchRanks.EXACT_MATCH,
                 )
@@ -344,9 +272,6 @@ class DictionaryIndex(Index):
 
         string_norm = StringNormalizer.normalize(query)
         hits = self._search_index(string_norm, top_n=top_n)
-        if not (len(hits) == 1 and hits[0].confidence == SearchRanks.EXACT_MATCH):
-            hits = self.hit_post_processor(hits, string_norm)
-
         yield from hits
 
     def _load(self, path: PathLike) -> Any:
@@ -357,7 +282,6 @@ class DictionaryIndex(Index):
                 self.vectorizer,
                 self.normalised_syn_dict,
                 self.tf_idf_matrix,
-                self.hit_post_processor,
             ) = pickle.load(f)
         self.key_lst = list(self.normalised_syn_dict.keys())
         self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
@@ -366,12 +290,7 @@ class DictionaryIndex(Index):
         if isinstance(path, str):
             path = Path(path)
         path.mkdir()
-        pickleable = (
-            self.vectorizer,
-            self.normalised_syn_dict,
-            self.tf_idf_matrix,
-            self.hit_post_processor,
-        )
+        pickleable = (self.vectorizer, self.normalised_syn_dict, self.tf_idf_matrix)
         with open(path.joinpath("objects.pkl"), "wb") as f:
             pickle.dump(pickleable, f)
 
