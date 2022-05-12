@@ -103,6 +103,9 @@ class SynonymData:
     )  # needed to lookup the original source of a given id
     mapping_type: FrozenSet[str] = field(default_factory=frozenset, hash=False)
 
+    def __lt__(self, other):
+        return tuple(self.ids) < tuple(other.ids)
+
 
 @dataclass(frozen=True)
 class Mapping:
@@ -119,6 +122,14 @@ class Mapping:
         default_factory=frozenset, hash=True
     )  # the type of KB mapping
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
+
+
+class SynonymDataSet(frozenset):
+    def __new__(cls, data):
+        return super(SynonymDataSet, cls).__new__(cls, data)
+
+    def __lt__(self, other):
+        return tuple(self) < tuple(other)
 
 
 @dataclass
