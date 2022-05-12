@@ -54,7 +54,7 @@ class SpanFinder:
         self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label
 
-    def resolve_word(self, word: TokenizedWord) -> Set[Tuple[str, str]]:
+    def resolve_word(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         """
         get a set of classes and a list of token confidences associated with a token within a word
         :param word:
@@ -99,7 +99,7 @@ class SpanFinder:
                 break
 
     def span_continue_condition(
-        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, str]]
+        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
     ):
         """
         A potential entity span must continue if any of the following conditions are met:
@@ -120,7 +120,9 @@ class SpanFinder:
         else:
             return False
 
-    def _update_active_spans(self, bio_and_class_labels: Set[Tuple[str, str]], word: TokenizedWord):
+    def _update_active_spans(
+        self, bio_and_class_labels: Set[Tuple[str, Optional[str]]], word: TokenizedWord
+    ):
         """
         updates any active spans. If a B label is detected in an active span, make a copy and add to closed spans,
         as it's likely the start of another entity of the same class (but we still want to keep the original span open)
@@ -141,7 +143,7 @@ class SpanFinder:
 
     def start_span(
         self,
-        bio_and_class_labels: Set[Tuple[str, str]],
+        bio_and_class_labels: Set[Tuple[str, Optional[str]]],
         word: TokenizedWord,
         subspan: bool,
     ):
