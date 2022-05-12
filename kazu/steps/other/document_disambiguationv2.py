@@ -4,6 +4,7 @@ import functools
 import itertools
 import logging
 import pickle
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict, Dict
@@ -26,10 +27,12 @@ from kazu.modelling.ontology_preprocessing.base import (
     SynonymDatabase,
     StringNormalizer,
 )
+from kazu.modelling.ontology_preprocessing.synonym_generation import GreekSymbolSubstitution
 from kazu.steps import BaseStep
-from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver, HitPostProcessor
+from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver
+from rapidfuzz import process, fuzz
 from sklearn.feature_extraction.text import TfidfVectorizer
-from strsimpy import LongestCommonSubsequence
+from strsimpy import LongestCommonSubsequence, NGram
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +43,81 @@ DISAMBIGUATED_BY_CONTEXT = "document context"
 KB_DISAMBIGUATION_FAILURE = "unable_to_disambiguate_within_ontology"
 GLOBAL_DISAMBIGUATION_FAILURE = "unable_to_disambiguate_on_context"
 SUGGEST_DROP = "suggest_drop"
-
+MATCHED_NUMBER_SCORE = "matched_number_score"
+NGRAM_SCORE = "ngram_score"
+FUZZ_SCORE = "fuzz_score"
 UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
     EquivalentIdAggregationStrategy.UNAMBIGUOUS,
     EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE,
     EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
     EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
 }
+
+
+class HitPostProcessor:
+    def __init__(self):
+        self.ngram = NGram(2)
+        self.numeric_class_phrase_disambiguation = ["TYPE"]
+        self.numeric_class_phrase_disambiguation_re = [
+            re.compile(x + " [0-9]+") for x in self.numeric_class_phrase_disambiguation
+        ]
+        self.modifier_phrase_disambiguation = ["LIKE"]
+
+    def phrase_disambiguation_filter(self, hits, text):
+        new_hits = []
+        for numeric_phrase_re in self.numeric_class_phrase_disambiguation_re:
+            match = re.search(numeric_phrase_re, text)
+            if match:
+                found_string = match.group()
+                for hit in hits:
+                    if found_string in hit.string_norm:
+                        new_hits.append(hit)
+        if not new_hits:
+            for modifier_phrase in self.modifier_phrase_disambiguation:
+                in_text = modifier_phrase in text
+                if in_text:
+                    for hit in filter(lambda x: modifier_phrase in x.string_norm, hits):
+                        new_hits.append(hit)
+                else:
+                    for hit in filter(lambda x: modifier_phrase not in x.string_norm, hits):
+                        new_hits.append(hit)
+        if new_hits:
+            return new_hits
+        else:
+            return hits
+
+    def ngram_scorer(self, hits: List[Hit], text):
+        # low conf
+        for hit in hits:
+            hit.metrics[NGRAM_SCORE] = 2 / (self.ngram.distance(text, hit.string_norm) + 1.0)
+        return hits
+
+    def run_fuzz_algo(self, hits: List[Hit], text):
+        # low conf
+        choices = [x.string_norm for x in hits]
+        if len(text) > 10 and len(text.split(" ")) > 4:
+            scores = process.extract(text, choices, scorer=fuzz.token_sort_ratio)
+        else:
+            scores = process.extract(text, choices, scorer=fuzz.WRatio)
+        for score in scores:
+            hit = hits[score[2]]
+            hit.metrics[FUZZ_SCORE] = score[1]
+        return hits
+
+    def run_number_algo(self, hits, text):
+        number_resolver = NumberResolver(text)
+        for hit in hits:
+            numbers_matched = number_resolver(hit.string_norm)
+            hit.metrics[MATCHED_NUMBER_SCORE] = numbers_matched
+        return hits
+
+    def __call__(self, hits: List[Hit], string_norm: str) -> List[Hit]:
+
+        hits = self.phrase_disambiguation_filter(hits, string_norm)
+        hits = self.run_number_algo(hits, string_norm)
+        hits = self.run_fuzz_algo(hits, string_norm)
+        hits = self.ngram_scorer(hits, string_norm)
+        return hits
 
 
 class NumberCheckStringSimilarityResolver:
@@ -242,6 +313,7 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
         self.search_threshold = search_threshold
         self.preference = preference
         self.max_rank_to_consider = max_rank_to_consider
+        self.hit_post_processor = HitPostProcessor()
 
     def hit_threshold_condition(
         self, search_score: float, embedding_score: float, rank_position: float
@@ -271,8 +343,10 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
         self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
         records = []
-        ns = NumberResolver(StringNormalizer.normalize(ent_match))
-        hits = [x for x in hits if ns(x.string_norm)]
+        string_norm = StringNormalizer.normalize(ent_match)
+        hits = self.hit_post_processor(hits, string_norm)
+        # only consider hits with matched numbers
+        hits = [x for x in hits if x.metrics[MATCHED_NUMBER_SCORE]]
         hits_by_syn_data = {
             k: set(v)
             for k, v in itertools.groupby(
@@ -392,6 +466,7 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         self.manipulator = DocumentManipulator()
         self.hit_post_processor = HitPostProcessor()
         self.synonym_db = SynonymDatabase()
+        self.threshold = 7.0
 
     def prepare(self, document: Document):
         self.query_mat = build_query_matrix_cacheable(document, self.vectoriser, self.manipulator)
@@ -399,12 +474,7 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
     def __call__(
         self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
-        string_norm = StringNormalizer.normalize(ent_match)
         parser_name = hits[0].parser_name
-        # todo: move to caching step
-        # self.find_good_tuples(document)
-        # string_resolver = self.get_string_resolver_strategy()
-        # works on exact hits only
         filtered_hits = filter(lambda x: x.confidence == SearchRanks.EXACT_MATCH, hits)
 
         filtered_hits = list(filtered_hits)
@@ -442,7 +512,7 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         hit_found = False
         for i, row in df.iterrows():
             score = row["score"]
-            if not score > 0.0:
+            if not score > self.threshold:
                 break
             #     different syns ay have same score
             synonyms_this_rank = row["synonym"]
@@ -451,7 +521,7 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
                 # syn is not ambiguous!
                 if len(syn_data_this_rank) == 1:
                     syn_data = next(iter(syn_data_this_rank))
-                    logger.info(
+                    logger.debug(
                         f'possible hit resolved: original: <{ent_match}> -> <{synonym}>: tfidf: {row["score"]}'
                     )
                     for idx in syn_data.ids:
@@ -716,10 +786,7 @@ class Disambiguator:
         }
         self.always_disambiguate = {"ExplosionNERStep"}
 
-        # strategies to implement:
-        # found exact unambiguous match
-        tfidf_symbolic_kb_strategy = TfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
-        tfidf_non_symbolic_kb_strategy = TfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
+        tfidf_ambiguous_kb_strategy = TfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
         required_full_definition_strategy = (
             RequireFullDefinitionKnowledgeBaseDisambiguationStrategy()
         )
@@ -735,7 +802,7 @@ class Disambiguator:
         self.default_strategy = [required_high_confidence]
 
         self.prefilter_lookup = {
-            "gene": [prefilter_imprecise_subspans],
+            "gene": [prefilter_imprecise_subspans, prefilter_unlikely_gene_symbols],
             "disease": [prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
             "drug": [prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
             "anatomy": [prefilter_imprecise_subspans],
@@ -745,23 +812,24 @@ class Disambiguator:
                 required_full_definition_strategy,
                 required_high_confidence,
                 prefer_default_label,
-                tfidf_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
             "disease": [
                 required_full_definition_strategy,
                 required_high_confidence,
                 prefer_default_label,
+                tfidf_ambiguous_kb_strategy,
             ],
             "drug": [
                 required_full_definition_strategy,
                 required_high_confidence,
                 prefer_default_label,
-                tfidf_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
             "anatomy": [
                 required_high_confidence,
                 prefer_default_label,
-                tfidf_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
         }
         self.non_symbolic_disambiguation_strategy_lookup = {
@@ -769,25 +837,25 @@ class Disambiguator:
                 required_high_confidence,
                 prefer_default_label,
                 hit_ensemble_strategy,
-                tfidf_non_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
             "disease": [
                 required_high_confidence,
                 prefer_default_label,
                 hit_ensemble_strategy,
-                tfidf_non_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
             "drug": [
                 required_high_confidence,
                 prefer_default_label,
                 hit_ensemble_strategy,
-                tfidf_non_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
             "anatomy": [
                 required_high_confidence,
                 prefer_default_label,
                 hit_ensemble_strategy,
-                tfidf_non_symbolic_kb_strategy,
+                tfidf_ambiguous_kb_strategy,
             ],
         }
 
@@ -801,14 +869,13 @@ class Disambiguator:
         )
 
         self.all_strategies = [
-            tfidf_symbolic_kb_strategy,
-            tfidf_non_symbolic_kb_strategy,
+            tfidf_ambiguous_kb_strategy,
+            hit_ensemble_strategy,
             required_full_definition_strategy,
             keep_high_conf_global_strategy,
             tfidf_global_strategy,
             required_full_definition_global,
             required_high_confidence,
-            # embedding_kb_strategy,
             prefer_default_label,
         ]
 
@@ -897,7 +964,7 @@ class Disambiguator:
                 ) = self.global_non_symbolic_disambiguation_strategy(
                     match_str, match_ents, document
                 )
-            logger.info(
+            logger.debug(
                 f"global disambiguation of {match_str} with {strategy_used}: {len(resolved_ents)} references resolved"
             )
 
@@ -982,7 +1049,7 @@ class Disambiguator:
                         continue
                     else:
                         strategy = strategy_list[i]
-                        logger.info(
+                        logger.debug(
                             f"running strategy {strategy.__class__.__name__} on class :<{entity_class}>, match: <{entity_match}> for parser: {parser_name} remaining: {len(entities_this_group)}"
                         )
                         new_mappings = []
@@ -1002,7 +1069,7 @@ class Disambiguator:
                                 confidence=disambiguate_hit.confidence,
                                 additional_metadata=additional_metadata,
                             )
-                            logger.info(
+                            logger.debug(
                                 f"mapping created: original string: {entity_match}, mapping: {mapping}"
                             )
                             new_mappings.append(mapping)
@@ -1040,10 +1107,30 @@ def prefilter_imprecise_subspans(ents: Iterable[Entity]) -> List[Entity]:
 def prefilter_unlikely_acronyms(ents: Iterable[Entity]) -> List[Entity]:
     result = []
     for ent in ents:
-        if len(ent.match) <= 3:
+        # filter if weird chars in short strings
+        if len(ent.match) <= 4:
             for char in ent.match:
-                if not char.isalpha() or not char.isupper():
+                if not char.isalnum() or not char in GreekSymbolSubstitution.GREEK_SUBS:
                     break
+            else:
+                result.append(ent)
+        else:
+            result.append(ent)
+    return result
+
+
+def prefilter_unlikely_gene_symbols(ents: Iterable[Entity]) -> List[Entity]:
+    result = []
+    for ent in ents:
+        # filter if prefix or suffix looks weird
+        if len(ent.match) <= 4:
+            if (
+                not ent.match[0].isalnum()
+                or not ent.match[0].isalnum() in GreekSymbolSubstitution.GREEK_SUBS
+                or not ent.match[-1].isalnum()
+                or not ent.match[-1].isalnum() in GreekSymbolSubstitution.GREEK_SUBS
+            ):
+                break
             else:
                 result.append(ent)
         else:
@@ -1067,6 +1154,8 @@ class DocumentLevelDisambiguationStep(BaseStep):
         self,
         depends_on: Optional[List[str]],
         tfidf_disambiguator: Disambiguator,
+        drop_unmapped_ents: bool = False,
+        drop_hits: bool = False,
     ):
         """
 
@@ -1075,25 +1164,25 @@ class DocumentLevelDisambiguationStep(BaseStep):
         """
 
         super().__init__(depends_on)
+        self.drop_hits = drop_hits
+        self.drop_unmapped_ents = drop_unmapped_ents
         self.tfidf_disambiguator = tfidf_disambiguator
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs: List[Document] = []
         for doc in docs:
             self.tfidf_disambiguator.run(doc)
+            if self.drop_unmapped_ents or self.drop_hits:
+                for section in doc.sections:
+                    if self.drop_unmapped_ents:
+                        ents_to_keep = list(filter(lambda x: x.mappings, section.entities))
+                    else:
+                        ents_to_keep = section.entities
+                    if self.drop_hits:
+                        for ent in ents_to_keep:
+                            ent.hits.clear()
+                    section.entities = ents_to_keep
         return docs, failed_docs
-
-
-class SubStringResolver:
-    def __init__(self, query_string_norm):
-        self.query_string_norm = query_string_norm
-        # require min 70% subsequence overlap
-        self.min_distance = float(len(query_string_norm)) * 0.7
-        self.lcs = LongestCommonSubsequence()
-
-    def __call__(self, synonym_string_norm: str):
-        length = self.lcs.distance(self.query_string_norm, synonym_string_norm)
-        return length >= self.min_distance
 
 
 class TfIdfCorpusScorer:
