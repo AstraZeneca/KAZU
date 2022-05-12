@@ -12,6 +12,8 @@ from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import BaseStep
 from kazu.steps.base.step import StepMetadata
 
+from datetime import datetime
+
 logger = logging.getLogger(__name__)
 
 
@@ -118,6 +120,7 @@ class Pipeline:
         else:
             logger.info("profiling not configured")
             self.summary_writer = None
+        self.init_time = datetime.now().strftime("%m_%d_%Y_%H_%M")
 
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
@@ -132,7 +135,7 @@ class Pipeline:
             start = time.time()
             succeeded_docs, failed_docs = step(succeeded_docs)
             end = time.time()
-            step_times[step.namespace()] = round(end - start, 4)
+            step_times[f"{step.namespace()}_{self.init_time}"] = round(end - start, 4)
             self.update_failed_docs(step, failed_docs)
         self.profile(step_times)
         self.reset()
