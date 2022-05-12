@@ -4,12 +4,12 @@ import functools
 import itertools
 import logging
 import pickle
-import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict, Dict
 
 import numpy as np
+import pandas as pd
 import pydash
 from kazu.data.data import (
     Document,
@@ -27,12 +27,9 @@ from kazu.modelling.ontology_preprocessing.base import (
     StringNormalizer,
 )
 from kazu.steps import BaseStep
-from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver
-from kazu.utils.spacy_pipeline import SpacyPipeline
+from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver, HitPostProcessor
 from sklearn.feature_extraction.text import TfidfVectorizer
-from spacy.tokens import Doc
-from strsimpy import NGram, LongestCommonSubsequence
-import pandas as pd
+from strsimpy import LongestCommonSubsequence
 
 logger = logging.getLogger(__name__)
 
@@ -50,79 +47,6 @@ UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
     EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
     EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
 }
-
-
-class NgramEmbeddingStringSimilarityResolver:
-    """
-    attempt to score NON symbolic alternative names to an entity match string
-    """
-
-    def __init__(self, min_similarity_score: float = 0.85, min_lcs_length: float = 0.7):
-        self.min_lcs_length = min_lcs_length
-        self.min_similarity_score = min_similarity_score
-        self.entity_match_string = None
-        self.entity_match_string_spacy = None
-        self.ent_match_norm = None
-        self.number_resolver = None
-        self.spacy_pipeline = SpacyPipeline(
-            "/Users/test/PycharmProjects/azner/model_pack/scispacy/en_core_sci_md-0.4.0/en_core_sci_md/en_core_sci_md-0.4.0"
-        )
-        self.lcs = LongestCommonSubsequence()
-
-    def clean_norm_string_for_embedding(self, norm_string: str):
-        parts = [x for x in norm_string.lower().split(" ") if x != "s"]
-        return " ".join(parts)
-
-    @functools.lru_cache(maxsize=1)
-    def prepare(self, entity_match_string: str):
-        self.entity_match_string = entity_match_string
-        self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
-        self.entity_match_string_spacy = self.spacy_pipeline.instance.nlp(
-            self.clean_norm_string_for_embedding(self.ent_match_norm)
-        )
-        self.number_resolver = NumberResolver(self.ent_match_norm)
-        self.min_lcs_score = float(len(self.ent_match_norm)) * self.min_lcs_length
-
-    def score_alternative_name(
-        self, entity_match_string: str, alternative_name_norm: str
-    ) -> Dict[str, bool]:
-        self.prepare(entity_match_string)
-
-        if not self.number_resolver(alternative_name_norm):
-            logger.debug(
-                f"{alternative_name_norm} still ambiguous: number mismatch: {self.ent_match_norm}"
-            )
-            return {"number_correct": False}
-
-        else:
-            result = {"number_correct": True}
-
-            lcs_score = self.lcs.length(alternative_name_norm, self.ent_match_norm)
-            logger.info(f"lcs score: {lcs_score}: {self.ent_match_norm} -> {alternative_name_norm}")
-            if lcs_score >= self.min_lcs_score:
-                result["lcs_score"] = True
-            else:
-                result["lcs_score"] = False
-
-            alternative_name_doc: Doc = self.spacy_pipeline.instance.nlp(
-                self.clean_norm_string_for_embedding(alternative_name_norm)
-            )
-
-            if any(not token.has_vector for token in alternative_name_doc):
-                logger.info(
-                    f"cannot perform embedding similarity due to OOV for {alternative_name_norm}"
-                )
-                result["embedding_score"] = False
-            else:
-                simscore = self.entity_match_string_spacy.similarity(alternative_name_doc)
-                logger.info(
-                    f"embedding score: {simscore}: {self.entity_match_string_spacy.text} -> {alternative_name_doc.text}"
-                )
-                if simscore >= self.min_similarity_score:
-                    result["embedding_score"] = True
-                else:
-                    result["embedding_score"] = False
-        return result
 
 
 class NumberCheckStringSimilarityResolver:
@@ -396,16 +320,16 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
                     rank_position=rank_position,
                 )
                 if hit_ok:
-                    for syn_data in syn_data_set:
-                        if syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                            for idx in syn_data.ids:
+                    for target_syn_data in syn_data_set:
+                        if target_syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                            for idx in target_syn_data.ids:
                                 yield DisambiguatedHit(
                                     original_hit=None,
                                     idx=idx,
-                                    source=syn_data.ids_to_source[idx],
+                                    source=target_syn_data.ids_to_source[idx],
                                     confidence=confidence,
                                     parser_name=hits[0].parser_name,
-                                    mapping_type=syn_data.mapping_type,
+                                    mapping_type=target_syn_data.mapping_type,
                                 )
                                 hit_found = True
 
@@ -466,106 +390,85 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         self.manipulator = DocumentManipulator()
         self.query_mat = None
         self.manipulator = DocumentManipulator()
-        self.good_tuples = set()
+        self.hit_post_processor = HitPostProcessor()
+        self.synonym_db = SynonymDatabase()
 
     def prepare(self, document: Document):
         self.query_mat = build_query_matrix_cacheable(document, self.vectoriser, self.manipulator)
 
-    @functools.lru_cache(maxsize=1)
-    def find_good_tuples(self, document: Document):
-        self.good_tuples = self.manipulator.mappings_to_parser_name_and_idx_tuples(document)
-
-    def get_string_resolver_strategy(self):
-        raise NotImplementedError()
-
-    def previously_found(self, parser_name, syn_data: SynonymData):
-        return any(
-            (
-                parser_name,
-                idx,
-            )
-            in self.good_tuples
-            for idx in syn_data.ids
-        )
-
     def __call__(
         self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
+        string_norm = StringNormalizer.normalize(ent_match)
         parser_name = hits[0].parser_name
         # todo: move to caching step
-        self.find_good_tuples(document)
-        string_resolver = self.get_string_resolver_strategy()
-        # group hits by confidence (process high first)
-        hits_by_confidence = itertools.groupby(
-            sorted(hits, key=lambda x: x.confidence), key=lambda x: x.confidence
+        # self.find_good_tuples(document)
+        # string_resolver = self.get_string_resolver_strategy()
+        # works on exact hits only
+        filtered_hits = filter(lambda x: x.confidence == LinkRanks.HIGH_CONFIDENCE, hits)
+
+        filtered_hits = list(filtered_hits)
+        syn_data_set_to_hits = {
+            k: set(v)
+            for k, v in itertools.groupby(
+                sorted(filtered_hits, key=lambda x: tuple(x.syn_data)),
+                key=lambda x: tuple(x.syn_data),
+            )
+        }
+
+        synonym_to_syn_data = defaultdict(set)
+        for syn_data_set, hits_set in syn_data_set_to_hits.items():
+            hit = next(iter(hits_set))
+            for syn_data in syn_data_set:
+                for idx in syn_data.ids:
+                    syns_this_id = self.synonym_db.get_syns_for_id(hit.parser_name, idx)
+                    for syn in syns_this_id:
+                        synonym_to_syn_data[syn].add(syn_data)
+
+        synonyms_and_scores = list(
+            self.corpus_scorer(list(synonym_to_syn_data.keys()), self.query_mat)
         )
+        df = pd.DataFrame.from_records(synonyms_and_scores, columns=["synonym", "score"])
+        df["rank"] = df["score"].rank(ascending=True, na_option="bottom")
+
+        df = (
+            df[["synonym", "score"]]
+            .groupby("score")
+            .agg(set)
+            .reset_index()
+            .sort_values("score", ascending=False)
+        )
+
         hit_found = False
-        for confidence, hits_iter in hits_by_confidence:
-            if hit_found:
+        for i, row in df.iterrows():
+            score = row["score"]
+            if not score > 0.0:
                 break
-
-            hits_this_confidence = list(hits_iter)
-
-            (
-                unambiguous_synonym_corpus,
-                unambiguous_syn_to_syn_data,
-            ) = self.queries.create_corpus_for_source(hits_this_confidence)
-            unambiguous_syns_and_scores = list(
-                self.corpus_scorer(unambiguous_synonym_corpus, self.query_mat)
-            )
-            unambiguous_syns_and_scores = sorted(
-                unambiguous_syns_and_scores, key=lambda x: x[1], reverse=True
-            )
-            for unambiguous_syn, score in unambiguous_syns_and_scores:
-                # TODO: set his correctly
-                if score <= 7.0:
-                    break
-
-                target_syn_data_set = unambiguous_syn_to_syn_data[unambiguous_syn]
-                if len(target_syn_data_set) != 1:
-                    logger.warning("target syndata is too long!")
-                target_syn_data = next(iter(target_syn_data_set))
-                previously_found = self.previously_found(parser_name, target_syn_data)
-                if not previously_found:
-                    string_score_results = string_resolver.score_alternative_name(
-                        alternative_name_norm=unambiguous_syn, entity_match_string=ent_match
-                    )
-                else:
-                    string_score_results = {}
-
-                logger.info(
-                    f"original: <{ent_match}>, matched: <{unambiguous_syn}>, previously found: <{previously_found}>, context: {score}, string score {string_score_results}"
-                )
-                if previously_found or all(x for x in string_score_results.values()):
-                    hit_found = True
-                    for idx in target_syn_data.ids:
+            #     different syns ay have same score
+            synonyms_this_rank = row["synonym"]
+            for synonym in synonyms_this_rank:
+                syn_data_this_rank = synonym_to_syn_data[synonym]
+                # syn is not ambiguous!
+                if len(syn_data_this_rank) == 1:
+                    syn_data = next(iter(syn_data_this_rank))
+                    # previously_found = self.previously_found(parser_name, target_syn_data)
+                    # new_hit = Hit(string_norm=synonym,parser_name=parser_name,syn_data=syn_data,confidence=LinkRanks.LOW_CONFIDENCE)
+                    # new_hit = self.hit_post_processor([new_hit],string_norm=string_norm)[0]
+                    # logger.info(f'possible hit resolved: original: <{ent_match}> -> <{synonym}>: tfidf: {row["score"]},other {new_hit.metrics}')
+                    for idx in syn_data.ids:
                         yield DisambiguatedHit(
                             original_hit=None,
                             idx=idx,
-                            source=target_syn_data.ids_to_source[idx],
+                            source=syn_data.ids_to_source[idx],
                             confidence=LinkRanks.MEDIUM_CONFIDENCE,  # set to medium, since we got to this strategy without finding a hit...
                             parser_name=parser_name,
-                            mapping_type=target_syn_data.mapping_type,
+                            mapping_type=syn_data.mapping_type,
                         )
-                    # we break the loop after the first successful hit is found in this strategy, so as to not
-                    # produce less good mappings than the best found
-                    if hit_found:
-                        logger.info(f"hit found at {confidence.name}. Stopping search")
-                        break
-
-
-class IntegerValidationTfIdfKnowledgeBaseDisambiguationStrategy(
-    TfIdfKnowledgeBaseDisambiguationStrategy
-):
-    def get_string_resolver_strategy(self):
-        return NumberCheckStringSimilarityResolver()
-
-
-class NgramEmbeddingValidationTfIdfKnowledgeBaseDisambiguationStrategy(
-    TfIdfKnowledgeBaseDisambiguationStrategy
-):
-    def get_string_resolver_strategy(self):
-        return NgramEmbeddingStringSimilarityResolver()
+                    hit_found = True
+                if hit_found:
+                    break
+            if hit_found:
+                break
 
 
 class GlobalDisambiguationStrategy:
@@ -705,7 +608,7 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
                 still_ambiguous_ents = pydash.flatten(
                     [ents for clazz, ents in class_and_ents.items() if clazz != chosen_class]
                 )
-                return disambiguated_ents, still_ambiguous_ents
+                return list(disambiguated_ents), list(still_ambiguous_ents)
             else:
                 # run tfidf on syns
                 records = []
@@ -737,7 +640,7 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
                                 if clazz != chosen_class
                             ]
                         )
-                        return disambiguated_ents, still_ambiguous_ents
+                        return list(disambiguated_ents), list(still_ambiguous_ents)
 
                 else:
                     return [], entities
@@ -816,12 +719,8 @@ class Disambiguator:
 
         # strategies to implement:
         # found exact unambiguous match
-        tfidf_symbolic_kb_strategy = IntegerValidationTfIdfKnowledgeBaseDisambiguationStrategy(
-            self.vectoriser
-        )
-        tfidf_non_symbolic_kb_strategy = (
-            NgramEmbeddingValidationTfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
-        )
+        tfidf_symbolic_kb_strategy = TfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
+        tfidf_non_symbolic_kb_strategy = TfIdfKnowledgeBaseDisambiguationStrategy(self.vectoriser)
         required_full_definition_strategy = (
             RequireFullDefinitionKnowledgeBaseDisambiguationStrategy()
         )
@@ -1226,26 +1125,3 @@ class TfIdfCorpusScorer:
             distances = score_matrix[neighbours]
             distances = 100 * -distances
         return neighbours, distances
-
-
-class EmbeddingCorpusScorer:
-    def __init__(self, spacy_pipeline: SpacyPipeline):
-        self.spacy_pipeline = spacy_pipeline
-
-    def __call__(self, corpus: List[str], query: Doc) -> Iterable[Tuple[str, float]]:
-        if len(corpus) == 0:
-            return None
-        else:
-            for doc, score in self.find_neighbours_and_scores(corpus=corpus, query=query):
-                yield doc.text, score
-
-    def find_neighbours_and_scores(self, corpus: List[str], query: Doc):
-        corpus_docs = self.spacy_pipeline.instance.nlp.pipe(corpus)
-        corpus_docs_and_score = [
-            (
-                doc,
-                query.similarity(doc),
-            )
-            for doc in corpus_docs
-        ]
-        return sorted(corpus_docs_and_score, key=lambda x: x[1], reverse=True)
