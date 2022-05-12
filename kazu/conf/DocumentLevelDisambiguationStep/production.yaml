@@ -1,5 +1,7 @@
 _target_: kazu.steps.other.document_disambiguationv2.DocumentLevelDisambiguationStep
 depends_on: ~
+drop_unmapped_ents: true
+drop_hits: true
 tfidf_disambiguator:
   _target_: kazu.steps.other.document_disambiguationv2.Disambiguator
   path: ${oc.env:KAZU_MODEL_PACK}/disambiguation/tfidf_vec.pkl
