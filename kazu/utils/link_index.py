@@ -103,8 +103,7 @@ class HitPostProcessor:
         number_resolver = NumberResolver(text)
         for hit in hits:
             numbers_matched = number_resolver(hit.string_norm)
-            if numbers_matched:
-                hit.metrics[MATCHED_NUMBER_SCORE] = numbers_matched
+            hit.metrics[MATCHED_NUMBER_SCORE] = numbers_matched
         return hits
 
     def __call__(self, hits: List[Hit], string_norm: str) -> List[Hit]:
