@@ -17,6 +17,7 @@ from kazu.data.data import (
     Entity,
     SynonymData,
     EquivalentIdAggregationStrategy,
+    IS_SUBSPAN,
 )
 from kazu.data.data import LinkRanks
 from kazu.modelling.ontology_preprocessing.base import (
@@ -26,7 +27,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     StringNormalizer,
 )
 from kazu.steps import BaseStep
-from kazu.utils.link_index import Hit, create_char_ngrams
+from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver
 from kazu.utils.spacy_pipeline import SpacyPipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy.tokens import Doc
@@ -130,7 +131,9 @@ class NumberCheckStringSimilarityResolver:
         self.ent_match_norm = StringNormalizer.normalize(entity_match_string)
         self.number_resolver = NumberResolver(self.ent_match_norm)
 
-    def score_alternative_name(self, entity_match_string: str, alternative_name_norm: str) -> Dict[str,bool]:
+    def score_alternative_name(
+        self, entity_match_string: str, alternative_name_norm: str
+    ) -> Dict[str, bool]:
         self.prepare(entity_match_string)
         if not self.number_resolver(alternative_name_norm):
             logger.debug(
@@ -194,20 +197,13 @@ class SynonymDbQueryExtensions:
         result = []
         for ent in ents:
             for hit in ent.hits:
-                if hit.confidence == LinkRanks.LOW_CONFIDENCE:
-                    continue
-                else:
-                    for syn_data in hit.syn_data:
-                        for idx in syn_data.ids:
-                            result.extend(
-                                pydash.flatten_deep(
-                                    list(
-                                        self.synonym_db.get_syns_for_id(
-                                            name=hit.parser_name, idx=idx
-                                        )
-                                    )
-                                )
+                for syn_data in hit.syn_data:
+                    for idx in syn_data.ids:
+                        result.extend(
+                            pydash.flatten_deep(
+                                list(self.synonym_db.get_syns_for_id(name=hit.parser_name, idx=idx))
                             )
+                        )
         return result
 
 
@@ -279,11 +275,11 @@ class PreferDefaultLabelKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambi
     def __call__(
         self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
-        ent_match_norm = StringNormalizer.normalize(ent_match)
+        match_norm = StringNormalizer.normalize(ent_match)
         found = False
         for hit in hits:
             default_label_ids = self.default_label_norm_to_id[hit.parser_name].get(
-                ent_match_norm, set()
+                match_norm, set()
             )
             for syn_data in hit.syn_data:
                 found_ids = default_label_ids.intersection(syn_data.ids)
@@ -292,7 +288,7 @@ class PreferDefaultLabelKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambi
                         original_hit=hit,
                         idx=idx,
                         source=syn_data.ids_to_source[idx],
-                        confidence=hit.confidence,
+                        confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE,
                         parser_name=hit.parser_name,
                         mapping_type=syn_data.mapping_type,
                     )
@@ -301,6 +297,117 @@ class PreferDefaultLabelKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambi
                     break
             if found:
                 break
+
+
+class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
+    def __init__(
+        self,
+        preference: str = "embedding",
+        search_threshold=80.0,
+        embedding_threshold=99.9945,
+        embedding_threshold_max=99.9954,
+        search_field="search_score",
+        embedding_field="sapbert_score",
+        max_rank_to_consider: float = 2.0,
+    ):
+
+        self.embedding_threshold_max = embedding_threshold_max
+        self.embedding_field = embedding_field
+        self.search_field = search_field
+        self.embedding_threshold = embedding_threshold
+        self.search_threshold = search_threshold
+        self.preference = preference
+        self.max_rank_to_consider = max_rank_to_consider
+
+    def hit_threshold_condition(
+        self, search_score: float, embedding_score: float, rank_position: float
+    ) -> Tuple[bool, LinkRanks]:
+
+        if (
+            rank_position == 1.0
+            and search_score >= self.search_threshold
+            and embedding_score >= self.embedding_threshold
+        ):
+            return True, LinkRanks.HIGH_CONFIDENCE
+        elif (
+            rank_position <= self.max_rank_to_consider
+            and search_score >= self.search_threshold
+            and embedding_score >= self.embedding_threshold
+        ):
+            return True, LinkRanks.MEDIUM_HIGH_CONFIDENCE
+        elif (
+            rank_position <= self.max_rank_to_consider
+            and embedding_score >= self.embedding_threshold_max
+        ):
+            return True, LinkRanks.MEDIUM_CONFIDENCE
+        else:
+            return False, LinkRanks.LOW_CONFIDENCE
+
+    def __call__(
+        self, ent_match: str, document: Document, hits: List[Hit]
+    ) -> Iterable[DisambiguatedHit]:
+        records = []
+        ns = NumberResolver(StringNormalizer.normalize(ent_match))
+        hits = [x for x in hits if ns(x.string_norm)]
+        hits_by_syn_data = {
+            k: set(v)
+            for k, v in itertools.groupby(
+                sorted(hits, key=lambda x: tuple(x.syn_data)), key=lambda x: tuple(x.syn_data)
+            )
+        }
+
+        for syn_data, hit_set in hits_by_syn_data.items():
+            record = {"syn_data": syn_data}
+            global_metrics = {}
+            # choose best overall result across all hits that are part of the same synset, thereby aggregating best
+            # match information across multiple potential synonyms
+            for hit in hit_set:
+                for metric, score in hit.metrics.items():
+                    if global_metrics.get(metric, 0) < score:
+                        global_metrics[metric] = score
+            record.update(global_metrics)
+            records.append(record)
+
+        df = pd.DataFrame.from_records(records)
+        rank_cols = []
+        for colname in df.columns:
+            if colname != "syn_data":
+                rank_name = f"{colname}_rank"
+                rank_cols.append(rank_name)
+                df[rank_name] = df[colname].rank(method="min", na_option="bottom", ascending=False)
+        # require at least 3 ranks
+        if len(rank_cols) >= 3:
+            df["total"] = df[rank_cols].sum(axis=1)
+            df["total_rank"] = df["total"].rank(method="min", na_option="bottom", ascending=True)
+            df.sort_values(by="total_rank", ascending=True, inplace=True)
+            hit_found = False
+            for i, row in df.iterrows():
+                rank_position = row["total_rank"]
+                if hit_found or rank_position > self.max_rank_to_consider:
+                    break
+                syn_data_set = row["syn_data"]
+                search_score = row[self.search_field]
+                if self.embedding_field not in row or self.search_field not in row:
+                    continue
+                embedding_score = row[self.embedding_field]
+                hit_ok, confidence = self.hit_threshold_condition(
+                    search_score=search_score,
+                    embedding_score=embedding_score,
+                    rank_position=rank_position,
+                )
+                if hit_ok:
+                    for syn_data in syn_data_set:
+                        if syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                            for idx in syn_data.ids:
+                                yield DisambiguatedHit(
+                                    original_hit=None,
+                                    idx=idx,
+                                    source=syn_data.ids_to_source[idx],
+                                    confidence=confidence,
+                                    parser_name=hits[0].parser_name,
+                                    mapping_type=syn_data.mapping_type,
+                                )
+                                hit_found = True
 
 
 class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
@@ -316,7 +423,7 @@ class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisa
                                 original_hit=hit,
                                 idx=idx,
                                 source=syn_data.ids_to_source[idx],
-                                confidence=hit.confidence,
+                                confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE,
                                 parser_name=hit.parser_name,
                                 mapping_type=syn_data.mapping_type,
                             )
@@ -436,7 +543,7 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
                             original_hit=None,
                             idx=idx,
                             source=target_syn_data.ids_to_source[idx],
-                            confidence=LinkRanks.MEDIUM_CONFIDENCE, #set to medium, since we got to this strategy without finding a hit...
+                            confidence=LinkRanks.MEDIUM_CONFIDENCE,  # set to medium, since we got to this strategy without finding a hit...
                             parser_name=parser_name,
                             mapping_type=target_syn_data.mapping_type,
                         )
@@ -536,46 +643,104 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
         self.queries = SynonymDbQueryExtensions()
         self.vectoriser = vectoriser
         self.corpus_scorer = TfIdfCorpusScorer(vectoriser)
-        self.threshold = 7.0
+        self.threshold = 0.5
         # if any entity string matches  are longer than this and have a high confidence hit, assume they're probably right
         self.manipulator = DocumentManipulator()
-        self.query_mat = None
+        self.document_tfidf_matrix = None
 
     def prepare(self, document: Document):
-        self.query_mat = build_query_matrix_cacheable(document, self.vectoriser, self.manipulator)
+        self.document_tfidf_matrix = build_query_matrix_cacheable(
+            document, self.vectoriser, self.manipulator
+        )
 
     def __call__(
         self, ent_match: str, entities: List[Entity], document: Document
     ) -> Tuple[List[Entity], List[Entity]]:
-        # test context for good hits...
-        disambiguated_ents = []
-        still_ambiguous_ents = []
-        # group ents by hit source
-        hit_sources_to_ents = defaultdict(set)
-        for ent in entities:
-            for hit in ent.hits:
-                hit_sources_to_ents[hit.parser_name].add(ent)
+        """
+        get doc representation (full)
+        group ents by class
+        get all syns per class and build TFIDF matrix
+        score
+        if syn name is compatible, as before
 
-        corpus = list(set(self.queries.collect_all_syns_from_ents(entities)))
-        for synonym, score in self.corpus_scorer(corpus, self.query_mat):
-            if score < self.threshold:
-                # no ents could be resolved this match
-                still_ambiguous_ents.extend(entities)
-                break
+        :param ent_match:
+        :param entities:
+        :param document:
+        :return:
+        """
+        class_and_ents = {
+            k: set(v)
+            for k, v in itertools.groupby(
+                sorted(entities, key=lambda x: x.entity_class), key=lambda x: x.entity_class
+            )
+        }
+        # if only one class:
+        if len(class_and_ents) == 1:
+            return entities, []
 
-            kbs_this_hit = self.queries.synonym_db.get_kbs_for_syn_global(synonym)
-            if not self.kbs_are_compatible(kbs_this_hit):
-                logger.debug(f"class still ambiguous: {kbs_this_hit}")
+        disam, amb = [], []
+        for entity_class, ent_set in class_and_ents.items():
+            test_ent = next(iter(ent_set))
+            if any(hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in test_ent.hits):
+                disam.extend(list(ent_set))
             else:
-                # for the first unambiguous kb hit,return the ent that has a hit with this kb.
-                for kb_hit in kbs_this_hit:
-                    ents_this_kb = hit_sources_to_ents.get(kb_hit)
-                    if ents_this_kb:
-                        disambiguated_ents.extend(list(ents_this_kb))
-                        break
-                if len(disambiguated_ents) > 0:
-                    break
-        return disambiguated_ents, still_ambiguous_ents
+                amb.extend(list(ent_set))
+        # if either class have high conf hits
+        if disam:
+            return disam, amb
+
+        else:
+
+            class_to_query = {}
+
+            for entity_class, ent_set in class_and_ents.items():
+                test_ent = next(iter(ent_set))
+                query = set(self.queries.collect_all_syns_from_ents([test_ent]))
+                if query:
+                    class_to_query[entity_class] = query
+            # if only one class has synonyms
+            if len(class_to_query) < 2:
+                chosen_class = next(iter(class_to_query.keys()))
+                disambiguated_ents = class_and_ents[chosen_class]
+                still_ambiguous_ents = pydash.flatten(
+                    [ents for clazz, ents in class_and_ents.items() if clazz != chosen_class]
+                )
+                return disambiguated_ents, still_ambiguous_ents
+            else:
+                # run tfidf on syns
+                records = []
+                for entity_class, query in class_to_query.items():
+                    hits_and_scores = list(
+                        self.corpus_scorer(list(query), self.document_tfidf_matrix)
+                    )
+                    for hit, score in hits_and_scores:
+                        records.append({"class": entity_class, "hit": hit, "score": score})
+                df = pd.DataFrame.from_records(records)
+                df["rank"] = df["score"].rank(ascending=True, na_option="bottom")
+                df = (
+                    df[["class", "score"]]
+                    .groupby("score")
+                    .agg(set)
+                    .reset_index()
+                    .sort_values("score", ascending=False)
+                )
+                for i, row in df.iterrows():
+                    if len(row["class"]) > 1:
+                        continue
+                    else:
+                        chosen_class = next(iter(row["class"]))
+                        disambiguated_ents = class_and_ents[chosen_class]
+                        still_ambiguous_ents = pydash.flatten(
+                            [
+                                ents
+                                for clazz, ents in class_and_ents.items()
+                                if clazz != chosen_class
+                            ]
+                        )
+                        return disambiguated_ents, still_ambiguous_ents
+
+                else:
+                    return [], entities
 
 
 class GlobalDisambiguationStrategyList:
@@ -667,12 +832,20 @@ class Disambiguator:
         tfidf_global_strategy = TfIdfGlobalDisambiguationStrategy(
             self.vectoriser, self.kbs_are_compatible
         )
+        hit_ensemble_strategy = HitEnsembleKnowledgeBaseDisambiguationStrategy()
         # embedding_kb_strategy = PreferEmbeddingKnowledgeBaseDisambiguationStrategy(
         #     set("SapBertForEntityLinkingStep")
         # )
         # embedding_kb_strategy = EmbeddingKnowledgeBaseDisambiguationStrategy()
 
         self.default_strategy = [required_high_confidence]
+
+        self.prefilter_lookup = {
+            "gene": [prefilter_imprecise_subspans],
+            "disease": [prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
+            "drug": [prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
+            "anatomy": [prefilter_imprecise_subspans],
+        }
         self.symbolic_disambiguation_strategy_lookup = {
             "gene": [
                 required_full_definition_strategy,
@@ -701,21 +874,25 @@ class Disambiguator:
             "gene": [
                 required_high_confidence,
                 prefer_default_label,
+                hit_ensemble_strategy,
                 tfidf_non_symbolic_kb_strategy,
             ],
             "disease": [
                 required_high_confidence,
                 prefer_default_label,
+                hit_ensemble_strategy,
                 tfidf_non_symbolic_kb_strategy,
             ],
             "drug": [
                 required_high_confidence,
                 prefer_default_label,
+                hit_ensemble_strategy,
                 tfidf_non_symbolic_kb_strategy,
             ],
             "anatomy": [
                 required_high_confidence,
                 prefer_default_label,
+                hit_ensemble_strategy,
                 tfidf_non_symbolic_kb_strategy,
             ],
         }
@@ -789,6 +966,7 @@ class Disambiguator:
         # TODO: cache any strategy data that only needs to be run once
         self.prepare_strategies(doc)
         entities = doc.get_entities()
+        entities = prefilter_imprecise_subspans(entities)
         symbolic_entities, non_symbolic_entities = self.sort_entities_by_symbolism(entities)
         globally_disambiguated_non_symbolic_entities = self.execute_global_disambiguation_strategy(
             non_symbolic_entities, doc, False
@@ -828,6 +1006,7 @@ class Disambiguator:
             logger.info(
                 f"global disambiguation of {match_str} with {strategy_used}: {len(resolved_ents)} references resolved"
             )
+
             result.extend(resolved_ents)
         return result
 
@@ -869,15 +1048,19 @@ class Disambiguator:
             )
             for (entity_class, entity_match), ents_iter in ents_grouped_by_class_and_match:
                 entities_this_class_and_match = list(ents_iter)
+                filters = self.prefilter_lookup.get(entity_class, [])
+                for f in filters:
+                    entities_this_class_and_match = f(entities_this_class_and_match)
                 # note,assume all ents with same match have same hits!
-                hits = entities_this_class_and_match[0].hits
-                hits_by_parser = itertools.groupby(
-                    sorted(hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
-                )
-                for parser_name, hits_iter in hits_by_parser:
-                    yield entity_class, entity_match, parser_name, entities_this_class_and_match, list(
-                        hits_iter
+                if len(entities_this_class_and_match) > 0:
+                    hits = entities_this_class_and_match[0].hits
+                    hits_by_parser = itertools.groupby(
+                        sorted(hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
                     )
+                    for parser_name, hits_iter in hits_by_parser:
+                        yield entity_class, entity_match, parser_name, entities_this_class_and_match, list(
+                            hits_iter
+                        )
 
         # entity_class, entity_match, parser_name,hits
         tuples: List[Tuple[str, str, str, List[Entity], List[Hit]]] = list(
@@ -948,6 +1131,32 @@ def mapping_kb_group_key(mapping: Mapping):
     return mapping.source
 
 
+def prefilter_imprecise_subspans(ents: Iterable[Entity]) -> List[Entity]:
+    result = []
+    metadata_needing_exact_match = ["split_rule", IS_SUBSPAN]
+    for ent in ents:
+        if any(x in ent.metadata for x in metadata_needing_exact_match):
+            if any(hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in ent.hits):
+                result.append(ent)
+        else:
+            result.append(ent)
+    return result
+
+
+def prefilter_unlikely_acronyms(ents: Iterable[Entity]) -> List[Entity]:
+    result = []
+    for ent in ents:
+        if len(ent.match) <= 3:
+            for char in ent.match:
+                if not char.isalpha() or not char.isupper():
+                    break
+            else:
+                result.append(ent)
+        else:
+            result.append(ent)
+    return result
+
+
 class DocumentLevelDisambiguationStep(BaseStep):
 
     """
@@ -979,19 +1188,6 @@ class DocumentLevelDisambiguationStep(BaseStep):
         for doc in docs:
             self.tfidf_disambiguator.run(doc)
         return docs, failed_docs
-
-
-class NumberResolver:
-    number_finder = re.compile("[0-9]+")
-
-    def __init__(self, query_string_norm):
-        self.ent_match_number_count = Counter(re.findall(self.number_finder, query_string_norm))
-
-    def __call__(self, synonym_string_norm: str):
-        synonym_string_norm_match_number_count = Counter(
-            re.findall(self.number_finder, synonym_string_norm)
-        )
-        return synonym_string_norm_match_number_count == self.ent_match_number_count
 
 
 class SubStringResolver:
