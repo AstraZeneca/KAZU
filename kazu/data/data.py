@@ -37,12 +37,18 @@ LINK_CONFIDENCE = "link_confidence"
 
 
 class LinkRanks(IntEnum):
-    # labels for ranking. NOTE! ordering important, as used for iteration
+    # labels for ranking linking hits. NOTE! ordering important, as used for iteration
     HIGH_CONFIDENCE = 0
     MEDIUM_HIGH_CONFIDENCE = 1
     MEDIUM_CONFIDENCE = 2
     AMBIGUOUS = 3
     LOW_CONFIDENCE = 4
+
+
+class SearchRanks(IntEnum):
+    # labels for ranking search hits. NOTE! ordering important, as used for iteration
+    EXACT_MATCH = 0
+    NEAR_MATCH = 1
 
 
 @dataclass
@@ -143,7 +149,7 @@ class Hit:
     parser_name: str  # NOTE: this is the parser name, not the kb name. TODO: rename to data_source for consistency
     namespace: str = field(init=False)
     syn_data: FrozenSet[SynonymData]
-    confidence: LinkRanks
+    confidence: SearchRanks
     metrics: Dict[str, Any] = field(default_factory=dict)
 
     def __hash__(self):

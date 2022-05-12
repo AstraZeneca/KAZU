@@ -19,7 +19,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     IS_SUBSPAN,
 )
-from kazu.data.data import LinkRanks
+from kazu.data.data import LinkRanks, SearchRanks
 from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
     MetadataDatabase,
@@ -339,7 +339,7 @@ class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisa
         self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
         for hit in hits:
-            if hit.confidence == LinkRanks.HIGH_CONFIDENCE:
+            if hit.confidence == SearchRanks.EXACT_MATCH:
                 for syn_data in hit.syn_data:
                     if syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
                         for idx in syn_data.ids:
@@ -405,7 +405,7 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         # self.find_good_tuples(document)
         # string_resolver = self.get_string_resolver_strategy()
         # works on exact hits only
-        filtered_hits = filter(lambda x: x.confidence == LinkRanks.HIGH_CONFIDENCE, hits)
+        filtered_hits = filter(lambda x: x.confidence == SearchRanks.EXACT_MATCH, hits)
 
         filtered_hits = list(filtered_hits)
         syn_data_set_to_hits = {
@@ -451,10 +451,9 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
                 # syn is not ambiguous!
                 if len(syn_data_this_rank) == 1:
                     syn_data = next(iter(syn_data_this_rank))
-                    # previously_found = self.previously_found(parser_name, target_syn_data)
-                    # new_hit = Hit(string_norm=synonym,parser_name=parser_name,syn_data=syn_data,confidence=LinkRanks.LOW_CONFIDENCE)
-                    # new_hit = self.hit_post_processor([new_hit],string_norm=string_norm)[0]
-                    # logger.info(f'possible hit resolved: original: <{ent_match}> -> <{synonym}>: tfidf: {row["score"]},other {new_hit.metrics}')
+                    logger.info(
+                        f'possible hit resolved: original: <{ent_match}> -> <{synonym}>: tfidf: {row["score"]}'
+                    )
                     for idx in syn_data.ids:
                         yield DisambiguatedHit(
                             original_hit=None,
@@ -530,7 +529,7 @@ class KeepHighConfidenceHitsGlobalDisambiguationStrategy(GlobalDisambiguationStr
         if len(ent_match) >= self.min_string_length_to_test_for_high_confidence:
             for ent in entities:
                 for hit in ent.hits:
-                    if hit.confidence == LinkRanks.HIGH_CONFIDENCE:
+                    if hit.confidence == SearchRanks.EXACT_MATCH:
                         ents_with_high_conf.append(ent)
                         break
                 else:
@@ -584,7 +583,7 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
         disam, amb = [], []
         for entity_class, ent_set in class_and_ents.items():
             test_ent = next(iter(ent_set))
-            if any(hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in test_ent.hits):
+            if any(hit.confidence == SearchRanks.EXACT_MATCH for hit in test_ent.hits):
                 disam.extend(list(ent_set))
             else:
                 amb.extend(list(ent_set))
@@ -732,10 +731,6 @@ class Disambiguator:
             self.vectoriser, self.kbs_are_compatible
         )
         hit_ensemble_strategy = HitEnsembleKnowledgeBaseDisambiguationStrategy()
-        # embedding_kb_strategy = PreferEmbeddingKnowledgeBaseDisambiguationStrategy(
-        #     set("SapBertForEntityLinkingStep")
-        # )
-        # embedding_kb_strategy = EmbeddingKnowledgeBaseDisambiguationStrategy()
 
         self.default_strategy = [required_high_confidence]
 
@@ -1035,7 +1030,7 @@ def prefilter_imprecise_subspans(ents: Iterable[Entity]) -> List[Entity]:
     metadata_needing_exact_match = ["split_rule", IS_SUBSPAN]
     for ent in ents:
         if any(x in ent.metadata for x in metadata_needing_exact_match):
-            if any(hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in ent.hits):
+            if any(hit.confidence == SearchRanks.EXACT_MATCH for hit in ent.hits):
                 result.append(ent)
         else:
             result.append(ent)

@@ -8,7 +8,7 @@ from typing import List, Tuple, Iterable, Optional, Dict
 import pydash
 import torch
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, LinkRanks
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, LinkRanks, SearchRanks
 from kazu.steps import BaseStep
 from kazu.utils.caching import (
     EntityLinkingLookupCache,
@@ -115,9 +115,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                     )
                     needs_sapbert = False
                     for parser_name, hits_iter in hits_by_parser_name:
-                        if not any(
-                            hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in hits_iter
-                        ):
+                        if not any(hit.confidence == SearchRanks.EXACT_MATCH for hit in hits_iter):
                             needs_sapbert = True
                             break
                     if needs_sapbert:

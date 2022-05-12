@@ -10,7 +10,7 @@ from typing import Tuple, Any, Dict, List, Iterable, Optional, FrozenSet, Set
 
 import numpy as np
 import torch
-from kazu.data.data import LinkRanks, SynonymData, Hit
+from kazu.data.data import SearchRanks, SynonymData, Hit
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     IDX,
@@ -303,7 +303,7 @@ class DictionaryIndex(Index):
                     parser_name=self.name,
                     metrics={EXACT_MATCH: True, SEARCH_SCORE: 100.0},
                     syn_data=frozenset(self.normalised_syn_dict[string_norm]),
-                    confidence=LinkRanks.HIGH_CONFIDENCE,
+                    confidence=SearchRanks.EXACT_MATCH,
                 )
             ]
         else:
@@ -329,7 +329,7 @@ class DictionaryIndex(Index):
                         parser_name=self.name,
                         syn_data=frozenset(self.normalised_syn_dict[found_norm]),
                         metrics={SEARCH_SCORE: score},
-                        confidence=LinkRanks.LOW_CONFIDENCE,
+                        confidence=SearchRanks.NEAR_MATCH,
                     )
                 )
 
@@ -344,7 +344,7 @@ class DictionaryIndex(Index):
 
         string_norm = StringNormalizer.normalize(query)
         hits = self._search_index(string_norm, top_n=top_n)
-        if not (len(hits) == 1 and hits[0].confidence == LinkRanks.HIGH_CONFIDENCE):
+        if not (len(hits) == 1 and hits[0].confidence == SearchRanks.EXACT_MATCH):
             hits = self.hit_post_processor(hits, string_norm)
 
         yield from hits
@@ -460,7 +460,7 @@ class EmbeddingIndex(Index):
                     string_norm=string_norm,
                     syn_data=frozenset(syn_data),
                     parser_name=self.name,
-                    confidence=LinkRanks.LOW_CONFIDENCE,
+                    confidence=SearchRanks.NEAR_MATCH,
                     metrics={SAPBERT_SCORE: score},
                 )
                 yield hit
