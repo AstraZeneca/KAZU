@@ -1,3 +1,4 @@
+import itertools
 import logging
 import sys
 import traceback
@@ -107,11 +108,20 @@ class SapBertForEntityLinkingStep(BaseStep):
             for ent in pydash.flatten([x.get_entities() for x in docs]):
                 if ent.entity_class not in self.index_group.entity_class_to_indices.keys():
                     continue
-                if self.ignore_high_conf and any(
-                    hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in ent.hits
-                ):
-                    continue
-                entities_to_process.append(ent)
+                if self.ignore_high_conf:
+                    # check every parser namespace has a high conf hit
+                    hits_by_parser_name = itertools.groupby(
+                        sorted(ent.hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
+                    )
+                    needs_sapbert = False
+                    for parser_name, hits_iter in hits_by_parser_name:
+                        if not any(
+                            hit.confidence == LinkRanks.HIGH_CONFIDENCE for hit in hits_iter
+                        ):
+                            needs_sapbert = True
+                            break
+                    if needs_sapbert:
+                        entities_to_process.append(ent)
 
             self.process_entities(entities_to_process)
         except Exception:
