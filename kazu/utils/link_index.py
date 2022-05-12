@@ -36,12 +36,21 @@ EXACT_MATCH = "exact_match"
 DICTIONARY_HITS = "dictionary_hits"
 
 
+class NumberResolver:
+    number_finder = re.compile("[0-9]+")
+
+    def __init__(self, query_string_norm):
+        self.ent_match_number_count = Counter(re.findall(self.number_finder, query_string_norm))
+
+    def __call__(self, synonym_string_norm: str):
+        synonym_string_norm_match_number_count = Counter(
+            re.findall(self.number_finder, synonym_string_norm)
+        )
+        return synonym_string_norm_match_number_count == self.ent_match_number_count
+
+
 class HitPostProcessor:
-    def __init__(
-        self,
-        ngram_score_threshold: float = 0.2,
-    ):
-        self.ngram_score_threshold = ngram_score_threshold
+    def __init__(self):
         self.ngram = NGram(2)
         self.numeric_class_phrase_disambiguation = ["TYPE"]
         self.numeric_class_phrase_disambiguation_re = [
@@ -49,7 +58,7 @@ class HitPostProcessor:
         ]
         self.modifier_phrase_disambiguation = ["LIKE"]
 
-    def phrase_disambiguation(self, hits, text):
+    def phrase_disambiguation_filter(self, hits, text):
         new_hits = []
         for numeric_phrase_re in self.numeric_class_phrase_disambiguation_re:
             match = re.search(numeric_phrase_re, text)
@@ -57,18 +66,15 @@ class HitPostProcessor:
                 found_string = match.group()
                 for hit in hits:
                     if found_string in hit.string_norm:
-                        hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
                         new_hits.append(hit)
         if not new_hits:
             for modifier_phrase in self.modifier_phrase_disambiguation:
                 in_text = modifier_phrase in text
                 if in_text:
                     for hit in filter(lambda x: modifier_phrase in x.string_norm, hits):
-                        hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
                         new_hits.append(hit)
                 else:
                     for hit in filter(lambda x: modifier_phrase not in x.string_norm, hits):
-                        hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
                         new_hits.append(hit)
         if new_hits:
             return new_hits
@@ -76,90 +82,37 @@ class HitPostProcessor:
             return hits
 
     def ngram_scorer(self, hits: List[Hit], text):
+        # low conf
         for hit in hits:
-            hit.metrics[NGRAM_SCORE] = self.ngram.distance(text, hit.string_norm)
-            if hit.metrics[NGRAM_SCORE] and hit.metrics[NGRAM_SCORE] > self.ngram_score_threshold:
-                hit.confidence = LinkRanks.LOW_CONFIDENCE
-            else:
-                hit.confidence = LinkRanks.MEDIUM_CONFIDENCE
+            hit.metrics[NGRAM_SCORE] = 2 / (self.ngram.distance(text, hit.string_norm) + 1.0)
         return hits
 
-    def run_fuzz_algo(self, hits: List[Hit], text, fuzz_threshold=0.75, n=5):
+    def run_fuzz_algo(self, hits: List[Hit], text):
+        # low conf
         choices = [x.string_norm for x in hits]
         if len(text) > 10 and len(text.split(" ")) > 4:
-            scores = process.extract(
-                text, choices, scorer=fuzz.token_sort_ratio, limit=n, score_cutoff=fuzz_threshold
-            )
+            scores = process.extract(text, choices, scorer=fuzz.token_sort_ratio)
         else:
-            scores = process.extract(
-                text, choices, scorer=fuzz.WRatio, limit=n, score_cutoff=fuzz_threshold
-            )
-        if scores:
-            new_hits = []
-            for score in scores:
-                hit = hits[score[2]]
-                hit.confidence = LinkRanks.MEDIUM_HIGH_CONFIDENCE
-                hit.metrics[FUZZ_SCORE] = score[1]
-                new_hits.append(hit)
-            return new_hits
-        else:
-            return hits
-
-    @staticmethod
-    def score_numbers(original: Counter, hit: Counter):
-        total = 0.0
-        for number, expected_count in original.items():
-            found_count = hit.get(number, 0)
-            if found_count == expected_count:
-                total += 1.0
-            elif found_count < expected_count and found_count > 0:
-                total += 0.5
-        return total
+            scores = process.extract(text, choices, scorer=fuzz.WRatio)
+        for score in scores:
+            hit = hits[score[2]]
+            hit.metrics[FUZZ_SCORE] = score[1]
+        return hits
 
     def run_number_algo(self, hits, text):
-        text_numbers = Counter(list(re.findall("[0-9]+", text)))
-        scores = []
+        number_resolver = NumberResolver(text)
         for hit in hits:
-            hit_numbers = Counter(list(re.findall("[0-9]+", hit.string_norm)))
-            number_score = self.score_numbers(text_numbers, hit_numbers)
-            if number_score > 0.0:
-                hit.confidence = LinkRanks.HIGH_CONFIDENCE
-                hit.metrics[MATCHED_NUMBER_SCORE] = number_score
-                scores.append(
-                    (
-                        hit,
-                        number_score,
-                    )
-                )
-        if scores:
-            return [x[0] for x in sorted(scores, key=lambda x: x[1])]
-        else:
-            return hits
+            numbers_matched = number_resolver(hit.string_norm)
+            if numbers_matched:
+                hit.metrics[MATCHED_NUMBER_SCORE] = numbers_matched
+        return hits
 
     def __call__(self, hits: List[Hit], string_norm: str) -> List[Hit]:
-        def single_result_matched(hits, message):
-            if len(hits) == 1:
-                logger.debug(f"result found by {message}")
-                return True
-            elif len(hits) > 1:
-                # print(f"{message} result not conclusive. remaining hits ")
-                for x in hits:
-                    logger.debug(x)
 
-                return False
-
+        hits = self.phrase_disambiguation_filter(hits, string_norm)
         hits = self.run_number_algo(hits, string_norm)
-        if single_result_matched(hits, "numbers"):
-            return [hits[0]]
         hits = self.run_fuzz_algo(hits, string_norm)
-        if single_result_matched(hits, "fuzz"):
-            return [hits[0]]
-        hits = self.phrase_disambiguation(hits, string_norm)
-        if single_result_matched(hits, "type_search"):
-            return [hits[0]]
         hits = self.ngram_scorer(hits, string_norm)
-        if single_result_matched(hits, "ngram score"):
-            return [hits[0]]
         return hits
 
 
@@ -349,7 +302,7 @@ class DictionaryIndex(Index):
                 Hit(
                     string_norm=string_norm,
                     parser_name=self.name,
-                    metrics={EXACT_MATCH: True},
+                    metrics={EXACT_MATCH: True, SEARCH_SCORE: 100.0},
                     syn_data=frozenset(self.normalised_syn_dict[string_norm]),
                     confidence=LinkRanks.HIGH_CONFIDENCE,
                 )
@@ -377,7 +330,7 @@ class DictionaryIndex(Index):
                         parser_name=self.name,
                         syn_data=frozenset(self.normalised_syn_dict[found_norm]),
                         metrics={SEARCH_SCORE: score},
-                        confidence=LinkRanks.MEDIUM_CONFIDENCE,
+                        confidence=LinkRanks.LOW_CONFIDENCE,
                     )
                 )
 
@@ -392,7 +345,9 @@ class DictionaryIndex(Index):
 
         string_norm = StringNormalizer.normalize(query)
         hits = self._search_index(string_norm, top_n=top_n)
-        hits = self.hit_post_processor(hits, string_norm)
+        if not (len(hits) == 1 and hits[0].confidence == LinkRanks.HIGH_CONFIDENCE):
+            hits = self.hit_post_processor(hits, string_norm)
+
         yield from hits
 
     def _load(self, path: PathLike) -> Any:
@@ -496,27 +451,24 @@ class EmbeddingIndex(Index):
     ) -> Iterable[Hit]:
         distances, neighbours = self._search_func(query=query, top_n=top_n)
         for score, n in zip(distances, neighbours):
-            if score < score_cutoffs[0]:
-                break
-            else:
-                idx, metadata = self.metadata_db.get_by_index(self.name, n)
-                # the norm form of the default label should always be in the syn database
-                string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
-                try:
-                    syn_data = self.synonym_db.get(self.name, string_norm)
-                    # confidence is always low, dso can be later disambiguated
-                    hit = Hit(
-                        string_norm=string_norm,
-                        syn_data=frozenset(syn_data),
-                        parser_name=self.name,
-                        confidence=LinkRanks.LOW_CONFIDENCE,
-                        metrics={SAPBERT_SCORE: score},
-                    )
-                    yield hit
-                except KeyError:
-                    logger.warning(
-                        f"{string_norm} is not in the synonym database! is the parser for {self.name} correctly configured?"
-                    )
+            idx, metadata = self.metadata_db.get_by_index(self.name, n)
+            # the norm form of the default label should always be in the syn database
+            string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
+            try:
+                syn_data = self.synonym_db.get(self.name, string_norm)
+                # confidence is always medium, dso can be later disambiguated
+                hit = Hit(
+                    string_norm=string_norm,
+                    syn_data=frozenset(syn_data),
+                    parser_name=self.name,
+                    confidence=LinkRanks.LOW_CONFIDENCE,
+                    metrics={SAPBERT_SCORE: score},
+                )
+                yield hit
+            except KeyError:
+                logger.warning(
+                    f"{string_norm} is not in the synonym database! is the parser for {self.name} correctly configured?"
+                )
 
     def __getstate__(self):
         return self.name
