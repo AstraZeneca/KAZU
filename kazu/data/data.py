@@ -513,3 +513,9 @@ class Document:
         idx = uuid.uuid4().hex
         sections = [Section(text=text, name="na")]
         return cls(idx=idx, sections=sections)
+
+    def __len__(self):
+        length = 0
+        for section in self.sections:
+            length += len(section.get_text())
+        return length
