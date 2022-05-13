@@ -384,9 +384,9 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
                 if hit_found or rank_position > self.max_rank_to_consider:
                     break
                 syn_data_set = row["syn_data"]
-                search_score = row[self.search_field]
                 if self.embedding_field not in row or self.search_field not in row:
                     continue
+                search_score = row[self.search_field]
                 embedding_score = row[self.embedding_field]
                 hit_ok, confidence = self.hit_threshold_condition(
                     search_score=search_score,
