@@ -30,6 +30,11 @@ def load_steps(cfg: DictConfig) -> List[BaseStep]:
     return steps
 
 
+def batch_metrics(docs: List[Document]):
+    lengths = [len(doc) for doc in docs]
+    return {"max_length": max(lengths), "mean_length": float(sum(lengths)) / float(len(docs))}
+
+
 class FailedDocsHandler:
     """
     class to somehow handle failed docs
@@ -144,12 +149,17 @@ class Pipeline:
             self.update_failed_docs(step, failed_docs)
         batch_time = round(time.time() - batch_start, 4)
         if self.profile_steps_dir:
-            self.profile(step_times, batch_time)
+            self.profile(step_times, batch_time, batch_metrics(docs))
         self.reset()
         return succeeded_docs
 
-    def profile(self, step_times: Dict, batch_time: float):
+    def profile(self, step_times: Dict, batch_time: float, batch_metrics_dict: Dict):
         if self.summary_writer is not None:
+            self.summary_writer.add_scalars(
+                main_tag="batch_metrics",
+                tag_scalar_dict=batch_metrics_dict,
+                global_step=self.call_count,
+            )
             self.summary_writer.add_scalars(
                 main_tag="all_steps", tag_scalar_dict=step_times, global_step=self.call_count
             )
