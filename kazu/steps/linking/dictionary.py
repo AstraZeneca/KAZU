@@ -1,3 +1,5 @@
+import copy
+import itertools
 import logging
 import traceback
 from typing import List, Tuple
@@ -59,27 +61,48 @@ class DictionaryEntityLinkingStep(BaseStep):
         """
         failed_docs = []
         entities = pydash.flatten([x.get_entities() for x in docs])
-        if len(entities) > 0:
-            for entity in entities:
-                cache_missed_entities = self.lookup_cache.check_lookup_cache([entity])
+        ents_by_match_and_class = {
+            k: list(v)
+            for k, v in itertools.groupby(
+                sorted(
+                    entities,
+                    key=lambda x: (
+                        x.match,
+                        x.entity_class,
+                    ),
+                ),
+                key=lambda x: (
+                    x.match,
+                    x.entity_class,
+                ),
+            )
+        }
+        if len(ents_by_match_and_class) > 0:
+            for ent_match_and_class, ents_this_match in ents_by_match_and_class.items():
+
+                cache_missed_entities = self.lookup_cache.check_lookup_cache(ents_this_match)
                 if len(cache_missed_entities) == 0:
                     continue
                 else:
                     try:
                         hits = list(
                             self.index_group.search(
-                                query=entity.match,
-                                entity_class=entity.entity_class,
+                                query=ent_match_and_class[0],
+                                entity_class=ent_match_and_class[0],
                                 top_n=self.top_n,
                                 namespace=self.namespace(),
                             )
                         )
-                        entity.hits.extend(hits)
-                        self.lookup_cache.update_hits_lookup_cache(entity, hits)
+                        for ent in ents_this_match:
+                            ent.hits.extend(copy.deepcopy(hits))
+                        self.lookup_cache.update_hits_lookup_cache(ents_this_match[0], hits)
 
                     except Exception:
-                        doc = find_document_from_entity(docs, entity)
-                        doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                        failed_docs.append(doc)
+                        failed_docs_set = set()
+                        for ent in ents_this_match:
+                            doc = find_document_from_entity(docs, ent)
+                            doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                            failed_docs_set.add(doc)
+                        failed_docs.extend(list(failed_docs_set))
 
         return docs, failed_docs
