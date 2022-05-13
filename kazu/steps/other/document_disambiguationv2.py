@@ -1020,7 +1020,9 @@ class Disambiguator:
             )
             for (entity_class, entity_match), ents_iter in ents_grouped_by_class_and_match:
                 entities_this_class_and_match = list(ents_iter)
-                filters = self.prefilter_lookup.get(entity_class, [])
+                filters = self.prefilter_lookup.get(
+                    entity_class, [prefilter_imprecise_subspans, prefilter_unlikely_acronyms]
+                )
                 for f in filters:
                     entities_this_class_and_match = f(entities_this_class_and_match)
                 # note,assume all ents with same match have same hits!
