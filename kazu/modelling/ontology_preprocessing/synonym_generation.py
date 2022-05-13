@@ -74,6 +74,8 @@ class CombinatorialSynonymGenerator:
         return results
 
 
+# TODO: this isn't used currently - do we want to try and refine it
+# or just kill it off altogether?
 class SeparatorExpansion(SynonymGenerator):
     def __init__(self, spacy_pipeline: SpacyPipeline):
         self.all_stopwords = spacy_pipeline.nlp.Defaults.stop_words
