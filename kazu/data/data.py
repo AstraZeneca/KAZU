@@ -464,12 +464,23 @@ class Document:
             entities.extend(section.entities)
         return entities
 
-    def json(self, **kwargs):
+    def json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False, **kwargs):
         """
         custom encoder needed to handle serialisation issues with our data model
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
+        if drop_unmapped_ents or drop_hits:
+            for section in self.sections:
+                if drop_unmapped_ents:
+                    ents_to_keep = list(filter(lambda x: x.mappings, section.entities))
+                else:
+                    ents_to_keep = section.entities
+                if drop_hits:
+                    for ent in ents_to_keep:
+                        ent.hits.clear()
+                section.entities = ents_to_keep
+
         return json.dumps(self, cls=DocumentEncoder, **kwargs)
 
     @classmethod
