@@ -9,9 +9,8 @@ from enum import IntEnum, Enum, auto
 from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet
-
 import pandas as pd
-from numpy import ndarray, float32, float16
+from numpy import ndarray, float32, float16, array
 from spacy import displacy
 
 
@@ -49,6 +48,24 @@ class SearchRanks(IntEnum):
     # labels for ranking search hits. NOTE! ordering important, as used for iteration
     EXACT_MATCH = 0
     NEAR_MATCH = 1
+
+
+def remove_empty(d):
+    """
+    recursive function to remove empty objects (e.g. for json minification)
+    :param d:
+    :return:
+    """
+    final_dict = {}
+    for a, b in d.items():
+        if b:
+            if isinstance(b, dict):
+                final_dict[a] = remove_empty(b)
+            elif isinstance(b, list):
+                final_dict[a] = list(filter(None, [remove_empty(i) for i in b]))
+            else:
+                final_dict[a] = b
+    return final_dict
 
 
 @dataclass
@@ -482,6 +499,11 @@ class Document:
                 section.entities = ents_to_keep
 
         return json.dumps(self, cls=DocumentEncoder, **kwargs)
+
+    def as_minified_json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False) -> str:
+        as_dict = json.loads(self.json(drop_unmapped_ents, drop_hits))
+        as_dict_minified = remove_empty(as_dict)
+        return json.dumps(as_dict_minified)
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
