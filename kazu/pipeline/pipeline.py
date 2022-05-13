@@ -113,14 +113,17 @@ class Pipeline:
         # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
         self.failed_docs: Dict[str, List[Document]] = {}
         # performance tracking
+        self.init_time = datetime.now().strftime("%m_%d_%Y_%H_%M")
+        logger.info(f"pipeline initialised: {self.init_time}")
+        self.profile_steps_dir = profile_steps_dir
         if profile_steps_dir:
-            logger.info(f"profiling configured. log dir is {profile_steps_dir}")
-            self.summary_writer = SummaryWriter(log_dir=profile_steps_dir)
+            dir_and_time = f"{profile_steps_dir}_{self.init_time}"
+            logger.info(f"profiling configured. log dir is {dir_and_time}")
+            self.summary_writer = SummaryWriter(log_dir=dir_and_time)
             self.call_count = 0
         else:
             logger.info("profiling not configured")
             self.summary_writer = None
-        self.init_time = datetime.now().strftime("%m_%d_%Y_%H_%M")
 
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
@@ -131,20 +134,27 @@ class Pipeline:
         """
         succeeded_docs = docs
         step_times = {}
+        batch_start = time.time()
         for step in self.steps:
             start = time.time()
             succeeded_docs, failed_docs = step(succeeded_docs)
-            end = time.time()
-            step_times[f"{step.namespace()}_{self.init_time}"] = round(end - start, 4)
+            step_times[f"{step.namespace()}_{self.init_time}"] = round(time.time() - start, 4)
             self.update_failed_docs(step, failed_docs)
-        self.profile(step_times)
+        batch_time = round(time.time() - batch_start, 4)
+        if self.profile_steps_dir:
+            self.profile(step_times, batch_time)
         self.reset()
         return succeeded_docs
 
-    def profile(self, data: Dict):
+    def profile(self, step_times: Dict, batch_time: float):
         if self.summary_writer is not None:
             self.summary_writer.add_scalars(
-                main_tag="", tag_scalar_dict=data, global_step=self.call_count
+                main_tag="step", tag_scalar_dict=step_times, global_step=self.call_count
+            )
+            self.summary_writer.add_scalars(
+                main_tag="throughput",
+                tag_scalar_dict={"batch": batch_time},
+                global_step=self.call_count,
             )
             self.call_count += 1
 
