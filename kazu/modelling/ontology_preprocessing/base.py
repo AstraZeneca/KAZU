@@ -835,7 +835,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             records.append({SYN: json_dict["id"], MAPPING_TYPE: "opentargets_id"})
             df = pd.DataFrame.from_records(records, columns=[SYN, MAPPING_TYPE])
             df[IDX] = json_dict["id"]
-            df[DEFAULT_LABEL] = json_dict["approvedSymbol"]
+            df[DEFAULT_LABEL] = json_dict["approvedName"]
             df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
             yield df
 
