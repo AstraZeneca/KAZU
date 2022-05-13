@@ -1,6 +1,7 @@
 import logging
 import os.path
 import time
+import uuid
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -117,7 +118,8 @@ class Pipeline:
         logger.info(f"pipeline initialised: {self.init_time}")
         self.profile_steps_dir = profile_steps_dir
         if profile_steps_dir:
-            dir_and_time = f"{profile_steps_dir}_{self.init_time}"
+            idx_this_process = uuid.uuid1().hex
+            dir_and_time = f"{idx_this_process}__{self.init_time}_{profile_steps_dir}"
             logger.info(f"profiling configured. log dir is {dir_and_time}")
             self.summary_writer = SummaryWriter(log_dir=dir_and_time)
             self.call_count = 0
@@ -138,7 +140,7 @@ class Pipeline:
         for step in self.steps:
             start = time.time()
             succeeded_docs, failed_docs = step(succeeded_docs)
-            step_times[f"{step.namespace()}_{self.init_time}"] = round(time.time() - start, 4)
+            step_times[step.namespace()] = round(time.time() - start, 4)
             self.update_failed_docs(step, failed_docs)
         batch_time = round(time.time() - batch_start, 4)
         if self.profile_steps_dir:
@@ -149,13 +151,19 @@ class Pipeline:
     def profile(self, step_times: Dict, batch_time: float):
         if self.summary_writer is not None:
             self.summary_writer.add_scalars(
-                main_tag="step", tag_scalar_dict=step_times, global_step=self.call_count
+                main_tag="all_steps", tag_scalar_dict=step_times, global_step=self.call_count
             )
             self.summary_writer.add_scalars(
-                main_tag="throughput",
+                main_tag="batch_time",
                 tag_scalar_dict={"batch": batch_time},
                 global_step=self.call_count,
             )
+            for step_name, step_time in step_times.items():
+                self.summary_writer.add_scalars(
+                    main_tag=step_name,
+                    tag_scalar_dict={"time": step_time},
+                    global_step=self.call_count,
+                )
             self.call_count += 1
 
     def update_failed_docs(self, step: BaseStep, failed_docs: List[Document]):
