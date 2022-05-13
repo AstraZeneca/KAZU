@@ -88,7 +88,7 @@ class DictionaryEntityLinkingStep(BaseStep):
                         hits = list(
                             self.index_group.search(
                                 query=ent_match_and_class[0],
-                                entity_class=ent_match_and_class[0],
+                                entity_class=ent_match_and_class[1],
                                 top_n=self.top_n,
                                 namespace=self.namespace(),
                             )
