@@ -650,28 +650,19 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
         if len(class_and_ents) == 1:
             return entities, []
 
-        disam, amb = [], []
-        for entity_class, ent_set in class_and_ents.items():
-            test_ent = next(iter(ent_set))
-            if any(hit.confidence == SearchRanks.EXACT_MATCH for hit in test_ent.hits):
-                disam.extend(list(ent_set))
-            else:
-                amb.extend(list(ent_set))
         # if either class have high conf hits
+        amb, disam = self.sort_by_exact_match(class_and_ents)
         if disam:
             return disam, amb
 
         else:
 
-            class_to_query = {}
-
-            for entity_class, ent_set in class_and_ents.items():
-                test_ent = next(iter(ent_set))
-                query = set(self.queries.collect_all_syns_from_ents([test_ent]))
-                if query:
-                    class_to_query[entity_class] = query
-            # if only one class has synonyms
-            if len(class_to_query) < 2:
+            class_to_query = self.entity_class_to_synonym_query(class_and_ents)
+            # if no synonyms found
+            if len(class_to_query) == 0:
+                return [], entities
+            elif len(class_to_query) == 1:
+                # if only one ent class has synonyms, chose that one
                 chosen_class = next(iter(class_to_query.keys()))
                 disambiguated_ents = class_and_ents[chosen_class]
                 still_ambiguous_ents = pydash.flatten(
@@ -680,22 +671,7 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
                 return list(disambiguated_ents), list(still_ambiguous_ents)
             else:
                 # run tfidf on syns
-                records = []
-                for entity_class, query in class_to_query.items():
-                    hits_and_scores = list(
-                        self.corpus_scorer(list(query), self.document_tfidf_matrix)
-                    )
-                    for hit, score in hits_and_scores:
-                        records.append({"class": entity_class, "hit": hit, "score": score})
-                df = pd.DataFrame.from_records(records)
-                df["rank"] = df["score"].rank(ascending=True, na_option="bottom")
-                df = (
-                    df[["class", "score"]]
-                    .groupby("score")
-                    .agg(set)
-                    .reset_index()
-                    .sort_values("score", ascending=False)
-                )
+                df = self.build_ranking_dataframe(class_to_query)
                 for i, row in df.iterrows():
                     if len(row["class"]) > 1:
                         continue
@@ -713,6 +689,42 @@ class TfIdfGlobalDisambiguationStrategy(GlobalDisambiguationStrategy):
 
                 else:
                     return [], entities
+
+    def build_ranking_dataframe(self, class_to_query):
+        records = []
+        for entity_class, query in class_to_query.items():
+            hits_and_scores = list(self.corpus_scorer(list(query), self.document_tfidf_matrix))
+            for hit, score in hits_and_scores:
+                records.append({"class": entity_class, "hit": hit, "score": score})
+        df = pd.DataFrame.from_records(records)
+        df["rank"] = df["score"].rank(ascending=True, na_option="bottom")
+        df = (
+            df[["class", "score"]]
+            .groupby("score")
+            .agg(set)
+            .reset_index()
+            .sort_values("score", ascending=False)
+        )
+        return df
+
+    def entity_class_to_synonym_query(self, class_and_ents):
+        class_to_query = {}
+        for entity_class, ent_set in class_and_ents.items():
+            test_ent = next(iter(ent_set))
+            query = set(self.queries.collect_all_syns_from_ents([test_ent]))
+            if query:
+                class_to_query[entity_class] = query
+        return class_to_query
+
+    def sort_by_exact_match(self, class_and_ents):
+        disam, amb = [], []
+        for entity_class, ent_set in class_and_ents.items():
+            test_ent = next(iter(ent_set))
+            if any(hit.confidence == SearchRanks.EXACT_MATCH for hit in test_ent.hits):
+                disam.extend(list(ent_set))
+            else:
+                amb.extend(list(ent_set))
+        return amb, disam
 
 
 class GlobalDisambiguationStrategyList:
@@ -927,7 +939,6 @@ class Disambiguator:
         # TODO: cache any strategy data that only needs to be run once
         self.prepare_strategies(doc)
         entities = doc.get_entities()
-        entities = prefilter_imprecise_subspans(entities)
         symbolic_entities, non_symbolic_entities = self.sort_entities_by_symbolism(entities)
         globally_disambiguated_non_symbolic_entities = self.execute_global_disambiguation_strategy(
             non_symbolic_entities, doc, False
@@ -1099,6 +1110,8 @@ def prefilter_imprecise_subspans(ents: Iterable[Entity]) -> List[Entity]:
         if any(x in ent.metadata for x in metadata_needing_exact_match):
             if any(hit.confidence == SearchRanks.EXACT_MATCH for hit in ent.hits):
                 result.append(ent)
+            else:
+                logger.debug("filtered %s -> imprecise subspan", ent)
         else:
             result.append(ent)
     return result
@@ -1110,7 +1123,8 @@ def prefilter_unlikely_acronyms(ents: Iterable[Entity]) -> List[Entity]:
         # filter if weird chars in short strings
         if len(ent.match) <= 4:
             for char in ent.match:
-                if not char.isalnum() or not char in GreekSymbolSubstitution.GREEK_SUBS:
+                if not (char.isalnum() or char in GreekSymbolSubstitution.GREEK_SUBS):
+                    logger.debug("filtered %s -> unlikely acronym", ent.match)
                     break
             else:
                 result.append(ent)
@@ -1124,15 +1138,12 @@ def prefilter_unlikely_gene_symbols(ents: Iterable[Entity]) -> List[Entity]:
     for ent in ents:
         # filter if prefix or suffix looks weird
         if len(ent.match) <= 4:
-            if (
-                not ent.match[0].isalnum()
-                or not ent.match[0].isalnum() in GreekSymbolSubstitution.GREEK_SUBS
-                or not ent.match[-1].isalnum()
-                or not ent.match[-1].isalnum() in GreekSymbolSubstitution.GREEK_SUBS
+            if (ent.match[0].isalnum() or ent.match[0] in GreekSymbolSubstitution.GREEK_SUBS) and (
+                ent.match[-1].isalnum() or ent.match[-1] in GreekSymbolSubstitution.GREEK_SUBS
             ):
-                break
-            else:
                 result.append(ent)
+            else:
+                logger.debug("filtered %s -> unlikely gene symbol", ent.match)
         else:
             result.append(ent)
     return result
@@ -1150,13 +1161,7 @@ class DocumentLevelDisambiguationStep(BaseStep):
 
     """
 
-    def __init__(
-        self,
-        depends_on: Optional[List[str]],
-        tfidf_disambiguator: Disambiguator,
-        drop_unmapped_ents: bool = False,
-        drop_hits: bool = False,
-    ):
+    def __init__(self, depends_on: Optional[List[str]], tfidf_disambiguator: Disambiguator):
         """
 
         :param depends_on:
@@ -1164,24 +1169,12 @@ class DocumentLevelDisambiguationStep(BaseStep):
         """
 
         super().__init__(depends_on)
-        self.drop_hits = drop_hits
-        self.drop_unmapped_ents = drop_unmapped_ents
         self.tfidf_disambiguator = tfidf_disambiguator
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs: List[Document] = []
         for doc in docs:
             self.tfidf_disambiguator.run(doc)
-            if self.drop_unmapped_ents or self.drop_hits:
-                for section in doc.sections:
-                    if self.drop_unmapped_ents:
-                        ents_to_keep = list(filter(lambda x: x.mappings, section.entities))
-                    else:
-                        ents_to_keep = section.entities
-                    if self.drop_hits:
-                        for ent in ents_to_keep:
-                            ent.hits.clear()
-                    section.entities = ents_to_keep
         return docs, failed_docs
 
 
