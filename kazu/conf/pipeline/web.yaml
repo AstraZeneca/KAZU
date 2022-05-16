@@ -1,0 +1,9 @@
+# @package _global_
+pipeline:
+  steps:
+    - SciSpacyAbbreviationExpansionStep
+    - ExplosionNERStep
+    - TransformersModelForTokenClassificationNerStep
+    - DictionaryEntityLinkingStep
+    - SapBertForEntityLinkingStep
+    - DocumentLevelDisambiguationStep

@@ -1,5 +1,5 @@
 defaults:
-  - ray: cluster
+  - ray: local
   - SpacyPipeline: default
   - SciSpacyAbbreviationExpansionStep: default
   - SpacyNerStep: default
