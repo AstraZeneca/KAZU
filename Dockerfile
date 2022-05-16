@@ -1,4 +1,4 @@
-FROM rayproject/ray:1.9.2-py38-cpu
+FROM rayproject/ray:1.12.0-py38-cpu
 COPY  . .
 RUN sudo apt-get update
 RUN sudo apt-get install unzip
