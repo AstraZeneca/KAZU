@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 from typing import List, Dict, Optional
 
+import psutil
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.tensorboard import SummaryWriter
@@ -124,7 +125,7 @@ class Pipeline:
         self.profile_steps_dir = profile_steps_dir
         if profile_steps_dir:
             idx_this_process = uuid.uuid1().hex
-            dir_and_time = f"{idx_this_process}__{self.init_time}_{profile_steps_dir}"
+            dir_and_time = f"{profile_steps_dir}_{self.init_time}_{idx_this_process}"
             logger.info(f"profiling configured. log dir is {dir_and_time}")
             self.summary_writer = SummaryWriter(log_dir=dir_and_time)
             self.call_count = 0
@@ -166,6 +167,11 @@ class Pipeline:
             self.summary_writer.add_scalars(
                 main_tag="batch_time",
                 tag_scalar_dict={"batch": batch_time},
+                global_step=self.call_count,
+            )
+            self.summary_writer.add_scalars(
+                main_tag="memory",
+                tag_scalar_dict={"MB": psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2},
                 global_step=self.call_count,
             )
             for step_name, step_time in step_times.items():
