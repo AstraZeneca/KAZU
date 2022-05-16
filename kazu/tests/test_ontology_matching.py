@@ -57,13 +57,13 @@ def test_initialize():
         assert ontology_matcher.nr_lowercase_rules == 0
         # non-existing dir does not work
         with pytest.raises(ValueError):
-            ontology_matcher.set_ontologies(d / "non_existing")
+            ontology_matcher.create_phrasematchers(d / "non_existing")
         # non-existing file does not work
         with pytest.raises(ValueError):
-            ontology_matcher.set_ontologies(d / "single_file.parquet")
+            ontology_matcher.create_phrasematchers(d / "single_file.parquet")
         # existing parquet file
         parquet_loc = _create_parquet_file(d / "single_file.parquet")
-        ontology_matcher.set_ontologies(parquet_loc)
+        ontology_matcher.create_phrasematchers(parquet_loc)
         assert ontology_matcher.ontologies == ["single_file.parquet"]
         assert ontology_matcher.nr_strict_rules > 0
         assert ontology_matcher.nr_lowercase_rules > 0
@@ -71,14 +71,14 @@ def test_initialize():
         json_loc = d / "single_file.json"
         Path(json_loc).touch()
         with pytest.raises(ValueError):
-            ontology_matcher.set_ontologies(json_loc)
+            ontology_matcher.create_phrasematchers(json_loc)
         # subdir of files: ignore non-parquet files
         sub_dir = d / "subdir"
         sub_dir.mkdir()
         _create_parquet_file(sub_dir / "file1.parquet")
         Path(sub_dir / "file2.json").touch()
         _create_parquet_file(sub_dir / "file3.parquet")
-        ontology_matcher.set_ontologies(sub_dir)
+        ontology_matcher.create_phrasematchers(sub_dir)
         assert set(ontology_matcher.ontologies) == set(("file1.parquet", "file3.parquet"))
 
 
@@ -91,7 +91,7 @@ def test_apply(example_text):
         ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
         assert isinstance(ontology_matcher, OntologyMatcher)
         ontology_matcher.set_labels([ANATOMY, DISEASE])
-        ontology_matcher.set_ontologies(parquet_file)
+        ontology_matcher.create_phrasematchers(parquet_file)
         doc = nlp(example_text)
         matches = doc.spans["my_hits"]
         assert len(matches) == 3
@@ -124,7 +124,7 @@ def test_labels(example_text, labels, results):
         ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
         assert isinstance(ontology_matcher, OntologyMatcher)
         ontology_matcher.set_labels(labels)
-        ontology_matcher.set_ontologies(parquet_file)
+        ontology_matcher.create_phrasematchers(parquet_file)
         doc = nlp(example_text)
         matches = doc.spans["my_hits"]
         assert len(matches) == results
@@ -139,7 +139,7 @@ def test_serialization(example_text):
         ontology_matcher = nlp1.add_pipe("ontology_matcher", config=config)
         assert isinstance(ontology_matcher, OntologyMatcher)
         ontology_matcher.set_labels([ANATOMY, DISEASE])
-        ontology_matcher.set_ontologies(parquet_file)
+        ontology_matcher.create_phrasematchers(parquet_file)
         doc1 = nlp1(example_text)
         spans1 = set((s.start_char, s.end_char, s.text) for s in doc1.spans["my_hits"])
         nlp_loc = d / "ontology_pipeline"

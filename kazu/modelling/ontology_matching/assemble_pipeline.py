@@ -32,6 +32,6 @@ def main(
     if isinstance(labels, str):
         labels = labels.split(",")
     ontology_matcher.set_labels(labels)
-    ontology_matcher.set_ontologies(parsers, blacklisters)
+    ontology_matcher.create_phrasematchers(parsers, blacklisters)
     nlp.to_disk(output_dir)
     return nlp

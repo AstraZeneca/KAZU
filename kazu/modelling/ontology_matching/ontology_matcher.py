@@ -3,7 +3,7 @@ import pickle
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Callable, Iterable, Set
+from typing import List, Dict, Union, Callable, Iterable
 
 import spacy
 import srsly
@@ -11,7 +11,6 @@ from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import Blac
 from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
 from kazu.modelling.ontology_matching.variants import create_variants
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
-from kazu.utils.utils import PathLike, SinglePathLikeOrIterable, as_path
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
@@ -72,7 +71,6 @@ class OntologyMatcherConfig:
     span_key: str
     match_id_sep: str
     labels: List[str]
-    parquet_files: List[str]
     parser_name_to_entity_type: Dict[str, str]
 
 
@@ -103,7 +101,6 @@ class OntologyMatcher:
             span_key=span_key,
             match_id_sep=match_id_sep,
             labels=[],
-            parquet_files=[],
             parser_name_to_entity_type=parser_name_to_entity_type,
         )
         # These will be defined when calling initialize
@@ -150,25 +147,57 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
-    @property
-    def ontologies(self) -> List[str]:
-        """RETURNS (List[str]): List of parquet files that were processed"""
-        return self.cfg.parquet_files
-
-    def set_ontologies(self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]):
-        """Initialize the ontologies when creating this component.
+    def create_phrasematchers(
+        self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]
+    ):
+        """Initialize the phrase matchers when creating this component.
         This method should not be run on an existing or deserialized pipeline.
         """
-        if len(self.ontologies) > 0:
-            logging.warning("Ontologies are being redefined - is this by intention?")
+        if self.strict_matcher is not None or self.lowercase_matcher is not None:
+            logging.warning("Phrase matchers are being redefined - is this by intention?")
 
-        # paths = self._define_paths(parquet_files)
+        strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
+        lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
+        for parser in parsers:
+            # TODO: fix api call
+            synonym_data = parser.collect_aggregate_synonym_data(False)
+            generated_synonym_data = parser.generate_synonyms()
+            generated_synonym_data.update(synonym_data)
 
-        # dfs = {path.name: pd.read_parquet(path) for path in paths}
-        self.strict_matcher, self.lowercase_matcher = self._create_phrasematcher(
-            parsers, blacklisters
-        )
-        # self.cfg.parquet_files = [path.name for path in paths]
+            parser_name = parser.name
+            logging.info(f"generating {len(generated_synonym_data)} patterns for {parser_name}")
+            patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
+
+            blacklister = blacklisters.get(parser_name)
+            for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
+                for syn_data in syn_data_list:
+                    for idx in syn_data.ids:
+                        # TODO: combine entry_filter and blacklisters
+                        if blacklister is None:
+                            passes_blacklist = True
+                        else:
+                            passes_blacklist = blacklister(syn)[0]
+
+                        if passes_blacklist:
+                            add_case_sens_pat, add_case_insens_pat = self.entry_filter(syn, idx)
+                            # should not both be true - we only need to add the pattern
+                            # in a single matcher
+                            assert not (add_case_sens_pat and add_case_insens_pat)
+                            try:
+                                match_id = parser_name + self.match_id_sep + str(idx)
+                                if add_case_sens_pat:
+                                    strict_matcher.add(match_id, [patterns[i]])
+                                elif add_case_insens_pat:
+                                    lowercase_matcher.add(match_id, [patterns[i]])
+                            except KeyError as e:
+                                logging.warning(
+                                    f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
+                                    e,
+                                )
+
+        self.strict_matcher = strict_matcher
+        self.lowercase_matcher = lowercase_matcher
+        return strict_matcher, lowercase_matcher
 
     # dead code?
     # def initialize(
@@ -211,7 +240,7 @@ class OntologyMatcher:
         if self.nr_strict_rules == 0 or self.nr_lowercase_rules == 0:
             raise ValueError(
                 "The matcher rules have not been set up properly. "
-                "Did you initialize the labels and the ontologies?"
+                "Did you initialize the labels and the phrase matchers?"
             )
 
         assert self.strict_matcher is not None
@@ -315,75 +344,12 @@ class OntologyMatcher:
             return False
         return False
 
-    def _define_paths(self, in_loc: SinglePathLikeOrIterable) -> Set[Path]:
-        if isinstance(in_loc, (str, Path)):
-            in_locs: Iterable[PathLike] = (in_loc,)
-        else:
-            in_locs = in_loc
-
-        all_paths = set()
-        for path in in_locs:
-            path = as_path(path)
-            if not path.exists():
-                raise ValueError(f"Location {path} is not an existing file or directory.")
-            if path.is_file():
-                if path.suffix != ".parquet":
-                    raise ValueError(f"Provided file {path} is not a Parquet file.")
-                all_paths.add(path)
-            if path.is_dir():
-                all_paths.update(path.glob("**/*.parquet"))
-        return all_paths
-
     def _set_span_attributes(self, spans):
         for span in spans:
             # would this be better as the 'source' of the synonyms rather than parser name?
             parser_name, span.kb_id_ = span.label_.split(self.match_id_sep, maxsplit=1)
             span.label_ = self.parser_name_to_entity_type[parser_name]
         return spans
-
-    def _create_phrasematcher(
-        self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]
-    ):
-        orth_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
-        lower_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
-        for parser in parsers:
-            # TODO: fix api call
-            synonym_data = parser.collect_aggregate_synonym_data(False)
-            generated_synonym_data = parser.generate_synonyms()
-            generated_synonym_data.update(synonym_data)
-
-            parser_name = parser.name
-            logging.info(f"generating {len(generated_synonym_data)} patterns for {parser_name}")
-            patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
-
-            blacklister = blacklisters.get(parser_name)
-            for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
-                for syn_data in syn_data_list:
-                    for idx in syn_data.ids:
-                        # TODO: combine entry_filter and blacklisters
-                        if blacklister is None:
-                            passes_blacklist = True
-                        else:
-                            passes_blacklist = blacklister(syn)[0]
-
-                        if passes_blacklist:
-                            add_case_sens_pat, add_case_insens_pat = self.entry_filter(syn, idx)
-                            # should not both be true - we only need to add the pattern
-                            # in a single matcher
-                            assert not (add_case_sens_pat and add_case_insens_pat)
-                            try:
-                                match_id = parser_name + self.match_id_sep + str(idx)
-                                if add_case_sens_pat:
-                                    orth_matcher.add(match_id, [patterns[i]])
-                                elif add_case_insens_pat:
-                                    lower_matcher.add(match_id, [patterns[i]])
-                            except KeyError as e:
-                                logging.warning(
-                                    f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
-                                    e,
-                                )
-
-        return orth_matcher, lower_matcher
 
     def _create_token_matchers(self):
         tp_matchers = {}
