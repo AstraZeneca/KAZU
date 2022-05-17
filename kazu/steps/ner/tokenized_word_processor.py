@@ -49,7 +49,7 @@ class SpanFinder:
         self.threshold = threshold
         self.active_spans: List[TokWordSpan] = []
         self.words: List[TokenizedWord] = []
-        self.span_breaking_chars = set("() ")
+        self.span_breaking_chars = set("() ;")
         self.non_breaking_span_chars = set("-")
         self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label

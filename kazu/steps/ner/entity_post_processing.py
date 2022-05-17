@@ -58,30 +58,12 @@ class SplitOnConjunctionPattern:
         for i, pattern in enumerate(patterns):
             self.matcher.add(f"{self.__class__.__name__}_{i}", [pattern], greedy="LONGEST")
 
-    def process_ents(self, entity: Entity, doc: Doc, text: str) -> List[Entity]:
-        ents = []
-        for ent in doc.ents:
-            ents.append(
-                _copy_ent_with_new_spans(
-                    spans=[
-                        (entity.start + ent.start_char, entity.start + ent.end_char),
-                    ],
-                    text=text,
-                    entity=entity,
-                    join_str=" ",
-                    rule_name="spacy ner",
-                )
-            )
-        return ents
-
     def __call__(self, entity: Entity, text: str) -> List[Entity]:
         # if any((x in entity.match for x in [" and ", " or ", " nor ", ", ", "/"])):
         doc = self.nlp(entity.match)
         ents = []
         if any((x in entity.match for x in [" and ", " or ", " nor "])):
             ents = self.run_conjunction_rules(doc, entity, text)
-        if doc.ents:
-            ents.extend(self.process_ents(entity=entity, doc=doc, text=text))
         return ents
 
     def run_conjunction_rules(self, doc, entity, text):
