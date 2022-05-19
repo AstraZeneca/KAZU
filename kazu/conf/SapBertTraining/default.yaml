@@ -10,7 +10,7 @@ model:
     type_of_triplets: "all"
     train_file: ???
     train_batch_size: 256
-    num_workers: 2
+    num_workers: 0
   sapbert_evaluation_manager:
     _target_: kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager
     debug: true
