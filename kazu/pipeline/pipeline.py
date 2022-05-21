@@ -30,10 +30,20 @@ def load_steps(cfg: DictConfig) -> List[BaseStep]:
 
     return steps
 
+def calc_doc_size(doc:Document):
+    return sum([len(section.text) for section in doc.sections])
 
 def batch_metrics(docs: List[Document]):
-    lengths = [len(doc) for doc in docs]
-    return {"max_length": max(lengths), "mean_length": float(sum(lengths)) / float(len(docs))}
+    lengths = []
+    ent_count = []
+    for doc in docs:
+        lengths.append(calc_doc_size(doc))
+        ent_count.append(len(doc.get_entities()))
+    return {"max_length": max(lengths),
+            "mean_length": float(sum(lengths)) / float(len(docs)),
+            "max_ents":max(ent_count),
+            "mean_ents":float(sum(ent_count)) / float(len(ent_count)),
+            }
 
 
 class FailedDocsHandler:
@@ -106,6 +116,7 @@ class Pipeline:
         steps: List[BaseStep],
         failure_handler: Optional[List[FailedDocsHandler]] = None,
         profile_steps_dir: Optional[str] = None,
+        skip_doc_len:Optional[int] = 2e5
     ):
         """
         A basic pipeline, used to help run a series of steps
@@ -114,6 +125,7 @@ class Pipeline:
         :param failure_handler: optional list of handlers to process failed docs
         :param profile_steps_dir: profile throughout of each step with tensorboard. path to log dir
         """
+        self.skip_doc_len = skip_doc_len
         self.failure_handlers = failure_handler
         self.pipeline_metadata: Dict[str, StepMetadata] = {}  # metadata about each step
         self.steps = steps
@@ -133,6 +145,18 @@ class Pipeline:
             logger.info("profiling not configured")
             self.summary_writer = None
 
+    def prefilter_docs(self,docs:List[Document]):
+        docs_to_process = []
+        for doc in docs:
+            doc_size = calc_doc_size(doc)
+            if doc_size>=self.skip_doc_len:
+                doc.metadata[PROCESSING_EXCEPTION] = f'document too long: {doc_size}. max:{self.skip_doc_len}'
+                logger.warning(f'skipping doc: {doc.idx}: reason: too long')
+            else:
+                docs_to_process.append(doc)
+        return docs_to_process
+
+
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
         run the pipeline
@@ -140,19 +164,20 @@ class Pipeline:
         :param docs: Docs to process
         :return: processed docs
         """
-        succeeded_docs = docs
+        docs_to_process = self.prefilter_docs(docs)
         step_times = {}
         batch_start = time.time()
         for step in self.steps:
             start = time.time()
-            succeeded_docs, failed_docs = step(succeeded_docs)
+            succeeded_docs, failed_docs = step(docs_to_process)
             step_times[step.namespace()] = round(time.time() - start, 4)
             self.update_failed_docs(step, failed_docs)
         batch_time = round(time.time() - batch_start, 4)
         if self.profile_steps_dir:
             self.profile(step_times, batch_time, batch_metrics(docs))
         self.reset()
-        return succeeded_docs
+
+        return docs
 
     def profile(self, step_times: Dict, batch_time: float, batch_metrics_dict: Dict):
         if self.summary_writer is not None:

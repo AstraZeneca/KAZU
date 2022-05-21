@@ -33,6 +33,7 @@ from kazu.utils.link_index import (
     EmbeddingIndex,
     MatMulTensorEmbeddingIndex,
 )
+from transformers.file_utils import PaddingStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +155,7 @@ class SapbertTrainingParams(BaseModel):
 
 
 def get_embedding_dataloader_from_strings(
-    texts: List[str], tokenizer: Callable, batch_size: int, num_workers: int
+    texts: List[str], tokenizer: Callable, batch_size: int, num_workers: int, max_length: int = 50
 ):
     """
     get a dataloader with dataset HFSapbertInferenceDataset and DataCollatorWithPadding. This should be used to
@@ -167,7 +168,9 @@ def get_embedding_dataloader_from_strings(
     """
     indices = [i for i in range(len(texts))]
     # padding handled by collate func
-    batch_encodings = tokenizer(texts, padding=False)
+    batch_encodings = tokenizer(
+        texts, padding=PaddingStrategy.MAX_LENGTH, max_length=max_length, truncation=True
+    )
     batch_encodings["indices"] = indices
     dataset = HFSapbertInferenceDataset(batch_encodings)
     collate_func = init_hf_collate_fn(tokenizer)
