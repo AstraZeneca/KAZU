@@ -5,7 +5,7 @@ from typing import Optional, List, Tuple, Callable
 
 from py4j.java_gateway import JavaGateway
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Mapping, LinkRanks
 from kazu.steps import BaseStep
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,9 @@ class SethStep(BaseStep):
         depends_on: Optional[List[str]],
         entity_class: str,
         seth_fatjar_path: str,
+        java_home:str,
         condition: Optional[Callable[[Document], bool]] = None,
+
     ):
         """
 
@@ -48,7 +50,7 @@ class SethStep(BaseStep):
         self.condition = condition
         if not os.path.exists(seth_fatjar_path):
             raise RuntimeError(f"required jar: {seth_fatjar_path} not found")
-        self.gateway = JavaGateway.launch_gateway(classpath=seth_fatjar_path, die_on_exit=True)
+        self.gateway = JavaGateway.launch_gateway(classpath=seth_fatjar_path, die_on_exit=True,java_path=java_home)
         self.seth = self.gateway.jvm.com.astrazeneca.kazu.SethRunner()
         self.entity_class = entity_class
 
@@ -74,6 +76,9 @@ class SethStep(BaseStep):
                                     entity_class=self.entity_class,
                                     namespace=self.namespace(),
                                     metadata=python_dict,
+                                    mappings=[Mapping(default_label=self.entity_class
+                                                      ,source=self.entity_class,
+                                                      parser_name='n/a',idx=self.entity_class,confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE)]
                                 ),
                             )
                         section.entities.extend(entities)
