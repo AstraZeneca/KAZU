@@ -37,14 +37,15 @@ class TokWordSpan:
     tok_words: List[TokenizedWord] = field(default_factory=list)
 
 
-class SpanFinder:
+class SmartSpanFinder:
     """
     finds spans across a sequence of TokenizedWord, according to some rules. After being called, the spans can be
     accessed via self.spans. This is a list of dictionaries. Each dictionary has a key of the entity class, and a
     list of TokenizedWord representing the entity
     """
 
-    def __init__(self, threshold: float, text: str, id2label: Dict[int, str]):
+    def __init__(self, threshold: float, text: str, id2label: Dict[int, str],detect_subspans:bool=False):
+        self.detect_subspans = detect_subspans
         self.text = text
         self.threshold = threshold
         self.active_spans: List[TokWordSpan] = []
@@ -185,7 +186,8 @@ class SpanFinder:
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
             elif self.span_continue_condition(word, bio_and_class_labels):
                 self._update_active_spans(bio_and_class_labels, word)
-                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
+                if self.detect_subspans:
+                    self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
             else:
                 self.close_spans()
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
@@ -216,7 +218,7 @@ class TokenizedWordProcessor:
         self.confidence_threshold = confidence_threshold
 
     def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
-        span_finder = SpanFinder(
+        span_finder = SmartSpanFinder(
             threshold=self.confidence_threshold, text=text, id2label=self.id2label
         )
         span_finder(words)
