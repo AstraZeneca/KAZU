@@ -10,7 +10,7 @@ from kazu.steps import BaseStep
 
 logger = logging.getLogger(__name__)
 
-
+SETH_METADATA_KEY='seth'
 class SethStep(BaseStep):
     """
     A Step that calls SETH (SNP Extraction Tool for Human Variations) over py4j
@@ -75,7 +75,7 @@ class SethStep(BaseStep):
                                     text=section.get_text(),
                                     entity_class=self.entity_class,
                                     namespace=self.namespace(),
-                                    metadata=python_dict,
+                                    metadata={SETH_METADATA_KEY:python_dict},
                                     mappings=[Mapping(default_label=self.entity_class
                                                       ,source=self.entity_class,
                                                       parser_name='n/a',idx=self.entity_class,confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE)]
