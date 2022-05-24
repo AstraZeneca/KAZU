@@ -1,0 +1,8 @@
+# @package _global_
+pipeline:
+  steps:
+    - TransformersModelForTokenClassificationNerStep
+    - SethStep
+    - DictionaryEntityLinkingStep
+    - SapBertForEntityLinkingStep
+    - DocumentLevelDisambiguationStep
