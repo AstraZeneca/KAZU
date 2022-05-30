@@ -44,7 +44,9 @@ class SmartSpanFinder:
     list of TokenizedWord representing the entity
     """
 
-    def __init__(self, threshold: float, text: str, id2label: Dict[int, str],detect_subspans:bool=False):
+    def __init__(
+        self, threshold: float, text: str, id2label: Dict[int, str], detect_subspans: bool = False
+    ):
         self.detect_subspans = detect_subspans
         self.text = text
         self.threshold = threshold
@@ -187,7 +189,9 @@ class SmartSpanFinder:
             elif self.span_continue_condition(word, bio_and_class_labels):
                 self._update_active_spans(bio_and_class_labels, word)
                 if self.detect_subspans:
-                    self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
+                    self.start_span(
+                        bio_and_class_labels=bio_and_class_labels, word=word, subspan=True
+                    )
             else:
                 self.close_spans()
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
@@ -213,13 +217,19 @@ class TokenizedWordProcessor:
 
     """
 
-    def __init__(self, confidence_threshold: float, id2label: Dict[int, str]):
+    def __init__(
+        self, confidence_threshold: float, id2label: Dict[int, str], detect_subspans: bool = False
+    ):
+        self.detect_subspans = detect_subspans
         self.id2label = id2label
         self.confidence_threshold = confidence_threshold
 
     def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
         span_finder = SmartSpanFinder(
-            threshold=self.confidence_threshold, text=text, id2label=self.id2label
+            threshold=self.confidence_threshold,
+            text=text,
+            id2label=self.id2label,
+            detect_subspans=self.detect_subspans,
         )
         span_finder(words)
         ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)

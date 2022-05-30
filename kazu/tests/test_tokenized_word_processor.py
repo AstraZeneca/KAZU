@@ -1,11 +1,12 @@
+import pytest
 import torch
 
 from kazu.steps.ner.tokenized_word_processor import TokenizedWord, TokenizedWordProcessor
 
 
-def test_tokenized_word_processor():
-    # should produce one ent
+def test_tokenized_word_processor_with_subspan_detection():
     text = "hello to you"
+    # should produce one ent
     word1 = TokenizedWord(
         word_id=0,
         token_ids=[0],
@@ -34,11 +35,17 @@ def test_tokenized_word_processor():
         word_char_end=11,
     )
 
-    processor = TokenizedWordProcessor(confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"})
+    processor = TokenizedWordProcessor(
+        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=True
+    )
     ents = processor(words=[word1, word2, word3], text=text, namespace="test")
     assert len(ents) == 1
     assert ents[0].match == "hello"
-    # also check this works if the word hello is composed of two Btokens
+
+
+def test_tokenized_word_processor_with_subspan_detection_2():
+    text = "hello to you"
+    # also check this works if the word hello is composed of two B tokens
     word1 = TokenizedWord(
         word_id=0,
         token_ids=[0, 1],
@@ -66,11 +73,19 @@ def test_tokenized_word_processor():
         word_char_start=9,
         word_char_end=11,
     )
+    processor = TokenizedWordProcessor(
+        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=True
+    )
     ents = processor(words=[word1, word2, word3], text=text, namespace="test")
     assert len(ents) == 1
     assert ents[0].match == "hello"
 
-    # should produce three ents, since '-' is non breaking
+
+@pytest.mark.parametrize(
+    "detect_subspans",
+    (True, False),
+)
+def test_tokenized_word_processor_with_subspan_detection_3(detect_subspans: bool):
     text = "hello-to you"
     word1 = TokenizedWord(
         word_id=0,
@@ -109,16 +124,35 @@ def test_tokenized_word_processor():
         word_char_end=11,
     )
 
-    processor = TokenizedWordProcessor(confidence_threshold=0.2, id2label={0: "B-greeting", 1: "O"})
+    processor = TokenizedWordProcessor(
+        confidence_threshold=0.2,
+        id2label={0: "B-greeting", 1: "O"},
+        detect_subspans=detect_subspans,
+    )
     ents = processor(words=[word1, word2, word3, word4], text=text, namespace="test")
-    assert len(ents) == 3
-    assert ents[0].match == "hello"
-    assert ents[0].entity_class == "greeting"
-    assert ents[1].match == "hello-to"
-    assert ents[1].entity_class == "greeting"
-    assert ents[2].match == "to"
-    assert ents[2].entity_class == "greeting"
+    if detect_subspans:
+        # should produce three ents, since '-' is non breaking
+        assert len(ents) == 3
+        assert ents[0].match == "hello-"
+        assert ents[0].entity_class == "greeting"
+        assert ents[1].match == "hello-to"
+        assert ents[1].entity_class == "greeting"
+        assert ents[2].match == "to"
+        assert ents[2].entity_class == "greeting"
+    else:
+        # should produce two ents, since '-' is non breaking
+        assert len(ents) == 2
+        assert ents[0].match == "hello-"
+        assert ents[0].entity_class == "greeting"
+        assert ents[1].match == "hello-to"
+        assert ents[1].entity_class == "greeting"
 
+
+@pytest.mark.parametrize(
+    "detect_subspans",
+    (True, False),
+)
+def test_tokenized_word_processor_with_subspan_detection_4(detect_subspans):
     # should produce two ent as " " is span breaking
     text = "hello to you"
     word1 = TokenizedWord(
@@ -149,7 +183,9 @@ def test_tokenized_word_processor():
         word_char_end=12,
     )
 
-    processor = TokenizedWordProcessor(confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"})
+    processor = TokenizedWordProcessor(
+        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=detect_subspans
+    )
     ents = processor(words=[word1, word2, word3], text=text, namespace="test")
     assert len(ents) == 2
     assert ents[0].match == "hello"
