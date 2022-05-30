@@ -14,7 +14,7 @@ unfound_correct_hgvs_strings = {"p.Leu90Pro", "c.269T>C", "c.35delG"}
 def check_step_has_found_entitites(doc, step_entity_class):
     for ent in doc.get_entities():
         if ent.entity_class == step_entity_class:
-            unfound_correct_hgvs_strings.discard(ent.metadata["hgvs"])
+            unfound_correct_hgvs_strings.discard(ent.metadata["seth"]["hgvs"])
     assert not unfound_correct_hgvs_strings
 
 
