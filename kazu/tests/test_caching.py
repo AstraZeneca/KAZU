@@ -38,6 +38,9 @@ def dummy_df() -> pd.DataFrame:
 class DummyParser(OntologyParser):
     name = DUMMY_SOURCE
 
+    def find_kb(self, string: str) -> str:
+        return DUMMY_SOURCE
+
     def parse_to_dataframe(self) -> pd.DataFrame:
 
         return dummy_df()
@@ -95,7 +98,7 @@ def test_embedding_cache_manager(tmp_path: Path, index_type: str):
             parsers=[parser],
         )
         manager.get_or_create_ontology_indices()
-        load_ontology_from_cache.assert_called_with(cache_dir, parser)
+        load_ontology_from_cache.assert_called_with(cache_dir)
 
 
 def test_dictionary_cache_manager(tmp_path: Path):
@@ -120,7 +123,7 @@ def test_dictionary_cache_manager(tmp_path: Path):
             index_type="DictionaryIndex", parsers=[parser], rebuild_cache=False
         )
         manager.get_or_create_ontology_indices()
-        load_ontology_from_cache.assert_called_with(cache_dir, parser)
+        load_ontology_from_cache.assert_called_with(cache_dir)
 
 
 def test_cached_index_group(tmp_path: Path):
@@ -146,14 +149,16 @@ def test_cached_index_group(tmp_path: Path):
         entity_class_to_ontology_mappings=entity_ontology_mappings,
     )
     cached_index_group.load()
-    ontology_1_mappings = list(
+    ontology_1_hits = list(
         cached_index_group.search(query="two", entity_class="entity_class_1", namespace="test")
     )
-    assert ontology_1_mappings[0].idx == "second"
-    assert ontology_1_mappings[0].source == parser1.name
+    syndata = next(iter(ontology_1_hits[0].syn_data))
+    assert "second" in syndata.ids
+    assert ontology_1_hits[0].parser_name == parser1.name
 
-    ontology_2_mappings = list(
+    ontology_2_hits = list(
         cached_index_group.search(query="3", entity_class="entity_class_2", namespace="test2")
     )
-    assert ontology_2_mappings[0].idx == "third"
-    assert ontology_2_mappings[0].source == parser2.name
+    syndata = next(iter(ontology_2_hits[0].syn_data))
+    assert "third" in syndata.ids
+    assert ontology_2_hits[0].parser_name == parser2.name

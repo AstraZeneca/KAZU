@@ -10,7 +10,7 @@ from kazu.data.data import (
 )
 from kazu.data.data import LinkRanks
 from kazu.modelling.ontology_preprocessing.base import MetadataDatabase
-from kazu.steps.other.document_disambiguation import (
+from kazu.steps.other.document_disambiguationv2 import (
     DISAMBIGUATED_BY,
     DISAMBIGUATED_BY_DEFINED_ELSEWHERE,
     DISAMBIGUATED_BY_REACTOME,
