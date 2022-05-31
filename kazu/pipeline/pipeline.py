@@ -119,7 +119,7 @@ class Pipeline:
         steps: List[BaseStep],
         failure_handler: Optional[List[FailedDocsHandler]] = None,
         profile_steps_dir: Optional[str] = None,
-        skip_doc_len: Optional[int] = 2e5,
+        skip_doc_len: Optional[int] = 200000,
     ):
         """
         A basic pipeline, used to help run a series of steps

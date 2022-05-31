@@ -7,7 +7,7 @@ import pickle
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict, Dict
+from typing import Any, List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict, Dict
 
 import numpy as np
 import pandas as pd
@@ -356,7 +356,10 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
 
         for syn_data, hit_set in hits_by_syn_data.items():
             record = {"syn_data": syn_data}
-            global_metrics = {}
+            # TODO: can this be more strictly typed if hit.metrics is more strictly typed?
+            # you would think metrics would always be some kind of number - they at least
+            # have to have the '<' operator implemented for the below code to more
+            global_metrics: Dict[str, Any] = {}
             # choose best overall result across all hits that are part of the same synset, thereby aggregating best
             # match information across multiple potential synonyms
             for hit in hit_set:
@@ -477,7 +480,6 @@ class TfIdfKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrate
         parser_name = hits[0].parser_name
         filtered_hits = filter(lambda x: x.confidence == SearchRanks.EXACT_MATCH, hits)
 
-        filtered_hits = list(filtered_hits)
         syn_data_set_to_hits = {
             k: set(v)
             for k, v in itertools.groupby(

@@ -311,6 +311,7 @@ class MetadataDatabase:
         :param name: name of ontology
         :return:
         """
+        assert self.instance is not None
         return set(self.instance.database.keys())
 
     def add(self, name: str, metadata: Dict[str, Any]):
@@ -431,6 +432,7 @@ class SynonymDatabase:
         return a global view of synonym data across all dbs, for a specific synonym
         :return:
         """
+        assert self.instance is not None
         return self.instance.syns_database_by_syn_global.get(synonym, set())
 
     def get_kbs_for_syn_global(self, synonym: str) -> Set[str]:
@@ -438,6 +440,7 @@ class SynonymDatabase:
         return a global list ok kbs across all dbs, for a specific synonym
         :return:
         """
+        assert self.instance is not None
         return self.instance.kb_database_by_syn_global.get(synonym, set())
 
     def get_loaded_kbs(self) -> Set[str]:
@@ -445,6 +448,7 @@ class SynonymDatabase:
         return a global view of all ambiguous synonyms data across all dbs
         :return:
         """
+        assert self.instance is not None
         return self.instance.loaded_kbs
 
     def get_database(self) -> DefaultDict[str, Dict[str, Set[SynonymData]]]:
@@ -975,11 +979,11 @@ class GeneOntologyParser(OntologyParser):
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
         )
-        default_labels = df[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
-        default_labels[SYN] = default_labels[DEFAULT_LABEL]
-        default_labels[MAPPING_TYPE] = "label"
+        default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
+        default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
+        default_labels_df[MAPPING_TYPE] = "label"
 
-        return pd.concat([df, default_labels])
+        return pd.concat([df, default_labels_df])
 
 
 class BiologicalProcessGeneOntologyParser(GeneOntologyParser):

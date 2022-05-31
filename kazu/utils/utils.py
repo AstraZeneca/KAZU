@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class ParseSourceFromId:
     def __init__(self, regex_to_source: Dict[str, Dict[str, str]]):
-        self.regex_to_source = defaultdict(dict)
+        self.regex_to_source: Dict[str, Dict[re.Pattern, str]] = defaultdict(dict)
         for source, re_dict in regex_to_source.items():
             for k, v in re_dict.items():
                 self.regex_to_source[source][re.compile(k)] = v
