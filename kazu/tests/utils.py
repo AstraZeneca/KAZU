@@ -6,6 +6,13 @@ import pandas as pd
 import pytest
 
 from kazu.data.data import Document, Entity, Mapping, CharSpan
+from kazu.modelling.ontology_preprocessing.base import (
+    IDX,
+    DEFAULT_LABEL,
+    SYN,
+    MAPPING_TYPE,
+    OntologyParser,
+)
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -38,14 +45,7 @@ class MockedCachedIndexGroup:
         self.callcount = 0
 
     def mock_search(self, *args, **kwargs):
-        mappings = [
-            Mapping(
-                source=self.sources[self.callcount],
-                idx=self.iris[self.callcount],
-                mapping_type=["test"],
-                default_label="n/a",
-            )
-        ]
+        mappings = []
         self.callcount += 1
         return mappings
 
@@ -251,3 +251,21 @@ def add_whole_document_entity(doc: Document, entity_class: str):
 
 def get_TransformersModelForTokenClassificationNerStep_model_path():
     return os.getenv("TransformersModelForTokenClassificationPath")
+
+
+class DummyParser(OntologyParser):
+    DUMMY_SOURCE = "test_parser"
+    DUMMY_DATA = {
+        IDX: ["first", "first", "second", "second", "third", "alpha"],
+        DEFAULT_LABEL: ["1", "1", "2", "2", "3", "4"],
+        SYN: ["1", "one", "2", "two", "3", "1"],
+        MAPPING_TYPE: ["int", "text", "int", "text", "int", "text"],
+    }
+    name = DUMMY_SOURCE
+
+    def find_kb(self, string: str) -> str:
+        return self.DUMMY_SOURCE
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+
+        return pd.DataFrame.from_dict(self.DUMMY_DATA)
