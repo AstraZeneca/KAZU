@@ -23,7 +23,6 @@ from kazu.utils.caching import (
 from kazu.utils.link_index import Index
 
 
-
 def test_enumerate_dataframe_chunks():
     # + 1 to check we can handle chunk sizes larger than the df
     parser = DummyParser("")

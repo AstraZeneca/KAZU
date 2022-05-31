@@ -814,10 +814,18 @@ class Disambiguator:
         self.default_strategy = [required_high_confidence]
 
         self.prefilter_lookup = {
-            "gene": [prefilter_zero_len,prefilter_imprecise_subspans, prefilter_unlikely_gene_symbols],
-            "disease": [prefilter_zero_len,prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
-            "drug": [prefilter_zero_len,prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
-            "anatomy": [prefilter_zero_len,prefilter_imprecise_subspans],
+            "gene": [
+                prefilter_zero_len,
+                prefilter_imprecise_subspans,
+                prefilter_unlikely_gene_symbols,
+            ],
+            "disease": [
+                prefilter_zero_len,
+                prefilter_imprecise_subspans,
+                prefilter_unlikely_acronyms,
+            ],
+            "drug": [prefilter_zero_len, prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
+            "anatomy": [prefilter_zero_len, prefilter_imprecise_subspans],
         }
         self.symbolic_disambiguation_strategy_lookup = {
             "gene": [
@@ -1021,7 +1029,8 @@ class Disambiguator:
             for (entity_class, entity_match), ents_iter in ents_grouped_by_class_and_match:
                 entities_this_class_and_match = list(ents_iter)
                 filters = self.prefilter_lookup.get(
-                    entity_class, [prefilter_zero_len,prefilter_imprecise_subspans, prefilter_unlikely_acronyms]
+                    entity_class,
+                    [prefilter_zero_len, prefilter_imprecise_subspans, prefilter_unlikely_acronyms],
                 )
                 for f in filters:
                     entities_this_class_and_match = f(entities_this_class_and_match)
@@ -1118,16 +1127,18 @@ def prefilter_imprecise_subspans(ents: Iterable[Entity]) -> List[Entity]:
             result.append(ent)
     return result
 
+
 def prefilter_zero_len(ents: Iterable[Entity]) -> List[Entity]:
     result = []
     for ent in ents:
         # filter if weird chars in short strings
         if len(ent.match) == 0:
-                logger.debug("filtered %s -> zero length!", ent.match)
-                break
+            logger.debug("filtered %s -> zero length!", ent.match)
+            break
         else:
             result.append(ent)
     return result
+
 
 def prefilter_unlikely_acronyms(ents: Iterable[Entity]) -> List[Entity]:
     result = []
