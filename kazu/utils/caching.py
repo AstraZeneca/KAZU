@@ -11,7 +11,7 @@ import torch
 from cachetools import LFUCache
 from pytorch_lightning import Trainer
 
-from kazu.data.data import Entity, NAMESPACE, Hit
+from kazu.data.data import Entity, Hit
 from kazu.data.data import Mapping
 from kazu.modelling.linking.sapbert.train import (
     PLSapbertModel,

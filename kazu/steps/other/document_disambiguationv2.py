@@ -32,7 +32,7 @@ from kazu.steps import BaseStep
 from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver
 from rapidfuzz import process, fuzz
 from sklearn.feature_extraction.text import TfidfVectorizer
-from strsimpy import LongestCommonSubsequence, NGram
+from strsimpy import NGram
 
 logger = logging.getLogger(__name__)
 

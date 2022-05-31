@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, FrozenSet
 from typing import Optional, DefaultDict
 from urllib import parse
-import cachetools
 import pandas as pd
-import pydash
 import rdflib
 from rdflib import URIRef
 from tqdm.auto import tqdm
@@ -976,54 +974,54 @@ class GeneOntologyParser(OntologyParser):
 
 class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
     name = "BP_GENE_ONTOLOGY"
-    query = """    
+    query = """
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-                
-                SELECT DISTINCT ?goid ?label ?synonym 
+
+                SELECT DISTINCT ?goid ?label ?synonym
                         WHERE {
-                
+
                             ?goid oboinowl:hasExactSynonym ?synonym .
                             ?goid rdfs:label ?label .
                             ?goid oboinowl:hasOBONamespace "biological_process" .
-                  
+
                   }
         """
 
 
 class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
     name = "MF_GENE_ONTOLOGY"
-    query = """    
+    query = """
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-                
-                SELECT DISTINCT ?goid ?label ?synonym 
+
+                SELECT DISTINCT ?goid ?label ?synonym
                         WHERE {
-                
+
                             ?goid oboinowl:hasExactSynonym ?synonym .
                             ?goid rdfs:label ?label .
                             ?goid oboinowl:hasOBONamespace "molecular_function".
-                  
+
                   }
         """
 
 
 class CellularComponentGeneOntologyParser(GeneOntologyParser):
     name = "CC_GENE_ONTOLOGY"
-    query = """    
+    query = """
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-                
-                SELECT DISTINCT ?goid ?label ?synonym 
+
+                SELECT DISTINCT ?goid ?label ?synonym
                         WHERE {
-                
+
                             ?goid oboinowl:hasExactSynonym ?synonym .
                             ?goid rdfs:label ?label .
                             ?goid oboinowl:hasOBONamespace "cellular_component" .
-                  
+
                   }
         """
 

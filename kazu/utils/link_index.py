@@ -6,7 +6,7 @@ import re
 import shutil
 from collections import defaultdict, Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, Optional, FrozenSet, Set
+from typing import Tuple, Any, Dict, List, Iterable, Set
 
 import numpy as np
 import torch
@@ -21,9 +21,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     SynonymDatabase,
 )
 from kazu.utils.utils import PathLike, as_path
-from rapidfuzz import fuzz, process
 from sklearn.feature_extraction.text import TfidfVectorizer
-from strsimpy import NGram
 
 logger = logging.getLogger(__name__)
 

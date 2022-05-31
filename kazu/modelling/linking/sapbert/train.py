@@ -33,7 +33,6 @@ from kazu.utils.link_index import (
     EmbeddingIndex,
     MatMulTensorEmbeddingIndex,
 )
-from transformers.file_utils import PaddingStrategy
 
 logger = logging.getLogger(__name__)
 

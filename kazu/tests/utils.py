@@ -5,7 +5,7 @@ from typing import List, Tuple
 import pandas as pd
 import pytest
 
-from kazu.data.data import Document, Entity, Mapping, CharSpan
+from kazu.data.data import Document, Entity, CharSpan
 from kazu.modelling.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,

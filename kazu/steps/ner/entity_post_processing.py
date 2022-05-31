@@ -3,7 +3,7 @@ import logging
 from typing import List, Callable, Tuple, Dict, Optional
 
 from spacy.matcher import Matcher
-from spacy.tokens import Token, Span, Doc
+from spacy.tokens import Token, Span
 
 from kazu.data.data import Entity
 from kazu.utils.spacy_pipeline import SpacyPipeline

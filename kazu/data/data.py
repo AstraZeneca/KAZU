@@ -5,12 +5,12 @@ import uuid
 import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, date
-from enum import IntEnum, Enum, auto
+from enum import IntEnum, Enum
 from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet
 import pandas as pd
-from numpy import ndarray, float32, float16, array
+from numpy import ndarray, float32, float16
 from spacy import displacy
 
 

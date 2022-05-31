@@ -2,9 +2,8 @@ import logging
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Dict, Tuple, Union, Iterable, Optional
+from typing import List, Dict, Tuple, Union, Iterable
 
-from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL, MAPPING_TYPE, MetadataDatabase
 from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
@@ -13,11 +12,6 @@ from kazu.data.data import (
     Document,
     Entity,
     Section,
-    Hit,
-    Mapping,
-    LINK_CONFIDENCE,
-    LinkRanks,
-    AMBIGUOUS_IDX,
 )
 
 logger = logging.getLogger(__name__)

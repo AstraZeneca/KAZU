@@ -8,7 +8,7 @@ from typing import List, Tuple, Iterable, Optional, Dict
 import pydash
 import torch
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, LinkRanks, SearchRanks
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, SearchRanks
 from kazu.steps import BaseStep
 from kazu.utils.caching import (
     EntityLinkingLookupCache,

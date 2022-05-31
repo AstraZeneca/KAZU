@@ -2,18 +2,11 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-import pandas as pd
 import pytest
 from pytorch_lightning import Trainer
 
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
-from kazu.modelling.ontology_preprocessing.base import (
-    OntologyParser,
-    IDX,
-    DEFAULT_LABEL,
-    SYN,
-    MAPPING_TYPE,
-)
+from kazu.modelling.ontology_preprocessing.base import IDX
 from kazu.tests.utils import BERT_TEST_MODEL_PATH, DummyParser
 from kazu.utils.caching import (
     EmbeddingIndexCacheManager,

@@ -3,7 +3,6 @@ from kazu.data.data import (
     Document,
     Entity,
     Mapping,
-    LINK_UNCERTAINTY,
     LINK_CONFIDENCE,
     AMBIGUOUS_IDX,
     SynonymData,
