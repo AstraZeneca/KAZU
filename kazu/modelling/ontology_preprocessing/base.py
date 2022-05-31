@@ -83,10 +83,20 @@ class StringNormalizer:
     @staticmethod
     def tokenize(norm_string: str, n_set: Set[int]) -> List[str]:
         parts = norm_string.split(" ")
-        result = []
+        num_parts = len(parts)
+        result: List[str] = []
         for n in n_set:
-            result.extend(zip(*[parts[i:] for i in range(n)]))
-        return [" ".join(ngram) for ngram in result]
+            for i in range(num_parts):
+                ngram_end_index = i + n
+                if ngram_end_index > num_parts:
+                    # ngram would extend beyond end of parts
+                    # it's ok for it to be the same number though as otherwise
+                    # we don't get the final word of ngrams at the right of parts
+                    break
+
+                result.append(" ".join(parts[i : i + n]))
+
+        return result
 
     @staticmethod
     def is_symbol_like(debug, original_string) -> Optional[str]:
