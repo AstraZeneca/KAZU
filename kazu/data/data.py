@@ -499,9 +499,13 @@ class Document:
         return json.dumps(self, cls=DocumentEncoder, **kwargs)
 
     def as_minified_json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False) -> str:
+        as_dict_minified = self.as_minified_dict(drop_unmapped_ents, drop_hits)
+        return json.dumps(as_dict_minified)
+
+    def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_hits: bool = False) -> Dict:
         as_dict = json.loads(self.json(drop_unmapped_ents, drop_hits))
         as_dict_minified = remove_empty_elements(as_dict)
-        return json.dumps(as_dict_minified)
+        return as_dict_minified
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
