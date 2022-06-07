@@ -8,7 +8,6 @@ setup(
     description="NER",
     install_requires=[
         "spacy==3.2.1",
-        "en_core_web_sm@https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0-py3-none-any.whl#5e02939fb7fbae6dbcc9c5a1355f5e4e02939b649a1f0846ee844ac1d479bbeb",
         "torch==1.10.0",
         "torchvision==0.11.1",
         "torchaudio==0.10.0",
