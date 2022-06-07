@@ -77,28 +77,6 @@ class StringNormalizer:
     trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
 
     @staticmethod
-    def unigram_bigram_tokenize(norm_string: str):
-        return StringNormalizer.tokenize(norm_string, {1, 2})
-
-    @staticmethod
-    def tokenize(norm_string: str, n_set: Set[int]) -> List[str]:
-        parts = norm_string.split(" ")
-        num_parts = len(parts)
-        result: List[str] = []
-        for n in n_set:
-            for i in range(num_parts):
-                ngram_end_index = i + n
-                if ngram_end_index > num_parts:
-                    # ngram would extend beyond end of parts
-                    # it's ok for it to be the same number though as otherwise
-                    # we don't get the final word of ngrams at the right of parts
-                    break
-
-                result.append(" ".join(parts[i : i + n]))
-
-        return result
-
-    @staticmethod
     def is_symbol_like(debug, original_string) -> Optional[str]:
         # TODO: rename method
         # True if all upper, all alphanum, no spaces,

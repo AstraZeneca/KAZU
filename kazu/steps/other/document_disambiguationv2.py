@@ -29,7 +29,8 @@ from kazu.modelling.ontology_preprocessing.base import (
 )
 from kazu.modelling.ontology_preprocessing.synonym_generation import GreekSymbolSubstitution
 from kazu.steps import BaseStep
-from kazu.utils.link_index import Hit, create_char_ngrams, NumberResolver
+from kazu.utils.link_index import Hit, NumberResolver
+from kazu.utils.utils import create_char_ngrams, create_word_ngrams
 from rapidfuzz import process, fuzz
 from sklearn.feature_extraction.text import TfidfVectorizer
 from strsimpy import NGram
@@ -747,23 +748,13 @@ class GlobalDisambiguationStrategyList:
         return "no_successful_strategy", [], entities
 
 
-def create_char_3grams(string):
-    return create_char_ngrams(string, n=3)
-
-
-def create_word_ngrams(string: str, n=2):
-    words = string.split(" ")
-    ngrams = zip(*[words[i:] for i in range(n)])
-    return [" ".join(ngram) for ngram in ngrams]
-
-
 def create_word_unigram_bigram_and_char_3grams(string):
     result = []
     unigrams = create_word_ngrams(string, 1)
     result.extend(unigrams)
     bigrams = create_word_ngrams(string, 2)
     result.extend(bigrams)
-    char_trigrams = create_char_3grams(string)
+    char_trigrams = create_char_ngrams(string, 3)
     result.extend(char_trigrams)
     return result
 

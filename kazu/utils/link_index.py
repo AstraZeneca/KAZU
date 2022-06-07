@@ -20,7 +20,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     StringNormalizer,
     SynonymDatabase,
 )
-from kazu.utils.utils import PathLike, as_path
+from kazu.utils.utils import PathLike, as_path, create_char_ngrams
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
@@ -58,11 +58,6 @@ def to_torch(matrix):
         matrix.shape,
     ).to_sparse_csr()
     return result
-
-
-def create_char_ngrams(string, n=2):
-    ngrams = zip(*[string[i:] for i in range(n)])
-    return ["".join(ngram) for ngram in ngrams]
 
 
 class Index(abc.ABC):

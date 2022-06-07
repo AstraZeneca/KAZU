@@ -2,7 +2,7 @@ import logging
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Dict, Tuple, Union, Iterable
+from typing import List, Dict, Tuple, Union, Iterable, Sequence, overload
 
 from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
@@ -166,3 +166,41 @@ class EntityClassFilter:
         return any(
             (entity.entity_class in self.required_entities for entity in document.get_entities())
         )
+
+
+@overload
+def _create_ngrams_iter(tokens: str, n: int) -> Iterable[str]:
+    ...
+
+
+@overload
+def _create_ngrams_iter(tokens: Sequence[str], n: int) -> Iterable[Sequence[str]]:
+    ...
+
+
+def _create_ngrams_iter(tokens, n=2):
+    """Yields ngrams of the input as a sequence of strings.
+
+    Tokens can be a single string where each token is a character, or an Iterable of words.
+    If tokens is a str"""
+    num_tokens = len(tokens)
+    for i in range(num_tokens):
+        ngram_end_index = i + n
+        if ngram_end_index > num_tokens:
+            # ngram would extend beyond end of parts
+            # it's ok for it to be the same number though as otherwise
+            # we don't get the final word of ngrams at the right of parts
+            break
+        yield tokens[i : i + n]
+
+
+def create_char_ngrams(s: str, n: int = 2) -> List[str]:
+    """Return list of char ngrams as a string."""
+    return list(_create_ngrams_iter(s, n))
+
+
+def create_word_ngrams(s: str, n: int = 2) -> List[str]:
+    """Return list of word ngrams as a single space-separated string."""
+    words = s.split(" ")
+    ngrams_iter = _create_ngrams_iter(words, n)
+    return [" ".join(ngram) for ngram in ngrams_iter]
