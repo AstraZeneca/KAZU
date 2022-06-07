@@ -32,7 +32,7 @@ def load_steps(cfg: DictConfig) -> List[BaseStep]:
 
 
 def calc_doc_size(doc: Document):
-    return sum([len(section.text) for section in doc.sections])
+    return sum(len(section.text) for section in doc.sections)
 
 
 def batch_metrics(docs: List[Document]):
