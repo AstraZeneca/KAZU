@@ -1,11 +1,10 @@
 import tempfile
+from unittest.mock import patch
 
 from kazu.data.data import SearchRanks
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
-from kazu.tests.utils import BERT_TEST_MODEL_PATH, DummyParser
+from kazu.tests.utils import DummyParser
 from kazu.utils.link_index import DictionaryIndex, SEARCH_SCORE
-from unittest.mock import patch
-
 from kazu.utils.utils import get_cache_dir
 
 

@@ -1,4 +1,5 @@
 import abc
+import itertools
 import logging
 import os
 import pickle
@@ -6,13 +7,14 @@ import re
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable
+from typing import Tuple, Any, Dict, List, Iterable, Iterator
 
 import numpy as np
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from kazu.data.data import SearchRanks, SynonymData, Hit
+from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     IDX,
@@ -23,7 +25,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     SynonymDatabase,
     OntologyParser,
 )
-from kazu.utils.utils import PathLike, create_char_ngrams, get_cache_dir
+from kazu.utils.utils import create_char_ngrams, get_cache_dir
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +122,7 @@ class Index(abc.ABC):
     def get_index_data_path(path: Path) -> Path:
         return path.joinpath("index.data")
 
-    def _save(self, path: PathLike):
+    def _save(self, path: Path):
         """
         concrete implementations should implement this to save any data specific to the implementation. This method is
         called by self.save
@@ -216,6 +218,7 @@ class DictionaryIndex(Index):
         parser: OntologyParser,
     ):
         super().__init__(parser=parser)
+        self.synonym_db: SynonymDatabase = SynonymDatabase()
 
     def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
         if string_norm in self.normalised_syn_dict:
@@ -279,9 +282,7 @@ class DictionaryIndex(Index):
         self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
         self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
 
-    def _save(self, path: PathLike):
-        if isinstance(path, str):
-            path = Path(path)
+    def _save(self, path: Path):
         path.mkdir()
         pickleable = (self.vectorizer, self.normalised_syn_dict, self.tf_idf_matrix)
         with open(path.joinpath("objects.pkl"), "wb") as f:
@@ -319,9 +320,13 @@ class EmbeddingIndex(Index):
     a wrapper around an embedding index strategy.
     """
 
-    def __init__(self, name: str = "unnamed_index"):
-        super().__init__(name)
-        self.synonym_db = SynonymDatabase()
+    def __init__(self, parser: OntologyParser, ontology_partition_size: int = 1000):
+        super().__init__(parser=parser)
+        self.ontology_partition_size = ontology_partition_size
+        self.embedding_model: PLSapbertModel
+
+    def set_embedding_model(self, embedding_model: PLSapbertModel):
+        self.embedding_model = embedding_model
 
     def _add(self, embeddings: torch.Tensor):
         """
@@ -374,7 +379,7 @@ class EmbeddingIndex(Index):
     ) -> Iterable[Hit]:
         distances, neighbours = self._search_func(query=query, top_n=top_n)
         for score, n in zip(distances, neighbours):
-            idx, metadata = self.metadata_db.get_by_index(self.name, n)
+            idx, metadata = self.metadata_db.get_by_index(self.parser.name, n)
             # the norm form of the default label should always be in the syn database
             string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
             try:
@@ -393,23 +398,85 @@ class EmbeddingIndex(Index):
                     f"{string_norm} is not in the synonym database! is the parser for {self.parser.name} correctly configured?"
                 )
 
+    def _build_ontology_cache(self, cache_dir: Path):
+        if not hasattr(self, "embedding_model"):
+            raise RuntimeError("you must call set_embedding_model before trying to build the cache")
+
+        logger.info(f"creating index for {self.parser.in_path}")
+
+        self.parser.populate_metadata_database()
+        for (
+            partition_number,
+            metadata,
+            ontology_embeddings,
+        ) in self.predict_ontology_embeddings(self.parser.name):
+            logger.info(f"processing partition {partition_number} ")
+            self.add(data=ontology_embeddings, metadata=metadata)
+            logger.info(f"index size is now {len(self)}")
+        index_path = self.save(cache_dir, overwrite=True)
+        logger.info(f"saved {self.parser.name} index to {index_path.absolute()}")
+        logger.info(f"final index size for {self.parser.name} is {len(self)}")
+
+    @staticmethod
+    def enumerate_database_chunks(
+        name: str, chunk_size: int = 100000
+    ) -> Iterable[Tuple[int, Dict[str, Any]]]:
+        """
+        generator to split up a dataframe into partitions
+        :param name: ontology name to query the metadata database with
+        :param chunk_size: size of partittions to create
+        :return:
+        """
+
+        data: Dict[str, Any] = MetadataDatabase().get_all(name)
+        for i in range(0, len(data), chunk_size):
+            yield i, dict(itertools.islice(data.items(), i, i + chunk_size))
+
+    def predict_ontology_embeddings(
+        self, name: str
+    ) -> Iterator[Tuple[int, Dict[str, Any], torch.Tensor]]:
+        """
+        since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
+        and add them to the index sequentially
+        :param name: name of ontology
+        :return: partition number, metadata and embeddings
+        """
+
+        for partition_number, metadata in self.enumerate_database_chunks(
+            name, self.ontology_partition_size
+        ):
+            len_df = len(metadata)
+            if len_df == 0:
+                return
+            logger.info(f"creating partitions for partition {partition_number}")
+            logger.info(f"read {len_df} rows from ontology")
+            default_labels = [x[DEFAULT_LABEL] for x in metadata.values()]
+            logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
+            results = self.embedding_model.get_embeddings_for_strings(texts=default_labels)
+            yield partition_number, metadata, results
+
 
 class TensorEmbeddingIndex(EmbeddingIndex):
     """
     a simple index of torch tensors.
     """
 
-    def __init__(self, name: str):
-
-        super().__init__(name)
+    def __init__(
+        self,
+        parser: OntologyParser,
+    ):
+        super().__init__(parser=parser)
         self.index: torch.Tensor
 
-    def _load(self, path: PathLike):
-        self.index = torch.load(path, map_location="cpu")
-        self.keys_lst = list(self.metadata_db.get_all(self.name).keys())
+    def _load_cache(self, path: Path) -> Any:
+        with open(path.joinpath("objects.pkl"), "rb") as f:
+            self.index = pickle.load(f)
 
-    def _save(self, path: PathLike):
-        torch.save(self.index, path)
+    def _save(self, path: Path):
+        path.mkdir()
+        pickleable = self.index
+        with open(path.joinpath("objects.pkl"), "wb") as f:
+            pickle.dump(pickleable, f)
 
     def _add_embeddings(self, embeddings: torch.Tensor):
         self.index = torch.cat([self.index, embeddings])

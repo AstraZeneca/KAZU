@@ -2,14 +2,14 @@ import copy
 import itertools
 import logging
 import traceback
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Set
 
 import pydash
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Hit
 from kazu.steps import BaseStep
-from kazu.utils.caching import CachedIndexGroup, DictionaryIndexCacheManager
 from kazu.utils.caching import EntityLinkingLookupCache
+from kazu.utils.link_index import DictionaryIndex
 from kazu.utils.utils import (
     find_document_from_entity,
 )
@@ -25,7 +25,8 @@ class DictionaryEntityLinkingStep(BaseStep):
     def __init__(
         self,
         depends_on: List[str],
-        index_group: CachedIndexGroup,
+        indices: List[DictionaryIndex],
+        entity_class_to_ontology_mappings: Dict[str, List[str]],
         lookup_cache_size: int = 5000,
         top_n: int = 20,
     ):
@@ -37,17 +38,31 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param top_n: keep the top_n hits of the query
         """
         super().__init__(depends_on=depends_on)
-        if not all(
-            [isinstance(x, DictionaryIndexCacheManager) for x in index_group.cache_managers]
-        ):
-            raise RuntimeError(
-                "The CachedIndexGroup must be configured with an DictionaryIndexCacheManager to work"
-                "correctly with the DictionaryEntityLinkingStep"
-            )
+
+        self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
+        self.entity_class_to_indices: Dict[str, Set[DictionaryIndex]] = {}
         self.top_n = top_n
-        self.index_group = index_group
-        self.index_group.load()
+        self.indices = indices
+        self.load_or_build_caches()
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
+
+    def load_or_build_caches(self):
+        for index in self.indices:
+            index.load_or_build_cache()
+        all_indices = {index.parser.name: index for index in self.indices}
+
+        for entity_class, ontologies in self.entity_class_to_ontology_mappings.items():
+            current_indices = set()
+            for ontology_name in ontologies:
+                index = all_indices.get(ontology_name)
+                if index is None:
+                    logger.warning(f"No index found for {ontology_name}")
+                else:
+                    current_indices.add(index)
+
+            if not current_indices:
+                logger.warning(f"No indices loaded for entity class {entity_class}")
+            self.entity_class_to_indices[entity_class] = current_indices
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
@@ -85,17 +100,17 @@ class DictionaryEntityLinkingStep(BaseStep):
                     continue
                 else:
                     try:
-                        hits = list(
-                            self.index_group.search(
-                                query=ent_match_and_class[0],
-                                entity_class=ent_match_and_class[1],
-                                top_n=self.top_n,
-                                namespace=self.namespace(),
-                            )
-                        )
-                        for ent in ents_this_match:
-                            ent.hits.extend(copy.deepcopy(hits))
-                        self.lookup_cache.update_hits_lookup_cache(ents_this_match[0], hits)
+                        indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
+                        if indices_to_search:
+                            all_hits: List[Hit] = []
+                            for index in indices_to_search:
+                                all_hits.extend(index.search(ent_match_and_class[0], self.top_n))
+                            for hit in all_hits:
+                                hit.namespace = self.namespace()
+
+                            for ent in ents_this_match:
+                                ent.hits.extend(copy.deepcopy(all_hits))
+                            self.lookup_cache.update_hits_lookup_cache(ents_this_match[0], all_hits)
 
                     except Exception:
                         failed_docs_set = set()
