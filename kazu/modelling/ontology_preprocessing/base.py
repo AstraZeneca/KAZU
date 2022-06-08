@@ -1,5 +1,4 @@
 import copy
-import functools
 import itertools
 import json
 import logging
@@ -12,17 +11,19 @@ from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, FrozenSet
 from typing import Optional, DefaultDict
 from urllib import parse
+
 import pandas as pd
 import rdflib
 from rdflib import URIRef
 from tqdm.auto import tqdm
+
+from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy, Mapping, LinkRanks
 
 # dataframe column keys
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
     GreekSymbolSubstitution,
 )
-from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy, Mapping, LinkRanks
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
