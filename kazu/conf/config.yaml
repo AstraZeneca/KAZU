@@ -1,5 +1,6 @@
 defaults:
   - ray: local
+  - PLSapbertModel: default
   - SpacyPipeline: default
   - SciSpacyAbbreviationExpansionStep: default
   - SpacyNerStep: default
