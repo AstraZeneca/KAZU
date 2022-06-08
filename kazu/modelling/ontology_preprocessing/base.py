@@ -643,7 +643,6 @@ class OntologyParser(ABC):
         # SynonymDatabase().add(self.name, generated_synonym_data)
         SynonymDatabase().add(self.name, synonym_data)
 
-    @functools.lru_cache
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         splits a table of ontology information into a synonym table and a metadata table, deduplicating and grouping
@@ -929,7 +928,6 @@ class GeneOntologyParser(OntologyParser):
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
     query = """UNDEFINED"""
 
-    @functools.lru_cache
     def load_go(self):
         g = rdflib.Graph()
         g.parse(self.in_path)
