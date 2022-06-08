@@ -29,11 +29,6 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from kazu.utils.link_index import (
-    EmbeddingIndex,
-    MatMulTensorEmbeddingIndex,
-)
-
 logger = logging.getLogger(__name__)
 
 
@@ -401,64 +396,7 @@ class PLSapbertModel(LightningModule):
         :return:
         """
         assert self.sapbert_evaluation_manager is not None
-        outputs_all = self.all_gather(outputs)
-        if self.trainer.is_global_zero:
-            # stride 2 as each return from the validation step will have results for a query_output and
-            # an ontology_output
-            for dataset_index, output_index in enumerate(range(0, len(outputs_all), 2)):
-                dataset_name = list(self.sapbert_evaluation_manager.datasets.keys())[dataset_index]
-                query_output, ontology_output = (
-                    outputs_all[output_index],
-                    outputs_all[output_index + 1],
-                )
-                ontology_embeddings = self.get_embeddings(ontology_output)
-                index = MatMulTensorEmbeddingIndex(name=dataset_name)
-                ontology_source = self.sapbert_evaluation_manager.datasets[
-                    dataset_name
-                ].ontology_source
-                index.add(
-                    data=ontology_embeddings,
-                    metadata=ontology_source.to_dict(orient="index"),
-                )
-                query_embeddings = self.get_embeddings(query_output)
-                queries = self.generate_evaluation_data(dataset_name, index, query_embeddings)
-                metrics = self.evaluate_topk_acc(queries)
-                self.log_results(dataset_name, metrics)
-
-    def generate_evaluation_data(
-        self, dataset_name: str, ontology_embeddings: EmbeddingIndex, query_embeddings: torch.Tensor
-    ) -> List[GoldStandardExample]:
-        """
-        for a given dataset, return a list of GoldStandardExample that can be used for evaluation
-        :param dataset_name: string of dataset
-        :param ontology_embeddings: EmbeddingIndex to query
-        :param query_embeddings: to query with!
-        :return:
-        """
-        assert self.sapbert_evaluation_manager is not None
-        assert self.sapbert_training_params is not None
-        responses = []
-        for i in range(query_embeddings.shape[0]):
-            query_embedding = query_embeddings[[i], :]
-            ontology_entry: pd.Series = self.sapbert_evaluation_manager.datasets[
-                dataset_name
-            ].query_source.iloc[i]
-            candidate_df_slice = ontology_embeddings.search(
-                query_embedding, original_string="", top_n=self.sapbert_training_params.topk
-            )
-            default_label = ontology_entry["default_label"]
-            golden_iri = ontology_entry["iri"]
-            dict_candidates = self.get_candidate_dict(
-                candidate_df_slice,
-                golden_iri,
-            )
-            gold_example = GoldStandardExample(
-                gold_default_label=default_label,
-                gold_iri=golden_iri,
-                candidates=dict_candidates,
-            )
-            responses.append(gold_example)
-        return responses
+        raise NotImplementedError()
 
     def log_results(self, dataset_name, metrics):
         for key, val in metrics.items():
@@ -514,7 +452,7 @@ class PLSapbertModel(LightningModule):
         :return: a 2d tensor of embeddings
         """
         if trainer is None:
-            trainer = Trainer()
+            trainer = Trainer(progress_bar_refresh_rate=0, logger=False)
         if batch_size is None:
             batch_size = 16
 
