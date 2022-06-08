@@ -4,12 +4,14 @@ import os
 import pickle
 import re
 import shutil
-from collections import defaultdict, Counter
+from collections import Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, Set
+from typing import Tuple, Any, Dict, List, Iterable
 
 import numpy as np
 import torch
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 from kazu.data.data import SearchRanks, SynonymData, Hit
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
@@ -19,9 +21,9 @@ from kazu.modelling.ontology_preprocessing.base import (
     MetadataDatabase,
     StringNormalizer,
     SynonymDatabase,
+    OntologyParser,
 )
-from kazu.utils.utils import PathLike, as_path, create_char_ngrams
-from sklearn.feature_extraction.text import TfidfVectorizer
+from kazu.utils.utils import PathLike, create_char_ngrams, get_cache_dir
 
 logger = logging.getLogger(__name__)
 
@@ -69,52 +71,42 @@ class Index(abc.ABC):
 
     def __init__(
         self,
-        name: str = "unnamed_index",
+        parser: OntologyParser,
     ):
         """
 
         :param name: the name of the index. default is unnamed_index
         """
-        self.name = name
+        self.parser = parser
         self.metadata_db: MetadataDatabase = MetadataDatabase()
-        self.index: Any
+        self.synonym_db: SynonymDatabase = SynonymDatabase()
         self.namespace = self.__class__.__name__
 
-    def save(self, path: PathLike, overwrite: bool = False) -> Path:
+    def save(self, directory: Path, overwrite: bool = False) -> Path:
         """
         save to disk. Makes a directory at the path location with all the index assets
 
         :param path:
         :return: a Path to where the index was saved
         """
-        directory = as_path(path)
         if directory.exists() and overwrite:
             shutil.rmtree(directory)
         os.makedirs(directory, exist_ok=False)
-        with open(self.get_index_path(directory), "wb") as f:
-            pickle.dump(self, f)
         with open(self.get_metadata_path(directory), "wb") as f:
-            pickle.dump(self.metadata_db.get_all(self.name), f)
-
+            pickle.dump(self.metadata_db.get_all(self.parser.name), f)
         self._save(self.get_index_data_path(directory))
         return directory
 
-    @classmethod
-    def load(cls, path: PathLike):
+    def load(self, cache_path: Path):
         """
         load from disk
         :param path: the parent path of the index
         :return:
         """
 
-        root_path = as_path(path)
-        with open(cls.get_index_path(root_path), "rb") as f:
-            index = pickle.load(f)
-        index.metadata_db = MetadataDatabase()
-        with open(cls.get_metadata_path(root_path), "rb") as f:
-            index.metadata_db.add(index.name, pickle.load(f))
-        index._load(cls.get_index_data_path(root_path))
-        return index
+        self._load_cache(self.get_index_data_path(cache_path))
+        with open(self.get_metadata_path(cache_path), "rb") as f:
+            self.metadata_db.add(self.parser.name, pickle.load(f))
 
     @staticmethod
     def get_metadata_path(path: Path) -> Path:
@@ -137,14 +129,7 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
-    def __getstate__(self):
-        return self.name
-
-    def __setstate__(self, state):
-        self.name = state
-        self.metadata_db = MetadataDatabase()
-
-    def _load(self, path: PathLike) -> None:
+    def _load_cache(self, path: Path) -> None:
         """
         concrete implementations should implement this to load any data specific to the implementation. This method is
         called by self.load
@@ -169,7 +154,7 @@ class Index(abc.ABC):
         :param data:
         :return:
         """
-        self.metadata_db.add(self.name, metadata)
+        self.metadata_db.add(self.parser.name, metadata)
         self._add(data)
 
     def __len__(self) -> int:
@@ -177,7 +162,44 @@ class Index(abc.ABC):
         should return the size of the index
         :return:
         """
-        return len(self.metadata_db.get_all(self.name))
+        return len(self.metadata_db.get_all(self.parser.name))
+
+    def load_or_build_cache(self, force_rebuild_cache: bool = False):
+        """
+        for each parser in self.parsers, create an index. If a cached version is available, load it instead
+        :return:
+        """
+        cache_dir = get_cache_dir(
+            self.parser.in_path,
+            prefix=f"{self.parser.name}_{self.__class__.__name__}",
+            create_if_not_exist=False,
+        )
+        if force_rebuild_cache:
+            logger.info("forcing a rebuild of the ontology cache")
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir)
+            cache_dir.mkdir()
+            self.build_ontology_cache(cache_dir)
+        elif cache_dir.exists():
+            logger.info(f"loading cached ontology file from {cache_dir}")
+            self.load(cache_dir)
+        else:
+            logger.info("No ontology cache file found. Building a new one")
+            self.build_ontology_cache(cache_dir)
+
+    def build_ontology_cache(self, cache_dir: Path):
+        cache_dir.mkdir()
+        self._build_ontology_cache(cache_dir)
+
+    @abc.abstractmethod
+    def _build_ontology_cache(self, cache_dir: Path):
+        """
+        Implementations should implement this method to determine how an index gets built for a given parser
+        :param cache_dir:
+        :param parser:
+        :return:
+        """
+        pass
 
 
 class DictionaryIndex(Index):
@@ -191,37 +213,16 @@ class DictionaryIndex(Index):
 
     def __init__(
         self,
-        synonym_dict: Dict[str, Set[SynonymData]],
-        requires_normalisation: bool = True,
-        name: str = "unnamed_index",
+        parser: OntologyParser,
     ):
-        super().__init__(name)
-        self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-        if requires_normalisation:
-            self.normalised_syn_dict = self.gen_normalised(synonym_dict)
-        else:
-            self.normalised_syn_dict = synonym_dict
-        self.key_lst = list(self.normalised_syn_dict.keys())
-        self.tf_idf_matrix = self.vectorizer.fit_transform(self.key_lst)
-        self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
-
-    def gen_normalised(
-        self, synonym_dict: Dict[str, Set[SynonymData]]
-    ) -> Dict[str, Set[SynonymData]]:
-        norm_syn_dict: Dict[str, Set[SynonymData]] = defaultdict(set)
-        for syn, syn_set in synonym_dict.items():
-
-            new_syn = StringNormalizer.normalize(syn)
-            for syn_data in syn_set:
-                norm_syn_dict[new_syn].add(syn_data)
-        return norm_syn_dict
+        super().__init__(parser=parser)
 
     def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
         if string_norm in self.normalised_syn_dict:
             return [
                 Hit(
                     string_norm=string_norm,
-                    parser_name=self.name,
+                    parser_name=self.parser.name,
                     metrics={SEARCH_SCORE: 100.0},
                     syn_data=frozenset(self.normalised_syn_dict[string_norm]),
                     confidence=SearchRanks.EXACT_MATCH,
@@ -247,7 +248,7 @@ class DictionaryIndex(Index):
                 hits.append(
                     Hit(
                         string_norm=found_norm,
-                        parser_name=self.name,
+                        parser_name=self.parser.name,
                         syn_data=frozenset(self.normalised_syn_dict[found_norm]),
                         metrics={SEARCH_SCORE: score},
                         confidence=SearchRanks.NEAR_MATCH,
@@ -267,9 +268,7 @@ class DictionaryIndex(Index):
         hits = self._search_index(string_norm, top_n=top_n)
         yield from hits
 
-    def _load(self, path: PathLike) -> Any:
-        if isinstance(path, str):
-            path = Path(path)
+    def _load_cache(self, path: Path) -> Any:
         with open(path.joinpath("objects.pkl"), "rb") as f:
             (
                 self.vectorizer,
@@ -278,6 +277,7 @@ class DictionaryIndex(Index):
             ) = pickle.load(f)
         self.key_lst = list(self.normalised_syn_dict.keys())
         self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
+        self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
 
     def _save(self, path: PathLike):
         if isinstance(path, str):
@@ -298,6 +298,21 @@ class DictionaryIndex(Index):
         """
         raise NotImplementedError()
 
+    def _build_ontology_cache(self, cache_dir: Path):
+        logger.info(f"creating index for {self.parser.in_path}")
+
+        self.parser.populate_metadata_database()
+        self.normalised_syn_dict = self.parser.collect_aggregate_synonym_data(True)
+        self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
+
+        self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
+        self.key_lst = list(self.normalised_syn_dict.keys())
+        self.tf_idf_matrix = self.vectorizer.fit_transform(self.key_lst)
+        self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
+        index_path = self.save(cache_dir, overwrite=True)
+        logger.info(f"saved {self.parser.name} index to {index_path.absolute()}")
+        logger.info(f"final index size for {self.parser.name} is {len(self)}")
+
 
 class EmbeddingIndex(Index):
     """
@@ -306,7 +321,6 @@ class EmbeddingIndex(Index):
 
     def __init__(self, name: str = "unnamed_index"):
         super().__init__(name)
-        self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()
 
     def _add(self, embeddings: torch.Tensor):
@@ -356,8 +370,6 @@ class EmbeddingIndex(Index):
     def search(
         self,
         query: torch.Tensor,
-        original_string: str,
-        score_cutoffs: Tuple[float, float] = (99.9945, 99.995),
         top_n: int = 1,
     ) -> Iterable[Hit]:
         distances, neighbours = self._search_func(query=query, top_n=top_n)
@@ -366,72 +378,20 @@ class EmbeddingIndex(Index):
             # the norm form of the default label should always be in the syn database
             string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
             try:
-                syn_data = self.synonym_db.get(self.name, string_norm)
+                syn_data = self.synonym_db.get(self.parser.name, string_norm)
                 # confidence is always medium, dso can be later disambiguated
                 hit = Hit(
                     string_norm=string_norm,
                     syn_data=frozenset(syn_data),
-                    parser_name=self.name,
+                    parser_name=self.parser.name,
                     confidence=SearchRanks.NEAR_MATCH,
                     metrics={SAPBERT_SCORE: score},
                 )
                 yield hit
             except KeyError:
                 logger.warning(
-                    f"{string_norm} is not in the synonym database! is the parser for {self.name} correctly configured?"
+                    f"{string_norm} is not in the synonym database! is the parser for {self.parser.name} correctly configured?"
                 )
-
-    def __getstate__(self):
-        return self.name
-
-    def __setstate__(self, state):
-        self.name = state
-        self.metadata_db = MetadataDatabase()
-        self.synonym_db = SynonymDatabase()
-
-
-class FaissEmbeddingIndex(EmbeddingIndex):
-    """
-    an embedding index that uses faiss.IndexFlatL2
-    """
-
-    def __init__(self, name: str = "unnamed_index"):
-        super().__init__(name)
-        self.import_faiss()
-
-    def import_faiss(self):
-        try:
-            import faiss
-
-            self.faiss = faiss
-        except ImportError:
-            raise RuntimeError(f"faiss is not installed. Cannot use {self.__class__.__name__}")
-
-    def _load(self, path: PathLike):
-        self.import_faiss()
-        self.index = self.faiss.read_index(str(path))
-        self.keys_lst = list(self.metadata_db.get_all(self.name).keys())
-
-    def _save(self, path: PathLike):
-        self.faiss.write_index(self.index, str(path))
-
-    def _search_func(
-        self, query: torch.Tensor, score_cutoff: float = 99.0, top_n: int = 20, **kwargs
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        distances, neighbours = self.index.search(query.numpy(), top_n)
-        return np.squeeze(distances), np.squeeze(neighbours)
-
-    def _create_index(self, embeddings: torch.Tensor):
-        index = self.faiss.IndexFlatL2(embeddings.shape[1])
-        index.add(embeddings.numpy())
-        return index
-
-    def _add_embeddings(self, embeddings: torch.Tensor):
-        self.index.add(embeddings.numpy())
-        return self.index
-
-    def __len__(self):
-        return self.index.ntotal
 
 
 class TensorEmbeddingIndex(EmbeddingIndex):
