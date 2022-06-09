@@ -1,0 +1,15 @@
+_target_: kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep
+depends_on: ~
+namespace_preferred_order:
+  - ExplosionNERStep
+  - TransformersModelForTokenClassificationNerStep
+ent_class_preferred_order:
+  - disease
+  - drug
+  - gene
+  - anatomy
+  - cell_line
+  - cell_type
+  - go_bp
+  - go_mf
+  - go_cc
