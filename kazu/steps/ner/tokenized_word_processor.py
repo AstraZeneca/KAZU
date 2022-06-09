@@ -37,19 +37,15 @@ class TokWordSpan:
     tok_words: List[TokenizedWord] = field(default_factory=list)
 
 
-class SmartSpanFinder:
+class SpanFinder:
     """
     finds spans across a sequence of TokenizedWord, according to some rules. After being called, the spans can be
     accessed via self.spans. This is a list of dictionaries. Each dictionary has a key of the entity class, and a
     list of TokenizedWord representing the entity
     """
 
-    def __init__(
-        self, threshold: float, text: str, id2label: Dict[int, str], detect_subspans: bool = False
-    ):
-        self.detect_subspans = detect_subspans
+    def __init__(self, text: str, id2label: Dict[int, str]):
         self.text = text
-        self.threshold = threshold
         self.active_spans: List[TokWordSpan] = []
         self.words: List[TokenizedWord] = []
         self.span_breaking_chars = set("() ;")
@@ -65,9 +61,7 @@ class SmartSpanFinder:
         """
         bio_and_class_labels = set()
         for i in range(len(word.token_confidences)):
-            for bio_label, class_label, confidence_val in self.get_labels_under_threshold(
-                word=word, label_index=i
-            ):
+            for bio_label, class_label, confidence_val in self.get_labels(word=word, label_index=i):
                 bio_and_class_labels.add(
                     (
                         bio_label,
@@ -76,52 +70,28 @@ class SmartSpanFinder:
                 )
         return bio_and_class_labels
 
-    def get_labels_under_threshold(
+    def get_labels(
         self, word: TokenizedWord, label_index: int
     ) -> Iterable[Tuple[str, Optional[str], float]]:
         """
-        for a given word, yield a BIO label, class label and confidence val for all labels above the configured
-        threshold
+        for a given word, yield a BIO label, class label and confidence val based upon some logic
         :param word:
         :param label_index:
         :return:
         """
-        confidences_indices_sorted = torch.argsort(
-            word.token_confidences[label_index], dim=-1, descending=True
-        )
-        for confidence_index in confidences_indices_sorted:
-            confidence_val: float = word.token_confidences[label_index][confidence_index].item()
-            if confidence_val > self.threshold:
-                bio_label = self.id2label[confidence_index.item()]
-                if bio_label == ENTITY_OUTSIDE_SYMBOL:
-                    yield bio_label, None, confidence_val
-                else:
-                    bio_label, class_label = bio_label.split("-")
-                    yield bio_label, class_label, confidence_val
-            else:
-                break
+
+        raise NotImplementedError()
 
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
     ):
         """
-        A potential entity span must continue if any of the following conditions are met:
-        1. There are any class assignments in any of the tokens in the next word.
-        2. The previous character to the word is in the set of self.non_breaking_span_chars
-        3. The previous character to the word is not in the set of self.span_breaking_chars
+        based upon some logic, determine whether a span should continue or not
         :param word:
+        :param bio_and_class_labels:
         :return:
         """
-        classes_set = set([x[1] for x in bio_and_class_labels])
-        classes_set.discard(None)
-        if (
-            self.text[word.word_char_start - 1] not in self.span_breaking_chars
-            or self.text[word.word_char_start - 1] in self.non_breaking_span_chars
-            or len(classes_set) > 0
-        ):
-            return True
-        else:
-            return False
+        raise NotImplementedError()
 
     def _update_active_spans(
         self, bio_and_class_labels: Set[Tuple[str, Optional[str]]], word: TokenizedWord
@@ -177,6 +147,79 @@ class SmartSpanFinder:
 
     def process_next_word(self, word: TokenizedWord):
         """
+        process the next word in the sequence, according to some logic
+        :param word:
+        :return:
+        """
+
+        raise NotImplementedError()
+
+    def __call__(self, words: List[TokenizedWord]):
+        for word in words:
+            self.process_next_word(word)
+        self.close_spans()
+
+
+class SimpleSpanFinder(SpanFinder):
+    """
+    finds spans across a sequence of TokenizedWord, according to some rules. After being called, the spans can be
+    accessed via self.spans. This is a list of dictionaries. Each dictionary has a key of the entity class, and a
+    list of TokenizedWord representing the entity
+    """
+
+    def __init__(self, text: str, id2label: Dict[int, str]):
+
+        super().__init__(text, id2label)
+
+    def get_labels(
+        self, word: TokenizedWord, label_index: int
+    ) -> Iterable[Tuple[str, Optional[str], float]]:
+        """
+        for a given word, yield a BIO label, class label and confidence val the most confident result
+        :param word:
+        :param label_index:
+        :return:
+        """
+        confidences_indices_sorted = torch.argsort(
+            word.token_confidences[label_index], dim=-1, descending=True
+        )
+        for confidence_index in confidences_indices_sorted:
+            confidence_val: float = word.token_confidences[label_index][confidence_index].item()
+            bio_label = self.id2label[confidence_index.item()]
+            if bio_label == ENTITY_OUTSIDE_SYMBOL:
+                yield bio_label, None, confidence_val
+            else:
+                bio_label, class_label = bio_label.split("-")
+                yield bio_label, class_label, confidence_val
+            break
+
+    def span_continue_condition(
+        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
+    ):
+        """
+        A potential entity span must continue if any of the following conditions are met:
+        1. There are any class assignments in any of the tokens in the next word.
+        2. The previous character to the word is in the set of self.non_breaking_span_chars
+        3. The previous character to the word is not in the set of self.span_breaking_chars
+        4. the most confident label in the word under consideration is not None
+        :param word:
+        :return:
+        """
+        classes_set = set([x[1] for x in bio_and_class_labels])
+        if None in classes_set:
+            return False
+        else:
+            if (
+                self.text[word.word_char_start - 1] not in self.span_breaking_chars
+                or self.text[word.word_char_start - 1] in self.non_breaking_span_chars
+                or len(classes_set) > 0
+            ):
+                return True
+            else:
+                return False
+
+    def process_next_word(self, word: TokenizedWord):
+        """
         process the next word in the sequence, updating span information accordingly
         :param word:
         :return:
@@ -188,10 +231,102 @@ class SmartSpanFinder:
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
             elif self.span_continue_condition(word, bio_and_class_labels):
                 self._update_active_spans(bio_and_class_labels, word)
-                if self.detect_subspans:
-                    self.start_span(
-                        bio_and_class_labels=bio_and_class_labels, word=word, subspan=True
-                    )
+            else:
+                self.close_spans()
+                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
+        else:
+            self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
+        self.words.append(word)
+
+
+class SmartSpanFinder(SpanFinder):
+    """
+    finds spans across a sequence of TokenizedWord, according to some rules. After being called, the spans can be
+    accessed via self.spans. This is a list of dictionaries. Each dictionary has a key of the entity class, and a
+    list of TokenizedWord representing the entity
+    """
+
+    def __init__(self, threshold: Optional[float], text: str, id2label: Dict[int, str]):
+        super().__init__(text, id2label)
+        self.text = text
+        self.threshold = threshold
+        self.active_spans: List[TokWordSpan] = []
+        self.words: List[TokenizedWord] = []
+        self.span_breaking_chars = set("() ;")
+        self.non_breaking_span_chars = set("-")
+        self.closed_spans: List[TokWordSpan] = []
+        self.id2label = id2label
+
+    def get_labels(
+        self, word: TokenizedWord, label_index: int
+    ) -> Iterable[Tuple[str, Optional[str], float]]:
+        """
+        for a given word, yield a BIO label, class label and confidence val for all labels above the configured
+        threshold
+        :param word:
+        :param label_index:
+        :return:
+        """
+        confidences_indices_sorted = torch.argsort(
+            word.token_confidences[label_index], dim=-1, descending=True
+        )
+        for confidence_index in confidences_indices_sorted:
+            confidence_val: float = word.token_confidences[label_index][confidence_index].item()
+            if self.threshold is not None:
+                if confidence_val > self.threshold:
+                    bio_label = self.id2label[confidence_index.item()]
+                    if bio_label == ENTITY_OUTSIDE_SYMBOL:
+                        yield bio_label, None, confidence_val
+                    else:
+                        bio_label, class_label = bio_label.split("-")
+                        yield bio_label, class_label, confidence_val
+                else:
+                    break
+            else:
+                bio_label = self.id2label[confidence_index.item()]
+                if bio_label == ENTITY_OUTSIDE_SYMBOL:
+                    yield bio_label, None, confidence_val
+                else:
+                    bio_label, class_label = bio_label.split("-")
+                    yield bio_label, class_label, confidence_val
+                break
+
+    def span_continue_condition(
+        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
+    ):
+        """
+        A potential entity span must continue if any of the following conditions are met:
+        1. There are any class assignments in any of the tokens in the next word.
+        2. The previous character to the word is in the set of self.non_breaking_span_chars
+        3. The previous character to the word is not in the set of self.span_breaking_chars
+        :param word:
+        :return:
+        """
+        classes_set = set([x[1] for x in bio_and_class_labels])
+        classes_set.discard(None)
+        if (
+            self.text[word.word_char_start - 1] not in self.span_breaking_chars
+            or self.text[word.word_char_start - 1] in self.non_breaking_span_chars
+            or len(classes_set) > 0
+        ):
+            return True
+        else:
+            return False
+
+    def process_next_word(self, word: TokenizedWord):
+        """
+        process the next word in the sequence, updating span information accordingly
+        :param word:
+        :return:
+        """
+
+        bio_and_class_labels = self.resolve_word(word)
+        if self.words:
+            if len(self.active_spans) == 0:
+                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
+            elif self.span_continue_condition(word, bio_and_class_labels):
+                self._update_active_spans(bio_and_class_labels, word)
+                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
             else:
                 self.close_spans()
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
@@ -218,19 +353,25 @@ class TokenizedWordProcessor:
     """
 
     def __init__(
-        self, confidence_threshold: float, id2label: Dict[int, str], detect_subspans: bool = False
+        self,
+        confidence_threshold: Optional[float],
+        id2label: Dict[int, str],
+        detect_subspans: bool = False,
     ):
         self.detect_subspans = detect_subspans
         self.id2label = id2label
         self.confidence_threshold = confidence_threshold
 
     def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
-        span_finder = SmartSpanFinder(
-            threshold=self.confidence_threshold,
-            text=text,
-            id2label=self.id2label,
-            detect_subspans=self.detect_subspans,
-        )
+        span_finder: SpanFinder
+        if self.detect_subspans:
+            span_finder = SmartSpanFinder(
+                threshold=self.confidence_threshold,
+                text=text,
+                id2label=self.id2label,
+            )
+        else:
+            span_finder = SimpleSpanFinder(text=text, id2label=self.id2label)
         span_finder(words)
         ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)
         return ents

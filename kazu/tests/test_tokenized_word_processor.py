@@ -140,11 +140,11 @@ def test_tokenized_word_processor_with_subspan_detection_3(detect_subspans: bool
         assert ents[2].match == "to"
         assert ents[2].entity_class == "greeting"
     else:
-        # should produce two ents, since '-' is non breaking
+        # should produce two ents
         assert len(ents) == 2
         assert ents[0].match == "hello-"
         assert ents[0].entity_class == "greeting"
-        assert ents[1].match == "hello-to"
+        assert ents[1].match == "to"
         assert ents[1].entity_class == "greeting"
 
 
@@ -190,3 +190,87 @@ def test_tokenized_word_processor_with_subspan_detection_4(detect_subspans):
     assert len(ents) == 2
     assert ents[0].match == "hello"
     assert ents[1].match == "you"
+
+
+def test_tokenized_word_processor_with_threshold():
+    text = "hello to you"
+    # should produce one ent
+    word1 = TokenizedWord(
+        word_id=0,
+        token_ids=[0],
+        tokens=["hello"],
+        token_confidences=[torch.Tensor([0.70, 0.20, 0.10])],
+        token_offsets=[(0, 5)],
+        word_char_start=0,
+        word_char_end=5,
+    )
+    word2 = TokenizedWord(
+        word_id=1,
+        token_ids=[1],
+        tokens=["to"],
+        token_confidences=[torch.Tensor([0.01, 0.01, 0.98])],
+        token_offsets=[(6, 8)],
+        word_char_start=6,
+        word_char_end=8,
+    )
+    word3 = TokenizedWord(
+        word_id=2,
+        token_ids=[2],
+        tokens=["you"],
+        token_confidences=[torch.Tensor([0.01, 0.01, 0.98])],
+        token_offsets=[(9, 11)],
+        word_char_start=9,
+        word_char_end=11,
+    )
+
+    processor = TokenizedWordProcessor(
+        confidence_threshold=0.1,
+        id2label={0: "B-class1", 1: "B-class2", 2: "O"},
+        detect_subspans=True,
+    )
+    ents = processor(words=[word1, word2, word3], text=text, namespace="test")
+    assert len(ents) == 2
+    detected_ent_classes = [ent.entity_class for ent in ents]
+    assert "class1" in detected_ent_classes
+    assert "class2" in detected_ent_classes
+
+
+def test_tokenized_word_processor_no_threshold():
+    text = "hello to you"
+    # should produce one ent
+    word1 = TokenizedWord(
+        word_id=0,
+        token_ids=[0],
+        tokens=["hello"],
+        token_confidences=[torch.Tensor([0.70, 0.20, 0.10])],
+        token_offsets=[(0, 5)],
+        word_char_start=0,
+        word_char_end=5,
+    )
+    word2 = TokenizedWord(
+        word_id=1,
+        token_ids=[1],
+        tokens=["to"],
+        token_confidences=[torch.Tensor([0.01, 0.01, 0.98])],
+        token_offsets=[(6, 8)],
+        word_char_start=6,
+        word_char_end=8,
+    )
+    word3 = TokenizedWord(
+        word_id=2,
+        token_ids=[2],
+        tokens=["you"],
+        token_confidences=[torch.Tensor([0.01, 0.01, 0.98])],
+        token_offsets=[(9, 11)],
+        word_char_start=9,
+        word_char_end=11,
+    )
+
+    processor = TokenizedWordProcessor(
+        confidence_threshold=None,
+        id2label={0: "B-class1", 1: "B-class2", 2: "O"},
+        detect_subspans=True,
+    )
+    ents = processor(words=[word1, word2, word3], text=text, namespace="test")
+    assert len(ents) == 1
+    assert ents[0].entity_class == "class1"
