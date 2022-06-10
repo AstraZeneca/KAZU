@@ -237,7 +237,7 @@ class OntologyMatcher:
     #         self.set_ontologies(parquet_files)
 
     def __call__(self, doc: Doc) -> Doc:
-        if self.nr_strict_rules == 0 or self.nr_lowercase_rules == 0:
+        if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
             raise ValueError(
                 "The matcher rules have not been set up properly. "
                 "Did you initialize the labels and the phrase matchers?"
