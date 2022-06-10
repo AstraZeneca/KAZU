@@ -1,11 +1,7 @@
 import copy
 import logging
-from typing import List, Callable, Tuple, Dict, Optional
-
-from spacy.matcher import Matcher
-from spacy.tokens import Token, Span
-
-from kazu.data.data import Entity
+from typing import List, Callable, Tuple, Dict, Optional, Set
+from kazu.data.data import Entity, CharSpan
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
@@ -36,30 +32,8 @@ class SplitOnConjunctionPattern:
         :param pattern:
         """
         self.nlp = spacy_pipeline.nlp
-        self.matcher = Matcher(self.nlp.vocab)
-        patterns = [
-            [
-                {"POS": "ADJ", "OP": "*"},
-                {"POS": "NOUN", "OP": "*"},
-                {"POS": "PUNCT", "OP": "*"},
-                {"POS": "ADJ", "OP": "*"},
-                {"POS": "NOUN"},
-                {"POS": "CCONJ"},
-                {"POS": "ADJ", "OP": "*"},
-                {"POS": "NOUN"},
-                {"POS": "NOUN"},
-            ],
-            [
-                {"POS": "NOUN", "OP": "*"},
-                {"POS": "PUNCT", "OP": "*"},
-                {"POS": "NOUN"},
-            ],
-        ]
-        for i, pattern in enumerate(patterns):
-            self.matcher.add(f"{self.__class__.__name__}_{i}", [pattern], greedy="LONGEST")
 
     def __call__(self, entity: Entity, text: str) -> List[Entity]:
-        # if any((x in entity.match for x in [" and ", " or ", " nor ", ", ", "/"])):
         doc = self.nlp(entity.match)
         ents = []
         if any((x in entity.match for x in [" and ", " or ", " nor "])):
@@ -67,66 +41,51 @@ class SplitOnConjunctionPattern:
         return ents
 
     def run_conjunction_rules(self, doc, entity, text):
-        # high precision rules for splitting conjunctions
         ents = []
-        matches = self.matcher(doc)
-        if len(matches) == 1:
-            _, start, end = matches[0]
-            span = doc[start:end]
-            toks = list(span)
-            anchor = toks[-1]
-            noun_chunks = list(span.noun_chunks)
-            if len(noun_chunks) > 1:
-                # noun chunks detected, use them
-                ents = self.process_noun_chunks(anchor, entity, noun_chunks, text)
-            if len(ents) < 2:
-                ents = self.process_pos_tags(anchor, entity, text, toks)
-        return ents
-
-    def process_pos_tags(self, anchor: Token, entity: Entity, text: str, toks: List[Token]):
-        ents = []
-        nouns = list(filter(lambda x: x.pos_ == "NOUN", toks[:-1]))
-        for noun in nouns:
+        noun_chunks = list(doc.noun_chunks)
+        anchor_chunk = noun_chunks[-1]
+        anchor = None
+        for tok in anchor_chunk:
+            if tok.dep_ == "conj":
+                anchor = tok
+        if anchor is not None:
             ents.append(
                 _copy_ent_with_new_spans(
                     spans=[
-                        (entity.start + noun.idx, entity.start + len(noun) + noun.idx),
-                        (entity.start + anchor.idx, entity.start + len(anchor) + anchor.idx),
+                        (
+                            entity.start + anchor_chunk.start_char,
+                            entity.start + anchor_chunk.end_char,
+                        )
                     ],
                     text=text,
                     entity=entity,
                     join_str=" ",
-                    rule_name="spacy pos tags",
+                    rule_name="spacy noun chunk tags",
                 )
             )
-        return ents
+            for chunk in noun_chunks[:-1]:
+                if anchor in chunk.conjuncts:
+                    ents.append(
+                        _copy_ent_with_new_spans(
+                            spans=[
+                                (
+                                    entity.start + chunk.start_char,
+                                    entity.start
+                                    + (chunk.end_char - chunk.start_char)
+                                    + chunk.start_char,
+                                ),
+                                (
+                                    entity.start + anchor.idx,
+                                    entity.start + len(anchor) + anchor.idx,
+                                ),
+                            ],
+                            text=text,
+                            entity=entity,
+                            join_str=" ",
+                            rule_name="spacy noun chunk tags",
+                        )
+                    )
 
-    def process_noun_chunks(
-        self, anchor: Token, entity: Entity, noun_chunks: List[Span], text: str
-    ):
-        ents = []
-        for chunk in noun_chunks[:-1]:
-            ents.append(
-                _copy_ent_with_new_spans(
-                    spans=[
-                        (entity.start + chunk.start_char, entity.start + chunk.end_char),
-                        (entity.start + anchor.idx, len(anchor) + entity.start + anchor.idx),
-                    ],
-                    text=text,
-                    entity=entity,
-                    join_str=" ",
-                    rule_name="spacy noun chunker",
-                )
-            )
-        ents.append(
-            _copy_ent_with_new_spans(
-                spans=[(noun_chunks[-1].start_char, noun_chunks[-1].end_char)],
-                text=text,
-                entity=entity,
-                join_str=" ",
-                rule_name=self.__class__.__name__,
-            )
-        )
         return ents
 
 
@@ -200,28 +159,15 @@ class NonContiguousEntitySplitter:
         self.entity_conditions = entity_conditions
 
     def __call__(self, entity: Entity, text: str) -> List[Entity]:
-        existing_offsets = {
-            (
-                entity.start,
-                entity.end,
-            )
-        }
+        existing_offsets: Set[CharSpan] = set()
+        existing_offsets.update(entity.spans)
 
         new_ents = []
         for rule in self.entity_conditions.get(entity.entity_class, []):
             found_ents = rule(entity, text)
             for found_ent in found_ents:
                 # only add new ent if offsets have changed
-
-                if (
-                    found_ent.start,
-                    found_ent.end,
-                ) not in existing_offsets:
+                if any(span not in existing_offsets for span in found_ent.spans):
                     new_ents.append(found_ent)
-                    existing_offsets.add(
-                        (
-                            found_ent.start,
-                            found_ent.end,
-                        )
-                    )
+                    existing_offsets.update(found_ent.spans)
         return new_ents
