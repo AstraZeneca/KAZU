@@ -7,7 +7,19 @@ import pickle
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, List, Tuple, Optional, Set, Iterable, Callable, FrozenSet, DefaultDict, Dict
+from typing import (
+    Any,
+    List,
+    Tuple,
+    Optional,
+    Set,
+    Iterable,
+    Callable,
+    FrozenSet,
+    DefaultDict,
+    Dict,
+    Union,
+)
 
 import numpy as np
 import pandas as pd
@@ -231,7 +243,7 @@ def build_query_matrix_cacheable(
 
 @dataclasses.dataclass
 class DisambiguatedHit:
-    original_hit: Hit
+    original_hit: Optional[Hit]
     mapping_type: FrozenSet[str]
     idx: str
     source: str
@@ -881,7 +893,9 @@ class Disambiguator:
             [required_full_definition_global, tfidf_global_strategy]
         )
 
-        self.all_strategies = [
+        self.all_strategies: List[
+            Union[KnowledgeBaseDisambiguationStrategy, GlobalDisambiguationStrategy]
+        ] = [
             tfidf_ambiguous_kb_strategy,
             hit_ensemble_strategy,
             required_full_definition_strategy,
