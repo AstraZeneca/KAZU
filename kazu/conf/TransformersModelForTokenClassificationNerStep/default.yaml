@@ -19,4 +19,4 @@ entity_splitter:
     disease:
       - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
         spacy_pipeline: ${......SpacyPipeline}
-threshold: 0.03
+threshold: ~
