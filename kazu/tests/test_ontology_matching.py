@@ -8,6 +8,7 @@ from spacy.lang.en import English
 
 from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 
 
 def test_constructor():
@@ -118,27 +119,30 @@ example_text = (
 def test_results_and_serialization(
     tmp_path, labels, match_len, match_texts, match_entity_classes, match_kb_ids
 ):
-    nlp = English()
+    TEST_SPAN_KEY = "my_hits"
+    TEST_OUTPUT_DIR = tmp_path / "ontology_pipeline"
     parser_name_to_entity_type = {
         parser_1.name: "ent_type_1",
         parser_2.name: "ent_type_2",
     }
-    config = {"span_key": "my_hits", "parser_name_to_entity_type": parser_name_to_entity_type}
-    ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
-    assert isinstance(ontology_matcher, OntologyMatcher)
-    ontology_matcher.set_labels(labels)
-    ontology_matcher.create_phrasematchers(parsers=[parser_1, parser_2], blacklisters={})
+    nlp = assemble_pipeline(
+        parsers=[parser_1, parser_2],
+        blacklisters={},
+        parser_name_to_entity_type=parser_name_to_entity_type,
+        labels=labels,
+        output_dir=TEST_OUTPUT_DIR,
+        span_key=TEST_SPAN_KEY,
+    )
+
     doc = nlp(example_text)
-    matches = doc.spans[config["span_key"]]
+    matches = doc.spans[TEST_SPAN_KEY]
 
     assert_matches(matches, match_len, match_texts, match_entity_classes, match_kb_ids)
 
-    nlp_loc = tmp_path / "ontology_pipeline"
-    nlp.to_disk(nlp_loc)
-    nlp2 = spacy.load(nlp_loc)
+    nlp2 = spacy.load(TEST_OUTPUT_DIR)
 
     doc2 = nlp2(example_text)
-    matches2 = doc2.spans[config["span_key"]]
+    matches2 = doc2.spans[TEST_SPAN_KEY]
 
     assert_matches(matches2, match_len, match_texts, match_entity_classes, match_kb_ids)
 

@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import pandas as pd
 import pydash
 import pytest
@@ -5,6 +7,7 @@ from hydra.utils import instantiate
 
 from kazu.data.data import Entity, Document
 from kazu.pipeline import Pipeline, load_steps
+from kazu.steps.ner.explosion import ExplosionNERStep
 from kazu.tests.utils import (
     entity_linking_hard_cases,
     requires_model_pack,
@@ -147,3 +150,137 @@ def test_TransformersModelForTokenClassificationNerStep(kazu_test_config):
         )
         for ent in doc.sections[0].entities:
             assert ent.entity_class == target_class
+
+
+@pytest.fixture(scope="module")
+def explosion_ner_step(kazu_test_config) -> ExplosionNERStep:
+    return instantiate(kazu_test_config.ExplosionNERStep)
+
+
+# fmt: off
+test_ner_sentences_and_entities: List[Tuple[str, List[str]]] = [
+    ("The mean (SD) HAVOC score was 2.6.", []),
+    ("Diseases associated with WAS include Wiskott Syndrome and Thrombocytopenia 1.", ["WAS", "Wiskott Syndrome", "Thrombocytopenia", "Thrombocytopenia 1"]),
+    ("MEDI8897 is a recombinant human RSV monoclonal antibody", ["MEDI8897"]),
+    ("We aimed to confirm these findings in patients with a BRCA1 or BRCA2 mutation", ["BRCA1", "BRCA2"]),
+    ("Gastrointestinal AEs were typically low-grade.", []),
+    ("Few clinical trials in asthma have focused on Hispanic populations.", ["asthma"]),
+    ("These patients were treated with abemaciclib.", ["abemaciclib"]),
+    ("Blood was sampled pre- and post-dose on Day 32.", ["Blood"]),
+    ("TIME cells express readily detectable telomerase activity. There is TIME !", ["TIME"]),
+    ("Subjects with prevalent kidney disease were randomized to linagliptin or placebo added to usual care.", ["kidney", "kidney disease", "linagliptin"]),
+    ("The increase in lifespan is matched by time free from incident cardiovascular disease.", ["cardiovascular disease", "lifespan"]),
+    ("The necuparanib arm had a higher incidence of haematologic toxicity.", ["necuparanib"]),
+    ("This was a single-arm trial. My arm hurts.", ["arm"]),
+    ("We value life more than anything.", ["life"]),
+    ("The main endpoint is quality of life.", []),
+    ("The main endpoint is quality-of-life.", []),
+    ("IVF, with or without ICSI, was received in all 500 patients.", []),
+    ("All three decontamination processes reduced bacteria counts similarly.", []),
+    ("The primary endpoint was MFS.", []),
+    ("Vandetanib plus docetaxel led to a significant improvement in PFS versus placebo plus docetaxel.", ["Vandetanib", "docetaxel", "docetaxel"]),
+    ("Mean glycated haemoglobin concentration was 66 mmol/mol (8.2%).", ["haemoglobin"]),
+    ("Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.", ["pembrolizumab", "breast cancer", "breast", "cancer", "chemotherapy"]),
+    ("Anifrolumab dose-dependently suppressed the IFN gene signature.", ["IFN", "Anifrolumab"]),
+    ("Antiplatelet effects of citalopram in patients with ischemic stroke", ["citalopram", "ischemic stroke", "stroke"]),
+    ("We reviewed 19 patients with the Dandy-Walker syndrome", ["Dandy-Walker syndrome"]),
+    ("We reviewed 19 patients with the Dandy Walker syndrome", ["Dandy Walker syndrome"]),
+]
+# fmt: on
+
+
+@pytest.mark.parametrize(
+    argnames=["sentence", "entities"], argvalues=test_ner_sentences_and_entities
+)
+@requires_model_pack
+def test_ExplosionNERStep_single_ner_results(
+    explosion_ner_step: ExplosionNERStep, sentence: str, entities: List[str]
+):
+    doc = Document.create_simple_document(sentence)
+    successes, failures = explosion_ner_step(docs=[doc])
+    assert len(successes) == 1 and len(failures) == 0
+
+    pred_ents = successes[0].sections[0].entities
+    assert set(e.match for e in pred_ents) == set(entities)
+
+
+@requires_model_pack
+def test_ExplosionNERStep_batch_ner_results(explosion_ner_step: ExplosionNERStep):
+    """tests that we can feed in multiple docs at once and get the correct response.
+
+    Note, this will only pass if all parametrizations of test_ExplosionNERStep_single_ner_results pass,
+    but having the parametrization is beneficial since we see all failures at once, not just the first doc that
+    fails and then need to keep re-running tests. But we also want to check we can pass a batch of documents to the
+    step and it still work."""
+    docs = [
+        Document.create_simple_document(sentence)
+        for sentence, entities in test_ner_sentences_and_entities
+    ]
+    entities = [entities for sentence, entities in test_ner_sentences_and_entities]
+    successes, failures = explosion_ner_step(docs)
+    assert len(successes) == len(docs) and len(failures) == 0
+    for doc, ents_for_doc in zip(successes, entities):
+        pred_ents = doc.sections[0].entities
+        assert set(e.match for e in pred_ents) == set(ents_for_doc)
+
+
+# fmt: off
+test_nel_sentences_and_ids: List[Tuple[str, List[str]]] = [
+    ("We aimed to confirm these findings in patients with a BRCA1 or BRCA2 mutation", ["ENSG00000012048", "ENSG00000139618"]),
+    ("These patients were treated with abemaciclib.", ["CHEMBL3301610"]),
+    ("Blood was sampled pre- and post-dose on Day 32.", ["http://purl.obolibrary.org/obo/UBERON_0000178"]),
+    ("TIME cells express readily detectable telomerase activity", ["CVCL_0047"]),
+    (
+        "Studying pembrolizumab plus neoadjuvant chemotherapy in early-stage breast cancer.",
+        [
+            "CHEMBL3137343",  # pembrolizumab
+            "http://purl.obolibrary.org/obo/MONDO_0007254",  # MONDO breast cancer
+            "http://purl.obolibrary.org/obo/UBERON_0000310",  # UBERON breaset
+            "http://purl.obolibrary.org/obo/MONDO_0004992",  # MONDO cancer
+            "http://purl.obolibrary.org/obo/HP_0002664",  # HP neoplasm (~= cancer)
+            # this is 'breast carcinoma' - this one is a bit questionable as http://purl.obolibrary.org/obo/MONDO_0007254 'breast cancer' is better -
+            # ideally we would use the synonym type to prefer 'breast cancer' since the link for 'breast carcinoma' is 'has broad synonym'.
+            # However, we're not using the entity linking for now, so not worth it.
+            "http://purl.obolibrary.org/obo/MONDO_0004989",
+            "10006187",  # Meddra breast cancer
+            "10028997",  # Meddra Neoplasm malignant (~=cancer)
+            "10061758",  # Meddra Chemotherapy
+
+        ],
+    ),
+]
+# fmt: on
+
+
+@pytest.mark.parametrize(argnames=["sentence", "ids"], argvalues=test_nel_sentences_and_ids)
+@requires_model_pack
+def test_ExplosionNERStep_single_nel_results(
+    explosion_ner_step: ExplosionNERStep, sentence: str, ids: List[str]
+):
+    doc = Document.create_simple_document(sentence)
+    successes, failures = explosion_ner_step(docs=[doc])
+    assert len(successes) == 1 and len(failures) == 0
+
+    pred_ents = successes[0].sections[0].entities
+    # TODO: is this the full check we want to do?
+    assert set(mapping for e in pred_ents for mapping in e.mappings) == set(ids)
+
+
+@requires_model_pack
+def test_ExplosionNERStep_batch_nel_results(explosion_ner_step: ExplosionNERStep):
+    """tests that we can feed in multiple docs at once and get the correct response.
+
+    Note, this will only pass if all parametrizations of test_ExplosionNERStep_single_ner_results pass,
+    but having the parametrization is beneficial since we see all failures at once, not just the first doc that
+    fails and then need to keep re-running tests. But we also want to check we can pass a batch of documents to the
+    step and it still work."""
+    docs = [
+        Document.create_simple_document(sentence) for sentence, ids in test_nel_sentences_and_ids
+    ]
+    ids = [ids for sentence, ids in test_nel_sentences_and_ids]
+    successes, failures = explosion_ner_step(docs)
+    assert len(successes) == len(docs) and len(failures) == 0
+    for doc, ids_for_doc in zip(successes, ids):
+        pred_ents = doc.sections[0].entities
+        # TODO: as above
+        assert set(mapping for e in pred_ents for mapping in e.mappings) == set(ids_for_doc)
