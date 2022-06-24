@@ -7,7 +7,7 @@ from kazu.data.data import (
     AMBIGUOUS_IDX,
     SynonymData,
 )
-from kazu.data.data import LinkRanks
+from kazu.data.data import LinkRanks, EquivalentIdAggregationStrategy
 from kazu.modelling.ontology_preprocessing.base import MetadataDatabase
 from kazu.steps.other.document_disambiguationv2 import (
     DISAMBIGUATED_BY,
@@ -44,18 +44,27 @@ def test_kb_disambiguation(kazu_test_config):
             source="ENSEMBL",
             idx=AMBIGUOUS_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.AMBIGUOUS,
             metadata={
                 LINK_CONFIDENCE: LinkRanks.AMBIGUOUS,
                 DICTIONARY_HITS: [
                     Hit(
-                        matched_str="",
+                        string_norm="",
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(ids=frozenset([WRONG_IDX])),
-                                SynonymData(ids=frozenset([EXPECTED_IDX])),
+                                SynonymData(
+                                    ids=frozenset([WRONG_IDX]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
+                                ),
+                                SynonymData(
+                                    ids=frozenset([EXPECTED_IDX]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
+                                ),
                             ]
                         ),
+                        parser_name="OPENTARGETS_TARGET",
                     )
                 ],
             },
@@ -70,6 +79,8 @@ def test_kb_disambiguation(kazu_test_config):
             source="ENSEMBL",
             idx=PATHWAY_LINKED_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.HIGH_CONFIDENCE,
             metadata={LINK_CONFIDENCE: LinkRanks.HIGH_CONFIDENCE},
         )
     ]
@@ -104,18 +115,27 @@ def test_document_disambiguation_s1(kazu_test_config):
             source="test_kb",
             idx=AMBIGUOUS_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.AMBIGUOUS,
             metadata={
                 LINK_CONFIDENCE: LinkRanks.AMBIGUOUS,
                 DICTIONARY_HITS: [
                     Hit(
-                        matched_str="",
+                        string_norm="",
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(ids=frozenset(["im wrong"])),
-                                SynonymData(ids=frozenset([EXPECTED_IDX])),
+                                SynonymData(
+                                    ids=frozenset(["im wrong"]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
+                                ),
+                                SynonymData(
+                                    ids=frozenset([EXPECTED_IDX]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
+                                ),
                             ]
                         ),
+                        parser_name="OPENTARGETS_TARGET",
                     )
                 ],
             },
@@ -130,6 +150,8 @@ def test_document_disambiguation_s1(kazu_test_config):
             source="test_kb",
             idx=EXPECTED_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.HIGH_CONFIDENCE,
             metadata={LINK_CONFIDENCE: LinkRanks.HIGH_CONFIDENCE},
         )
     ]
@@ -161,18 +183,27 @@ def test_document_disambiguation_s2(kazu_test_config):
             source="test_kb",
             idx=AMBIGUOUS_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.AMBIGUOUS,
             metadata={
                 LINK_CONFIDENCE: LinkRanks.AMBIGUOUS,
                 DICTIONARY_HITS: [
                     Hit(
-                        matched_str="",
+                        string_norm="",
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(ids=frozenset(["im wrong"])),
-                                SynonymData(ids=frozenset([EXPECTED_IDX])),
+                                SynonymData(
+                                    ids=frozenset(["im wrong"]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
+                                ),
+                                SynonymData(
+                                    ids=frozenset([EXPECTED_IDX]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
+                                ),
                             ]
                         ),
+                        parser_name="OPENTARGETS_TARGET",
                     )
                 ],
             },
@@ -187,6 +218,8 @@ def test_document_disambiguation_s2(kazu_test_config):
             source="test_kb",
             idx=EXPECTED_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.LOW_CONFIDENCE,
             metadata={LINK_CONFIDENCE: LinkRanks.LOW_CONFIDENCE},
         )
     ]
@@ -200,6 +233,8 @@ def test_document_disambiguation_s2(kazu_test_config):
             source="test_kb",
             idx=EXPECTED_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.HIGH_CONFIDENCE,
             metadata={LINK_CONFIDENCE: LinkRanks.HIGH_CONFIDENCE},
         )
     ]
@@ -242,18 +277,27 @@ def test_document_disambiguation_s3(kazu_test_config):
             source="kb_x",
             idx=AMBIGUOUS_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.AMBIGUOUS,
             metadata={
                 LINK_CONFIDENCE: LinkRanks.AMBIGUOUS,
                 DICTIONARY_HITS: [
                     Hit(
-                        matched_str="",
+                        string_norm="",
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(ids=frozenset(["I may be right"])),
-                                SynonymData(ids=frozenset(["I also may be right"])),
+                                SynonymData(
+                                    ids=frozenset(["I may be right"]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
+                                ),
+                                SynonymData(
+                                    ids=frozenset(["I also may be right"]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
+                                ),
                             ]
                         ),
+                        parser_name="OPENTARGETS_TARGET",
                     )
                 ],
             },
@@ -263,6 +307,8 @@ def test_document_disambiguation_s3(kazu_test_config):
             source="kb_y",
             idx=EXPECTED_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.HIGH_CONFIDENCE,
             metadata={LINK_CONFIDENCE: LinkRanks.HIGH_CONFIDENCE},
         ),
     ]
@@ -275,6 +321,8 @@ def test_document_disambiguation_s3(kazu_test_config):
             source="test_kb",
             idx=EXPECTED_IDX,
             mapping_type=frozenset(),
+            parser_name="OPENTARGETS_TARGET",
+            confidence=LinkRanks.HIGH_CONFIDENCE,
             metadata={LINK_CONFIDENCE: LinkRanks.HIGH_CONFIDENCE},
         )
     ]
