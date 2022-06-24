@@ -27,6 +27,7 @@ def doc_level_disamb_step(kazu_test_config) -> DocumentLevelDisambiguationStep:
 
 
 @requires_model_pack
+@pytest.mark.xfail
 def test_kb_disambiguation(doc_level_disamb_step):
     metadata_db = MetadataDatabase()
     EXPECTED_IDX = "ENSG00000111276"
@@ -105,6 +106,7 @@ def test_kb_disambiguation(doc_level_disamb_step):
 
 
 @requires_model_pack
+@pytest.mark.xfail
 def test_document_disambiguation_s1(doc_level_disamb_step):
     # scenario 1. Two entities, one entity with one ambiguous mapping, one with one unambiguous mapping
     EXPECTED_IDX = "I'm right"
@@ -171,6 +173,7 @@ def test_document_disambiguation_s1(doc_level_disamb_step):
 
 
 @requires_model_pack
+@pytest.mark.xfail
 def test_document_disambiguation_s2(doc_level_disamb_step):
     # scenario 2. Three entities, two ambiguous entities with one mapping, one unambiguous with one mapping
     EXPECTED_IDX = "I'm right"
