@@ -115,12 +115,8 @@ class Index(abc.ABC):
         return path.joinpath("ontology_metadata.pkl")
 
     @staticmethod
-    def get_index_path(path: Path) -> Path:
-        return path.joinpath("index.pkl")
-
-    @staticmethod
     def get_index_data_path(path: Path) -> Path:
-        return path.joinpath("index.data")
+        return path.joinpath("index.pkl")
 
     def _save(self, path: Path):
         """
@@ -180,7 +176,6 @@ class Index(abc.ABC):
             logger.info("forcing a rebuild of the ontology cache")
             if cache_dir.exists():
                 shutil.rmtree(cache_dir)
-            cache_dir.mkdir()
             self.build_ontology_cache(cache_dir)
         elif cache_dir.exists():
             logger.info(f"loading cached ontology file from {cache_dir}")
@@ -272,7 +267,7 @@ class DictionaryIndex(Index):
         yield from hits
 
     def _load_cache(self, path: Path) -> Any:
-        with open(path.joinpath("objects.pkl"), "rb") as f:
+        with open(path, "rb") as f:
             (
                 self.vectorizer,
                 self.normalised_syn_dict,
@@ -283,9 +278,8 @@ class DictionaryIndex(Index):
         self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
 
     def _save(self, path: Path):
-        path.mkdir()
         pickleable = (self.vectorizer, self.normalised_syn_dict, self.tf_idf_matrix)
-        with open(path.joinpath("objects.pkl"), "wb") as f:
+        with open(path, "wb") as f:
             pickle.dump(pickleable, f)
 
     def _add(self, data: Dict[str, List[SynonymData]]):
@@ -469,13 +463,12 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         self.index: torch.Tensor
 
     def _load_cache(self, path: Path) -> Any:
-        with open(path.joinpath("objects.pkl"), "rb") as f:
+        with open(path, "rb") as f:
             self.index = pickle.load(f)
 
     def _save(self, path: Path):
-        path.mkdir()
         pickleable = self.index
-        with open(path.joinpath("objects.pkl"), "wb") as f:
+        with open(path, "wb") as f:
             pickle.dump(pickleable, f)
 
     def _add_embeddings(self, embeddings: torch.Tensor):
