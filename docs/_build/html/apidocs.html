@@ -65,7 +65,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.Entity">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">match:</span> <span class="pre">str,</span> <span class="pre">entity_class:</span> <span class="pre">str,</span> <span class="pre">spans:</span> <span class="pre">typing.FrozenSet[kazu.data.data.CharSpan],</span> <span class="pre">namespace:</span> <span class="pre">str,</span> <span class="pre">mappings:</span> <span class="pre">typing.List[kazu.data.data.Mapping]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">metadata:</span> <span class="pre">typing.Dict[typing.Any,</span> <span class="pre">typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.Entity" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">match:</span> <span class="pre">str,</span> <span class="pre">entity_class:</span> <span class="pre">str,</span> <span class="pre">spans:</span> <span class="pre">typing.FrozenSet[kazu.data.data.CharSpan],</span> <span class="pre">namespace:</span> <span class="pre">str,</span> <span class="pre">mappings:</span> <span class="pre">typing.List[kazu.data.data.Mapping]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">hits:</span> <span class="pre">typing.List[kazu.data.data.Hit]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">metadata:</span> <span class="pre">typing.Dict[typing.Any,</span> <span class="pre">typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.Entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
 we have to define the semantics of overlapping spans.</p>
 <dl class="py method">
@@ -88,11 +88,12 @@ we have to define the semantics of overlapping spans.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.from_spans">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spans</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.Entity.from_spans" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spans</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.Entity.from_spans" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an instance of Entity from a list of character indices. A text string of underlying doc is
 also required to produce a representative match
 :param spans:
 :param text:
+:param join_str: a string used to join the spans together
 :param kwargs:
 :return:</p>
 </dd></dl>
@@ -137,43 +138,8 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.Mapping">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">default_label:</span> <span class="pre">str,</span> <span class="pre">source:</span> <span class="pre">str,</span> <span class="pre">idx:</span> <span class="pre">str,</span> <span class="pre">mapping_type:</span> <span class="pre">List[str],</span> <span class="pre">metadata:</span> <span class="pre">Dict[Any,</span> <span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.Mapping" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.data.data.NerProcessedSection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">NerProcessedSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_frame_offsets:</span> <span class="pre">typing.List[typing.Tuple[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_word_ids:</span> <span class="pre">typing.List[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_labels:</span> <span class="pre">typing.List[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_frame_confidences:</span> <span class="pre">typing.List[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.NerProcessedSection" title="Permalink to this definition">¶</a></dt>
-<dd><p>long Sections may need to be split into multiple frames when processing with a transformer. This class is a
-convenient container to reassemble the frames into a coherent object, post transformer. Not hashable due to
-all properties being lists (and therefore mutable)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.data.data.NerProcessedSection.to_tokenized_words">
-<span class="sig-name descname"><span class="pre">to_tokenized_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id2label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.TokenizedWord" title="kazu.data.data.TokenizedWord"><span class="pre">kazu.data.data.TokenizedWord</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.data.data.NerProcessedSection.to_tokenized_words" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a List[TokenizedWord]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>id2label</strong> – Dict mapping labels to strings</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.data.data.TokenizedWord">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">TokenizedWord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word_labels:</span> <span class="pre">typing.List[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_labels_strings:</span> <span class="pre">typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_confidences:</span> <span class="pre">typing.List[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">word_offsets:</span> <span class="pre">typing.List[typing.Tuple[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bio_labels:</span> <span class="pre">typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_labels:</span> <span class="pre">typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_post_inference:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.TokenizedWord" title="Permalink to this definition">¶</a></dt>
-<dd><p>A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.data.data.TokenizedWord.parse_labels_to_bio_and_class">
-<span class="sig-name descname"><span class="pre">parse_labels_to_bio_and_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.TokenizedWord.parse_labels_to_bio_and_class" title="Permalink to this definition">¶</a></dt>
-<dd><p>since the BIO schema actually encodes two pieces of info, it’s often useful to handle them separately.
-This method parses the BIO labels in self.word_labels_strings and add the fields bio_labels and class labels
-:return:</p>
-</dd></dl>
-
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_label:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence:</span> <span class="pre">kazu.data.data.LinkRanks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping_type:</span> <span class="pre">typing.FrozenSet[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata:</span> <span class="pre">typing.Dict[typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.data.data.Mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>a mapping is a fully mapped and disambiguated kb concept</p>
 </dd></dl>
 
 <span class="target" id="module-kazu.data.pytorch"></span><dl class="py class">
@@ -293,7 +259,8 @@ dataloader_idx: Index of the current dataloader</p>
 <dd><p>loads steps based on the cfg.pipeline</p>
 </dd></dl>
 
-<span class="target" id="module-kazu.steps"></span><span class="target" id="module-kazu.steps.linking.link_ensembling"></span><dl class="py class">
+<span class="target" id="module-kazu.steps"></span><span class="target" id="module-kazu.steps.linking.link_ensembling"></span><p>DEPRECATED</p>
+<dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.link_ensembling.MappingPostProcessing">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.link_ensembling.</span></span><span class="sig-name descname"><span class="pre">MappingPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><span class="pre">kazu.data.data.Entity</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">linker_score_thresholds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.steps.linking.link_ensembling.MappingPostProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ensemble and resolve mapping information for an entity, according to a custom algorithm:
@@ -336,112 +303,13 @@ on, sorted by score
 </dd></dl>
 
 <span class="target" id="module-kazu.utils.caching"></span><dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.caching.CachedIndexGroup">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">CachedIndexGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_class_to_ontology_mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_managers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.utils.caching.IndexCacheManager" title="kazu.utils.caching.IndexCacheManager"><span class="pre">kazu.utils.caching.IndexCacheManager</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.caching.CachedIndexGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convenience class for building and loading Indices, and querying against them</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.CachedIndexGroup.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.caching.CachedIndexGroup.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>loads the cached version of the indices from disk</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.CachedIndexGroup.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.Mapping" title="kazu.data.data.Mapping"><span class="pre">kazu.data.data.Mapping</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.CachedIndexGroup.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>search across all indices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> – passed to the search method of each index</p></li>
-<li><p><strong>entity_class</strong> – used to restrict the search space to certain indices - see
-entity_class_to_ontology_mappings in constructor</p></li>
-<li><p><strong>namespace</strong> – the namespace of the calling step (added to mapping metadata)</p></li>
-<li><p><strong>kwargs</strong> – any other kwargs to pass to the search method of each index</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.caching.DictionaryIndexCacheManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndexCacheManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.caching.DictionaryIndexCacheManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>implementation for use with <a class="reference internal" href="steps.html#kazu.steps.DictionaryEntityLinkingStep" title="kazu.steps.linking.dictionary.DictionaryEntityLinkingStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.linking.dictionary.DictionaryEntityLinkingStep</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.DictionaryIndexCacheManager.build_ontology_cache">
-<span class="sig-name descname"><span class="pre">build_ontology_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#kazu.utils.link_index.Index" title="kazu.utils.link_index.Index"><span class="pre">kazu.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#kazu.utils.caching.DictionaryIndexCacheManager.build_ontology_cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implementations should implement this method to determine how an index gets built for a given parser
-:param cache_dir:
-:param parser:
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.DictionaryIndexCacheManager.select_index_type">
-<span class="sig-name descname"><span class="pre">select_index_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.utils.link_index.DictionaryIndex" title="kazu.utils.link_index.DictionaryIndex"><span class="pre">kazu.utils.link_index.DictionaryIndex</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.DictionaryIndexCacheManager.select_index_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>select a index type based on its string name. Note, this should return a type compatible with the concrete
-implementation (e.g. EmbeddingIndexCacheManager -&gt; EmbeddingIndex )
-:param index_class_name:
-:return:</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.caching.EmbeddingIndexCacheManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndexCacheManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.linking.sapbert.train.PLSapbertModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pytorch_lightning.trainer.trainer.Trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology_partition_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.caching.EmbeddingIndexCacheManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>implementation for use with embedding style linking steps, such as
-<a class="reference internal" href="steps.html#kazu.steps.SapBertForEntityLinkingStep" title="kazu.steps.linking.sapbert.SapBertForEntityLinkingStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.linking.sapbert.SapBertForEntityLinkingStep</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.EmbeddingIndexCacheManager.build_ontology_cache">
-<span class="sig-name descname"><span class="pre">build_ontology_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#kazu.utils.link_index.Index" title="kazu.utils.link_index.Index"><span class="pre">kazu.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#kazu.utils.caching.EmbeddingIndexCacheManager.build_ontology_cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implementations should implement this method to determine how an index gets built for a given parser
-:param cache_dir:
-:param parser:
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.EmbeddingIndexCacheManager.enumerate_dataframe_chunks">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enumerate_dataframe_chunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.EmbeddingIndexCacheManager.enumerate_dataframe_chunks" title="Permalink to this definition">¶</a></dt>
-<dd><p>generator to split up a dataframe into partitions
-:param df:
-:param chunk_size: size of partittions to create
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.EmbeddingIndexCacheManager.predict_ontology_embeddings">
-<span class="sig-name descname"><span class="pre">predict_ontology_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ontology_dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.EmbeddingIndexCacheManager.predict_ontology_embeddings" title="Permalink to this definition">¶</a></dt>
-<dd><p>since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
-and add them to the index sequentially
-:param ontology_dataframe:
-:return: partition number, metadata dataframe and embeddings</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.EmbeddingIndexCacheManager.select_index_type">
-<span class="sig-name descname"><span class="pre">select_index_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex" title="kazu.utils.link_index.EmbeddingIndex"><span class="pre">kazu.utils.link_index.EmbeddingIndex</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.EmbeddingIndexCacheManager.select_index_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>select a index type based on its string name. Note, this should return a type compatible with the concrete
-implementation (e.g. EmbeddingIndexCacheManager -&gt; EmbeddingIndex )
-:param index_class_name:
-:return:</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.caching.EntityLinkingLookupCache">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EntityLinkingLookupCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache" title="Permalink to this definition">¶</a></dt>
 <dd><p>A simple wrapper around LFUCache to reduce calls to expensive processes (e.g. bert)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache">
-<span class="sig-name descname"><span class="pre">check_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><span class="pre">kazu.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><span class="pre">kazu.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>checks the cache for mappings. If relevant mappings are found for an entity, update its mappings
+<span class="sig-name descname"><span class="pre">check_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><span class="pre">kazu.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><span class="pre">kazu.data.data.Entity</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks the cache for mappings and hits. If relevant mappings are found for an entity, update its mappings
 accordingly. If not return as a list of cache misses (e.g. for further processing)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -455,124 +323,84 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.caching.IndexCacheManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">IndexCacheManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.caching.IndexCacheManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>An IndexCacheManager is responsible for creating, saving and loading a set of <code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.utils.caching.Index</span></code>.
-It’s useful to use this class, instead of an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.utils.caching.Index</span></code> directly, as this class
-will automatically cache any expensive index creation aspects (such as embedding generation for sapbert)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.IndexCacheManager.build_ontology_cache">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_ontology_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#kazu.utils.link_index.Index" title="kazu.utils.link_index.Index"><span class="pre">kazu.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#kazu.utils.caching.IndexCacheManager.build_ontology_cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implementations should implement this method to determine how an index gets built for a given parser
-:param cache_dir:
-:param parser:
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.IndexCacheManager.get_or_create_ontology_indices">
-<span class="sig-name descname"><span class="pre">get_or_create_ontology_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.utils.link_index.Index" title="kazu.utils.link_index.Index"><span class="pre">kazu.utils.link_index.Index</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.caching.IndexCacheManager.get_or_create_ontology_indices" title="Permalink to this definition">¶</a></dt>
-<dd><p>for each parser in self.parsers, create an index. If a cached version is available, load it instead
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.IndexCacheManager.load_ontology_from_cache">
-<span class="sig-name descname"><span class="pre">load_ontology_from_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#kazu.utils.link_index.Index" title="kazu.utils.link_index.Index"><span class="pre">kazu.utils.link_index.Index</span></a></span></span><a class="headerlink" href="#kazu.utils.caching.IndexCacheManager.load_ontology_from_cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>load an index from the cache
-:param cache_dir:
-:param parser:
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.caching.IndexCacheManager.select_index_type">
-<span class="sig-name descname"><span class="pre">select_index_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span></span></span><a class="headerlink" href="#kazu.utils.caching.IndexCacheManager.select_index_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>select a index type based on its string name. Note, this should return a type compatible with the concrete
-implementation (e.g. EmbeddingIndexCacheManager -&gt; EmbeddingIndex )
-:param index_class_name:
-:return:</p>
-</dd></dl>
-
-</dd></dl>
-
 <span class="target" id="module-kazu.utils.link_index"></span><dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.CDistTensorEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">CDistTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.CDistTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">CDistTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.CDistTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate embedding based on cosine distance</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.DictionaryIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>a simple dictionary index for linking</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>a simple dictionary index for linking. Uses a Dict[str, List[SynonymData]] for matching synonyms,
+with optional fuzzy matching. Note, since a given synonym can match to more than one metadata entry (even
+within the same knowledgebase), we have a pathological situation in which ‘true’ synonyms can not be said to
+exist. In such situations, we return multiple kb references for overloaded synonyms - i.e. the disambiguation is
+delegated elsewhere</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.link_index.DictionaryIndex.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>add data to the index. Two indices are required - synonyms and metadata. Metadata should have a primary key
-(IDX) and synonyms should use IDX as a foreign key
-:param synonym_df: synonyms dataframe
-:param metadata_df: metadata dataframe
-:return:</p>
+<dt class="sig sig-object py" id="kazu.utils.link_index.DictionaryIndex.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">kazu.data.data.Hit</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>search the index
+:param query: a string of text
+:return: Iterable of Tuple [kb.id, metadata_dict]</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.EmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.EmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">EmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology_partition_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.EmbeddingIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>a wrapper around an embedding index strategy.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.link_index.EmbeddingIndex.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embeddings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.EmbeddingIndex.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>add embeddings to the index</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>embeddings</strong> – a 2d tensor of embeddings</p></li>
-<li><p><strong>metadata_df</strong> – a pd.DataFrame of metadata</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="kazu.utils.link_index.EmbeddingIndex.enumerate_database_chunks">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enumerate_database_chunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.link_index.EmbeddingIndex.enumerate_database_chunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>generator to split up a dataframe into partitions
+:param name: ontology name to query the metadata database with
+:param chunk_size: size of partittions to create
+:return:</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.link_index.EmbeddingIndex.predict_ontology_embeddings">
+<span class="sig-name descname"><span class="pre">predict_ontology_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.link_index.EmbeddingIndex.predict_ontology_embeddings" title="Permalink to this definition">¶</a></dt>
+<dd><p>since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
+and add them to the index sequentially
+:param name: name of ontology
+:return: partition number, metadata and embeddings</p>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.link_index.FaissEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">FaissEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.FaissEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>an embedding index that uses faiss.IndexFlatL2</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.Index">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unnamed_index'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.Index" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.Index" title="Permalink to this definition">¶</a></dt>
 <dd><p>base class for all indices.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.link_index.Index.check_dataframe_types">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_dataframe_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#kazu.utils.link_index.Index.check_dataframe_types" title="Permalink to this definition">¶</a></dt>
-<dd><p>certain fields in the metadata dataframe must be of a certain type. This method modifies a df to ensure the
-types are consistently used.
-:param df:
+<dt class="sig sig-object py" id="kazu.utils.link_index.Index.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.Index.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>add data to the index
+:param data:
 :return:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.link_index.Index.load">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.Index.load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.Index.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>load from disk
 :param path: the parent path of the index
-:param name: the name of the index within the parent path
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.link_index.Index.load_or_build_cache">
+<span class="sig-name descname"><span class="pre">load_or_build_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_rebuild_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.Index.load_or_build_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>for each parser in self.parsers, create an index. If a cached version is available, load it instead
 :return:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.link_index.Index.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#kazu.utils.link_index.Index.save" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#kazu.utils.link_index.Index.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>save to disk. Makes a directory at the path location with all the index assets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -584,33 +412,45 @@ types are consistently used.
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.link_index.Index.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#kazu.utils.link_index.Index.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>search the index
-:param query: the query to use
-:param kwargs: any other arguments to pass to self._search
-:return: a <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> of hits, with a score column</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.MatMulTensorEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">MatMulTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.MatMulTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">MatMulTensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.MatMulTensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculate embedding based on MatMul</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.TensorEmbeddingIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">TensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.TensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">TensorEmbeddingIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.TensorEmbeddingIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>a simple index of torch tensors.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.utils.link_index.to_torch">
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">to_torch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.link_index.to_torch" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a sparse CSR matrix to a sparse torch matrix
+:param matrix:
+:param shape:
+:return:</p>
 </dd></dl>
 
 <span class="target" id="module-kazu.utils.stopwatch"></span><span class="target" id="module-kazu.utils.utils"></span><dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.utils.EntityClassFilter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.utils.</span></span><span class="sig-name descname"><span class="pre">EntityClassFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required_entity_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kazu.utils.utils.EntityClassFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>A condition that returns True if a document has any entities that match the class of the required_entity_classes</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.utils.utils.create_char_ngrams">
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.utils.</span></span><span class="sig-name descname"><span class="pre">create_char_ngrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.utils.create_char_ngrams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of char ngrams as a string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.utils.utils.create_word_ngrams">
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.utils.</span></span><span class="sig-name descname"><span class="pre">create_word_ngrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kazu.utils.utils.create_word_ngrams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of word ngrams as a single space-separated string.</p>
 </dd></dl>
 
 <dl class="py function">
