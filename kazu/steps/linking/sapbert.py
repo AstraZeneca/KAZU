@@ -1,4 +1,3 @@
-import itertools
 import logging
 import sys
 import traceback
@@ -113,15 +112,19 @@ class SapBertForEntityLinkingStep(BaseStep):
                     continue
                 if self.ignore_high_conf:
                     # check every parser namespace has a high conf hit
-                    hits_by_parser_name = itertools.groupby(
-                        sorted(ent.hits, key=lambda x: x.parser_name), key=lambda x: x.parser_name
-                    )
-                    needs_sapbert = False
-                    for parser_name, hits_iter in hits_by_parser_name:
-                        if not any(hit.confidence == SearchRanks.EXACT_MATCH for hit in hits_iter):
-                            needs_sapbert = True
-                            break
-                    if needs_sapbert:
+                    # gives false by default, so if there are no hits for a parser
+                    # we run sapbert
+                    parser_has_high_conf_hit: Dict[str, bool] = defaultdict(bool)
+                    for hit in ent.hits:
+                        if hit.confidence == SearchRanks.EXACT_MATCH:
+                            parser_has_high_conf_hit[hit.parser_name] = True
+
+                    # TODO: in theory I think you could pass an embedding index when constructing
+                    # that never gets used because it isn't in the list of entities and ontologies
+                    # but I'm unclear here - unimportant enough to delay until later
+                    if not all(
+                        parser_has_high_conf_hit[index.parser.name] for index in self.indices
+                    ):
                         entities_to_process.append(ent)
 
             self.process_entities(entities_to_process)
