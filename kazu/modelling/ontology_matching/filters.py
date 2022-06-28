@@ -22,14 +22,66 @@ BLACKLIST_EXACT = {
     # a fair few entities have synonyms 'X disease' or 'X syndrome' where
     # x happens to also be a stopword. Getting rid of these here - we
     # may be able to use StopWordRemover more intelligently instead
-    "*": ["was", "for", "disease", "Disease", "syndrome", "Syndrome"],
+    "*": [
+        "was",
+        "for",
+        "disease",
+        "Disease",
+        "syndrome",
+        "Syndrome",
+        "life",
+        "Life",
+        "Scale",
+        "scale",
+        "Appendix",
+        "tail",
+        "extension",
+        "segment",
+        "bar",
+        "back",
+        "Bar",
+        "pad",
+        "lower",
+        "left",
+        "right",
+        "behavior",
+        "upper",
+        "tip",
+    ],
 }
 
 BLACKLIST_LOWER = {
     "CHEMBL2272076": ["impact"],
     "http://purl.obolibrary.org/obo/MONDO_0012268": ["aids"],
     # as above in BLACKLIST_EXACT
-    "*": ["all", "was", "disease", "syndrome", "cat", "mat", "has", "may", "can", "same", "read"],
+    "*": [
+        "all",
+        "was",
+        "disease",
+        "syndrome",
+        "cat",
+        "mat",
+        "has",
+        "may",
+        "can",
+        "same",
+        "read",
+        "life",
+        "scale",
+        "appendix",
+        "tail",
+        "extension",
+        "segment",
+        "bar",
+        "back",
+        "pad",
+        "lower",
+        "left",
+        "right",
+        "behavior",
+        "upper",
+        "tip",
+    ],
 }
 # a set of gene names that are often used to mean 'actual genes' but also other things (such as page numbers, in the
 # case of p27, p53 etc). We match on them, and disambiguate later
