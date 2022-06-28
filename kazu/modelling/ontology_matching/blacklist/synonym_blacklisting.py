@@ -29,7 +29,7 @@ class AnnotationLookup:
 
 class BlackLister(abc.ABC):
     """
-    applies entity class specfic rules to a synonym, to see if it should be blacklisted or not
+    applies entity class specific rules to a synonym, to see if it should be blacklisted or not
     """
 
     # def _collect_syn_set
