@@ -200,7 +200,7 @@ class Pipeline:
             )
             self.summary_writer.add_scalars(
                 main_tag="memory",
-                tag_scalar_dict={"MB": psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2},
+                tag_scalar_dict={"MB": psutil.Process(os.getpid()).memory_info().rss / 1024**2},
                 global_step=self.call_count,
             )
             for step_name, step_time in step_times.items():

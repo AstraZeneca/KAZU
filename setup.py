@@ -29,7 +29,7 @@ setup(
     ],
     extras_require={
         "dev": [
-            "black==20.8b1",
+            "black~=22.0",
             "flake8",
             "bump2version",
             "pre-commit",
