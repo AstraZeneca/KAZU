@@ -3,7 +3,7 @@ import pickle
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Callable, Iterable
+from typing import List, Dict, Union, Callable, Iterable, Tuple, Set
 
 import spacy
 import srsly
@@ -28,12 +28,12 @@ MATCH_ID_SEP = ":::"
 
 
 @spacy.registry.misc("arizona.variant_generator.v1")
-def create_generator() -> Callable:
+def create_generator() -> Callable[[str], Set[str]]:
     return create_variants
 
 
 @spacy.registry.misc("arizona.entry_filter_blacklist.v1")
-def create_filter() -> Callable:
+def create_filter() -> Callable[[str, str], Tuple[bool, bool]]:
     return is_valid_ontology_entry
 
 
@@ -62,8 +62,8 @@ class OntologyMatcher:
         *,
         span_key: str = SPAN_KEY,
         match_id_sep: str = MATCH_ID_SEP,
-        entry_filter: Callable,
-        variant_generator: Callable,
+        entry_filter: Callable[[str, str], Tuple[bool, bool]],
+        variant_generator: Callable[[str], Set[str]],
         parser_name_to_entity_type: Dict[str, str],
     ):
         """

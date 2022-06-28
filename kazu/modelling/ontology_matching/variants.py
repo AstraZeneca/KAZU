@@ -1,4 +1,7 @@
-def create_variants(syn: str):
+from typing import Set
+
+
+def create_variants(syn: str) -> Set[str]:
     variants = {syn}
     for key, values in REPLACE_DICT.items():
         for v in values:

@@ -1,5 +1,6 @@
+from numbers import Real
 import re
-from typing import Container, Mapping, Tuple
+from typing import Container, Mapping, Tuple, Union
 
 from kazu.modelling.ontology_preprocessing.base import StringNormalizer
 
@@ -70,7 +71,7 @@ def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
     return False, True
 
 
-def _hits_blacklist(blacklist: Mapping[str, Container[str]], syn: str, iri: str):
+def _hits_blacklist(blacklist: Mapping[str, Container[str]], syn: str, iri: str) -> bool:
     blacklist_syns = blacklist.get(iri, [])
     if syn in blacklist_syns:
         return True
@@ -81,7 +82,7 @@ def _hits_blacklist(blacklist: Mapping[str, Container[str]], syn: str, iri: str)
     return False
 
 
-def _is_number(value):
+def _is_number(value: Union[str, Real]) -> bool:
     try:
         float(value)
         return True
