@@ -27,35 +27,6 @@ SPAN_KEY = "RAW_HITS"
 MATCH_ID_SEP = ":::"
 
 
-@Language.factory(
-    "ontology_matcher",
-    default_config={
-        "span_key": SPAN_KEY,
-        "match_id_sep": MATCH_ID_SEP,
-        "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
-        "variant_generator": {"@misc": "arizona.variant_generator.v1"},
-    },
-)
-def create_ontology_mather(
-    nlp,
-    name,
-    span_key: str,
-    match_id_sep: str,
-    entry_filter: Callable,
-    variant_generator: Callable,
-    parser_name_to_entity_type: Dict[str, str],
-):
-    return OntologyMatcher(
-        nlp,
-        name,
-        span_key=span_key,
-        match_id_sep=match_id_sep,
-        entry_filter=entry_filter,
-        variant_generator=variant_generator,
-        parser_name_to_entity_type=parser_name_to_entity_type,
-    )
-
-
 @spacy.registry.misc("arizona.variant_generator.v1")
 def create_generator() -> Callable:
     return create_variants
@@ -74,6 +45,15 @@ class OntologyMatcherConfig:
     parser_name_to_entity_type: Dict[str, str]
 
 
+@Language.factory(
+    "ontology_matcher",
+    default_config={
+        "span_key": SPAN_KEY,
+        "match_id_sep": MATCH_ID_SEP,
+        "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
+        "variant_generator": {"@misc": "arizona.variant_generator.v1"},
+    },
+)
 class OntologyMatcher:
     def __init__(
         self,
