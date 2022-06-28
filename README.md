@@ -1,6 +1,6 @@
 # Kazu - Biomedical NLP
 
-Welcome to Kazu (Korea AstraZeneca University), a python NLP library built in collboration with Korea University,
+Welcome to Kazu (Korea AstraZeneca University), a python NLP library built in collaboration with Korea University,
 designed to handle production workloads.
 
 This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
