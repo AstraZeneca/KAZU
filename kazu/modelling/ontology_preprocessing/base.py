@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import sqlite3
+import urllib
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
@@ -311,14 +312,24 @@ class MetadataDatabase:
         mapping_type: FrozenSet[str],
         confidence: LinkRanks,
         additional_metadata: Optional[Dict],
+        strip_url: bool = True,
     ) -> Mapping:
         metadata = self.get_by_idx(name=parser_name, idx=idx)
         metadata[DATA_ORIGIN] = parser_name
         if additional_metadata:
             metadata.update(additional_metadata)
+        if strip_url:
+            url = urllib.parse.urlparse(idx)
+            if url.scheme == "":
+                # not a url
+                new_idx = idx
+            else:
+                new_idx = url.path.split("/")[-1]
+        else:
+            new_idx = idx
         return Mapping(
             default_label=metadata.pop(DEFAULT_LABEL),
-            idx=idx,
+            idx=new_idx,
             source=source,
             confidence=confidence,
             parser_name=metadata.pop(DATA_ORIGIN),
@@ -807,6 +818,9 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         for json_dict in jsons_gen:
+            biotype = json_dict.get("biotype")
+            if biotype == "" or biotype == "tec" or json_dict["id"] == json_dict["approvedSymbol"]:
+                continue
             records = []
             for key in ["synonyms", "obsoleteSymbols", "obsoleteNames", "proteinIds"]:
                 synonyms_and_sources_lst = json_dict.get(key, [])
@@ -948,6 +962,9 @@ class GeneOntologyParser(OntologyParser):
 
         for row in result:
             idx = row.goid
+            if "obsolete" in row.label:
+                logger.info(f"skipping obsolete id: {row.goid}, {row.label}")
+                continue
             if self._uri_regex.match(idx):
                 default_labels.append(row.label)
                 iris.append(row.goid)
@@ -1292,7 +1309,7 @@ class CellosaurusOntologyParser(OntologyParser):
 
 
 class MeddraOntologyParser(OntologyParser):
-    name = "MEDDRA"
+    name = "MEDDRA_DISEASE"
     """
     input is an unzipped directory to a MEddra release (Note, requires licence). This
     should contain the files 'mdhier.asc' and 'llt.asc'
@@ -1330,6 +1347,8 @@ class MeddraOntologyParser(OntologyParser):
         "NULL",
     )
 
+    _exclude_soc = ["Surgical and medical procedures", "Social circumstances", "Investigations"]
+
     def find_kb(self, string: str) -> str:
         return "MEDDRA"
 
@@ -1345,6 +1364,7 @@ class MeddraOntologyParser(OntologyParser):
             names=self._mdhier_asc_col_names,
             dtype="string",
         )
+        hier_df = hier_df[~hier_df["soc_name"].isin(self._exclude_soc)]
 
         llt_df = pd.read_csv(
             llt_path,
