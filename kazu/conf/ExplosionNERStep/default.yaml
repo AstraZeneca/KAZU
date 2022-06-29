@@ -57,7 +57,7 @@ blacklisters:
   # to decide the blacklister.
   CHEMBL: ${BlackListers.DrugBlackLister}
   OPENTARGETS_MOLECULE: ${BlackListers.DrugBlackLister}
-  MEDDRA: ${BlackListers.DiseaseBlackLister}
+  MEDDRA_DISEASE: ${BlackListers.DiseaseBlackLister}
   MONDO: ${BlackListers.DiseaseBlackLister}
   OPENTARGETS_DISEASE: ${BlackListers.DiseaseBlackLister}
   ENSEMBL: ${BlackListers.GeneBlackLister}

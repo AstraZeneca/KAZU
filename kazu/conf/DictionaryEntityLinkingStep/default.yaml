@@ -7,7 +7,7 @@ entity_class_to_ontology_mappings:
     - CHEMBL
     - OPENTARGETS_MOLECULE
   disease:
-    - MEDDRA
+    - MEDDRA_DISEASE
     - MONDO
     - OPENTARGETS_DISEASE
   gene:

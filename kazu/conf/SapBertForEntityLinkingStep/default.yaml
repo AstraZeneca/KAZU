@@ -23,7 +23,7 @@ entity_class_to_ontology_mappings:
     - OPENTARGETS_MOLECULE
   disease:
     - MONDO
-    - MEDDRA
+    - MEDDRA_DISEASE
     - OPENTARGETS_DISEASE
   gene:
     - OPENTARGETS_TARGET
