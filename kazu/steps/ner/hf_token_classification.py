@@ -16,12 +16,11 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from kazu.data.data import Document, Section, NerProcessedSection, PROCESSING_EXCEPTION
+from kazu.data.data import Document, Section, PROCESSING_EXCEPTION
 from kazu.data.pytorch import HFDataset
 from kazu.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
 from kazu.steps import BaseStep
-from kazu.steps.ner.bio_label_parser import BIOLabelParser
-from kazu.steps.ner.bio_label_preprocessor import BioLabelPreProcessor
+from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 
@@ -30,10 +29,10 @@ logger = logging.getLogger(__name__)
 
 class TransformersModelForTokenClassificationNerStep(BaseStep):
     """
-    An wrapper for :class:`transformers.AutoModelForTokenClassification' and
-    :class:`kazu.steps.ner.bio_label_preprocessor.BioLabelPreProcessor`. This implementation uses a sliding
+    An wrapper for :class:`transformers.AutoModelForTokenClassification'. This implementation uses a sliding
     window concept to process large documents that don't fit into the maximum sequence length allowed by a model.
-
+    Resulting token labels are then post processed by
+    :py:class:`kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor`.
     """
 
     def __init__(
@@ -44,20 +43,24 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         stride: int,
         max_sequence_length: int,
         trainer: Trainer,
-        debug=False,
+        detect_subspans: bool = False,
+        threshold: Optional[float] = None,
         entity_splitter: Optional[NonContiguousEntitySplitter] = None,
     ):
         """
-        :param stride: passed to HF tokenizers (for splitting long docs)
-        :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
+
         :param path: path to HF model, config and tokenizer. Passed to HF .from_pretrained()
         :param depends_on:
         :param batch_size: batch size for dataloader
-        :param debug: print extra logging info
+        :param stride: passed to HF tokenizers (for splitting long docs)
+        :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
+        :param trainer: an instance of :py:class:`pytorch_lightning.Trainer`
+        :param threshold: the confidence threshold that the token softmax value should consider to classify a given
+            token (i.e. if set to 0, every token will be classed as an instance of every label
         """
+
         super().__init__(depends_on=depends_on)
         self.entity_splitter = entity_splitter
-        self.debug = debug
         if max_sequence_length % 2 != 0:
             raise RuntimeError(
                 "max_sequence_length must %2 ==0 in order for correct document windowing"
@@ -70,13 +73,14 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         self.config = AutoConfig.from_pretrained(path)
         self.tokeniser = AutoTokenizer.from_pretrained(path, config=self.config)
         self.model = AutoModelForTokenClassification.from_pretrained(path, config=self.config)
-        self.model = PLAutoModelForTokenClassification(self.model)
+        self.model = PLAutoModelForTokenClassification(self.model).eval()
         self.trainer = trainer
         self.softmax = Softmax(dim=-1)
-        self.entity_mapper = BIOLabelParser(
-            list(self.config.id2label.values()), namespace=self.namespace()
+        self.tokenized_word_processor = TokenizedWordProcessor(
+            detect_subspans=detect_subspans,
+            confidence_threshold=threshold,
+            id2label=self.config.id2label,
         )
-        self.bio_preprocessor = BioLabelPreProcessor()
 
     def get_dataloader(self, docs: List[Document]) -> Tuple[DataLoader, Dict[int, Section]]:
         """
@@ -90,14 +94,6 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         batch_encoding, id_section_map = documents_to_document_section_batch_encodings_map(
             docs, self.tokeniser, stride=self.stride, max_length=self.max_sequence_length
         )
-
-        if self.debug:
-            decoded_texts = [
-                self.tokeniser.decode(encoding.ids) for encoding in batch_encoding.encodings
-            ]
-            for decoded_text in decoded_texts:
-                logger.info(f"inputs to model this call: {decoded_text}")
-
         dataset = HFDataset(batch_encoding)
         collate_func = DataCollatorWithPadding(
             tokenizer=self.tokeniser, padding=PaddingStrategy.MAX_LENGTH
@@ -105,143 +101,14 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         loader = DataLoader(dataset=dataset, batch_size=self.batch_size, collate_fn=collate_func)
         return loader, id_section_map
 
-    def merge_section_frames(
-        self,
-        section_index: int,
-        batch_encoding: BatchEncoding,
-        confidence_and_labels_tensor: Tuple[Tensor, Tensor],
-    ) -> NerProcessedSection:
-        """
-        for a given section index, obtain a NerProcessedSection representing all of the inferred labels for that section
-        :param section_index: int of the section index
-        :param batch_encoding: the BatchEncoding for this dataset
-        :param confidence_and_labels_tensor: a tuple of the confidence and labels from the model
-        :return:
-        """
-        all_frame_offsets = []
-        all_frame_word_ids = []
-        all_frame_labels = []
-        all_frame_confidences = []
-
-        section_frame_indices = self.get_list_of_batch_encoding_frames_for_section(
-            batch_encoding, section_index
-        )
-        for frame_index, section_frame_index in enumerate(section_frame_indices):
-            (
-                frame_offsets,
-                frame_word_ids,
-                frame_labels,
-                frame_confidence,
-            ) = self.get_offset_and_word_id_frames(
-                batch_encoding=batch_encoding,
-                number_of_frames=len(section_frame_indices),
-                frame_index=frame_index,
-                section_frame_index=section_frame_index,
-                confidence_and_labels_tensor=confidence_and_labels_tensor,
-            )
-            all_frame_confidences.extend(frame_confidence.numpy().tolist())
-            all_frame_labels.extend(frame_labels.numpy().tolist())
-            all_frame_word_ids.extend(frame_word_ids)
-            all_frame_offsets.extend(frame_offsets)
-
-        return NerProcessedSection(
-            all_frame_offsets=all_frame_offsets,
-            all_frame_labels=all_frame_labels,
-            all_frame_word_ids=all_frame_word_ids,
-            all_frame_confidences=all_frame_confidences,
-        )
-
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
-        try:
-            loader, id_section_map = self.get_dataloader(docs)
-            # run the transformer and get results
-            confidence_and_labels_tensor = self.get_confidence_and_labels_tensor(loader)
-            for section_index, section in id_section_map.items():
-                # for long docs, we need to split section.get_text() into frames (i.e. portions that will fit into Bert or
-                # similar)
-                ner_processed_section = self.merge_section_frames(
-                    section_index=section_index,
-                    batch_encoding=loader.dataset.encodings,
-                    confidence_and_labels_tensor=confidence_and_labels_tensor,
-                )
-                all_words = ner_processed_section.to_tokenized_words(self.config.id2label)
-                transformed_words = self.bio_preprocessor(all_words)
-                for transformed_word in transformed_words:
-                    for i, label in enumerate(transformed_word.word_labels_strings):
-                        if self.debug:
-                            logger.info(
-                                f"processing label: {label} for token {section.get_text()[transformed_word.word_offsets[i][0]:transformed_word.word_offsets[i][1]]}"
-                            )
-                        self.entity_mapper.update_parse_states(
-                            label,
-                            offsets=transformed_word.word_offsets[i],
-                            text=section.get_text(),
-                            confidence=transformed_word.word_confidences[i],
-                        )
-
-                # at the end of the section, get the results
-                ents = self.entity_mapper.get_entities()
-                section.entities.extend(ents)
-                if self.entity_splitter:
-                    for ent in ents:
-                        section.entities.extend(self.entity_splitter(ent, section.get_text()))
-                # reset the entity mapper in preparation for the next section
-                self.entity_mapper.reset()
-        except Exception:
-            affected_doc_ids = [doc.idx for doc in docs]
-            for doc in docs:
-                message = (
-                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
-                )
-                doc.metadata[PROCESSING_EXCEPTION] = message
-                failed_docs.append(doc)
-
-        return docs, failed_docs
-
-    def get_list_of_batch_encoding_frames_for_section(
-        self, batch_encoding: BatchEncoding, section_index: int
-    ) -> List[int]:
-        """
-        for a given dataloader with a HFDataset, return a list of frame indexes associated with a given section index
-        :param loader:
-        :param section_index:
-        :return:
-        """
-        section_frame_indices = [
-            i
-            for i, x in enumerate(batch_encoding.data["overflow_to_sample_mapping"])
-            if x == section_index
-        ]
-        return section_frame_indices
-
-    def get_confidence_and_labels_tensor(self, loader: DataLoader) -> Tuple[Tensor, Tensor]:
-        """
-        get a namedtuple_values_indices consisting of confidence and labels for a given dataloader (i.e. run bert)
-        :param loader:
-        :return:
-        """
-        results = torch.cat(
-            [
-                x.logits
-                for x in self.trainer.predict(
-                    model=self.model, dataloaders=loader, return_predictions=True
-                )
-            ]
-        )
-        softmax = self.softmax(results)
-        # get confidence scores and label ints
-        confidence_and_labels_tensor = torch.max(softmax, dim=-1)
-        return confidence_and_labels_tensor
-
-    def get_offset_and_word_id_frames(
+    def frame_to_tok_word(
         self,
         batch_encoding: BatchEncoding,
         number_of_frames: int,
         frame_index: int,
         section_frame_index: int,
-        confidence_and_labels_tensor: Tuple[Tensor, Tensor],
-    ) -> Tuple[List[Tuple[int, int]], List[int], Tensor, Tensor]:
+        predictions: Tensor,
+    ) -> List[TokenizedWord]:
         """
         depending on the number of frames generated by a string of text, and whether it is the first or last frame,
         we need to return different subsets of the frame offsets and frame word_ids
@@ -270,16 +137,142 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         frame_word_ids = batch_encoding.encodings[section_frame_index].word_ids[
             start_index:end_index
         ]
-        frame_input_ids = batch_encoding.encodings[section_frame_index].ids
-        frame_labels = confidence_and_labels_tensor[1][section_frame_index][start_index:end_index]
-        frame_confidence = confidence_and_labels_tensor[0][section_frame_index][
-            start_index:end_index
-        ]
+        frame_token_ids = batch_encoding.encodings[section_frame_index].ids[start_index:end_index]
+        frame_tokens = batch_encoding.encodings[section_frame_index].tokens[start_index:end_index]
+        predictions = predictions[section_frame_index][start_index:end_index]
+        prev_word_id = None
+        all_words = []
 
-        if self.debug:
-            logger.info(
-                f"inputs this frame: {self.tokeniser.decode(frame_input_ids[:start_index])}<-IGNORED "
-                f"START->{self.tokeniser.decode(frame_input_ids[start_index:end_index])}"
-                f"<-END IGNORED->{self.tokeniser.decode(frame_input_ids[end_index:])}"
+        word_id_index_start, offset_start, offset_end = 0, 0, 0
+
+        for i, word_id in enumerate(frame_word_ids):
+            if word_id != prev_word_id:
+                # start a new word, and add the previous
+                if prev_word_id is not None:
+                    all_words.append(
+                        TokenizedWord(
+                            token_offsets=frame_offsets[word_id_index_start:i],
+                            token_confidences=predictions[word_id_index_start:i],
+                            token_ids=frame_token_ids[word_id_index_start:i],
+                            tokens=frame_tokens[word_id_index_start:i],
+                            word_char_start=offset_start,
+                            word_char_end=offset_end - 1,
+                            word_id=prev_word_id,
+                        )
+                    )
+                word_id_index_start = i
+                offset_start, offset_end = frame_offsets[i]
+            if i == len(frame_word_ids) - 1 and word_id is not None:
+                # if checking the last word in a frame, if word_id is not None, add it
+                all_words.append(
+                    TokenizedWord(
+                        token_offsets=frame_offsets[word_id_index_start : i + 1],
+                        token_confidences=predictions[word_id_index_start : i + 1],
+                        token_ids=frame_token_ids[word_id_index_start : i + 1],
+                        tokens=frame_tokens[word_id_index_start : i + 1],
+                        word_char_start=offset_start,
+                        word_char_end=offset_end,
+                        word_id=word_id,
+                    )
+                )
+
+            _, offset_end = frame_offsets[i]
+            prev_word_id = word_id
+
+        frame_word_ids_excluding_nones = set(frame_word_ids)
+        frame_word_ids_excluding_nones.discard(None)
+        assert len(set(frame_word_ids_excluding_nones)) == len(all_words)
+
+        logger.debug(
+            f"inputs this frame: {self.tokeniser.decode(frame_token_ids[:start_index])}<-IGNORED "
+            f"START->{self.tokeniser.decode(frame_token_ids[start_index:end_index])}"
+            f"<-END IGNORED->{self.tokeniser.decode(frame_token_ids[end_index:])}"
+        )
+        return all_words
+
+    def section_frames_to_tokenised_words(
+        self,
+        section_index: int,
+        batch_encoding: BatchEncoding,
+        predictions: Tensor,
+    ) -> List[TokenizedWord]:
+        words = []
+
+        section_frame_indices = self.get_list_of_batch_encoding_frames_for_section(
+            batch_encoding, section_index
+        )
+        for frame_index, section_frame_index in enumerate(section_frame_indices):
+            word_sub_list = self.frame_to_tok_word(
+                batch_encoding=batch_encoding,
+                number_of_frames=len(section_frame_indices),
+                frame_index=frame_index,
+                section_frame_index=section_frame_index,
+                predictions=predictions,
             )
-        return frame_offsets, frame_word_ids, frame_labels, frame_confidence
+            words.extend(word_sub_list)
+        return words
+
+    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+        failed_docs = []
+        try:
+            loader, id_section_map = self.get_dataloader(docs)
+            # run the transformer and get results
+            softmax = self.get_softmax_predictions(loader)
+            for section_index, section in id_section_map.items():
+                words = self.section_frames_to_tokenised_words(
+                    section_index=section_index,
+                    batch_encoding=loader.dataset.encodings,
+                    predictions=softmax,
+                )
+                entities = self.tokenized_word_processor(
+                    words, text=section.get_text(), namespace=self.namespace()
+                )
+                section.entities.extend(entities)
+                if self.entity_splitter:
+                    for ent in entities:
+                        section.entities.extend(self.entity_splitter(ent, section.get_text()))
+        except Exception:
+            affected_doc_ids = [doc.idx for doc in docs]
+            for doc in docs:
+                message = (
+                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
+                )
+                doc.metadata[PROCESSING_EXCEPTION] = message
+                failed_docs.append(doc)
+
+        return docs, failed_docs
+
+    def get_list_of_batch_encoding_frames_for_section(
+        self, batch_encoding: BatchEncoding, section_index: int
+    ) -> List[int]:
+        """
+        for a given dataloader with a HFDataset, return a list of frame indexes associated with a given section index
+        :param loader:
+        :param section_index:
+        :return:
+        """
+        section_frame_indices = [
+            i
+            for i, x in enumerate(batch_encoding.data["overflow_to_sample_mapping"])
+            if x == section_index
+        ]
+        return section_frame_indices
+
+    def get_softmax_predictions(self, loader: DataLoader) -> Tensor:
+        """
+        get a namedtuple_values_indices consisting of confidence and labels for a given dataloader (i.e. run bert)
+        :param loader:
+        :return:
+        """
+        results = torch.cat(
+            [
+                x.logits
+                for x in self.trainer.predict(
+                    model=self.model, dataloaders=loader, return_predictions=True
+                )
+            ]
+        )
+        softmax = self.softmax(results)
+        # get confidence scores and label ints
+        # confidence_and_labels_tensor = torch.max(softmax, dim=-1)
+        return softmax
