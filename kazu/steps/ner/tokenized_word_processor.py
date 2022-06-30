@@ -145,7 +145,6 @@ class SpanFinder:
         :param word:
         :return:
         """
-
         raise NotImplementedError()
 
     def __call__(self, words: List[TokenizedWord]):
