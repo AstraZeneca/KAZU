@@ -389,8 +389,8 @@ class Section:
         for ent in self.entities:
             if len(ent.mappings) > 0:
                 mapping_id = ent.mappings[0].idx
-                mapping_label = ent.mappings[0].metadata["default_label"]
-                mapping_conf = ent.mappings[0].metadata[LINK_CONFIDENCE]
+                mapping_label = ent.mappings[0].default_label
+                mapping_conf = ent.mappings[0].confidence
                 metadata = ent.mappings[0].metadata
             else:
                 mapping_id = None
