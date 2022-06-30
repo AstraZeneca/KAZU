@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Kazu data model &#8212; Kazu  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -44,16 +45,19 @@
           <div class="body" role="main">
             
   <section id="kazu-data-model">
-<h1>Kazu data model<a class="headerlink" href="#kazu-data-model" title="Permalink to this headline">¶</a></h1>
+<h1>Kazu data model<a class="headerlink" href="#kazu-data-model" title="Permalink to this heading">¶</a></h1>
 <p>The Kazu datamodel is based around the concepts of Documents and Steps. Steps are run over documents,
 generally returning the original document with additional information added.</p>
 <p>Documents are composed of a sequence of sections (for instance, title, body). A Section is a container
 for text and metadata, (such as entities detected by an NER step).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
-<span class="c1"># a SimpleDocument is a subclass for Document for simple text strings</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</span> <span class="kn">import</span> <span class="n">SciSpacyAbbreviationExpansionStep</span>
+
 <span class="n">step</span> <span class="o">=</span> <span class="n">SciSpacyAbbreviationExpansionStep</span><span class="p">([])</span>
-<span class="n">doc</span> <span class="o">=</span> <span class="n">SimpleDocument</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">succeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
+<span class="c1"># creates a document with a single section</span>
+<span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_simple_document</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
+<span class="n">succeeded</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">step</span><span class="p">([</span><span class="n">doc</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">succeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -91,7 +95,7 @@ for text and metadata, (such as entities detected by an NER step).</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -117,7 +121,7 @@ for text and metadata, (such as entities detected by an NER step).</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Korea University, AstraZeneca.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

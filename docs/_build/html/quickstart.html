@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Quickstart &#8212; Kazu  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -44,9 +45,9 @@
           <div class="body" role="main">
             
   <section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">¶</a></h1>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
 <p>Note, currently not functional - install from repo only at present.
 Ensure you are on version 21.0 or newer of pip.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install kazu</span>
@@ -54,25 +55,26 @@ Ensure you are on version 21.0 or newer of pip.</p>
 </div>
 </section>
 <section id="model-pack">
-<h2>Model Pack<a class="headerlink" href="#model-pack" title="Permalink to this headline">¶</a></h2>
+<h2>Model Pack<a class="headerlink" href="#model-pack" title="Permalink to this heading">¶</a></h2>
 <p>In order to use the majority of Kazu, you will need the model pack, which contains
 the pretrained models required by the pipeline. This is available from &lt;TBA&gt;</p>
 </section>
 <section id="running-steps">
-<h2>Running Steps<a class="headerlink" href="#running-steps" title="Permalink to this headline">¶</a></h2>
+<h2>Running Steps<a class="headerlink" href="#running-steps" title="Permalink to this heading">¶</a></h2>
 <p>Components are wrapped as instances of BaseStep.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
-<span class="kn">import</span> <span class="nn">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</span> <span class="kn">import</span> <span class="n">SciSpacyAbbreviationExpansionStep</span>
+
+<span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_simple_document</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
 <span class="n">step</span> <span class="o">=</span> <span class="n">SciSpacyAbbreviationExpansionStep</span><span class="p">([])</span>
-<span class="n">doc</span> <span class="o">=</span> <span class="n">SimpleDocument</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
 <span class="c1"># a step may fail to process a document, so it returns two lists, successes and failures</span>
-<span class="n">succeeded</span><span class="p">,</span><span class="n">failed</span> <span class="o">=</span> <span class="n">step</span><span class="p">([</span><span class="n">doc</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">succeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
+<span class="n">succeeded</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">step</span><span class="p">([</span><span class="n">doc</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">succeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
 <section id="advanced-pipeline-configuration-with-hydra">
-<h2>Advanced Pipeline configuration with Hydra<a class="headerlink" href="#advanced-pipeline-configuration-with-hydra" title="Permalink to this headline">¶</a></h2>
+<h2>Advanced Pipeline configuration with Hydra<a class="headerlink" href="#advanced-pipeline-configuration-with-hydra" title="Permalink to this heading">¶</a></h2>
 <p>To create an NLP pipeline, you need to instantiate steps. Given the large amount
 of configuration required, the easiest way to do this is with Hydra <a class="reference external" href="https://hydra.cc/docs/intro/">https://hydra.cc/docs/intro/</a></p>
 <p>Here, you will need a hydra config directory (see kazu/conf for an example).</p>
@@ -83,21 +85,22 @@ or manually update the model paths that use the variable - search for
 <cite>${oc.env:KAZU_MODEL_PACK}</cite> in kazu/conf).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">hydra</span> <span class="kn">import</span> <span class="n">compose</span><span class="p">,</span> <span class="n">initialize_config_dir</span>
-<span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">SimpleDocument</span>
+<span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
 <span class="kn">from</span> <span class="nn">kazu.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">load_steps</span>
-<span class="c1">#some text we want to process</span>
+<span class="c1"># some text we want to process</span>
 <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;EGFR is a gene&quot;&quot;&quot;</span>
 
 <span class="k">with</span> <span class="n">initialize_config_dir</span><span class="p">(</span><span class="n">config_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;KAZU_CONFIG_DIR&quot;</span><span class="p">)):</span>
     <span class="n">cfg</span> <span class="o">=</span> <span class="n">compose</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">)</span>
     <span class="c1"># instantiate a pipeline based on Hydra defaults</span>
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">load_steps</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
-    <span class="c1"># create an instance of SimpleDocument from our text string</span>
-    <span class="n">doc</span> <span class="o">=</span> <span class="n">SimpleDocument</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="c1"># create an instance of Document from our text string</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_simple_document</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="c1"># Pipeline takes a List[Document] as an argument to __call__</span>
-    <span class="c1"># and returns a processes List[Document]</span>
-    <span class="n">result</span><span class="p">:</span> <span class="n">SimpleDocument</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">([</span><span class="n">doc</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="c1"># a Document is composed of Sections (SimpleDocument only has one)</span>
+    <span class="c1"># and returns a processed List[Document]</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">Document</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">([</span><span class="n">doc</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># a Document is composed of Sections</span>
+    <span class="c1"># (a Document created with create_simple_document has only one)</span>
     <span class="c1"># calling render() renders the entities with displacy</span>
     <span class="n">result</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
     <span class="c1"># the entities can also be transformed into a pandas Dataframe</span>
@@ -153,7 +156,7 @@ or manually update the model paths that use the variable - search for
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -179,7 +182,7 @@ or manually update the model paths that use the variable - search for
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Korea University, AstraZeneca.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

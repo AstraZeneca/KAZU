@@ -24,13 +24,14 @@ Components are wrapped as instances of BaseStep.
 
 .. code-block:: python
 
-    from kazu.data.data import SimpleDocument
-    import kazu.steps.string_preprocessing.scispacy_abbreviation_expansion
+    from kazu.data.data import Document
+    from kazu.steps.string_preprocessing.scispacy_abbreviation_expansion import SciSpacyAbbreviationExpansionStep
+
+    doc = Document.create_simple_document("EGFR (Epidermal Growth Factor Receptor) is a gene")
     step = SciSpacyAbbreviationExpansionStep([])
-    doc = SimpleDocument("EGFR (Epidermal Growth Factor Receptor) is a gene")
     # a step may fail to process a document, so it returns two lists, successes and failures
-    succeeded,failed = step([doc])
-    print(succeeded[0].get_text())
+    succeeded, failed = step([doc])
+    print(succeeded[0].sections[0].get_text())
 
 
 Advanced Pipeline configuration with Hydra
@@ -52,21 +53,22 @@ or manually update the model paths that use the variable - search for
 
     import os
     from hydra import compose, initialize_config_dir
-    from kazu.data.data import SimpleDocument
+    from kazu.data.data import Document
     from kazu.pipeline import Pipeline, load_steps
-    #some text we want to process
+    # some text we want to process
     text = """EGFR is a gene"""
 
     with initialize_config_dir(config_dir=os.environ.get("KAZU_CONFIG_DIR")):
         cfg = compose(config_name="config")
         # instantiate a pipeline based on Hydra defaults
         pipeline = Pipeline(steps=load_steps(cfg))
-        # create an instance of SimpleDocument from our text string
-        doc = SimpleDocument(text)
+        # create an instance of Document from our text string
+        doc = Document.create_simple_document(text)
         # Pipeline takes a List[Document] as an argument to __call__
-        # and returns a processes List[Document]
-        result: SimpleDocument = pipeline([doc])[0]
-        # a Document is composed of Sections (SimpleDocument only has one)
+        # and returns a processed List[Document]
+        result: Document = pipeline([doc])[0]
+        # a Document is composed of Sections
+        # (a Document created with create_simple_document has only one)
         # calling render() renders the entities with displacy
         result.sections[0].render()
         # the entities can also be transformed into a pandas Dataframe

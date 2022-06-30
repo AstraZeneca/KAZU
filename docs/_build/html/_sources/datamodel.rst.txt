@@ -10,8 +10,11 @@ for text and metadata, (such as entities detected by an NER step).
 
 .. code-block:: python
 
-    from kazu.data.data import SimpleDocument
-    # a SimpleDocument is a subclass for Document for simple text strings
+    from kazu.data.data import Document
+    from kazu.steps.string_preprocessing.scispacy_abbreviation_expansion import SciSpacyAbbreviationExpansionStep
+
     step = SciSpacyAbbreviationExpansionStep([])
-    doc = SimpleDocument("EGFR (Epidermal Growth Factor Receptor) is a gene")
-    print(succeeded[0].get_text())
+    # creates a document with a single section
+    doc = Document.create_simple_document("EGFR (Epidermal Growth Factor Receptor) is a gene")
+    succeeded, failed = step([doc])
+    print(succeeded[0].sections[0].get_text())
