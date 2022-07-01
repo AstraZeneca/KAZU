@@ -28,7 +28,7 @@ from kazu.data.data import (
     Document,
     Mapping,
     Entity,
-    SynonymData,
+    EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     IS_SUBSPAN,
 )
@@ -68,15 +68,28 @@ UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
 
 
 class HitPostProcessor:
+    """
+    several heuristics to score the quality of a hit.
+    """
     def __init__(self):
         self.ngram = NGram(2)
         self.numeric_class_phrase_disambiguation = ["TYPE"]
         self.numeric_class_phrase_disambiguation_re = [
             re.compile(x + " [0-9]+") for x in self.numeric_class_phrase_disambiguation
         ]
-        self.modifier_phrase_disambiguation = ["LIKE"]
+        self.modifier_phrase_disambiguation = ["LIKE","PSEUDOGENE"]
 
-    def phrase_disambiguation_filter(self, hits, text):
+    def phrase_disambiguation_filter(self, hits:List[Hit], text:str)->List[Hit]:
+        """
+        string similarity metrics are easily confused by situations such as:
+        hit 1 match: ING1
+        hit 2 match: ING1-like
+
+        this method filters these from the hit list if they're going to cause a problem
+        :param hits:
+        :param text:
+        :return:
+        """
         new_hits = []
         for numeric_phrase_re in self.numeric_class_phrase_disambiguation_re:
             match = re.search(numeric_phrase_re, text)
@@ -182,7 +195,7 @@ class SynonymDbQueryExtensions:
 
     def create_corpus_for_source(
         self, ambig_hits_this_source: List[Hit]
-    ) -> Tuple[List[str], DefaultDict[str, Set[SynonymData]]]:
+    ) -> Tuple[List[str], DefaultDict[str, Set[EquivalentIdSet]]]:
         corpus = []
         unambiguous_syn_to_syn_data = defaultdict(set)
         for hit in ambig_hits_this_source:
@@ -290,17 +303,18 @@ class PreferDefaultLabelKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambi
                 match_norm, set()
             )
             for syn_data in hit.syn_data:
-                found_ids = default_label_ids.intersection(syn_data.ids)
-                for idx in found_ids:
-                    yield DisambiguatedHit(
-                        original_hit=hit,
-                        idx=idx,
-                        source=syn_data.ids_to_source[idx],
-                        confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE,
-                        parser_name=hit.parser_name,
-                        mapping_type=syn_data.mapping_type,
-                    )
-                    found = True
+                if syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                    found_ids = default_label_ids.intersection(syn_data.ids)
+                    for idx in found_ids:
+                        yield DisambiguatedHit(
+                            original_hit=hit,
+                            idx=idx,
+                            source=syn_data.ids_to_source[idx],
+                            confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE,
+                            parser_name=hit.parser_name,
+                            mapping_type=syn_data.mapping_type,
+                        )
+                        found = True
                 if found:
                     break
             if found:
@@ -331,6 +345,13 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
     def hit_threshold_condition(
         self, search_score: float, embedding_score: float, rank_position: float
     ) -> Tuple[bool, LinkRanks]:
+        """
+        some heuristics to assess the quality of the hit. returns Tuple[<condition met>,<LinkRank associated with successful hit>]
+        :param search_score:
+        :param embedding_score:
+        :param rank_position:
+        :return:
+        """
 
         if (
             rank_position == 1.0
@@ -355,18 +376,79 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
     def __call__(
         self, ent_match: str, document: Document, hits: List[Hit]
     ) -> Iterable[DisambiguatedHit]:
-        records = []
+
         string_norm = StringNormalizer.normalize(ent_match)
         hits = self.hit_post_processor(hits, string_norm)
         # only consider hits with matched numbers
         hits = [x for x in hits if x.metrics[MATCHED_NUMBER_SCORE]]
+        # group hits by syn_data
         hits_by_syn_data = {
             k: set(v)
             for k, v in itertools.groupby(
                 sorted(hits, key=lambda x: tuple(x.syn_data)), key=lambda x: tuple(x.syn_data)
             )
         }
+        df = self._create_ensemble_ranking_df(hits_by_syn_data)
+        rank_cols:List[str] = self._rank_hits(df)
+        # require at least 3 separate metrics
+        if len(rank_cols) >= 3:
+            # score all the ranks together and sort
+            df["total"] = df[rank_cols].sum(axis=1)
+            df["total_rank"] = df["total"].rank(method="min", na_option="bottom", ascending=True)
+            df.sort_values(by="total_rank", ascending=True, inplace=True)
+            hit_found = False
+            # loop through top ranked hits, and test if they satisfy the hit_threshold_condition
+            for i, row in df.iterrows():
+                rank_position = row["total_rank"]
+                # break if a hit already found, or self.max_rank_to_consider exceeded
+                if hit_found or rank_position > self.max_rank_to_consider:
+                    break
+                # ignore rows without an embedding or search score
+                if self.embedding_field not in row or self.search_field not in row:
+                    continue
+                search_score = row[self.search_field]
+                embedding_score = row[self.embedding_field]
+                hit_ok, confidence = self.hit_threshold_condition(
+                    search_score=search_score,
+                    embedding_score=embedding_score,
+                    rank_position=rank_position,
+                )
+                if hit_ok:
+                    syn_data_set = row["syn_data"]
+                    for target_syn_data in syn_data_set:
+                        if target_syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                            for idx in target_syn_data.ids:
+                                yield DisambiguatedHit(
+                                    original_hit=None,
+                                    idx=idx,
+                                    source=target_syn_data.ids_to_source[idx],
+                                    confidence=confidence,
+                                    parser_name=hits[0].parser_name,
+                                    mapping_type=target_syn_data.mapping_type,
+                                )
+                                hit_found = True
 
+    def _rank_hits(self, df:pd.DataFrame)->List[str]:
+        """
+        rank a dataframe's hits, and return a list of column names that have been ranked
+        :param df:
+        :return:
+        """
+        rank_cols = []
+        for colname in df.columns:
+            if colname != "syn_data":
+                rank_name = f"{colname}_rank"
+                rank_cols.append(rank_name)
+                df[rank_name] = df[colname].rank(method="min", na_option="bottom", ascending=False)
+        return rank_cols
+
+    def _create_ensemble_ranking_df(self, hits_by_syn_data:Dict[FrozenSet[EquivalentIdSet], Set[Hit]])->pd.DataFrame:
+        """
+        arrange syndata/hits into a dataframk
+        :param hits_by_syn_data:
+        :return:
+        """
+        records = []
         for syn_data, hit_set in hits_by_syn_data.items():
             record = {"syn_data": syn_data}
             # TODO: can this be more strictly typed if hit.metrics is more strictly typed?
@@ -381,47 +463,8 @@ class HitEnsembleKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguation
                         global_metrics[metric] = score
             record.update(global_metrics)
             records.append(record)
-
         df = pd.DataFrame.from_records(records)
-        rank_cols = []
-        for colname in df.columns:
-            if colname != "syn_data":
-                rank_name = f"{colname}_rank"
-                rank_cols.append(rank_name)
-                df[rank_name] = df[colname].rank(method="min", na_option="bottom", ascending=False)
-        # require at least 3 ranks
-        if len(rank_cols) >= 3:
-            df["total"] = df[rank_cols].sum(axis=1)
-            df["total_rank"] = df["total"].rank(method="min", na_option="bottom", ascending=True)
-            df.sort_values(by="total_rank", ascending=True, inplace=True)
-            hit_found = False
-            for i, row in df.iterrows():
-                rank_position = row["total_rank"]
-                if hit_found or rank_position > self.max_rank_to_consider:
-                    break
-                syn_data_set = row["syn_data"]
-                if self.embedding_field not in row or self.search_field not in row:
-                    continue
-                search_score = row[self.search_field]
-                embedding_score = row[self.embedding_field]
-                hit_ok, confidence = self.hit_threshold_condition(
-                    search_score=search_score,
-                    embedding_score=embedding_score,
-                    rank_position=rank_position,
-                )
-                if hit_ok:
-                    for target_syn_data in syn_data_set:
-                        if target_syn_data.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                            for idx in target_syn_data.ids:
-                                yield DisambiguatedHit(
-                                    original_hit=None,
-                                    idx=idx,
-                                    source=target_syn_data.ids_to_source[idx],
-                                    confidence=confidence,
-                                    parser_name=hits[0].parser_name,
-                                    mapping_type=target_syn_data.mapping_type,
-                                )
-                                hit_found = True
+        return df
 
 
 class RequireHighConfidenceKnowledgeBaseDisambiguationStrategy(KnowledgeBaseDisambiguationStrategy):
@@ -1052,7 +1095,7 @@ class Disambiguator:
                             hits_iter
                         )
 
-        # entity_class, entity_match, parser_name,hits
+        # entity_class, entity_match, parser_name,entities,hits
         tuples: List[Tuple[str, str, str, List[Entity], List[Hit]]] = list(
             group_ents(ents_needing_disambig)
         )

@@ -110,7 +110,7 @@ class EquivalentIdAggregationStrategy(Enum):
 
 
 @dataclass(frozen=True)
-class SynonymData:
+class EquivalentIdSet:
     """
     Synonym data is a representation of a set of kb ID's that map to the same synonym and mean the same thing.
     """
@@ -161,9 +161,10 @@ class Hit:
     """
 
     string_norm: str
+    synonym_str:str
     parser_name: str  # NOTE: this is the parser name, not the kb name. TODO: rename to data_source for consistency
     namespace: str = field(init=False)
-    syn_data: FrozenSet[SynonymData]
+    syn_data: EquivalentIdSet
     confidence: SearchRanks
     metrics: Dict[str, Any] = field(default_factory=dict)
 

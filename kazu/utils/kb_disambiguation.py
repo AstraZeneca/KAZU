@@ -3,7 +3,7 @@ from typing import List, Tuple, Optional, Dict, Set, FrozenSet, KeysView
 
 from kazu.data.data import LinkRanks
 from kazu.data.data import (
-    SynonymData,
+    EquivalentIdSet,
 )
 import pandas as pd
 
@@ -32,7 +32,7 @@ class ReactomeDb:
     def rank_pathways(
         self,
         document_unambiguous_ids: KeysView[Tuple[str, str, LinkRanks]],
-        query: FrozenSet[SynonymData],
+        query: FrozenSet[EquivalentIdSet],
     ) -> Optional[str]:
         ranks = []
 

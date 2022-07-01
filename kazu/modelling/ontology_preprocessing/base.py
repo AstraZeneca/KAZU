@@ -17,7 +17,7 @@ import rdflib
 from rdflib import URIRef
 from tqdm.auto import tqdm
 
-from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy, Mapping, LinkRanks
+from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, Mapping, LinkRanks
 
 # dataframe column keys
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
@@ -344,17 +344,17 @@ class SynonymDatabase:
     instance: Optional["__SynonymDatabase"] = None
 
     class __SynonymDatabase:
-        syns_database_by_syn: DefaultDict[str, Dict[str, Set[SynonymData]]] = defaultdict(
+        syns_database_by_syn: DefaultDict[str, Dict[str, Set[EquivalentIdSet]]] = defaultdict(
             lambda: defaultdict(set)
         )
         syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
             lambda: defaultdict(set)
         )
-        syns_database_by_syn_global: DefaultDict[str, Set[SynonymData]] = defaultdict(set)
+        syns_database_by_syn_global: DefaultDict[str, Set[EquivalentIdSet]] = defaultdict(set)
         kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
         loaded_kbs: Set[str] = set()
 
-        def add(self, name: str, synonyms: Dict[str, FrozenSet[SynonymData]], norm: bool):
+        def add(self, name: str, synonyms: Dict[str, FrozenSet[EquivalentIdSet]], norm: bool):
             self.loaded_kbs.add(name)
             for syn_string, syn_data_set in synonyms.items():
                 if norm:
@@ -369,7 +369,7 @@ class SynonymDatabase:
                     for idx in syn_data.ids:
                         self.syns_database_by_idx[name][idx].add(syn_string_norm)
 
-        def get(self, name: str, synonym: str) -> Set[SynonymData]:
+        def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
             return self.syns_database_by_syn[name][synonym]
 
         def get_syns_for_id(self, name: str, idx: str) -> Set[str]:
@@ -382,7 +382,7 @@ class SynonymDatabase:
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
-    def get(self, name: str, synonym: str) -> Set[SynonymData]:
+    def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
         """
         get a list of SynonymData associated with an ontology and synonym string
         :param name: name of ontology to query
@@ -407,7 +407,7 @@ class SynonymDatabase:
                 result.update(self.get_syns_for_id(name, idx))
         return result
 
-    def get_all(self, name: str) -> Dict[str, Set[SynonymData]]:
+    def get_all(self, name: str) -> Dict[str, Set[EquivalentIdSet]]:
         """
         get all synonyms associated with an ontology
         :param name: name of ontology
@@ -415,7 +415,7 @@ class SynonymDatabase:
         """
         return self.instance.syns_database_by_syn[name]  # type: ignore
 
-    def get_syns_global(self, synonym: str) -> Set[SynonymData]:
+    def get_syns_global(self, synonym: str) -> Set[EquivalentIdSet]:
         """
         return a global view of synonym data across all dbs, for a specific synonym
         :return:
@@ -439,10 +439,10 @@ class SynonymDatabase:
         assert self.instance is not None
         return self.instance.loaded_kbs
 
-    def get_database(self) -> DefaultDict[str, Dict[str, Set[SynonymData]]]:
+    def get_database(self) -> DefaultDict[str, Dict[str, Set[EquivalentIdSet]]]:
         return self.instance.syns_database_by_syn  # type: ignore
 
-    def add(self, name: str, synonyms: Dict[str, Set[SynonymData]]):
+    def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]]):
         """
         add SynonymData to the database.
         :param name: name of ontology to add to
@@ -451,7 +451,7 @@ class SynonymDatabase:
         """
         self.instance.add(name, synonyms, norm=False)  # type: ignore
 
-    def normalise_and_add(self, name: str, synonyms: Dict[str, Set[SynonymData]]):
+    def normalise_and_add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]]):
         """
         add SynonymData to the database.
         :param name: name of ontology to add to
@@ -506,7 +506,7 @@ class OntologyParser(ABC):
 
     def dataframe_to_syndata_dict(
         self, synonym_df: pd.DataFrame, normalise_original_syns: bool
-    ) -> Dict[str, Set[SynonymData]]:
+    ) -> Dict[str, Set[EquivalentIdSet]]:
         result = self.resolve_composite_synonym_dataframe(synonym_df, normalise_original_syns)
         return dict(result)
 
@@ -536,7 +536,7 @@ class OntologyParser(ABC):
 
                 if len(syn) >= self.min_syn_length_to_merge:
                     result[syn].add(
-                        SynonymData(
+                        EquivalentIdSet(
                             ids=frozenset(ids),
                             mapping_type=frozenset(),
                             aggregated_by=strategy,
@@ -546,7 +546,7 @@ class OntologyParser(ABC):
                 else:
                     for idx in ids:
                         result[syn].add(
-                            SynonymData(
+                            EquivalentIdSet(
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=strategy,
@@ -556,7 +556,7 @@ class OntologyParser(ABC):
             elif len(ontologies) == len(ids):
                 if len(syn) >= self.min_syn_length_to_merge:
                     result[syn].add(
-                        SynonymData(
+                        EquivalentIdSet(
                             ids=frozenset(ids),
                             mapping_type=frozenset(),
                             aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
@@ -566,7 +566,7 @@ class OntologyParser(ABC):
                 else:
                     for idx in ids:
                         result[syn].add(
-                            SynonymData(
+                            EquivalentIdSet(
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
@@ -583,7 +583,7 @@ class OntologyParser(ABC):
                 # within the same composite KB
                 if len(syn) >= self.min_syn_length_to_merge:
                     result[syn].add(
-                        SynonymData(
+                        EquivalentIdSet(
                             ids=frozenset(ids),
                             mapping_type=frozenset(),
                             aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
@@ -597,7 +597,7 @@ class OntologyParser(ABC):
                 else:
                     for idx in ids:
                         result[syn].add(
-                            SynonymData(
+                            EquivalentIdSet(
                                 ids=frozenset([idx]),
                                 mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
@@ -621,7 +621,7 @@ class OntologyParser(ABC):
 
     def collect_aggregate_synonym_data(
         self, normalise_original_syns: bool
-    ) -> Dict[str, Set[SynonymData]]:
+    ) -> Dict[str, Set[EquivalentIdSet]]:
         synonym_df, _ = self.generate_synonym_and_metadata_dataframes()
         # strip trailing whitespace from syns
         synonym_df[SYN] = synonym_df[SYN].apply(str.strip)

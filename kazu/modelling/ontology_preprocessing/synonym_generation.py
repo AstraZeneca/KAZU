@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import List, Dict, Optional, Iterable, Set
 
-from kazu.data.data import SynonymData
+from kazu.data.data import EquivalentIdSet
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
@@ -14,15 +14,15 @@ logger = logging.getLogger(__name__)
 
 class SynonymGenerator(ABC):
     @abstractmethod
-    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         pass
 
-    def __call__(self, syn_data: Dict[str, Set[SynonymData]]) -> Dict[str, Set[SynonymData]]:
+    def __call__(self, syn_data: Dict[str, Set[EquivalentIdSet]]) -> Dict[str, Set[EquivalentIdSet]]:
 
-        result: Dict[str, Set[SynonymData]] = {}
+        result: Dict[str, Set[EquivalentIdSet]] = {}
         for synonym, metadata in syn_data.items():
             metadata_copy = copy.copy(metadata)
-            generated_syn_dict: Optional[Dict[str, Set[SynonymData]]] = self.call(
+            generated_syn_dict: Optional[Dict[str, Set[EquivalentIdSet]]] = self.call(
                 synonym, metadata_copy
             )
             if generated_syn_dict:
@@ -44,7 +44,7 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: Set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, synonym_data: Dict[str, Set[SynonymData]]) -> Dict[str, Set[SynonymData]]:
+    def __call__(self, synonym_data: Dict[str, Set[EquivalentIdSet]]) -> Dict[str, Set[EquivalentIdSet]]:
         """
         for every permutation of modifiers, generate a list of syns, then aggregate at the end
         :param synonym_data:
@@ -83,7 +83,7 @@ class SeparatorExpansion(SynonymGenerator):
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
 
-    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         bracket_results = {}
         all_group_results = {}
         if "(" in text and ")" in text:
@@ -137,7 +137,7 @@ class StopWordRemover(SynonymGenerator):
         # for NER
         self.all_stopwords.remove("i")
 
-    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         lst = []
         detected = False
         for token in text.split():
@@ -240,7 +240,7 @@ class StringReplacement(SynonymGenerator):
         self.replacement_dict = replacement_dict
         self.digit_aware_replacement_dict = digit_aware_replacement_dict
 
-    def call(self, text: str, syn_data: Set[SynonymData]) -> Optional[Dict[str, Set[SynonymData]]]:
+    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         results = {}
         if self.replacement_dict:
             for to_replace, replacement_list in self.replacement_dict.items():

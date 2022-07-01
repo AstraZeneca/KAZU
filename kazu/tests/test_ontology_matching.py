@@ -6,7 +6,7 @@ import pytest
 import spacy
 from spacy.lang.en import English
 
-from kazu.data.data import SynonymData, EquivalentIdAggregationStrategy
+from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 
@@ -40,14 +40,14 @@ def test_initialize():
 class MockParser:
     def __init__(self, parser_name: str, id_to_syns: Dict[str, Set[str]]):
         self.name = parser_name
-        self.syn_to_syn_data: Dict[str, Set[SynonymData]] = defaultdict(set)
+        self.syn_to_syn_data: Dict[str, Set[EquivalentIdSet]] = defaultdict(set)
         # format input into structure of the output of collect_aggregate_synonym_data
         # doing this lets us have a simpler structure for creating new parsers to extend
         # the tests if desired
         for id, syns in id_to_syns.items():
             for syn in syns:
                 self.syn_to_syn_data[syn].add(
-                    SynonymData(
+                    EquivalentIdSet(
                         aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
                         ids=frozenset((id,)),
                     )
@@ -55,7 +55,7 @@ class MockParser:
 
     def collect_aggregate_synonym_data(
         self, normalise_original_syns: bool
-    ) -> Dict[str, Set[SynonymData]]:
+    ) -> Dict[str, Set[EquivalentIdSet]]:
         return self.syn_to_syn_data
 
     def generate_synonyms(self):

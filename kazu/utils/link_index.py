@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from kazu.data.data import SearchRanks, SynonymData, Hit
+from kazu.data.data import SearchRanks, EquivalentIdSet, Hit
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
@@ -216,16 +216,20 @@ class DictionaryIndex(Index):
         self.synonym_db: SynonymDatabase = SynonymDatabase()
 
     def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
+        hits = []
         if string_norm in self.normalised_syn_dict:
-            return [
-                Hit(
+
+            for syn_data in self.normalised_syn_dict[string_norm]:
+                hits.append(Hit(
                     string_norm=string_norm,
                     parser_name=self.parser.name,
                     metrics={SEARCH_SCORE: 100.0},
-                    syn_data=frozenset(self.normalised_syn_dict[string_norm]),
+                    syn_data=syn_data,
                     confidence=SearchRanks.EXACT_MATCH,
-                )
-            ]
+                ))
+            return hits
+
+
         else:
 
             query = self.vectorizer.transform([string_norm]).todense()
@@ -243,16 +247,14 @@ class DictionaryIndex(Index):
             hits = []
             for neighbour, score in zip(neighbours, distances):
                 found_norm = self.key_lst[neighbour]
-                hits.append(
-                    Hit(
+                for syn_data in self.normalised_syn_dict[string_norm]:
+                    hits.append(Hit(
                         string_norm=found_norm,
                         parser_name=self.parser.name,
-                        syn_data=frozenset(self.normalised_syn_dict[found_norm]),
-                        metrics={SEARCH_SCORE: score},
-                        confidence=SearchRanks.NEAR_MATCH,
-                    )
-                )
-
+                        metrics={SEARCH_SCORE: 100.0},
+                        syn_data=syn_data,
+                        confidence=SearchRanks.EXACT_MATCH,
+                    ))
         return sorted(hits, key=lambda x: x.metrics[SEARCH_SCORE], reverse=True)
 
     def search(self, query: str, top_n: int = 15) -> Iterable[Hit]:
@@ -282,7 +284,7 @@ class DictionaryIndex(Index):
         with open(path, "wb") as f:
             pickle.dump(pickleable, f)
 
-    def _add(self, data: Dict[str, List[SynonymData]]):
+    def _add(self, data: Dict[str, List[EquivalentIdSet]]):
         """
         deprecated
         add data to the index. Two dicts are required - synonyms and metadata. Metadata should have a primary key
@@ -377,16 +379,16 @@ class EmbeddingIndex(Index):
             # the norm form of the default label should always be in the syn database
             string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
             try:
-                syn_data = self.synonym_db.get(self.parser.name, string_norm)
-                # confidence is always medium, dso can be later disambiguated
-                hit = Hit(
-                    string_norm=string_norm,
-                    syn_data=frozenset(syn_data),
-                    parser_name=self.parser.name,
-                    confidence=SearchRanks.NEAR_MATCH,
-                    metrics={SAPBERT_SCORE: score},
-                )
-                yield hit
+                for syn_data in self.synonym_db.get(self.parser.name, string_norm):
+                    # confidence is always medium, dso can be later disambiguated
+                    hit = Hit(
+                        string_norm=string_norm,
+                        syn_data=syn_data,
+                        parser_name=self.parser.name,
+                        confidence=SearchRanks.NEAR_MATCH,
+                        metrics={SAPBERT_SCORE: score},
+                    )
+                    yield hit
             except KeyError:
                 logger.warning(
                     f"{string_norm} is not in the synonym database! is the parser for {self.parser.name} correctly configured?"

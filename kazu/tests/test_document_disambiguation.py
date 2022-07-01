@@ -7,7 +7,7 @@ from kazu.data.data import (
     Mapping,
     LINK_CONFIDENCE,
     AMBIGUOUS_IDX,
-    SynonymData,
+    EquivalentIdSet,
 )
 from kazu.data.data import LinkRanks, EquivalentIdAggregationStrategy
 from kazu.modelling.ontology_preprocessing.base import MetadataDatabase
@@ -61,11 +61,11 @@ def test_kb_disambiguation(doc_level_disamb_step):
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset([WRONG_IDX]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
                                 ),
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset([EXPECTED_IDX]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
                                 ),
@@ -132,11 +132,11 @@ def test_document_disambiguation_s1(doc_level_disamb_step):
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset(["im wrong"]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
                                 ),
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset([EXPECTED_IDX]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
                                 ),
@@ -200,11 +200,11 @@ def test_document_disambiguation_s2(doc_level_disamb_step):
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset(["im wrong"]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
                                 ),
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset([EXPECTED_IDX]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT,
                                 ),
@@ -293,11 +293,11 @@ def test_document_disambiguation_s3(doc_level_disamb_step):
                         confidence=LinkRanks.MEDIUM_CONFIDENCE,
                         syn_data=frozenset(
                             [
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset(["I may be right"]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
                                 ),
-                                SynonymData(
+                                EquivalentIdSet(
                                     ids=frozenset(["I also may be right"]),
                                     aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
                                 ),
