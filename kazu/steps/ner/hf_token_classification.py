@@ -55,8 +55,9 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         :param stride: passed to HF tokenizers (for splitting long docs)
         :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
         :param trainer: an instance of :py:class:`pytorch_lightning.Trainer`
-        :param threshold: the confidence threshold that the token softmax value should consider to classify a given
-            token (i.e. if set to 0, every token will be classed as an instance of every label
+        :param: detect_subspans: EXPERIMENTAL attempt to detect nested entities (threshold must be configured)
+        :param threshold: EXPERIMENTAL the confidence threshold used to detect nested entities
+        :param entity_splitter: instance of NonContiguousEntitySplitter to detect non-contiguous entities
         """
 
         super().__init__(depends_on=depends_on)

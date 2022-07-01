@@ -69,7 +69,7 @@ class SpanFinder:
         self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label
 
-    def get_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
+    def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         """
         return a set of Tuple[<BIO label>,Optional[<class label>]] for a TokenizedWord. Optional[<class label>] is None
         if the BIO label is "O".
@@ -155,14 +155,14 @@ class SpanFinder:
 
 class SimpleSpanFinder(SpanFinder):
     """
-    A basic implemetation of SpanFinder. Uses highest confidence labels only
+    A basic implementation of SpanFinder. Uses highest confidence labels only
     """
 
     def __init__(self, text: str, id2label: Dict[int, str]):
 
         super().__init__(text, id2label)
 
-    def get_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
+    def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
         token_confidences_sorted = torch.argsort(word.token_confidences, dim=1, descending=True)
 
@@ -193,7 +193,7 @@ class SimpleSpanFinder(SpanFinder):
         """
         A potential entity span will end if any of the following conditions are met:
         1. any of the BIO classes for word are O
-        2. The previous character to the word is not in the set of self.span_breaking_chars
+        2. The previous character to the word is in the set of self.span_breaking_chars
         :param word:
         :return:
         """
@@ -210,7 +210,7 @@ class SimpleSpanFinder(SpanFinder):
         :return:
         """
 
-        bio_and_class_labels = self.get_labels(word)
+        bio_and_class_labels = self.get_bio_and_class_labels(word)
         if self.words:
             if len(self.active_spans) == 0:
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=None)
@@ -234,14 +234,13 @@ class SmartSpanFinder(SpanFinder):
         super().__init__(text, id2label)
         self.text = text
         self.threshold = threshold
-        self.active_spans: List[TokWordSpan] = []
-        self.words: List[TokenizedWord] = []
-        self.span_breaking_chars = set("() ;")
-        self.non_breaking_span_chars = set("-")
-        self.closed_spans: List[TokWordSpan] = []
-        self.id2label = id2label
 
-    def get_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
+    def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
+        """
+        returns bio and class labels if their confidence is above the configured threshold
+        :param word:
+        :return:
+        """
         bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
         token_confidences_sorted = torch.argsort(word.token_confidences, dim=1, descending=True)
 
@@ -297,7 +296,7 @@ class SmartSpanFinder(SpanFinder):
         :return:
         """
 
-        bio_and_class_labels = self.get_labels(word)
+        bio_and_class_labels = self.get_bio_and_class_labels(word)
         if self.words:
             if len(self.active_spans) == 0:
                 self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
@@ -328,6 +327,12 @@ class TokenizedWordProcessor:
         id2label: Dict[int, str],
         detect_subspans: bool = False,
     ):
+        """
+
+        :param confidence_threshold: optional threshold if using SmartSpanFinder. Ignored is detect_subspans is false
+        :param id2label: mapping of label int id to str label
+        :param detect_subspans: use SmartSpanFinder if True. A confidence_threshold must be provided
+        """
         self.detect_subspans = detect_subspans
         self.id2label = id2label
         if detect_subspans is False:
@@ -364,9 +369,9 @@ class TokenizedWordProcessor:
     ) -> List[Entity]:
         """
         convert spans to instances of Entity, adding in namespace info as appropriate
-        :param span_dict:
-        :param text:
-        :param namespace:
+        :param spans: list of TokWordSpan to consider
+        :param text: original text
+        :param namespace: namespace to add to Entity
         :return:
         """
         entities = []
