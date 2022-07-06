@@ -300,13 +300,27 @@ class SmartSpanFinder(SpanFinder):
         self.words.append(word)
 
 
-class SpanFinderFactory:
+class TokenizedWordProcessor:
+    """
+    Because of the inherent obscurity of the inner workings of transformers, sometimes they produce BIO tags that
+    don't correctly align to whole words, or maybe the classic BIO format gets confused by nested entities.
+
+    This class is designed to work when an entire sequence of NER labels is known and therefore we can apply some
+    post-processing logic. Namely, we use the SpanFinder class to find entity spans according to their internal logic
+    """
+
     def __init__(
         self,
-        detect_subspans: bool,
+        confidence_threshold: Optional[float],
         id2label: Dict[int, str],
-        confidence_threshold: Optional[float] = None,
+        detect_subspans: bool = False,
     ):
+        """
+
+        :param confidence_threshold: optional threshold if using SmartSpanFinder. Ignored is detect_subspans is false
+        :param id2label: mapping of label int id to str label
+        :param detect_subspans: use SmartSpanFinder if True. A confidence_threshold must be provided
+        """
 
         self.id2label = id2label
         self.detect_subspans = detect_subspans
@@ -344,36 +358,8 @@ class SpanFinderFactory:
         else:
             return self._make_simple_span_finder(text)
 
-
-class TokenizedWordProcessor:
-    """
-    Because of the inherent obscurity of the inner workings of transformers, sometimes they produce BIO tags that
-    don't correctly align to whole words, or maybe the classic BIO format gets confused by nested entities.
-
-    This class is designed to work when an entire sequence of NER labels is known and therefore we can apply some
-    post-processing logic. Namely, we use the SpanFinder class to find entity spans according to their internal logic
-    """
-
-    def __init__(
-        self,
-        confidence_threshold: Optional[float],
-        id2label: Dict[int, str],
-        detect_subspans: bool = False,
-    ):
-        """
-
-        :param confidence_threshold: optional threshold if using SmartSpanFinder. Ignored is detect_subspans is false
-        :param id2label: mapping of label int id to str label
-        :param detect_subspans: use SmartSpanFinder if True. A confidence_threshold must be provided
-        """
-        self.span_finder_factory = SpanFinderFactory(
-            detect_subspans=detect_subspans,
-            id2label=id2label,
-            confidence_threshold=confidence_threshold,
-        )
-
     def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
-        span_finder: SpanFinder = self.span_finder_factory.make_span_finder(text)
+        span_finder: SpanFinder = self.make_span_finder(text)
         span_finder(words)
         ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)
         return ents
