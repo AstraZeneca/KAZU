@@ -7,10 +7,11 @@ import re
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, Iterator
+from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional
 
 import numpy as np
 import torch
+from pytorch_lightning import Trainer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from kazu.data.data import SearchRanks, EquivalentIdSet, Hit
@@ -51,7 +52,6 @@ def to_torch(matrix):
     """
     convert a sparse CSR matrix to a sparse torch matrix
     :param matrix:
-    :param shape:
     :return:
     """
 
@@ -77,7 +77,7 @@ class Index(abc.ABC):
     ):
         """
 
-        :param name: the name of the index. default is unnamed_index
+        :param parser: The ontology parser to use with this index
         """
         self.parser = parser
         self.metadata_db: MetadataDatabase = MetadataDatabase()
@@ -88,7 +88,8 @@ class Index(abc.ABC):
         """
         save to disk. Makes a directory at the path location with all the index assets
 
-        :param path:
+        :param directory: a dir to save the index.
+        :param overwrite: should the directory be deleted before attempting to save? (CAREFUL!)
         :return: a Path to where the index was saved
         """
         if directory.exists() and overwrite:
@@ -102,7 +103,7 @@ class Index(abc.ABC):
     def load(self, cache_path: Path):
         """
         load from disk
-        :param path: the parent path of the index
+        :param cache_path: the path to the cached files. Normally created via .save
         :return:
         """
 
@@ -193,7 +194,6 @@ class Index(abc.ABC):
         """
         Implementations should implement this method to determine how an index gets built for a given parser
         :param cache_dir:
-        :param parser:
         :return:
         """
         pass
@@ -276,7 +276,6 @@ class DictionaryIndex(Index):
                 self.tf_idf_matrix,
             ) = pickle.load(f)
         self.key_lst = list(self.normalised_syn_dict.keys())
-        self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
         self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
 
     def _save(self, path: Path):
@@ -289,8 +288,7 @@ class DictionaryIndex(Index):
         deprecated
         add data to the index. Two dicts are required - synonyms and metadata. Metadata should have a primary key
         (IDX) and synonyms should use IDX as a foreign key
-        :param synonym_dict: synonyms dict of {synonym:List[SynonymData]}
-        :param metadata_dict: metadata dict
+        :param data: synonyms dict of {synonym:List[EquivalentIdSet]}
         :return:
         """
         raise NotImplementedError()
@@ -305,7 +303,6 @@ class DictionaryIndex(Index):
         self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
         self.key_lst = list(self.normalised_syn_dict.keys())
         self.tf_idf_matrix = self.vectorizer.fit_transform(self.key_lst)
-        self.tf_idf_matrix_torch = to_torch(self.tf_idf_matrix)
         index_path = self.save(cache_dir, overwrite=True)
         logger.info(f"saved {self.parser.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {self.parser.name} is {len(self)}")
@@ -320,17 +317,27 @@ class EmbeddingIndex(Index):
         super().__init__(parser=parser)
         self.ontology_partition_size = ontology_partition_size
         self.embedding_model: PLSapbertModel
+        self.trainer: Optional[Trainer]
 
-    def set_embedding_model(self, embedding_model: PLSapbertModel):
+    def set_embedding_model(
+        self, embedding_model: PLSapbertModel, trainer: Optional[Trainer] = None
+    ):
+        """
+        set the embedding model to be used to generate target ontology embeddings when the cache is generated
+        (currently only PLSapbertModel supported). Also, optionally set a PL Trainer that should be used (a Trainer
+        configured with default params will be used otherwise)
+        :param embedding_model:
+        :param trainer:
+        :return:
+        """
         self.embedding_model = embedding_model
+        self.trainer = trainer
 
     def _add(self, embeddings: torch.Tensor):
         """
         add embeddings to the index
 
         :param embeddings: a 2d tensor of embeddings
-        :param metadata_df: an ordered dict of metadata, with the order of each key corresponding to the embedding of
-        the first dimension of embeddings
         :return:
         """
         if not hasattr(self, "index"):
@@ -448,7 +455,9 @@ class EmbeddingIndex(Index):
             logger.info(f"read {len_df} rows from ontology")
             default_labels = [x[DEFAULT_LABEL] for x in metadata.values()]
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
-            results = self.embedding_model.get_embeddings_for_strings(texts=default_labels)
+            results = self.embedding_model.get_embeddings_for_strings(
+                texts=default_labels, trainer=self.trainer
+            )
             yield partition_number, metadata, results
 
 
