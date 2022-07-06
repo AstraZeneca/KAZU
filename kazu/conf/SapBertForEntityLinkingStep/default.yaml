@@ -18,17 +18,10 @@ trainer:
   gpus: 0
   logger: false
 entity_class_to_ontology_mappings:
-  drug:
-    - CHEMBL
-    - OPENTARGETS_MOLECULE
   disease:
     - MONDO
     - MEDDRA_DISEASE
     - OPENTARGETS_DISEASE
-  gene:
-    - OPENTARGETS_TARGET
-  anatomy:
-    - UBERON
 indices:
   - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
     parser:
