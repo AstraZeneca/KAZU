@@ -9,8 +9,7 @@ import urllib
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, FrozenSet
-from typing import Optional, DefaultDict
+from typing import List, Tuple, Dict, Any, Iterable, Set, FrozenSet, Optional, DefaultDict
 from urllib import parse
 
 import pandas as pd
@@ -268,7 +267,7 @@ class MetadataDatabase:
         """
         get the metadata associated with an ontology and id
         :param name: name of ontology to query
-        :param idx: idx to query
+        :param default_label: default label
         :return:
         """
         return copy.deepcopy(self.instance.get_by_default_label(name, default_label))  # type: ignore
@@ -288,7 +287,6 @@ class MetadataDatabase:
     def get_loaded_parsers(self) -> Set[str]:
         """
         get the names of all loaded parsers
-        :param name: name of ontology
         :return:
         """
         assert self.instance is not None
@@ -399,8 +397,8 @@ class SynonymDatabase:
     def get_syns_for_synonym(self, name: str, synonym: str) -> Set[str]:
         """
         get all other syns for a synonym in a kb
-        :param name:
-        :param idx:
+        :param name: parser name
+        :param synonym: synonym
         :return:
         """
         result = set()
@@ -489,7 +487,7 @@ class OntologyParser(ABC):
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
             parser.name, as is used to identify the origin of a mapping back to a data source
-        :param synonym_generators: list of synonym generators to apply to this parser
+        :param synonym_generator: optional CombinatorialSynonymGenerator
         :param min_syn_length_to_merge: synonyms of this length or greater will be merged into the same SynonymData object,
             set higher for highly symbolic sources (e.g. Gene symbols), and lower for more natural language sources (e.g. anatomy)
         """
@@ -501,7 +499,7 @@ class OntologyParser(ABC):
     def find_kb(self, string: str) -> str:
         """
         split an IDX somehow to find the ontology SOURCE reference
-        :param df:
+        :param string: the IDX string to process
         :return:
         """
         raise NotImplementedError()
@@ -632,8 +630,7 @@ class OntologyParser(ABC):
 
     def generate_synonyms(self):
         """
-
-        :param normalise_original_syns: should the string normaliser be used before aggregating synonym data
+        generate synonyms based on configured synonym generator
         :return:
         """
         synonym_data = self.collect_aggregate_synonym_data(False)
@@ -818,6 +815,8 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[pd.DataFrame]:
         for json_dict in jsons_gen:
+            # due to a bug in OT data, TEC genes have "gene" as a synonym. Sunce they're uninteresting, we just filter
+            # them
             biotype = json_dict.get("biotype")
             if biotype == "" or biotype == "tec" or json_dict["id"] == json_dict["approvedSymbol"]:
                 continue
