@@ -237,8 +237,19 @@ def test_tokenized_word_processor_with_threshold():
 
 def test_tokenized_word_processor_no_threshold():
     with pytest.raises(ValueError):
-        TokenizedWordProcessor(
+        text = "hello"
+        word1 = TokenizedWord(
+            word_id=0,
+            token_ids=[0],
+            tokens=["hello"],
+            token_confidences=torch.Tensor([[0.70, 0.20, 0.10]]),
+            token_offsets=[(0, 5)],
+            word_char_start=0,
+            word_char_end=5,
+        )
+        processor = TokenizedWordProcessor(
             confidence_threshold=None,
             id2label={0: "B-class1", 1: "B-class2", 2: "O"},
             detect_subspans=True,
         )
+        processor(words=[word1], text=text, namespace="test")

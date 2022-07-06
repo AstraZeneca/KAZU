@@ -52,8 +52,7 @@ class SpanFinder:
     The __call__ method of this class operates on a list of TokenizedWord, processing each sequentially according to
     a logic determined by the implementing class.
 
-    After being called, the spans can be accessed via self.spans. This is a list of dictionaries. Each dictionary has a
-    key of the entity class, and a list of TokenizedWord representing the entity span
+    After being called, the spans can be accessed via self.closed_spans. This is a list of TokWordSpan.
     """
 
     def __init__(self, text: str, id2label: Dict[int, str]):
@@ -96,8 +95,7 @@ class SpanFinder:
         """
         updates any active spans. If a B label is detected in an active span, make a copy and add to closed spans,
         as it's likely the start of another entity of the same class (but we still want to keep the original span open)
-        :param bio_labels:
-        :param classes:
+        :param bio_and_class_labels: BIO and optional class label set
         :param word:
         :return:
         """
@@ -119,8 +117,7 @@ class SpanFinder:
     ):
         """
         start a new TokWordSpan if a B label is detected
-        :param bio_labels:
-        :param classes:
+        :param bio_and_class_labels:
         :param word:
         :return:
         """
@@ -164,26 +161,26 @@ class SimpleSpanFinder(SpanFinder):
 
     def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
-        token_confidences_sorted = torch.argsort(word.token_confidences, dim=1, descending=True)
-
-        for token_confidence in token_confidences_sorted:
-            confidence_index = token_confidence[0]
-            bio_label = self.id2label[confidence_index.item()]
-            if bio_label == ENTITY_OUTSIDE_SYMBOL:
-                bio_and_class_labels.add(
-                    (
-                        bio_label,
-                        None,
-                    )
+        confidence_index = torch.argmax(
+            word.token_confidences,
+            dim=1,
+        )
+        bio_label = self.id2label[confidence_index.item()]
+        if bio_label == ENTITY_OUTSIDE_SYMBOL:
+            bio_and_class_labels.add(
+                (
+                    bio_label,
+                    None,
                 )
-            else:
-                bio_label, class_label = bio_label.split("-")
-                bio_and_class_labels.add(
-                    (
-                        bio_label,
-                        class_label,
-                    )
+            )
+        else:
+            bio_label, class_label = bio_label.split("-")
+            bio_and_class_labels.add(
+                (
+                    bio_label,
+                    class_label,
                 )
+            )
 
         return bio_and_class_labels
 
@@ -211,15 +208,12 @@ class SimpleSpanFinder(SpanFinder):
         """
 
         bio_and_class_labels = self.get_bio_and_class_labels(word)
-        if self.words:
-            if len(self.active_spans) == 0:
-                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=None)
-            elif self.span_continue_condition(word, bio_and_class_labels):
-                self._update_active_spans(bio_and_class_labels, word)
-            else:
-                self.close_spans()
-                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=None)
+        if not self.words or len(self.active_spans) == 0:
+            self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=None)
+        elif self.span_continue_condition(word, bio_and_class_labels):
+            self._update_active_spans(bio_and_class_labels, word)
         else:
+            self.close_spans()
             self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=None)
         self.words.append(word)
 
@@ -242,31 +236,27 @@ class SmartSpanFinder(SpanFinder):
         :return:
         """
         bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
-        token_confidences_sorted = torch.argsort(word.token_confidences, dim=1, descending=True)
-
-        for i, token_confidence_indices in enumerate(token_confidences_sorted):
-            for confidence_index in token_confidence_indices:
-                confidence_val: float = word.token_confidences[i][confidence_index].item()
-                if confidence_val > self.threshold:
-                    bio_label = self.id2label[confidence_index.item()]
-                    if bio_label == ENTITY_OUTSIDE_SYMBOL:
-                        bio_and_class_labels.add(
-                            (
-                                bio_label,
-                                None,
-                            )
-                        )
-                    else:
-                        bio_label, class_label = bio_label.split("-")
-                        bio_and_class_labels.add(
-                            (
-                                bio_label,
-                                class_label,
-                            )
-                        )
-                else:
-                    break
-
+        indices_of_confs_above_threshold = torch.argwhere(word.token_confidences > self.threshold)
+        # the 0th dimension is the order of the tokens in the word, which we don't need.
+        # The first dimension represents which label the confidence score relates to.
+        label_indices_above_threshold = indices_of_confs_above_threshold[:, 1]
+        for label_index in label_indices_above_threshold:
+            bio_label = self.id2label[label_index.item()]
+            if bio_label == ENTITY_OUTSIDE_SYMBOL:
+                bio_and_class_labels.add(
+                    (
+                        bio_label,
+                        None,
+                    )
+                )
+            else:
+                bio_label, class_label = bio_label.split("-")
+                bio_and_class_labels.add(
+                    (
+                        bio_label,
+                        class_label,
+                    )
+                )
         return bio_and_class_labels
 
     def span_continue_condition(
@@ -297,19 +287,62 @@ class SmartSpanFinder(SpanFinder):
         """
 
         bio_and_class_labels = self.get_bio_and_class_labels(word)
-        if self.words:
-            if len(self.active_spans) == 0:
-                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
-            elif self.span_continue_condition(word, bio_and_class_labels):
-                self._update_active_spans(bio_and_class_labels, word)
-                # we start a new span here for each new word if B is detected as a soft label
-                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
-            else:
-                self.close_spans()
-                self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
-        else:
+        if not self.words or len(self.active_spans) == 0:
             self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
+        elif self.span_continue_condition(word, bio_and_class_labels):
+            self._update_active_spans(bio_and_class_labels, word)
+            # we start a new span here for each new word if B is detected as a soft label
+            self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=True)
+        else:
+            self.close_spans()
+            self.start_span(bio_and_class_labels=bio_and_class_labels, word=word, subspan=False)
+
         self.words.append(word)
+
+
+class SpanFinderFactory:
+    def __init__(
+        self,
+        detect_subspans: bool,
+        id2label: Dict[int, str],
+        confidence_threshold: Optional[float] = None,
+    ):
+
+        self.id2label = id2label
+        self.detect_subspans = detect_subspans
+        self.confidence_threshold = confidence_threshold
+
+    def _make_smart_span_finder(self, text: str):
+        logger.debug(
+            "detect_subspans is %s. Using %s, confidence threshold: %s",
+            self.detect_subspans,
+            SmartSpanFinder.__class__.__name__,
+            self.confidence_threshold,
+        )
+        if isinstance(self.confidence_threshold, float):
+            return SmartSpanFinder(
+                threshold=self.confidence_threshold,
+                text=text,
+                id2label=self.id2label,
+            )
+        else:
+            raise ValueError(
+                f"tried to instantiate {SmartSpanFinder.__class__.__name__} but confidence threshold is not a float"
+            )
+
+    def _make_simple_span_finder(self, text: str):
+        logger.debug(
+            "detect_subspans is %s. Using %s",
+            self.detect_subspans,
+            SimpleSpanFinder.__class__.__name__,
+        )
+        return SimpleSpanFinder(text=text, id2label=self.id2label)
+
+    def make_span_finder(self, text: str) -> SpanFinder:
+        if self.detect_subspans:
+            return self._make_smart_span_finder(text)
+        else:
+            return self._make_simple_span_finder(text)
 
 
 class TokenizedWordProcessor:
@@ -333,33 +366,14 @@ class TokenizedWordProcessor:
         :param id2label: mapping of label int id to str label
         :param detect_subspans: use SmartSpanFinder if True. A confidence_threshold must be provided
         """
-        self.detect_subspans = detect_subspans
-        self.id2label = id2label
-        if detect_subspans is False:
-            logger.info(
-                f"detect_subspans is {detect_subspans} for {self.__class__.__name__}. Using {SimpleSpanFinder.__class__.__name__}"
-            )
-        else:
-            logger.info(
-                f"detect_subspans is {detect_subspans} for {self.__class__.__name__}. Using {SmartSpanFinder.__class__.__name__}"
-            )
-            if isinstance(confidence_threshold, float):
-                self.confidence_threshold = confidence_threshold
-            else:
-                raise ValueError(
-                    f"detect_subspans is {detect_subspans} but confidence threshold is not a float"
-                )
+        self.span_finder_factory = SpanFinderFactory(
+            detect_subspans=detect_subspans,
+            id2label=id2label,
+            confidence_threshold=confidence_threshold,
+        )
 
     def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
-        span_finder: SpanFinder
-        if self.detect_subspans:
-            span_finder = SmartSpanFinder(
-                threshold=self.confidence_threshold,
-                text=text,
-                id2label=self.id2label,
-            )
-        else:
-            span_finder = SimpleSpanFinder(text=text, id2label=self.id2label)
+        span_finder: SpanFinder = self.span_finder_factory.make_span_finder(text)
         span_finder(words)
         ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)
         return ents
