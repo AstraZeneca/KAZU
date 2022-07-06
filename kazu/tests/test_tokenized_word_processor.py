@@ -4,7 +4,11 @@ import torch
 from kazu.steps.ner.tokenized_word_processor import TokenizedWord, TokenizedWordProcessor
 
 
-def test_tokenized_word_processor_with_subspan_detection():
+@pytest.mark.parametrize(
+    "detect_subspans",
+    (True, False),
+)
+def test_tokenized_word_processor_with_subspan_detection(detect_subspans):
     text = "hello to you"
     # should produce one ent
     word1 = TokenizedWord(
@@ -36,14 +40,18 @@ def test_tokenized_word_processor_with_subspan_detection():
     )
 
     processor = TokenizedWordProcessor(
-        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=True
+        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=detect_subspans
     )
     ents = processor(words=[word1, word2, word3], text=text, namespace="test")
     assert len(ents) == 1
     assert ents[0].match == "hello"
 
 
-def test_tokenized_word_processor_with_subspan_detection_2():
+@pytest.mark.parametrize(
+    "detect_subspans",
+    (True, False),
+)
+def test_tokenized_word_processor_with_subspan_detection_2(detect_subspans):
     text = "hello to you"
     # also check this works if the word hello is composed of two B tokens
     word1 = TokenizedWord(
@@ -74,7 +82,7 @@ def test_tokenized_word_processor_with_subspan_detection_2():
         word_char_end=11,
     )
     processor = TokenizedWordProcessor(
-        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=True
+        confidence_threshold=0.2, id2label={0: "B-hello", 1: "O"}, detect_subspans=detect_subspans
     )
     ents = processor(words=[word1, word2, word3], text=text, namespace="test")
     assert len(ents) == 1

@@ -161,26 +161,24 @@ class SimpleSpanFinder(SpanFinder):
 
     def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
-        confidence_index = torch.argmax(
-            word.token_confidences,
-            dim=1,
-        )
-        bio_label = self.id2label[confidence_index.item()]
-        if bio_label == ENTITY_OUTSIDE_SYMBOL:
-            bio_and_class_labels.add(
-                (
-                    bio_label,
-                    None,
+        most_conf_index_per_token = torch.argmax(word.token_confidences, dim=1)
+        for confidence_index in most_conf_index_per_token:
+            bio_label = self.id2label[confidence_index.item()]
+            if bio_label == ENTITY_OUTSIDE_SYMBOL:
+                bio_and_class_labels.add(
+                    (
+                        bio_label,
+                        None,
+                    )
                 )
-            )
-        else:
-            bio_label, class_label = bio_label.split("-")
-            bio_and_class_labels.add(
-                (
-                    bio_label,
-                    class_label,
+            else:
+                bio_label, class_label = bio_label.split("-")
+                bio_and_class_labels.add(
+                    (
+                        bio_label,
+                        class_label,
+                    )
                 )
-            )
 
         return bio_and_class_labels
 
