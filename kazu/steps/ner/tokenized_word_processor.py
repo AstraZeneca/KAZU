@@ -386,7 +386,7 @@ class TokenizedWordProcessor:
             ):
                 end = end - 1
             match_str = text[start:end]
-            if span.subspan:
+            if span.subspan is not None:
                 metadata = {IS_SUBSPAN: span.subspan}
             else:
                 metadata = {}
