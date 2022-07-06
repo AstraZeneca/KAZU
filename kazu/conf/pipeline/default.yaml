@@ -7,4 +7,3 @@ pipeline:
     - SethStep
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
-    - DocumentLevelDisambiguationStep
