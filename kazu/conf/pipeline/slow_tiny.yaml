@@ -5,3 +5,4 @@ pipeline:
     - SethStep
     - DictionaryEntityLinkingStep
     - DocumentLevelDisambiguationStep
+    - MergeOverlappingEntsStep

@@ -17,3 +17,4 @@ defaults:
   - BlackListers: default
   - ExplosionNERStep: default
   - DocumentLevelDisambiguationStep: default
+  - MergeOverlappingEntsStep: default

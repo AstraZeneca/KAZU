@@ -6,3 +6,4 @@ pipeline:
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
     - DocumentLevelDisambiguationStep
+    - MergeOverlappingEntsStep
