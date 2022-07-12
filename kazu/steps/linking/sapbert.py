@@ -47,15 +47,17 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
 
         :param depends_on:
-        :param index_group: an instance of CachedIndexGroup constructed with a list of EmbeddingIndexCacheManager
+        :param indices: list of EmbeddingIndex to use with this model
+        :param trainer: PL trainer to call when generarting embeddings
+        :param entity_class_to_ontology_mappings: defines which NER classes shold be linked to which ontologies
         :param min_string_length_to_trigger: a per entity class mapping that signals sapbert will not run on matches
             shorter than this. (sapbert is less good at symbolic matching than string processing techniques)
-        :param ignore_high_conf: don't process ents that already have at least one high confidence hit(a.k.a perfect match)
-            i.e. if we've scored a perfect match already, sapbert unlikely to improve
+        :param ignore_high_conf: If a perfect match has already been found, don't run sapbert
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
         :param top_n: keep up to the top_n hits of the query
         :param score_cutoffs: min score for a hit to be considered. first is lower bound for medium confidence,
             second is upper bound for med high confidence
+        :param batch_size: inference batch size
         """
 
         super().__init__(depends_on=depends_on)
@@ -75,7 +77,7 @@ class SapBertForEntityLinkingStep(BaseStep):
 
     def load_or_build_caches(self):
         for index in self.indices:
-            index.set_embedding_model(self.embedding_model)
+            index.set_embedding_model(self.embedding_model, self.trainer)
             index.load_or_build_cache()
         all_indices = {index.parser.name: index for index in self.indices}
 
