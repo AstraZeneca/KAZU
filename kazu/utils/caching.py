@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Iterable, List
+from typing import Iterable, List, Set
 
 from cachetools import LFUCache
 
@@ -26,7 +26,7 @@ class EntityLinkingLookupCache:
         if cache_hit is None:
             self.mappings_lookup_cache[hash_val] = mappings
 
-    def update_hits_lookup_cache(self, entity: Entity, hits: List[Hit]):
+    def update_hits_lookup_cache(self, entity: Entity, hits: Set[Hit]):
         hash_val = get_match_entity_class_hash(entity)
         cache_hit = self.hits_lookup_cache.get(hash_val)
         if cache_hit is None:
@@ -49,7 +49,7 @@ class EntityLinkingLookupCache:
                 cache_misses.append(ent)
             else:
                 for mapping in mappings_cache_hits:
-                    ent.mappings.append(copy.deepcopy(mapping))
+                    ent.mappings.add(copy.deepcopy(mapping))
                 for hit in hits_cache_hits:
-                    ent.hits.append(copy.deepcopy(hit))
+                    ent.update_hits([copy.deepcopy(hit)])
         return cache_misses
