@@ -1,10 +1,9 @@
 import tempfile
 from unittest.mock import patch
 
-from kazu.data.data import SearchRanks
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.tests.utils import DummyParser
-from kazu.utils.link_index import DictionaryIndex, SEARCH_SCORE
+from kazu.utils.link_index import DictionaryIndex, SEARCH_SCORE, EXACT_MATCH
 from kazu.utils.utils import get_cache_dir
 
 
@@ -29,7 +28,7 @@ def assert_search_is_working(parser: OntologyParser):
     assert len(hits) == 1
     hit = hits[0]
     assert hit.parser_name == parser.name
-    assert hit.confidence == SearchRanks.EXACT_MATCH
+    assert hit.metrics[EXACT_MATCH] is True
 
     hits = list(index.search("nothing"))
     for hit in hits:

@@ -1,3 +1,4 @@
+import copy
 import logging
 import sys
 import traceback
@@ -8,11 +9,11 @@ import pydash
 import torch
 from pytorch_lightning import Trainer
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, SearchRanks, Hit
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Hit
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
-from kazu.utils.link_index import EmbeddingIndex
+from kazu.utils.link_index import EmbeddingIndex, EXACT_MATCH
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +119,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                     # we run sapbert
                     parser_has_high_conf_hit: Dict[str, bool] = defaultdict(bool)
                     for hit in ent.hits:
-                        if hit.confidence == SearchRanks.EXACT_MATCH:
+                        if hit.metrics[EXACT_MATCH] is True:
                             parser_has_high_conf_hit[hit.parser_name] = True
 
                     # TODO: in theory I think you could pass an embedding index when constructing
@@ -171,10 +172,8 @@ class SapBertForEntityLinkingStep(BaseStep):
                                 entity.entity_class
                             )
                             if indices_to_search:
-                                all_hits: List[Hit] = []
+                                all_hits: Set[Hit] = set()
                                 for index in indices_to_search:
-                                    all_hits.extend(index.search(result, self.top_n))
-                                for hit in all_hits:
-                                    hit.namespace = self.namespace()
-                                entity.hits.extend(all_hits)
+                                    all_hits.update(index.search(result, self.top_n))
+                                entity.update_hits(copy.deepcopy(all_hits))
                                 self.lookup_cache.update_hits_lookup_cache(entity, all_hits)

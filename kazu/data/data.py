@@ -1,4 +1,5 @@
 import dataclasses
+import itertools
 import json
 import tempfile
 import uuid
@@ -8,11 +9,10 @@ from datetime import datetime, date
 from enum import IntEnum, Enum
 from itertools import cycle, chain
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet
-import pandas as pd
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Iterator
+
 from numpy import ndarray, float32, float16
 from spacy import displacy
-
 
 IS_SUBSPAN = "is_subspan"
 # ambiguous_synonyms or confused mappings
@@ -42,12 +42,6 @@ class LinkRanks(IntEnum):
     MEDIUM_CONFIDENCE = 2
     AMBIGUOUS = 3
     LOW_CONFIDENCE = 4
-
-
-class SearchRanks(IntEnum):
-    # labels for ranking search hits. NOTE! ordering important, as used for iteration
-    EXACT_MATCH = 0
-    NEAR_MATCH = 1
 
 
 def remove_empty_elements(d):
@@ -109,7 +103,7 @@ class EquivalentIdAggregationStrategy(Enum):
     AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE = 6
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class EquivalentIdSet:
     """
     Synonym data is a representation of a set of kb ID's that map to the same synonym and mean the same thing.
@@ -126,6 +120,9 @@ class EquivalentIdSet:
 
     def __lt__(self, other):
         return tuple(self.ids) < tuple(other.ids)
+
+    def __hash__(self):
+        return hash(self.ids)
 
 
 @dataclass(frozen=True)
@@ -153,26 +150,31 @@ class SynonymDataSet(frozenset):
         return tuple(self) < tuple(other)
 
 
-@dataclass
+HitStoreKey = Tuple[str, EquivalentIdSet]  # parser name and EquivalentIdSet
+
+
+@dataclass(frozen=True, eq=True)
 class Hit:
     """
     Hit is a precursor to a Mapping, meaning that a match has been detected and linked to a set of SynonymData, but
     is not ready to become a fully fledged mapping yet, as it may require further disambiguation
     """
 
-    string_norm: str
-    synonym_str:str
+    hit_string_norm: str  # Normalised version of the string that was hit
     parser_name: str  # NOTE: this is the parser name, not the kb name. TODO: rename to data_source for consistency
-    namespace: str = field(init=False)
-    syn_data: EquivalentIdSet
-    confidence: SearchRanks
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    id_set: EquivalentIdSet
+    metrics: Dict[str, float] = field(default_factory=dict)  # metrics associated with this hit
 
-    def __hash__(self):
-        return id(self)
+    def get_store_key(self) -> HitStoreKey:
+        return self.parser_name, self.id_set
 
-    def __eq__(self, other):
-        return id(self) == id(other)
+    def merge_metrics(self, hit: "Hit"):
+        for metric_name, metric_value in hit.metrics.items():
+            if metric_name in self.metrics:
+                raise ValueError(
+                    f"tried to add a metric {metric_name} that already exists on this hit"
+                )
+            self.metrics[metric_name] = metric_value
 
 
 @dataclass
@@ -186,11 +188,23 @@ class Entity:
     entity_class: str  # entity class
     spans: FrozenSet[CharSpan]  # charspans
     namespace: str  # namespace of BaseStep that produced this instance
-    mappings: List[Mapping] = field(default_factory=list)
-    hits: List[Hit] = field(default_factory=list)
+    mappings: Set[Mapping] = field(default_factory=set)
+    _hit_store: Dict[HitStoreKey, Hit] = field(default_factory=dict)
     metadata: Dict[Any, Any] = field(default_factory=dict)  # generic metadata
     start: int = field(init=False)
     end: int = field(init=False)
+
+    @property
+    def hits(self):
+        return set(self._hit_store.values())
+
+    def update_hits(self, hits: Iterable[Hit]):
+        for hit in hits:
+            maybe_existing_hit: Optional[Hit] = self._hit_store.get(hit.get_store_key())
+            if maybe_existing_hit is None:
+                self._hit_store[hit.get_store_key()] = hit
+            else:
+                maybe_existing_hit.merge_metrics(hit)
 
     def __hash__(self):
         return id(self)
@@ -293,7 +307,7 @@ class Entity:
         :param mapping:
         :return:
         """
-        self.mappings.append(mapping)
+        self.mappings.add(mapping)
 
     @classmethod
     def from_spans(cls, spans: List[Tuple[int, int]], text: str, join_str: str = "", **kwargs):
@@ -380,54 +394,6 @@ class Section:
             f.write(html)
         webbrowser.open(url, new=2)
 
-    def entities_as_dataframe(self) -> Optional[pd.DataFrame]:
-        """
-        convert entities into a pandas dataframe. Useful for building annotation sets
-        non-contiguous entities currently not supported
-        :return:
-        """
-        data = []
-        for ent in self.entities:
-            if len(ent.mappings) > 0:
-                mapping_id = ent.mappings[0].idx
-                mapping_label = ent.mappings[0].default_label
-                mapping_conf = ent.mappings[0].confidence
-                metadata = ent.mappings[0].metadata
-            else:
-                mapping_id = None
-                mapping_label = None
-                mapping_conf = None
-                metadata = None
-            data.append(
-                (
-                    ent.namespace,
-                    ent.match,
-                    mapping_label,
-                    mapping_conf,
-                    metadata,
-                    mapping_id,
-                    ent.entity_class,
-                    ent.start,
-                    ent.end,
-                )
-            )
-        if len(data) > 0:
-            df: pd.DataFrame = pd.DataFrame.from_records(data)
-            df.columns = [
-                "namespace",
-                "match",
-                "mapping_label",
-                "mapping_conf",
-                "metadata",
-                "mapping_id",
-                "entity_class",
-                "start",
-                "end",
-            ]
-            return df
-        else:
-            return None
-
 
 class DocumentEncoder(json.JSONEncoder):
     """
@@ -479,6 +445,22 @@ class Document:
         for section in self.sections:
             entities.extend(section.entities)
         return entities
+
+    @property
+    def group_entities_on_hits(
+        self,
+    ) -> Iterator[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterator[Entity]]]:
+        yield from itertools.groupby(
+            sorted(
+                self.get_entities(),
+                key=lambda x: (x.match, x.entity_class, frozenset(x.hits)),
+            ),
+            key=lambda x: (
+                x.match,
+                x.entity_class,
+                frozenset(x.hits),
+            ),
+        )
 
     def json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False, **kwargs):
         """

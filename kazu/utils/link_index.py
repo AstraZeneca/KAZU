@@ -14,7 +14,7 @@ import torch
 from pytorch_lightning import Trainer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from kazu.data.data import SearchRanks, EquivalentIdSet, Hit
+from kazu.data.data import EquivalentIdSet, Hit
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 SAPBERT_SCORE = "sapbert_score"
 SEARCH_SCORE = "search_score"
 DICTIONARY_HITS = "dictionary_hits"
+EXACT_MATCH = "exact_match"
 
 
 class NumberResolver:
@@ -219,16 +220,16 @@ class DictionaryIndex(Index):
         hits = []
         if string_norm in self.normalised_syn_dict:
 
-            for syn_data in self.normalised_syn_dict[string_norm]:
-                hits.append(Hit(
-                    string_norm=string_norm,
-                    parser_name=self.parser.name,
-                    metrics={SEARCH_SCORE: 100.0},
-                    syn_data=syn_data,
-                    confidence=SearchRanks.EXACT_MATCH,
-                ))
+            for id_set in self.normalised_syn_dict[string_norm]:
+                hits.append(
+                    Hit(
+                        hit_string_norm=string_norm,
+                        parser_name=self.parser.name,
+                        metrics={SEARCH_SCORE: 100.0, EXACT_MATCH: True},
+                        id_set=id_set,
+                    )
+                )
             return hits
-
 
         else:
 
@@ -247,14 +248,15 @@ class DictionaryIndex(Index):
             hits = []
             for neighbour, score in zip(neighbours, distances):
                 found_norm = self.key_lst[neighbour]
-                for syn_data in self.normalised_syn_dict[string_norm]:
-                    hits.append(Hit(
-                        string_norm=found_norm,
-                        parser_name=self.parser.name,
-                        metrics={SEARCH_SCORE: 100.0},
-                        syn_data=syn_data,
-                        confidence=SearchRanks.EXACT_MATCH,
-                    ))
+                for id_set in self.normalised_syn_dict[string_norm]:
+                    hits.append(
+                        Hit(
+                            hit_string_norm=found_norm,
+                            parser_name=self.parser.name,
+                            metrics={SEARCH_SCORE: score, EXACT_MATCH: False},
+                            id_set=id_set,
+                        )
+                    )
         return sorted(hits, key=lambda x: x.metrics[SEARCH_SCORE], reverse=True)
 
     def search(self, query: str, top_n: int = 15) -> Iterable[Hit]:
@@ -386,13 +388,12 @@ class EmbeddingIndex(Index):
             # the norm form of the default label should always be in the syn database
             string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
             try:
-                for syn_data in self.synonym_db.get(self.parser.name, string_norm):
+                for id_set in self.synonym_db.get(self.parser.name, string_norm):
                     # confidence is always medium, dso can be later disambiguated
                     hit = Hit(
-                        string_norm=string_norm,
-                        syn_data=syn_data,
+                        hit_string_norm=string_norm,
+                        id_set=id_set,
                         parser_name=self.parser.name,
-                        confidence=SearchRanks.NEAR_MATCH,
                         metrics={SAPBERT_SCORE: score},
                     )
                     yield hit

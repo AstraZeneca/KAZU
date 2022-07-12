@@ -102,14 +102,12 @@ class DictionaryEntityLinkingStep(BaseStep):
                     try:
                         indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
                         if indices_to_search:
-                            all_hits: List[Hit] = []
+                            all_hits: Set[Hit] = set()
                             for index in indices_to_search:
-                                all_hits.extend(index.search(ent_match_and_class[0], self.top_n))
-                            for hit in all_hits:
-                                hit.namespace = self.namespace()
+                                all_hits.update(index.search(ent_match_and_class[0], self.top_n))
 
                             for ent in ents_this_match:
-                                ent.hits.extend(copy.deepcopy(all_hits))
+                                ent.update_hits(copy.deepcopy(all_hits))
                             self.lookup_cache.update_hits_lookup_cache(ents_this_match[0], all_hits)
 
                     except Exception:
