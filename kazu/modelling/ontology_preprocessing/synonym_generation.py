@@ -14,10 +14,14 @@ logger = logging.getLogger(__name__)
 
 class SynonymGenerator(ABC):
     @abstractmethod
-    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
+    def call(
+        self, text: str, syn_data: Set[EquivalentIdSet]
+    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         pass
 
-    def __call__(self, syn_data: Dict[str, Set[EquivalentIdSet]]) -> Dict[str, Set[EquivalentIdSet]]:
+    def __call__(
+        self, syn_data: Dict[str, Set[EquivalentIdSet]]
+    ) -> Dict[str, Set[EquivalentIdSet]]:
 
         result: Dict[str, Set[EquivalentIdSet]] = {}
         for synonym, metadata in syn_data.items():
@@ -44,7 +48,9 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: Set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, synonym_data: Dict[str, Set[EquivalentIdSet]]) -> Dict[str, Set[EquivalentIdSet]]:
+    def __call__(
+        self, synonym_data: Dict[str, Set[EquivalentIdSet]]
+    ) -> Dict[str, Set[EquivalentIdSet]]:
         """
         for every permutation of modifiers, generate a list of syns, then aggregate at the end
         :param synonym_data:
@@ -83,7 +89,9 @@ class SeparatorExpansion(SynonymGenerator):
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
 
-    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
+    def call(
+        self, text: str, syn_data: Set[EquivalentIdSet]
+    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         bracket_results = {}
         all_group_results = {}
         if "(" in text and ")" in text:
@@ -137,7 +145,9 @@ class StopWordRemover(SynonymGenerator):
         # for NER
         self.all_stopwords.remove("i")
 
-    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
+    def call(
+        self, text: str, syn_data: Set[EquivalentIdSet]
+    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         lst = []
         detected = False
         for token in text.split():
@@ -240,7 +250,9 @@ class StringReplacement(SynonymGenerator):
         self.replacement_dict = replacement_dict
         self.digit_aware_replacement_dict = digit_aware_replacement_dict
 
-    def call(self, text: str, syn_data: Set[EquivalentIdSet]) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
+    def call(
+        self, text: str, syn_data: Set[EquivalentIdSet]
+    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
         results = {}
         if self.replacement_dict:
             for to_replace, replacement_list in self.replacement_dict.items():
@@ -282,80 +294,3 @@ class StringReplacement(SynonymGenerator):
             return results
         else:
             return None
-
-
-#
-# class GreekSymbolSubstitution():
-#     GREEK_SUBS = {
-#         "\u0391": "alpha",
-#         "\u0392": "beta",
-#         "\u0393": "gamma",
-#         "\u0394": "delta",
-#         "\u0395": "epsilon",
-#         "\u0396": "zeta",
-#         "\u0397": "eta",
-#         "\u0398": "theta",
-#         "\u0399": "iota",
-#         "\u039A": "kappa",
-#         "\u039B": "lamda",
-#         "\u039C": "mu",
-#         "\u039D": "nu",
-#         "\u039E": "xi",
-#         "\u039F": "omicron",
-#         "\u03A0": "pi",
-#         "\u03A1": "rho",
-#         "\u03A3": "sigma",
-#         "\u03A4": "tau",
-#         "\u03A5": "upsilon",
-#         "\u03A6": "phi",
-#         "\u03A7": "chi",
-#         "\u03A8": "psi",
-#         "\u03A9": "omega",
-#         "\u03F4": "theta",
-#         "\u03B1": "alpha",
-#         "\u03B2": "beta",
-#         "\u03B3": "gamma",
-#         "\u03B4": "delta",
-#         "\u03B5": "epsilon",
-#         "\u03B6": "zeta",
-#         "\u03B7": "eta",
-#         "\u03B8": "theta",
-#         "\u03B9": "iota",
-#         "\u03BA": "kappa",
-#         "\u03BC": "mu",
-#         "\u03BD": "nu",
-#         "\u03BE": "xi",
-#         "\u03BF": "omicron",
-#         "\u03C0": "pi",
-#         "\u03C1": "rho",
-#         "\u03C2": "final sigma",
-#         "\u03C3": "sigma",
-#         "\u03C4": "tau",
-#         "\u03C5": "upsilon",
-#         "\u03C6": "phi",
-#         "\u03C7": "chi",
-#         "\u03C8": "psi",
-#         "\u03C9": "omega",
-#     }
-#
-#     GREEK_SUBS_ABBRV = {k: v[0] for k, v in GREEK_SUBS.items()}
-#     GREEK_SUBS_REVERSED = {v: k for k, v in GREEK_SUBS.items()}
-#     #
-#     # def call(
-#     #     self, text: str, syn_data: List[SynonymData]
-#     # ) -> Optional[Dict[str, List[SynonymData]]]:
-#     #     results = {}
-#     #     results[self.substitute(text, self.GREEK_SUBS)] = syn_data
-#     #     results[self.substitute(text, self.GREEK_SUBS_REVERSED)] = syn_data
-#     #     results[self.substitute(text, self.GREEK_SUBS_ABBRV)] = syn_data
-#     #     if len(results) > 0:
-#     #         return results
-#     #     else:
-#     #         return None
-#     #
-#     # def substitute(self, text: str, replace_dict: Dict[str, str]) -> str:
-#     #     chars_found = filter(lambda x: x in text, replace_dict.keys())
-#     #     for greek_unicode in chars_found:
-#     #         text = text.replace(greek_unicode, replace_dict[greek_unicode])
-#     #         text = self.substitute(text, replace_dict)
-#     #     return text
