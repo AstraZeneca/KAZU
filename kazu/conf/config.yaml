@@ -16,5 +16,4 @@ defaults:
   - SynonymGeneration: default
   - BlackListers: default
   - ExplosionNERStep: default
-  - DocumentLevelDisambiguationStep: default
   - MergeOverlappingEntsStep: default
