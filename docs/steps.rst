@@ -27,11 +27,3 @@ Linking
    :members:
 
    .. automethod:: __init__
-
-Ensembling linking methods
-===========================
-
-.. autoclass:: kazu.steps.EnsembleEntityLinkingStep
-   :members:
-
-   .. automethod:: __init__

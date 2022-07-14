@@ -16,9 +16,6 @@ API Documentation
 .. automodule:: kazu.steps
    :members:
 
-.. automodule:: kazu.steps.linking.link_ensembling
-   :members: MappingPostProcessing
-
 .. automodule:: kazu.utils.caching
    :members:
 
