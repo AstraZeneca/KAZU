@@ -59,7 +59,4 @@ or manually update the model paths that use the variable - search for
         result: Document = pipeline([doc])[0]
         # a Document is composed of Sections
         # (a Document created with create_simple_document has only one)
-        # calling render() renders the entities with displacy
-        result.sections[0].render()
-        # the entities can also be transformed into a pandas Dataframe
-        df = result.sections[0].entities_as_dataframe()
+        print(result.sections[0].get_text())
