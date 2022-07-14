@@ -39,7 +39,8 @@ set the environment variable KAZU_MODEL_PACK to a path for a kazu model pack,
 or manually update the model paths that use the variable - search for
 `${oc.env:KAZU_MODEL_PACK}` in kazu/conf).
 
-.. code-block:: python
+.. testcode::
+    :skipif: kazu_config_missing or kazu_model_pack_missing
 
     import os
     from hydra import compose, initialize_config_dir
@@ -60,3 +61,9 @@ or manually update the model paths that use the variable - search for
         # a Document is composed of Sections
         # (a Document created with create_simple_document has only one)
         print(result.sections[0].get_text())
+
+.. testoutput::
+    :hide:
+    :skipif: kazu_config_missing or kazu_model_pack_missing
+
+    EGFR is a gene

@@ -44,3 +44,12 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
 # a list of builtin themes.
 #
 html_theme = "sphinxdoc"
+
+# set these variables everywhere to avoid repeating
+# to decide whether we skip tests in docs
+doctest_global_setup = """
+import os
+
+kazu_config_missing = os.environ.get("KAZU_CONFIG_DIR") is None
+kazu_model_pack_missing = os.environ.get("KAZU_MODEL_PACK") is None
+"""
