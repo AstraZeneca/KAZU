@@ -71,6 +71,9 @@ instance/
 # Sphinx documentation
 docs/_build/doctrees/
 
+# Sphinx doctest output
+docs/_build/doctest/output.txt
+
 # PyBuilder
 target/
 
