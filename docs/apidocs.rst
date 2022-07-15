@@ -2,7 +2,7 @@ API Documentation
 =================
 
 .. automodule:: kazu.data.data
-   :members: CharSpan,TokenizedWord,NerProcessedSection,Mapping,EntityMetadata,Entity
+   :members: CharSpan,Mapping,Entity
 
 .. automodule:: kazu.data.pytorch
    :members:
