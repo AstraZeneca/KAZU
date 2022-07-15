@@ -1,14 +1,17 @@
+Steps
+=====
+
 String Preprocessing
-================================
+--------------------------------
 
 .. autoclass:: kazu.steps.StringPreprocessorStep
 
 Current implementations of StringPreprocessorStep
--------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: kazu.steps.SciSpacyAbbreviationExpansionStep
 
 NER
-===
+---
 
 .. autoclass:: kazu.steps.TransformersModelForTokenClassificationNerStep
    :members:
@@ -16,7 +19,7 @@ NER
    .. automethod:: __init__
 
 Linking
-=======
+-------
 
 .. autoclass:: kazu.steps.SapBertForEntityLinkingStep
    :members:
