@@ -46,3 +46,6 @@ jobs:
       with:
         arguments: test
         build-root-directory: kazu-jvm/
+    - name: Run Sphinx doctest
+      run: |
+        make -C docs doctest
