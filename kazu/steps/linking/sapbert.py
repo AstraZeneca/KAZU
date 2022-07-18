@@ -120,7 +120,10 @@ class SapBertForEntityLinkingStep(BaseStep):
                     # we run sapbert
                     parser_has_high_conf_hit: Dict[str, bool] = defaultdict(bool)
                     for hit in ent.hits:
-                        if hit.metrics[EXACT_MATCH] is True:
+                        if any(
+                            metrics[EXACT_MATCH] is True
+                            for metrics in hit.per_normalized_syn_metrics.values()
+                        ):
                             parser_has_high_conf_hit[hit.parser_name] = True
 
                     # TODO: in theory I think you could pass an embedding index when constructing

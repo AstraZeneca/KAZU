@@ -223,9 +223,10 @@ class DictionaryIndex(Index):
             for id_set in self.normalised_syn_dict[string_norm]:
                 hits.append(
                     Hit(
-                        hit_string_norm=string_norm,
                         parser_name=self.parser.name,
-                        metrics={SEARCH_SCORE: 100.0, EXACT_MATCH: True},
+                        per_normalized_syn_metrics={
+                            string_norm: {SEARCH_SCORE: 100.0, EXACT_MATCH: True}
+                        },
                         id_set=id_set,
                     )
                 )
@@ -251,13 +252,19 @@ class DictionaryIndex(Index):
                 for id_set in self.normalised_syn_dict[found_norm]:
                     hits.append(
                         Hit(
-                            hit_string_norm=found_norm,
                             parser_name=self.parser.name,
-                            metrics={SEARCH_SCORE: score, EXACT_MATCH: False},
+                            per_normalized_syn_metrics={
+                                found_norm: {SEARCH_SCORE: score, EXACT_MATCH: False}
+                            },
                             id_set=id_set,
                         )
                     )
-        return sorted(hits, key=lambda x: x.metrics[SEARCH_SCORE], reverse=True)
+
+        return sorted(hits, key=self.get_best_search_score, reverse=True)
+
+    @staticmethod
+    def get_best_search_score(hit: Hit) -> float:
+        return max(metrics[SEARCH_SCORE] for metrics in hit.per_normalized_syn_metrics.values())
 
     def search(self, query: str, top_n: int = 15) -> Iterable[Hit]:
         """
@@ -391,10 +398,9 @@ class EmbeddingIndex(Index):
                 for id_set in self.synonym_db.get(self.parser.name, string_norm):
                     # confidence is always medium, dso can be later disambiguated
                     hit = Hit(
-                        hit_string_norm=string_norm,
                         id_set=id_set,
                         parser_name=self.parser.name,
-                        metrics={SAPBERT_SCORE: score},
+                        per_normalized_syn_metrics={string_norm: {SAPBERT_SCORE: score}},
                     )
                     yield hit
             except KeyError:

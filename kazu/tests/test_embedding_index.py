@@ -55,7 +55,7 @@ def assert_search_is_working(
         query_embedding = embedding_model.get_embeddings_for_strings(["4"])
         hits = list(index.search(query_embedding))
         assert len(hits) == 1
-        scores.add(hits[0].metrics[SAPBERT_SCORE])
+        scores.add(hits[0].per_normalized_syn_metrics["4"][SAPBERT_SCORE])
     # multiple calls to the same string should return same score
     assert len(scores) == 1
 

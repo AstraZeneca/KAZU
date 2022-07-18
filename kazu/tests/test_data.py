@@ -15,7 +15,7 @@ def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit
     id_set = EquivalentIdSet(
         aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS, ids=frozenset(ids)
     )
-    hit = Hit(id_set=id_set, parser_name=parser_name, hit_string_norm="test", metrics=metrics)
+    hit = Hit(id_set=id_set, parser_name=parser_name, per_normalized_syn_metrics={"test": metrics})
     return hit
 
 
@@ -85,8 +85,10 @@ def test_hit_manipulation():
     e1.update_hits([hit_2])
     assert len(e1.hits) == 1
     merged_hit: Hit = next(iter(e1.hits))
-    assert metrics_1.items() <= merged_hit.metrics.items()
-    assert metrics_2.items() <= merged_hit.metrics.items()
+    # make_hits makes "test" the norm_syn that metrics are grouped by
+    test_metric_items = merged_hit.per_normalized_syn_metrics["test"].items()
+    assert metrics_1.items() <= test_metric_items
+    assert metrics_2.items() <= test_metric_items
 
     # now test hits are differentiated if parser name is different
     metrics_3 = {"test_metric_1": 99.5}

@@ -28,11 +28,13 @@ def assert_search_is_working(parser: OntologyParser):
     assert len(hits) == 1
     hit = hits[0]
     assert hit.parser_name == parser.name
-    assert hit.metrics[EXACT_MATCH] is True
+    assert hit.per_normalized_syn_metrics["3"][EXACT_MATCH] is True
 
     hits = list(index.search("nothing"))
     for hit in hits:
-        assert hit.metrics[SEARCH_SCORE] == 0.0
+        assert all(
+            metrics[SEARCH_SCORE] == 0.0 for metrics in hit.per_normalized_syn_metrics.values()
+        )
 
 
 def asset_cache_loaded(cache_dir, parser, f):

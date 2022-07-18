@@ -9,7 +9,7 @@ from datetime import datetime, date
 from enum import IntEnum, Enum
 from itertools import cycle, chain
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Iterator
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Iterator, Union
 
 from numpy import ndarray, float32, float16
 from spacy import displacy
@@ -140,6 +140,8 @@ class SynonymDataSet(frozenset):
 
 HitStoreKey = Tuple[str, EquivalentIdSet]  # parser name and EquivalentIdSet
 
+numeric_metric = Union[bool, int, float]
+
 
 @dataclass(frozen=True, eq=True)
 class Hit:
@@ -148,20 +150,25 @@ class Hit:
     is not ready to become a fully fledged mapping yet, as it may require further disambiguation
     """
 
-    hit_string_norm: str  # Normalised version of the string that was hit
     parser_name: str  # NOTE: this is the parser name, not the kb name.
     id_set: EquivalentIdSet
-    metrics: Dict[str, float] = field(
+    # key is hit_string_norm, value is metric name to metric value
+    per_normalized_syn_metrics: Dict[str, Dict[str, numeric_metric]] = field(
         default_factory=dict, hash=False
     )  # metrics associated with this hit
 
     def merge_metrics(self, hit: "Hit"):
-        for metric_name, metric_value in hit.metrics.items():
-            if metric_name in self.metrics:
-                raise ValueError(
-                    f"tried to add a metric {metric_name} that already exists on this hit"
-                )
-            self.metrics[metric_name] = metric_value
+        for hit_string_norm, new_metrics in hit.per_normalized_syn_metrics.items():
+            existing_metrics = self.per_normalized_syn_metrics.get(hit_string_norm)
+            if existing_metrics is None:
+                self.per_normalized_syn_metrics[hit_string_norm] = new_metrics
+            else:
+                for metric_name, metric_val in new_metrics.items():
+                    if metric_name in existing_metrics:
+                        raise ValueError(
+                            f"tried to add a metric {metric_name} that already exists on this hit"
+                        )
+                    existing_metrics[metric_name] = metric_val
 
 
 @dataclass
