@@ -103,26 +103,20 @@ class EquivalentIdAggregationStrategy(Enum):
     AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE = 6
 
 
-@dataclass(frozen=True, eq=True)
+@dataclass(frozen=True, eq=True, order=True)
 class EquivalentIdSet:
     """
     Synonym data is a representation of a set of kb ID's that map to the same synonym and mean the same thing.
     """
 
-    aggregated_by: EquivalentIdAggregationStrategy  # how was this insatnce
+    aggregated_by: EquivalentIdAggregationStrategy = field(hash=False, compare=False)
     ids: FrozenSet[str] = field(
         default_factory=frozenset, hash=True
     )  # other ID's mapping to this syn, from different KBs
     ids_to_source: Dict[str, str] = field(
-        default_factory=dict, hash=False
+        default_factory=dict, hash=False, compare=False
     )  # needed to lookup the original source of a given id
-    mapping_type: FrozenSet[str] = field(default_factory=frozenset, hash=False)
-
-    def __lt__(self, other):
-        return tuple(self.ids) < tuple(other.ids)
-
-    def __hash__(self):
-        return hash(self.ids)
+    mapping_type: FrozenSet[str] = field(default_factory=frozenset, hash=False, compare=False)
 
 
 @dataclass(frozen=True)
