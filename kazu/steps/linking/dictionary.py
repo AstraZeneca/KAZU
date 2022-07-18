@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, Set
 
 import pydash
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Hit
+from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Hit
 from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.link_index import DictionaryIndex
@@ -75,7 +75,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :return:
         """
         failed_docs = []
-        entities = pydash.flatten([x.get_entities() for x in docs])
+        entities: List[Entity] = pydash.flatten([x.get_entities() for x in docs])
         ents_by_match_and_class = {
             k: list(v)
             for k, v in itertools.groupby(
