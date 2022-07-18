@@ -311,7 +311,6 @@ class MetadataDatabase:
         parser_name: str,
         source: str,
         idx: str,
-        mapping_type: FrozenSet[str],
         confidence: LinkRanks,
         additional_metadata: Optional[Dict],
         strip_url: bool = True,
@@ -334,7 +333,6 @@ class MetadataDatabase:
             source=source,
             confidence=confidence,
             parser_name=parser_name,
-            mapping_type=mapping_type,
             metadata=metadata,
         )
 
@@ -541,7 +539,6 @@ class OntologyParser(ABC):
                     result[syn].add(
                         EquivalentIdSet(
                             ids=frozenset(ids),
-                            mapping_type=frozenset(),
                             aggregated_by=strategy,
                             ids_to_source=id_to_source,
                         )
@@ -551,7 +548,6 @@ class OntologyParser(ABC):
                         result[syn].add(
                             EquivalentIdSet(
                                 ids=frozenset([idx]),
-                                mapping_type=frozenset(),
                                 aggregated_by=strategy,
                                 ids_to_source={idx: id_to_source[idx]},
                             )
@@ -561,7 +557,6 @@ class OntologyParser(ABC):
                     result[syn].add(
                         EquivalentIdSet(
                             ids=frozenset(ids),
-                            mapping_type=frozenset(),
                             aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
                             ids_to_source=id_to_source,
                         )
@@ -571,7 +566,6 @@ class OntologyParser(ABC):
                         result[syn].add(
                             EquivalentIdSet(
                                 ids=frozenset([idx]),
-                                mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
                                 ids_to_source={idx: id_to_source[idx]},
                             )
@@ -588,7 +582,6 @@ class OntologyParser(ABC):
                     result[syn].add(
                         EquivalentIdSet(
                             ids=frozenset(ids),
-                            mapping_type=frozenset(),
                             aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
                             ids_to_source=id_to_source,
                         )
@@ -602,7 +595,6 @@ class OntologyParser(ABC):
                         result[syn].add(
                             EquivalentIdSet(
                                 ids=frozenset([idx]),
-                                mapping_type=frozenset(),
                                 aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
                                 ids_to_source={idx: id_to_source[idx]},
                             )

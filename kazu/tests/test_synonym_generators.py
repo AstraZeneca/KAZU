@@ -19,7 +19,6 @@ from kazu.tests.utils import requires_model_pack
 # this is frozen so we only need to instantiate once
 dummy_syn_data = EquivalentIdSet(
     ids=frozenset(("text",)),
-    mapping_type=frozenset(),
     aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
 )
 

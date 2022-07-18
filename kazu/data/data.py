@@ -113,10 +113,7 @@ class EquivalentIdSet:
     ids: FrozenSet[str] = field(
         default_factory=frozenset, hash=True
     )  # other ID's mapping to this syn, from different KBs
-    ids_to_source: Dict[str, str] = field(
-        default_factory=dict, hash=False, compare=False
-    )  # needed to lookup the original source of a given id
-    mapping_type: FrozenSet[str] = field(default_factory=frozenset, hash=False, compare=False)
+    ids_to_source: Dict[str, str] = field(default_factory=dict, hash=False, compare=False)
 
 
 @dataclass(frozen=True)
@@ -130,9 +127,6 @@ class Mapping:
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
     confidence: LinkRanks
-    mapping_type: FrozenSet[str] = field(
-        default_factory=frozenset, hash=True
-    )  # the type of KB mapping
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
