@@ -224,24 +224,28 @@ class MetadataDatabase:
     instance: Optional["__MetadataDatabase"] = None
 
     class __MetadataDatabase:
-        database: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
-        database_defaultlabel: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
-        keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
+        database: DefaultDict[str, Dict[str, Dict]] = defaultdict(
+            dict
+        )  # key: parser_name, value: {idx:<generic metadata>}
+        # database_defaultlabel: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict) #key: parser_name, value: {default label:<generic metadata>}
+        keys_lst: DefaultDict[str, List[str]] = defaultdict(
+            list
+        )  # key: parser_name,value: List[IDX]
 
         def add(self, name: str, metadata: Dict[str, Dict[str, Any]]):
             self.database[name].update(metadata)
-            for k, v in metadata.items():
-                if v[DEFAULT_LABEL] in self.database_defaultlabel[name]:
-                    self.database_defaultlabel[name][v[DEFAULT_LABEL]].append(k)
-                else:
-                    self.database_defaultlabel[name][v[DEFAULT_LABEL]] = [k]
+            # for k, v in metadata.items():
+            #     if v[DEFAULT_LABEL] in self.database_defaultlabel[name]:
+            #         self.database_defaultlabel[name][v[DEFAULT_LABEL]].append(k)
+            #     else:
+            #         self.database_defaultlabel[name][v[DEFAULT_LABEL]] = [k]
             self.keys_lst[name] = list(self.database[name].keys())
 
         def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
             return self.database[name][idx]
 
-        def get_by_default_label(self, name: str, default_label: str) -> List[str]:
-            return self.database_defaultlabel[name].get(default_label, [])
+        # def get_by_default_label(self, name: str, default_label: str) -> List[str]:
+        #     return self.database_defaultlabel[name].get(default_label, [])
 
         def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, Any]]:
             idx = self.keys_lst[name][i]
@@ -263,14 +267,14 @@ class MetadataDatabase:
         """
         return copy.deepcopy(self.instance.get_by_idx(name, idx))  # type: ignore
 
-    def get_by_default_label(self, name: str, default_label: str) -> List[str]:
-        """
-        get the metadata associated with an ontology and id
-        :param name: name of ontology to query
-        :param default_label: default label
-        :return:
-        """
-        return copy.deepcopy(self.instance.get_by_default_label(name, default_label))  # type: ignore
+    # def get_by_default_label(self, name: str, default_label: str) -> List[str]:
+    #     """
+    #     get the metadata associated with an ontology and id
+    #     :param name: name of ontology to query
+    #     :param default_label: default label
+    #     :return:
+    #     """
+    #     return copy.deepcopy(self.instance.get_by_default_label(name, default_label))  # type: ignore
 
     def get_by_index(self, name: str, i: int) -> Dict:
 
@@ -313,7 +317,6 @@ class MetadataDatabase:
         strip_url: bool = True,
     ) -> Mapping:
         metadata = self.get_by_idx(name=parser_name, idx=idx)
-        metadata[DATA_ORIGIN] = parser_name
         if additional_metadata:
             metadata.update(additional_metadata)
         if strip_url:
@@ -330,7 +333,7 @@ class MetadataDatabase:
             idx=new_idx,
             source=source,
             confidence=confidence,
-            parser_name=metadata.pop(DATA_ORIGIN),
+            parser_name=parser_name,
             mapping_type=mapping_type,
             metadata=metadata,
         )
