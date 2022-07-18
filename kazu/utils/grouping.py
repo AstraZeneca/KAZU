@@ -1,9 +1,11 @@
 from itertools import groupby
-from typing import Callable, Iterable, Tuple, TypeVar
-from _typeshed import SupportsRichComparison
+from typing import Callable, Iterable, Tuple, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _typeshed import SupportsRichComparison
 
 Item = TypeVar("Item")
-Key = TypeVar("Key", bound=SupportsRichComparison)
+Key = TypeVar("Key", bound="SupportsRichComparison")
 
 
 def sort_then_group(
