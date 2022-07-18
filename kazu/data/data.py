@@ -161,9 +161,11 @@ class Hit:
     """
 
     hit_string_norm: str  # Normalised version of the string that was hit
-    parser_name: str  # NOTE: this is the parser name, not the kb name. TODO: rename to data_source for consistency
+    parser_name: str  # NOTE: this is the parser name, not the kb name.
     id_set: EquivalentIdSet
-    metrics: Dict[str, float] = field(default_factory=dict)  # metrics associated with this hit
+    metrics: Dict[str, float] = field(
+        default_factory=dict, hash=False
+    )  # metrics associated with this hit
 
     def get_store_key(self) -> HitStoreKey:
         return self.parser_name, self.id_set
@@ -200,9 +202,10 @@ class Entity:
 
     def update_hits(self, hits: Iterable[Hit]):
         for hit in hits:
-            maybe_existing_hit: Optional[Hit] = self._hit_store.get(hit.get_store_key())
+            key = hit.get_store_key()
+            maybe_existing_hit: Optional[Hit] = self._hit_store.get(key)
             if maybe_existing_hit is None:
-                self._hit_store[hit.get_store_key()] = hit
+                self._hit_store[key] = hit
             else:
                 maybe_existing_hit.merge_metrics(hit)
 
@@ -393,6 +396,22 @@ class Section:
             url = "file://" + f.name
             f.write(html)
         webbrowser.open(url, new=2)
+
+    @property
+    def group_entities_on_hits(
+        self,
+    ) -> Iterator[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterator[Entity]]]:
+        yield from itertools.groupby(
+            sorted(
+                self.entities,
+                key=lambda x: (x.match, x.entity_class, frozenset(x.hits)),
+            ),
+            key=lambda x: (
+                x.match,
+                x.entity_class,
+                frozenset(x.hits),
+            ),
+        )
 
 
 class DocumentEncoder(json.JSONEncoder):
