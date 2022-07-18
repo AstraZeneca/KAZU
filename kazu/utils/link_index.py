@@ -248,7 +248,7 @@ class DictionaryIndex(Index):
             hits = []
             for neighbour, score in zip(neighbours, distances):
                 found_norm = self.key_lst[neighbour]
-                for id_set in self.normalised_syn_dict[string_norm]:
+                for id_set in self.normalised_syn_dict[found_norm]:
                     hits.append(
                         Hit(
                             hit_string_norm=found_norm,
@@ -383,8 +383,8 @@ class EmbeddingIndex(Index):
         top_n: int = 1,
     ) -> Iterable[Hit]:
         distances, neighbours = self._search_func(query=query, top_n=top_n)
-        for score, n in zip(distances, neighbours):
-            idx, metadata = self.metadata_db.get_by_index(self.parser.name, n)
+        for score, neighbour in zip(distances, neighbours):
+            idx, metadata = self.metadata_db.get_by_index(self.parser.name, neighbour)
             # the norm form of the default label should always be in the syn database
             string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
             try:
