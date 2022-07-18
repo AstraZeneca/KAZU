@@ -4,5 +4,4 @@ pipeline:
     - TransformersModelForTokenClassificationNerStep
     - SethStep
     - DictionaryEntityLinkingStep
-    - DocumentLevelDisambiguationStep
     - MergeOverlappingEntsStep

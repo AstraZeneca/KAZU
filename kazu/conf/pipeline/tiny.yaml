@@ -4,4 +4,3 @@ pipeline:
     - ExplosionNERStep
     - TransformersModelForTokenClassificationNerStep
     - DictionaryEntityLinkingStep
-    - DocumentLevelDisambiguationStep

@@ -5,5 +5,4 @@ pipeline:
     - SethStep
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
-    - DocumentLevelDisambiguationStep
     - MergeOverlappingEntsStep

@@ -6,4 +6,3 @@ pipeline:
     - TransformersModelForTokenClassificationNerStep
     - DictionaryEntityLinkingStep
     - SapBertForEntityLinkingStep
-    - DocumentLevelDisambiguationStep
