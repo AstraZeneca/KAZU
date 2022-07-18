@@ -436,15 +436,6 @@ class SynonymDatabase:
         assert self.instance is not None
         self.instance.add(name, synonyms, norm=False)
 
-    def normalise_and_add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]]):
-        """
-        add SynonymData to the database.
-        :param name: name of ontology to add to
-        :param synonyms: dict in format {synonym string:List[SynonymData]}
-        :return:
-        """
-        self.instance.add(name, synonyms, norm=True)  # type: ignore
-
 
 class OntologyParser(ABC):
     """
