@@ -409,7 +409,7 @@ class SynonymDatabase:
 
     def get_kbs_for_syn_global(self, synonym: str) -> Set[str]:
         """
-        return a global list ok kbs across all dbs, for a specific synonym
+        return a global set of kbs in the db, for a specific synonym
         :return:
         """
         assert self.instance is not None
