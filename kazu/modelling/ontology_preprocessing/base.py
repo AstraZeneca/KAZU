@@ -9,7 +9,7 @@ import urllib
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, FrozenSet, Optional, DefaultDict
+from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, DefaultDict
 from urllib import parse
 
 import pandas as pd
@@ -338,7 +338,7 @@ class SynonymDatabase:
         kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
         loaded_kbs: Set[str] = set()
 
-        def add(self, name: str, synonyms: Dict[str, FrozenSet[EquivalentIdSet]], norm: bool):
+        def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]], norm: bool):
             self.loaded_kbs.add(name)
             for syn_string, syn_data_set in synonyms.items():
                 if norm:
@@ -433,7 +433,8 @@ class SynonymDatabase:
         :param synonyms: dict in format {synonym string:List[SynonymData]}
         :return:
         """
-        self.instance.add(name, synonyms, norm=False)  # type: ignore
+        assert self.instance is not None
+        self.instance.add(name, synonyms, norm=False)
 
     def normalise_and_add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]]):
         """
