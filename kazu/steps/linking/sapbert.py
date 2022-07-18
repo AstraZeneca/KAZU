@@ -110,6 +110,7 @@ class SapBertForEntityLinkingStep(BaseStep):
         failed_docs = []
         try:
             entities_to_process = []
+            ent: Entity
             for ent in pydash.flatten([x.get_entities() for x in docs]):
                 if ent.entity_class not in self.entity_class_to_indices.keys():
                     continue
