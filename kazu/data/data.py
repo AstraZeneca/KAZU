@@ -155,9 +155,6 @@ class Hit:
         default_factory=dict, hash=False
     )  # metrics associated with this hit
 
-    def get_store_key(self) -> HitStoreKey:
-        return self.parser_name, self.id_set
-
     def merge_metrics(self, hit: "Hit"):
         for metric_name, metric_value in hit.metrics.items():
             if metric_name in self.metrics:
@@ -190,7 +187,7 @@ class Entity:
 
     def update_hits(self, hits: Iterable[Hit]):
         for hit in hits:
-            key = hit.get_store_key()
+            key = (hit.parser_name, hit.id_set)
             maybe_existing_hit: Optional[Hit] = self._hit_store.get(key)
             if maybe_existing_hit is None:
                 self._hit_store[key] = hit
