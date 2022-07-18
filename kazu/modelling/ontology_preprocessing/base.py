@@ -619,7 +619,6 @@ class OntologyParser(ABC):
         :return:
         """
         synonym_data = self.collect_aggregate_synonym_data(True)
-        # SynonymDatabase().add(self.name, generated_synonym_data)
         SynonymDatabase().add(self.name, synonym_data)
 
     def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
