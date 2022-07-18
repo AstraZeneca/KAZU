@@ -336,10 +336,10 @@ class SynonymDatabase:
         )
         syns_database_by_syn_global: DefaultDict[str, Set[EquivalentIdSet]] = defaultdict(set)
         kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
-        loaded_kbs: Set[str] = set()
+        loaded_parsers: Set[str] = set()
 
         def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]], norm: bool):
-            self.loaded_kbs.add(name)
+            self.loaded_parsers.add(name)
             for syn_string, syn_data_set in synonyms.items():
                 if norm:
                     syn_string_norm = StringNormalizer.normalize(syn_string)
@@ -414,14 +414,6 @@ class SynonymDatabase:
         """
         assert self.instance is not None
         return self.instance.kb_database_by_syn_global.get(synonym, set())
-
-    def get_loaded_kbs(self) -> Set[str]:
-        """
-        return a global view of all ambiguous synonyms data across all dbs
-        :return:
-        """
-        assert self.instance is not None
-        return self.instance.loaded_kbs
 
     def get_database(self) -> DefaultDict[str, Dict[str, Set[EquivalentIdSet]]]:
         return self.instance.syns_database_by_syn  # type: ignore
