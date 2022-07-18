@@ -1,7 +1,6 @@
 import logging
 import traceback
 from collections import defaultdict
-from itertools import groupby
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
 import spacy
@@ -11,6 +10,7 @@ from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import Blac
 from kazu.modelling.ontology_matching.ontology_matcher import SPAN_KEY
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.steps import BaseStep
+from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import as_path, PathLike
 from spacy.tokens import Span as spacy_span
 
@@ -142,8 +142,7 @@ class ExplosionNERStep(BaseStep):
                 entities = []
 
                 spans = processed_text.spans[self.span_key]
-                sorted_spans = sorted(spans, key=self._mapping_invariant_span)
-                grouped_spans = groupby(sorted_spans, key=self._mapping_invariant_span)
+                grouped_spans = sort_then_group(spans, self._mapping_invariant_span)
                 for mapping_invariant_span, span_group in grouped_spans:
                     span_start, span_end, span_text, entity_type = mapping_invariant_span
                     e = Entity(

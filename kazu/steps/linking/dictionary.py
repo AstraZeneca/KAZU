@@ -1,5 +1,4 @@
 import copy
-import itertools
 import logging
 import traceback
 from typing import List, Tuple, Dict, Set
@@ -9,6 +8,7 @@ import pydash
 from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Hit
 from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
+from kazu.utils.grouping import sort_then_group
 from kazu.utils.link_index import DictionaryIndex
 from kazu.utils.utils import (
     find_document_from_entity,
@@ -77,20 +77,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         failed_docs = []
         entities: List[Entity] = pydash.flatten([x.get_entities() for x in docs])
         ents_by_match_and_class = {
-            k: list(v)
-            for k, v in itertools.groupby(
-                sorted(
-                    entities,
-                    key=lambda x: (
-                        x.match,
-                        x.entity_class,
-                    ),
-                ),
-                key=lambda x: (
-                    x.match,
-                    x.entity_class,
-                ),
-            )
+            k: list(v) for k, v in sort_then_group(entities, lambda x: (x.match, x.entity_class))
         }
         if len(ents_by_match_and_class) > 0:
             for ent_match_and_class, ents_this_match in ents_by_match_and_class.items():

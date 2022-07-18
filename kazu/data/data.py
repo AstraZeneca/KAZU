@@ -1,5 +1,4 @@
 import dataclasses
-import itertools
 import json
 import tempfile
 import uuid
@@ -9,10 +8,12 @@ from datetime import datetime, date
 from enum import IntEnum, Enum
 from itertools import cycle, chain
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Iterator, Union
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
 from numpy import ndarray, float32, float16
 from spacy import displacy
+
+from kazu.utils.grouping import sort_then_group
 
 IS_SUBSPAN = "is_subspan"
 # ambiguous_synonyms or confused mappings
@@ -392,18 +393,12 @@ class Section:
     @property
     def group_entities_on_hits(
         self,
-    ) -> Iterator[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterator[Entity]]]:
-        yield from itertools.groupby(
-            sorted(
-                self.entities,
-                key=lambda x: (x.match, x.entity_class, frozenset(x.hits)),
-            ),
-            key=lambda x: (
-                x.match,
-                x.entity_class,
-                frozenset(x.hits),
-            ),
-        )
+    ) -> Iterable[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterable[Entity]]]:
+        yield from sort_then_group(self.entities, _get_key_to_group_ent_on_hits)
+
+
+def _get_key_to_group_ent_on_hits(e: Entity) -> Tuple[str, str, FrozenSet[Hit]]:
+    return (e.match, e.entity_class, frozenset(e.hits))
 
 
 class DocumentEncoder(json.JSONEncoder):
@@ -460,18 +455,8 @@ class Document:
     @property
     def group_entities_on_hits(
         self,
-    ) -> Iterator[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterator[Entity]]]:
-        yield from itertools.groupby(
-            sorted(
-                self.get_entities(),
-                key=lambda x: (x.match, x.entity_class, frozenset(x.hits)),
-            ),
-            key=lambda x: (
-                x.match,
-                x.entity_class,
-                frozenset(x.hits),
-            ),
-        )
+    ) -> Iterable[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterable[Entity]]]:
+        yield from sort_then_group(self.get_entities(), key_func=_get_key_to_group_ent_on_hits)
 
     def json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False, **kwargs):
         """
