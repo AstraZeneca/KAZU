@@ -368,7 +368,7 @@ class SynonymDatabase:
 
     def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
         """
-        get a list of SynonymData associated with an ontology and synonym string
+        get a set of EquivalentIdSets associated with an ontology and synonym string
         :param name: name of ontology to query
         :param synonym: idx to query
         :return:
@@ -420,9 +420,9 @@ class SynonymDatabase:
 
     def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]]):
         """
-        add SynonymData to the database.
+        add synonyms to the database.
         :param name: name of ontology to add to
-        :param synonyms: dict in format {synonym string:List[SynonymData]}
+        :param synonyms: dict in format {synonym string: Set[EquivalentIdSet]}
         :return:
         """
         assert self.instance is not None
@@ -456,7 +456,7 @@ class OntologyParser(ABC):
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
             parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator
-        :param min_syn_length_to_merge: synonyms of this length or greater will be merged into the same SynonymData object,
+        :param min_syn_length_to_merge: synonyms of this length or greater will be merged into the same EquivalentIdSet object,
             set higher for highly symbolic sources (e.g. Gene symbols), and lower for more natural language sources (e.g. anatomy)
         """
         self.data_origin = data_origin
