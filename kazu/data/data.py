@@ -131,14 +131,6 @@ class Mapping:
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
-class SynonymDataSet(frozenset):
-    def __new__(cls, data):
-        return super(SynonymDataSet, cls).__new__(cls, data)
-
-    def __lt__(self, other):
-        return tuple(self) < tuple(other)
-
-
 HitStoreKey = Tuple[str, EquivalentIdSet]  # parser name and EquivalentIdSet
 
 numeric_metric = Union[bool, int, float]
