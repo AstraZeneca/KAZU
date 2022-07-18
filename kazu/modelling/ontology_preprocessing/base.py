@@ -234,18 +234,10 @@ class MetadataDatabase:
 
         def add(self, name: str, metadata: Dict[str, Dict[str, Any]]):
             self.database[name].update(metadata)
-            # for k, v in metadata.items():
-            #     if v[DEFAULT_LABEL] in self.database_defaultlabel[name]:
-            #         self.database_defaultlabel[name][v[DEFAULT_LABEL]].append(k)
-            #     else:
-            #         self.database_defaultlabel[name][v[DEFAULT_LABEL]] = [k]
             self.keys_lst[name] = list(self.database[name].keys())
 
         def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
             return self.database[name][idx]
-
-        # def get_by_default_label(self, name: str, default_label: str) -> List[str]:
-        #     return self.database_defaultlabel[name].get(default_label, [])
 
         def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, Any]]:
             idx = self.keys_lst[name][i]
@@ -266,15 +258,6 @@ class MetadataDatabase:
         :return:
         """
         return copy.deepcopy(self.instance.get_by_idx(name, idx))  # type: ignore
-
-    # def get_by_default_label(self, name: str, default_label: str) -> List[str]:
-    #     """
-    #     get the metadata associated with an ontology and id
-    #     :param name: name of ontology to query
-    #     :param default_label: default label
-    #     :return:
-    #     """
-    #     return copy.deepcopy(self.instance.get_by_default_label(name, default_label))  # type: ignore
 
     def get_by_index(self, name: str, i: int) -> Dict:
 
