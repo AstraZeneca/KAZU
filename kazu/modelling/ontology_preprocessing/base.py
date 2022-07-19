@@ -227,7 +227,6 @@ class MetadataDatabase:
         database: DefaultDict[str, Dict[str, Dict]] = defaultdict(
             dict
         )  # key: parser_name, value: {idx:<generic metadata>}
-        # database_defaultlabel: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict) #key: parser_name, value: {default label:<generic metadata>}
         keys_lst: DefaultDict[str, List[str]] = defaultdict(
             list
         )  # key: parser_name,value: List[IDX]
