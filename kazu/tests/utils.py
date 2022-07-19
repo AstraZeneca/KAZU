@@ -258,8 +258,8 @@ class DummyParser(OntologyParser):
     DUMMY_DATA = {
         IDX: ["first", "first", "second", "second", "third", "alpha"],
         DEFAULT_LABEL: ["1", "1", "2", "2", "3", "4"],
-        SYN: ["1", "one", "2", "two", "3", "1"],
-        MAPPING_TYPE: ["int", "text", "int", "text", "int", "text"],
+        SYN: ["1", "one", "2", "two", "3", "4"],
+        MAPPING_TYPE: ["int", "text", "int", "text", "int", "int"],
     }
     name = DUMMY_SOURCE
 
