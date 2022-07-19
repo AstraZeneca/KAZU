@@ -431,7 +431,8 @@ class OntologyParser(ABC):
     Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking. This involves generating
     two dataframes: one that holds the linking metadata (e.g. default label, IDX and other info), and another that
     holds any synonym information
-    Implementations should have a class attribute 'name' to something suitably representative
+    Implementations should have a class attribute 'name' to something suitably representative.
+    Note: It is the responsibility of a parser implementation to add default labels as synonyms.
     """
 
     name = "unnamed"  # a label for his parser
