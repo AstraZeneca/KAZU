@@ -281,10 +281,6 @@ class DictionaryIndex(Index):
         # we don't sort the hits as we expect them to enter an unsorted set
         return hits
 
-    @staticmethod
-    def get_best_search_score(hit: Hit) -> float:
-        return max(metrics[SEARCH_SCORE] for metrics in hit.per_normalized_syn_metrics.values())
-
     def search(self, query: str, top_n: int = 15) -> Iterable[Hit]:
         """
         search the index
