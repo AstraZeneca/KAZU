@@ -1,10 +1,10 @@
-import abc
 import itertools
 import logging
 import os
 import pickle
 import re
 import shutil
+from abc import ABC, abstractmethod
 from collections import Counter
 from pathlib import Path
 from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, Set
@@ -65,7 +65,7 @@ def to_torch(matrix):
     return result
 
 
-class Index(abc.ABC):
+class Index(ABC):
     """
     base class for all indices.
     """
@@ -198,7 +198,7 @@ class Index(abc.ABC):
         self._build_ontology_cache(cache_dir)
         self.load(cache_dir)
 
-    @abc.abstractmethod
+    @abstractmethod
     def _build_ontology_cache(self, cache_dir: Path):
         """
         Implementations should implement this method to determine how an index gets built for a given parser
