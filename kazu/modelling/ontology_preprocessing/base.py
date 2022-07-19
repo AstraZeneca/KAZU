@@ -224,12 +224,10 @@ class MetadataDatabase:
     instance: Optional["__MetadataDatabase"] = None
 
     class __MetadataDatabase:
-        database: DefaultDict[str, Dict[str, Dict]] = defaultdict(
-            dict
-        )  # key: parser_name, value: {idx:<generic metadata>}
-        keys_lst: DefaultDict[str, List[str]] = defaultdict(
-            list
-        )  # key: parser_name,value: List[IDX]
+        # key: parser_name, value: {idx:<generic metadata>}
+        database: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
+        # key: parser_name,value: List[IDX]
+        keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
 
         def add(self, name: str, metadata: Dict[str, Dict[str, Any]]):
             self.database[name].update(metadata)
