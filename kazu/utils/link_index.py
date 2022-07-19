@@ -206,7 +206,7 @@ class Index(ABC):
 
 class DictionaryIndex(Index):
     """
-    a simple dictionary index for linking. Uses a Dict[str, List[SynonymData]] for matching synonyms,
+    a simple dictionary index for linking. Uses a Dict[str, List[EquivalentIdSet]] for matching synonyms,
     with optional fuzzy matching. Note, since a given synonym can match to more than one metadata entry (even
     within the same knowledgebase), we have a pathological situation in which 'true' synonyms can not be said to
     exist. In such situations, we return multiple kb references for overloaded synonyms - i.e. the disambiguation is
