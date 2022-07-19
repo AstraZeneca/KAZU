@@ -7,7 +7,7 @@ import re
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional
+from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, Set
 
 import numpy as np
 import torch
@@ -98,6 +98,8 @@ class Index(abc.ABC):
         os.makedirs(directory, exist_ok=False)
         with open(self.get_metadata_path(directory), "wb") as f:
             pickle.dump(self.metadata_db.get_all(self.parser.name), f)
+        with open(self.get_synonym_data_path(directory), "wb") as f:
+            pickle.dump(self.synonym_db.get_all(self.parser.name), f)
         self._save(self.get_index_data_path(directory))
         return directory
 
@@ -107,14 +109,19 @@ class Index(abc.ABC):
         :param cache_path: the path to the cached files. Normally created via .save
         :return:
         """
-
-        self._load_cache(self.get_index_data_path(cache_path))
         with open(self.get_metadata_path(cache_path), "rb") as f:
             self.metadata_db.add(self.parser.name, pickle.load(f))
+        with open(self.get_synonym_data_path(cache_path), "rb") as f:
+            self.synonym_db.add(self.parser.name, pickle.load(f))
+        self._load(self.get_index_data_path(cache_path))
 
     @staticmethod
     def get_metadata_path(path: Path) -> Path:
         return path.joinpath("ontology_metadata.pkl")
+
+    @staticmethod
+    def get_synonym_data_path(path: Path) -> Path:
+        return path.joinpath("ontology_synonym_data.pkl")
 
     @staticmethod
     def get_index_data_path(path: Path) -> Path:
@@ -129,7 +136,7 @@ class Index(abc.ABC):
         """
         raise NotImplementedError()
 
-    def _load_cache(self, path: Path) -> None:
+    def _load(self, path: Path) -> None:
         """
         concrete implementations should implement this to load any data specific to the implementation. This method is
         called by self.load
@@ -189,6 +196,7 @@ class Index(abc.ABC):
     def build_ontology_cache(self, cache_dir: Path):
         cache_dir.mkdir()
         self._build_ontology_cache(cache_dir)
+        self.load(cache_dir)
 
     @abc.abstractmethod
     def _build_ontology_cache(self, cache_dir: Path):
@@ -198,6 +206,17 @@ class Index(abc.ABC):
         :return:
         """
         pass
+
+    def _populate_databases(self) -> Dict[str, Set[EquivalentIdSet]]:
+        """
+        populate the databases with the results of the parser
+        :return: normalised dictionary of syn: set(ids)
+        """
+        # populate the databases
+        self.parser.populate_metadata_database()
+        normalised_syn_dict = self.parser.collect_aggregate_synonym_data(True)
+        self.synonym_db.add(self.parser.name, normalised_syn_dict)
+        return normalised_syn_dict
 
 
 class DictionaryIndex(Index):
@@ -218,9 +237,8 @@ class DictionaryIndex(Index):
 
     def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
         hits = []
-        if string_norm in self.normalised_syn_dict:
-
-            for id_set in self.normalised_syn_dict[string_norm]:
+        if string_norm in self.synonym_db.get_all(self.parser.name):
+            for id_set in self.synonym_db.get(self.parser.name, string_norm):
                 hits.append(
                     Hit(
                         parser_name=self.parser.name,
@@ -248,8 +266,9 @@ class DictionaryIndex(Index):
             distances = 100 * -distances
             hits = []
             for neighbour, score in zip(neighbours, distances):
-                found_norm = self.key_lst[neighbour]
-                for id_set in self.normalised_syn_dict[found_norm]:
+                # get by index
+                found_norm = list(self.synonym_db.get_all(self.parser.name))[neighbour]
+                for id_set in self.synonym_db.get(self.parser.name, string_norm):
                     hits.append(
                         Hit(
                             parser_name=self.parser.name,
@@ -259,8 +278,8 @@ class DictionaryIndex(Index):
                             id_set=id_set,
                         )
                     )
-
-        return sorted(hits, key=self.get_best_search_score, reverse=True)
+        # we don't sort the hits as we expect them to enter an unsorted set
+        return hits
 
     @staticmethod
     def get_best_search_score(hit: Hit) -> float:
@@ -277,18 +296,15 @@ class DictionaryIndex(Index):
         hits = self._search_index(string_norm, top_n=top_n)
         yield from hits
 
-    def _load_cache(self, path: Path) -> Any:
+    def _load(self, path: Path) -> Any:
         with open(path, "rb") as f:
             (
                 self.vectorizer,
-                self.normalised_syn_dict,
                 self.tf_idf_matrix,
             ) = pickle.load(f)
-        self.key_lst = list(self.normalised_syn_dict.keys())
-        self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
 
     def _save(self, path: Path):
-        pickleable = (self.vectorizer, self.normalised_syn_dict, self.tf_idf_matrix)
+        pickleable = (self.vectorizer, self.tf_idf_matrix)
         with open(path, "wb") as f:
             pickle.dump(pickleable, f)
 
@@ -305,13 +321,9 @@ class DictionaryIndex(Index):
     def _build_ontology_cache(self, cache_dir: Path):
         logger.info(f"creating index for {self.parser.in_path}")
 
-        self.parser.populate_metadata_database()
-        self.normalised_syn_dict = self.parser.collect_aggregate_synonym_data(True)
-        self.synonym_db.add(self.parser.name, self.normalised_syn_dict)
-
+        normalised_syn_dict = self._populate_databases()
         self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-        self.key_lst = list(self.normalised_syn_dict.keys())
-        self.tf_idf_matrix = self.vectorizer.fit_transform(self.key_lst)
+        self.tf_idf_matrix = self.vectorizer.fit_transform(normalised_syn_dict.keys())
         index_path = self.save(cache_dir, overwrite=True)
         logger.info(f"saved {self.parser.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {self.parser.name} is {len(self)}")
@@ -414,7 +426,9 @@ class EmbeddingIndex(Index):
 
         logger.info(f"creating index for {self.parser.in_path}")
 
-        self.parser.populate_metadata_database()
+        # populate the databases
+        normalised_syn_dict = self._populate_databases()
+        self.synonym_db.add(self.parser.name, normalised_syn_dict)
         for (
             partition_number,
             metadata,
@@ -427,9 +441,8 @@ class EmbeddingIndex(Index):
         logger.info(f"saved {self.parser.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {self.parser.name} is {len(self)}")
 
-    @staticmethod
     def enumerate_database_chunks(
-        name: str, chunk_size: int = 100000
+        self, name: str, chunk_size: int = 100000
     ) -> Iterable[Tuple[int, Dict[str, Any]]]:
         """
         generator to split up a dataframe into partitions
@@ -438,7 +451,7 @@ class EmbeddingIndex(Index):
         :return:
         """
 
-        data: Dict[str, Any] = MetadataDatabase().get_all(name)
+        data: Dict[str, Any] = self.metadata_db.get_all(name)
         for i in range(0, len(data), chunk_size):
             yield i, dict(itertools.islice(data.items(), i, i + chunk_size))
 
@@ -480,7 +493,7 @@ class TensorEmbeddingIndex(EmbeddingIndex):
         super().__init__(parser=parser)
         self.index: torch.Tensor
 
-    def _load_cache(self, path: Path) -> Any:
+    def _load(self, path: Path) -> Any:
         with open(path, "rb") as f:
             self.index = pickle.load(f)
 
