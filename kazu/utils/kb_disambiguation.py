@@ -36,8 +36,8 @@ class ReactomeDb:
     ) -> Optional[str]:
         ranks = []
 
-        for ambiguous_syn_data in query:
-            for idx in ambiguous_syn_data.ids:
+        for ambiguous_id_set in query:
+            for idx in ambiguous_id_set.ids:
                 ranks.append(
                     (
                         self.score_pathways(

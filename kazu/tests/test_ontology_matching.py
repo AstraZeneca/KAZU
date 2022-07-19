@@ -40,13 +40,13 @@ def test_initialize():
 class MockParser:
     def __init__(self, parser_name: str, id_to_syns: Dict[str, Set[str]]):
         self.name = parser_name
-        self.syn_to_syn_data: Dict[str, Set[EquivalentIdSet]] = defaultdict(set)
+        self.syn_dict: Dict[str, Set[EquivalentIdSet]] = defaultdict(set)
         # format input into structure of the output of collect_aggregate_synonym_data
         # doing this lets us have a simpler structure for creating new parsers to extend
         # the tests if desired
         for id, syns in id_to_syns.items():
             for syn in syns:
-                self.syn_to_syn_data[syn].add(
+                self.syn_dict[syn].add(
                     EquivalentIdSet(
                         aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
                         ids=frozenset((id,)),
@@ -56,7 +56,7 @@ class MockParser:
     def collect_aggregate_synonym_data(
         self, normalise_original_syns: bool
     ) -> Dict[str, Set[EquivalentIdSet]]:
-        return self.syn_to_syn_data
+        return self.syn_dict
 
     def generate_synonyms(self):
         return {}

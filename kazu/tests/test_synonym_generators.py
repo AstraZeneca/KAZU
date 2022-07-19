@@ -17,7 +17,7 @@ from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy
 from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
-dummy_syn_data = EquivalentIdSet(
+dummy_equiv_ids = EquivalentIdSet(
     ids=frozenset(("text",)),
     aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
 )
@@ -28,7 +28,7 @@ def check_generator_result(
     expected_syns: Set[str],
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
-    data = {input_str: set((dummy_syn_data,))}
+    data = {input_str: set((dummy_equiv_ids,))}
     result = generator(data)
     new_syns = set(result.keys())
     assert new_syns == expected_syns

@@ -149,9 +149,9 @@ class OntologyMatcher:
             patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
 
             blacklister = blacklisters.get(parser_name)
-            for i, (syn, syn_data_list) in enumerate(generated_synonym_data.items()):
-                for syn_data in syn_data_list:
-                    for idx in syn_data.ids:
+            for i, (syn, set_of_equiv_id_sets) in enumerate(generated_synonym_data.items()):
+                for equiv_id_set in set_of_equiv_id_sets:
+                    for idx in equiv_id_set.ids:
                         # TODO: combine entry_filter and blacklisters
                         if blacklister is None:
                             passes_blacklist = True

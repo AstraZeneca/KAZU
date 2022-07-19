@@ -340,17 +340,17 @@ class SynonymDatabase:
 
         def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]], norm: bool):
             self.loaded_parsers.add(name)
-            for syn_string, syn_data_set in synonyms.items():
+            for syn_string, syn_data in synonyms.items():
                 if norm:
                     syn_string_norm = StringNormalizer.normalize(syn_string)
                 else:
                     syn_string_norm = syn_string
-                self.syns_database_by_syn[name][syn_string_norm].update(syn_data_set)
-                self.syns_database_by_syn_global[syn_string_norm].update(syn_data_set)
+                self.syns_database_by_syn[name][syn_string_norm].update(syn_data)
+                self.syns_database_by_syn_global[syn_string_norm].update(syn_data)
                 self.kb_database_by_syn_global[syn_string_norm].add(name)
 
-                for syn_data in syn_data_set:
-                    for idx in syn_data.ids:
+                for equiv_ids in syn_data:
+                    for idx in equiv_ids.ids:
                         self.syns_database_by_idx[name][idx].add(syn_string_norm)
 
         def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
@@ -386,8 +386,8 @@ class SynonymDatabase:
         :return:
         """
         result = set()
-        for syn_data in self.get(name, synonym):
-            for idx in syn_data.ids:
+        for equiv_id_set in self.get(name, synonym):
+            for idx in equiv_id_set.ids:
                 result.update(self.get_syns_for_id(name, idx))
         return result
 
