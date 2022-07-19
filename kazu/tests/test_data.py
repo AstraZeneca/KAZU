@@ -160,23 +160,3 @@ def test_entity_hit_groups():
 
     groups = list(doc.sections[0].group_entities_on_hits)
     assert len(groups) == 3
-
-
-def make_entity_with_hits(
-    start: int,
-    end: int,
-):
-    e1 = Entity(
-        namespace="test",
-        match="metastatic liver cancer",
-        entity_class="test",
-        spans=frozenset([CharSpan(start=start, end=end)]),
-    )
-    # first test hits are merged correctly (same id set, same parser name)
-    metrics_1 = {"test_metric_1": 99.5}
-    hit_1 = make_hit(["1", "2", "3"], parser_name="test", metrics=metrics_1)
-    e1.update_hits([hit_1])
-    metrics_2 = {"test_metric_2": 99.6}
-    hit_2 = make_hit(["1", "2", "3"], parser_name="test", metrics=metrics_2)
-    e1.update_hits([hit_2])
-    return e1
