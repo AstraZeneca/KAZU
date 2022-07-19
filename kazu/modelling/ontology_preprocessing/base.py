@@ -9,7 +9,7 @@ import urllib
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, DefaultDict
+from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, DefaultDict, Union
 from urllib import parse
 
 import pandas as pd
@@ -17,7 +17,13 @@ import rdflib
 from rdflib import URIRef
 from tqdm.auto import tqdm
 
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, Mapping, LinkRanks
+from kazu.data.data import (
+    EquivalentIdSet,
+    EquivalentIdAggregationStrategy,
+    Mapping,
+    LinkRanks,
+    NumericMetric,
+)
 
 # dataframe column keys
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
@@ -215,6 +221,9 @@ class StringNormalizer:
         return string
 
 
+SimpleValue = Union[NumericMetric, str]
+
+
 class MetadataDatabase:
     """
     Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
@@ -224,19 +233,19 @@ class MetadataDatabase:
     instance: Optional["__MetadataDatabase"] = None
 
     class __MetadataDatabase:
-        # key: parser_name, value: {idx:<generic metadata>}
-        database: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
+        # key: parser_name, value: {idx:<generic metadata - dict of strings to simple values>}
+        database: DefaultDict[str, Dict[str, Dict[str, SimpleValue]]] = defaultdict(dict)
         # key: parser_name,value: List[IDX]
         keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
 
-        def add(self, name: str, metadata: Dict[str, Dict[str, Any]]):
+        def add(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
             self.database[name].update(metadata)
             self.keys_lst[name] = list(self.database[name].keys())
 
-        def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
+        def get_by_idx(self, name: str, idx: str) -> Dict[str, SimpleValue]:
             return self.database[name][idx]
 
-        def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, Any]]:
+        def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, SimpleValue]]:
             idx = self.keys_lst[name][i]
             return idx, self.database[name][idx]
 
@@ -247,26 +256,28 @@ class MetadataDatabase:
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
-    def get_by_idx(self, name: str, idx: str) -> Dict[str, Any]:
+    def get_by_idx(self, name: str, idx: str) -> Dict[str, SimpleValue]:
         """
         get the metadata associated with an ontology and id
         :param name: name of ontology to query
         :param idx: idx to query
         :return:
         """
-        return copy.deepcopy(self.instance.get_by_idx(name, idx))  # type: ignore
+        assert self.instance is not None
+        return copy.deepcopy(self.instance.get_by_idx(name, idx))
 
-    def get_by_index(self, name: str, i: int) -> Dict:
+    def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, SimpleValue]]:
+        assert self.instance is not None
+        return copy.deepcopy(self.instance.get_by_index(name, i))
 
-        return copy.deepcopy(self.instance.get_by_index(name, i))  # type: ignore
-
-    def get_all(self, name: str) -> Dict[str, Any]:
+    def get_all(self, name: str) -> Dict[str, Dict[str, SimpleValue]]:
         """
         get all metadata associated with an ontology
         :param name: name of ontology
         :return:
         """
-        return self.instance.database[name]  # type: ignore
+        assert self.instance is not None
+        return self.instance.database[name]
 
     def get_loaded_parsers(self) -> Set[str]:
         """
@@ -276,7 +287,7 @@ class MetadataDatabase:
         assert self.instance is not None
         return set(self.instance.database.keys())
 
-    def add(self, name: str, metadata: Dict[str, Any]):
+    def add(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
         """
         add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
         override any existing entries with associated with the keys in the metadata dict
@@ -307,8 +318,10 @@ class MetadataDatabase:
                 new_idx = url.path.split("/")[-1]
         else:
             new_idx = idx
+        default_label = metadata.pop(DEFAULT_LABEL)
+        assert isinstance(default_label, str)
         return Mapping(
-            default_label=metadata.pop(DEFAULT_LABEL),
+            default_label=default_label,
             idx=new_idx,
             source=source,
             confidence=confidence,

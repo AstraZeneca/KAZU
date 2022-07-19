@@ -7,7 +7,7 @@ import shutil
 from abc import ABC, abstractmethod
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, Set
+from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, Set, cast
 
 import numpy as np
 import torch
@@ -25,6 +25,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     StringNormalizer,
     SynonymDatabase,
     OntologyParser,
+    SimpleValue,
 )
 from kazu.utils.utils import create_char_ngrams, get_cache_dir
 
@@ -139,7 +140,7 @@ class Index(ABC):
         """
         raise NotImplementedError()
 
-    def add(self, data: Any, metadata: Dict[str, Any]):
+    def add(self, data: Any, metadata: Dict[str, Dict[str, SimpleValue]]):
         """
         add data to the index
         :param data:
@@ -386,7 +387,9 @@ class EmbeddingIndex(Index):
         for score, neighbour in zip(distances, neighbours):
             idx, metadata = self.metadata_db.get_by_index(self.parser.name, neighbour)
             # the norm form of the default label should always be in the syn database
-            string_norm = StringNormalizer.normalize(metadata[DEFAULT_LABEL])
+            default_label = metadata[DEFAULT_LABEL]
+            assert isinstance(default_label, str)
+            string_norm = StringNormalizer.normalize(default_label)
             try:
                 for id_set in self.synonym_db.get(self.parser.name, string_norm):
                     # confidence is always medium, dso can be later disambiguated
@@ -423,7 +426,7 @@ class EmbeddingIndex(Index):
 
     def enumerate_database_chunks(
         self, name: str, chunk_size: int = 100000
-    ) -> Iterable[Tuple[int, Dict[str, Any]]]:
+    ) -> Iterable[Tuple[int, Dict[str, Dict[str, SimpleValue]]]]:
         """
         generator to split up a dataframe into partitions
         :param name: ontology name to query the metadata database with
@@ -431,13 +434,13 @@ class EmbeddingIndex(Index):
         :return:
         """
 
-        data: Dict[str, Any] = self.metadata_db.get_all(name)
+        data = self.metadata_db.get_all(name)
         for i in range(0, len(data), chunk_size):
             yield i, dict(itertools.islice(data.items(), i, i + chunk_size))
 
     def predict_ontology_embeddings(
         self, name: str
-    ) -> Iterator[Tuple[int, Dict[str, Any], torch.Tensor]]:
+    ) -> Iterator[Tuple[int, Dict[str, Dict[str, SimpleValue]], torch.Tensor]]:
         """
         since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
         and add them to the index sequentially
@@ -453,7 +456,8 @@ class EmbeddingIndex(Index):
                 return
             logger.info(f"creating partitions for partition {partition_number}")
             logger.info(f"read {len_df} rows from ontology")
-            default_labels = [x[DEFAULT_LABEL] for x in metadata.values()]
+            # use cast to tell mypy this is already the right type
+            default_labels = cast(List[str], [x[DEFAULT_LABEL] for x in metadata.values()])
             logger.info(f"predicting embeddings for default_labels. Examples: {default_labels[:3]}")
             results = self.embedding_model.get_embeddings_for_strings(
                 texts=default_labels, trainer=self.trainer
