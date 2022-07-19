@@ -133,7 +133,7 @@ class Mapping:
 
 HitStoreKey = Tuple[str, EquivalentIdSet]  # parser name and EquivalentIdSet
 
-numeric_metric = Union[bool, int, float]
+NumericMetric = Union[bool, int, float]
 
 
 @dataclass(frozen=True, eq=True)
@@ -146,7 +146,7 @@ class Hit:
     parser_name: str  # NOTE: this is the parser name, not the kb name.
     id_set: EquivalentIdSet
     # key is hit_string_norm, value is metric name to metric value
-    per_normalized_syn_metrics: Dict[str, Dict[str, numeric_metric]] = field(
+    per_normalized_syn_metrics: Dict[str, Dict[str, NumericMetric]] = field(
         default_factory=dict, hash=False
     )  # metrics associated with this hit
 
