@@ -49,22 +49,6 @@ class NumberResolver:
         return synonym_string_norm_match_number_count == self.ent_match_number_count
 
 
-def to_torch(matrix):
-    """
-    convert a sparse CSR matrix to a sparse torch matrix
-    :param matrix:
-    :return:
-    """
-
-    Acoo = matrix.tocoo()
-    result = torch.sparse_coo_tensor(
-        torch.LongTensor([Acoo.row.tolist(), Acoo.col.tolist()]),
-        torch.FloatTensor(Acoo.data),
-        matrix.shape,
-    ).to_sparse_csr()
-    return result
-
-
 class Index(ABC):
     """
     base class for all indices.
