@@ -107,7 +107,7 @@ class EquivalentIdAggregationStrategy(Enum):
 @dataclass(frozen=True, eq=True, order=True)
 class EquivalentIdSet:
     """
-    Synonym data is a representation of a set of kb ID's that map to the same synonym and mean the same thing.
+    A representation of a set of kb ID's that map to the same synonym and mean the same thing.
     """
 
     aggregated_by: EquivalentIdAggregationStrategy = field(hash=False, compare=False)
@@ -139,7 +139,7 @@ numeric_metric = Union[bool, int, float]
 @dataclass(frozen=True, eq=True)
 class Hit:
     """
-    Hit is a precursor to a Mapping, meaning that a match has been detected and linked to a set of SynonymData, but
+    Hit is a precursor to a Mapping, meaning that a match has been detected and linked to a set of EquivalentIdSet, but
     is not ready to become a fully fledged mapping yet, as it may require further disambiguation
     """
 
