@@ -49,6 +49,7 @@ class SapBertForEntityLinkingStep(BaseStep):
 
         :param depends_on:
         :param indices: list of EmbeddingIndex to use with this model
+        :param embedding_model: The SapBERT model to use to generate embeddings for entity mentions in input documents
         :param trainer: PL trainer to call when generarting embeddings
         :param entity_class_to_ontology_mappings: defines which NER classes shold be linked to which ontologies
         :param min_string_length_to_trigger: a per entity class mapping that signals sapbert will not run on matches
