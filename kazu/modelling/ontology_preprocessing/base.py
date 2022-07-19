@@ -325,9 +325,9 @@ class SynonymDatabase:
     instance: Optional["__SynonymDatabase"] = None
 
     class __SynonymDatabase:
-        syns_database_by_syn: DefaultDict[str, Dict[str, Set[EquivalentIdSet]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
+        syns_database_by_syn: DefaultDict[
+            str, DefaultDict[str, Set[EquivalentIdSet]]
+        ] = defaultdict(lambda: defaultdict(set))
         syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
             lambda: defaultdict(set)
         )
