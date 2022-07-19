@@ -427,8 +427,7 @@ class EmbeddingIndex(Index):
         logger.info(f"creating index for {self.parser.in_path}")
 
         # populate the databases
-        normalised_syn_dict = self._populate_databases()
-        self.synonym_db.add(self.parser.name, normalised_syn_dict)
+        self._populate_databases()
         for (
             partition_number,
             metadata,
