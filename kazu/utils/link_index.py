@@ -249,9 +249,10 @@ class DictionaryIndex(Index):
             distances = score_matrix[neighbours]
             distances = 100 * -distances
             hits = []
+            synonym_list = list(self.synonym_db.get_all(self.parser.name))
             for neighbour, score in zip(neighbours, distances):
                 # get by index
-                found_norm = list(self.synonym_db.get_all(self.parser.name))[neighbour]
+                found_norm = synonym_list[neighbour]
                 for id_set in self.synonym_db.get(self.parser.name, found_norm):
                     hits.append(
                         Hit(
