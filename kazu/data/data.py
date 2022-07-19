@@ -407,6 +407,13 @@ class DocumentEncoder(json.JSONEncoder):
             return as_dict
         elif isinstance(obj, (set, frozenset)):
             return list(obj)
+        elif isinstance(obj, Entity):
+            as_dict = obj.__dict__
+            hits = obj.hits
+            # remove hit store
+            as_dict.pop("_hit_store")
+            as_dict["hits"] = hits
+            return as_dict
         elif isinstance(obj, (datetime, date)):
             return obj.isoformat()
         elif isinstance(obj, ndarray):
