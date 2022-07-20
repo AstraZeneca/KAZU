@@ -392,7 +392,6 @@ class EmbeddingIndex(Index):
             string_norm = StringNormalizer.normalize(default_label)
             try:
                 for id_set in self.synonym_db.get(self.parser.name, string_norm):
-                    # confidence is always medium, dso can be later disambiguated
                     hit = Hit(
                         id_set=id_set,
                         parser_name=self.parser.name,
