@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from kazu.modelling.ontology_preprocessing.synonym_generation import GreekSymbolSubstitution
+from kazu.utils.language_phenomena import GREEK_SUBS
 
 
 class StringNormalizer:
@@ -11,7 +11,7 @@ class StringNormalizer:
     """
 
     allowed_additional_chars = {" ", "(", ")", "+", "-", "‐"}
-    greek_subs = GreekSymbolSubstitution.GREEK_SUBS
+    greek_subs = GREEK_SUBS
     greek_subs_upper = {x: f" {y.upper()} " for x, y in greek_subs.items()}
     other_subs = {
         "(": " (",
