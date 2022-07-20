@@ -1,22 +1,12 @@
 import json
-from typing import Dict, List
 
 from kazu.data.data import (
     CharSpan,
     Entity,
     Document,
     Hit,
-    EquivalentIdSet,
-    EquivalentIdAggregationStrategy,
 )
-
-
-def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit:
-    id_set = EquivalentIdSet(
-        aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS, ids=frozenset(ids)
-    )
-    hit = Hit(id_set=id_set, parser_name=parser_name, per_normalized_syn_metrics={"test": metrics})
-    return hit
+from kazu.tests.utils import make_hit
 
 
 def test_serialisation():

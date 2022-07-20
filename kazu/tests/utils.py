@@ -1,11 +1,18 @@
 import os
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import pandas as pd
 import pytest
 
-from kazu.data.data import Document, Entity, CharSpan
+from kazu.data.data import (
+    Document,
+    Entity,
+    CharSpan,
+    Hit,
+    EquivalentIdSet,
+    EquivalentIdAggregationStrategy,
+)
 from kazu.modelling.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
@@ -269,3 +276,15 @@ class DummyParser(OntologyParser):
     def parse_to_dataframe(self) -> pd.DataFrame:
 
         return pd.DataFrame.from_dict(self.DUMMY_DATA)
+
+
+class DummyParser2(DummyParser):
+    DUMMY_SOURCE = "test_parser2"
+
+
+def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit:
+    id_set = EquivalentIdSet(
+        aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS, ids=frozenset(ids)
+    )
+    hit = Hit(id_set=id_set, parser_name=parser_name, per_normalized_syn_metrics={"test": metrics})
+    return hit
