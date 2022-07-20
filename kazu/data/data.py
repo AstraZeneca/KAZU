@@ -10,6 +10,7 @@ from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
+from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
 from spacy import displacy
 
@@ -180,6 +181,7 @@ class Entity:
     metadata: Dict[Any, Any] = field(default_factory=dict)  # generic metadata
     start: int = field(init=False)
     end: int = field(init=False)
+    match_norm: str = field(init=False)
 
     @property
     def hits(self):
@@ -216,6 +218,7 @@ class Entity:
 
     def __post_init__(self):
         self.start, self.end = self.calc_starts_and_ends()
+        self.match_norm = StringNormalizer.normalize(self.match_norm)
 
     def is_completely_overlapped(self, other):
         """

@@ -2,7 +2,7 @@ from numbers import Real
 import re
 from typing import Container, Mapping, Tuple, Union
 
-from kazu.modelling.ontology_preprocessing.base import StringNormalizer
+from kazu.utils.string_normalizer import StringNormalizer
 
 BLACKLIST_EXACT = {
     "CHEMBL1201112": ["MAY"],

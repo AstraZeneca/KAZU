@@ -14,6 +14,7 @@ from urllib import parse
 
 import pandas as pd
 import rdflib
+from kazu.utils.string_normalizer import StringNormalizer
 from rdflib import URIRef
 from tqdm.auto import tqdm
 
@@ -28,7 +29,6 @@ from kazu.data.data import (
 # dataframe column keys
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
-    GreekSymbolSubstitution,
 )
 
 DEFAULT_LABEL = "default_label"
@@ -40,186 +40,6 @@ DATA_ORIGIN = "data_origin"
 
 
 logger = logging.getLogger(__name__)
-
-
-class StringNormalizer:
-    """
-    normalise a biomedical string for search
-    TODO: make configurable
-    """
-
-    allowed_additional_chars = {" ", "(", ")", "+", "-", "‐"}
-    greek_subs = GreekSymbolSubstitution.GREEK_SUBS
-    greek_subs_upper = {x: f" {y.upper()} " for x, y in greek_subs.items()}
-    other_subs = {
-        "(": " (",
-        ")": ") ",
-        ",": " ",
-        "/": " ",
-        "VIII": " 8 ",
-        "VII": " 7 ",
-        "XII": " 12 ",
-        "III": " 3 ",
-        "VI": " 6 ",
-        "IV": " 4 ",
-        "IX": " 9 ",
-        "XI": " 11 ",
-        "II": " 2 ",
-    }
-    re_subs = {
-        re.compile(r"(?<!\()-(?!\))"): " ",  # minus not in brackets
-        re.compile(r"(?<!\()‐(?!\))"): " ",  # hyphen not in brackets
-        re.compile(r"\sI\s|\sI$"): " 1 ",
-        re.compile(r"\sV\s|\sV$"): " 5 ",
-        re.compile(r"\sX\s|\sX$"): " 10 ",
-    }
-    re_subs_2 = {
-        re.compile(r"\sA\s|\sA$|^A\s"): " ALPHA ",
-        re.compile(r"\sB\s|\sB$|^B\s"): " BETA ",
-    }
-
-    number_split_pattern = re.compile(r"(\d+)")
-
-    symbol_number_split = re.compile(r"(\d+)$")
-    trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
-
-    @staticmethod
-    def is_symbol_like(debug, original_string) -> Optional[str]:
-        # TODO: rename method
-        # True if all upper, all alphanum, no spaces,
-
-        for char in original_string:
-            if char.islower() or not char.isalnum():
-                return None
-        else:
-            splits = [
-                x.strip() for x in re.split(StringNormalizer.symbol_number_split, original_string)
-            ]
-            string = " ".join(splits).strip()
-            if debug:
-                print(string)
-            return string
-
-    @staticmethod
-    def split_on_trailing_s_prefix(debug, string):
-        splits = [x.strip() for x in re.split(StringNormalizer.trailing_lowercase_s_split, string)]
-        string = " ".join(splits).strip()
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def normalize(original_string: str, debug: bool = False):
-        original_string = original_string.strip()
-        symbol_like = StringNormalizer.is_symbol_like(debug, original_string)
-        if symbol_like:
-            return symbol_like
-        else:
-            string = StringNormalizer.replace_substrings(debug, original_string)
-
-            # split up numbers
-            string = StringNormalizer.split_on_numbers(debug, string)
-            # replace greek
-            string = StringNormalizer.replace_greek(debug, string)
-
-            # strip non alphanum
-            string = StringNormalizer.replace_non_alphanum(debug, string)
-
-            string = StringNormalizer.split_on_trailing_s_prefix(debug, string)
-            # strip modifying lowercase prefixes
-            string = StringNormalizer.handle_lower_case_prefixes(debug, string)
-
-            string = StringNormalizer.sub_greek_char_abbreviations(debug, string)
-
-            string = string.strip()
-            if debug:
-                print(string)
-            return string
-
-    @staticmethod
-    def sub_greek_char_abbreviations(debug, string):
-        for re_sub, replace in StringNormalizer.re_subs_2.items():
-            string = re.sub(re_sub, replace, string)
-            if debug:
-                print(string)
-        return string
-
-    @staticmethod
-    def to_upper(debug, string):
-        string = string.upper()
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def handle_lower_case_prefixes(debug, string):
-        """
-        preserve case only if first char of contiguous subsequence is lower case, and is alphanum, and upper
-        case detected in rest of part
-        :param debug:
-        :param string:
-        :return:
-        """
-        parts = string.split(" ")
-        new_parts = []
-        for part in parts:
-            if part != "":
-                if part.islower() and not len(part) == 1:
-                    new_parts.append(part.upper())
-                else:
-                    first_char_case = part[0].islower()
-                    if (first_char_case and part[0].isalnum()) or (
-                        first_char_case and len(part) == 1
-                    ):
-                        new_parts.append(part)
-                    else:
-                        new_parts.append(part.upper())
-        string = " ".join(new_parts)
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def replace_non_alphanum(debug, string):
-        string = "".join(
-            [x for x in string if (x.isalnum() or x in StringNormalizer.allowed_additional_chars)]
-        )
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def replace_greek(debug, string):
-        for substr, replace in StringNormalizer.greek_subs_upper.items():
-            if substr in string:
-                string = string.replace(substr, replace)
-                if debug:
-                    print(string)
-        return string
-
-    @staticmethod
-    def split_on_numbers(debug, string):
-        splits = [x.strip() for x in re.split(StringNormalizer.number_split_pattern, string)]
-        string = " ".join(splits)
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
-    def replace_substrings(debug, original_string):
-        string = original_string
-        # replace substrings
-        for substr, replace in StringNormalizer.other_subs.items():
-            if substr in string:
-                string = string.replace(substr, replace)
-                if debug:
-                    print(string)
-        for re_sub, replace in StringNormalizer.re_subs.items():
-            string = re.sub(re_sub, replace, string)
-            if debug:
-                print(string)
-        return string
-
 
 SimpleValue = Union[NumericMetric, str]
 

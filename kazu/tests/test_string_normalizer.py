@@ -1,4 +1,4 @@
-from kazu.modelling.ontology_preprocessing.base import StringNormalizer
+from kazu.utils.string_normalizer import StringNormalizer
 
 
 def check_case(original, expected):

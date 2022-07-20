@@ -22,12 +22,12 @@ from kazu.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
     DEFAULT_LABEL,
     MetadataDatabase,
-    StringNormalizer,
     SynonymDatabase,
     OntologyParser,
     SimpleValue,
 )
 from kazu.utils.utils import create_char_ngrams, get_cache_dir
+from kazu.utils.string_normalizer import StringNormalizer
 
 logger = logging.getLogger(__name__)
 
