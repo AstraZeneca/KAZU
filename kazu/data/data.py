@@ -128,6 +128,7 @@ class Mapping:
     source: str  # the knowledgebase/database/ontology name
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
+    strategy: str  # the strategy used to create the mapping
     confidence: LinkRanks
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
@@ -218,7 +219,7 @@ class Entity:
 
     def __post_init__(self):
         self.start, self.end = self.calc_starts_and_ends()
-        self.match_norm = StringNormalizer.normalize(self.match_norm)
+        self.match_norm = StringNormalizer.normalize(self.match)
 
     def is_completely_overlapped(self, other):
         """
