@@ -117,38 +117,6 @@ class MetadataDatabase:
         """
         self.instance.add(name, metadata)  # type: ignore
 
-    def create_mapping(
-        self,
-        parser_name: str,
-        source: str,
-        idx: str,
-        confidence: LinkRanks,
-        additional_metadata: Optional[Dict],
-        strip_url: bool = True,
-    ) -> Mapping:
-        metadata = self.get_by_idx(name=parser_name, idx=idx)
-        if additional_metadata:
-            metadata.update(additional_metadata)
-        if strip_url:
-            url = urllib.parse.urlparse(idx)
-            if url.scheme == "":
-                # not a url
-                new_idx = idx
-            else:
-                new_idx = url.path.split("/")[-1]
-        else:
-            new_idx = idx
-        default_label = metadata.pop(DEFAULT_LABEL)
-        assert isinstance(default_label, str)
-        return Mapping(
-            default_label=default_label,
-            idx=new_idx,
-            source=source,
-            confidence=confidence,
-            parser_name=parser_name,
-            metadata=metadata,
-        )
-
 
 class SynonymDatabase:
     """
