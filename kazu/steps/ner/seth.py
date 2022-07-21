@@ -85,6 +85,7 @@ class SethStep(BaseStep):
                                             source=self.entity_class,
                                             parser_name="n/a",
                                             idx=self.entity_class,
+                                            strategy=self.namespace(),
                                             confidence=LinkRanks.MEDIUM_HIGH_CONFIDENCE,
                                         )
                                     ],
