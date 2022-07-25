@@ -5,7 +5,6 @@ import logging
 import os
 import re
 import sqlite3
-import urllib
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
@@ -14,15 +13,9 @@ from urllib import parse
 
 import pandas as pd
 import rdflib
-from kazu.utils.string_normalizer import StringNormalizer
-from rdflib import URIRef
-from tqdm.auto import tqdm
-
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
-    Mapping,
-    LinkRanks,
     NumericMetric,
 )
 
@@ -30,6 +23,9 @@ from kazu.data.data import (
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
 )
+from kazu.utils.string_normalizer import StringNormalizer
+from rdflib import URIRef
+from tqdm.auto import tqdm
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -129,11 +125,14 @@ class SynonymDatabase:
         syns_database_by_syn: DefaultDict[
             str, DefaultDict[str, Set[EquivalentIdSet]]
         ] = defaultdict(lambda: defaultdict(set))
-        syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
+        ambig_syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
             lambda: defaultdict(set)
         )
-        syns_database_by_syn_global: DefaultDict[str, Set[EquivalentIdSet]] = defaultdict(set)
-        kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
+        unambig_syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
+        # syns_database_by_syn_global: DefaultDict[str, Set[EquivalentIdSet]] = defaultdict(set)
+        # kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
         loaded_parsers: Set[str] = set()
 
         def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]], norm: bool):
@@ -144,18 +143,28 @@ class SynonymDatabase:
                 else:
                     syn_string_norm = syn_string
                 self.syns_database_by_syn[name][syn_string_norm].update(syn_data)
-                self.syns_database_by_syn_global[syn_string_norm].update(syn_data)
-                self.kb_database_by_syn_global[syn_string_norm].add(name)
+                # self.syns_database_by_syn_global[syn_string_norm].update(syn_data)
+                # self.kb_database_by_syn_global[syn_string_norm].add(name)
 
                 for equiv_ids in syn_data:
-                    for idx in equiv_ids.ids:
-                        self.syns_database_by_idx[name][idx].add(syn_string_norm)
+                    if equiv_ids.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                        for idx in equiv_ids.ids:
+                            self.unambig_syns_database_by_idx[name][idx].add(syn_string_norm)
+                    else:
+                        for idx in equiv_ids.ids:
+                            self.ambig_syns_database_by_idx[name][idx].add(syn_string_norm)
 
         def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
             return self.syns_database_by_syn[name][synonym]
 
-        def get_syns_for_id(self, name: str, idx: str) -> Set[str]:
-            return self.syns_database_by_idx[name][idx]
+        def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
+            if ignore_ambiguous:
+                return self.unambig_syns_database_by_idx[name][idx]
+            else:
+                result = set()
+                result.update(self.unambig_syns_database_by_idx[name][idx])
+                result.update(self.ambig_syns_database_by_idx[name][idx])
+                return result
 
     def __init__(self):
         if not SynonymDatabase.instance:
@@ -171,12 +180,13 @@ class SynonymDatabase:
         :param synonym: idx to query
         :return:
         """
+
         return self.instance.get(name, synonym)  # type: ignore
 
-    def get_syns_for_id(self, name: str, idx: str) -> Set[str]:
-        return self.instance.get_syns_for_id(name, idx)  # type: ignore
+    def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
+        return self.instance.get_syns_for_id(name, idx, ignore_ambiguous)  # type: ignore
 
-    def get_syns_for_synonym(self, name: str, synonym: str) -> Set[str]:
+    def get_syns_for_synonym(self, name: str, synonym: str, ignore_ambiguous: bool) -> List[str]:
         """
         get all other syns for a synonym in a kb
         :param name: parser name
@@ -185,9 +195,15 @@ class SynonymDatabase:
         """
         result = set()
         for equiv_id_set in self.get(name, synonym):
+            if (
+                ignore_ambiguous
+                and equiv_id_set.aggregated_by not in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
+            ):
+                continue
+
             for idx in equiv_id_set.ids:
-                result.update(self.get_syns_for_id(name, idx))
-        return result
+                result.update(self.get_syns_for_id(name, idx, ignore_ambiguous))
+        return list(sorted(result))
 
     def get_all(self, name: str) -> Dict[str, Set[EquivalentIdSet]]:
         """
@@ -196,22 +212,6 @@ class SynonymDatabase:
         :return:
         """
         return self.instance.syns_database_by_syn[name]  # type: ignore
-
-    def get_syns_global(self, synonym: str) -> Set[EquivalentIdSet]:
-        """
-        return a global view of synonym data across all dbs, for a specific synonym
-        :return:
-        """
-        assert self.instance is not None
-        return self.instance.syns_database_by_syn_global.get(synonym, set())
-
-    def get_kbs_for_syn_global(self, synonym: str) -> Set[str]:
-        """
-        return a global set of kbs in the db, for a specific synonym
-        :return:
-        """
-        assert self.instance is not None
-        return self.instance.kb_database_by_syn_global.get(synonym, set())
 
     def get_database(self) -> DefaultDict[str, Dict[str, Set[EquivalentIdSet]]]:
         return self.instance.syns_database_by_syn  # type: ignore
@@ -225,6 +225,10 @@ class SynonymDatabase:
         """
         assert self.instance is not None
         self.instance.add(name, synonyms, norm=False)
+
+    def get_loaded_parsers(self) -> Set[str]:
+        assert self.instance is not None
+        return self.instance.loaded_parsers
 
 
 class OntologyParser(ABC):
@@ -248,20 +252,16 @@ class OntologyParser(ABC):
         in_path: str,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        min_syn_length_to_merge: int = 4,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
             parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator
-        :param min_syn_length_to_merge: synonyms of this length or greater will be merged into the same EquivalentIdSet object,
-            set higher for highly symbolic sources (e.g. Gene symbols), and lower for more natural language sources (e.g. anatomy)
         """
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
-        self.min_syn_length_to_merge = min_syn_length_to_merge
 
     def find_kb(self, string: str) -> str:
         """
@@ -283,7 +283,9 @@ class OntologyParser(ABC):
         result = defaultdict(set)
         for i, row in synonym_df[[SYN, IDX]].groupby([SYN]).agg(set).reset_index().iterrows():
 
+            is_symbolic = StringNormalizer.is_probably_symbol_like(row[SYN])
             syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
+
             ids = row[IDX]
             id_to_source = {}
             ontologies = set()
@@ -296,12 +298,12 @@ class OntologyParser(ABC):
                 # most common - one or more ids and one kb per syn
                 if len(ids) == 1:
                     strategy = EquivalentIdAggregationStrategy.UNAMBIGUOUS
-                elif len(syn) >= self.min_syn_length_to_merge:
+                elif not is_symbolic:
                     strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE
                 else:
                     strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT
 
-                if len(syn) >= self.min_syn_length_to_merge:
+                if not is_symbolic:
                     result[syn].add(
                         EquivalentIdSet(
                             ids=frozenset(ids),
@@ -319,7 +321,7 @@ class OntologyParser(ABC):
                             )
                         )
             elif len(ontologies) == len(ids):
-                if len(syn) >= self.min_syn_length_to_merge:
+                if not is_symbolic:
                     result[syn].add(
                         EquivalentIdSet(
                             ids=frozenset(ids),
@@ -344,7 +346,7 @@ class OntologyParser(ABC):
             else:
                 # pathological scenario - one synonym maps to multiple KBs and multiple ids within those KBs,
                 # within the same composite KB
-                if len(syn) >= self.min_syn_length_to_merge:
+                if not is_symbolic:
                     result[syn].add(
                         EquivalentIdSet(
                             ids=frozenset(ids),
@@ -354,7 +356,7 @@ class OntologyParser(ABC):
                     )
                     logger.warning(
                         f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn} is more than 4 chars, parser has aggregated - i.e. assumed they refer to the same concepts"
+                        f"As {syn} appears to be non-symbolic, parser has aggregated - i.e. assumed they refer to the same concepts"
                     )
                 else:
                     for idx in ids:
@@ -367,7 +369,7 @@ class OntologyParser(ABC):
                         )
                     logger.warning(
                         f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn} is les than 4 chars, parser has split - i.e. assumed they refer to different concepts"
+                        f"As {syn} appears to be symbolic, parser has split - i.e. assumed they refer to different concepts"
                     )
         return result
 
@@ -1168,3 +1170,11 @@ class MeddraOntologyParser(OntologyParser):
             {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
         return df
+
+
+UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
+    EquivalentIdAggregationStrategy.UNAMBIGUOUS,
+    EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE,
+    EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+    EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+}
