@@ -6,42 +6,54 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import List, Dict, Optional, Iterable, Set
 
-from kazu.data.data import EquivalentIdSet
+from kazu.data.data import SynonymTerm
 from kazu.utils.language_phenomena import GREEK_SUBS
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
 
 
+def make_synonym_term(new_terms: Iterable[str], original_synonym_term: SynonymTerm) -> SynonymTerm:
+    return SynonymTerm(
+        terms=frozenset(new_terms),
+        term_norm=original_synonym_term.term_norm,
+        is_symbolic=original_synonym_term.is_symbolic,
+        associated_id_sets=original_synonym_term.associated_id_sets,
+        mapping_types=original_synonym_term.mapping_types,
+    )
+
+
 class SynonymGenerator(ABC):
     @abstractmethod
-    def call(
-        self, text: str, syn_data: Set[EquivalentIdSet]
-    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
         pass
 
-    def __call__(
-        self, syn_dict: Dict[str, Set[EquivalentIdSet]]
-    ) -> Dict[str, Set[EquivalentIdSet]]:
+    def __call__(self, synonyms: Set[SynonymTerm]) -> Set[SynonymTerm]:
 
-        result: Dict[str, Set[EquivalentIdSet]] = {}
-        for synonym, metadata in syn_dict.items():
-            metadata_copy = copy.copy(metadata)
-            generated_syn_dict: Optional[Dict[str, Set[EquivalentIdSet]]] = self.call(
-                synonym, metadata_copy
-            )
-            if generated_syn_dict:
-                for generated_syn in generated_syn_dict:
-                    if generated_syn in syn_dict:
+        existing_terms = set(term for synonym in synonyms for term in synonym.terms)
+
+        result: Set[SynonymTerm] = set()
+        for synonym in synonyms:
+            generated_synonym_terms: Optional[SynonymTerm] = self.call(synonym)
+            if generated_synonym_terms:
+                new_terms = set()
+                for generated_syn in generated_synonym_terms.terms:
+                    if generated_syn in existing_terms:
                         logger.debug(
-                            f"generated synonym '{generated_syn}' matches existing synonym {syn_dict[generated_syn]} "
+                            f"generated synonym '{generated_syn}' matches existing synonym {synonym} "
                         )
-                    elif generated_syn in result:
+                    elif generated_syn in new_terms:
                         logger.debug(
-                            f"generated synonym '{generated_syn}' matches another generated synonym {result[generated_syn]} "
+                            f"generated synonym '{generated_syn}' matches another generated synonym {synonym} "
                         )
                     else:
-                        result[generated_syn] = metadata_copy
+                        new_terms.add(generated_syn)
+                if new_terms:
+
+                    result.add(
+                        make_synonym_term(new_terms=new_terms, original_synonym_term=synonym)
+                    )
+
         return result
 
 
@@ -49,35 +61,35 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: Set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(
-        self, syn_dict: Dict[str, Set[EquivalentIdSet]]
-    ) -> Dict[str, Set[EquivalentIdSet]]:
+    def __call__(self, synonyms: Set[SynonymTerm]) -> Set[SynonymTerm]:
         """
         for every permutation of modifiers, generate a list of syns, then aggregate at the end
         :param synonym_data:
         :return:
         """
-        results = defaultdict(set)
+        existing_terms = set(term for synonym in synonyms for term in synonym.terms)
         synonym_gen_permutations = itertools.permutations(self.synonym_generators)
+        results = set()
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original synonyms
-            all_syns = copy.deepcopy(syn_dict)
+            all_syns = copy.deepcopy(synonyms)
             logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
             for generator in permutation_list:
                 # run the generator
-                new_syns = generator(all_syns)
-                for new_syn, syn_data in new_syns.items():
+                new_syns: Set[SynonymTerm] = generator(all_syns)
+                for new_syn_term in new_syns:
                     # don't add if it maps to a clean syn
-                    if new_syn not in syn_dict:
-                        results[new_syn].update(syn_data)
+                    new_terms_this_generator = new_syn_term.terms.difference(existing_terms)
+                    if len(new_terms_this_generator) > 0:
+                        synonym_term_with_unique_new_terms = make_synonym_term(
+                            new_terms_this_generator, new_syn_term
+                        )
+                        results.add(synonym_term_with_unique_new_terms)
                         # let following generators operate on the output.
                         # a synonym might be in all_syns but not synonym_data
                         # since a previous generator might have already produced it
-                        existing_syn_set = all_syns.get(new_syn)
-                        if existing_syn_set:
-                            existing_syn_set.update(syn_data)
-                        else:
-                            all_syns[new_syn] = syn_data
+                        all_syns.add(synonym_term_with_unique_new_terms)
+
         return results
 
 
@@ -90,46 +102,45 @@ class SeparatorExpansion(SynonymGenerator):
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
 
-    def call(
-        self, text: str, syn_data: Set[EquivalentIdSet]
-    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
-        bracket_results = {}
-        all_group_results = {}
-        if "(" in text and ")" in text:
-            # expand end expression brackets
-            matches = re.match(self.end_expression_brackets, text)
-            if matches is not None:
-                all_groups_no_brackets = []
-                for group in matches.groups():
-                    if (
-                        group not in self.excluded_parenthesis
-                        and group.lower() not in self.all_stopwords
-                    ):
-                        bracket_results[group.strip()] = syn_data
-                        all_groups_no_brackets.append(group)
-                all_group_results["".join(all_groups_no_brackets)] = syn_data
-            else:
-                # remove mid expression  brackets
-                matches = re.match(self.mid_expression_brackets, text)
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+        bracket_results = set()
+        all_group_results = set()
+        for text in synonym.terms:
+            if "(" in text and ")" in text:
+                # expand end expression brackets
+                matches = re.match(self.end_expression_brackets, text)
                 if matches is not None:
                     all_groups_no_brackets = []
                     for group in matches.groups():
-                        all_groups_no_brackets.append(group.strip())
-                    all_group_results[" ".join(all_groups_no_brackets)] = syn_data
+                        if (
+                            group not in self.excluded_parenthesis
+                            and group.lower() not in self.all_stopwords
+                        ):
+                            bracket_results.add(group.strip())
+                            all_groups_no_brackets.append(group)
+                    all_group_results.add("".join(all_groups_no_brackets))
+                else:
+                    # remove mid expression  brackets
+                    matches = re.match(self.mid_expression_brackets, text)
+                    if matches is not None:
+                        all_groups_no_brackets = []
+                        for group in matches.groups():
+                            all_groups_no_brackets.append(group.strip())
+                        all_group_results.add(" ".join(all_groups_no_brackets))
 
-        # expand slashes
-        for x in list(bracket_results.keys()):
-            if "/" in x:
-                splits = x.split("/")
-                for split in splits:
-                    bracket_results[split.strip()] = syn_data
-            if "," in x:
-                splits = x.split(",")
-                for split in splits:
-                    bracket_results[split.strip()] = syn_data
-        bracket_results.update(all_group_results)
+            # expand slashes
+            for x in list(bracket_results):
+                if "/" in x:
+                    splits = x.split("/")
+                    for split in splits:
+                        bracket_results.add(split.strip())
+                if "," in x:
+                    splits = x.split(",")
+                    for split in splits:
+                        bracket_results.add(split.strip())
+            bracket_results.update(all_group_results)
         if len(bracket_results) > 0:
-            return bracket_results
+            return make_synonym_term(bracket_results, synonym)
         else:
             return None
 
@@ -146,18 +157,20 @@ class StopWordRemover(SynonymGenerator):
         # for NER
         self.all_stopwords.remove("i")
 
-    def call(
-        self, text: str, syn_data: Set[EquivalentIdSet]
-    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
-        lst = []
-        detected = False
-        for token in text.split():
-            if token.lower() in self.all_stopwords:
-                detected = True
-            else:
-                lst.append(token)
-        if detected:
-            return {" ".join(lst): syn_data}
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+        new_terms = set()
+        for text in synonym.terms:
+            lst = []
+            detected = False
+            for token in text.split():
+                if token.lower() in self.all_stopwords:
+                    detected = True
+                else:
+                    lst.append(token)
+            if detected:
+                new_terms.add(" ".join(lst))
+        if new_terms:
+            return make_synonym_term(new_terms, synonym)
         else:
             return None
 
@@ -197,47 +210,46 @@ class StringReplacement(SynonymGenerator):
         self.replacement_dict = replacement_dict
         self.digit_aware_replacement_dict = digit_aware_replacement_dict
 
-    def call(
-        self, text: str, syn_data: Set[EquivalentIdSet]
-    ) -> Optional[Dict[str, Set[EquivalentIdSet]]]:
-        results = {}
-        if self.replacement_dict:
-            for to_replace, replacement_list in self.replacement_dict.items():
-                if to_replace in text:
-                    for replace_with in replacement_list:
-                        results[text.replace(to_replace, replace_with).strip()] = syn_data
-        if self.digit_aware_replacement_dict:
-            for to_replace, replacement_list in self.digit_aware_replacement_dict.items():
-                matches = set(re.findall(to_replace + r"[0-9]+", text))
-                for match in matches:
-                    number = match.split(to_replace)[1]
-                    for sub_in in replacement_list:
-                        new_str = text.replace(match, f"{sub_in}{number}").strip()
-                        results[new_str] = syn_data
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+        results = set()
+        for text in synonym.terms:
+            if self.replacement_dict:
+                for to_replace, replacement_list in self.replacement_dict.items():
+                    if to_replace in text:
+                        for replace_with in replacement_list:
+                            results.add(text.replace(to_replace, replace_with).strip())
+            if self.digit_aware_replacement_dict:
+                for to_replace, replacement_list in self.digit_aware_replacement_dict.items():
+                    matches = set(re.findall(to_replace + r"[0-9]+", text))
+                    for match in matches:
+                        number = match.split(to_replace)[1]
+                        for sub_in in replacement_list:
+                            new_str = text.replace(match, f"{sub_in}{number}").strip()
+                            results.add(new_str)
 
-        if self.include_greek:
-            # only strip text once initially - the greek character replacement
-            # will not introduce leading or trailing whitespace unlike the other
-            # replacements above
-            stripped_text = text.strip()
-            strings_to_substitute = {stripped_text}
-            for to_replace, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
-                # if it's in the original text it should be in all previous substitutions, no
-                # need to check all of them
-                if to_replace in text:
-                    # necessary so we don't modify strings_to_substitute while looping over it,
-                    # which throws an error
-                    outputs_this_step = set()
-                    for string_to_subsitute in strings_to_substitute:
-                        for replacement in replacement_set:
-                            single_unique_letter_substituted = string_to_subsitute.replace(
-                                to_replace, replacement
-                            )
-                            outputs_this_step.add(single_unique_letter_substituted)
-                            results[single_unique_letter_substituted] = syn_data
-                    strings_to_substitute.update(outputs_this_step)
+            if self.include_greek:
+                # only strip text once initially - the greek character replacement
+                # will not introduce leading or trailing whitespace unlike the other
+                # replacements above
+                stripped_text = text.strip()
+                strings_to_substitute = {stripped_text}
+                for to_replace, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
+                    # if it's in the original text it should be in all previous substitutions, no
+                    # need to check all of them
+                    if to_replace in text:
+                        # necessary so we don't modify strings_to_substitute while looping over it,
+                        # which throws an error
+                        outputs_this_step = set()
+                        for string_to_subsitute in strings_to_substitute:
+                            for replacement in replacement_set:
+                                single_unique_letter_substituted = string_to_subsitute.replace(
+                                    to_replace, replacement
+                                )
+                                outputs_this_step.add(single_unique_letter_substituted)
+                                results.add(single_unique_letter_substituted)
+                        strings_to_substitute.update(outputs_this_step)
 
         if len(results) > 0:
-            return results
+            return make_synonym_term(results, synonym)
         else:
             return None

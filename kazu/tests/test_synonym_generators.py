@@ -13,10 +13,12 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     GreekSymbolSubstitution,
     CombinatorialSynonymGenerator,
 )
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy
+from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
+from kazu.utils.language_phenomena import GREEK_SUBS
+
 dummy_equiv_ids = EquivalentIdSet(
     ids=frozenset(("text",)),
     aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
@@ -28,9 +30,20 @@ def check_generator_result(
     expected_syns: Set[str],
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
-    data = {input_str: set((dummy_equiv_ids,))}
-    result = generator(data)
-    new_syns = set(result.keys())
+
+    term = {
+        SynonymTerm(
+            terms=frozenset([input_str]),
+            term_norm="NA",
+            is_symbolic=False,
+            mapping_types=frozenset(),
+            associated_id_sets=frozenset([dummy_equiv_ids]),
+        )
+    }
+
+    result: Set[SynonymTerm] = generator(term)
+
+    new_syns = set(term for synonym in result for term in synonym.terms)
     assert new_syns == expected_syns
 
 
@@ -165,12 +178,12 @@ def test_greek_substitution_dict_casing():
         for v in val_set:
             # if we substitute to a greek letter, we should sub
             # to both cases
-            if v in GreekSymbolSubstitution.GREEK_SUBS:
+            if v in GREEK_SUBS:
                 if v.islower():
                     flipped_case_v = v.upper()
                 elif v.isupper():
                     flipped_case_v = v.lower()
-                assert flipped_case_v in GreekSymbolSubstitution.GREEK_SUBS
+                assert flipped_case_v in GREEK_SUBS
                 assert flipped_case_v == k or flipped_case_v in val_set
 
 
@@ -180,7 +193,7 @@ def test_greek_substitution_dict_uncode_variants():
         char = chr(i)
         try:
             char_name_lower = unicodedata.name(char).lower()
-            for greek_letter in GreekSymbolSubstitution.GREEK_SUBS.values():
+            for greek_letter in GREEK_SUBS.values():
                 assert greek_letter not in char_name_lower
         except ValueError:
             # character doesn't exist or has no name
