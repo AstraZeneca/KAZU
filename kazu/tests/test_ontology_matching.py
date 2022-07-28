@@ -1,14 +1,10 @@
-from collections import defaultdict
-from typing import Dict, Set
-
 import pytest
-
 import spacy
-from spacy.lang.en import English
-
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
+from kazu.tests.utils import make_dummy_parser
+from spacy.lang.en import English
 
 
 def test_constructor():
@@ -37,38 +33,31 @@ def test_initialize():
     assert ontology_matcher.nr_lowercase_rules == 0
 
 
-class MockParser:
-    def __init__(self, parser_name: str, id_to_syns: Dict[str, Set[str]]):
-        self.name = parser_name
-        self.syn_dict: Dict[str, Set[EquivalentIdSet]] = defaultdict(set)
-        # format input into structure of the output of collect_aggregate_synonym_data
-        # doing this lets us have a simpler structure for creating new parsers to extend
-        # the tests if desired
-        for id, syns in id_to_syns.items():
-            for syn in syns:
-                self.syn_dict[syn].add(
-                    EquivalentIdSet(
-                        aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
-                        ids=frozenset((id,)),
-                    )
-                )
-
-    def collect_aggregate_synonym_data(
-        self, normalise_original_syns: bool
-    ) -> Dict[str, Set[EquivalentIdSet]]:
-        return self.syn_dict
-
-    def generate_synonyms(self):
-        return {}
-
-
-parser_1 = MockParser(
-    "first_mock_parser", {"http://purl.obolibrary.org/obo/UBERON_042": {"Q42_label", "Q42_syn"}}
+parser_1 = make_dummy_parser(
+    in_path="",
+    name="first_mock_parser",
+    source="test",
+    data={
+        IDX: [
+            "http://purl.obolibrary.org/obo/UBERON_042",
+            "http://purl.obolibrary.org/obo/UBERON_042",
+        ],
+        DEFAULT_LABEL: ["Q42", "Q42"],
+        SYN: ["Q42_label", "Q42_syn"],
+        MAPPING_TYPE: ["test", "test"],
+    },
 )
 
-
-parser_2 = MockParser(
-    "second_mock_parser", {"http://purl.obolibrary.org/obo/MONDO_08": {"Q8_label", "Q8_syn"}}
+parser_2 = make_dummy_parser(
+    in_path="",
+    name="second_mock_parser",
+    source="test",
+    data={
+        IDX: ["http://purl.obolibrary.org/obo/MONDO_08", "http://purl.obolibrary.org/obo/MONDO_08"],
+        DEFAULT_LABEL: ["Q8", "Q8"],
+        SYN: ["Q8_label", "Q8_syn"],
+        MAPPING_TYPE: ["test", "test"],
+    },
 )
 
 example_text = (

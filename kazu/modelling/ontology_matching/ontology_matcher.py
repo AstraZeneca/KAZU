@@ -7,6 +7,7 @@ from typing import List, Dict, Union, Callable, Iterable, Tuple, Set
 
 import spacy
 import srsly
+from kazu.data.data import SynonymTerm
 from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
 from kazu.modelling.ontology_matching.variants import create_variants
@@ -140,81 +141,51 @@ class OntologyMatcher:
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         for parser in parsers:
             # TODO: fix api call
-            synonym_data = parser.collect_aggregate_synonym_data(False)
-            generated_synonym_data = parser.generate_synonyms()
-            generated_synonym_data.update(synonym_data)
+            synonym_data: Set[SynonymTerm] = parser.export_synonym_terms()
+            synonym_terms = parser.generate_synonyms()
+            synonym_terms.update(synonym_data)
 
             parser_name = parser.name
-            logging.info(f"generating {len(generated_synonym_data)} patterns for {parser_name}")
-            patterns = list(self.nlp.tokenizer.pipe(generated_synonym_data.keys()))
+            logging.info(
+                f"generating {sum(len(x.terms) for x in synonym_terms)} patterns for {parser_name}"
+            )
+            patterns = list(
+                self.nlp.tokenizer.pipe(
+                    [term for synonym in synonym_terms for term in synonym.terms]
+                )
+            )
 
             blacklister = blacklisters.get(parser_name)
-            for i, (syn, set_of_equiv_id_sets) in enumerate(generated_synonym_data.items()):
-                for equiv_id_set in set_of_equiv_id_sets:
-                    for idx in equiv_id_set.ids:
-                        # TODO: combine entry_filter and blacklisters
-                        if blacklister is None:
-                            passes_blacklist = True
-                        else:
-                            passes_blacklist = blacklister(syn)[0]
+            for i, synonym_term in enumerate(synonym_terms):
+                for syn in synonym_term.terms:
+                    for equiv_id_set in synonym_term.associated_id_sets:
+                        for idx in equiv_id_set.ids:
+                            # TODO: combine entry_filter and blacklisters
+                            if blacklister is None:
+                                passes_blacklist = True
+                            else:
+                                passes_blacklist = blacklister(syn)[0]
 
-                        if passes_blacklist:
-                            add_case_sens_pat, add_case_insens_pat = self.entry_filter(syn, idx)
-                            # should not both be true - we only need to add the pattern
-                            # in a single matcher
-                            assert not (add_case_sens_pat and add_case_insens_pat)
-                            try:
-                                match_id = parser_name + self.match_id_sep + str(idx)
-                                if add_case_sens_pat:
-                                    strict_matcher.add(match_id, [patterns[i]])
-                                elif add_case_insens_pat:
-                                    lowercase_matcher.add(match_id, [patterns[i]])
-                            except KeyError as e:
-                                logging.warning(
-                                    f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
-                                    e,
-                                )
+                            if passes_blacklist:
+                                add_case_sens_pat, add_case_insens_pat = self.entry_filter(syn, idx)
+                                # should not both be true - we only need to add the pattern
+                                # in a single matcher
+                                assert not (add_case_sens_pat and add_case_insens_pat)
+                                try:
+                                    match_id = parser_name + self.match_id_sep + str(idx)
+                                    if add_case_sens_pat:
+                                        strict_matcher.add(match_id, [patterns[i]])
+                                    elif add_case_insens_pat:
+                                        lowercase_matcher.add(match_id, [patterns[i]])
+                                except KeyError as e:
+                                    logging.warning(
+                                        f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
+                                        e,
+                                    )
 
         self.strict_matcher = strict_matcher
         self.lowercase_matcher = lowercase_matcher
         return strict_matcher, lowercase_matcher
-
-    # dead code?
-    # def initialize(
-    #     self,
-    #     get_examples: Callable,
-    #     *,
-    #     nlp: Optional[Language] = None,
-    #     parquet_files: SinglePathLikeOrIterable = None,
-    #     labels: Optional[Iterable[str]] = None,
-    # ) -> None:
-    #     """Initialize the labels and ontologies when creating this component.
-    #     This method is not called when reading the pipeline from disk.
-    #
-    #     nlp (Language): The current nlp object the component is part of.
-    #     parquet_files (str or Path): location to parquet file or directory of parquet files
-    #     labels (Optional[Iterable[str]]): The labels to add to the component
-    #     """
-    #     # Define the labels
-    #     if not labels:
-    #         ex_labels = set()
-    #         for example in get_examples():
-    #             for cat in example.y.cats:
-    #                 ex_labels.add(cat)
-    #         self.set_labels(ex_labels)
-    #         if len(self.labels) > 0:
-    #             logging.info(f"Inferred {len(self.labels)} labels from the data.")
-    #         else:
-    #             self.set_labels([GENE, DRUG, ANATOMY, DISEASE, CELL_LINE, ENTITY])
-    #             logging.info(f"Used the {len(self.labels)} default labels.")
-    #
-    #     else:
-    #         self.set_labels(labels)
-    #         logging.info(f"Used the {len(self.labels)} given labels.")
-    #
-    #     # Define the ontologies
-    #     if parquet_files:
-    #         self.set_ontologies(parquet_files)
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
