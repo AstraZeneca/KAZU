@@ -16,7 +16,6 @@ setup(
         "rdflib==6.0.2",
         "hydra-core==1.1.1",
         "pytorch-lightning==1.6.4",
-        "pydash==5.1.0",
         "pandas==1.3.4",
         "pyarrow==8.0.0",
         "pytorch-metric-learning==0.9.99",

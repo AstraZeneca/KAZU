@@ -3,9 +3,7 @@ import logging
 import traceback
 from typing import List, Tuple, Dict, Set
 
-import pydash
-
-from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Hit
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Hit
 from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
@@ -75,7 +73,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :return:
         """
         failed_docs = []
-        entities: List[Entity] = pydash.flatten([x.get_entities() for x in docs])
+        entities = [ent for doc in docs for ent in doc.get_entities()]
         ents_by_match_and_class = {
             k: list(v) for k, v in sort_then_group(entities, lambda x: (x.match, x.entity_class))
         }

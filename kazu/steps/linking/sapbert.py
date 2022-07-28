@@ -5,7 +5,6 @@ import traceback
 from collections import defaultdict
 from typing import List, Tuple, Iterable, Optional, Dict, Set
 
-import pydash
 import torch
 from pytorch_lightning import Trainer
 
@@ -111,29 +110,29 @@ class SapBertForEntityLinkingStep(BaseStep):
         failed_docs = []
         try:
             entities_to_process = []
-            ent: Entity
-            for ent in pydash.flatten([x.get_entities() for x in docs]):
-                if ent.entity_class not in self.entity_class_to_indices.keys():
-                    continue
-                if self.ignore_high_conf:
-                    # check every parser namespace has a high conf hit
-                    # gives false by default, so if there are no hits for a parser
-                    # we run sapbert
-                    parser_has_high_conf_hit: Dict[str, bool] = defaultdict(bool)
-                    for hit in ent.hits:
-                        if any(
-                            metrics[EXACT_MATCH] is True
-                            for metrics in hit.per_normalized_syn_metrics.values()
-                        ):
-                            parser_has_high_conf_hit[hit.parser_name] = True
+            for doc in docs:
+                for ent in doc.get_entities():
+                    if ent.entity_class not in self.entity_class_to_indices.keys():
+                        continue
+                    if self.ignore_high_conf:
+                        # check every parser namespace has a high conf hit
+                        # gives false by default, so if there are no hits for a parser
+                        # we run sapbert
+                        parser_has_high_conf_hit: Dict[str, bool] = defaultdict(bool)
+                        for hit in ent.hits:
+                            if any(
+                                metrics[EXACT_MATCH] is True
+                                for metrics in hit.per_normalized_syn_metrics.values()
+                            ):
+                                parser_has_high_conf_hit[hit.parser_name] = True
 
-                    # TODO: in theory I think you could pass an embedding index when constructing
-                    # that never gets used because it isn't in the list of entities and ontologies
-                    # but I'm unclear here - unimportant enough to delay until later
-                    if not all(
-                        parser_has_high_conf_hit[index.parser.name] for index in self.indices
-                    ):
-                        entities_to_process.append(ent)
+                        # TODO: in theory I think you could pass an embedding index when constructing
+                        # that never gets used because it isn't in the list of entities and ontologies
+                        # but I'm unclear here - unimportant enough to delay until later
+                        if not all(
+                            parser_has_high_conf_hit[index.parser.name] for index in self.indices
+                        ):
+                            entities_to_process.append(ent)
 
             self.process_entities(entities_to_process)
         except Exception:
