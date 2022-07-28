@@ -32,4 +32,4 @@ repos:
     rev: v0.931  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
-        additional_dependencies: [types-six,types-requests,types-cachetools]
+        additional_dependencies: [types-requests,types-cachetools]
