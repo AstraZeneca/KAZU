@@ -4,10 +4,11 @@ import os
 import re
 import sqlite3
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet
 from urllib import parse
-
+import itertools
 import pandas as pd
 import rdflib
 from kazu.data.data import (
@@ -23,8 +24,10 @@ from kazu.modelling.language.symbol_classification import SymbolClassifier, Defa
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
 )
+from kazu.utils.spacy_pipeline import SpacyPipeline
 from kazu.utils.string_normalizer import StringNormalizer
 from rdflib import URIRef
+from strsimpy import NGram
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -56,6 +59,7 @@ class OntologyParser(ABC):
     def __init__(
         self,
         in_path: str,
+        spacy_pipeline: SpacyPipeline,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         symbol_classifier: Optional[SymbolClassifier] = None,
@@ -73,6 +77,8 @@ class OntologyParser(ABC):
             all associated ID's into a single EquivalentIdSet. If no symbol classifier is specified, a default one will
             be used
         """
+        self.spacy_pipeline = spacy_pipeline
+        self.synonym_merge_threshold = 0.65
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
@@ -80,6 +86,7 @@ class OntologyParser(ABC):
         self.symbol_classifier: SymbolClassifier = (
             symbol_classifier if symbol_classifier is not None else DefaultSymbolClassifier()
         )
+        self.metadata_db = MetadataDatabase()
 
     def find_kb(self, string: str) -> str:
         """
@@ -89,7 +96,7 @@ class OntologyParser(ABC):
         """
         raise NotImplementedError()
 
-    def resolve_composite_synonym_dataframe(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
+    def resolve_synoyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
         """
         synonym lists are noisy, so we need an algorithm to identify when a synonym
 
@@ -113,6 +120,7 @@ class OntologyParser(ABC):
                 logger.debug(f"normaliser has merged {syn_set} into a single term: {syn_norm}")
 
             is_symbolic = any(self.symbol_classifier.is_symbolic(x) for x in syn_set)
+
             ids: Set[str] = row[IDX]
             id_to_source = {}
             ontologies = set()
@@ -121,102 +129,66 @@ class OntologyParser(ABC):
                 ontologies.add(source)
                 id_to_source[idx] = source
 
-            def merge_ids(strategy: EquivalentIdAggregationStrategy):
-                synonym_term = SynonymTerm(
-                    term_norm=syn_norm,
-                    terms=frozenset(syn_set),
-                    is_symbolic=is_symbolic,
-                    mapping_types=mapping_type_set,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids=frozenset(ids),
-                                aggregated_by=strategy,
-                                ids_to_source={idx: id_to_source[idx] for idx in ids},
-                            )
-                        ]
-                    ),
-                )
+            associated_id_sets: FrozenSet[EquivalentIdSet] = self.score_and_group_ids(
+                ids, id_to_source, is_symbolic
+            )
 
-                result.add(synonym_term)
+            synonym_term = SynonymTerm(
+                term_norm=syn_norm,
+                terms=frozenset(syn_set),
+                is_symbolic=is_symbolic,
+                mapping_types=mapping_type_set,
+                associated_id_sets=associated_id_sets,
+            )
 
-            def split_ids(strategy: EquivalentIdAggregationStrategy):
-                set_of_id_set = set()
-                for idx in ids:
-                    set_of_id_set.add(
-                        EquivalentIdSet(
-                            ids=frozenset([idx]),
-                            aggregated_by=strategy,
-                            ids_to_source={idx: id_to_source[idx] for idx in ids},
-                        )
-                    )
-                synonym_term = SynonymTerm(
-                    term_norm=syn_norm,
-                    terms=frozenset(syn_set),
-                    is_symbolic=is_symbolic,
-                    mapping_types=mapping_type_set,
-                    associated_id_sets=frozenset(set_of_id_set),
-                )
-                if synonym_term.is_confused:
-                    logger.warning(
-                        f"synonym term {synonym_term} is confused. ids: {synonym_term.associated_id_sets}, terms"
-                    )
-                result.add(synonym_term)
+            result.add(synonym_term)
 
-            if len(ontologies) == 1:
-                # most common - one or more ids and one kb per syn
-                if len(ids) == 1:
-                    strategy = EquivalentIdAggregationStrategy.UNAMBIGUOUS
-                elif not is_symbolic:
-                    strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE
-                else:
-                    strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT
-
-                if not is_symbolic:
-                    merge_ids(strategy)
-                else:
-                    split_ids(strategy)
-            elif len(ontologies) == len(ids):
-                if not is_symbolic:
-                    strategy = (
-                        EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE
-                    )
-                    merge_ids(strategy)
-                else:
-                    strategy = (
-                        EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT
-                    )
-                    split_ids(strategy)
-                # pathological scenario - multiple ontologies and ids, one syn. Syn may refer to different concepts
-                # (although probably not)
-                logger.warning(
-                    f"found independent identifiers for {syn_norm}: {ids}. This may cause disambiguation problems "
-                    f"if the identifiers are not cross references"
-                )
-            else:
-                # pathological scenario - one synonym maps to multiple KBs and multiple ids within those KBs,
-                # within the same composite KB
-                if not is_symbolic:
-                    strategy = (
-                        EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE
-                    )
-                    merge_ids(strategy)
-                    logger.warning(
-                        f"could not resolve {syn_norm} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn_norm} appears to be non-symbolic, "
-                        f"parser has aggregated - i.e. assumed they refer to the same concepts"
-                    )
-                else:
-                    strategy = (
-                        EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT
-                    )
-                    split_ids(strategy)
-                    logger.warning(
-                        f"could not resolve {syn_norm} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn_norm} appears to be symbolic, "
-                        f"parser has split - i.e. assumed they refer to different concepts"
-                    )
         return result
+
+    def score_and_group_ids(
+        self, ids: Set[str], id_to_source: Dict[str, str], is_symbolic: bool
+    ) -> FrozenSet[EquivalentIdSet]:
+        id_to_label = {}
+        label_to_id = defaultdict(set)
+        for idx in ids:
+            default_label: str = str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
+            id_to_label[idx] = default_label
+            label_to_id[default_label].add(idx)
+
+        if len(label_to_id) == 1 or not is_symbolic:
+            # default label is the same, or it's not symbolic. It's the same concept
+            id_set = EquivalentIdSet(
+                ids=frozenset(ids),
+                aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                ids_to_source={idx: id_to_source[idx] for idx in ids},
+            )
+            return frozenset([id_set])
+        else:
+            # we need to check similarity
+            id_groups = defaultdict(set)
+            for s1, s2 in itertools.combinations(label_to_id.keys(), r=2):
+                # score = self.ngram.distance(s1,s2)
+                score = self.spacy_pipeline.nlp(s1.lower()).similarity(
+                    self.spacy_pipeline.nlp(s2.lower())
+                )
+                id_groups[s1].update(label_to_id[s1])
+                id_groups[s2].update(label_to_id[s2])
+                if score >= self.synonym_merge_threshold:
+                    # ids prob the same thing
+                    id_groups[s1].update(label_to_id[s2])
+                    id_groups[s2].update(label_to_id[s1])
+
+            result_sets_hashable = set(frozenset(x) for x in id_groups.values())
+            result = set()
+            for id_group in result_sets_hashable:
+                result.add(
+                    EquivalentIdSet(
+                        ids=frozenset(id_group),
+                        aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                        ids_to_source={idx: id_to_source[idx] for idx in id_group},
+                    )
+                )
+            return frozenset(result)
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
@@ -245,10 +217,11 @@ class OntologyParser(ABC):
         assert isinstance(self.parsed_dataframe, pd.DataFrame)
         # ensure correct order
         syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
+        syn_df = syn_df.dropna(subset=[SYN])
         syn_df[SYN] = syn_df[SYN].apply(str.strip)
         syn_df.drop_duplicates(subset=self.all_synonym_column_names)
         assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-        synonym_terms = self.resolve_composite_synonym_dataframe(synonym_df=syn_df)
+        synonym_terms = self.resolve_synoyms(synonym_df=syn_df)
         return synonym_terms
 
     def populate_metadata_database(self):
@@ -440,6 +413,8 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
     ) -> Iterable[pd.DataFrame]:
         for json_dict in jsons_gen:
             synonyms = json_dict.get("synonyms", [])
+            main_name = json_dict["name"]
+            synonyms.append(main_name)
             mapping_types = ["synonyms"] * len(synonyms)
             trade_names = json_dict.get("tradeNames", [])
             synonyms.extend(trade_names)
@@ -508,6 +483,7 @@ class RDFGraphParser(OntologyParser):
                     iris.append(str(sub))
                     syns.append(str(other_syn_obj))
                     mapping_type.append(syn_predicate)
+
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
         )
@@ -648,7 +624,9 @@ class MondoOntologyParser(OntologyParser):
     """
 
     def find_kb(self, string: str):
-        return parse.urlparse(string).path.split("_")[0]
+        path = parse.urlparse(string).path
+
+        return path.split("/")[-1]
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         x = json.load(open(self.in_path, "r"))
@@ -664,6 +642,9 @@ class MondoOntologyParser(OntologyParser):
 
             idx = node["id"]
             default_label = node.get("lbl")
+            if default_label is None:
+                # skip if no default label is available
+                continue
             # add default_label to syn type
             all_syns.append(default_label)
             default_label_list.append(default_label)
