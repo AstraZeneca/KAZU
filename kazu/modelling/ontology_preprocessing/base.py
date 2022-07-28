@@ -1,5 +1,4 @@
 import copy
-import itertools
 import json
 import logging
 import os
@@ -8,15 +7,17 @@ import sqlite3
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, DefaultDict, Union
+from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, DefaultDict, Union, FrozenSet
 from urllib import parse
 
 import pandas as pd
 import rdflib
+from gilda.process import replace_dashes
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     NumericMetric,
+    SynonymTerm,
 )
 
 # dataframe column keys
@@ -25,7 +26,6 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
 )
 from kazu.utils.string_normalizer import StringNormalizer
 from rdflib import URIRef
-from tqdm.auto import tqdm
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -122,39 +122,29 @@ class SynonymDatabase:
     instance: Optional["__SynonymDatabase"] = None
 
     class __SynonymDatabase:
-        syns_database_by_syn: DefaultDict[
-            str, DefaultDict[str, Set[EquivalentIdSet]]
-        ] = defaultdict(lambda: defaultdict(set))
+        syns_database_by_syn: DefaultDict[str, Dict[str, SynonymTerm]] = defaultdict(dict)
         ambig_syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
             lambda: defaultdict(set)
         )
         unambig_syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
             lambda: defaultdict(set)
         )
-        # syns_database_by_syn_global: DefaultDict[str, Set[EquivalentIdSet]] = defaultdict(set)
-        # kb_database_by_syn_global: DefaultDict[str, Set[str]] = defaultdict(set)
         loaded_parsers: Set[str] = set()
 
-        def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]], norm: bool):
+        def add(self, name: str, synonyms: Iterable[SynonymTerm]):
             self.loaded_parsers.add(name)
-            for syn_string, syn_data in synonyms.items():
-                if norm:
-                    syn_string_norm = StringNormalizer.normalize(syn_string)
-                else:
-                    syn_string_norm = syn_string
-                self.syns_database_by_syn[name][syn_string_norm].update(syn_data)
-                # self.syns_database_by_syn_global[syn_string_norm].update(syn_data)
-                # self.kb_database_by_syn_global[syn_string_norm].add(name)
+            for synonym in synonyms:
+                self.syns_database_by_syn[name][synonym.term_norm] = synonym
 
-                for equiv_ids in syn_data:
+                for equiv_ids in synonym.associated_id_sets:
                     if equiv_ids.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
                         for idx in equiv_ids.ids:
-                            self.unambig_syns_database_by_idx[name][idx].add(syn_string_norm)
+                            self.unambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
                     else:
                         for idx in equiv_ids.ids:
-                            self.ambig_syns_database_by_idx[name][idx].add(syn_string_norm)
+                            self.ambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
 
-        def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
+        def get(self, name: str, synonym: str) -> SynonymTerm:
             return self.syns_database_by_syn[name][synonym]
 
         def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
@@ -173,15 +163,15 @@ class SynonymDatabase:
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
-    def get(self, name: str, synonym: str) -> Set[EquivalentIdSet]:
+    def get(self, name: str, synonym: str) -> SynonymTerm:
         """
         get a set of EquivalentIdSets associated with an ontology and synonym string
         :param name: name of ontology to query
         :param synonym: idx to query
         :return:
         """
-
-        return self.instance.get(name, synonym)  # type: ignore
+        assert self.instance is not None
+        return self.instance.get(name, synonym)
 
     def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
         return self.instance.get_syns_for_id(name, idx, ignore_ambiguous)  # type: ignore
@@ -194,7 +184,8 @@ class SynonymDatabase:
         :return:
         """
         result = set()
-        for equiv_id_set in self.get(name, synonym):
+        synonym_term = self.get(name, synonym)
+        for equiv_id_set in synonym_term.associated_id_sets:
             if (
                 ignore_ambiguous
                 and equiv_id_set.aggregated_by not in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
@@ -205,18 +196,19 @@ class SynonymDatabase:
                 result.update(self.get_syns_for_id(name, idx, ignore_ambiguous))
         return list(sorted(result))
 
-    def get_all(self, name: str) -> Dict[str, Set[EquivalentIdSet]]:
+    def get_all(self, name: str) -> Dict[str, SynonymTerm]:
         """
         get all synonyms associated with an ontology
         :param name: name of ontology
         :return:
         """
-        return self.instance.syns_database_by_syn[name]  # type: ignore
+        assert self.instance is not None
+        return self.instance.syns_database_by_syn[name]
 
-    def get_database(self) -> DefaultDict[str, Dict[str, Set[EquivalentIdSet]]]:
+    def get_database(self) -> DefaultDict[str, Dict[str, SynonymTerm]]:
         return self.instance.syns_database_by_syn  # type: ignore
 
-    def add(self, name: str, synonyms: Dict[str, Set[EquivalentIdSet]]):
+    def add(self, name: str, synonyms: Iterable[SynonymTerm]):
         """
         add synonyms to the database.
         :param name: name of ontology to add to
@@ -224,7 +216,7 @@ class SynonymDatabase:
         :return:
         """
         assert self.instance is not None
-        self.instance.add(name, synonyms, norm=False)
+        self.instance.add(name, synonyms)
 
     def get_loaded_parsers(self) -> Set[str]:
         assert self.instance is not None
@@ -262,6 +254,7 @@ class OntologyParser(ABC):
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
+        self.parsed_dataframe: Optional[pd.DataFrame] = None
 
     def find_kb(self, string: str) -> str:
         """
@@ -271,28 +264,87 @@ class OntologyParser(ABC):
         """
         raise NotImplementedError()
 
-    def dataframe_to_syndata_dict(
-        self, synonym_df: pd.DataFrame, normalise_original_syns: bool
-    ) -> Dict[str, Set[EquivalentIdSet]]:
-        result = self.resolve_composite_synonym_dataframe(synonym_df, normalise_original_syns)
-        return dict(result)
+    def is_synonym_symbolic(self, syn: str):
+        """
+        override if a more sophisticated algorithm is desired to determine if a synonym is symbolic or not
+        :param syn:
+        :return:
+        """
+        return StringNormalizer.is_probably_symbol_like(syn)
 
-    def resolve_composite_synonym_dataframe(
-        self, synonym_df: pd.DataFrame, normalise_original_syns: bool
-    ):
-        result = defaultdict(set)
-        for i, row in synonym_df[[SYN, IDX]].groupby([SYN]).agg(set).reset_index().iterrows():
+    def resolve_composite_synonym_dataframe(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
+        """
+        synonym lists are noisy, so we need an algorithm to identify when a synonym
 
-            is_symbolic = StringNormalizer.is_probably_symbol_like(row[SYN])
-            syn = StringNormalizer.normalize(row[SYN]) if normalise_original_syns else row[SYN]
+        """
 
-            ids = row[IDX]
+        result = set()
+        synonym_df["syn_norm"] = synonym_df[SYN].apply(StringNormalizer.normalize)
+
+        for i, row in (
+            synonym_df[["syn_norm", SYN, IDX, MAPPING_TYPE]]
+            .groupby(["syn_norm"])
+            .agg(set)
+            .reset_index()
+            .iterrows()
+        ):
+
+            syn_set = row[SYN]
+            mapping_type_set: FrozenSet[str] = frozenset(row[MAPPING_TYPE])
+            syn_norm = row["syn_norm"]
+            if len(syn_set) > 1:
+                logger.debug(f"normaliser has merged {syn_set} into a single term: {syn_norm}")
+
+            is_symbolic = any(self.is_synonym_symbolic(x) for x in syn_set)
+            ids: Set[str] = row[IDX]
             id_to_source = {}
             ontologies = set()
             for idx in ids:
                 source = self.find_kb(idx)
                 ontologies.add(source)
                 id_to_source[idx] = source
+
+            def merge_ids(strategy: EquivalentIdAggregationStrategy):
+                synonym_term = SynonymTerm(
+                    term_norm=syn_norm,
+                    terms=frozenset(syn_set),
+                    is_symbolic=is_symbolic,
+                    mapping_types=mapping_type_set,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids=frozenset(ids),
+                                aggregated_by=strategy,
+                                ids_to_source={idx: id_to_source[idx] for idx in ids},
+                            )
+                        ]
+                    ),
+                )
+
+                result.add(synonym_term)
+
+            def split_ids(strategy: EquivalentIdAggregationStrategy):
+                set_of_id_set = set()
+                for idx in ids:
+                    set_of_id_set.add(
+                        EquivalentIdSet(
+                            ids=frozenset([idx]),
+                            aggregated_by=strategy,
+                            ids_to_source={idx: id_to_source[idx] for idx in ids},
+                        )
+                    )
+                synonym_term = SynonymTerm(
+                    term_norm=syn_norm,
+                    terms=frozenset(syn_set),
+                    is_symbolic=is_symbolic,
+                    mapping_types=mapping_type_set,
+                    associated_id_sets=frozenset(set_of_id_set),
+                )
+                if synonym_term.is_confused:
+                    logger.warning(
+                        f"synonym term {synonym_term} is confused. ids: {synonym_term.associated_id_sets}, terms"
+                    )
+                result.add(synonym_term)
 
             if len(ontologies) == 1:
                 # most common - one or more ids and one kb per syn
@@ -304,100 +356,95 @@ class OntologyParser(ABC):
                     strategy = EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT
 
                 if not is_symbolic:
-                    result[syn].add(
-                        EquivalentIdSet(
-                            ids=frozenset(ids),
-                            aggregated_by=strategy,
-                            ids_to_source=id_to_source,
-                        )
-                    )
+                    merge_ids(strategy)
                 else:
-                    for idx in ids:
-                        result[syn].add(
-                            EquivalentIdSet(
-                                ids=frozenset([idx]),
-                                aggregated_by=strategy,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                        )
+                    split_ids(strategy)
             elif len(ontologies) == len(ids):
                 if not is_symbolic:
-                    result[syn].add(
-                        EquivalentIdSet(
-                            ids=frozenset(ids),
-                            aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
-                            ids_to_source=id_to_source,
-                        )
+                    strategy = (
+                        EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE
                     )
+                    merge_ids(strategy)
                 else:
-                    for idx in ids:
-                        result[syn].add(
-                            EquivalentIdSet(
-                                ids=frozenset([idx]),
-                                aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                        )
+                    strategy = (
+                        EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT
+                    )
+                    split_ids(strategy)
                 # pathological scenario - multiple kb ids, one syn. Syn may refer to different concepts (although probably not)
                 logger.warning(
-                    f"found independent identifiers for {syn}: {ids}. This may cause disambiguation problems "
+                    f"found independent identifiers for {syn_norm}: {ids}. This may cause disambiguation problems "
                     f"if the identifiers are not cross references"
                 )
             else:
                 # pathological scenario - one synonym maps to multiple KBs and multiple ids within those KBs,
                 # within the same composite KB
                 if not is_symbolic:
-                    result[syn].add(
-                        EquivalentIdSet(
-                            ids=frozenset(ids),
-                            aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
-                            ids_to_source=id_to_source,
-                        )
+                    strategy = (
+                        EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE
                     )
+                    merge_ids(strategy)
                     logger.warning(
-                        f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn} appears to be non-symbolic, parser has aggregated - i.e. assumed they refer to the same concepts"
+                        f"could not resolve {syn_norm} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
+                        f"As {syn_norm} appears to be non-symbolic, parser has aggregated - i.e. assumed they refer to the same concepts"
                     )
                 else:
-                    for idx in ids:
-                        result[syn].add(
-                            EquivalentIdSet(
-                                ids=frozenset([idx]),
-                                aggregated_by=EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                        )
+                    strategy = (
+                        EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT
+                    )
+                    split_ids(strategy)
                     logger.warning(
-                        f"could not resolve {syn} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
-                        f"As {syn} appears to be symbolic, parser has split - i.e. assumed they refer to different concepts"
+                        f"could not resolve {syn_norm} for {self.name}. ids: {ids}, ontologies: {ontologies}. "
+                        f"As {syn_norm} appears to be symbolic, parser has split - i.e. assumed they refer to different concepts"
                     )
         return result
+
+    def _parse_df_if_not_already_parsed(self):
+        if self.parsed_dataframe is None:
+            self.parsed_dataframe = self.parse_to_dataframe()
+            self.parsed_dataframe[DATA_ORIGIN] = self.data_origin
+            self.parsed_dataframe[IDX] = self.parsed_dataframe[IDX].astype(str)
+            self.parsed_dataframe.loc[
+                pd.isnull(self.parsed_dataframe[DEFAULT_LABEL]), DEFAULT_LABEL
+            ] = self.parsed_dataframe[IDX]
+
+    def export_metadata(self) -> Dict[str, Dict[str, SimpleValue]]:
+        self._parse_df_if_not_already_parsed()
+        assert isinstance(self.parsed_dataframe, pd.DataFrame)
+        metadata_columns = self.parsed_dataframe.columns.tolist()
+        metadata_columns.remove(MAPPING_TYPE)
+        metadata_columns.remove(SYN)
+        metadata_df = self.parsed_dataframe[metadata_columns]
+        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
+        metadata_df.set_index(inplace=True, drop=True, keys=IDX)
+        assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
+        metadata = metadata_df.to_dict(orient="index")
+        return metadata
+
+    def export_synonym_terms(self) -> Set[SynonymTerm]:
+        self._parse_df_if_not_already_parsed()
+        assert isinstance(self.parsed_dataframe, pd.DataFrame)
+        # ensure correct order
+        syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
+        syn_df[SYN] = syn_df[SYN].apply(str.strip)
+        syn_df.drop_duplicates(subset=self.all_synonym_column_names)
+        assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
+        synonym_terms = self.resolve_composite_synonym_dataframe(synonym_df=syn_df)
+        return synonym_terms
 
     def populate_metadata_database(self):
         """
         populate the metadata database with this ontology
         :return:
         """
-        _, metadata_df = self.generate_synonym_and_metadata_dataframes()
-        metadata = metadata_df.to_dict(orient="index")
-        MetadataDatabase().add(self.name, metadata)
+        MetadataDatabase().add(self.name, self.export_metadata())
 
-    def collect_aggregate_synonym_data(
-        self, normalise_original_syns: bool
-    ) -> Dict[str, Set[EquivalentIdSet]]:
-        synonym_df, _ = self.generate_synonym_and_metadata_dataframes()
-        # strip trailing whitespace from syns
-        synonym_df[SYN] = synonym_df[SYN].apply(str.strip)
-        synonym_data = self.dataframe_to_syndata_dict(synonym_df, normalise_original_syns)
-        return synonym_data
-
-    def generate_synonyms(self):
+    def generate_synonyms(self) -> Set[SynonymTerm]:
         """
         generate synonyms based on configured synonym generator
         :return:
         """
-        synonym_data = self.collect_aggregate_synonym_data(False)
-        generated_synonym_data = {}
+        synonym_data = self.export_synonym_terms()
+        generated_synonym_data = set()
         if self.synonym_generator:
             generated_synonym_data = self.synonym_generator(synonym_data)
         logger.info(
@@ -407,44 +454,20 @@ class OntologyParser(ABC):
 
     def populate_synonym_database(self):
         """
-        deprecated
-        call synonym generators and populate the synonym database
+        populate the synonym database
         :return:
         """
-        synonym_data = self.collect_aggregate_synonym_data(True)
-        SynonymDatabase().add(self.name, synonym_data)
 
-    def generate_synonym_and_metadata_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        splits a table of ontology information into a synonym table and a metadata table, deduplicating and grouping
-        as appropriate
-        :return: a 2-tuple - first is synonym dataframe, second is metadata
-        """
-        df = self.parse_to_dataframe()
-        df[DATA_ORIGIN] = self.data_origin
-        df[IDX] = df[IDX].astype(str)
+        SynonymDatabase().add(self.name, self.export_synonym_terms())
 
-        # in case the default label isn't populated, just use the IDX
-        df.loc[pd.isnull(df[DEFAULT_LABEL]), DEFAULT_LABEL] = df[IDX]
-        # ensure correct order
-        syn_df = df[self.all_synonym_column_names]
-        syn_df.drop_duplicates(subset=self.all_synonym_column_names)
-        # group mapping types of same synonym together
-        syn_df = syn_df.groupby(by=[IDX, SYN]).agg(set).reset_index()
-        syn_df = syn_df.dropna(axis=0)
-        syn_df.sort_values(by=[IDX, SYN], inplace=True)
-        # needs to be a list so can be serialised
-        syn_df[MAPPING_TYPE] = syn_df[MAPPING_TYPE].apply(list)
-        syn_df.reset_index(inplace=True, drop=True)
-        metadata_columns = df.columns.tolist()
-        metadata_columns.remove(MAPPING_TYPE)
-        metadata_columns.remove(SYN)
-        metadata_df = df[metadata_columns]
-        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
-        metadata_df.set_index(inplace=True, drop=True, keys=IDX)
-        assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-        assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
-        return syn_df, metadata_df
+    def populate_databases(self):
+        """
+        populate the databases with the results of the parser
+        """
+        # populate the databases
+        self.populate_metadata_database()
+        self.populate_synonym_database()
+        self.parsed_dataframe = None  # clear the reference to save memory
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
@@ -468,14 +491,7 @@ class OntologyParser(ABC):
         generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)
         :return:
         """
-        synonym_table = self.generate_synonym_and_metadata_dataframes()[0]
-        tqdm.pandas(desc=f"generating training pairs for {self.name}")
-        df = synonym_table.groupby(by=[IDX]).progress_apply(self.select_pos_pairs)
-        df.index = [i for i in range(df.shape[0])]
-        df = df[[0, 1, IDX]]
-        df.columns = OntologyParser.training_col_names
-        df[IDX] = df[IDX].astype("category").cat.codes
-        return df
+        raise NotImplementedError()
 
     def select_pos_pairs(self, df: pd.Series):
         """
@@ -483,14 +499,7 @@ class OntologyParser(ABC):
         :param df:
         :return:
         """
-        id = df[IDX].unique()[0]
-        labels = df[SYN].unique()
-        if len(labels) > 50:
-            labels = list(labels)[:50]
-        combinations = list(itertools.combinations(labels, 2))
-        new_df = pd.DataFrame(combinations)
-        new_df[IDX] = id
-        return new_df
+        raise NotImplementedError()
 
     def write_training_pairs(self, out_path: str):
         """
@@ -498,12 +507,7 @@ class OntologyParser(ABC):
         :param out_path: directory to write to
         :return:
         """
-        path = Path(out_path)
-        if not path.is_dir():
-            raise RuntimeError(f"{path} is not a directory")
-        self.format_training_table().to_parquet(
-            path.joinpath(f"{self.name}_training_pairs.parquet"), index=None
-        )
+        raise NotImplementedError()
 
 
 class JsonLinesOntologyParser(OntologyParser):
@@ -572,6 +576,47 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
     def find_kb(self, string: str) -> str:
         return "ENSEMBL"
+
+    def word_like_filter(self, word: str):
+        if len(word) < 4:
+            return False
+        else:
+
+            upper_count = 1
+            lower_count = 1
+            int_count = 1
+
+            for char in word:
+                if char.isalpha():
+                    if char.isupper():
+                        upper_count += 1
+                    else:
+                        lower_count += 1
+                elif char.isnumeric():
+                    int_count += 1
+
+            upper_lower_ratio = float(upper_count) / float(lower_count)
+            # print(upper_lower_ratio)
+            int_alpha_ratio = float(int_count) / (float(upper_count + lower_count - 1))
+            # print(int_alpha_ratio)
+            if upper_lower_ratio > 1.0 or int_alpha_ratio > 1.0:
+                return False
+            else:
+                return True
+
+    def count_word_like_tokens(self, raw_str: str) -> int:
+        raw_str = replace_dashes(raw_str, " ")
+        tokens = raw_str.split(" ")
+        if len(tokens) == 1:
+            return 0
+        else:
+            return sum([1 for x in tokens if self.word_like_filter(x)])
+
+    def is_synonym_symbolic(self, syn: str):
+        if self.count_word_like_tokens(syn) == 0:
+            return False
+        else:
+            return True
 
     def json_dict_to_parser_dataframe(
         self, jsons_gen: Iterable[Dict[str, Any]]
