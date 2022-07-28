@@ -73,7 +73,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :return:
         """
         failed_docs = []
-        entities = [ent for doc in docs for ent in doc.get_entities()]
+        entities = (ent for doc in docs for ent in doc.get_entities())
         ents_by_match_and_class = {
             k: list(v) for k, v in sort_then_group(entities, lambda x: (x.match, x.entity_class))
         }
