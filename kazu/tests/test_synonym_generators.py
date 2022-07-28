@@ -17,7 +17,7 @@ from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, Syn
 from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
-from kazu.utils.language_phenomena import GREEK_SUBS
+from kazu.modelling.language.language_phenomena import GREEK_SUBS
 
 dummy_equiv_ids = EquivalentIdSet(
     ids=frozenset(("text",)),

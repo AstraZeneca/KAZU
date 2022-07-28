@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Tuple, List, Dict, Optional
 import pandas as pd
 
-from kazu.modelling.ontology_preprocessing.base import SynonymDatabase
+from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.utils.string_normalizer import StringNormalizer
 
 

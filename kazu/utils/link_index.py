@@ -7,27 +7,24 @@ import shutil
 from abc import ABC, abstractmethod
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, Set, cast
+from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, cast
 
 import numpy as np
 import torch
-from pytorch_lightning import Trainer
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-from kazu.data.data import EquivalentIdSet, Hit
+from kazu.data.data import EquivalentIdSet, Hit, SimpleValue
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     IDX,
     MAPPING_TYPE,
     DEFAULT_LABEL,
-    MetadataDatabase,
-    SynonymDatabase,
     OntologyParser,
-    SimpleValue,
 )
-from kazu.utils.utils import create_char_ngrams, get_cache_dir
+from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.utils.string_normalizer import StringNormalizer
+from kazu.utils.utils import create_char_ngrams, get_cache_dir
+from pytorch_lightning import Trainer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +81,7 @@ class Index(ABC):
         with open(self.get_metadata_path(directory), "wb") as f:
             pickle.dump(self.metadata_db.get_all(self.parser.name), f)
         with open(self.get_synonym_data_path(directory), "wb") as f:
-            pickle.dump(self.synonym_db.get_all(self.parser.name), f)
+            pickle.dump(list(self.synonym_db.get_all(self.parser.name).values()), f)
         self._save(self.get_index_data_path(directory))
         return directory
 
@@ -192,17 +189,6 @@ class Index(ABC):
         """
         pass
 
-    def _populate_databases(self) -> Dict[str, Set[EquivalentIdSet]]:
-        """
-        populate the databases with the results of the parser
-        :return: normalised dictionary of syn: set(ids)
-        """
-        # populate the databases
-        self.parser.populate_metadata_database()
-        normalised_syn_dict = self.parser.collect_aggregate_synonym_data(True)
-        self.synonym_db.add(self.parser.name, normalised_syn_dict)
-        return normalised_syn_dict
-
 
 class DictionaryIndex(Index):
     """
@@ -223,7 +209,7 @@ class DictionaryIndex(Index):
     def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
         hits = []
         if string_norm in self.synonym_db.get_all(self.parser.name):
-            for id_set in self.synonym_db.get(self.parser.name, string_norm):
+            for id_set in self.synonym_db.get(self.parser.name, string_norm).associated_id_sets:
                 hits.append(
                     Hit(
                         parser_name=self.parser.name,
@@ -254,7 +240,7 @@ class DictionaryIndex(Index):
             for neighbour, score in zip(neighbours, distances):
                 # get by index
                 found_norm = synonym_list[neighbour]
-                for id_set in self.synonym_db.get(self.parser.name, found_norm):
+                for id_set in self.synonym_db.get(self.parser.name, found_norm).associated_id_sets:
                     hits.append(
                         Hit(
                             parser_name=self.parser.name,
@@ -303,9 +289,11 @@ class DictionaryIndex(Index):
     def _build_ontology_cache(self, cache_dir: Path):
         logger.info(f"creating index for {self.parser.in_path}")
 
-        normalised_syn_dict = self._populate_databases()
+        self.parser.populate_databases()
         self.vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-        self.tf_idf_matrix = self.vectorizer.fit_transform(normalised_syn_dict.keys())
+        self.tf_idf_matrix = self.vectorizer.fit_transform(
+            self.synonym_db.get_all(self.parser.name).keys()
+        )
         index_path = self.save(cache_dir, overwrite=True)
         logger.info(f"saved {self.parser.name} index to {index_path.absolute()}")
         logger.info(f"final index size for {self.parser.name} is {len(self)}")
@@ -391,7 +379,7 @@ class EmbeddingIndex(Index):
             assert isinstance(default_label, str)
             string_norm = StringNormalizer.normalize(default_label)
             try:
-                for id_set in self.synonym_db.get(self.parser.name, string_norm):
+                for id_set in self.synonym_db.get(self.parser.name, string_norm).associated_id_sets:
                     hit = Hit(
                         id_set=id_set,
                         parser_name=self.parser.name,
@@ -410,7 +398,7 @@ class EmbeddingIndex(Index):
         logger.info(f"creating index for {self.parser.in_path}")
 
         # populate the databases
-        self._populate_databases()
+        self.parser.populate_databases()
         for (
             partition_number,
             metadata,

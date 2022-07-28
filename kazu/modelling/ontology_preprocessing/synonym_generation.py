@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import List, Dict, Optional, Iterable, Set
 
 from kazu.data.data import SynonymTerm
-from kazu.utils.language_phenomena import GREEK_SUBS
+from kazu.modelling.language.language_phenomena import GREEK_SUBS
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
