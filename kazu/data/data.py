@@ -10,11 +10,10 @@ from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
+from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
 from spacy import displacy
-
-from kazu.utils.grouping import sort_then_group
 
 IS_SUBSPAN = "is_subspan"
 # ambiguous_synonyms or confused mappings
@@ -505,3 +504,20 @@ class Document:
         for section in self.sections:
             length += len(section.get_text())
         return length
+
+
+@dataclass(frozen=True)
+class SynonymTerm:
+    terms: FrozenSet[str]
+    term_norm: str
+    is_symbolic: bool
+    associated_id_sets: FrozenSet[EquivalentIdSet]
+    mapping_types: FrozenSet[str] = field(hash=False)
+
+    @property
+    def is_ambiguous(self):
+        return len(self.associated_id_sets) > 1
+
+    @property
+    def is_confused(self):
+        return self.is_ambiguous and len(self.terms) > 1
