@@ -17,15 +17,16 @@ def test_merge_overlapping_step_case_1(merge_step):
         match="Baclofen",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=8)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent = Entity(
@@ -33,7 +34,7 @@ def test_merge_overlapping_step_case_1(merge_step):
         match="Baclofen drug",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=13)]),
-        mappings=[],
+        mappings=set(),
     )
 
     doc = Document.create_simple_document("Baclofen drug")
@@ -51,15 +52,16 @@ def test_merge_overlapping_step_case_2(merge_step):
         match="Baclofen",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=8)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="ignore me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent = Entity(
@@ -67,15 +69,16 @@ def test_merge_overlapping_step_case_2(merge_step):
         match="Baclofen drug",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=13)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     doc = Document.create_simple_document("Baclofen drug")
@@ -93,15 +96,16 @@ def test_merge_overlapping_step_case_3(merge_step):
         match="Baclofen",
         entity_class="anatomy",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=0, end=8)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="ignore me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent = Entity(
@@ -109,15 +113,16 @@ def test_merge_overlapping_step_case_3(merge_step):
         match="Baclofen",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=8)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
+                strategy="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
             )
-        ],
+        },
     )
 
     doc = Document.create_simple_document("Baclofen drug")
@@ -135,15 +140,16 @@ def test_merge_overlapping_step_case_4(merge_step):
         match="Baclofen",
         entity_class="anatomy",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=0, end=8)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="ignore me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent = Entity(
@@ -151,30 +157,32 @@ def test_merge_overlapping_step_case_4(merge_step):
         match="Baclofen drug",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=13)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="ignore me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
     transformer_ent_2 = Entity(
         namespace="TransformersModelForTokenClassificationNerStep",
         match="drug treatment",
         entity_class="disease",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=8, end=22)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     doc = Document.create_simple_document("Baclofen drug treatment")
@@ -192,15 +200,16 @@ def test_merge_overlapping_step_case_5(merge_step):
         match="Baclofen",
         entity_class="anatomy",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=0, end=8)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="ignore me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent = Entity(
@@ -208,30 +217,32 @@ def test_merge_overlapping_step_case_5(merge_step):
         match="Baclofen drug",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=13)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="ignore me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
     transformer_ent_2 = Entity(
         namespace="TransformersModelForTokenClassificationNerStep",
         match="drug treatment",
         entity_class="disease",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=8, end=22)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent_3 = Entity(
@@ -239,15 +250,16 @@ def test_merge_overlapping_step_case_5(merge_step):
         match="inpatients-",
         entity_class="disease",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=23, end=34)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     transformer_ent_4 = Entity(
@@ -255,15 +267,16 @@ def test_merge_overlapping_step_case_5(merge_step):
         match="assistance",
         entity_class="disease",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=34, end=44)]),
-        mappings=[
+        mappings={
             Mapping(
                 default_label="pick me!",
                 source="test",
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGH_CONFIDENCE,
+                strategy="test",
             )
-        ],
+        },
     )
 
     doc = Document.create_simple_document("Baclofen drug treatment inpatients-assistance")
