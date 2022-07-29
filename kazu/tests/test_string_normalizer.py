@@ -44,5 +44,5 @@ def test_normalizer():
     check_case(original, expected)
 
     original = "MPNs"
-    expected = "MPN s"
+    expected = "MPN"
     check_case(original, expected)

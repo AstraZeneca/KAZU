@@ -1,7 +1,8 @@
 import re
 from typing import Optional
 
-from kazu.utils.language_phenomena import GREEK_SUBS
+from gilda.process import depluralize
+from kazu.modelling.language.language_phenomena import GREEK_SUBS
 
 
 class StringNormalizer:
@@ -94,14 +95,6 @@ class StringNormalizer:
             return False
 
     @staticmethod
-    def split_on_trailing_s_prefix(debug, string):
-        splits = [x.strip() for x in re.split(StringNormalizer.trailing_lowercase_s_split, string)]
-        string = " ".join(splits).strip()
-        if debug:
-            print(string)
-        return string
-
-    @staticmethod
     def normalize(original_string: str, debug: bool = False):
         original_string = original_string.strip()
         symbol_like = StringNormalizer.is_symbol_like(debug, original_string)
@@ -118,7 +111,7 @@ class StringNormalizer:
             # strip non alphanum
             string = StringNormalizer.replace_non_alphanum(debug, string)
 
-            string = StringNormalizer.split_on_trailing_s_prefix(debug, string)
+            string = StringNormalizer.depluralize(debug, string)
             # strip modifying lowercase prefixes
             string = StringNormalizer.handle_lower_case_prefixes(debug, string)
 
@@ -128,6 +121,14 @@ class StringNormalizer:
             if debug:
                 print(string)
             return string
+
+    @staticmethod
+    def depluralize(debug, string):
+        if len(string) > 3:
+            string = depluralize(string)[0]
+        if debug:
+            print(string)
+        return string
 
     @staticmethod
     def sub_greek_char_abbreviations(debug, string):
