@@ -95,14 +95,11 @@ class CharSpan:
 
 
 class EquivalentIdAggregationStrategy(Enum):
-    UNAMBIGUOUS = 0
-    AMBIGUOUS_WITHIN_SINGLE_KB_SPLIT = 1
-    AMBIGUOUS_WITHIN_SINGLE_KB_MERGE = 2
-    AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT = 3
-    AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE = 4
-    AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_SPLIT = 5
-    AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE = 6
-    RESOLVED_BY_SIMILARITY = 7
+    NO_STRATEGY = 1  # no strategy. should be used for debugging/testing only
+    RESOLVED_BY_SIMILARITY = 2  # synonym linked to ID via similarity to default ID label
+    SYNONYM_IS_AMBIGUOUS = 3  # synonym has no unambiguous meaning
+    CUSTOM = 4  # a place holder for any strategy that
+    UNAMBIGUOUS = 5
 
 
 @dataclass(frozen=True, eq=True, order=True)
@@ -526,8 +523,6 @@ class SynonymTerm:
 
 UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
     EquivalentIdAggregationStrategy.UNAMBIGUOUS,
-    EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE,
-    EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
-    EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+    EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
 }
 SimpleValue = Union[NumericMetric, str]
