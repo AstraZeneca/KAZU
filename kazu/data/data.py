@@ -521,8 +521,5 @@ class SynonymTerm:
         return self.is_ambiguous and len(self.terms) > 1
 
 
-UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
-    EquivalentIdAggregationStrategy.UNAMBIGUOUS,
-    EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
-}
+UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
 SimpleValue = Union[NumericMetric, str]
