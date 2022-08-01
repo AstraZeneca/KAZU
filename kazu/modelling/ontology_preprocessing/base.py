@@ -1,3 +1,4 @@
+import itertools
 import json
 import logging
 import os
@@ -8,7 +9,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet
 from urllib import parse
-import itertools
+
 import pandas as pd
 import rdflib
 from kazu.data.data import (
@@ -27,7 +28,6 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
 from kazu.utils.spacy_pipeline import SpacyPipeline
 from kazu.utils.string_normalizer import StringNormalizer
 from rdflib import URIRef
-from strsimpy import NGram
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -59,13 +59,19 @@ class OntologyParser(ABC):
     def __init__(
         self,
         in_path: str,
-        spacy_pipeline: SpacyPipeline,
+        spacy_pipeline: Optional[SpacyPipeline] = None,
+        synonym_merge_threshold: float = 0.65,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         symbol_classifier: Optional[SymbolClassifier] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
+        :param spacy_pipeline: Optional instance of SpacyPipeline.  Used for resolving ambiguous symbolic synonyms via
+            similarity calculation of the default label associated with the conflicted labels. If no instance is
+            provided, all synonym conflicts will be merged. This is not recommended!
+        :param synonym_merge_threshold: similarity threshold to trigger a merge of conflicted synonyms into a single
+            EquivalentIdSet
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
             parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator
@@ -77,8 +83,10 @@ class OntologyParser(ABC):
             all associated ID's into a single EquivalentIdSet. If no symbol classifier is specified, a default one will
             be used
         """
+        if spacy_pipeline is None:
+            logger.warning("no spacy pipeline configured. Synonym resolution disabled.")
         self.spacy_pipeline = spacy_pipeline
-        self.synonym_merge_threshold = 0.65
+        self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
@@ -129,9 +137,21 @@ class OntologyParser(ABC):
                 ontologies.add(source)
                 id_to_source[idx] = source
 
-            associated_id_sets: FrozenSet[EquivalentIdSet] = self.score_and_group_ids(
-                ids, id_to_source, is_symbolic
-            )
+            associated_id_sets: FrozenSet[EquivalentIdSet]
+            if not isinstance(self.spacy_pipeline, SpacyPipeline):
+                associated_id_sets = frozenset(
+                    [
+                        EquivalentIdSet(
+                            ids=frozenset(ids),
+                            aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
+                            ids_to_source={idx: id_to_source[idx] for idx in ids},
+                        )
+                    ]
+                )
+            else:
+                associated_id_sets = self.score_and_group_ids(
+                    ids, id_to_source, is_symbolic, syn_set
+                )
 
             synonym_term = SynonymTerm(
                 term_norm=syn_norm,
@@ -146,49 +166,66 @@ class OntologyParser(ABC):
         return result
 
     def score_and_group_ids(
-        self, ids: Set[str], id_to_source: Dict[str, str], is_symbolic: bool
+        self,
+        ids: Set[str],
+        id_to_source: Dict[str, str],
+        is_symbolic: bool,
+        original_syn_set: Set[str],
     ) -> FrozenSet[EquivalentIdSet]:
-        id_to_label = {}
-        label_to_id = defaultdict(set)
-        for idx in ids:
-            default_label: str = str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
-            id_to_label[idx] = default_label
-            label_to_id[default_label].add(idx)
-
-        if len(label_to_id) == 1 or not is_symbolic:
-            # default label is the same, or it's not symbolic. It's the same concept
-            id_set = EquivalentIdSet(
-                ids=frozenset(ids),
-                aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
-                ids_to_source={idx: id_to_source[idx] for idx in ids},
-            )
-            return frozenset([id_set])
-        else:
-            # we need to check similarity
-            id_groups = defaultdict(set)
-            for s1, s2 in itertools.combinations(label_to_id.keys(), r=2):
-                # score = self.ngram.distance(s1,s2)
-                score = self.spacy_pipeline.nlp(s1.lower()).similarity(
-                    self.spacy_pipeline.nlp(s2.lower())
-                )
-                id_groups[s1].update(label_to_id[s1])
-                id_groups[s2].update(label_to_id[s2])
-                if score >= self.synonym_merge_threshold:
-                    # ids prob the same thing
-                    id_groups[s1].update(label_to_id[s2])
-                    id_groups[s2].update(label_to_id[s1])
-
-            result_sets_hashable = set(frozenset(x) for x in id_groups.values())
-            result = set()
-            for id_group in result_sets_hashable:
-                result.add(
+        if not isinstance(self.spacy_pipeline, SpacyPipeline):
+            associated_id_sets = frozenset(
+                [
                     EquivalentIdSet(
-                        ids=frozenset(id_group),
-                        aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
-                        ids_to_source={idx: id_to_source[idx] for idx in id_group},
+                        ids=frozenset(ids),
+                        aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
+                        ids_to_source={idx: id_to_source[idx] for idx in ids},
                     )
+                ]
+            )
+            return associated_id_sets
+        else:
+
+            id_to_label = {}
+            label_to_id = defaultdict(set)
+            for idx in ids:
+                default_label: str = str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
+                id_to_label[idx] = default_label
+                label_to_id[default_label].add(idx)
+
+            if len(label_to_id) == 1 or not is_symbolic:
+                # default label is the same, or it's not symbolic. It's the same concept
+                id_set = EquivalentIdSet(
+                    ids=frozenset(ids),
+                    aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                    ids_to_source={idx: id_to_source[idx] for idx in ids},
                 )
-            return frozenset(result)
+                return frozenset([id_set])
+            else:
+                # we need to check similarity
+                id_groups = defaultdict(set)
+                for s1, s2 in itertools.combinations(label_to_id.keys(), r=2):
+                    # score = self.ngram.distance(s1,s2)
+                    score = self.spacy_pipeline.nlp(s1.lower()).similarity(
+                        self.spacy_pipeline.nlp(s2.lower())
+                    )
+                    id_groups[s1].update(label_to_id[s1])
+                    id_groups[s2].update(label_to_id[s2])
+                    if score >= self.synonym_merge_threshold:
+                        # ids prob the same thing
+                        id_groups[s1].update(label_to_id[s2])
+                        id_groups[s2].update(label_to_id[s1])
+
+                result_sets_hashable = set(frozenset(x) for x in id_groups.values())
+                associated_id_sets_temp = set()
+                for id_group in result_sets_hashable:
+                    associated_id_sets_temp.add(
+                        EquivalentIdSet(
+                            ids=frozenset(id_group),
+                            aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                            ids_to_source={idx: id_to_source[idx] for idx in id_group},
+                        )
+                    )
+            return frozenset(associated_id_sets_temp)
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
@@ -367,6 +404,166 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_TARGET"
 
+    annotation_fields = {
+        "subcellularLocations",
+        "tractability",
+        "constraint",
+        "functionDescriptions",
+        "go",
+        "hallmarks",
+        "chemicalProbes",
+        "safetyLiabilities",
+        "pathways",
+        "targetClass",
+    }
+
+    def score_and_group_ids(
+        self,
+        ids: Set[str],
+        id_to_source: Dict[str, str],
+        is_symbolic: bool,
+        original_syn_set: Set[str],
+    ) -> FrozenSet[EquivalentIdSet]:
+        """
+        custom score to deal with highly confused synonyms in opentargets
+        in the case of a confused synonym, we pick the ID with the highest annotation score
+
+
+
+        :param ids:
+        :param id_to_source:
+        :param is_symbolic:
+        :return:
+        """
+
+        if not isinstance(self.spacy_pipeline, SpacyPipeline):
+            associated_id_sets = frozenset(
+                [
+                    EquivalentIdSet(
+                        ids=frozenset(ids),
+                        aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
+                        ids_to_source={idx: id_to_source[idx] for idx in ids},
+                    )
+                ]
+            )
+            return associated_id_sets
+        else:
+            if len(ids) == 1:
+                # default label is the same, it's the same concept
+                id_set = EquivalentIdSet(
+                    ids=frozenset(ids),
+                    aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
+                    ids_to_source={idx: id_to_source[idx] for idx in ids},
+                )
+                associated_id_sets = frozenset([id_set])
+                return associated_id_sets
+            else:
+                id_to_label = {}
+                label_to_id = defaultdict(set)
+                id_to_score = {}
+
+                for idx in ids:
+                    approved_name: str = str(
+                        self.metadata_db.get_by_idx(self.name, idx)["approvedName"]
+                    )
+                    annotation_score: int = int(
+                        self.metadata_db.get_by_idx(self.name, idx)["annotation_score"]
+                    )
+                    id_to_label[idx] = approved_name
+                    id_to_score[idx] = annotation_score
+                    label_to_id[approved_name].add(idx)
+
+                curated_ids = {idx for idx, score in id_to_score.items() if score > 0}
+                if len(curated_ids) == 1:
+                    # if we have info on the curated IDs, pick those, as it's more likely someone's hand curated it.
+                    associated_id_sets = frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids=frozenset(curated_ids),
+                                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+                                ids_to_source={idx: id_to_source[idx] for idx in curated_ids},
+                            )
+                        ]
+                    )
+                    return associated_id_sets
+
+                # if we have info on the curated IDs, pick those, as it's more likely someone's hand curated it.
+                # if not, assume all are valid
+                if len(curated_ids) > 1:
+                    chosen_ids = curated_ids
+                    label_to_id_subset = {
+                        k: v for k, v in label_to_id.items() if len(v.intersection(chosen_ids)) > 0
+                    }
+                else:
+                    chosen_ids = ids
+                    label_to_id_subset = dict(label_to_id)
+
+                if is_symbolic:
+                    #     if is symbolic, it's very hard to know what to do. Symbols vary massively, so more or less
+                    # impossible to determine which (if any) is correct
+                    # if we have info on the curated IDs, pick those, as it's more likely someone's hand curated it.
+                    # if not, assume all are valid
+
+                    associated_id_sets = frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids=frozenset([idx]),
+                                aggregated_by=EquivalentIdAggregationStrategy.SYNONYM_IS_AMBIGUOUS,
+                                ids_to_source={idx: id_to_source[idx]},
+                            )
+                            for idx in chosen_ids
+                        ]
+                    )
+                    return associated_id_sets
+
+                else:
+                    # for non symbolic ids, pick one based on similarity to the default label, if above a threshold.
+                    # Otherwise, just assume the synonym is noisy
+
+                    if len(original_syn_set) > 1:
+
+                        original_syn = next(iter(sorted(original_syn_set)))
+                        logger.warning(
+                            f"normaliser has merged two strings: {original_syn_set}. Chosen {original_syn}"
+                            f"for similarity comparison"
+                        )
+                    else:
+                        original_syn = next(iter(original_syn_set))
+                    # if the normaliser hasn't merged two similar strings,
+
+                    scores = []
+                    for s1, s2 in itertools.product(label_to_id_subset.keys(), [original_syn]):
+                        score = self.spacy_pipeline.nlp(s1.lower()).similarity(
+                            self.spacy_pipeline.nlp(s2.lower())
+                        )
+                        scores.append((s1, score))
+                    best_label, best_score = max(scores, key=lambda x: x[1])
+                    if best_score <= self.synonym_merge_threshold:
+                        # not similar enough to justify choosing one over another, so we keep all
+
+                        associated_id_sets = frozenset(
+                            [
+                                EquivalentIdSet(
+                                    ids=frozenset([idx]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.SYNONYM_IS_AMBIGUOUS,
+                                    ids_to_source={idx: id_to_source[idx]},
+                                )
+                                for idx in chosen_ids
+                            ]
+                        )
+                    else:
+                        best_id = next(iter(label_to_id_subset[best_label]))
+                        associated_id_sets = frozenset(
+                            [
+                                EquivalentIdSet(
+                                    ids=frozenset([best_id]),
+                                    aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                                    ids_to_source={best_id: id_to_source[best_id]},
+                                )
+                            ]
+                        )
+                    return associated_id_sets
+
     def find_kb(self, string: str) -> str:
         return "ENSEMBL"
 
@@ -392,6 +589,14 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
                     record[MAPPING_TYPE] = record.pop("source")
                     records.append(record)
 
+            annotation_score = sum(
+                [
+                    1
+                    for annotation_field in self.annotation_fields
+                    if len(json_dict.get(annotation_field, [])) > 0
+                ]
+            )
+
             records.append({SYN: json_dict["approvedSymbol"], MAPPING_TYPE: "approvedSymbol"})
             records.append({SYN: json_dict["approvedName"], MAPPING_TYPE: "approvedName"})
             records.append({SYN: json_dict["id"], MAPPING_TYPE: "opentargets_id"})
@@ -399,6 +604,8 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             df[IDX] = json_dict["id"]
             df[DEFAULT_LABEL] = json_dict["approvedSymbol"]
             df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
+            df["annotation_score"] = [annotation_score] * df.shape[0]
+            df["approvedName"] = json_dict["approvedName"]
             yield df
 
 
