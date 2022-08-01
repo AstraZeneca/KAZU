@@ -16,6 +16,7 @@ def _copy_ent_with_new_spans(
 ):
     attrb_dict = copy.deepcopy(entity).__dict__
     attrb_dict.pop("spans")
+    attrb_dict.pop("match_norm")
     attrb_dict.pop("match")
     attrb_dict.pop("start")
     attrb_dict.pop("end")
