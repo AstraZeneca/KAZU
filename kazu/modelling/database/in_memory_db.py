@@ -2,7 +2,7 @@ import copy
 from collections import defaultdict
 from typing import Optional, DefaultDict, Dict, List, Tuple, Set, Iterable
 
-from kazu.data.data import SynonymTerm, UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES, SimpleValue
+from kazu.data.data import SynonymTerm, UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES, SimpleValue
 
 
 class MetadataDatabase:
@@ -102,7 +102,7 @@ class SynonymDatabase:
                 self.syns_database_by_syn[name][synonym.term_norm] = synonym
 
                 for equiv_ids in synonym.associated_id_sets:
-                    if equiv_ids.aggregated_by in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                    if equiv_ids.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
                         for idx in equiv_ids.ids:
                             self.unambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
                     else:
@@ -153,7 +153,7 @@ class SynonymDatabase:
         for equiv_id_set in synonym_term.associated_id_sets:
             if (
                 ignore_ambiguous
-                and equiv_id_set.aggregated_by not in UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
+                and equiv_id_set.aggregated_by not in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
             ):
                 continue
 
