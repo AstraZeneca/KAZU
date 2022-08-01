@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from gilda.process import replace_dashes
 from kazu.utils.string_normalizer import StringNormalizer
@@ -65,6 +65,6 @@ class GeneSymbolClassifier(SymbolClassifier):
     @staticmethod
     def is_symbolic(string: str) -> bool:
         if GeneSymbolClassifier.count_word_like_tokens(string) == 0:
-            return False
-        else:
             return True
+        else:
+            return False
