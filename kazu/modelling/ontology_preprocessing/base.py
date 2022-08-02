@@ -103,7 +103,7 @@ class OntologyParser(ABC):
         """
         raise NotImplementedError()
 
-    def resolve_synoyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
+    def resolve_synonyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
         """
         synonym lists are noisy, so we need an algorithm to identify when a synonym
 
@@ -258,7 +258,7 @@ class OntologyParser(ABC):
         syn_df[SYN] = syn_df[SYN].apply(str.strip)
         syn_df.drop_duplicates(subset=self.all_synonym_column_names)
         assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-        synonym_terms = self.resolve_synoyms(synonym_df=syn_df)
+        synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
         return synonym_terms
 
     def populate_metadata_database(self):
