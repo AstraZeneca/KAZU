@@ -522,9 +522,10 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
                     if len(original_syn_set) > 1:
 
+                        # sorted call is so we consistently choose the same element for reproducibility
                         original_syn = next(iter(sorted(original_syn_set)))
                         logger.warning(
-                            f"normaliser has merged two strings: {original_syn_set}. Chosen {original_syn}"
+                            f"normaliser has merged two or more strings: {original_syn_set}. Chosen {original_syn}"
                             f"for similarity comparison"
                         )
                     else:
