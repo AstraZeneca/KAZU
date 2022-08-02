@@ -50,7 +50,6 @@ class OntologyParser(ABC):
     """
 
     name = "unnamed"  # a label for his parser
-    training_col_names = ["id", "syn1", "syn2"]
     # the synonym table should have these (and only these columns)
     all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
     # the metadata table should have at least these columns (note, IDX will become the index
