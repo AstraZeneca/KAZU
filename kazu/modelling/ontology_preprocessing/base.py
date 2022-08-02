@@ -435,7 +435,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             return associated_id_sets
         else:
             if len(ids) == 1:
-                # default label is the same, it's the same concept
                 id_set = EquivalentIdSet(
                     ids=frozenset(ids),
                     aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
