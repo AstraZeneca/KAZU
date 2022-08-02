@@ -135,10 +135,28 @@ HitStoreKey = Tuple[str, EquivalentIdSet]  # parser name and EquivalentIdSet
 NumericMetric = Union[bool, int, float]
 
 
+@dataclass(frozen=True)
+class SynonymTerm:
+    terms: FrozenSet[str]
+    term_norm: str
+    parser_name: str
+    is_symbolic: bool
+    associated_id_sets: FrozenSet[EquivalentIdSet]
+    mapping_types: FrozenSet[str] = field(hash=False)
+
+    @property
+    def is_ambiguous(self):
+        return len(self.associated_id_sets) > 1
+
+    @property
+    def is_confused(self):
+        return self.is_ambiguous and len(self.terms) > 1
+
+
 @dataclass(frozen=True, eq=True)
 class Hit:
     """
-    Hit is a precursor to a Mapping, meaning that a match has been detected and linked to a set of EquivalentIdSet, but
+    Hit is a precursor to a Mapping, meaning that a match has been detected and linked to an EquivalentIdSet, but
     is not ready to become a fully fledged mapping yet, as it may require further disambiguation
     """
 
@@ -164,6 +182,43 @@ class Hit:
 
 
 @dataclass
+class SynonymTermWithMetrics:
+    terms: FrozenSet[str]
+    term_norm: str
+    parser_name: str
+    is_symbolic: bool
+    associated_id_sets: FrozenSet[EquivalentIdSet]
+    mapping_types: FrozenSet[str] = field(hash=False)
+    search_score: Optional[float] = None
+    embed_score: Optional[float] = None
+    bool_score: Optional[float] = None
+    exact_match: Optional[bool] = None
+
+    @staticmethod
+    def from_synonym_term(term: SynonymTerm):
+
+        return SynonymTermWithMetrics(**term.__dict__)
+
+    @property
+    def is_ambiguous(self):
+        return len(self.associated_id_sets) > 1
+
+    @property
+    def is_confused(self):
+        return self.is_ambiguous and len(self.terms) > 1
+
+    def merge_metrics(self, term: "SynonymTermWithMetrics"):
+        if term.bool_score is not None:
+            self.bool_score = term.bool_score
+        if term.exact_match is not None:
+            self.exact_match = term.exact_match
+        if term.embed_score is not None:
+            self.embed_score = term.embed_score
+        if term.search_score is not None:
+            self.search_score = term.search_score
+
+
+@dataclass
 class Entity:
     """
     Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
@@ -180,6 +235,8 @@ class Entity:
     start: int = field(init=False)
     end: int = field(init=False)
     match_norm: str = field(init=False)
+    syn_norm_to_synonym_terms: Dict[str, SynonymTermWithMetrics] = field(default_factory=dict)
+    # id_set_to_syn_term: Dict[EquivalentIdSet, SynonymTermWithMetrics] = field(default_factory=dict)
 
     @property
     def hits(self):
@@ -193,6 +250,16 @@ class Entity:
                 self._hit_store[key] = hit
             else:
                 maybe_existing_hit.merge_metrics(hit)
+
+    def update_terms(self, terms: Iterable[SynonymTermWithMetrics]):
+        for term in terms:
+            existing_term: Optional[SynonymTermWithMetrics] = self.syn_norm_to_synonym_terms.get(
+                term.term_norm
+            )
+            if existing_term is not None:
+                existing_term.merge_metrics(term)
+            else:
+                self.syn_norm_to_synonym_terms[term.term_norm] = term
 
     def __hash__(self):
         return id(self)
@@ -502,23 +569,6 @@ class Document:
         for section in self.sections:
             length += len(section.get_text())
         return length
-
-
-@dataclass(frozen=True)
-class SynonymTerm:
-    terms: FrozenSet[str]
-    term_norm: str
-    is_symbolic: bool
-    associated_id_sets: FrozenSet[EquivalentIdSet]
-    mapping_types: FrozenSet[str] = field(hash=False)
-
-    @property
-    def is_ambiguous(self):
-        return len(self.associated_id_sets) > 1
-
-    @property
-    def is_confused(self):
-        return self.is_ambiguous and len(self.terms) > 1
 
 
 UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
