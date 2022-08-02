@@ -160,13 +160,13 @@ class OntologyParser(ABC):
     ) -> FrozenSet[EquivalentIdSet]:
         if not isinstance(self.spacy_pipeline, SpacyPipeline):
             associated_id_sets = frozenset(
-                [
+                (
                     EquivalentIdSet(
                         ids=frozenset(ids),
                         aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
                         ids_to_source={idx: id_to_source[idx] for idx in ids},
-                    )
-                ]
+                    ),
+                )
             )
             return associated_id_sets
         else:
@@ -185,7 +185,7 @@ class OntologyParser(ABC):
                     aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
                     ids_to_source={idx: id_to_source[idx] for idx in ids},
                 )
-                return frozenset([id_set])
+                return frozenset((id_set,))
             else:
                 # we need to check similarity
                 id_groups = defaultdict(set)
