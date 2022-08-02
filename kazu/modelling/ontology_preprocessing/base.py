@@ -159,6 +159,7 @@ class OntologyParser(ABC):
                 is_symbolic=is_symbolic,
                 mapping_types=mapping_type_set,
                 associated_id_sets=associated_id_sets,
+                parser_name=self.name,
             )
 
             result.add(synonym_term)
