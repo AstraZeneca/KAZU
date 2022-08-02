@@ -209,8 +209,7 @@ class SynonymDatabase:
     def validate_integrity(self):
         failed_terms = []
         for parser_name in self.get_loaded_parsers():
-            term: SynonymTerm
-            for term_norm, term in self.get_all(parser_name).items():
+            for term in self.get_all(parser_name).values():
                 if len(term.associated_id_sets) > 1:
                     for id_set in term.associated_id_sets:
                         # if more than one id_set associated with a term, it can't be unambiguous
