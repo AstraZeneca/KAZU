@@ -49,10 +49,10 @@ class OntologyParser(ABC):
     Note: It is the responsibility of a parser implementation to add default labels as synonyms.
     """
 
-    name = "unnamed"  # a label for his parser
+    name = "unnamed"  # a label for this parser
     # the synonym table should have these (and only these columns)
     all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
-    # the metadata table should have at least these columns (note, IDX will become the index
+    # the metadata table should have at least these columns (note, IDX will become the index)
     minimum_metadata_column_names = [DEFAULT_LABEL, DATA_ORIGIN]
 
     def __init__(
