@@ -182,7 +182,7 @@ class OntologyParser(ABC):
                 # default label is the same, or it's not symbolic. It's the same concept
                 id_set = EquivalentIdSet(
                     ids=frozenset(ids),
-                    aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                    aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
                     ids_to_source={idx: id_to_source[idx] for idx in ids},
                 )
                 return frozenset((id_set,))
