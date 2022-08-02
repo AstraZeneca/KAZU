@@ -174,7 +174,7 @@ class OntologyParser(ABC):
             id_to_label = {}
             label_to_id = defaultdict(set)
             for idx in ids:
-                default_label: str = str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
+                default_label = str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
                 id_to_label[idx] = default_label
                 label_to_id[default_label].add(idx)
 
