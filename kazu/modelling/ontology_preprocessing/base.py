@@ -136,21 +136,7 @@ class OntologyParser(ABC):
                 ontologies.add(source)
                 id_to_source[idx] = source
 
-            associated_id_sets: FrozenSet[EquivalentIdSet]
-            if not isinstance(self.spacy_pipeline, SpacyPipeline):
-                associated_id_sets = frozenset(
-                    [
-                        EquivalentIdSet(
-                            ids=frozenset(ids),
-                            aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
-                            ids_to_source={idx: id_to_source[idx] for idx in ids},
-                        )
-                    ]
-                )
-            else:
-                associated_id_sets = self.score_and_group_ids(
-                    ids, id_to_source, is_symbolic, syn_set
-                )
+            associated_id_sets = self.score_and_group_ids(ids, id_to_source, is_symbolic, syn_set)
 
             synonym_term = SynonymTerm(
                 term_norm=syn_norm,
