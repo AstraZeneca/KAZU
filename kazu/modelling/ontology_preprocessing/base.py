@@ -361,7 +361,7 @@ class JsonLinesOntologyParser(OntologyParser):
     ) -> Iterable[pd.DataFrame]:
         """
         for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
-        strucutre of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
+        structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
         IDX. All other keys are used as mapping metadata
         :param jsons_gen: iterator of python dict representing json objects
         :return: pd.DataFrame
