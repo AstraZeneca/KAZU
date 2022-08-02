@@ -590,11 +590,9 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
                     records.append(record)
 
             annotation_score = sum(
-                [
-                    1
-                    for annotation_field in self.annotation_fields
-                    if len(json_dict.get(annotation_field, [])) > 0
-                ]
+                1
+                for annotation_field in self.annotation_fields
+                if len(json_dict.get(annotation_field, [])) > 0
             )
 
             records.append({SYN: json_dict["approvedSymbol"], MAPPING_TYPE: "approvedSymbol"})
