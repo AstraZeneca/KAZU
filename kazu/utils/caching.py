@@ -1,11 +1,9 @@
 import copy
 import logging
-from typing import Iterable, List, Set
+from typing import Iterable, List
 
 from cachetools import LFUCache
-
-from kazu.data.data import Entity, Hit
-from kazu.data.data import Mapping
+from kazu.data.data import Entity, SynonymTermWithMetrics
 from kazu.utils.utils import get_match_entity_class_hash
 
 logger = logging.getLogger(__name__)
@@ -17,20 +15,13 @@ class EntityLinkingLookupCache:
     """
 
     def __init__(self, lookup_cache_size: int = 5000):
-        self.mappings_lookup_cache: LFUCache = LFUCache(lookup_cache_size)
-        self.hits_lookup_cache: LFUCache = LFUCache(lookup_cache_size)
+        self.terms_lookup_cache: LFUCache = LFUCache(lookup_cache_size)
 
-    def update_mappings_lookup_cache(self, entity: Entity, mappings: List[Mapping]):
+    def update_terms_lookup_cache(self, entity: Entity, terms: Iterable[SynonymTermWithMetrics]):
         hash_val = get_match_entity_class_hash(entity)
-        cache_hit = self.mappings_lookup_cache.get(hash_val)
+        cache_hit = self.terms_lookup_cache.get(hash_val)
         if cache_hit is None:
-            self.mappings_lookup_cache[hash_val] = mappings
-
-    def update_hits_lookup_cache(self, entity: Entity, hits: Set[Hit]):
-        hash_val = get_match_entity_class_hash(entity)
-        cache_hit = self.hits_lookup_cache.get(hash_val)
-        if cache_hit is None:
-            self.hits_lookup_cache[hash_val] = hits
+            self.terms_lookup_cache[hash_val] = set(terms)
 
     def check_lookup_cache(self, entities: Iterable[Entity]) -> List[Entity]:
         """
@@ -43,13 +34,9 @@ class EntityLinkingLookupCache:
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
-            mappings_cache_hits = self.mappings_lookup_cache.get(hash_val, [])
-            hits_cache_hits = self.hits_lookup_cache.get(hash_val, [])
-            if not mappings_cache_hits and not hits_cache_hits:
+            hits_cache_hits = self.terms_lookup_cache.get(hash_val, set())
+            if not hits_cache_hits:
                 cache_misses.append(ent)
             else:
-                for mapping in mappings_cache_hits:
-                    ent.mappings.add(copy.deepcopy(mapping))
-                for hit in hits_cache_hits:
-                    ent.update_hits([copy.deepcopy(hit)])
+                ent.update_terms(copy.deepcopy(hits_cache_hits))
         return cache_misses
