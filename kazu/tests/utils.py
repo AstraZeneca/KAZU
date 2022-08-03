@@ -1,17 +1,16 @@
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 import pandas as pd
 import pytest
-
 from kazu.data.data import (
     Document,
     Entity,
     CharSpan,
-    Hit,
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
+    SynonymTermWithMetrics,
 )
 from kazu.modelling.ontology_preprocessing.base import (
     IDX,
@@ -288,9 +287,27 @@ def make_dummy_parser(
     return parser
 
 
-def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit:
-    id_set = EquivalentIdSet(
-        aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS, ids=frozenset(ids)
+def make_dummy_synonym_term(
+    ids: List[str],
+    parser_name: str,
+    search_score: Optional[float] = None,
+    embed_score: Optional[float] = None,
+) -> SynonymTermWithMetrics:
+    return SynonymTermWithMetrics(
+        terms=frozenset(
+            (
+                "1",
+                "one",
+            )
+        ),
+        term_norm="1",
+        parser_name=parser_name,
+        search_score=search_score,
+        embed_score=embed_score,
+        associated_id_sets=frozenset(
+            (EquivalentIdSet(ids_to_source={id_: "test" for id_ in ids}, ids=frozenset(ids)),)
+        ),
+        aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
+        is_symbolic=True,
+        mapping_types=frozenset(),
     )
-    hit = Hit(id_set=id_set, parser_name=parser_name, per_normalized_syn_metrics={"test": metrics})
-    return hit

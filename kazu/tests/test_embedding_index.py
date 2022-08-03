@@ -5,14 +5,12 @@ from unittest.mock import patch
 
 import pytest
 from hydra.utils import instantiate
-
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.tests.utils import DummyParser, requires_model_pack
 from kazu.utils.link_index import (
     MatMulTensorEmbeddingIndex,
     CDistTensorEmbeddingIndex,
-    SAPBERT_SCORE,
 )
 from kazu.utils.utils import get_cache_dir
 
@@ -53,9 +51,9 @@ def assert_search_is_working(
     scores = set()
     for _ in range(5):
         query_embedding = embedding_model.get_embeddings_for_strings(["4"])
-        hits = list(index.search(query_embedding))
-        assert len(hits) == 1
-        scores.add(hits[0].per_normalized_syn_metrics["4"][SAPBERT_SCORE])
+        terms = list(index.search(query_embedding))
+        assert len(terms) == 1
+        scores.update(terms)
     # multiple calls to the same string should return same score
     assert len(scores) == 1
 

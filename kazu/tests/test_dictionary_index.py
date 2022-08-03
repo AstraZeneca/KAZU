@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.tests.utils import DummyParser
-from kazu.utils.link_index import DictionaryIndex, SEARCH_SCORE, EXACT_MATCH
+from kazu.utils.link_index import DictionaryIndex
 from kazu.utils.utils import get_cache_dir
 
 
@@ -24,17 +24,15 @@ def test_dictionary_index_caching():
 def assert_search_is_working(parser: OntologyParser):
     index = DictionaryIndex(parser)
     index.load_or_build_cache(False)
-    hits = list(index.search("3"))
-    assert len(hits) == 1
-    hit = hits[0]
-    assert hit.parser_name == parser.name
-    assert hit.per_normalized_syn_metrics["3"][EXACT_MATCH] is True
+    terms = list(index.search("3"))
+    assert len(terms) == 1
+    term = terms[0]
+    assert term.parser_name == parser.name
+    assert term.exact_match
 
-    hits = list(index.search("nothing"))
-    for hit in hits:
-        assert all(
-            metrics[SEARCH_SCORE] == 0.0 for metrics in hit.per_normalized_syn_metrics.values()
-        )
+    terms = list(index.search("nothing"))
+
+    assert all(term.search_score == 0.0 for term in terms)
 
 
 def asset_cache_loaded(cache_dir, parser, f):
