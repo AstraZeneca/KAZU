@@ -185,71 +185,44 @@ class DictionaryIndex(Index):
     """
 
     def __init__(
-        self,
-        parser: OntologyParser,
+        self, parser: OntologyParser, boolean_scorers: Optional[List[StringSimilarityScorer]] = None
     ):
+        """
+
+        :param parser:
+        :param boolean_scorers: precision can be increased by applying boolean checks on the returned result, for
+            instance, checking that all integers are represented, that any noun modifiers are present etc
+        """
         super().__init__(parser=parser)
+        self.boolean_scorers = boolean_scorers
         self.synonym_db: SynonymDatabase = SynonymDatabase()
 
-    # def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
-    #     hits = []
-    #     if string_norm in self.synonym_db.get_all(self.parser.name):
-    #         for id_set in self.synonym_db.get(self.parser.name, string_norm).associated_id_sets:
-    #             hits.append(
-    #                 Hit(
-    #                     parser_name=self.parser.name,
-    #                     per_normalized_syn_metrics={
-    #                         string_norm: {SEARCH_SCORE: 100.0, EXACT_MATCH: True}
-    #                     },
-    #                     id_set=id_set,
-    #                 )
-    #             )
-    #         return hits
-    #
-    #     else:
-    #
-    #         query = self.vectorizer.transform([string_norm]).todense()
-    #         # minus to negate, so arg sort works in correct order
-    #         score_matrix = np.squeeze(-np.asarray(self.tf_idf_matrix.dot(query.T)))
-    #         neighbours = score_matrix.argsort()[:top_n]
-    #         # don't use torch for this - it's slow
-    #         # query = torch.FloatTensor(query)
-    #         # score_matrix = self.tf_idf_matrix_torch.matmul(query.T)
-    #         # score_matrix = torch.squeeze(score_matrix.T)
-    #         # neighbours = torch.argsort(score_matrix, descending=True)[:top_n]
-    #
-    #         distances = score_matrix[neighbours]
-    #         distances = 100 * -distances
-    #         hits = []
-    #         synonym_list = list(self.synonym_db.get_all(self.parser.name))
-    #         for neighbour, score in zip(neighbours, distances):
-    #             # get by index
-    #             found_norm = synonym_list[neighbour]
-    #             for id_set in self.synonym_db.get(self.parser.name, found_norm).associated_id_sets:
-    #                 hits.append(
-    #                     Hit(
-    #                         parser_name=self.parser.name,
-    #                         per_normalized_syn_metrics={
-    #                             found_norm: {SEARCH_SCORE: score, EXACT_MATCH: False}
-    #                         },
-    #                         id_set=id_set,
-    #                     )
-    #                 )
-    #     # we don't sort the hits as we expect them to enter an unsorted set
-    #     return hits
-    def _search_index(self, string_norm: str, top_n: int = 15) -> List[SynonymTermWithMetrics]:
+    def apply_boolean_scorers(self, match: str, match_norm: str, term_norm: str) -> bool:
 
-        if string_norm in self.synonym_db.get_all(self.parser.name):
-            term = self.synonym_db.get(self.parser.name, string_norm)
-            term_with_metrics = SynonymTermWithMetrics.from_synonym_term(term)
-            term_with_metrics.search_score = 100.0
-            term_with_metrics.exact_match = True
+        if self.boolean_scorers is not None:
+            for scorer in self.boolean_scorers:
+                if not scorer(match=match, match_norm=match_norm, term_norm=term_norm):
+                    return False
+            else:
+                return True
+        else:
+            return True
 
+    def _search_index(
+        self, match: str, match_norm: str, top_n: int = 15
+    ) -> List[SynonymTermWithMetrics]:
+
+        if match_norm in self.synonym_db.get_all(self.parser.name):
+            term = self.synonym_db.get(self.parser.name, match_norm)
+            term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
+                term, search_score=100.0, bool_score=True, exact_match=True
+            )
             return [term_with_metrics]
 
         else:
-
-            query = self.vectorizer.transform([string_norm]).todense()
+            # TODO: this seems to not be using sparse mat mul, and can be a lot faster. See TfIdfDocumentScorer
+            # TODO: for example code on how to reimplement with sparse
+            query = self.vectorizer.transform([match_norm]).todense()
             # minus to negate, so arg sort works in correct order
             score_matrix = np.squeeze(-np.asarray(self.tf_idf_matrix.dot(query.T)))
             neighbours = score_matrix.argsort()[:top_n]
@@ -266,10 +239,15 @@ class DictionaryIndex(Index):
             for neighbour, score in zip(neighbours, distances):
                 # get by index
                 term = synonym_list[neighbour]
-                term_with_metrics = SynonymTermWithMetrics.from_synonym_term(term)
-                term_with_metrics.search_score = score
-                term_with_metrics.exact_match = False
-                result.append(term_with_metrics)
+                if self.apply_boolean_scorers(
+                    match=match, match_norm=match_norm, term_norm=term.term_norm
+                ):
+                    term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
+                        term, search_score=score, bool_score=True, exact_match=False
+                    )
+                    result.append(term_with_metrics)
+                else:
+                    logger.debug("filtered term %s as failed boolean checks", term)
                 # we don't sort the hits as we expect them to enter an unsorted set
             return result
 
@@ -280,8 +258,8 @@ class DictionaryIndex(Index):
         :return: Iterable of Tuple [kb.id, metadata_dict]
         """
 
-        string_norm = StringNormalizer.normalize(query)
-        hits = self._search_index(string_norm, top_n=top_n)
+        match_norm = StringNormalizer.normalize(query)
+        hits = self._search_index(query, match_norm, top_n=top_n)
         yield from hits
 
     def _load(self, path: Path) -> Any:
