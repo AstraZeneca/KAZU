@@ -438,16 +438,6 @@ class Section:
             f.write(html)
         webbrowser.open(url, new=2)
 
-    @property
-    def group_entities_on_hits(
-        self,
-    ) -> Iterable[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterable[Entity]]]:
-        yield from sort_then_group(self.entities, _get_key_to_group_ent_on_hits)
-
-
-def _get_key_to_group_ent_on_hits(e: Entity) -> Tuple[str, str, FrozenSet[Hit]]:
-    return (e.match, e.entity_class, frozenset(e.hits))
-
 
 class DocumentEncoder(json.JSONEncoder):
     """
