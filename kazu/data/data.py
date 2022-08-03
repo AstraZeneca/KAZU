@@ -96,7 +96,6 @@ class EquivalentIdSet:
     A representation of a set of kb ID's that map to the same synonym and mean the same thing.
     """
 
-    aggregated_by: EquivalentIdAggregationStrategy = field(hash=False, compare=False)
     ids: FrozenSet[str] = field(
         default_factory=frozenset, hash=True
     )  # other ID's mapping to this syn, from different KBs
@@ -131,6 +130,7 @@ class SynonymTerm:
     is_symbolic: bool
     associated_id_sets: FrozenSet[EquivalentIdSet]
     mapping_types: FrozenSet[str] = field(hash=False)
+    aggregated_by: EquivalentIdAggregationStrategy = field(hash=False, compare=False)
 
     @property
     def is_ambiguous(self):
@@ -169,23 +169,36 @@ class Hit:
                     existing_metrics[metric_name] = metric_val
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class SynonymTermWithMetrics:
     terms: FrozenSet[str]
     term_norm: str
     parser_name: str
     is_symbolic: bool
     associated_id_sets: FrozenSet[EquivalentIdSet]
-    mapping_types: FrozenSet[str] = field(hash=False)
-    search_score: Optional[float] = None
-    embed_score: Optional[float] = None
-    bool_score: Optional[float] = None
-    exact_match: Optional[bool] = None
+    aggregated_by: EquivalentIdAggregationStrategy
+    mapping_types: FrozenSet[str] = field(compare=False)
+    search_score: Optional[float] = field(compare=False, default=None)
+    embed_score: Optional[float] = field(compare=False, default=None)
+    bool_score: Optional[float] = field(compare=False, default=None)
+    exact_match: Optional[bool] = field(compare=False, default=None)
 
     @staticmethod
-    def from_synonym_term(term: SynonymTerm):
+    def from_synonym_term(
+        term: SynonymTerm,
+        search_score: Optional[float] = None,
+        embed_score: Optional[float] = None,
+        bool_score: Optional[float] = None,
+        exact_match: Optional[bool] = None,
+    ):
 
-        return SynonymTermWithMetrics(**term.__dict__)
+        return SynonymTermWithMetrics(
+            search_score=search_score,
+            embed_score=embed_score,
+            bool_score=bool_score,
+            exact_match=exact_match,
+            **term.__dict__,
+        )
 
     @property
     def is_ambiguous(self):
@@ -195,15 +208,14 @@ class SynonymTermWithMetrics:
     def is_confused(self):
         return self.is_ambiguous and len(self.terms) > 1
 
-    def merge_metrics(self, term: "SynonymTermWithMetrics"):
-        if term.bool_score is not None:
-            self.bool_score = term.bool_score
-        if term.exact_match is not None:
-            self.exact_match = term.exact_match
-        if term.embed_score is not None:
-            self.embed_score = term.embed_score
-        if term.search_score is not None:
-            self.search_score = term.search_score
+    def merge_metrics(self, term: "SynonymTermWithMetrics") -> "SynonymTermWithMetrics":
+        new_values = {
+            k: v
+            for k, v in term.__dict__.items()
+            if k in {"search_score", "embed_score", "bool_score", "exact_match"} and v is not None
+        }
+        new_term = dataclasses.replace(self, **new_values)
+        return new_term
 
 
 @dataclass
