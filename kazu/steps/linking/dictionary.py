@@ -80,26 +80,30 @@ class DictionaryEntityLinkingStep(BaseStep):
         if len(ents_by_match_and_class) > 0:
             for ent_match_and_class, ents_this_match in ents_by_match_and_class.items():
 
-                # cache_missed_entities = self.lookup_cache.check_lookup_cache(ents_this_match)
-                # if len(cache_missed_entities) == 0:
-                #     continue
-                # else:
-                try:
-                    indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
-                    if indices_to_search:
-                        terms: List[SynonymTermWithMetrics] = []
-                        for index in indices_to_search:
-                            terms.extend(list(index.search(ent_match_and_class[0], self.top_n)))
+                cache_missed_entities = self.lookup_cache.check_lookup_cache(ents_this_match)
+                if len(cache_missed_entities) == 0:
+                    continue
+                else:
+                    try:
+                        indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
+                        if indices_to_search:
+                            terms: List[SynonymTermWithMetrics] = []
+                            for index in indices_to_search:
+                                terms.extend(list(index.search(ent_match_and_class[0], self.top_n)))
 
+                            for ent in ents_this_match:
+                                ent.update_terms(terms)
+
+                            self.lookup_cache.update_terms_lookup_cache(
+                                entity=next(iter(ents_this_match)), terms=terms
+                            )
+
+                    except Exception:
+                        failed_docs_set = set()
                         for ent in ents_this_match:
-                            ent.update_terms(terms)
-
-                except Exception:
-                    failed_docs_set = set()
-                    for ent in ents_this_match:
-                        doc = find_document_from_entity(docs, ent)
-                        doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                        failed_docs_set.add(doc)
-                    failed_docs.extend(list(failed_docs_set))
+                            doc = find_document_from_entity(docs, ent)
+                            doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                            failed_docs_set.add(doc)
+                        failed_docs.extend(list(failed_docs_set))
 
         return docs, failed_docs
