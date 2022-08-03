@@ -497,37 +497,31 @@ class Document:
             entities.extend(section.entities)
         return entities
 
-    @property
-    def group_entities_on_hits(
-        self,
-    ) -> Iterable[Tuple[Tuple[str, str, FrozenSet[Hit]], Iterable[Entity]]]:
-        yield from sort_then_group(self.get_entities(), key_func=_get_key_to_group_ent_on_hits)
-
-    def json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False, **kwargs):
+    def json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False, **kwargs):
         """
         custom encoder needed to handle serialisation issues with our data model
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
-        if drop_unmapped_ents or drop_hits:
+        if drop_unmapped_ents or drop_terms:
             for section in self.sections:
                 if drop_unmapped_ents:
                     ents_to_keep = list(filter(lambda x: x.mappings, section.entities))
                 else:
                     ents_to_keep = section.entities
-                if drop_hits:
+                if drop_terms:
                     for ent in ents_to_keep:
-                        ent.hits.clear()
+                        ent.syn_term_to_synonym_terms.clear()
                 section.entities = ents_to_keep
 
         return json.dumps(self, cls=DocumentEncoder, **kwargs)
 
-    def as_minified_json(self, drop_unmapped_ents: bool = False, drop_hits: bool = False) -> str:
-        as_dict_minified = self.as_minified_dict(drop_unmapped_ents, drop_hits)
+    def as_minified_json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> str:
+        as_dict_minified = self.as_minified_dict(drop_unmapped_ents, drop_terms)
         return json.dumps(as_dict_minified)
 
-    def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_hits: bool = False) -> Dict:
-        as_dict = json.loads(self.json(drop_unmapped_ents, drop_hits))
+    def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> Dict:
+        as_dict = json.loads(self.json(drop_unmapped_ents, drop_terms))
         as_dict_minified = remove_empty_elements(as_dict)
         return as_dict_minified
 
