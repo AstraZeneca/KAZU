@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import List, Dict, Optional, Iterable, Set
 
-from kazu.data.data import SynonymTerm
+from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
 from kazu.modelling.language.language_phenomena import GREEK_SUBS
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
@@ -21,6 +21,7 @@ def make_synonym_term(new_terms: Iterable[str], original_synonym_term: SynonymTe
         associated_id_sets=original_synonym_term.associated_id_sets,
         mapping_types=original_synonym_term.mapping_types,
         parser_name=original_synonym_term.parser_name,
+        aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
     )
 
 
