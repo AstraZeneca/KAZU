@@ -1,18 +1,17 @@
-import copy
 import logging
 import sys
 import traceback
 from collections import defaultdict
 from typing import List, Tuple, Iterable, Optional, Dict, Set
 
+import pydash
 import torch
-from pytorch_lightning import Trainer
-
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Hit
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, SynonymTermWithMetrics
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
-from kazu.utils.link_index import EmbeddingIndex, EXACT_MATCH
+from kazu.utils.link_index import EmbeddingIndex
+from pytorch_lightning import Trainer
 
 logger = logging.getLogger(__name__)
 
@@ -110,29 +109,26 @@ class SapBertForEntityLinkingStep(BaseStep):
         failed_docs = []
         try:
             entities_to_process = []
-            for doc in docs:
-                for ent in doc.get_entities():
-                    if ent.entity_class not in self.entity_class_to_indices.keys():
-                        continue
-                    if self.ignore_high_conf:
-                        # check every parser namespace has a high conf hit
-                        # gives false by default, so if there are no hits for a parser
-                        # we run sapbert
-                        parser_has_high_conf_hit: Dict[str, bool] = defaultdict(bool)
-                        for hit in ent.hits:
-                            if any(
-                                metrics[EXACT_MATCH] is True
-                                for metrics in hit.per_normalized_syn_metrics.values()
-                            ):
-                                parser_has_high_conf_hit[hit.parser_name] = True
+            ent: Entity
+            for ent in pydash.flatten([x.get_entities() for x in docs]):
+                if ent.entity_class not in self.entity_class_to_indices.keys():
+                    continue
+                if self.ignore_high_conf:
+                    # check every parser namespace has a high conf hit
+                    # gives false by default, so if there are no hits for a parser
+                    # we run sapbert
+                    parser_has_high_conf_term: Dict[str, bool] = defaultdict(bool)
+                    for term in ent.syn_term_to_synonym_terms.values():
+                        if term.exact_match:
+                            parser_has_high_conf_term[term.parser_name] = True
 
-                        # TODO: in theory I think you could pass an embedding index when constructing
-                        # that never gets used because it isn't in the list of entities and ontologies
-                        # but I'm unclear here - unimportant enough to delay until later
-                        if not all(
-                            parser_has_high_conf_hit[index.parser.name] for index in self.indices
-                        ):
-                            entities_to_process.append(ent)
+                    # TODO: in theory I think you could pass an embedding index when constructing
+                    # that never gets used because it isn't in the list of entities and ontologies
+                    # but I'm unclear here - unimportant enough to delay until later
+                    if not all(
+                        parser_has_high_conf_term[index.parser.name] for index in self.indices
+                    ):
+                        entities_to_process.append(ent)
 
             self.process_entities(entities_to_process)
         except Exception:
@@ -176,8 +172,9 @@ class SapBertForEntityLinkingStep(BaseStep):
                                 entity.entity_class
                             )
                             if indices_to_search:
-                                all_hits: Set[Hit] = set()
+                                terms: List[SynonymTermWithMetrics] = []
                                 for index in indices_to_search:
-                                    all_hits.update(index.search(result, self.top_n))
-                                entity.update_hits(copy.deepcopy(all_hits))
-                                self.lookup_cache.update_hits_lookup_cache(entity, all_hits)
+                                    terms.extend(list(index.search(result, self.top_n)))
+                                entity.update_terms(terms)
+
+                                self.lookup_cache.update_terms_lookup_cache(entity, terms)
