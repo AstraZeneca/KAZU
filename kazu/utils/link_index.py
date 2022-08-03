@@ -2,10 +2,8 @@ import itertools
 import logging
 import os
 import pickle
-import re
 import shutil
 from abc import ABC, abstractmethod
-from collections import Counter
 from pathlib import Path
 from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, cast
 
@@ -13,11 +11,11 @@ import numpy as np
 import torch
 from kazu.data.data import (
     EquivalentIdSet,
-    Hit,
     SimpleValue,
     SynonymTermWithMetrics,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
@@ -32,24 +30,6 @@ from pytorch_lightning import Trainer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
-
-SAPBERT_SCORE = "sapbert_score"
-SEARCH_SCORE = "search_score"
-DICTIONARY_HITS = "dictionary_hits"
-EXACT_MATCH = "exact_match"
-
-
-class NumberResolver:
-    number_finder = re.compile("[0-9]+")
-
-    def __init__(self, query_string_norm):
-        self.ent_match_number_count = Counter(re.findall(self.number_finder, query_string_norm))
-
-    def __call__(self, synonym_string_norm: str):
-        synonym_string_norm_match_number_count = Counter(
-            re.findall(self.number_finder, synonym_string_norm)
-        )
-        return synonym_string_norm_match_number_count == self.ent_match_number_count
 
 
 class Index(ABC):
