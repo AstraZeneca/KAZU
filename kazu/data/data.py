@@ -10,16 +10,11 @@ from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
-from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
 from spacy import displacy
 
 IS_SUBSPAN = "is_subspan"
-# ambiguous_synonyms or confused mappings
-LINK_UNCERTAINTY = "for_disambiguation"
-AMBIGUOUS_IDX = "requires_disambiguation"
-
 # BIO schema
 ENTITY_START_SYMBOL = "B"
 ENTITY_INSIDE_SYMBOL = "I"
@@ -27,13 +22,6 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 
 # key for Document Processing Failed
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
-
-# key for namespace in metadata
-NAMESPACE = "namespace"
-
-# key for linking score
-LINK_SCORE = "link_score"
-LINK_CONFIDENCE = "link_confidence"
 
 
 class LinkRanks(IntEnum):
