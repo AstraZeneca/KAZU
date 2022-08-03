@@ -430,7 +430,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         id_to_source: Dict[str, str],
         is_symbolic: bool,
         original_syn_set: Set[str],
-    ) -> FrozenSet[EquivalentIdSet]:
+    ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
         """
         since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
         all synonym resolution, and rely on disambiguation to decide on 'true' hits. Answers on a postcard if anyone
@@ -442,13 +442,15 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         :return:
         """
 
-        return frozenset(
-            EquivalentIdSet(
-                ids=frozenset((id_,)),
-                aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
-                ids_to_source={id_: id_to_source[id_]},
-            )
-            for id_ in ids
+        return (
+            frozenset(
+                EquivalentIdSet(
+                    ids=frozenset((id_,)),
+                    ids_to_source={id_: id_to_source[id_]},
+                )
+                for id_ in ids
+            ),
+            EquivalentIdAggregationStrategy.CUSTOM,
         )
 
     def find_kb(self, string: str) -> str:
