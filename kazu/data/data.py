@@ -230,36 +230,24 @@ class Entity:
     spans: FrozenSet[CharSpan]  # charspans
     namespace: str  # namespace of BaseStep that produced this instance
     mappings: Set[Mapping] = field(default_factory=set)
-    _hit_store: Dict[HitStoreKey, Hit] = field(default_factory=dict)
     metadata: Dict[Any, Any] = field(default_factory=dict)  # generic metadata
     start: int = field(init=False)
     end: int = field(init=False)
     match_norm: str = field(init=False)
-    syn_norm_to_synonym_terms: Dict[str, SynonymTermWithMetrics] = field(default_factory=dict)
-    # id_set_to_syn_term: Dict[EquivalentIdSet, SynonymTermWithMetrics] = field(default_factory=dict)
-
-    @property
-    def hits(self):
-        return set(self._hit_store.values())
-
-    def update_hits(self, hits: Iterable[Hit]):
-        for hit in hits:
-            key = (hit.parser_name, hit.id_set)
-            maybe_existing_hit: Optional[Hit] = self._hit_store.get(key)
-            if maybe_existing_hit is None:
-                self._hit_store[key] = hit
-            else:
-                maybe_existing_hit.merge_metrics(hit)
+    syn_term_to_synonym_terms: Dict[SynonymTermWithMetrics, SynonymTermWithMetrics] = field(
+        default_factory=dict
+    )
 
     def update_terms(self, terms: Iterable[SynonymTermWithMetrics]):
         for term in terms:
-            existing_term: Optional[SynonymTermWithMetrics] = self.syn_norm_to_synonym_terms.get(
-                term.term_norm
+            existing_term: Optional[SynonymTermWithMetrics] = self.syn_term_to_synonym_terms.get(
+                term
             )
             if existing_term is not None:
-                existing_term.merge_metrics(term)
+                new_term = existing_term.merge_metrics(term)
+                self.syn_term_to_synonym_terms[new_term] = new_term
             else:
-                self.syn_norm_to_synonym_terms[term.term_norm] = term
+                self.syn_term_to_synonym_terms[term] = term
 
     def __hash__(self):
         return id(self)
