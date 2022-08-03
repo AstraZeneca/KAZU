@@ -464,11 +464,11 @@ class DocumentEncoder(json.JSONEncoder):
         elif isinstance(obj, (set, frozenset)):
             return list(obj)
         elif isinstance(obj, Entity):
+            synonym_term_set = set(obj.syn_term_to_synonym_terms.values())
             as_dict = obj.__dict__
-            hits = obj.hits
-            # remove hit store
-            as_dict.pop("_hit_store")
-            as_dict["hits"] = hits
+            # convert syn_term_to_synonym_terms to set
+            as_dict.pop("syn_term_to_synonym_terms")
+            as_dict["synonym_terms"] = synonym_term_set
             return as_dict
         elif isinstance(obj, (datetime, date)):
             return obj.isoformat()
