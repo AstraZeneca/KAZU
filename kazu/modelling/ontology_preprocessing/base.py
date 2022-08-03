@@ -1,11 +1,9 @@
-import itertools
 import json
 import logging
 import os
 import re
 import sqlite3
 from abc import ABC, abstractmethod
-from collections import defaultdict
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet
 from urllib import parse
@@ -426,144 +424,24 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         original_syn_set: Set[str],
     ) -> FrozenSet[EquivalentIdSet]:
         """
-        custom score to deal with highly confused synonyms in opentargets
-        in the case of a confused synonym, we pick the ID with the highest annotation score
-
-
-
+        since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
+        all synonym resolution, and rely on disambiguation to decide on 'true' hits. Answers on a postcard if anyone
+        has a better idea on how to do this!
         :param ids:
         :param id_to_source:
         :param is_symbolic:
+        :param original_syn_set:
         :return:
         """
 
-        if not isinstance(self.spacy_pipeline, SpacyPipeline):
-            associated_id_sets = frozenset(
-                [
-                    EquivalentIdSet(
-                        ids=frozenset(ids),
-                        aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
-                        ids_to_source={idx: id_to_source[idx] for idx in ids},
-                    )
-                ]
+        return frozenset(
+            EquivalentIdSet(
+                ids=frozenset((id_,)),
+                aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+                ids_to_source={id_: id_to_source[id_]},
             )
-            return associated_id_sets
-        else:
-            if len(ids) == 1:
-                id_set = EquivalentIdSet(
-                    ids=frozenset(ids),
-                    aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS,
-                    ids_to_source={idx: id_to_source[idx] for idx in ids},
-                )
-                associated_id_sets = frozenset([id_set])
-                return associated_id_sets
-            else:
-                id_to_label = {}
-                label_to_id = defaultdict(set)
-                id_to_score = {}
-
-                for idx in ids:
-                    approved_name: str = str(
-                        self.metadata_db.get_by_idx(self.name, idx)["approvedName"]
-                    )
-                    annotation_score: int = int(
-                        self.metadata_db.get_by_idx(self.name, idx)["annotation_score"]
-                    )
-                    id_to_label[idx] = approved_name
-                    id_to_score[idx] = annotation_score
-                    label_to_id[approved_name].add(idx)
-
-                curated_ids = {idx for idx, score in id_to_score.items() if score > 0}
-                if len(curated_ids) == 1:
-                    # if we have info on the curated IDs, pick those, as it's more likely someone's hand curated it.
-                    associated_id_sets = frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids=frozenset(curated_ids),
-                                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
-                                ids_to_source={idx: id_to_source[idx] for idx in curated_ids},
-                            )
-                        ]
-                    )
-                    return associated_id_sets
-
-                # if we have info on the curated IDs, pick those, as it's more likely someone's hand curated it.
-                # if not, assume all are valid
-                if len(curated_ids) > 1:
-                    chosen_ids = curated_ids
-                    label_to_id_subset = {
-                        k: v for k, v in label_to_id.items() if len(v.intersection(chosen_ids)) > 0
-                    }
-                else:
-                    chosen_ids = ids
-                    label_to_id_subset = dict(label_to_id)
-
-                if is_symbolic:
-                    #     if is symbolic, it's very hard to know what to do. Symbols vary massively, so more or less
-                    # impossible to determine which (if any) is correct
-                    # if we have info on the curated IDs, pick those, as it's more likely someone's hand curated it.
-                    # if not, assume all are valid
-
-                    associated_id_sets = frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids=frozenset([idx]),
-                                aggregated_by=EquivalentIdAggregationStrategy.SYNONYM_IS_AMBIGUOUS,
-                                ids_to_source={idx: id_to_source[idx]},
-                            )
-                            for idx in chosen_ids
-                        ]
-                    )
-                    return associated_id_sets
-
-                else:
-                    # for non symbolic ids, pick one based on similarity to the default label, if above a threshold.
-                    # Otherwise, just assume the synonym is noisy
-
-                    if len(original_syn_set) > 1:
-
-                        # sorted call is so we consistently choose the same element for reproducibility
-                        original_syn = next(iter(sorted(original_syn_set)))
-                        logger.warning(
-                            f"normaliser has merged two or more strings: {original_syn_set}. Chosen {original_syn}"
-                            f"for similarity comparison"
-                        )
-                    else:
-                        original_syn = next(iter(original_syn_set))
-                    # if the normaliser hasn't merged two similar strings,
-
-                    scores = []
-                    for s1, s2 in itertools.product(label_to_id_subset.keys(), [original_syn]):
-                        score = self.spacy_pipeline.nlp(s1.lower()).similarity(
-                            self.spacy_pipeline.nlp(s2.lower())
-                        )
-                        scores.append((s1, score))
-                    best_label, best_score = max(scores, key=lambda x: x[1])
-                    if best_score <= self.synonym_merge_threshold:
-                        # not similar enough to justify choosing one over another, so we keep all
-
-                        associated_id_sets = frozenset(
-                            [
-                                EquivalentIdSet(
-                                    ids=frozenset([idx]),
-                                    aggregated_by=EquivalentIdAggregationStrategy.SYNONYM_IS_AMBIGUOUS,
-                                    ids_to_source={idx: id_to_source[idx]},
-                                )
-                                for idx in chosen_ids
-                            ]
-                        )
-                    else:
-                        best_id = next(iter(label_to_id_subset[best_label]))
-                        associated_id_sets = frozenset(
-                            [
-                                EquivalentIdSet(
-                                    ids=frozenset([best_id]),
-                                    aggregated_by=EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
-                                    ids_to_source={best_id: id_to_source[best_id]},
-                                )
-                            ]
-                        )
-                    return associated_id_sets
+            for id_ in ids
+        )
 
     def find_kb(self, string: str) -> str:
         return "ENSEMBL"
