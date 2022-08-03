@@ -410,7 +410,7 @@ class EmbeddingIndex(Index):
         self,
         query: torch.Tensor,
         top_n: int = 1,
-    ) -> Iterable[Hit]:
+    ) -> Iterable[SynonymTermWithMetrics]:
         distances, neighbours = self._search_func(query=query, top_n=top_n)
         for score, neighbour in zip(distances, neighbours):
             idx, metadata = self.metadata_db.get_by_index(self.parser.name, neighbour)
@@ -421,8 +421,9 @@ class EmbeddingIndex(Index):
             try:
 
                 term = self.synonym_db.get(self.parser.name, string_norm)
-                term_with_metrics = SynonymTermWithMetrics.from_synonym_term(term)
-                term_with_metrics.embed_score = score
+                term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
+                    term, embed_score=score
+                )
                 yield term_with_metrics
             except KeyError:
                 logger.warning(
