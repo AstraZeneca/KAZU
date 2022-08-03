@@ -108,13 +108,11 @@ class SynonymDatabase:
             self.loaded_parsers.add(name)
             for synonym in synonyms:
                 self.syns_database_by_syn[name][synonym.term_norm] = synonym
-
                 for equiv_ids in synonym.associated_id_sets:
-                    if equiv_ids.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                        for idx in equiv_ids.ids:
+                    for idx in equiv_ids.ids:
+                        if synonym.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
                             self.unambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
-                    else:
-                        for idx in equiv_ids.ids:
+                        else:
                             self.ambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
 
         def get(self, name: str, synonym: str) -> SynonymTerm:
@@ -163,7 +161,7 @@ class SynonymDatabase:
         for equiv_id_set in synonym_term.associated_id_sets:
             if (
                 ignore_ambiguous
-                and equiv_id_set.aggregated_by not in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
+                and synonym_term.aggregated_by not in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
             ):
                 continue
 
@@ -210,11 +208,9 @@ class SynonymDatabase:
         failed_terms = []
         for parser_name in self.get_loaded_parsers():
             for term in self.get_all(parser_name).values():
-                if len(term.associated_id_sets) > 1:
-                    for id_set in term.associated_id_sets:
-                        # if more than one id_set associated with a term, it can't be unambiguous
-                        if id_set.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                            failed_terms.append(term)
+                if term.is_ambiguous and term.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                    # if more than one id_set associated with a term, it can't be unambiguous
+                    failed_terms.append(term)
 
         for term in failed_terms:
             logger.error(f"{term} failed integrity check")
