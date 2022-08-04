@@ -211,8 +211,8 @@ class OntologyParser(ABC):
                 idx: str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL]) for idx in ids
             }
 
-            if len(id_to_label) == 1 or not is_symbolic:
-                # default label is the same, or it's not symbolic. It's the same concept
+            if len(id_to_label) == 1:
+                # default label is the same, It's the same concept
                 return (
                     frozenset(
                         (
@@ -223,6 +223,18 @@ class OntologyParser(ABC):
                         )
                     ),
                     EquivalentIdAggregationStrategy.UNAMBIGUOUS,
+                )
+            elif not is_symbolic:
+                return (
+                    frozenset(
+                        (
+                            EquivalentIdSet(
+                                ids=frozenset(ids),
+                                ids_to_source={idx: id_to_source[idx] for idx in ids},
+                            ),
+                        )
+                    ),
+                    EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC,
                 )
             else:
                 # use similarity to group ids into EquivalentIdSets
