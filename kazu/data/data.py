@@ -88,6 +88,7 @@ class EquivalentIdAggregationStrategy(Enum):
     SYNONYM_IS_AMBIGUOUS = 3  # synonym has no unambiguous meaning
     CUSTOM = 4  # a place holder for any strategy that
     UNAMBIGUOUS = 5
+    MERGED_AS_NON_SYMBOLIC = 6  # used when non-symbolic synonyms are merged
 
 
 @dataclass(frozen=True, eq=True, order=True)
