@@ -278,9 +278,14 @@ class DummyParser(OntologyParser):
         return pd.DataFrame.from_dict(self.DUMMY_DATA)
 
 
-class DummyParser2(DummyParser):
-    DUMMY_SOURCE = "test_parser2"
-    name = DUMMY_SOURCE
+def make_dummy_parser(
+    in_path: str, source: str, data: Dict[str, List[str]], name: str
+) -> DummyParser:
+    parser = DummyParser(in_path)
+    parser.name = name
+    parser.DUMMY_DATA = data
+    parser.DUMMY_SOURCE = source
+    return parser
 
 
 def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit:
