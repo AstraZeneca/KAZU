@@ -48,7 +48,10 @@ class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
     checks all TYPE x mentions in match norm are represented in term norm
     """
 
-    numeric_class_phrases = [re.compile(x) for x in ["TYPE [0-9]+"]]
+    # need to handle I explicitly
+    # other roman numerals get normalized to integers,
+    # but not I as this would be problematic
+    numeric_class_phrases = [re.compile(x) for x in ["TYPE (I|[0-9])+"]]
 
     def __call__(self, reference_term: str, query_term: str) -> bool:
         for pattern in self.numeric_class_phrases:
