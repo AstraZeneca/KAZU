@@ -45,9 +45,7 @@ class GeneSymbolClassifier(SymbolClassifier):
                     int_count += 1
 
             upper_lower_ratio = float(upper_count) / float(lower_count)
-            # print(upper_lower_ratio)
             int_alpha_ratio = float(int_count) / (float(upper_count + lower_count - 1))
-            # print(int_alpha_ratio)
             if upper_lower_ratio > 1.0 or int_alpha_ratio > 1.0:
                 return False
             else:
