@@ -1,8 +1,16 @@
 import copy
+import logging
 from collections import defaultdict
 from typing import Optional, DefaultDict, Dict, List, Tuple, Set, Iterable
 
-from kazu.data.data import SynonymTerm, UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES, SimpleValue
+from kazu.data.data import (
+    SynonymTerm,
+    UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES,
+    SimpleValue,
+    EquivalentIdSet,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class MetadataDatabase:
@@ -141,14 +149,16 @@ class SynonymDatabase:
     def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
         return self.instance.get_syns_for_id(name, idx, ignore_ambiguous)  # type: ignore
 
-    def get_syns_for_synonym(self, name: str, synonym: str, ignore_ambiguous: bool) -> List[str]:
+    def get_syns_for_synonym(
+        self, name: str, synonym: str, ignore_ambiguous: bool
+    ) -> List[Tuple[EquivalentIdSet, Set[str]]]:
         """
         get all other syns for a synonym in a kb
         :param name: parser name
         :param synonym: synonym
         :return:
         """
-        result = set()
+        result = []
         synonym_term = self.get(name, synonym)
         for equiv_id_set in synonym_term.associated_id_sets:
             if (
@@ -158,8 +168,17 @@ class SynonymDatabase:
                 continue
 
             for idx in equiv_id_set.ids:
-                result.update(self.get_syns_for_id(name, idx, ignore_ambiguous))
-        return list(sorted(result))
+                result.append(
+                    (
+                        equiv_id_set,
+                        self.get_syns_for_id(
+                            name,
+                            idx,
+                            ignore_ambiguous,
+                        ),
+                    )
+                )
+        return result
 
     def get_all(self, name: str) -> Dict[str, SynonymTerm]:
         """
@@ -186,3 +205,17 @@ class SynonymDatabase:
     def get_loaded_parsers(self) -> Set[str]:
         assert self.instance is not None
         return self.instance.loaded_parsers
+
+    def validate_integrity(self):
+        failed_terms = []
+        for parser_name in self.get_loaded_parsers():
+            term: SynonymTerm
+            for term_norm, term in self.get_all(parser_name).items():
+                if len(term.associated_id_sets) > 1:
+                    for id_set in term.associated_id_sets:
+                        # if more than one id_set associated with a term, it can't be unambiguous
+                        if id_set.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
+                            failed_terms.append(term)
+
+        for term in failed_terms:
+            logger.error(f"{term} failed integrity check")
