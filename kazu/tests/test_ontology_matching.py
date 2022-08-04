@@ -143,6 +143,6 @@ def test_results_and_serialization(
 
 def assert_matches(matches, match_len, match_texts, match_entity_classes, match_kb_ids):
     assert len(matches) == match_len
-    assert set([m.text for m in matches]) == match_texts
-    assert set([m.label_ for m in matches]) == match_entity_classes
-    assert set([m.kb_id_ for m in matches]) == match_kb_ids
+    assert set(m.text for m in matches) == match_texts
+    assert set(m.label_ for m in matches) == match_entity_classes
+    assert set(m.kb_id_ for m in matches) == match_kb_ids

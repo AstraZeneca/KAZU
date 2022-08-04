@@ -50,8 +50,8 @@ def find_abbreviation(
         long form expansion, or None if a match is not found.
     """
 
-    long_form = " ".join([x.text for x in long_form_candidate])
-    short_form = " ".join([x.text for x in short_form_candidate])
+    long_form = " ".join(x.text for x in long_form_candidate)
+    short_form = " ".join(x.text for x in short_form_candidate)
 
     long_index = len(long_form) - 1
     short_index = len(short_form) - 1

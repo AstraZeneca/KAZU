@@ -187,7 +187,7 @@ class SimpleSpanFinder(SpanFinder):
         :param word:
         :return:
         """
-        classes_set = set([x[1] for x in bio_and_class_labels])
+        classes_set = set(x[1] for x in bio_and_class_labels)
         if None in classes_set or self.text[word.word_char_start - 1] in self.span_breaking_chars:
             return False
         else:
@@ -262,7 +262,7 @@ class SmartSpanFinder(SpanFinder):
         :param word:
         :return:
         """
-        classes_set = set([x[1] for x in bio_and_class_labels])
+        classes_set = set(x[1] for x in bio_and_class_labels)
         classes_set.discard(None)
         if (
             self.text[word.word_char_start - 1] not in self.span_breaking_chars

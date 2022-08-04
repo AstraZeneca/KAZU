@@ -435,7 +435,7 @@ class PLSapbertModel(LightningModule):
             hit = 0
             for query in queries:
                 candidates = query.candidates[: i + 1]  # to get acc@(i+1)
-                if any([candidate.correct for candidate in candidates]):
+                if any(candidate.correct for candidate in candidates):
                     hit += 1
             result["acc{}".format(i + 1)] = hit / len(queries)
 
