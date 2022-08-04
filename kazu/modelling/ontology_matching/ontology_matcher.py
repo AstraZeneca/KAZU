@@ -7,7 +7,6 @@ from typing import List, Dict, Union, Callable, Iterable, Tuple, Set
 
 import spacy
 import srsly
-from kazu.data.data import SynonymTerm
 from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
 from kazu.modelling.ontology_matching.variants import create_variants
@@ -140,11 +139,7 @@ class OntologyMatcher:
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         for parser in parsers:
-            # TODO: fix api call
-            synonym_data: Set[SynonymTerm] = parser.export_synonym_terms()
             synonym_terms = parser.generate_synonyms()
-            synonym_terms.update(synonym_data)
-
             parser_name = parser.name
             logging.info(
                 f"generating {sum(len(x.terms) for x in synonym_terms)} patterns for {parser_name}"
