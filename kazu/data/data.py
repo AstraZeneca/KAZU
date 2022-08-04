@@ -120,55 +120,37 @@ class Mapping:
 NumericMetric = Union[bool, int, float]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class SynonymTerm:
-    terms: FrozenSet[str]
-    term_norm: str
-    parser_name: str
-    is_symbolic: bool
+    """
+    a SynonymTerm is a container for a single normalised synonym, and is produced by an OntologyParser implementation.
+    It may be composed of multiple terms that normalise
+    to the same unique string (e.g. "breast cancer" and "Breast Cancer"). The number of associated_id_sets that this
+    synonym maps to is determined by the  score_and_group_ids method of the associated OntologyParser
+    """
+
+    terms: FrozenSet[str]  # unnormalised synonym strings
+    term_norm: str  # normalised form
+    parser_name: str  # ontology parser name
+    is_symbolic: bool  # is the term symbolic? Determined by the OntologyParser
     associated_id_sets: FrozenSet[EquivalentIdSet]
-    mapping_types: FrozenSet[str] = field(hash=False)
-    aggregated_by: EquivalentIdAggregationStrategy = field(hash=False, compare=False)
+    mapping_types: FrozenSet[str] = field(hash=False)  # mapping type metadata
+    aggregated_by: EquivalentIdAggregationStrategy = field(
+        hash=False, compare=False
+    )  # determined by the ontology parser
 
     @property
     def is_ambiguous(self):
         return len(self.associated_id_sets) > 1
 
-    @property
-    def is_confused(self):
-        return self.is_ambiguous and len(self.terms) > 1
-
-
-@dataclass(frozen=True, eq=True)
-class Hit:
-    """
-    Hit is a precursor to a Mapping, meaning that a match has been detected and linked to an EquivalentIdSet, but
-    is not ready to become a fully fledged mapping yet, as it may require further disambiguation
-    """
-
-    parser_name: str  # NOTE: this is the parser name, not the kb name.
-    id_set: EquivalentIdSet
-    # key is hit_string_norm, value is metric name to metric value
-    per_normalized_syn_metrics: Dict[str, Dict[str, NumericMetric]] = field(
-        default_factory=dict, hash=False
-    )  # metrics associated with this hit
-
-    def merge_metrics(self, hit: "Hit"):
-        for hit_string_norm, new_metrics in hit.per_normalized_syn_metrics.items():
-            existing_metrics = self.per_normalized_syn_metrics.get(hit_string_norm)
-            if existing_metrics is None:
-                self.per_normalized_syn_metrics[hit_string_norm] = new_metrics
-            else:
-                for metric_name, metric_val in new_metrics.items():
-                    if metric_name in existing_metrics:
-                        raise ValueError(
-                            f"tried to add a metric {metric_name} that already exists on this hit"
-                        )
-                    existing_metrics[metric_name] = metric_val
-
 
 @dataclass(frozen=True, eq=True)
 class SynonymTermWithMetrics:
+    """
+    Similar to SynonymTerm, but also allows metrics to be scored. As these metrics are not used in the hash function,
+    care should be taken when hashing of this object is required
+    """
+
     terms: FrozenSet[str]
     term_norm: str
     parser_name: str
@@ -201,10 +183,6 @@ class SynonymTermWithMetrics:
     @property
     def is_ambiguous(self):
         return len(self.associated_id_sets) > 1
-
-    @property
-    def is_confused(self):
-        return self.is_ambiguous and len(self.terms) > 1
 
     def merge_metrics(self, term: "SynonymTermWithMetrics") -> "SynonymTermWithMetrics":
         new_values = {
