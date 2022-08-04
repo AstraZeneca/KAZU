@@ -78,20 +78,11 @@ class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
     noun_modifier_phrases = ["LIKE", "SUBUNIT", "PSEUDOGENE", "RECEPTOR"]
 
     def __call__(self, reference_term: str, query_term: str) -> bool:
-        for pattern in self.noun_modifier_phrases:
-            required_match = True if pattern in reference_term else False
-            pattern_in_query_term = True if pattern in query_term else False
-            if not pattern_in_query_term and not required_match:
-                continue
-            elif pattern_in_query_term and required_match:
-                continue
-            elif pattern_in_query_term and not required_match:
-                return False
-            elif not pattern_in_query_term and required_match:
-                return False
-            else:
-                raise RuntimeError("Impossible")
-        return True
+        # the pattern should either be in both or neither
+        return all(
+            pattern in reference_term == pattern in query_term
+            for pattern in self.noun_modifier_phrases
+        )
 
 
 class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
