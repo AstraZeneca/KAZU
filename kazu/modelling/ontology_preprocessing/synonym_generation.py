@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 import itertools
 import logging
 import re
@@ -11,18 +12,6 @@ from kazu.modelling.language.language_phenomena import GREEK_SUBS
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 logger = logging.getLogger(__name__)
-
-
-def make_synonym_term(new_terms: Iterable[str], original_synonym_term: SynonymTerm) -> SynonymTerm:
-    return SynonymTerm(
-        terms=frozenset(new_terms),
-        term_norm=original_synonym_term.term_norm,
-        is_symbolic=original_synonym_term.is_symbolic,
-        associated_id_sets=original_synonym_term.associated_id_sets,
-        mapping_types=original_synonym_term.mapping_types,
-        parser_name=original_synonym_term.parser_name,
-        aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
-    )
 
 
 class SynonymGenerator(ABC):
@@ -53,7 +42,11 @@ class SynonymGenerator(ABC):
                 if new_terms:
 
                     result.add(
-                        make_synonym_term(new_terms=new_terms, original_synonym_term=synonym)
+                        dataclasses.replace(
+                            synonym,
+                            terms=frozenset(new_terms),
+                            aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+                        )
                     )
 
         return result
@@ -83,8 +76,10 @@ class CombinatorialSynonymGenerator:
                     # don't add if it maps to a clean syn
                     new_terms_this_generator = new_syn_term.terms.difference(existing_terms)
                     if len(new_terms_this_generator) > 0:
-                        synonym_term_with_unique_new_terms = make_synonym_term(
-                            new_terms_this_generator, new_syn_term
+                        synonym_term_with_unique_new_terms = dataclasses.replace(
+                            new_syn_term,
+                            terms=frozenset(new_terms_this_generator),
+                            aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
                         )
                         results.add(synonym_term_with_unique_new_terms)
                         # let following generators operate on the output.
@@ -142,7 +137,11 @@ class SeparatorExpansion(SynonymGenerator):
                         bracket_results.add(split.strip())
             bracket_results.update(all_group_results)
         if len(bracket_results) > 0:
-            return make_synonym_term(bracket_results, synonym)
+            return dataclasses.replace(
+                synonym,
+                terms=frozenset(bracket_results),
+                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+            )
         else:
             return None
 
@@ -172,7 +171,11 @@ class StopWordRemover(SynonymGenerator):
             if detected:
                 new_terms.add(" ".join(lst))
         if new_terms:
-            return make_synonym_term(new_terms, synonym)
+            return dataclasses.replace(
+                synonym,
+                terms=frozenset(new_terms),
+                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+            )
         else:
             return None
 
@@ -252,6 +255,10 @@ class StringReplacement(SynonymGenerator):
                         strings_to_substitute.update(outputs_this_step)
 
         if len(results) > 0:
-            return make_synonym_term(results, synonym)
+            return dataclasses.replace(
+                synonym,
+                terms=frozenset(results),
+                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+            )
         else:
             return None
