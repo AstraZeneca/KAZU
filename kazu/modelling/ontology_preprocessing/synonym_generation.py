@@ -20,6 +20,7 @@ def make_synonym_term(new_terms: Iterable[str], original_synonym_term: SynonymTe
         is_symbolic=original_synonym_term.is_symbolic,
         associated_id_sets=original_synonym_term.associated_id_sets,
         mapping_types=original_synonym_term.mapping_types,
+        parser_name=original_synonym_term.parser_name,
     )
 
 
