@@ -195,11 +195,11 @@ class DictionaryIndex(Index):
         self.boolean_scorers = boolean_scorers
         self.synonym_db: SynonymDatabase = SynonymDatabase()
 
-    def apply_boolean_scorers(self, match: str, match_norm: str, term_norm: str) -> bool:
+    def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
 
         if self.boolean_scorers is not None:
             for scorer in self.boolean_scorers:
-                if not scorer(match=match, match_norm=match_norm, term_norm=term_norm):
+                if not scorer(reference_term=reference_term, query_term=query_term):
                     return False
             else:
                 return True
@@ -237,9 +237,7 @@ class DictionaryIndex(Index):
             for neighbour, score in zip(neighbours, distances):
                 # get by index
                 term = synonym_list[neighbour]
-                if self.apply_boolean_scorers(
-                    match=match, match_norm=match_norm, term_norm=term.term_norm
-                ):
+                if self.apply_boolean_scorers(reference_term=match_norm, query_term=term.term_norm):
                     term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
                         term, search_score=score, bool_score=True, exact_match=False
                     )
