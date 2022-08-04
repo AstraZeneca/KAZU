@@ -349,13 +349,15 @@ class OntologyParser(ABC):
         columns:
 
 
-        [IDX, DEFAULT_LABEL,DATA_ORIGIN, SYN, MAPPING_TYPE]
+        [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
 
         IDX: the ontology id
         DEFAULT_LABEL: the preferred label
         SYN: a synonym of the concept
         MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by
                     the ontology
+
+        Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.
         :return:
         """
         raise NotImplementedError()
