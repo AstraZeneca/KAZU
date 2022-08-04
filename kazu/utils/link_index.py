@@ -15,7 +15,7 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
-from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.modelling.language.string_similarity_scorers import BooleanStringSimilarityScorer
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
@@ -185,7 +185,9 @@ class DictionaryIndex(Index):
     """
 
     def __init__(
-        self, parser: OntologyParser, boolean_scorers: Optional[List[StringSimilarityScorer]] = None
+        self,
+        parser: OntologyParser,
+        boolean_scorers: Optional[List[BooleanStringSimilarityScorer]] = None,
     ):
         """
 
