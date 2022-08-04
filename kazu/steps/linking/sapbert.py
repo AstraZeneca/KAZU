@@ -19,13 +19,6 @@ logger = logging.getLogger(__name__)
 class SapBertForEntityLinkingStep(BaseStep):
     """
     This step wraps Sapbert: Self Alignment pretraining for biomedical entity representation.
-    We make use of two caches here:
-    1) :class:`kazu.utils.caching.CachedIndexGroup` Since we need to calculate embeddings for all labels in an ontology
-    , it makes sense to precompute them once and reload them each time. This is done automatically if no cache file is
-    detected.
-    2) :class:`kazu.utils.caching.EntityLinkingLookupCache` Since certain entities will come up more frequently, we
-    cache the result mappings rather than call bert repeatedly.
-
     Original paper https://aclanthology.org/2021.naacl-main.334.pdf
     """
 
@@ -40,7 +33,6 @@ class SapBertForEntityLinkingStep(BaseStep):
         ignore_high_conf: bool = True,
         lookup_cache_size: int = 5000,
         top_n: int = 20,
-        score_cutoffs: Tuple[float, float] = (99.9940, 99.995),
         batch_size: int = 16,
     ):
         """
@@ -55,8 +47,6 @@ class SapBertForEntityLinkingStep(BaseStep):
         :param ignore_high_conf: If a perfect match has already been found, don't run sapbert
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
         :param top_n: keep up to the top_n hits of the query
-        :param score_cutoffs: min score for a hit to be considered. first is lower bound for medium confidence,
-            second is upper bound for med high confidence
         :param batch_size: inference batch size
         """
 
@@ -67,7 +57,6 @@ class SapBertForEntityLinkingStep(BaseStep):
         self.embedding_model = embedding_model
         self.ignore_high_conf = ignore_high_conf
         self.min_string_length_to_trigger = min_string_length_to_trigger
-        self.score_cutoffs = score_cutoffs
         self.top_n = top_n
         self.indices = indices
         self.entity_class_to_indices: Dict[str, Set[EmbeddingIndex]] = {}
@@ -101,8 +90,8 @@ class SapBertForEntityLinkingStep(BaseStep):
         1) first obtain an entity list from all docs
         2) check the lookup LRUCache to see if it's been recently processed
         3) generate embeddings for the entities based on the value of Entity.match
-        4) query this embedding against self.index_group to determine the best matches based on cosine distance
-        5) generate a new Mapping, and update the entity information/LRUCache
+        4) query this embedding against configured EmbeddingIndex 's p to determine the best matches
+        5) update entity SynonymTermWithMetrics as appropriate
         :param docs:
         :return:
         """
