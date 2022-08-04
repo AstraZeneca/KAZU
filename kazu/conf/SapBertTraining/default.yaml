@@ -23,7 +23,7 @@ model:
         - ???
 trainer:
   _target_: pytorch_lightning.Trainer
-  progress_bar_refresh_rate: -1
+  enable_progress_bar: False
   num_sanity_val_steps: 2
   gpus: 0
   accelerator: ddp

@@ -14,27 +14,14 @@ embedding_model: ${PLSapbertModel}
 batch_size: 16
 trainer:
   _target_: pytorch_lightning.Trainer
-  progress_bar_refresh_rate: 0
-  gpus: 0
-  logger: false
-entity_class_to_ontology_mappings:
-  disease:
-    - MONDO
-    - MEDDRA_DISEASE
-    - OPENTARGETS_DISEASE
+  enable_progress_bar: False
+  accelerator: "auto"
+  logger: False
+entity_class_to_ontology_mappings: ${..entity_class_to_ontology_map}
 indices:
   - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
-    parser:
-      _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
-      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
-      data_origin: 'MONDO-2022-04-04'
+    parser: ${ontology_parser.mondo_parser}
   - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
-    parser:
-      _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
-      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
-      data_origin: 'OPENTARGETS-DISEASE'
+    parser: ${ontology_parser.ot_disease_parser}
   - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
-    parser:
-      _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
-      in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
-      data_origin: 'MEDDRA-24.1'
+    parser: ${ontology_parser.meddra_parser}

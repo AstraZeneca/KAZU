@@ -3,52 +3,17 @@ depends_on: ~
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 rebuild_pipeline: False
 parsers:
-  - _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
-    data_origin: 'chembl_29_sqlite'
-    synonym_generator: ${SynonymGeneration.chemical}
-  - _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
-    data_origin: 'MONDO-2022-04-04'
-    synonym_generator: ${SynonymGeneration.default}
-  - _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
-    data_origin: 'UBERON'
-    synonym_generator: ${SynonymGeneration.default}
-  - _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
-    data_origin: 'MEDDRA-24.1'
-    synonym_generator: ${SynonymGeneration.default}
-  - _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
-    data_origin: 'CLO'
-  - _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
-    data_origin: 'CELLOSAURUS'
-  - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
-    data_origin: 'OPENTARGETS-DISEASE'
-    synonym_generator: ${SynonymGeneration.default}
-  - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
-    data_origin: 'OPENTARGETS-MOLECULE'
-    synonym_generator: ${SynonymGeneration.chemical}
-  - _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
-    data_origin: 'OPENTARGETS-TARGET'
-    synonym_generator: ${SynonymGeneration.gene}
-  - _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: 'GO-BP'
-    synonym_generator: ${SynonymGeneration.default}
-  - _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: 'GO-MF'
-    synonym_generator: ${SynonymGeneration.default}
-  - _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: 'GO-CC'
-    synonym_generator: ${SynonymGeneration.default}
+  - ${ontology_parser.chembl_parser}
+  - ${ontology_parser.mondo_parser}
+  - ${ontology_parser.ot_disease_parser}
+  - ${ontology_parser.ot_molecule_parser}
+  - ${ontology_parser.ot_target_parser}
+  - ${ontology_parser.meddra_parser}
+  - ${ontology_parser.uberon_parser}
+  - ${ontology_parser.cellosaurus_parser}
+  - ${ontology_parser.go_bp_parser}
+  - ${ontology_parser.go_cc_parser}
+  - ${ontology_parser.go_mf_parser}
 blacklisters:
   # keys are parser 'names' so we can decide what blacklister to use
   # as we loop over parsers while creating the phrase matchers

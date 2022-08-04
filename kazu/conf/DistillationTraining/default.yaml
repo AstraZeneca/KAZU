@@ -40,8 +40,7 @@ trainer:
   _convert_: 'partial' #needed to convert ListConfig to list for Pytorch lightning plugins parameter, which needs a list (ver 1.6.4)
   _target_: pytorch_lightning.Trainer
   num_sanity_val_steps: 2
-  gpus: 0
-  accelerator: ~
+  accelerator: "cpu"
   val_check_interval: 1.0
   accumulate_grad_batches: 1
   max_epochs: ${DistillationTraining.training_params.max_epochs}

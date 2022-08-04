@@ -117,8 +117,6 @@ class Mapping:
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
-HitStoreKey = Tuple[str, EquivalentIdSet]  # parser name and EquivalentIdSet
-
 NumericMetric = Union[bool, int, float]
 
 

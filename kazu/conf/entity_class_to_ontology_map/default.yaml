@@ -1,0 +1,21 @@
+drug:
+  - CHEMBL
+  - OPENTARGETS_MOLECULE
+disease:
+  - MEDDRA_DISEASE
+  - MONDO
+  - OPENTARGETS_DISEASE
+gene:
+  - OPENTARGETS_TARGET
+anatomy:
+  - UBERON
+cell_line:
+  - CELLOSAURUS
+cell_type:
+  - CLO
+go_bp:
+  - BP_GENE_ONTOLOGY
+go_mf:
+  - MF_GENE_ONTOLOGY
+go_cc:
+  - CC_GENE_ONTOLOGY

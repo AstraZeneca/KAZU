@@ -6,9 +6,9 @@ stride: 16
 max_sequence_length: 128
 trainer:
   _target_: pytorch_lightning.Trainer
-  progress_bar_refresh_rate: 0
+  enable_progress_bar: False
   gpus: 0
-  logger: false
+  logger: False
 entity_splitter:
   _target_: kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter
   entity_conditions:
