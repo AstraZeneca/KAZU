@@ -40,11 +40,13 @@ logger = logging.getLogger(__name__)
 
 class OntologyParser(ABC):
     """
-    Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking. This involves generating
-    two dataframes: one that holds the linking metadata (e.g. default label, IDX and other info), and another that
-    holds any synonym information
+    Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking.
     Implementations should have a class attribute 'name' to something suitably representative.
-    Note: It is the responsibility of a parser implementation to add default labels as synonyms.
+    The key method is parse_to_dataframe, which should convert an input source to a dataframe suitable
+    for further processing.
+
+    The other important method is find_kb. This should parse an ID string (if required) and return the underlying
+    source. This is important for composite resources that contain identifiers from different seed sources
     """
 
     name = "unnamed"  # a label for this parser
@@ -66,19 +68,21 @@ class OntologyParser(ABC):
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         :param spacy_pipeline: Optional instance of SpacyPipeline.  Used for resolving ambiguous symbolic synonyms via
             similarity calculation of the default label associated with the conflicted labels. If no instance is
-            provided, all synonym conflicts will be merged. This is not recommended!
+            provided, all synonym conflicts will be assumed to refer to different concepts. This is not recommended!
         :param synonym_merge_threshold: similarity threshold to trigger a merge of conflicted synonyms into a single
-            EquivalentIdSet
-        :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different from the
-            parser.name, as is used to identify the origin of a mapping back to a data source
-        :param synonym_generator: optional CombinatorialSynonymGenerator
+            EquivalentIdSet. See docs for score_and_group_ids for further details
+        :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different
+            from the parser.name, as is used to identify the origin of a mapping back to a data source
+        :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
+            based NER matching
         :param symbol_classifier: optional SymbolClassifier. When parsing a data source, synonyms that are
             symbolic (as determined by the classifier) that refer to more than one id are more likely to be ambiguous.
             Therefore, we assume they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303' OR
             'ENSG00000198804', and thus they will yield multiple instances of EquivalentIdSet.
-            Non symbolic synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we merge
-            all associated ID's into a single EquivalentIdSet. If no symbol classifier is specified, a default one will
-            be used
+            Non symbolic synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we might
+            want to merge the associated ID's non-symbolic ambiguous synonyms into a single EquivalentIdSet.
+            The result of the symbol classifier forms the is_symbolic parameter to score_and_group_ids. If no
+            symbol classifier is specified, a default one will be used
         """
         if spacy_pipeline is None:
             logger.warning("no spacy pipeline configured. Synonym resolution disabled.")
@@ -102,10 +106,6 @@ class OntologyParser(ABC):
         raise NotImplementedError()
 
     def resolve_synonyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
-        """
-        synonym lists are noisy, so we need an algorithm to identify when a synonym
-
-        """
 
         result = set()
         synonym_df["syn_norm"] = synonym_df[SYN].apply(StringNormalizer.normalize)
@@ -159,6 +159,40 @@ class OntologyParser(ABC):
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
+        """
+        for a given data source, one normalised synonym may map to one or more id. In some cases, the ID may be
+        duplicate/redundant (e.g. there are many chembl ids for paracetamol). In other cases, the ID may refer to
+        distinct concepts (e.g. COX 1 could be 'ENSG00000095303' OR 'ENSG00000198804').
+
+
+        Since synonyms from data sources are confused in such a manner, we need to decide some way to cluster them into
+        a single SynonymTerm concept, which in turn is a container for one or more EquivalentIdSet (depending on
+        whether the concept is ambiguous or not)
+
+        The job of score_and_group_ids is to determine how many EquivalentIdSet's for a given set of ids should be
+        produced.
+
+        The default algorithm (which can be overridden by concrete parser implementations) works as follows:
+
+        1) If no SpacyPipeline is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
+            not recommended)
+        2) If only one ID is referenced, or the associated normalised synonym string is not symbolic, group the
+            ids into a single EquivalentIdSet (strategy UNAMBIGUOUS)
+        3) otherwise, compare the default label associated with each ID to every other default label. If it's above
+            self.synonym_merge_threshold, merge into one EquivalentIdSet, if not, create a new one
+
+        recommendation: Use the scispacy large model for comparison, as this uses 600k word vectors. Sapbert might also
+        be a good choice
+
+        IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
+        DEFAULT_LABEL
+
+        :param ids: set of ids to decide upon
+        :param id_to_source: mapping of id to original source
+        :param is_symbolic: is the underlying synonym symbolic?
+        :param original_syn_set: original synonyms associated with ids
+        :return:
+        """
         if not isinstance(self.spacy_pipeline, SpacyPipeline):
             # the NO_STRATEGY aggregation strategy assumes all synonyms are ambiguous
             return (
@@ -277,7 +311,8 @@ class OntologyParser(ABC):
 
     def generate_synonyms(self) -> Set[SynonymTerm]:
         """
-        generate synonyms based on configured synonym generator
+        generate synonyms based on configured synonym generator. Note, this method also calls
+        populate_databases(), as the metadata db must be populated for appropriate synonym resolution
         :return:
         """
         synonym_data = self.export_synonym_terms()
