@@ -315,10 +315,12 @@ class OntologyParser(ABC):
         populate_databases(), as the metadata db must be populated for appropriate synonym resolution
         :return:
         """
-        synonym_data = self.export_synonym_terms()
+        self.populate_databases()
+        synonym_data = set(SynonymDatabase().get_all(self.name).values())
         generated_synonym_data = set()
         if self.synonym_generator:
             generated_synonym_data = self.synonym_generator(synonym_data)
+        generated_synonym_data.update(synonym_data)
         logger.info(
             f"{len(synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
         )
