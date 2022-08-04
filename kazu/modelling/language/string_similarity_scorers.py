@@ -38,8 +38,8 @@ class NumberMatchStringSimilarityScorer(StringSimilarityScorer):
     number_finder = re.compile("[0-9]+")
 
     def __call__(self, reference_term: str, query_term: str) -> bool:
-        reference_term_number_count = Counter(re.findall(self.number_finder, reference_term))
-        query_term_number_count = Counter(re.findall(self.number_finder, query_term))
+        reference_term_number_count = Counter(self.number_finder.findall(reference_term))
+        query_term_number_count = Counter(self.number_finder.findall(query_term))
         return reference_term_number_count == query_term_number_count
 
 
@@ -55,11 +55,9 @@ class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
 
     def __call__(self, reference_term: str, query_term: str) -> bool:
         reference_term_numeric_phrase_count = Counter(
-            re.findall(self.numeric_class_phrases, reference_term)
+            self.numeric_class_phrases.findall(reference_term)
         )
-        query_term_numeric_phrase_count = Counter(
-            re.findall(self.numeric_class_phrases, query_term)
-        )
+        query_term_numeric_phrase_count = Counter(self.numeric_class_phrases.findall(query_term))
 
         # we don't want to just do reference_term_numeric_phrase_count == query_term_numeric_phrase_count
         # because e.g. if reference term is 'diabetes' that is an NER hit we've picked up in some text,
