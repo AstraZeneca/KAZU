@@ -452,7 +452,7 @@ class PLSapbertModel(LightningModule):
         :return: a 2d tensor of embeddings
         """
         if trainer is None:
-            trainer = Trainer(progress_bar_refresh_rate=0, logger=False)
+            trainer = Trainer(enable_progress_bar=False, logger=False)
         if batch_size is None:
             batch_size = 16
 
