@@ -521,3 +521,12 @@ class SynonymTerm:
     @property
     def is_confused(self):
         return self.is_ambiguous and len(self.terms) > 1
+
+
+UMAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {
+    EquivalentIdAggregationStrategy.UNAMBIGUOUS,
+    EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_MERGE,
+    EquivalentIdAggregationStrategy.AMBIGUOUS_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+    EquivalentIdAggregationStrategy.AMBIGUOUS_WITHIN_SINGLE_KB_AND_ACROSS_MULTIPLE_COMPOSITE_KBS_MERGE,
+}
+SimpleValue = Union[NumericMetric, str]
