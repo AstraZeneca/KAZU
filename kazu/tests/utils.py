@@ -280,6 +280,7 @@ class DummyParser(OntologyParser):
 
 class DummyParser2(DummyParser):
     DUMMY_SOURCE = "test_parser2"
+    name = DUMMY_SOURCE
 
 
 def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit:
