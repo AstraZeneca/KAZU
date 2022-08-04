@@ -59,8 +59,9 @@ class CombinatorialSynonymGenerator:
     def __call__(self, synonyms: Set[SynonymTerm]) -> Set[SynonymTerm]:
         """
         for every permutation of modifiers, generate a list of syns, then aggregate at the end
-        :param synonym_data:
-        :return:
+        :param synonyms:  Set[SynonymTerm] to generate from
+        :return:  Set[SynonymTerm] of generated synonyms. Note, the field values of the generated synonyms will
+            be the same as the seed synonym, apart from SynonymTerm.terms, which contains the generated synonyms
         """
         existing_terms = set(term for synonym in synonyms for term in synonym.terms)
         synonym_gen_permutations = itertools.permutations(self.synonym_generators)
