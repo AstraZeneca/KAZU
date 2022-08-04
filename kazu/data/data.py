@@ -230,8 +230,6 @@ class Entity:
 
     def __eq__(self, other):
         return id(self) == id(other)
-        # raise NotImplementedError("entity cannot be compared")
-        # return hash((self.entity_class, self.spans))
 
     def calc_starts_and_ends(self) -> Tuple[int, int]:
         earliest_start = inf
