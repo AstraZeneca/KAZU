@@ -63,6 +63,37 @@ class StringNormalizer:
             return string
 
     @staticmethod
+    def is_probably_symbol_like(original_string: str) -> bool:
+        """
+        a more forgiving version of is_symbol_like, designed to improve symbol recall on natural text
+        looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
+        upper case or integers is higher, assume it's a symbol
+        :param original_string:
+        :return:
+        """
+        #
+        # 1 to prevent div zero
+        upper_count = 1
+        lower_count = 1
+        int_count = 1
+
+        for char in original_string:
+            if char.isalpha():
+                if char.isupper():
+                    upper_count += 1
+                else:
+                    lower_count += 1
+            elif char.isnumeric():
+                int_count += 1
+
+        upper_lower_ratio = float(upper_count) / float(lower_count)
+        int_alpha_ratio = float(int_count) / (float(upper_count + lower_count - 1))
+        if upper_lower_ratio >= 1.0 or int_alpha_ratio >= 1.0:
+            return True
+        else:
+            return False
+
+    @staticmethod
     def split_on_trailing_s_prefix(debug, string):
         splits = [x.strip() for x in re.split(StringNormalizer.trailing_lowercase_s_split, string)]
         string = " ".join(splits).strip()
