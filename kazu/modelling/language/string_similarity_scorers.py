@@ -51,20 +51,25 @@ class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
     # need to handle I explicitly
     # other roman numerals get normalized to integers,
     # but not I as this would be problematic
-    numeric_class_phrases = [re.compile(x) for x in ["TYPE (I|[0-9])+"]]
+    numeric_class_phrases = re.compile("|".join(["TYPE (?:I|[0-9]+)"]))
 
     def __call__(self, reference_term: str, query_term: str) -> bool:
-        for pattern in self.numeric_class_phrases:
-            match = re.search(pattern, reference_term)
-            if match:
-                if match.group() in query_term:
-                    continue
-                else:
-                    return False
-            else:
-                continue
+        reference_term_numeric_phrase_count = Counter(
+            re.findall(self.numeric_class_phrases, reference_term)
+        )
+        query_term_numeric_phrase_count = Counter(
+            re.findall(self.numeric_class_phrases, query_term)
+        )
 
-        return True
+        # we don't want to just do reference_term_numeric_phrase_count == query_term_numeric_phrase_count
+        # because e.g. if reference term is 'diabetes' that is an NER hit we've picked up in some text,
+        # we want to keep hold of all of 'diabetes type I', 'diabetes type II', 'diabetes', in case surrounding context
+        # enables us to disambiguate which type of diabetes it is
+        return all(
+            numeric_class_phase in query_term_numeric_phrase_count
+            and query_term_numeric_phrase_count[numeric_class_phase] >= count
+            for numeric_class_phase, count in reference_term_numeric_phrase_count.items()
+        )
 
 
 class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
