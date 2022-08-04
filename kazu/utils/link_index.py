@@ -10,7 +10,6 @@ from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, cast
 import numpy as np
 import torch
 from kazu.data.data import (
-    EquivalentIdSet,
     SimpleValue,
     SynonymTermWithMetrics,
 )
@@ -140,7 +139,7 @@ class Index(ABC):
 
     def load_or_build_cache(self, force_rebuild_cache: bool = False):
         """
-        for each parser in self.parsers, create an index. If a cached version is available, load it instead
+        build the index, or if a cached version is available, load it instead
         :return:
         """
         cache_dir = get_cache_dir(
@@ -177,11 +176,8 @@ class Index(ABC):
 
 class DictionaryIndex(Index):
     """
-    a simple dictionary index for linking. Uses a Dict[str, List[EquivalentIdSet]] for matching synonyms,
-    with optional fuzzy matching. Note, since a given synonym can match to more than one metadata entry (even
-    within the same knowledgebase), we have a pathological situation in which 'true' synonyms can not be said to
-    exist. In such situations, we return multiple kb references for overloaded synonyms - i.e. the disambiguation is
-    delegated elsewhere
+    The dictionary index looks for SynonymTerms via a char ngram search between the normalised version of the
+    query string and the term_norm of all SynonymTerms associated with the provided OntologyParser.
     """
 
     def __init__(
@@ -256,8 +252,9 @@ class DictionaryIndex(Index):
     def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
         """
         search the index
+        :param top_n: return a maximum of top_n SynonymTermWithMetrics
         :param query: a string of text
-        :return: Iterable of Tuple [kb.id, metadata_dict]
+        :return:
         """
 
         match_norm = StringNormalizer.normalize(query)
@@ -276,15 +273,8 @@ class DictionaryIndex(Index):
         with open(path, "wb") as f:
             pickle.dump(pickleable, f)
 
-    def _add(self, data: Dict[str, List[EquivalentIdSet]]):
-        """
-        deprecated
-        add data to the index. Two dicts are required - synonyms and metadata. Metadata should have a primary key
-        (IDX) and synonyms should use IDX as a foreign key
-        :param data: synonyms dict of {synonym:List[EquivalentIdSet]}
-        :return:
-        """
-        raise NotImplementedError()
+    def _add(self, data: Any):
+        raise NotImplementedError(f"It's not possible to add data to a {self.__class__.__name__}")
 
     def _build_ontology_cache(self, cache_dir: Path):
         logger.info(f"creating index for {self.parser.in_path}")
@@ -371,6 +361,13 @@ class EmbeddingIndex(Index):
         query: torch.Tensor,
         top_n: int = 1,
     ) -> Iterable[SynonymTermWithMetrics]:
+        """
+
+        :param query: a query tensor
+        :param top_n: return top_n instances of SynonymTermWithMetrics
+        :return:
+        """
+
         distances, neighbours = self._search_func(query=query, top_n=top_n)
         for score, neighbour in zip(distances, neighbours):
             idx, metadata = self.metadata_db.get_by_index(self.parser.name, neighbour)
