@@ -146,19 +146,12 @@ class SynonymTerm:
 
 
 @dataclass(frozen=True, eq=True)
-class SynonymTermWithMetrics:
+class SynonymTermWithMetrics(SynonymTerm):
     """
     Similar to SynonymTerm, but also allows metrics to be scored. As these metrics are not used in the hash function,
     care should be taken when hashing of this object is required
     """
 
-    terms: FrozenSet[str]
-    term_norm: str
-    parser_name: str
-    is_symbolic: bool
-    associated_id_sets: FrozenSet[EquivalentIdSet]
-    aggregated_by: EquivalentIdAggregationStrategy
-    mapping_types: FrozenSet[str] = field(compare=False)
     search_score: Optional[float] = field(compare=False, default=None)
     embed_score: Optional[float] = field(compare=False, default=None)
     bool_score: Optional[float] = field(compare=False, default=None)
@@ -180,10 +173,6 @@ class SynonymTermWithMetrics:
             exact_match=exact_match,
             **term.__dict__,
         )
-
-    @property
-    def is_ambiguous(self):
-        return len(self.associated_id_sets) > 1
 
     def merge_metrics(self, term: "SynonymTermWithMetrics") -> "SynonymTermWithMetrics":
         new_values = {
