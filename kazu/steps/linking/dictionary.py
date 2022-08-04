@@ -1,9 +1,9 @@
-import copy
 import logging
 import traceback
 from typing import List, Tuple, Dict, Set
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Hit
+import pydash
+from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, SynonymTermWithMetrics
 from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
@@ -73,34 +73,33 @@ class DictionaryEntityLinkingStep(BaseStep):
         :return:
         """
         failed_docs = []
-        entities = (ent for doc in docs for ent in doc.get_entities())
+        entities: List[Entity] = pydash.flatten([x.get_entities() for x in docs])
         ents_by_match_and_class = {
             k: list(v) for k, v in sort_then_group(entities, lambda x: (x.match, x.entity_class))
         }
         if len(ents_by_match_and_class) > 0:
             for ent_match_and_class, ents_this_match in ents_by_match_and_class.items():
 
-                cache_missed_entities = self.lookup_cache.check_lookup_cache(ents_this_match)
-                if len(cache_missed_entities) == 0:
-                    continue
-                else:
-                    try:
-                        indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
-                        if indices_to_search:
-                            all_hits: Set[Hit] = set()
-                            for index in indices_to_search:
-                                all_hits.update(index.search(ent_match_and_class[0], self.top_n))
+                # cache_missed_entities = self.lookup_cache.check_lookup_cache(ents_this_match)
+                # if len(cache_missed_entities) == 0:
+                #     continue
+                # else:
+                try:
+                    indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
+                    if indices_to_search:
+                        terms: List[SynonymTermWithMetrics] = []
+                        for index in indices_to_search:
+                            terms.extend(list(index.search(ent_match_and_class[0], self.top_n)))
 
-                            for ent in ents_this_match:
-                                ent.update_hits(copy.deepcopy(all_hits))
-                            self.lookup_cache.update_hits_lookup_cache(ents_this_match[0], all_hits)
-
-                    except Exception:
-                        failed_docs_set = set()
                         for ent in ents_this_match:
-                            doc = find_document_from_entity(docs, ent)
-                            doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                            failed_docs_set.add(doc)
-                        failed_docs.extend(list(failed_docs_set))
+                            ent.update_terms(terms)
+
+                except Exception:
+                    failed_docs_set = set()
+                    for ent in ents_this_match:
+                        doc = find_document_from_entity(docs, ent)
+                        doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
+                        failed_docs_set.add(doc)
+                    failed_docs.extend(list(failed_docs_set))
 
         return docs, failed_docs
