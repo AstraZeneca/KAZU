@@ -11,7 +11,13 @@ from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, cast
 
 import numpy as np
 import torch
-from kazu.data.data import EquivalentIdSet, Hit, SimpleValue
+from kazu.data.data import (
+    EquivalentIdSet,
+    Hit,
+    SimpleValue,
+    SynonymTermWithMetrics,
+)
+from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import (
     SYN,
@@ -20,7 +26,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
     OntologyParser,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import create_char_ngrams, get_cache_dir
 from pytorch_lightning import Trainer
@@ -206,20 +211,61 @@ class DictionaryIndex(Index):
         super().__init__(parser=parser)
         self.synonym_db: SynonymDatabase = SynonymDatabase()
 
-    def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
-        hits = []
+    # def _search_index(self, string_norm: str, top_n: int = 15) -> List[Hit]:
+    #     hits = []
+    #     if string_norm in self.synonym_db.get_all(self.parser.name):
+    #         for id_set in self.synonym_db.get(self.parser.name, string_norm).associated_id_sets:
+    #             hits.append(
+    #                 Hit(
+    #                     parser_name=self.parser.name,
+    #                     per_normalized_syn_metrics={
+    #                         string_norm: {SEARCH_SCORE: 100.0, EXACT_MATCH: True}
+    #                     },
+    #                     id_set=id_set,
+    #                 )
+    #             )
+    #         return hits
+    #
+    #     else:
+    #
+    #         query = self.vectorizer.transform([string_norm]).todense()
+    #         # minus to negate, so arg sort works in correct order
+    #         score_matrix = np.squeeze(-np.asarray(self.tf_idf_matrix.dot(query.T)))
+    #         neighbours = score_matrix.argsort()[:top_n]
+    #         # don't use torch for this - it's slow
+    #         # query = torch.FloatTensor(query)
+    #         # score_matrix = self.tf_idf_matrix_torch.matmul(query.T)
+    #         # score_matrix = torch.squeeze(score_matrix.T)
+    #         # neighbours = torch.argsort(score_matrix, descending=True)[:top_n]
+    #
+    #         distances = score_matrix[neighbours]
+    #         distances = 100 * -distances
+    #         hits = []
+    #         synonym_list = list(self.synonym_db.get_all(self.parser.name))
+    #         for neighbour, score in zip(neighbours, distances):
+    #             # get by index
+    #             found_norm = synonym_list[neighbour]
+    #             for id_set in self.synonym_db.get(self.parser.name, found_norm).associated_id_sets:
+    #                 hits.append(
+    #                     Hit(
+    #                         parser_name=self.parser.name,
+    #                         per_normalized_syn_metrics={
+    #                             found_norm: {SEARCH_SCORE: score, EXACT_MATCH: False}
+    #                         },
+    #                         id_set=id_set,
+    #                     )
+    #                 )
+    #     # we don't sort the hits as we expect them to enter an unsorted set
+    #     return hits
+    def _search_index(self, string_norm: str, top_n: int = 15) -> List[SynonymTermWithMetrics]:
+
         if string_norm in self.synonym_db.get_all(self.parser.name):
-            for id_set in self.synonym_db.get(self.parser.name, string_norm).associated_id_sets:
-                hits.append(
-                    Hit(
-                        parser_name=self.parser.name,
-                        per_normalized_syn_metrics={
-                            string_norm: {SEARCH_SCORE: 100.0, EXACT_MATCH: True}
-                        },
-                        id_set=id_set,
-                    )
-                )
-            return hits
+            term = self.synonym_db.get(self.parser.name, string_norm)
+            term_with_metrics = SynonymTermWithMetrics.from_synonym_term(term)
+            term_with_metrics.search_score = 100.0
+            term_with_metrics.exact_match = True
+
+            return [term_with_metrics]
 
         else:
 
@@ -235,25 +281,19 @@ class DictionaryIndex(Index):
 
             distances = score_matrix[neighbours]
             distances = 100 * -distances
-            hits = []
-            synonym_list = list(self.synonym_db.get_all(self.parser.name))
+            result = []
+            synonym_list = list(self.synonym_db.get_all(self.parser.name).values())
             for neighbour, score in zip(neighbours, distances):
                 # get by index
-                found_norm = synonym_list[neighbour]
-                for id_set in self.synonym_db.get(self.parser.name, found_norm).associated_id_sets:
-                    hits.append(
-                        Hit(
-                            parser_name=self.parser.name,
-                            per_normalized_syn_metrics={
-                                found_norm: {SEARCH_SCORE: score, EXACT_MATCH: False}
-                            },
-                            id_set=id_set,
-                        )
-                    )
-        # we don't sort the hits as we expect them to enter an unsorted set
-        return hits
+                term = synonym_list[neighbour]
+                term_with_metrics = SynonymTermWithMetrics.from_synonym_term(term)
+                term_with_metrics.search_score = score
+                term_with_metrics.exact_match = False
+                result.append(term_with_metrics)
+                # we don't sort the hits as we expect them to enter an unsorted set
+            return result
 
-    def search(self, query: str, top_n: int = 15) -> Iterable[Hit]:
+    def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
         """
         search the index
         :param query: a string of text
@@ -379,13 +419,11 @@ class EmbeddingIndex(Index):
             assert isinstance(default_label, str)
             string_norm = StringNormalizer.normalize(default_label)
             try:
-                for id_set in self.synonym_db.get(self.parser.name, string_norm).associated_id_sets:
-                    hit = Hit(
-                        id_set=id_set,
-                        parser_name=self.parser.name,
-                        per_normalized_syn_metrics={string_norm: {SAPBERT_SCORE: score}},
-                    )
-                    yield hit
+
+                term = self.synonym_db.get(self.parser.name, string_norm)
+                term_with_metrics = SynonymTermWithMetrics.from_synonym_term(term)
+                term_with_metrics.embed_score = score
+                yield term_with_metrics
             except KeyError:
                 logger.warning(
                     f"{string_norm} is not in the synonym database! is the parser for {self.parser.name} correctly configured?"
