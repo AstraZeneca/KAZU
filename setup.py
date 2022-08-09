@@ -26,7 +26,7 @@ setup(
         "py4j==0.10.9.3",
         "fastparquet== 0.8.0",
         "scikit-learn==1.0.1",
-        "stanza==1.4.0"
+        "stanza==1.4.0",
     ],
     extras_require={
         "dev": [
