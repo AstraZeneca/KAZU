@@ -43,12 +43,24 @@ def test_equivalent_to_explosion_for_simple_sents(kazu_test_config):
     st_successes, st_failures = st_step(docs)
     ex_successes, ex_failures = ex_step(docs)
 
-    assert len(st_successes) == len(ex_successes) == len(docs) and len(st_failures) == len(ex_failures) == 0
+    assert (
+        len(st_successes) == len(ex_successes) == len(docs)
+        and len(st_failures) == len(ex_failures) == 0
+    )
 
     st_sent_spans = st_successes[0].sections[0].sentence_spans
-    ex_sent_spans = [CharSpan(start, end) for start, end in ex_successes[0].sections[0].metadata["sentence_offsets"]]
+    ex_sent_spans = [
+        CharSpan(start, end)
+        for start, end in ex_successes[0].sections[0].metadata["sentence_offsets"]
+    ]
 
     assert len(st_sent_spans) == len(ex_sent_spans) == 2
 
-    assert st_sent_spans[0].start == ex_sent_spans[0].start == 0 and st_sent_spans[0].end == ex_sent_spans[0].end == 29
-    assert st_sent_spans[1].start == ex_sent_spans[1].start == 30 and st_sent_spans[1].end == ex_sent_spans[1].end == 64
+    assert (
+        st_sent_spans[0].start == ex_sent_spans[0].start == 0
+        and st_sent_spans[0].end == ex_sent_spans[0].end == 29
+    )
+    assert (
+        st_sent_spans[1].start == ex_sent_spans[1].start == 30
+        and st_sent_spans[1].end == ex_sent_spans[1].end == 64
+    )
