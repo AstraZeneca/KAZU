@@ -39,10 +39,10 @@ class StanzaSentenceSegmentation(BaseStep):
                 for section in doc.sections:
                     stanza_doc = self.stanza_nlp(section.get_text())
                     sentences: List[Sentence] = stanza_doc.sentences
-                    char_spans = [
+                    char_spans = (
                         CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char)
                         for sent in sentences
-                    ]
+                    )
                     section.sentence_spans.extend(char_spans)
             except Exception:
                 doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
