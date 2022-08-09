@@ -1,15 +1,5 @@
 from setuptools import setup, find_packages
 
-import platform
-import os
-from distutils import util
-
-if 'arm64' in platform.machine() and 'mac' in util.get_platform():
-    os.environ["GRPC_PYTHON_BUILD_SYSTEM_OPENSSL"] = "1"
-    os.environ["GRPC_PYTHON_BUILD_SYSTEM_ZLIB"] = "1"
-else:
-    pass
-
 setup(
     name="kazu",
     version="0.0.1",
