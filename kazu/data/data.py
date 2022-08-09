@@ -361,11 +361,11 @@ class Section:
     offset_map: Dict[CharSpan, CharSpan] = field(
         default_factory=dict, hash=False, init=False
     )  # not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
-
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
     entities: List[Entity] = field(
         default_factory=list, hash=False
     )  # entities detected in this section
+    sentence_spans: List[CharSpan] = field(default_factory=list, hash=False, init=False)
 
     def __str__(self):
         return f"name: {self.name}, text: {self.get_text()[:100]}"

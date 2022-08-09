@@ -2,6 +2,7 @@
 pipeline:
   steps:
     - ExplosionNERStep
+    - StanzaSentenceSegmentationStep
     - TransformersModelForTokenClassificationNerStep
     - SethStep
     - DictionaryEntityLinkingStep
