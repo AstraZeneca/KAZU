@@ -53,9 +53,6 @@ def find_abbreviation(
     long_form = " ".join([x.text for x in long_form_candidate])
     short_form = " ".join([x.text for x in short_form_candidate])
 
-    nums = [5, 3, 2, 4, 8]
-    num_set = set(nums)
-
     long_index = len(long_form) - 1
     short_index = len(short_form) - 1
 
