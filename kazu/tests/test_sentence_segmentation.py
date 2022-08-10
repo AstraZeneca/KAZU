@@ -7,8 +7,8 @@ from typing import List
 
 
 @requires_model_pack
-def test_StanzaSentenceSegmentationStep(kazu_test_config):
-    step = instantiate(kazu_test_config.StanzaSentenceSegmentationStep)
+def test_StanzaStep(kazu_test_config):
+    step = instantiate(kazu_test_config.StanzaStep)
     docs = [Document.create_simple_document(x[0]) for x in ner_long_document_test_cases()]
     successes, failures = step(docs)
     assert len(successes) == len(docs) and len(failures) == 0
@@ -16,7 +16,7 @@ def test_StanzaSentenceSegmentationStep(kazu_test_config):
 
 @requires_model_pack
 def test_generates_correct_spans(kazu_test_config):
-    step: BaseStep = instantiate(kazu_test_config.StanzaSentenceSegmentationStep)
+    step: BaseStep = instantiate(kazu_test_config.StanzaStep)
     docs: List[Document] = [
         Document.create_simple_document(
             "this spans for char 0 to 28. This sentence spans from 29 to 63."
@@ -32,7 +32,7 @@ def test_generates_correct_spans(kazu_test_config):
 
 @requires_model_pack
 def test_equivalent_to_explosion_for_simple_sents(kazu_test_config):
-    st_step: BaseStep = instantiate(kazu_test_config.StanzaSentenceSegmentationStep)
+    st_step: BaseStep = instantiate(kazu_test_config.StanzaStep)
     ex_step: BaseStep = instantiate(kazu_test_config.ExplosionNERStep)
 
     docs: List[Document] = [

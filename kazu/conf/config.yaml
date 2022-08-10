@@ -4,6 +4,7 @@ defaults:
   - ontology_parser: default
   - PLSapbertModel: default
   - SpacyPipeline: default
+  - StanzaPipeline: default
   - SciSpacyAbbreviationExpansionStep: default
   - SpacyNerStep: default
   - TransformersModelForTokenClassificationNerStep: default
@@ -19,4 +20,4 @@ defaults:
   - BlackListers: default
   - ExplosionNERStep: default
   - MergeOverlappingEntsStep: default
-  - StanzaSentenceSegmentationStep: default
+  - StanzaStep: default

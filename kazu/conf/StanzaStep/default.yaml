@@ -1,0 +1,3 @@
+_target_: kazu.steps.other.stanza.StanzaStep
+depends_on: ~
+stanza_pipeline: ${..StanzaPipeline}
