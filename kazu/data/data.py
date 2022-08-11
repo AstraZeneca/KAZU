@@ -442,7 +442,7 @@ class DocumentEncoder(json.JSONEncoder):
                 as_dict["offset_map"] = list(as_dict["offset_map"].items())
             # needed to serialise the sentence_spans @property, and drop the private _sentence_spans
             as_dict["sentence_spans"] = list(obj.sentence_spans)
-            del as_dict["_sentence_spans"]
+            as_dict.pop("_sentence_spans", None)
             return as_dict
         elif isinstance(obj, (set, frozenset)):
             return list(obj)
