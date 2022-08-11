@@ -1,3 +1,4 @@
 _target_: kazu.utils.stanza_pipeline.StanzaPipeline.simple_init
 path: ${oc.env:KAZU_MODEL_PACK}/stanza_pipeline
 download: False
+use_gpu: False

@@ -30,7 +30,7 @@ class StanzaPipeline:
         return StanzaPipeline(stanza_pipeline)
 
     @classmethod
-    def simple_init(cls, path: PathLike, download: bool) -> "StanzaPipeline":
+    def simple_init(cls, path: PathLike, download: bool, use_gpu: bool) -> "StanzaPipeline":
         if download:
             stanza.download(lang="en", package="genia", model_dir=path)
 
@@ -39,7 +39,7 @@ class StanzaPipeline:
             model_dir=str(path),
             package=None,
             processors={"tokenize": "genia"},
-            use_gpu=False,
+            use_gpu=use_gpu,
             download_method=DownloadMethod.REUSE_RESOURCES,
         )
         return StanzaPipeline(stanza_pipeline)
