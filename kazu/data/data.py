@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import IntEnum, Enum, auto
 from itertools import cycle, chain
+from collections import OrderedDict
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
@@ -365,7 +366,23 @@ class Section:
     entities: List[Entity] = field(
         default_factory=list, hash=False
     )  # entities detected in this section
-    sentence_spans: List[CharSpan] = field(default_factory=list, hash=False, init=False)
+    _sentence_spans: Optional[OrderedDict[CharSpan, Any]] = field(
+        default=None, hash=False, init=False
+    )  # hidden implem. for an ordered, immutable set of sentence spans
+
+    @property
+    def sentence_spans(self) -> Iterable[CharSpan]:
+        if self._sentence_spans:
+            yield from self._sentence_spans.keys()
+        else:
+            yield from ()
+
+    @sentence_spans.setter
+    def sentence_spans(self, sent_spans: Iterable[CharSpan]):
+        if not self._sentence_spans:
+            self._sentence_spans = OrderedDict([(sent_span, True) for sent_span in sent_spans])
+        else:
+            raise AttributeError("Immutable sentence_spans is already set")
 
     def __str__(self):
         return f"name: {self.name}, text: {self.get_text()[:100]}"
@@ -423,6 +440,9 @@ class DocumentEncoder(json.JSONEncoder):
             # needed as CharSpan keys in offset map are not json serialisable
             if as_dict.get("offset_map"):
                 as_dict["offset_map"] = list(as_dict["offset_map"].items())
+            # needed to serialise the sentence_spans @property, and drop the private _sentence_spans
+            as_dict["sentence_spans"] = list(obj.sentence_spans)
+            del as_dict["_sentence_spans"]
             return as_dict
         elif isinstance(obj, (set, frozenset)):
             return list(obj)

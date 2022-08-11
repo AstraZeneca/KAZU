@@ -15,9 +15,11 @@ def test_serialisation():
             spans=frozenset([CharSpan(start=16, end=39)]),
         )
     ]
+    x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
     json_str = x.json()
     # ensure this is valid json
-    json.loads(json_str)
+    json_doc = json.loads(json_str)
+    assert type(json_doc["sections"][0]["sentence_spans"]) == list
 
 
 def test_overlap_logic():

@@ -46,7 +46,7 @@ class StanzaStep(BaseStep):
                         CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char)
                         for sent in sentences
                     )
-                    section.sentence_spans.extend(char_spans)
+                    section.sentence_spans = char_spans
             except Exception:
                 doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                 failed_docs.append(doc)

@@ -24,8 +24,8 @@ def test_generates_correct_spans(kazu_test_config):
     ]
     successes, failures = step(docs)
     assert len(successes) == len(docs) and len(failures) == 0
-    assert len(successes[0].sections[0].sentence_spans) == 2
-    sent_spans = successes[0].sections[0].sentence_spans
+    sent_spans = list(successes[0].sections[0].sentence_spans)
+    assert len(sent_spans) == 2
     assert sent_spans[0].start == 0 and sent_spans[0].end == 28
     assert sent_spans[1].start == 29 and sent_spans[1].end == 63
 
@@ -48,7 +48,7 @@ def test_equivalent_to_explosion_for_simple_sents(kazu_test_config):
         and len(st_failures) == len(ex_failures) == 0
     )
 
-    st_sent_spans = st_successes[0].sections[0].sentence_spans
+    st_sent_spans = list(st_successes[0].sections[0].sentence_spans)
     ex_sent_spans = [
         CharSpan(start, end)
         for start, end in ex_successes[0].sections[0].metadata["sentence_offsets"]
