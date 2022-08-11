@@ -366,7 +366,7 @@ class Section:
     entities: List[Entity] = field(
         default_factory=list, hash=False
     )  # entities detected in this section
-    _sentence_spans: Optional[OrderedDict[CharSpan, Any]] = field(
+    _sentence_spans: Optional[Dict[CharSpan, Any]] = field(
         default=None, hash=False, init=False
     )  # hidden implem. for an ordered, immutable set of sentence spans
 
