@@ -5,9 +5,9 @@ from typing import Optional, DefaultDict, Dict, List, Tuple, Set, Iterable
 
 from kazu.data.data import (
     SynonymTerm,
-    UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES,
     SimpleValue,
     EquivalentIdSet,
+    EquivalentIdAggregationStrategy,
 )
 
 logger = logging.getLogger(__name__)
@@ -96,12 +96,9 @@ class SynonymDatabase:
 
     class __SynonymDatabase:
         syns_database_by_syn: DefaultDict[str, Dict[str, SynonymTerm]] = defaultdict(dict)
-        ambig_syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        unambig_syns_database_by_idx: DefaultDict[str, Dict[str, Set[str]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
+        syns_by_aggregation_strategy: DefaultDict[
+            str, DefaultDict[EquivalentIdAggregationStrategy, DefaultDict[str, Set[str]]]
+        ] = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         loaded_parsers: Set[str] = set()
 
         def add(self, name: str, synonyms: Iterable[SynonymTerm]):
@@ -110,22 +107,27 @@ class SynonymDatabase:
                 self.syns_database_by_syn[name][synonym.term_norm] = synonym
                 for equiv_ids in synonym.associated_id_sets:
                     for idx in equiv_ids.ids:
-                        if synonym.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                            self.unambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
-                        else:
-                            self.ambig_syns_database_by_idx[name][idx].add(synonym.term_norm)
+                        self.syns_by_aggregation_strategy[name][synonym.aggregated_by][idx].add(
+                            synonym.term_norm
+                        )
 
         def get(self, name: str, synonym: str) -> SynonymTerm:
             return self.syns_database_by_syn[name][synonym]
 
-        def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
-            if ignore_ambiguous:
-                return self.unambig_syns_database_by_idx[name][idx]
+        def get_syns_for_id(
+            self,
+            name: str,
+            idx: str,
+            strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
+        ) -> Set[str]:
+            result = set()
+            if strategy_filters is None:
+                for _, syn_dict in self.syns_by_aggregation_strategy[name].items():
+                    result.update(syn_dict.get(idx, set()))
             else:
-                result = set()
-                result.update(self.unambig_syns_database_by_idx[name][idx])
-                result.update(self.ambig_syns_database_by_idx[name][idx])
-                return result
+                for agg_strategy in strategy_filters:
+                    result.update(self.syns_by_aggregation_strategy[name][agg_strategy][idx])
+            return result
 
     def __init__(self):
         if not SynonymDatabase.instance:
@@ -144,11 +146,19 @@ class SynonymDatabase:
         assert self.instance is not None
         return self.instance.get(name, synonym)
 
-    def get_syns_for_id(self, name: str, idx: str, ignore_ambiguous: bool) -> Set[str]:
-        return self.instance.get_syns_for_id(name, idx, ignore_ambiguous)  # type: ignore
+    def get_syns_for_id(
+        self,
+        name: str,
+        idx: str,
+        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
+    ) -> Set[str]:
+        return self.instance.get_syns_for_id(name, idx, strategy_filters)  # type: ignore
 
     def get_syns_for_synonym(
-        self, name: str, synonym: str, ignore_ambiguous: bool
+        self,
+        name: str,
+        synonym: str,
+        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> List[Tuple[EquivalentIdSet, Set[str]]]:
         """
         get all other syns for a synonym in a kb
@@ -159,10 +169,7 @@ class SynonymDatabase:
         result = []
         synonym_term = self.get(name, synonym)
         for equiv_id_set in synonym_term.associated_id_sets:
-            if (
-                ignore_ambiguous
-                and synonym_term.aggregated_by not in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES
-            ):
+            if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
                 continue
 
             for idx in equiv_id_set.ids:
@@ -172,7 +179,7 @@ class SynonymDatabase:
                         self.get_syns_for_id(
                             name,
                             idx,
-                            ignore_ambiguous,
+                            strategy_filters,
                         ),
                     )
                 )
@@ -203,14 +210,3 @@ class SynonymDatabase:
     def get_loaded_parsers(self) -> Set[str]:
         assert self.instance is not None
         return self.instance.loaded_parsers
-
-    def validate_integrity(self):
-        failed_terms = []
-        for parser_name in self.get_loaded_parsers():
-            for term in self.get_all(parser_name).values():
-                if term.is_ambiguous and term.aggregated_by in UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES:
-                    # if more than one id_set associated with a term, it can't be unambiguous
-                    failed_terms.append(term)
-
-        for term in failed_terms:
-            logger.error(f"{term} failed integrity check")
