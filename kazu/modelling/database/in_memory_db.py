@@ -164,6 +164,8 @@ class SynonymDatabase:
         get all other syns for a synonym in a kb
         :param name: parser name
         :param synonym: synonym
+        :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
+            via these strategies will be returned. If None (the default), all syns will be returned
         :return:
         """
         result = []
