@@ -1,6 +1,7 @@
 import json
 from typing import Dict, List
 
+import pytest
 
 from kazu.data.data import (
     CharSpan,
@@ -170,8 +171,5 @@ def test_section_sentence_spans_is_immutable():
     x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
 
     # try re-assigning sentence_spans, which should raise an error
-    try:
+    with pytest.raises(AttributeError):
         x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
-        assert False, "Should not be able to re-assign immutable sentence_spans"
-    except Exception as e:
-        assert isinstance(e, AttributeError)
