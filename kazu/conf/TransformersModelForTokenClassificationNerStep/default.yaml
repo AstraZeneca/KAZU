@@ -15,9 +15,9 @@ entity_splitter:
     gene:
       - _target_: kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix
       - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
-        spacy_pipeline: ${......SpacyPipeline}
+        spacy_pipeline: ${SpacyPipeline}
     disease:
       - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
-        spacy_pipeline: ${......SpacyPipeline}
+        spacy_pipeline: ${SpacyPipeline}
 detect_subspans: False
 threshold: ~

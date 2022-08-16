@@ -14,7 +14,7 @@ trainer:
   enable_progress_bar: False
   accelerator: "auto"
   logger: False
-entity_class_to_ontology_mappings: ${..entity_class_to_ontology_map}
+entity_class_to_ontology_mappings: ${entity_class_to_ontology_map}
 indices:
   - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
     parser: ${ontology_parser.mondo_parser}
