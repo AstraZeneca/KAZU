@@ -16,4 +16,4 @@ blacklisters:
   OPENTARGETS_DISEASE: ${BlackListers.DiseaseBlackLister}
   ENSEMBL: ${BlackListers.GeneBlackLister}
   OPENTARGETS_TARGET: ${BlackListers.GeneBlackLister}
-entity_class_to_ontology_mappings: ${DictionaryEntityLinkingStep.entity_class_to_ontology_mappings}
+entity_class_to_ontology_mappings: ${entity_class_to_ontology_map}
