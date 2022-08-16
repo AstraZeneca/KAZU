@@ -206,7 +206,7 @@ class SynonymDatabase:
         """
         add synonyms to the database.
         :param name: name of ontology to add to
-        :param synonyms: dict in format {synonym string: Set[EquivalentIdSet]}
+        :param synonyms: iterable of SynonymTerms to add
         :return:
         """
         assert self.instance is not None
