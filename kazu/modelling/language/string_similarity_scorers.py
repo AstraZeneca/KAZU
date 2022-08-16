@@ -72,7 +72,7 @@ class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
 
 class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
     """
-    checks all modifier phrased in reference_term are represented in term_norm
+    checks all modifier phrases in reference_term are represented in term_norm
     """
 
     noun_modifier_phrases = ["LIKE", "SUBUNIT", "PSEUDOGENE", "RECEPTOR"]
