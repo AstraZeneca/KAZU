@@ -46,7 +46,7 @@ def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     st_step(docs)
     ex_successes, ex_failures = ex_step(docs)
 
-    assert ex_failures == 1 and ex_successes == 0
+    assert len(ex_failures) == 1
 
 
 @requires_model_pack

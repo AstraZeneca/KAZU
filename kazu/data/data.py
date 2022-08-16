@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import IntEnum, Enum, auto
 from itertools import cycle, chain
-from collections import OrderedDict
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
@@ -379,8 +378,15 @@ class Section:
 
     @sentence_spans.setter
     def sentence_spans(self, sent_spans: Iterable[CharSpan]):
+        """
+        Setter for sentence_spans. sentence_spans are stored in the order provided by the iterable
+        sent_spans param, which may not necessarily be in sorted order.
+
+        :param sent_spans:
+        :return:
+        """
         if not self._sentence_spans:
-            self._sentence_spans = OrderedDict([(sent_span, True) for sent_span in sent_spans])
+            self._sentence_spans = {sent_span: True for sent_span in sent_spans}
         else:
             raise AttributeError("Immutable sentence_spans is already set")
 
