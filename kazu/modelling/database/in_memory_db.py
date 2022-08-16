@@ -84,7 +84,8 @@ class MetadataDatabase:
         :param metadata: dict in format {idx:metadata}
         :return:
         """
-        self.instance.add(name, metadata)  # type: ignore
+        assert self.instance is not None
+        self.instance.add(name, metadata)
 
 
 class SynonymDatabase:
@@ -152,7 +153,8 @@ class SynonymDatabase:
         idx: str,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> Set[str]:
-        return self.instance.get_syns_for_id(name, idx, strategy_filters)  # type: ignore
+        assert self.instance is not None
+        return self.instance.get_syns_for_id(name, idx, strategy_filters)
 
     def get_syns_for_synonym(
         self,
@@ -197,7 +199,8 @@ class SynonymDatabase:
         return self.instance.syns_database_by_syn[name]
 
     def get_database(self) -> DefaultDict[str, Dict[str, SynonymTerm]]:
-        return self.instance.syns_database_by_syn  # type: ignore
+        assert self.instance is not None
+        return self.instance.syns_database_by_syn
 
     def add(self, name: str, synonyms: Iterable[SynonymTerm]):
         """
