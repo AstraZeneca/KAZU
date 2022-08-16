@@ -42,6 +42,10 @@ indices:
     boolean_scorers:
       - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
   - _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontology_parser.clo_parser}
+    boolean_scorers:
+      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.go_bp_parser}
     boolean_scorers:
       - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
