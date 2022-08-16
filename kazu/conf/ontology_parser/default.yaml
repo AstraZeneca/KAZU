@@ -26,7 +26,6 @@ ot_molecule_parser:
   spacy_pipeline: ${SpacyPipeline}
   synonym_generator: ${SynonymGeneration.chemical}
 
-
 ot_target_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
@@ -36,14 +35,12 @@ ot_target_parser:
   symbol_classifier:
     _target_: kazu.modelling.language.symbol_classification.GeneSymbolClassifier
 
-
 meddra_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/MedDRA 24.1
   data_origin: 'MEDDRA-24.1'
   spacy_pipeline: ${SpacyPipeline}
   synonym_generator: ${SynonymGeneration.default}
-
 
 uberon_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
