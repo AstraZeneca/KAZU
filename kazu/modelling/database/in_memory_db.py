@@ -24,7 +24,7 @@ class MetadataDatabase:
     class __MetadataDatabase:
         # key: parser_name, value: {idx:<generic metadata - dict of strings to simple values>}
         database: DefaultDict[str, Dict[str, Dict[str, SimpleValue]]] = defaultdict(dict)
-        # key: parser_name,value: List[IDX]
+        # key: parser_name, value: List[IDX]
         keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
 
         def add(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
