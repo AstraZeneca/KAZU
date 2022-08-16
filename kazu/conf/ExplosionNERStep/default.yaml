@@ -2,18 +2,7 @@ _target_: kazu.steps.ner.explosion.ExplosionNERStep
 depends_on: ~
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 rebuild_pipeline: False
-parsers:
-  - ${ontology_parser.chembl_parser}
-  - ${ontology_parser.mondo_parser}
-  - ${ontology_parser.ot_disease_parser}
-  - ${ontology_parser.ot_molecule_parser}
-  - ${ontology_parser.ot_target_parser}
-  - ${ontology_parser.meddra_parser}
-  - ${ontology_parser.uberon_parser}
-  - ${ontology_parser.cellosaurus_parser}
-  - ${ontology_parser.go_bp_parser}
-  - ${ontology_parser.go_cc_parser}
-  - ${ontology_parser.go_mf_parser}
+parsers: "${oc.dict.values: ontology_parser}"
 blacklisters:
   # keys are parser 'names' so we can decide what blacklister to use
   # as we loop over parsers while creating the phrase matchers
