@@ -123,7 +123,7 @@ class SynonymDatabase:
         ) -> Set[str]:
             result = set()
             if strategy_filters is None:
-                for _, syn_dict in self.syns_by_aggregation_strategy[name].items():
+                for syn_dict in self.syns_by_aggregation_strategy[name].values():
                     result.update(syn_dict.get(idx, set()))
             else:
                 for agg_strategy in strategy_filters:
