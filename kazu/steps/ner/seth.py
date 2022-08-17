@@ -1,4 +1,3 @@
-import logging
 import os
 import traceback
 from typing import Optional, List, Tuple, Callable
@@ -8,7 +7,6 @@ from py4j.java_gateway import JavaGateway
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Mapping, LinkRanks
 from kazu.steps import BaseStep
 
-logger = logging.getLogger(__name__)
 
 SETH_METADATA_KEY = "seth"
 

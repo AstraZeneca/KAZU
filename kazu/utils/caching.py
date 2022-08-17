@@ -1,12 +1,9 @@
 import copy
-import logging
 from typing import Iterable, List
 
 from cachetools import LFUCache
 from kazu.data.data import Entity, SynonymTermWithMetrics
 from kazu.utils.utils import get_match_entity_class_hash
-
-logger = logging.getLogger(__name__)
 
 
 class EntityLinkingLookupCache:

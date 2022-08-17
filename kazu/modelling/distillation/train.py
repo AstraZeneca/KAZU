@@ -1,4 +1,3 @@
-import logging
 from typing import Union
 
 import hydra
@@ -12,8 +11,6 @@ from kazu.modelling.distillation.models import (
     SequenceTaggingDistillationForFinalLayer,
     SequenceTaggingDistillationForIntermediateLayer,
 )
-
-logger = logging.getLogger(__name__)
 
 
 @hydra.main(config_path="../../conf", config_name="config")

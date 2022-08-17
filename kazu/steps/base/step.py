@@ -1,10 +1,7 @@
-import logging
 from abc import ABC
 from typing import List, Tuple, Optional, TypedDict
 
 from kazu.data.data import Document
-
-logger = logging.getLogger(__name__)
 
 
 class StepMetadata(TypedDict):

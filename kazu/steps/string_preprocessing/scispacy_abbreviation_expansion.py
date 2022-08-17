@@ -1,4 +1,3 @@
-import logging
 import traceback
 from collections import defaultdict
 from typing import Tuple, List, Optional, Set, Dict
@@ -10,7 +9,6 @@ from spacy.tokens import Span, Doc
 from kazu.data.data import Document, Section, CharSpan, PROCESSING_EXCEPTION
 from .string_preprocessing_step import StringPreprocessorStep
 
-logger = logging.getLogger(__name__)
 
 """
 Original Credit:

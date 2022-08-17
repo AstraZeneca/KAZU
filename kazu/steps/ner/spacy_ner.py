@@ -1,4 +1,3 @@
-import logging
 import traceback
 from collections import defaultdict
 from typing import List, Tuple
@@ -6,8 +5,6 @@ from typing import List, Tuple
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
 from kazu.steps import BaseStep
 from kazu.utils.spacy_pipeline import SpacyPipeline
-
-logger = logging.getLogger(__name__)
 
 
 class SpacyNerStep(BaseStep):

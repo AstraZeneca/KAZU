@@ -1,10 +1,7 @@
-import logging
 from typing import List, Tuple, Optional, Dict
 
 from kazu.data.data import Document, CharSpan, Section
 from kazu.steps import BaseStep
-
-logger = logging.getLogger(__name__)
 
 
 class StringPreprocessorStep(BaseStep):

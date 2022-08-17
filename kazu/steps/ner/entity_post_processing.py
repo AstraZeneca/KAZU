@@ -1,10 +1,7 @@
 import copy
-import logging
 from typing import List, Callable, Tuple, Dict, Optional, Set
 from kazu.data.data import Entity, CharSpan
 from kazu.utils.spacy_pipeline import SpacyPipeline
-
-logger = logging.getLogger(__name__)
 
 
 def _copy_ent_with_new_spans(
