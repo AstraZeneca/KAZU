@@ -5,7 +5,7 @@ import uuid
 import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, date
-from enum import IntEnum, Enum
+from enum import IntEnum, Enum, auto
 from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
@@ -24,13 +24,22 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
 
+class AutoNameEnum(Enum):
+    """Subclass to create an Enum where values are the names when using enum.auto
+
+    Taken from the Python Enum Docs (licensed under Zero-Clause BSD)."""
+
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
+
 class LinkRanks(IntEnum):
     # labels for ranking linking hits.
-    HIGH_CONFIDENCE = 0
-    MEDIUM_HIGH_CONFIDENCE = 1
-    MEDIUM_CONFIDENCE = 2
-    AMBIGUOUS = 3
-    LOW_CONFIDENCE = 4
+    HIGH_CONFIDENCE = auto()
+    MEDIUM_HIGH_CONFIDENCE = auto()
+    MEDIUM_CONFIDENCE = auto()
+    AMBIGUOUS = auto()
+    LOW_CONFIDENCE = auto()
 
 
 def remove_empty_elements(d):
@@ -82,13 +91,13 @@ class CharSpan:
         return hash((self.start, self.end))
 
 
-class EquivalentIdAggregationStrategy(Enum):
-    NO_STRATEGY = 1  # no strategy. should be used for debugging/testing only
-    RESOLVED_BY_SIMILARITY = 2  # synonym linked to ID via similarity to default ID label
-    SYNONYM_IS_AMBIGUOUS = 3  # synonym has no unambiguous meaning
-    CUSTOM = 4  # a place holder for any strategy that
-    UNAMBIGUOUS = 5
-    MERGED_AS_NON_SYMBOLIC = 6  # used when non-symbolic synonyms are merged
+class EquivalentIdAggregationStrategy(AutoNameEnum):
+    NO_STRATEGY = auto()  # no strategy. should be used for debugging/testing only
+    RESOLVED_BY_SIMILARITY = auto()  # synonym linked to ID via similarity to default ID label
+    SYNONYM_IS_AMBIGUOUS = auto()  # synonym has no unambiguous meaning
+    CUSTOM = auto()  # a place holder for any strategy that
+    UNAMBIGUOUS = auto()
+    MERGED_AS_NON_SYMBOLIC = auto()  # used when non-symbolic synonyms are merged
 
 
 @dataclass(frozen=True, eq=True, order=True)
