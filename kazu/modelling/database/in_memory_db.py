@@ -1,7 +1,6 @@
 import copy
 import logging
-from collections import defaultdict
-from typing import Optional, DefaultDict, Dict, List, Tuple, Set, Iterable
+from typing import Optional, Dict, List, Tuple, Set, Iterable
 
 from kazu.data.data import SynonymTerm, SimpleValue, EquivalentIdAggregationStrategy
 
@@ -18,9 +17,9 @@ class MetadataDatabase:
 
     class __MetadataDatabase:
         # key: parser_name, value: {idx:<generic metadata - dict of strings to simple values>}
-        database: DefaultDict[str, Dict[str, Dict[str, SimpleValue]]] = defaultdict(dict)
+        database: Dict[str, Dict[str, Dict[str, SimpleValue]]] = {}
         # key: parser_name, value: List[IDX]
-        keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
+        keys_lst: Dict[str, List[str]] = {}
         loaded_parsers: Set[str] = set()
 
         def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
@@ -95,21 +94,29 @@ class SynonymDatabase:
     instance: Optional["__SynonymDatabase"] = None
 
     class __SynonymDatabase:
-        syns_database_by_syn: DefaultDict[str, Dict[str, SynonymTerm]] = defaultdict(dict)
-        syns_by_aggregation_strategy: DefaultDict[
-            str, DefaultDict[EquivalentIdAggregationStrategy, DefaultDict[str, Set[str]]]
-        ] = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+        syns_database_by_syn: Dict[str, Dict[str, SynonymTerm]] = {}
+        syns_by_aggregation_strategy: Dict[
+            str, Dict[EquivalentIdAggregationStrategy, Dict[str, Set[str]]]
+        ] = {}
         loaded_parsers: Set[str] = set()
 
         def add(self, name: str, synonyms: Iterable[SynonymTerm]):
             self.loaded_parsers.add(name)
+            self.syns_database_by_syn[name] = {}
             for synonym in synonyms:
                 self.syns_database_by_syn[name][synonym.term_norm] = synonym
                 for equiv_ids in synonym.associated_id_sets:
                     for idx in equiv_ids.ids:
-                        self.syns_by_aggregation_strategy[name][synonym.aggregated_by][idx].add(
-                            synonym.term_norm
+                        dict_for_this_parser = self.syns_by_aggregation_strategy.setdefault(
+                            name, {}
                         )
+                        dict_for_this_aggregation_strategy = dict_for_this_parser.setdefault(
+                            synonym.aggregated_by, {}
+                        )
+                        syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(
+                            idx, set()
+                        )
+                        syn_set_for_this_id.add(synonym.term_norm)
 
         def get(self, name: str, synonym: str) -> SynonymTerm:
             return self.syns_database_by_syn[name][synonym]
@@ -189,7 +196,7 @@ class SynonymDatabase:
         assert self.instance is not None
         return self.instance.syns_database_by_syn[name]
 
-    def get_database(self) -> DefaultDict[str, Dict[str, SynonymTerm]]:
+    def get_database(self) -> Dict[str, Dict[str, SynonymTerm]]:
         assert self.instance is not None
         return self.instance.syns_database_by_syn
 
