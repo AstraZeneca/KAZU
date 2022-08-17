@@ -46,9 +46,6 @@ class MetadataDatabase:
         if not MetadataDatabase.instance:
             MetadataDatabase.instance = MetadataDatabase.__MetadataDatabase()
 
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
-
     def get_by_idx(self, name: str, idx: str) -> Dict[str, SimpleValue]:
         """
         get the metadata associated with an ontology and id
@@ -137,9 +134,6 @@ class SynonymDatabase:
     def __init__(self):
         if not SynonymDatabase.instance:
             SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
-
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
 
     def get(self, name: str, synonym: str) -> SynonymTerm:
         """
