@@ -171,12 +171,11 @@ class SynonymDatabase:
             via these strategies will be returned. If None (the default), all syns will be returned
         :return:
         """
-        result = []
+        result: List[Tuple[EquivalentIdSet, Set[str]]] = []
         synonym_term = self.get(name, synonym)
+        if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
+            return result
         for equiv_id_set in synonym_term.associated_id_sets:
-            if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
-                continue
-
             for idx in equiv_id_set.ids:
                 result.append(
                     (
