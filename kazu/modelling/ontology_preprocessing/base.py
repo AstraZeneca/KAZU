@@ -25,7 +25,6 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
 )
 from kazu.utils.spacy_pipeline import SpacyPipeline
 from kazu.utils.string_normalizer import StringNormalizer
-from rdflib import URIRef
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -607,8 +606,8 @@ class RDFGraphParser(OntologyParser):
         g = rdflib.Graph()
         g.parse(self.in_path)
         label_pred_str = "http://www.w3.org/2000/01/rdf-schema#label"
-        label_predicates = URIRef(label_pred_str)
-        synonym_predicates = [URIRef(x) for x in self._get_synonym_predicates()]
+        label_predicates = rdflib.URIRef(label_pred_str)
+        synonym_predicates = [rdflib.URIRef(x) for x in self._get_synonym_predicates()]
         default_labels = []
         iris = []
         syns = []
