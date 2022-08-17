@@ -27,8 +27,12 @@ class MetadataDatabase:
         # key: parser_name, value: List[IDX]
         keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
 
-        def add(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
-            self.database[name].update(metadata)
+        def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
+            if name in self.database:
+                logger.info(
+                    f"parser {name} already present in metadata database - will override existing parser data."
+                )
+            self.database[name] = metadata
             self.keys_lst[name] = list(self.database[name].keys())
 
         def get_by_idx(self, name: str, idx: str) -> Dict[str, SimpleValue]:
@@ -76,7 +80,7 @@ class MetadataDatabase:
         assert self.instance is not None
         return set(self.instance.database.keys())
 
-    def add(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
+    def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
         """
         add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
         override any existing entries with associated with the keys in the metadata dict
@@ -85,7 +89,7 @@ class MetadataDatabase:
         :return:
         """
         assert self.instance is not None
-        self.instance.add(name, metadata)
+        self.instance.add_parser(name, metadata)
 
 
 class SynonymDatabase:

@@ -319,7 +319,7 @@ class OntologyParser(ABC):
         populate the metadata database with this ontology
         :return:
         """
-        MetadataDatabase().add(self.name, self.export_metadata())
+        MetadataDatabase().add_parser(self.name, self.export_metadata())
 
     def generate_synonyms(self) -> Set[SynonymTerm]:
         """

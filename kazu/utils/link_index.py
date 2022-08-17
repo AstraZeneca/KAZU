@@ -76,7 +76,7 @@ class Index(ABC):
         :return:
         """
         with open(self.get_metadata_path(cache_path), "rb") as f:
-            self.metadata_db.add(self.parser.name, pickle.load(f))
+            self.metadata_db.add_parser(self.parser.name, pickle.load(f))
         with open(self.get_synonym_data_path(cache_path), "rb") as f:
             self.synonym_db.add(self.parser.name, pickle.load(f))
         self._load(self.get_index_data_path(cache_path))
@@ -127,7 +127,7 @@ class Index(ABC):
         :param data:
         :return:
         """
-        self.metadata_db.add(self.parser.name, metadata)
+        self.metadata_db.add_parser(self.parser.name, metadata)
         self._add(data)
 
     def __len__(self) -> int:
