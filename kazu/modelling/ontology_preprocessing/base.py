@@ -289,9 +289,8 @@ class OntologyParser(ABC):
     def export_metadata(self) -> Dict[str, Dict[str, SimpleValue]]:
         self._parse_df_if_not_already_parsed()
         assert isinstance(self.parsed_dataframe, pd.DataFrame)
-        metadata_columns = self.parsed_dataframe.columns.tolist()
-        metadata_columns.remove(MAPPING_TYPE)
-        metadata_columns.remove(SYN)
+        metadata_columns = self.parsed_dataframe.columns
+        metadata_columns.drop([MAPPING_TYPE, SYN])
         metadata_df = self.parsed_dataframe[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
