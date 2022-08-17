@@ -25,7 +25,7 @@ PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
 
 class LinkRanks(IntEnum):
-    # labels for ranking linking hits. NOTE! ordering important, as used for iteration
+    # labels for ranking linking hits.
     HIGH_CONFIDENCE = 0
     MEDIUM_HIGH_CONFIDENCE = 1
     MEDIUM_CONFIDENCE = 2
