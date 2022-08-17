@@ -6,11 +6,7 @@ from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
 
-from kazu.data.data import (
-    Document,
-    Entity,
-    Section,
-)
+from kazu.data.data import Document, Entity, Section
 
 logger = logging.getLogger(__name__)
 

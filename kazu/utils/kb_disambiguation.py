@@ -2,9 +2,7 @@ import itertools
 from typing import List, Tuple, Optional, Dict, Set, FrozenSet, KeysView
 
 from kazu.data.data import LinkRanks
-from kazu.data.data import (
-    EquivalentIdSet,
-)
+from kazu.data.data import EquivalentIdSet
 import pandas as pd
 
 

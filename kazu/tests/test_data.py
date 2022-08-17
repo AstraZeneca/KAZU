@@ -1,11 +1,6 @@
 import json
 
-from kazu.data.data import (
-    CharSpan,
-    Entity,
-    Document,
-    SynonymTermWithMetrics,
-)
+from kazu.data.data import CharSpan, Entity, Document, SynonymTermWithMetrics
 from kazu.tests.utils import make_dummy_synonym_term
 
 

@@ -8,10 +8,7 @@ from hydra.utils import instantiate
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.tests.utils import DummyParser, requires_model_pack
-from kazu.utils.link_index import (
-    MatMulTensorEmbeddingIndex,
-    CDistTensorEmbeddingIndex,
-)
+from kazu.utils.link_index import MatMulTensorEmbeddingIndex, CDistTensorEmbeddingIndex
 from kazu.utils.utils import get_cache_dir
 
 

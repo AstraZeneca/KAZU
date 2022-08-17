@@ -1,10 +1,7 @@
 from hydra.utils import instantiate
 
 from kazu.data.data import Document
-from kazu.tests.utils import (
-    ner_simple_test_cases,
-    requires_model_pack,
-)
+from kazu.tests.utils import ner_simple_test_cases, requires_model_pack
 
 
 @requires_model_pack

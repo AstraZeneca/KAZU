@@ -9,10 +9,7 @@ from typing import Tuple, Any, Dict, List, Iterable, Iterator, Optional, cast
 
 import numpy as np
 import torch
-from kazu.data.data import (
-    SimpleValue,
-    SynonymTermWithMetrics,
-)
+from kazu.data.data import SimpleValue, SynonymTermWithMetrics
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.modelling.language.string_similarity_scorers import BooleanStringSimilarityScorer
 from kazu.modelling.linking.sapbert.train import PLSapbertModel

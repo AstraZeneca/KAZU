@@ -3,11 +3,7 @@ import logging
 from collections import defaultdict
 from typing import Optional, DefaultDict, Dict, List, Tuple, Set, Iterable
 
-from kazu.data.data import (
-    SynonymTerm,
-    SimpleValue,
-    EquivalentIdAggregationStrategy,
-)
+from kazu.data.data import SynonymTerm, SimpleValue, EquivalentIdAggregationStrategy
 
 logger = logging.getLogger(__name__)
 

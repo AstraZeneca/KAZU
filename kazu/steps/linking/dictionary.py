@@ -8,9 +8,7 @@ from kazu.steps import BaseStep
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.link_index import DictionaryIndex
-from kazu.utils.utils import (
-    find_document_from_entity,
-)
+from kazu.utils.utils import find_document_from_entity
 
 logger = logging.getLogger(__name__)
 

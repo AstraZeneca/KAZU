@@ -2,10 +2,7 @@ import logging
 from typing import Any, Optional
 
 from pytorch_lightning import LightningModule
-from transformers import (
-    AutoModelForTokenClassification,
-    AutoModel,
-)
+from transformers import AutoModelForTokenClassification, AutoModel
 
 logger = logging.getLogger(__name__)
 
