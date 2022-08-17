@@ -136,6 +136,34 @@ class SynonymDatabase:
                     result.update(self.syns_by_aggregation_strategy[name][agg_strategy][idx])
             return result
 
+        def get_syns_sharing_id(
+            self,
+            name: str,
+            synonym: str,
+            strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
+        ) -> Set[str]:
+            """
+            get all other syns for a synonym in a kb
+            :param name: parser name
+            :param synonym: synonym
+            :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
+                via these strategies will be returned. If None (the default), all syns will be returned
+            :return:
+            """
+            result: Set[str] = set()
+            synonym_term = self.get(name, synonym)
+            if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
+                return result
+            for equiv_id_set in synonym_term.associated_id_sets:
+                for idx in equiv_id_set.ids:
+                    syns = self.get_syns_for_id(
+                        name,
+                        idx,
+                        strategy_filters,
+                    )
+                    result.update(syns)
+            return result
+
     def __init__(self):
         if not SynonymDatabase.instance:
             SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
@@ -165,27 +193,8 @@ class SynonymDatabase:
         synonym: str,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> Set[str]:
-        """
-        get all other syns for a synonym in a kb
-        :param name: parser name
-        :param synonym: synonym
-        :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
-            via these strategies will be returned. If None (the default), all syns will be returned
-        :return:
-        """
-        result: Set[str] = set()
-        synonym_term = self.get(name, synonym)
-        if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
-            return result
-        for equiv_id_set in synonym_term.associated_id_sets:
-            for idx in equiv_id_set.ids:
-                syns = self.get_syns_for_id(
-                    name,
-                    idx,
-                    strategy_filters,
-                )
-                result.update(syns)
-        return result
+        assert self.instance is not None
+        return self.instance.get_syns_sharing_id(name, synonym, strategy_filters)
 
     def get_all(self, name: str) -> Dict[str, SynonymTerm]:
         """
