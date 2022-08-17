@@ -46,8 +46,8 @@ class StringNormalizer:
     symbol_number_split = re.compile(r"(\d+)$")
     trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
 
-    @staticmethod
-    def is_symbol_like(debug, original_string) -> Optional[str]:
+    @classmethod
+    def is_symbol_like(cls, debug, original_string) -> Optional[str]:
         # TODO: rename method
         # True if all upper, all alphanum, no spaces,
 
@@ -55,9 +55,7 @@ class StringNormalizer:
             if char.islower() or not char.isalnum():
                 return None
         else:
-            splits = [
-                x.strip() for x in re.split(StringNormalizer.symbol_number_split, original_string)
-            ]
+            splits = [x.strip() for x in re.split(cls.symbol_number_split, original_string)]
             string = " ".join(splits).strip()
             if debug:
                 print(string)
@@ -94,28 +92,28 @@ class StringNormalizer:
         else:
             return False
 
-    @staticmethod
-    def normalize(original_string: str, debug: bool = False):
+    @classmethod
+    def normalize(cls, original_string: str, debug: bool = False):
         original_string = original_string.strip()
-        symbol_like = StringNormalizer.is_symbol_like(debug, original_string)
+        symbol_like = cls.is_symbol_like(debug, original_string)
         if symbol_like:
             return symbol_like
         else:
-            string = StringNormalizer.replace_substrings(debug, original_string)
+            string = cls.replace_substrings(debug, original_string)
 
             # split up numbers
-            string = StringNormalizer.split_on_numbers(debug, string)
+            string = cls.split_on_numbers(debug, string)
             # replace greek
-            string = StringNormalizer.replace_greek(debug, string)
+            string = cls.replace_greek(debug, string)
 
             # strip non alphanum
-            string = StringNormalizer.replace_non_alphanum(debug, string)
+            string = cls.replace_non_alphanum(debug, string)
 
-            string = StringNormalizer.depluralize(debug, string)
+            string = cls.depluralize(debug, string)
             # strip modifying lowercase prefixes
-            string = StringNormalizer.handle_lower_case_prefixes(debug, string)
+            string = cls.handle_lower_case_prefixes(debug, string)
 
-            string = StringNormalizer.sub_greek_char_abbreviations(debug, string)
+            string = cls.sub_greek_char_abbreviations(debug, string)
 
             string = string.strip()
             if debug:
@@ -130,9 +128,9 @@ class StringNormalizer:
             print(string)
         return string
 
-    @staticmethod
-    def sub_greek_char_abbreviations(debug, string):
-        for re_sub, replace in StringNormalizer.re_subs_2.items():
+    @classmethod
+    def sub_greek_char_abbreviations(cls, debug, string):
+        for re_sub, replace in cls.re_subs_2.items():
             string = re.sub(re_sub, replace, string)
             if debug:
                 print(string)
@@ -173,42 +171,40 @@ class StringNormalizer:
             print(string)
         return string
 
-    @staticmethod
-    def replace_non_alphanum(debug, string):
-        string = "".join(
-            [x for x in string if (x.isalnum() or x in StringNormalizer.allowed_additional_chars)]
-        )
+    @classmethod
+    def replace_non_alphanum(cls, debug, string):
+        string = "".join([x for x in string if (x.isalnum() or x in cls.allowed_additional_chars)])
         if debug:
             print(string)
         return string
 
-    @staticmethod
-    def replace_greek(debug, string):
-        for substr, replace in StringNormalizer.greek_subs_upper.items():
+    @classmethod
+    def replace_greek(cls, debug, string):
+        for substr, replace in cls.greek_subs_upper.items():
             if substr in string:
                 string = string.replace(substr, replace)
                 if debug:
                     print(string)
         return string
 
-    @staticmethod
-    def split_on_numbers(debug, string):
-        splits = [x.strip() for x in re.split(StringNormalizer.number_split_pattern, string)]
+    @classmethod
+    def split_on_numbers(cls, debug, string):
+        splits = [x.strip() for x in re.split(cls.number_split_pattern, string)]
         string = " ".join(splits)
         if debug:
             print(string)
         return string
 
-    @staticmethod
-    def replace_substrings(debug, original_string):
+    @classmethod
+    def replace_substrings(cls, debug, original_string):
         string = original_string
         # replace substrings
-        for substr, replace in StringNormalizer.other_subs.items():
+        for substr, replace in cls.other_subs.items():
             if substr in string:
                 string = string.replace(substr, replace)
                 if debug:
                     print(string)
-        for re_sub, replace in StringNormalizer.re_subs.items():
+        for re_sub, replace in cls.re_subs.items():
             string = re.sub(re_sub, replace, string)
             if debug:
                 print(string)

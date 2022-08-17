@@ -51,18 +51,18 @@ class GeneSymbolClassifier(SymbolClassifier):
             else:
                 return True
 
-    @staticmethod
-    def count_word_like_tokens(raw_str: str) -> int:
+    @classmethod
+    def count_word_like_tokens(cls, raw_str: str) -> int:
         raw_str = replace_dashes(raw_str, " ")
         tokens = raw_str.split(" ")
         if len(tokens) == 1:
             return 0
         else:
-            return sum([1 for x in tokens if GeneSymbolClassifier.word_like_filter(x)])
+            return sum([1 for x in tokens if cls.word_like_filter(x)])
 
-    @staticmethod
-    def is_symbolic(string: str) -> bool:
-        if GeneSymbolClassifier.count_word_like_tokens(string) == 0:
+    @classmethod
+    def is_symbolic(cls, string: str) -> bool:
+        if cls.count_word_like_tokens(string) == 0:
             return True
         else:
             return False
