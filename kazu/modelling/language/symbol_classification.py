@@ -31,9 +31,9 @@ class GeneSymbolClassifier(SymbolClassifier):
             return False
         else:
 
-            upper_count = 1
-            lower_count = 1
-            int_count = 1
+            upper_count = 0
+            lower_count = 0
+            numeric_count = 0
 
             for char in word:
                 if char.isalpha():
@@ -42,11 +42,11 @@ class GeneSymbolClassifier(SymbolClassifier):
                     else:
                         lower_count += 1
                 elif char.isnumeric():
-                    int_count += 1
+                    numeric_count += 1
 
-            upper_lower_ratio = float(upper_count) / float(lower_count)
-            int_alpha_ratio = float(int_count) / (float(upper_count + lower_count - 1))
-            if upper_lower_ratio > 1.0 or int_alpha_ratio > 1.0:
+            if upper_count > lower_count:
+                return False
+            elif numeric_count > (upper_count + lower_count):
                 return False
             else:
                 return True
