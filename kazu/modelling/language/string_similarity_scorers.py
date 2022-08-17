@@ -72,7 +72,7 @@ class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
     def __call__(self, reference_term: str, query_term: str) -> bool:
         # the pattern should either be in both or neither
         return all(
-            pattern in reference_term == pattern in query_term
+            (pattern in reference_term) == (pattern in query_term)
             for pattern in self.noun_modifier_phrases
         )
 
