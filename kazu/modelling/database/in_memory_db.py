@@ -26,8 +26,10 @@ class MetadataDatabase:
         database: DefaultDict[str, Dict[str, Dict[str, SimpleValue]]] = defaultdict(dict)
         # key: parser_name, value: List[IDX]
         keys_lst: DefaultDict[str, List[str]] = defaultdict(list)
+        loaded_parsers: Set[str] = set()
 
         def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
+            self.loaded_parsers.add(name)
             if name in self.database:
                 logger.info(
                     f"parser {name} already present in metadata database - will override existing parser data."
@@ -69,13 +71,14 @@ class MetadataDatabase:
         assert self.instance is not None
         return self.instance.database[name]
 
-    def get_loaded_parsers(self) -> Set[str]:
+    @property
+    def loaded_parsers(self) -> Set[str]:
         """
         get the names of all loaded parsers
         :return:
         """
         assert self.instance is not None
-        return set(self.instance.database.keys())
+        return self.instance.loaded_parsers
 
     def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
         """
@@ -210,6 +213,7 @@ class SynonymDatabase:
         assert self.instance is not None
         self.instance.add(name, synonyms)
 
-    def get_loaded_parsers(self) -> Set[str]:
+    @property
+    def loaded_parsers(self) -> Set[str]:
         assert self.instance is not None
         return self.instance.loaded_parsers
