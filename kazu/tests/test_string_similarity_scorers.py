@@ -2,27 +2,12 @@ from typing import Iterable
 
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.modelling.language.string_similarity_scorers import (
-    NGramStringSimilarityScorer,
     EntitySubtypeStringSimilarityScorer,
     NumberMatchStringSimilarityScorer,
     EntityNounModifierStringSimilarityScorer,
     RapidFuzzStringSimilarityScorer,
 )
 from kazu.utils.string_normalizer import StringNormalizer
-
-
-def test_NGramStringSimilarityScorer():
-    hit = make_term_for_scorer_test(["bowel cancer"])
-    scorer = NGramStringSimilarityScorer()
-    ent_match = "bowels cancer"
-    assert (
-        scorer(
-            match=ent_match,
-            match_norm=StringNormalizer.normalize(ent_match),
-            term_norm=hit.term_norm,
-        )
-        > 0.0
-    )
 
 
 def test_EntitySubtypeStringSimilarityScorer():

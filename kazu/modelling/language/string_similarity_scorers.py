@@ -5,7 +5,6 @@ from typing import Protocol
 
 from kazu.data.data import NumericMetric
 from rapidfuzz import fuzz
-from strsimpy import NGram
 
 
 class StringSimilarityScorer(ABC):
@@ -21,13 +20,6 @@ class StringSimilarityScorer(ABC):
 class BooleanStringSimilarityScorer(Protocol):
     def __call__(self, reference_term: str, query_term: str) -> bool:
         ...
-
-
-class NGramStringSimilarityScorer(StringSimilarityScorer):
-    ngram = NGram(2)
-
-    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        return 2 / (self.ngram.distance(reference_term, query_term) + 1.0)
 
 
 class NumberMatchStringSimilarityScorer(StringSimilarityScorer):
