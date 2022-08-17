@@ -26,43 +26,12 @@ class DefaultSymbolClassifier(SymbolClassifier):
 
 class GeneSymbolClassifier(SymbolClassifier):
     @staticmethod
-    def word_like_filter(word: str):
-        if len(word) < 4:
-            return False
-        else:
-
-            upper_count = 0
-            lower_count = 0
-            numeric_count = 0
-
-            for char in word:
-                if char.isalpha():
-                    if char.isupper():
-                        upper_count += 1
-                    else:
-                        lower_count += 1
-                elif char.isnumeric():
-                    numeric_count += 1
-
-            if upper_count > lower_count:
-                return False
-            elif numeric_count > (upper_count + lower_count):
-                return False
-            else:
-                return True
-
-    @classmethod
-    def count_word_like_tokens(cls, raw_str: str) -> int:
-        raw_str = replace_dashes(raw_str, " ")
-        tokens = raw_str.split(" ")
+    def is_symbolic(string: str) -> bool:
+        string = replace_dashes(string, " ")
+        tokens = string.split(" ")
         if len(tokens) == 1:
-            return 0
-        else:
-            return sum([1 for x in tokens if cls.word_like_filter(x)])
-
-    @classmethod
-    def is_symbolic(cls, string: str) -> bool:
-        if cls.count_word_like_tokens(string) == 0:
+            # single tokens are likely gene symbols - can't trust capitalisation
+            # in part because of convention to camel case animal homologous gene symbols
             return True
         else:
-            return False
+            return all(len(x) < 4 or StringNormalizer.is_probably_symbol_like(x) for x in tokens)
