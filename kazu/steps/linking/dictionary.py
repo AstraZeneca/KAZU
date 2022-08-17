@@ -72,7 +72,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param docs:
         :return:
         """
-        failed_docs = []
+        failed_docs: List[Document] = []
         entities: List[Entity] = pydash.flatten([x.get_entities() for x in docs])
         ents_by_match_and_class = {
             k: list(v) for k, v in sort_then_group(entities, lambda x: (x.match, x.entity_class))
@@ -89,7 +89,7 @@ class DictionaryEntityLinkingStep(BaseStep):
                         if indices_to_search:
                             terms: List[SynonymTermWithMetrics] = []
                             for index in indices_to_search:
-                                terms.extend(list(index.search(ent_match_and_class[0], self.top_n)))
+                                terms.extend(index.search(ent_match_and_class[0], self.top_n))
 
                             for ent in ents_this_match:
                                 ent.update_terms(terms)
@@ -99,11 +99,11 @@ class DictionaryEntityLinkingStep(BaseStep):
                             )
 
                     except Exception:
-                        failed_docs_set = set()
+                        failed_docs_set: Set[Document] = set()
                         for ent in ents_this_match:
                             doc = find_document_from_entity(docs, ent)
                             doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
                             failed_docs_set.add(doc)
-                        failed_docs.extend(list(failed_docs_set))
+                        failed_docs.extend(failed_docs_set)
 
         return docs, failed_docs

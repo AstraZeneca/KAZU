@@ -163,7 +163,7 @@ class SapBertForEntityLinkingStep(BaseStep):
                             if indices_to_search:
                                 terms: List[SynonymTermWithMetrics] = []
                                 for index in indices_to_search:
-                                    terms.extend(list(index.search(result, self.top_n)))
+                                    terms.extend(index.search(result, self.top_n))
                                 entity.update_terms(terms)
 
                                 self.lookup_cache.update_terms_lookup_cache(entity, terms)
