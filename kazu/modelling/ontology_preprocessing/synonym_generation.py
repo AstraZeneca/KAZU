@@ -63,7 +63,6 @@ class CombinatorialSynonymGenerator:
         :return:  Set[SynonymTerm] of generated synonyms. Note, the field values of the generated synonyms will
             be the same as the seed synonym, apart from SynonymTerm.terms, which contains the generated synonyms
         """
-        existing_terms = set(term for synonym in synonyms for term in synonym.terms)
         synonym_gen_permutations = itertools.permutations(self.synonym_generators)
         results = set()
         for i, permutation_list in enumerate(synonym_gen_permutations):
@@ -74,19 +73,8 @@ class CombinatorialSynonymGenerator:
                 # run the generator
                 new_syns: Set[SynonymTerm] = generator(all_syns)
                 for new_syn_term in new_syns:
-                    # don't add if it maps to a clean syn
-                    new_terms_this_generator = new_syn_term.terms.difference(existing_terms)
-                    if len(new_terms_this_generator) > 0:
-                        synonym_term_with_unique_new_terms = dataclasses.replace(
-                            new_syn_term,
-                            terms=frozenset(new_terms_this_generator),
-                            aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
-                        )
-                        results.add(synonym_term_with_unique_new_terms)
-                        # let following generators operate on the output.
-                        # a synonym might be in all_syns but not synonym_data
-                        # since a previous generator might have already produced it
-                        all_syns.add(synonym_term_with_unique_new_terms)
+                    results.add(new_syn_term)
+                    all_syns.add(new_syn_term)
 
         return results
 
