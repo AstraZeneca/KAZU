@@ -68,7 +68,6 @@ def test_syn_term_manipulation():
     e1.update_terms([syn_term_2])
     assert len(e1.syn_term_to_synonym_terms) == 1
     merged_syn_term: SynonymTermWithMetrics = next(iter(e1.syn_term_to_synonym_terms.values()))
-    # make_hits makes "test" the norm_syn that metrics are grouped by
     assert merged_syn_term.embed_score == 99.6
     assert merged_syn_term.search_score == 99.5
 
