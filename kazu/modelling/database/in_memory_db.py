@@ -6,6 +6,13 @@ from kazu.data.data import SynonymTerm, SimpleValue, EquivalentIdAggregationStra
 
 logger = logging.getLogger(__name__)
 
+# type aliases to make function signatures more explanatory,
+# reduce need for comments.
+ParserName = str
+Idx = str
+NormalisedSynonymStr = str
+Metadata = Dict[str, SimpleValue]
+
 
 class MetadataDatabase:
     """
@@ -16,13 +23,11 @@ class MetadataDatabase:
     instance: Optional["__MetadataDatabase"] = None
 
     class __MetadataDatabase:
-        # key: parser_name, value: {idx:<generic metadata - dict of strings to simple values>}
-        database: Dict[str, Dict[str, Dict[str, SimpleValue]]] = {}
-        # key: parser_name, value: List[IDX]
-        keys_lst: Dict[str, List[str]] = {}
+        database: Dict[ParserName, Dict[Idx, Metadata]] = {}
+        keys_lst: Dict[ParserName, List[Idx]] = {}
         loaded_parsers: Set[str] = set()
 
-        def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
+        def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
             self.loaded_parsers.add(name)
             if name in self.database:
                 logger.info(
@@ -31,10 +36,10 @@ class MetadataDatabase:
             self.database[name] = metadata
             self.keys_lst[name] = list(self.database[name].keys())
 
-        def get_by_idx(self, name: str, idx: str) -> Dict[str, SimpleValue]:
+        def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
             return self.database[name][idx]
 
-        def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, SimpleValue]]:
+        def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
             idx = self.keys_lst[name][i]
             return idx, self.database[name][idx]
 
@@ -42,7 +47,7 @@ class MetadataDatabase:
         if not MetadataDatabase.instance:
             MetadataDatabase.instance = MetadataDatabase.__MetadataDatabase()
 
-    def get_by_idx(self, name: str, idx: str) -> Dict[str, SimpleValue]:
+    def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
         """
         get the metadata associated with an ontology and id
         :param name: name of ontology to query
@@ -52,11 +57,11 @@ class MetadataDatabase:
         assert self.instance is not None
         return copy.deepcopy(self.instance.get_by_idx(name, idx))
 
-    def get_by_index(self, name: str, i: int) -> Tuple[str, Dict[str, SimpleValue]]:
+    def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
         assert self.instance is not None
         return copy.deepcopy(self.instance.get_by_index(name, i))
 
-    def get_all(self, name: str) -> Dict[str, Dict[str, SimpleValue]]:
+    def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
         """
         get all metadata associated with an ontology
         :param name: name of ontology
@@ -66,7 +71,7 @@ class MetadataDatabase:
         return self.instance.database[name]
 
     @property
-    def loaded_parsers(self) -> Set[str]:
+    def loaded_parsers(self) -> Set[ParserName]:
         """
         get the names of all loaded parsers
         :return:
@@ -74,7 +79,7 @@ class MetadataDatabase:
         assert self.instance is not None
         return self.instance.loaded_parsers
 
-    def add_parser(self, name: str, metadata: Dict[str, Dict[str, SimpleValue]]):
+    def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
         """
         add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
         override any existing entries with associated with the keys in the metadata dict
@@ -94,13 +99,13 @@ class SynonymDatabase:
     instance: Optional["__SynonymDatabase"] = None
 
     class __SynonymDatabase:
-        syns_database_by_syn: Dict[str, Dict[str, SynonymTerm]] = {}
+        syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
         syns_by_aggregation_strategy: Dict[
-            str, Dict[EquivalentIdAggregationStrategy, Dict[str, Set[str]]]
+            ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
         ] = {}
-        loaded_parsers: Set[str] = set()
+        loaded_parsers: Set[ParserName] = set()
 
-        def add(self, name: str, synonyms: Iterable[SynonymTerm]):
+        def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
             self.loaded_parsers.add(name)
             self.syns_database_by_syn[name] = {}
             for synonym in synonyms:
@@ -118,15 +123,15 @@ class SynonymDatabase:
                         )
                         syn_set_for_this_id.add(synonym.term_norm)
 
-        def get(self, name: str, synonym: str) -> SynonymTerm:
+        def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
             return self.syns_database_by_syn[name][synonym]
 
         def get_syns_for_id(
             self,
-            name: str,
-            idx: str,
+            name: ParserName,
+            idx: Idx,
             strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-        ) -> Set[str]:
+        ) -> Set[NormalisedSynonymStr]:
             result = set()
             if strategy_filters is None:
                 for syn_dict in self.syns_by_aggregation_strategy[name].values():
@@ -138,10 +143,10 @@ class SynonymDatabase:
 
         def get_syns_sharing_id(
             self,
-            name: str,
-            synonym: str,
+            name: ParserName,
+            synonym: NormalisedSynonymStr,
             strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-        ) -> Set[str]:
+        ) -> Set[NormalisedSynonymStr]:
             """
             get all other syns for a synonym in a kb
             :param name: parser name
@@ -168,7 +173,7 @@ class SynonymDatabase:
         if not SynonymDatabase.instance:
             SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
 
-    def get(self, name: str, synonym: str) -> SynonymTerm:
+    def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
         """
         get a set of EquivalentIdSets associated with an ontology and synonym string
         :param name: name of ontology to query
@@ -180,23 +185,23 @@ class SynonymDatabase:
 
     def get_syns_for_id(
         self,
-        name: str,
-        idx: str,
+        name: ParserName,
+        idx: NormalisedSynonymStr,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-    ) -> Set[str]:
+    ) -> Set[NormalisedSynonymStr]:
         assert self.instance is not None
         return self.instance.get_syns_for_id(name, idx, strategy_filters)
 
     def get_syns_sharing_id(
         self,
-        name: str,
-        synonym: str,
+        name: ParserName,
+        synonym: NormalisedSynonymStr,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-    ) -> Set[str]:
+    ) -> Set[NormalisedSynonymStr]:
         assert self.instance is not None
         return self.instance.get_syns_sharing_id(name, synonym, strategy_filters)
 
-    def get_all(self, name: str) -> Dict[str, SynonymTerm]:
+    def get_all(self, name: ParserName) -> Dict[NormalisedSynonymStr, SynonymTerm]:
         """
         get all synonyms associated with an ontology
         :param name: name of ontology
@@ -205,11 +210,11 @@ class SynonymDatabase:
         assert self.instance is not None
         return self.instance.syns_database_by_syn[name]
 
-    def get_database(self) -> Dict[str, Dict[str, SynonymTerm]]:
+    def get_database(self) -> Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]]:
         assert self.instance is not None
         return self.instance.syns_database_by_syn
 
-    def add(self, name: str, synonyms: Iterable[SynonymTerm]):
+    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
         """
         add synonyms to the database.
         :param name: name of ontology to add to
@@ -220,6 +225,6 @@ class SynonymDatabase:
         self.instance.add(name, synonyms)
 
     @property
-    def loaded_parsers(self) -> Set[str]:
+    def loaded_parsers(self) -> Set[ParserName]:
         assert self.instance is not None
         return self.instance.loaded_parsers
