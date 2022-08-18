@@ -206,10 +206,10 @@ class DictionaryIndex(Index):
         self, match: str, match_norm: str, top_n: int = 15
     ) -> List[SynonymTermWithMetrics]:
 
-        if match_norm in self.synonym_db.get_all(self.parser.name):
-            term = self.synonym_db.get(self.parser.name, match_norm)
+        exact_match_term = self.synonym_db.get_all(self.parser.name).get(match_norm)
+        if exact_match_term is not None:
             term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
-                term, search_score=100.0, bool_score=True, exact_match=True
+                exact_match_term, search_score=100.0, bool_score=True, exact_match=True
             )
             return [term_with_metrics]
 
