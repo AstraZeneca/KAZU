@@ -766,8 +766,10 @@ class MondoOntologyParser(OntologyParser):
 
     def find_kb(self, string: str):
         path = parse.urlparse(string).path
-
-        return path.split("/")[-1]
+        # just the final bit, e.g. MONDO_0000123
+        path_end = path.split("/")[-1]
+        # we don't want the underscore or digits for the unique ID, just the ontology bit
+        return path_end.split("_")[0]
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         x = json.load(open(self.in_path, "r"))
