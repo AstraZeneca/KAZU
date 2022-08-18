@@ -53,7 +53,7 @@ def test_overlap_logic():
     assert not e1.is_partially_overlapped(e2)
 
 
-def test_hit_manipulation():
+def test_syn_term_manipulation():
     e1 = Entity(
         namespace="test",
         match="metastatic liver cancer",
@@ -61,23 +61,23 @@ def test_hit_manipulation():
         spans=frozenset([CharSpan(start=16, end=39)]),
     )
 
-    # first test hits are merged correctly (same id set, same parser name)
-    hit_1 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", search_score=99.5)
-    e1.update_terms([hit_1])
-    hit_2 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", embed_score=99.6)
-    e1.update_terms([hit_2])
+    # first test syn_terms are merged correctly (same id set, same parser name)
+    syn_term_1 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", search_score=99.5)
+    e1.update_terms([syn_term_1])
+    syn_term_2 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", embed_score=99.6)
+    e1.update_terms([syn_term_2])
     assert len(e1.syn_term_to_synonym_terms) == 1
-    merged_hit: SynonymTermWithMetrics = next(iter(e1.syn_term_to_synonym_terms.values()))
+    merged_syn_term: SynonymTermWithMetrics = next(iter(e1.syn_term_to_synonym_terms.values()))
     # make_hits makes "test" the norm_syn that metrics are grouped by
-    assert merged_hit.embed_score == 99.6
-    assert merged_hit.search_score == 99.5
+    assert merged_syn_term.embed_score == 99.6
+    assert merged_syn_term.search_score == 99.5
 
-    # now test hits are differentiated if parser name is different
-    hit_3 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test_2", search_score=99.5)
-    e1.update_terms([hit_3])
+    # now test syn_terms are differentiated if parser name is different
+    syn_term_3 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test_2", search_score=99.5)
+    e1.update_terms([syn_term_3])
     assert len(e1.syn_term_to_synonym_terms) == 2
 
-    # now test hits are differentiated if id set is different
-    hit_4 = make_dummy_synonym_term(["1", "2"], parser_name="test", search_score=99.5)
-    e1.update_terms([hit_4])
+    # now test syn_terms are differentiated if id set is different
+    syn_term_4 = make_dummy_synonym_term(["1", "2"], parser_name="test", search_score=99.5)
+    e1.update_terms([syn_term_4])
     assert len(e1.syn_term_to_synonym_terms) == 3

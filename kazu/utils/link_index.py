@@ -240,7 +240,7 @@ class DictionaryIndex(Index):
                     result.append(term_with_metrics)
                 else:
                     logger.debug("filtered term %s as failed boolean checks", term)
-                # we don't sort the hits as we expect them to enter an unsorted set
+                # we don't sort the terms as we expect them to enter an unsorted set
             return result
 
     def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
@@ -252,8 +252,8 @@ class DictionaryIndex(Index):
         """
 
         match_norm = StringNormalizer.normalize(query)
-        hits = self._search_index(query, match_norm, top_n=top_n)
-        yield from hits
+        terms = self._search_index(query, match_norm, top_n=top_n)
+        yield from terms
 
     def _load(self, path: Path) -> Any:
         with open(path, "rb") as f:
@@ -345,7 +345,7 @@ class EmbeddingIndex(Index):
         should be implemented
         :param query: a string of text
         :param score_cutoff:
-        :param top_n: return up to this many hits
+        :param top_n: return up to this many results
         :return:
         """
         raise NotImplementedError()

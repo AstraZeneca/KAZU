@@ -46,7 +46,7 @@ class SapBertForEntityLinkingStep(BaseStep):
             shorter than this. (sapbert is less good at symbolic matching than string processing techniques)
         :param ignore_high_conf: If a perfect match has already been found, don't run sapbert
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
-        :param top_n: keep up to the top_n hits of the query
+        :param top_n: keep up to the top_n results for the query
         :param batch_size: inference batch size
         """
 
@@ -103,8 +103,8 @@ class SapBertForEntityLinkingStep(BaseStep):
                 if ent.entity_class not in self.entity_class_to_indices.keys():
                     continue
                 if self.ignore_high_conf:
-                    # check every parser namespace has a high conf hit
-                    # gives false by default, so if there are no hits for a parser
+                    # check every parser namespace has a high conf term
+                    # gives false by default, so if there are no terms for a parser
                     # we run sapbert
                     parser_has_high_conf_term: Dict[str, bool] = defaultdict(bool)
                     for term in ent.syn_term_to_synonym_terms.values():

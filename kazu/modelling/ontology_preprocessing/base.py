@@ -480,7 +480,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
         """
         since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
-        all synonym resolution, and rely on disambiguation to decide on 'true' hits. Answers on a postcard if anyone
+        all synonym resolution, and rely on disambiguation to decide on 'true' mappings. Answers on a postcard if anyone
         has a better idea on how to do this!
         :param ids:
         :param id_to_source:

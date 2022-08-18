@@ -33,7 +33,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param entity_class_to_ontology_mappings: mapping of entity class to appropriate ontologies for this entity
             class
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
-        :param top_n: keep the top_n hits of the query (passed to DictionaryIndex)
+        :param top_n: keep the top_n results for the query (passed to DictionaryIndex)
         """
         super().__init__(depends_on=depends_on)
 

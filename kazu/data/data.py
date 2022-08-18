@@ -34,7 +34,7 @@ class AutoNameEnum(Enum):
 
 
 class LinkRanks(IntEnum):
-    # labels for ranking linking hits.
+    # labels for ranking linking mappings.
     HIGH_CONFIDENCE = auto()
     MEDIUM_HIGH_CONFIDENCE = auto()
     MEDIUM_CONFIDENCE = auto()

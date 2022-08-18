@@ -22,7 +22,7 @@ class EntityLinkingLookupCache:
 
     def check_lookup_cache(self, entities: Iterable[Entity]) -> List[Entity]:
         """
-        checks the cache for mappings and hits. If relevant mappings are found for an entity, update its mappings
+        checks the cache for synonym terms. If relevant terms are found for an entity, update it
         accordingly. If not return as a list of cache misses (e.g. for further processing)
 
         :param entities:
@@ -31,9 +31,9 @@ class EntityLinkingLookupCache:
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
-            hits_cache_hits = self.terms_lookup_cache.get(hash_val, set())
-            if not hits_cache_hits:
+            terms_from_cache = self.terms_lookup_cache.get(hash_val, set())
+            if not terms_from_cache:
                 cache_misses.append(ent)
             else:
-                ent.update_terms(copy.deepcopy(hits_cache_hits))
+                ent.update_terms(copy.deepcopy(terms_from_cache))
         return cache_misses

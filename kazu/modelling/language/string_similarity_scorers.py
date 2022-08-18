@@ -52,7 +52,7 @@ class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
         query_term_numeric_phrase_count = Counter(self.numeric_class_phrases.findall(query_term))
 
         # we don't want to just do reference_term_numeric_phrase_count == query_term_numeric_phrase_count
-        # because e.g. if reference term is 'diabetes' that is an NER hit we've picked up in some text,
+        # because e.g. if reference term is 'diabetes' that is an NER match we've picked up in some text,
         # we want to keep hold of all of 'diabetes type I', 'diabetes type II', 'diabetes', in case surrounding context
         # enables us to disambiguate which type of diabetes it is
         return all(
