@@ -14,11 +14,10 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
 )
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
+from kazu.modelling.language.language_phenomena import GREEK_SUBS
 from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
-from kazu.modelling.language.language_phenomena import GREEK_SUBS
-
 dummy_equiv_ids = EquivalentIdSet(ids=frozenset(("text",)))
 
 

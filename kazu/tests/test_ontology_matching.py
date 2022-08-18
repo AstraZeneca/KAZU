@@ -1,10 +1,11 @@
 import pytest
 import spacy
+from spacy.lang.en import English
+
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.tests.utils import make_dummy_parser
-from spacy.lang.en import English
 
 
 def test_constructor():
