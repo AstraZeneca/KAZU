@@ -195,11 +195,10 @@ class DictionaryIndex(Index):
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
 
         if self.boolean_scorers is not None:
-            for scorer in self.boolean_scorers:
-                if not scorer(reference_term=reference_term, query_term=query_term):
-                    return False
-            else:
-                return True
+            return all(
+                scorer(reference_term=reference_term, query_term=query_term)
+                for scorer in self.boolean_scorers
+            )
         else:
             return True
 
