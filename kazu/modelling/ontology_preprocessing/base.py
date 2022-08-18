@@ -204,12 +204,7 @@ class OntologyParser(ABC):
             )
         else:
 
-            id_to_label = {
-                idx: str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL]) for idx in ids
-            }
-
-            if len(id_to_label) == 1:
-                # default label is the same, It's the same concept
+            if len(ids) == 1:
                 return (
                     frozenset(
                         (
@@ -221,7 +216,12 @@ class OntologyParser(ABC):
                     ),
                     EquivalentIdAggregationStrategy.UNAMBIGUOUS,
                 )
-            elif not is_symbolic:
+
+            id_to_label = {
+                idx: str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL]) for idx in ids
+            }
+
+            if not is_symbolic:
                 return (
                     frozenset(
                         (
