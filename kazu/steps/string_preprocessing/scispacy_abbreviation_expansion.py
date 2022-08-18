@@ -307,7 +307,7 @@ class SciSpacyAbbreviationExpansionStep(StringPreprocessorStep):
 
     def expand_abbreviations_section(self, document: Document) -> Document:
 
-        all = " ".join([section.get_text() for section in document.sections])
+        all = " ".join(section.get_text() for section in document.sections)
         doc = self.nlp(all)
         try:
             self.abbreviation_pipe.find_abbreviations(doc)

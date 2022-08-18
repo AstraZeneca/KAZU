@@ -172,7 +172,7 @@ class StringNormalizer:
 
     @classmethod
     def replace_non_alphanum(cls, debug, string):
-        string = "".join([x for x in string if (x.isalnum() or x in cls.allowed_additional_chars)])
+        string = "".join(x for x in string if (x.isalnum() or x in cls.allowed_additional_chars))
         if debug:
             print(string)
         return string
