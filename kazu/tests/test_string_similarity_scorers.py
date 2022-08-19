@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Sequence
 
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.modelling.language.string_similarity_scorers import (
@@ -98,11 +98,11 @@ def test_RapidFuzzStringSimilarityScorer():
     )
 
 
-def make_term_for_scorer_test(synonyms: Iterable[str]) -> SynonymTerm:
+def make_term_for_scorer_test(synonyms: Sequence[str]) -> SynonymTerm:
 
     return SynonymTerm(
         terms=frozenset(synonyms),
-        term_norm=StringNormalizer.normalize(next(iter(synonyms))),
+        term_norm=StringNormalizer.normalize(synonyms[0]),
         associated_id_sets=frozenset(
             (
                 EquivalentIdSet(
