@@ -1,8 +1,8 @@
-import itertools
 from typing import List, Tuple, Optional, Dict, Set, FrozenSet, KeysView
 
 from kazu.data.data import LinkRanks
 from kazu.data.data import EquivalentIdSet
+from kazu.utils.grouping import sort_then_group
 import pandas as pd
 
 
@@ -58,8 +58,8 @@ class ReactomeDb:
         pathway_sets = sorted(self.get_ids_by_pathway_association(ambiguous_id), reverse=True)
         score = 0.0
         # always prefer confidence values over scores, and return early if a higher confidence result found
-        document_unambiguous_ids_by_confidence = itertools.groupby(
-            sorted(document_unambiguous_ids, key=lambda x: x[2]), key=lambda x: x[2]
+        document_unambiguous_ids_by_confidence = sort_then_group(
+            document_unambiguous_ids, key_func=lambda x: x[2]
         )
 
         for link_rank, link_rank_unambiguous in document_unambiguous_ids_by_confidence:
