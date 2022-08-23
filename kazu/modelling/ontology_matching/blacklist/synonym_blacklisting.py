@@ -1,7 +1,5 @@
-import abc
-from abc import abstractmethod
 from functools import cached_property
-from typing import Tuple, List, Dict, Optional, Iterable, Set
+from typing import Tuple, List, Dict, Optional, Iterable, Set, Protocol
 import pandas as pd
 
 from kazu.modelling.database.in_memory_db import SynonymDatabase
@@ -29,31 +27,32 @@ class AnnotationLookup:
             return None
 
 
-class BlackLister(abc.ABC):
+class BlackLister(Protocol):
     """
     applies entity class specific rules to a synonym, to see if it should be blacklisted or not
     """
 
-    @abstractmethod
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         """
 
         :param synonym: synonym to test
         :return: tuple of whether synonym is good True|False, and the reason for the decision
         """
-        raise NotImplementedError()
+        ...
 
-    @abstractmethod
-    def clear_caches(self):
+    def clear_caches(self) -> None:
         """Delete caches that aren't needed when synonym generation is done.
 
         At the moment, this just refers to caches of synonyms for other entity types. However, we
         want to be able to call this on all blacklisters, so we need a no-op implementation in the base
         class to be overriden.
 
+        We would need this even for blacklisters that don't have stored synonyms so that we can just call it on all
+        blacklisters (since the blacklisters used are dynamic depending on config).
+
         It would seem like this is a good use case for context managers, but python doesn't support a variable
         number of context managers based on an iterable as we would want in this case."""
-        raise NotImplementedError()
+        ...
 
 
 def _build_synonym_set(database: SynonymDatabase, synonym_sources: Iterable[str]) -> Set[str]:
