@@ -1,5 +1,6 @@
 import abc
 from abc import abstractmethod
+from functools import cached_property
 from typing import Tuple, List, Dict, Optional
 import pandas as pd
 
@@ -44,6 +45,18 @@ class BlackLister(abc.ABC):
         """
         raise NotImplementedError()
 
+    @abstractmethod
+    def clear_caches(self):
+        """Delete caches that aren't needed when synonym generation is done.
+
+        At the moment, this just refers to caches of synonyms for other entity types. However, we
+        want to be able to call this on all blacklisters, so we need a no-op implementation in the base
+        class to be overriden.
+
+        It would seem like this is a good use case for context managers, but python doesn't support a variable
+        number of context managers based on an iterable as we would want in this case."""
+        raise NotImplementedError()
+
 
 class DrugBlackLister:
     # CHEMBL drug names are often confused with genes and anatomy, for some reason
@@ -55,12 +68,26 @@ class DrugBlackLister:
     ):
         self.annotation_lookup = annotation_lookup
         self.syn_db = SynonymDatabase()
-        self.gene_syns = set()
-        for gene_synonym_source in gene_synonym_sources:
-            self.gene_syns.update(set(self.syn_db.get_all(gene_synonym_source).keys()))
-        self.anat_syns = set()
-        for anat_synonym_source in anatomy_synonym_sources:
-            self.anat_syns.update(set(self.syn_db.get_all(anat_synonym_source).keys()))
+        self.anatomy_synonym_sources = anatomy_synonym_sources
+        self.gene_synonym_sources = gene_synonym_sources
+
+    @cached_property
+    def gene_syns(self):
+        syns = set()
+        for gene_synonym_source in self.gene_synonym_sources:
+            syns.update(set(self.syn_db.get_all(gene_synonym_source).keys()))
+        return syns
+
+    @cached_property
+    def anat_syns(self):
+        syns = set()
+        for anat_synonym_source in self.anatomy_synonym_sources:
+            syns.update(set(self.syn_db.get_all(anat_synonym_source).keys()))
+        return syns
+
+    def clear_caches(self):
+        del self.gene_syns
+        del self.anat_syns
 
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         lookup_result = self.annotation_lookup(synonym)
@@ -88,12 +115,26 @@ class GeneBlackLister:
     ):
         self.annotation_lookup = annotation_lookup
         self.syn_db = SynonymDatabase()
-        self.disease_syns = set()
-        self.gene_syns = set()
-        for disease_synonym_source in disease_synonym_sources:
-            self.disease_syns.update(set(self.syn_db.get_all(disease_synonym_source).keys()))
-        for gene_synonym_source in gene_synonym_sources:
-            self.gene_syns.update(set(self.syn_db.get_all(gene_synonym_source).keys()))
+        self.disease_synonym_sources = disease_synonym_sources
+        self.gene_synonym_sources = gene_synonym_sources
+
+    @cached_property
+    def disease_syns(self):
+        syns = set()
+        for disease_synonym_source in self.disease_synonym_sources:
+            syns.update(set(self.syn_db.get_all(disease_synonym_source).keys()))
+        return syns
+
+    @cached_property
+    def gene_syns(self):
+        syns = set()
+        for gene_synonym_source in self.gene_synonym_sources:
+            syns.update(set(self.syn_db.get_all(gene_synonym_source).keys()))
+        return syns
+
+    def clear_caches(self):
+        del self.disease_syns
+        del self.gene_syns
 
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         lookup_result = self.annotation_lookup(synonym)
@@ -114,9 +155,17 @@ class DiseaseBlackLister:
     def __init__(self, annotation_lookup: AnnotationLookup, disease_synonym_sources: List[str]):
         self.annotation_lookup = annotation_lookup
         self.syn_db = SynonymDatabase()
-        self.disease_syns = set()
-        for disease_synonym_source in disease_synonym_sources:
-            self.disease_syns.update(set(self.syn_db.get_all(disease_synonym_source).keys()))
+        self.disease_synonym_sources = disease_synonym_sources
+
+    @cached_property
+    def disease_syns(self):
+        syns = set()
+        for disease_synonym_source in self.disease_synonym_sources:
+            syns.update(set(self.syn_db.get_all(disease_synonym_source).keys()))
+        return syns
+
+    def clear_caches(self):
+        del self.disease_syns
 
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         lookup_result = self.annotation_lookup(synonym)

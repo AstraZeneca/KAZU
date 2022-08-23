@@ -178,6 +178,12 @@ class OntologyMatcher:
                                         e,
                                     )
 
+        for unique_blacklister in set(blacklisters.values()):
+            # get rid of synonym caches to save memory now we've built the phrasematchers.
+            # These will get auto-populated again if we want to use them since they use
+            # functools.cached_property
+            unique_blacklister.clear_caches()
+
         self.strict_matcher = strict_matcher
         self.lowercase_matcher = lowercase_matcher
         return strict_matcher, lowercase_matcher
