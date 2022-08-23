@@ -34,8 +34,6 @@ class BlackLister(abc.ABC):
     applies entity class specific rules to a synonym, to see if it should be blacklisted or not
     """
 
-    # def _collect_syn_set
-
     @abstractmethod
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         """
