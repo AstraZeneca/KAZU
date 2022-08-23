@@ -41,7 +41,7 @@ class BlackLister(abc.ABC):
         """
 
         :param synonym: synonym to test
-        :return: tuple of whether synoym is good True|False, and the reason for the decision
+        :return: tuple of whether synonym is good True|False, and the reason for the decision
         """
         raise NotImplementedError()
 
