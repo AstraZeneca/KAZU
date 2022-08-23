@@ -1,7 +1,7 @@
 import abc
 from abc import abstractmethod
 from functools import cached_property
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict, Optional, Iterable, Set
 import pandas as pd
 
 from kazu.modelling.database.in_memory_db import SynonymDatabase
@@ -58,6 +58,13 @@ class BlackLister(abc.ABC):
         raise NotImplementedError()
 
 
+def _build_synonym_set(database: SynonymDatabase, synonym_sources: Iterable[str]) -> Set[str]:
+    syns = set()
+    for synonym_source in synonym_sources:
+        syns.update(set(database.get_all(synonym_source).keys()))
+    return syns
+
+
 class DrugBlackLister:
     # CHEMBL drug names are often confused with genes and anatomy, for some reason
     def __init__(
@@ -73,17 +80,11 @@ class DrugBlackLister:
 
     @cached_property
     def gene_syns(self):
-        syns = set()
-        for gene_synonym_source in self.gene_synonym_sources:
-            syns.update(set(self.syn_db.get_all(gene_synonym_source).keys()))
-        return syns
+        return _build_synonym_set(self.db, self.gene_synonym_sources)
 
     @cached_property
     def anat_syns(self):
-        syns = set()
-        for anat_synonym_source in self.anatomy_synonym_sources:
-            syns.update(set(self.syn_db.get_all(anat_synonym_source).keys()))
-        return syns
+        return _build_synonym_set(self.db, self.anatomy_synonym_sources)
 
     def clear_caches(self):
         del self.gene_syns
@@ -120,17 +121,11 @@ class GeneBlackLister:
 
     @cached_property
     def disease_syns(self):
-        syns = set()
-        for disease_synonym_source in self.disease_synonym_sources:
-            syns.update(set(self.syn_db.get_all(disease_synonym_source).keys()))
-        return syns
+        return _build_synonym_set(self.db, self.disease_synonym_sources)
 
     @cached_property
     def gene_syns(self):
-        syns = set()
-        for gene_synonym_source in self.gene_synonym_sources:
-            syns.update(set(self.syn_db.get_all(gene_synonym_source).keys()))
-        return syns
+        return _build_synonym_set(self.db, self.gene_synonym_sources)
 
     def clear_caches(self):
         del self.disease_syns
@@ -159,10 +154,7 @@ class DiseaseBlackLister:
 
     @cached_property
     def disease_syns(self):
-        syns = set()
-        for disease_synonym_source in self.disease_synonym_sources:
-            syns.update(set(self.syn_db.get_all(disease_synonym_source).keys()))
-        return syns
+        return _build_synonym_set(self.db, self.disease_synonym_sources)
 
     def clear_caches(self):
         del self.disease_syns
