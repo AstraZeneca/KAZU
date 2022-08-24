@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Tuple, List, Dict, Optional, Iterable, Set, Protocol
+from typing import Tuple, List, Dict, Optional, Collection, Set, Protocol
 import pandas as pd
 
 from kazu.modelling.database.in_memory_db import SynonymDatabase
@@ -55,11 +55,23 @@ class BlackLister(Protocol):
         ...
 
 
-def _build_synonym_set(database: SynonymDatabase, synonym_sources: Iterable[str]) -> Set[str]:
+def _build_synonym_set(database: SynonymDatabase, synonym_sources: Collection[str]) -> Set[str]:
+    """Build a set of all synonyms from the given source parsers.
+
+    :param database: a synonym database. This should be populated with the relevant parsers. If not, a KeyError will be raised.
+    :param synonym_sources: a collection of 'sources' for synonyms - these are names of parsers added to the database.
+    :return: the unique set of all the synonyms (as strings, normalized) associated with the parsers given in synonym_sources."""
     syns = set()
-    for synonym_source in synonym_sources:
-        syns.update(set(database.get_all(synonym_source).keys()))
-    return syns
+    try:
+        for synonym_source in synonym_sources:
+            syns.update(set(database.get_all(synonym_source).keys()))
+        return syns
+    except KeyError as e:
+        raise KeyError(
+            f"""A BlackLister has been called and the necessary parser(s) to use it are not loaded into the SynonymDatabase.
+            The BlackLister has attempted to read synonyms from these parsers: {synonym_sources}
+            The database has these parsers loaded: {database.loaded_parsers}"""
+        ) from e
 
 
 class DrugBlackLister:
