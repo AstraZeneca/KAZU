@@ -20,3 +20,6 @@ defaults:
   - ExplosionNERStep: default
   - MergeOverlappingEntsStep: default
   - StanzaStep: default
+  - MappingStep: default
+  - DisambiguationStrategies: default
+  - StringScorers: default
