@@ -1,3 +1,4 @@
+import functools
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -47,6 +48,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     ):
         self.found_equivalent_ids: Set[Tuple[str, str, str]] = set()
 
+    @functools.lru_cache(maxsize=1)
     def prepare(self, document: Document):
         self.found_equivalent_ids.clear()
         entities = document.get_entities()
