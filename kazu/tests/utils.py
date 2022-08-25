@@ -40,22 +40,6 @@ requires_model_pack = pytest.mark.skipif(
 )
 
 
-class MockedCachedIndexGroup:
-    """
-    class for mocking a call to CachedIndexGroup.search
-    """
-
-    def __init__(self, iris: List[str], sources: List[str]):
-        self.iris = iris
-        self.sources = sources
-        self.callcount = 0
-
-    def mock_search(self, *args, **kwargs):
-        mappings = []
-        self.callcount += 1
-        return mappings
-
-
 def full_pipeline_test_cases() -> Tuple[List[Document], List[pd.DataFrame]]:
     docs = []
     dfs = []
