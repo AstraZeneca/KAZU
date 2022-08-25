@@ -1,4 +1,5 @@
 import re
+from functools import lru_cache
 from typing import Optional
 
 from gilda.process import depluralize
@@ -92,11 +93,12 @@ class StringNormalizer:
             return False
 
     @classmethod
+    @lru_cache(maxsize=5000, typed=False)
     def normalize(cls, original_string: str, debug: bool = False):
         original_string = original_string.strip()
         symbol_like = cls.is_symbol_like(debug, original_string)
         if symbol_like:
-            return symbol_like
+            return cls.replace_substrings(debug, original_string).upper()
         else:
             string = cls.replace_substrings(debug, original_string)
 
