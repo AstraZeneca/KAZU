@@ -1,0 +1,36 @@
+default:
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
+    aggregation_strategies_to_build_id_set_representation:
+      - UNAMBIGUOUS
+    scorer_manager:
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
+      path:
+        _target_: pathlib.Path
+        _args_:
+          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
+
+gene:
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
+    aggregation_strategies_to_build_id_set_representation:
+      - CUSTOM
+    scorer_manager:
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
+      path:
+        _target_: pathlib.Path
+        _args_:
+          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy
+
+cell_line:
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
+    aggregation_strategies_to_build_id_set_representation:
+      - CUSTOM
+    scorer_manager:
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
+      path:
+        _target_: pathlib.Path
+        _args_:
+          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
