@@ -32,8 +32,7 @@ ot_target_parser:
   data_origin: 'OPENTARGETS-TARGET'
   spacy_pipeline: ${SpacyPipeline}
   synonym_generator: ${SynonymGeneration.gene}
-  symbol_classifier:
-    _target_: kazu.modelling.language.symbol_classification.GeneSymbolClassifier
+  entity_class: 'gene'
 
 meddra_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser
