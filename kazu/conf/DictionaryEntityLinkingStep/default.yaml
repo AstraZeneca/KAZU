@@ -6,54 +6,48 @@ entity_class_to_ontology_mappings: ${entity_class_to_ontology_map}
 indices:
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.chembl_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.drug}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.mondo_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-      - _target_: kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
+    boolean_scorers: ${StringScorers.disease}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.ot_disease_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-      - _target_: kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
+    boolean_scorers: ${StringScorers.disease}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.ot_molecule_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.drug}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.ot_target_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-      - _target_: kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer
-      - _target_: kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
+    boolean_scorers: ${StringScorers.gene}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.meddra_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-      - _target_: kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
+    boolean_scorers: ${StringScorers.disease}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.uberon_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.anatomy}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.cellosaurus_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.cell_type}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.clo_parser}
     boolean_scorers:
       - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.go_bp_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.go}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.go_cc_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.go}
+
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.go_mf_parser}
-    boolean_scorers:
-      - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+    boolean_scorers: ${StringScorers.go}
