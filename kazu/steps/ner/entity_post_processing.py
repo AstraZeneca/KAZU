@@ -41,48 +41,49 @@ class SplitOnConjunctionPattern:
     def run_conjunction_rules(self, doc, entity, text):
         ents = []
         noun_chunks = list(doc.noun_chunks)
-        anchor_chunk = noun_chunks[-1]
-        anchor = None
-        for tok in anchor_chunk:
-            if tok.dep_ == "conj":
-                anchor = tok
-        if anchor is not None:
-            ents.append(
-                _copy_ent_with_new_spans(
-                    spans=[
-                        (
-                            entity.start + anchor_chunk.start_char,
-                            entity.start + anchor_chunk.end_char,
-                        )
-                    ],
-                    text=text,
-                    entity=entity,
-                    join_str=" ",
-                    rule_name="spacy noun chunk tags",
-                )
-            )
-            for chunk in noun_chunks[:-1]:
-                if anchor in chunk.conjuncts:
-                    ents.append(
-                        _copy_ent_with_new_spans(
-                            spans=[
-                                (
-                                    entity.start + chunk.start_char,
-                                    entity.start
-                                    + (chunk.end_char - chunk.start_char)
-                                    + chunk.start_char,
-                                ),
-                                (
-                                    entity.start + anchor.idx,
-                                    entity.start + len(anchor) + anchor.idx,
-                                ),
-                            ],
-                            text=text,
-                            entity=entity,
-                            join_str=" ",
-                            rule_name="spacy noun chunk tags",
-                        )
+        if len(noun_chunks) > 0:
+            anchor_chunk = noun_chunks[-1]
+            anchor = None
+            for tok in anchor_chunk:
+                if tok.dep_ == "conj":
+                    anchor = tok
+            if anchor is not None:
+                ents.append(
+                    _copy_ent_with_new_spans(
+                        spans=[
+                            (
+                                entity.start + anchor_chunk.start_char,
+                                entity.start + anchor_chunk.end_char,
+                            )
+                        ],
+                        text=text,
+                        entity=entity,
+                        join_str=" ",
+                        rule_name="spacy noun chunk tags",
                     )
+                )
+                for chunk in noun_chunks[:-1]:
+                    if anchor in chunk.conjuncts:
+                        ents.append(
+                            _copy_ent_with_new_spans(
+                                spans=[
+                                    (
+                                        entity.start + chunk.start_char,
+                                        entity.start
+                                        + (chunk.end_char - chunk.start_char)
+                                        + chunk.start_char,
+                                    ),
+                                    (
+                                        entity.start + anchor.idx,
+                                        entity.start + len(anchor) + anchor.idx,
+                                    ),
+                                ],
+                                text=text,
+                                entity=entity,
+                                join_str=" ",
+                                rule_name="spacy noun chunk tags",
+                            )
+                        )
 
         return ents
 
