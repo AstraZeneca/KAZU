@@ -115,7 +115,7 @@ def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
         return True, False
 
     # don't match case-invariantly for (gene) symbols
-    if StringNormalizer.is_symbol_like(False, syn):
+    if StringNormalizer.classify_symbolic(syn):
         return True, False
 
     # if it doesn't hit any other conditions, it should match

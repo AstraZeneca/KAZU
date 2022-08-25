@@ -109,7 +109,7 @@ class DrugBlackLister:
                 return False, "likely_anatomy"
             elif norm in self.gene_syns:
                 return False, "likely_gene"
-            elif len(synonym) <= 3 and not StringNormalizer.is_symbol_like(False, synonym):
+            elif len(synonym) <= 3 and not StringNormalizer.classify_symbolic(synonym):
                 return False, "likely_bad_synonym"
             else:
                 return True, "not_blacklisted"
@@ -149,7 +149,7 @@ class GeneBlackLister:
                 return True, "not_blacklisted"
             elif StringNormalizer.normalize(synonym) in self.disease_syns:
                 return False, "likely_disease"
-            elif len(synonym) <= 3 and not StringNormalizer.is_symbol_like(False, synonym):
+            elif len(synonym) <= 3 and not StringNormalizer.classify_symbolic(synonym):
                 return False, "likely_bad_synonym"
             else:
                 return True, "not_blacklisted"
@@ -174,7 +174,7 @@ class DiseaseBlackLister:
             return lookup_result
         else:
 
-            is_symbol_like = StringNormalizer.is_symbol_like(False, synonym)
+            is_symbol_like = StringNormalizer.classify_symbolic(synonym)
             if synonym in self.disease_syns:
                 return True, "not_blacklisted"
             elif is_symbol_like:
