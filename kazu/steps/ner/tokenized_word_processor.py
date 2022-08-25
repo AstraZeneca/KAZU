@@ -221,6 +221,8 @@ class SmartSpanFinder(SpanFinder):
         super().__init__(text, id2label)
         self.text = text
         self.threshold = threshold
+        # we include a whitespace here so that new spans (potential entities) are started for each word
+        self.span_breaking_chars = {"(", ")", ";", " "}
 
     def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         """
