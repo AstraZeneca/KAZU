@@ -25,8 +25,15 @@ def load_steps(cfg: DictConfig) -> List[BaseStep]:
     """
     steps = []
     for step in cfg.pipeline.steps:
+        prev_memory = psutil.Process(os.getpid()).memory_info().rss / 1024**2
         new_step = instantiate(cfg[step])
         steps.append(new_step)
+        new_memory = psutil.Process(os.getpid()).memory_info().rss / 1024**2
+        mem_increase = ((new_memory - prev_memory) / prev_memory) * 100
+
+        logger.info(
+            f"loaded {step}. Memory usage now {round(new_memory,2)} MB. Increased by {round(new_memory-prev_memory,2)}MB, {round(mem_increase,2)}%"
+        )
 
     return steps
 
