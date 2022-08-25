@@ -251,7 +251,7 @@ class DictionaryIndex(Index):
         :return:
         """
 
-        match_norm = StringNormalizer.normalize(query)
+        match_norm = StringNormalizer.normalize(query, entity_class=self.parser.entity_class)
         terms = self._search_index(query, match_norm, top_n=top_n)
         yield from terms
 
@@ -368,7 +368,9 @@ class EmbeddingIndex(Index):
             # the norm form of the default label should always be in the syn database
             default_label = metadata[DEFAULT_LABEL]
             assert isinstance(default_label, str)
-            string_norm = StringNormalizer.normalize(default_label)
+            string_norm = StringNormalizer.normalize(
+                default_label, entity_class=self.parser.entity_class
+            )
             try:
 
                 term = self.synonym_db.get(self.parser.name, string_norm)
