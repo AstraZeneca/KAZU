@@ -19,7 +19,6 @@ from kazu.data.data import (
 
 # dataframe column keys
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
-from kazu.modelling.language.symbol_classification import SymbolClassifier, DefaultSymbolClassifier
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.spacy_pipeline import SpacyPipeline
 from kazu.utils.string_normalizer import StringNormalizer
