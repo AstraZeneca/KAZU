@@ -1,7 +1,7 @@
 import re
 from abc import ABC, abstractmethod
 from collections import Counter
-from typing import Protocol
+from typing import Protocol, List
 
 from kazu.data.data import NumericMetric
 from rapidfuzz import fuzz
@@ -67,7 +67,8 @@ class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
     checks all modifier phrases in reference_term are represented in term_norm
     """
 
-    noun_modifier_phrases = ["LIKE", "SUBUNIT", "PSEUDOGENE", "RECEPTOR"]
+    def __init__(self, noun_modifier_phrases: List[str]):
+        self.noun_modifier_phrases = noun_modifier_phrases
 
     def __call__(self, reference_term: str, query_term: str) -> bool:
         # the pattern should either be in both or neither
