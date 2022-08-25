@@ -62,8 +62,9 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
 
     text1 = "p27 is often confused"
     ent_match = "p27"
+    ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_term = next(filter(lambda x: x.term_norm == "P27", terms))
+    target_term = next(filter(lambda x: x.term_norm == ent_match_norm, terms))
     target_term_exact_match = dataclasses.replace(target_term, exact_match=True)
     terms.remove(target_term)
     terms.add(target_term_exact_match)
@@ -72,7 +73,7 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
         start=0,
         end=len("p27"),
         match="p27",
-        entity_class="gene",
+        entity_class="test",  # we set this to 'test' instead of gene for consistent stringnormaliser behaviour
         namespace="test",
     )
     p27_ent.update_terms(terms)
@@ -83,7 +84,7 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
     mappings = list(
         strategy(
             ent_match=ent_match,
-            ent_match_norm=StringNormalizer.normalize(ent_match),
+            ent_match_norm=ent_match_norm,
             document=doc,
             terms=frozenset(terms),
         )
@@ -98,13 +99,15 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
     text1 = "PAK-2p27 is often confused"
     ent_match = "PAK-2p27"
 
-    target_term = next(filter(lambda x: x.term_norm == "PAK 2P27", terms))
+    ent_match_norm = StringNormalizer.normalize(ent_match)
+
+    target_term = next(filter(lambda x: x.term_norm == ent_match_norm, terms))
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
         end=len("PAK-2p27"),
         match="PAK-2p27",
-        entity_class="gene",
+        entity_class="test",
         namespace="test",
     )
     p27_ent.update_terms(terms)
@@ -115,7 +118,7 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
     mappings = list(
         strategy(
             ent_match=ent_match,
-            ent_match_norm=StringNormalizer.normalize(ent_match),
+            ent_match_norm=ent_match_norm,
             document=doc,
             terms=frozenset(terms),
         )
@@ -126,15 +129,19 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
 
 def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     terms, parser = set_up_p27_test_case
-    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", terms))
     text1 = "CDKN1B gene has the wrong NER spans on it"
     ent_match = "CDKN1B gene"
+
+    ent_match_norm = StringNormalizer.normalize(ent_match)
+
+    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", terms))
+
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
         end=len(ent_match),
         match=ent_match,
-        entity_class="gene",
+        entity_class="test",
         namespace="test",
     )
     p27_ent.update_terms(terms)
@@ -145,7 +152,7 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     mappings = list(
         strategy(
             ent_match=ent_match,
-            ent_match_norm=StringNormalizer.normalize(ent_match),
+            ent_match_norm=ent_match_norm,
             document=doc,
             terms=frozenset(terms),
         )
@@ -156,15 +163,18 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
 
 def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
     terms, parser = set_up_p27_test_case
-    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", terms))
     text1 = "p27 gene is also known as CDKN1B"
     ent_match = "p27"
+    ent_match_norm = StringNormalizer.normalize(ent_match)
+
+    target_term = next(filter(lambda x: x.term_norm == ent_match_norm, terms))
+
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
         end=len(ent_match),
         match=ent_match,
-        entity_class="gene",
+        entity_class="test",
         namespace="test",
     )
     p27_ent.update_terms(terms)
@@ -172,7 +182,7 @@ def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
         start=len(text1) - len("CDKN1B"),
         end=len(text1),
         match="CDKN1B",
-        entity_class="gene",
+        entity_class="test",
         namespace="test",
     )
 
@@ -190,7 +200,7 @@ def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
     mappings = list(
         strategy(
             ent_match=ent_match,
-            ent_match_norm=StringNormalizer.normalize(ent_match),
+            ent_match_norm=ent_match_norm,
             document=doc,
             terms=frozenset(terms),
         )
@@ -227,7 +237,7 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
         start=0,
         end=len("p27"),
         match="p27",
-        entity_class="gene",
+        entity_class="test",
         namespace="test",
     )
     p27_ent.update_terms(terms_with_scores)
