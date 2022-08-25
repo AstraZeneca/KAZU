@@ -107,7 +107,9 @@ class OntologyParser(ABC):
     def resolve_synonyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
 
         result = set()
-        synonym_df["syn_norm"] = synonym_df[SYN].apply(StringNormalizer.normalize)
+        synonym_df["syn_norm"] = synonym_df[SYN].apply(
+            StringNormalizer.normalize, entity_class=self.entity_class
+        )
 
         for i, row in (
             synonym_df[["syn_norm", SYN, IDX, MAPPING_TYPE]]
@@ -123,7 +125,9 @@ class OntologyParser(ABC):
             if len(syn_set) > 1:
                 logger.debug(f"normaliser has merged {syn_set} into a single term: {syn_norm}")
 
-            is_symbolic = any(self.symbol_classifier.is_symbolic(x) for x in syn_set)
+            is_symbolic = any(
+                StringNormalizer.classify_symbolic(x, self.entity_class) for x in syn_set
+            )
 
             ids: Set[str] = row[IDX]
             id_to_source = {}
