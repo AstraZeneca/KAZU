@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Dict, Tuple, Union, Iterable, Sequence, overload
+from typing import List, Dict, Tuple, Union, Iterable, Sequence, overload, Type
 
 from transformers import AutoTokenizer, BatchEncoding
 from transformers.file_utils import PaddingStrategy
@@ -183,3 +183,12 @@ def create_word_ngrams(s: str, n: int = 2) -> List[str]:
     words = s.split(" ")
     ngrams_iter = _create_ngrams_iter(words, n)
     return [" ".join(ngram) for ngram in ngrams_iter]
+
+
+class Singleton(type):
+    _instances: Dict[Type, Type] = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
