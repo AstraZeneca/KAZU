@@ -1,6 +1,6 @@
 import re
 from functools import lru_cache
-from typing import Optional, Dict, Protocol
+from typing import Optional, Dict, Protocol, Type
 
 from gilda.process import depluralize, replace_dashes
 
@@ -49,13 +49,31 @@ class EntityClassNormalizer(Protocol):
     protocol describing methods a normalizer should implement
     """
 
-    def is_symbol_like(self, original_string: str) -> bool:
+    @classmethod
+    def is_symbol_like(cls, original_string: str) -> bool:
+        """
+        method to determine whether a string is a symbol (e.g. "AD") or a noun phrase (e.g. "ALzheimers Disease")
+        :param original_string:
+        :return:
+        """
         ...
 
-    def normalize_symbol(self, original_string: str) -> str:
+    @classmethod
+    def normalize_symbol(cls, original_string: str) -> str:
+        """
+        method for normalising a symbol
+        :param original_string:
+        :return:
+        """
         ...
 
-    def normalize_noun_phrase(self, original_string: str) -> str:
+    @classmethod
+    def normalize_noun_phrase(cls, original_string: str) -> str:
+        """
+        method for normalising a noun phrase
+        :param original_string:
+        :return:
+        """
         ...
 
 
@@ -99,52 +117,45 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     symbol_number_split = re.compile(r"(\d+)$")
     trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
 
-    @staticmethod
-    def is_symbol_like(original_string: str) -> bool:
-        # True if all upper, all alphanum, no spaces,
-        for char in original_string:
-            if char.islower() or not char.isalnum():
-                return False
-        else:
-            return True
+    @classmethod
+    def is_symbol_like(cls, original_string: str) -> bool:
+        return natural_text_symbol_classifier(original_string)
 
-    @staticmethod
-    def normalize_symbol(original_string: str) -> str:
+    @classmethod
+    def normalize_symbol(cls, original_string: str) -> str:
         return original_string.strip()
 
     @classmethod
     def normalize_noun_phrase(cls, original_string: str) -> str:
         string = cls.replace_substrings(original_string)
-        # split up numbers
         string = cls.split_on_numbers(string)
-        # replace greek
         string = cls.replace_greek(string)
-
-        # strip non alphanum
-        string = cls.replace_non_alphanum(string)
-
+        string = cls.remove_non_alphanum(string)
         string = cls.depluralize(string)
-
         string = cls.sub_greek_char_abbreviations(string)
-
         string = string.strip()
         return string.upper()
 
     @staticmethod
     def depluralize(string):
+        """
+        apply some depluralisation rules
+        :param string:
+        :return:
+        """
         if len(string) > 3:
             string = depluralize(string)[0]
         return string
 
     @classmethod
     def sub_greek_char_abbreviations(cls, string):
+        """
+        substitute single characters for alphanumeric representation - e.g. A -> ALPHA B--> BETA
+        :param string:
+        :return:
+        """
         for re_sub, replace in cls.re_subs_2.items():
             string = re.sub(re_sub, replace, string)
-        return string
-
-    @staticmethod
-    def to_upper(string):
-        string = string.upper()
         return string
 
     @staticmethod
@@ -175,11 +186,21 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return string
 
     @classmethod
-    def replace_non_alphanum(cls, string):
+    def remove_non_alphanum(cls, string):
+        """
+        removes all non alphanumeric characters
+        :param string:
+        :return:
+        """
         return "".join(x for x in string if (x.isalnum() or x in cls.allowed_additional_chars))
 
     @classmethod
     def replace_greek(cls, string):
+        """
+        replaces greek characters with string representation
+        :param string:
+        :return:
+        """
         for substr, replace in cls.greek_subs_upper.items():
             if substr in string:
                 string = string.replace(substr, replace)
@@ -187,12 +208,21 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @classmethod
     def split_on_numbers(cls, string):
+        """
+        splits a string on numbers, for consistency
+        :param string:
+        :return:
+        """
         return " ".join(x.strip() for x in re.split(cls.number_split_pattern, string))
 
     @classmethod
     def replace_substrings(cls, original_string):
+        """
+        replaces a range of other strings that might be confusing to a classifier, such as roman numerals
+        :param original_string:
+        :return:
+        """
         string = original_string
-        # replace substrings
         for substr, replace in cls.other_subs.items():
             if substr in string:
                 string = string.replace(substr, replace)
@@ -202,17 +232,8 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
 
 class GeneStringNormalizer(EntityClassNormalizer):
-    """
-    contrary to other entity classes,  gene symbols require special handling because of their highly unusual nature
-    :param original_string:
-    :param debug:
-    :param entity_class:
-    :return:
-    """
-
-    default_normalizer = DefaultStringNormalizer()
-
-    def is_symbol_like(self, original_string: str) -> bool:
+    @classmethod
+    def is_symbol_like(cls, original_string: str) -> bool:
         string = replace_dashes(original_string, " ")
         tokens = string.split(" ")
         if len(tokens) == 1:
@@ -223,33 +244,56 @@ class GeneStringNormalizer(EntityClassNormalizer):
         else:
             return all(len(x) < 4 or natural_text_symbol_classifier(x) for x in tokens)
 
-    def remove_training_lowercase_s(self, string):
-        if string[-1] == "s":
-            return string[:-1]
+    @classmethod
+    def remove_trailing_s_if_otherwise_capitalised(cls, string: str):
+        """
+        frustratingly, some gene symbols are pluralised like ERBBs. we can't jsut remove trailing s as this breaks
+        genuine symbols like 'MDH-s' and 'GASP10ps'
+        :param string:
+        :return:
+        """
+        alpha_count = 0
+        capital_count = 0
+        for i, char in enumerate(reversed(string)):
+            if i == 0 and char != "s":
+                return string
+            elif i > 0:
+                if char.isupper and char.isalpha:
+                    capital_count += 1
+                    alpha_count += 1
+                elif char.isalpha:
+                    alpha_count += 1
+        if capital_count == alpha_count:
+            return string.removesuffix("s")
         else:
             return string
 
-    def normalize_symbol(self, original_string: str, entity_class: Optional[str] = None) -> str:
+    @classmethod
+    def normalize_symbol(cls, original_string: str) -> str:
+        """
+        contrary to other entity classes, gene symbols require special handling because of their highly unusual
+        nature
 
-        string = self.remove_training_lowercase_s(original_string)
-        string = self.default_normalizer.replace_substrings(string)
-        # split up numbers
-        string = self.default_normalizer.split_on_numbers(string)
-        # replace greek
-        string = self.default_normalizer.replace_greek(string)
-
-        # strip non alphanum
-        string = self.default_normalizer.replace_non_alphanum(string)
-
-        string = self.default_normalizer.sub_greek_char_abbreviations(string)
-
+        :param original_string:
+        :return:
+        """
+        string = cls.remove_trailing_s_if_otherwise_capitalised(original_string)
+        string = DefaultStringNormalizer.replace_substrings(string)
+        string = DefaultStringNormalizer.split_on_numbers(string)
+        string = DefaultStringNormalizer.replace_greek(string)
+        string = DefaultStringNormalizer.remove_non_alphanum(string)
+        string = DefaultStringNormalizer.sub_greek_char_abbreviations(string)
         string = string.strip()
         return string.upper()
 
-    def normalize_noun_phrase(
-        self, original_string: str, entity_class: Optional[str] = None
-    ) -> str:
-        return self.default_normalizer.normalize_noun_phrase(original_string)
+    @classmethod
+    def normalize_noun_phrase(cls, original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_noun_phrase for non symbolic genes
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_noun_phrase(original_string)
 
 
 class StringNormalizer:
@@ -257,8 +301,8 @@ class StringNormalizer:
     call custom entity class normalizers, or a default normalizer if none is available
     """
 
-    default_normalizer = DefaultStringNormalizer()
-    normalizers: Dict[Optional[str], EntityClassNormalizer] = {"gene": GeneStringNormalizer()}
+    default_normalizer = DefaultStringNormalizer
+    normalizers: Dict[Optional[str], Type[EntityClassNormalizer]] = {"gene": GeneStringNormalizer}
 
     @staticmethod
     @lru_cache(maxsize=5000)
@@ -277,4 +321,3 @@ class StringNormalizer:
             return normaliser_for_entity_class.normalize_symbol(original_string)
         else:
             return normaliser_for_entity_class.normalize_noun_phrase(original_string)
-
