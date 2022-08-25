@@ -79,7 +79,7 @@ class OntologyParser(ABC):
             'ENSG00000198804', and thus they will yield multiple instances of EquivalentIdSet.
             Non symbolic synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we might
             want to merge the associated ID's non-symbolic ambiguous synonyms into a single EquivalentIdSet.
-            The result of StringNormalizer.is)symbolic forms the is_symbolic parameter to .score_and_group_ids.
+            The result of StringNormalizer.is_symbolic forms the is_symbolic parameter to .score_and_group_ids.
 
             If the underlying knowledgebase contains more than one entity type, muliple parsers should be
             implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)
@@ -93,7 +93,7 @@ class OntologyParser(ABC):
         self.synonym_generator = synonym_generator
         self.in_path = in_path
         self.parsed_dataframe: Optional[pd.DataFrame] = None
-        self.entity_class: Optional[str] = entity_class
+        self.entity_class = entity_class
         self.metadata_db = MetadataDatabase()
 
     def find_kb(self, string: str) -> str:

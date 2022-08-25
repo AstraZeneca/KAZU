@@ -99,7 +99,8 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     symbol_number_split = re.compile(r"(\d+)$")
     trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
 
-    def is_symbol_like(self, original_string: str) -> bool:
+    @staticmethod
+    def is_symbol_like(original_string: str) -> bool:
         # True if all upper, all alphanum, no spaces,
         for char in original_string:
             if char.islower() or not char.isalnum():
@@ -107,22 +108,24 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         else:
             return True
 
-    def normalize_symbol(self, original_string: str) -> str:
+    @staticmethod
+    def normalize_symbol(original_string: str) -> str:
         return original_string.strip()
 
-    def normalize_noun_phrase(self, original_string: str) -> str:
-        string = self.replace_substrings(original_string)
+    @classmethod
+    def normalize_noun_phrase(cls, original_string: str) -> str:
+        string = cls.replace_substrings(original_string)
         # split up numbers
-        string = self.split_on_numbers(string)
+        string = cls.split_on_numbers(string)
         # replace greek
-        string = self.replace_greek(string)
+        string = cls.replace_greek(string)
 
         # strip non alphanum
-        string = self.replace_non_alphanum(string)
+        string = cls.replace_non_alphanum(string)
 
-        string = self.depluralize(string)
+        string = cls.depluralize(string)
 
-        string = self.sub_greek_char_abbreviations(string)
+        string = cls.sub_greek_char_abbreviations(string)
 
         string = string.strip()
         return string.upper()
@@ -173,9 +176,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @classmethod
     def replace_non_alphanum(cls, string):
-        string = "".join(x for x in string if (x.isalnum() or x in cls.allowed_additional_chars))
-
-        return string
+        return "".join(x for x in string if (x.isalnum() or x in cls.allowed_additional_chars))
 
     @classmethod
     def replace_greek(cls, string):
@@ -186,9 +187,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @classmethod
     def split_on_numbers(cls, string):
-        splits = [x.strip() for x in re.split(cls.number_split_pattern, string)]
-        string = " ".join(splits)
-        return string
+        return " ".join(x.strip() for x in re.split(cls.number_split_pattern, string))
 
     @classmethod
     def replace_substrings(cls, original_string):
@@ -271,13 +270,11 @@ class StringNormalizer:
     @staticmethod
     @lru_cache(maxsize=5000)
     def normalize(original_string: str, entity_class: Optional[str] = None) -> str:
-        if StringNormalizer.normalizers.get(
+        normaliser_for_entity_class = StringNormalizer.normalizers.get(
             entity_class, StringNormalizer.default_normalizer
-        ).is_symbol_like(original_string):
-            return StringNormalizer.normalizers.get(
-                entity_class, StringNormalizer.default_normalizer
-            ).normalize_symbol(original_string)
+        )
+        if normaliser_for_entity_class.is_symbol_like(original_string):
+            return normaliser_for_entity_class.normalize_symbol(original_string)
         else:
-            return StringNormalizer.normalizers.get(
-                entity_class, DefaultStringNormalizer()
-            ).normalize_noun_phrase(original_string)
+            return normaliser_for_entity_class.normalize_noun_phrase(original_string)
+
