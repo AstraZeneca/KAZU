@@ -5,7 +5,7 @@ import uuid
 import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, date
-from enum import IntEnum, Enum, auto
+from enum import Enum, auto
 from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
@@ -33,13 +33,11 @@ class AutoNameEnum(Enum):
         return name
 
 
-class LinkRanks(IntEnum):
-    # labels for ranking linking mappings.
-    HIGH_CONFIDENCE = auto()
-    MEDIUM_HIGH_CONFIDENCE = auto()
-    MEDIUM_CONFIDENCE = auto()
+class LinkRanks(AutoNameEnum):
+    HIGHLY_LIKELY = auto()
+    PROBABLE = auto()
+    POSSIBLE = auto()
     AMBIGUOUS = auto()
-    LOW_CONFIDENCE = auto()
 
 
 def remove_empty_elements(d):
