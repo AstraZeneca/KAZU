@@ -3,4 +3,4 @@ pipeline:
   steps:
     - SciSpacyAbbreviationExpansionStep
     - ExplosionNERStep
-    - StanzaSentenceSegmentationStep
+    - StanzaStep

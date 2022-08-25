@@ -2,4 +2,4 @@
 pipeline:
   steps:
     - ExplosionNERStep
-    - StanzaSentenceSegmentationStep
+    - StanzaStep

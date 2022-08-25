@@ -2,7 +2,7 @@
 pipeline:
   steps:
     - ExplosionNERStep
-    - StanzaSentenceSegmentationStep
+    - StanzaStep
     - SpacyNerStep
     - TransformersModelForTokenClassificationNerStep
     - NerDeDuplicationStep
