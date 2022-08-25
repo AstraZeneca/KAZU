@@ -242,7 +242,7 @@ class Entity:
 
     def __post_init__(self):
         self.start, self.end = self.calc_starts_and_ends()
-        self.match_norm = StringNormalizer.normalize(self.match)
+        self.match_norm = StringNormalizer.normalize(self.match, self.entity_class)
 
     def is_completely_overlapped(self, other):
         """
