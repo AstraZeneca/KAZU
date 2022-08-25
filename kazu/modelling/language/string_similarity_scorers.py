@@ -3,8 +3,15 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from typing import Protocol, List
 
-from kazu.data.data import NumericMetric
+from cachetools import LFUCache
+from pytorch_lightning import Trainer
 from rapidfuzz import fuzz
+from torch import Tensor
+from torch.nn import CosineSimilarity
+
+from kazu.data.data import NumericMetric
+from kazu.modelling.linking.sapbert.train import PLSapbertModel
+from kazu.utils.utils import Singleton
 
 
 class StringSimilarityScorer(ABC):
@@ -89,3 +96,57 @@ class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
             return fuzz.token_sort_ratio(reference_term, query_term)
         else:
             return fuzz.WRatio(reference_term, query_term)
+
+
+class ComplexStringComparisonScorer(metaclass=Singleton):
+    def __init__(
+        self,
+        similarity_threshold: float = 0.55,
+    ):
+        self.similarity_threshold = similarity_threshold
+
+    def calc_similarity(self, s1: str, s2: str) -> float:
+        raise NotImplementedError()
+
+    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
+        return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
+
+
+class SapbertStringSimilarityScorer(ComplexStringComparisonScorer, metaclass=Singleton):
+    def __init__(
+        self, sapbert: PLSapbertModel, trainer: Trainer, similarity_threshold: float = 0.55
+    ):
+        super().__init__(similarity_threshold)
+        self.trainer = trainer
+        self.sapbert = sapbert
+        self.cos = CosineSimilarity(dim=0)
+        self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
+
+    def calc_similarity(self, s1: str, s2: str) -> float:
+        if s1 == s2:
+            return 1.0
+        else:
+            s1_embedding = self.embedding_cache.get(s1)
+            s2_embedding = self.embedding_cache.get(s2)
+            if s1_embedding is None and s2_embedding is None:
+                embeddings = self.sapbert.get_embeddings_for_strings(
+                    [s1, s2], batch_size=2, trainer=self.trainer
+                )
+                s1_embedding = embeddings[0]
+                s2_embedding = embeddings[1]
+                self.embedding_cache[s1] = s1_embedding
+                self.embedding_cache[s2] = s2_embedding
+            elif s1_embedding is None:
+                embeddings = self.sapbert.get_embeddings_for_strings(
+                    [s1], batch_size=1, trainer=self.trainer
+                )
+                s1_embedding = embeddings[0]
+                self.embedding_cache[s1] = s1_embedding
+            else:
+                embeddings = self.sapbert.get_embeddings_for_strings(
+                    [s2], batch_size=1, trainer=self.trainer
+                )
+                s2_embedding = embeddings[0]
+                self.embedding_cache[s2] = s2_embedding
+
+            return self.cos(s1_embedding, s2_embedding)
