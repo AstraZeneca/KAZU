@@ -58,7 +58,7 @@ class OntologyParser(ABC):
         synonym_merge_threshold: float = 0.65,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        symbol_classifier: Optional[SymbolClassifier] = None,
+        entity_class: Optional[str] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -71,14 +71,19 @@ class OntologyParser(ABC):
             from the parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
-        :param symbol_classifier: optional SymbolClassifier. When parsing a data source, synonyms that are
-            symbolic (as determined by the classifier) that refer to more than one id are more likely to be ambiguous.
-            Therefore, we assume they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303' OR
+        :param entity_class: optional str. the entity class associated with this parser, to pass to StringNormalizer.
+
+            Generally speaking, when parsing a data source, synonyms that are
+            symbolic (as determined by the StringNormalizer) that refer to more than one id are more likely to be
+            ambiguous. Therefore, we assume they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303' OR
             'ENSG00000198804', and thus they will yield multiple instances of EquivalentIdSet.
             Non symbolic synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we might
             want to merge the associated ID's non-symbolic ambiguous synonyms into a single EquivalentIdSet.
-            The result of the symbol classifier forms the is_symbolic parameter to score_and_group_ids. If no
-            symbol classifier is specified, a default one will be used
+            The result of StringNormalizer.is)symbolic forms the is_symbolic parameter to .score_and_group_ids.
+
+            If the underlying knowledgebase contains more than one entity type, muliple parsers should be
+            implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)
+
         """
         if spacy_pipeline is None:
             logger.warning("no spacy pipeline configured. Synonym resolution disabled.")
@@ -88,9 +93,7 @@ class OntologyParser(ABC):
         self.synonym_generator = synonym_generator
         self.in_path = in_path
         self.parsed_dataframe: Optional[pd.DataFrame] = None
-        self.symbol_classifier: SymbolClassifier = (
-            symbol_classifier if symbol_classifier is not None else DefaultSymbolClassifier()
-        )
+        self.entity_class: Optional[str] = entity_class
         self.metadata_db = MetadataDatabase()
 
     def find_kb(self, string: str) -> str:
