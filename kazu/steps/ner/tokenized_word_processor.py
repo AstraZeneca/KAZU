@@ -59,7 +59,7 @@ class SpanFinder:
         self.text = text
         self.active_spans: List[TokWordSpan] = []
         self.words: List[TokenizedWord] = []
-        self.span_breaking_chars = set("() ;")
+        self.span_breaking_chars = {"(", ")", ";"}
         self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label
 
