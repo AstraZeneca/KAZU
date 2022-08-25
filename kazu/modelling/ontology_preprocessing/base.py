@@ -968,9 +968,40 @@ class CellosaurusOntologyParser(OntologyParser):
     https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo
     :return:
     """
+    cell_line_re = re.compile("cell line", re.IGNORECASE)
 
     def find_kb(self, string: str) -> str:
         return "CELLOSAURUS"
+
+    def score_and_group_ids(
+        self,
+        ids: Set[str],
+        id_to_source: Dict[str, str],
+        is_symbolic: bool,
+        original_syn_set: Set[str],
+    ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
+        """
+        treat all synonyms as seperate cell lines
+        :param ids:
+        :param id_to_source:
+        :param is_symbolic:
+        :param original_syn_set:
+        :return:
+        """
+
+        return (
+            frozenset(
+                EquivalentIdSet(
+                    ids=frozenset((id_,)),
+                    ids_to_source={id_: id_to_source[id_]},
+                )
+                for id_ in ids
+            ),
+            EquivalentIdAggregationStrategy.CUSTOM,
+        )
+
+    def _remove_cell_line_text(self, text: str):
+        return self.cell_line_re.sub("", text).strip()
 
     def parse_to_dataframe(self) -> pd.DataFrame:
 
@@ -980,7 +1011,6 @@ class CellosaurusOntologyParser(OntologyParser):
         mapping_type = []
         with open(self.in_path, "r") as f:
             id = ""
-            default_label = ""
             for line in f:
                 text = line.rstrip()
                 if text.startswith("id:"):
@@ -988,21 +1018,26 @@ class CellosaurusOntologyParser(OntologyParser):
                 elif text.startswith("name:"):
                     default_label = text[5:].strip()
                     ids.append(id)
-                    default_labels.append(default_label)
-                    all_syns.append(default_label)
+                    # we remove "cell line" because they're all cell lines and it confuses mapping
+                    default_label_no_cell_line = self._remove_cell_line_text(default_label)
+                    default_labels.append(default_label_no_cell_line)
+                    all_syns.append(default_label_no_cell_line)
                     mapping_type.append("name")
-                elif text.startswith("synonym:"):
-                    match = self._synonym_regex.match(text)
-                    if match is None:
-                        raise ValueError(
-                            """synonym line does not match our synonym regex.
-                            Either something is wrong with the file, or it has updated
-                            and our regex is not correct/general enough."""
-                        )
-                    ids.append(id)
-                    default_labels.append(default_label)
-                    all_syns.append(match.group("syn"))
-                    mapping_type.append(match.group("mapping"))
+                # synonyms in cellosaurus are a bit of a mess, so we don't use this field for now. Leaving this here
+                # in case they improve at some point
+                # elif text.startswith("synonym:"):
+                #     match = self._synonym_regex.match(text)
+                #     if match is None:
+                #         raise ValueError(
+                #             """synonym line does not match our synonym regex.
+                #             Either something is wrong with the file, or it has updated
+                #             and our regex is not correct/general enough."""
+                #         )
+                #     ids.append(id)
+                #     default_labels.append(default_label)
+                #
+                #     all_syns.append(self._remove_cell_line_text(match.group("syn")))
+                #     mapping_type.append(match.group("mapping"))
                 else:
                     pass
         df = pd.DataFrame.from_dict(
