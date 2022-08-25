@@ -3,6 +3,8 @@ import logging
 import urllib
 from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
 
+import functools
+
 from kazu.data.data import (
     Document,
     Mapping,
@@ -18,6 +20,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
+from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -214,7 +217,7 @@ class StringMatchingStrategy:
                 )
 
 
-class ExactMatchStringMatchingStrategy(StringMatchingStrategy):
+class ExactMatchStringMatchingStrategy(StringMatchingStrategy, metaclass=Singleton):
     """
     returns any exact matches
     """
@@ -473,6 +476,7 @@ class DefinedElsewhereInDocumentStringMatchingStrategy(StringMatchingStrategy):
         super().__init__(confidence, disambiguation_strategies)
         self.found_equivalent_ids: Set[Tuple[str, str, str]] = set()
 
+    @functools.lru_cache(maxsize=1)
     def prepare(self, document: Document):
         self.found_equivalent_ids.clear()
         entities = document.get_entities()
