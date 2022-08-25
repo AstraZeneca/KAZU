@@ -1,15 +1,67 @@
 import re
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Dict, Protocol
 
-from gilda.process import depluralize
+from gilda.process import depluralize, replace_dashes
+
 from kazu.modelling.language.language_phenomena import GREEK_SUBS
 
 
-class StringNormalizer:
+def natural_text_symbol_classifier(original_string: str) -> bool:
     """
-    normalise a biomedical string for search
-    TODO: make configurable
+    a symbol classifier that is designed to improve recall on natural text, especially gene symbols
+    looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
+    upper case or integers is higher, assume it's a symbol. Also if the first char is lower case, and any
+    subsequent characters are upper case, it's probably a symbol (e.g. erbB2)
+    :param original_string:
+    :return:
+    """
+
+    upper_count = 0
+    lower_count = 0
+    numeric_count = 0
+    first_char_is_lower = False
+
+    for i, char in enumerate(original_string):
+        if char.isalpha():
+            if char.isupper():
+                upper_count += 1
+                if first_char_is_lower:
+                    return True
+            else:
+                lower_count += 1
+                if i == 0:
+                    first_char_is_lower = True
+
+        elif char.isnumeric():
+            numeric_count += 1
+
+    if upper_count > lower_count:
+        return True
+    elif numeric_count > (upper_count + lower_count):
+        return True
+    else:
+        return False
+
+
+class EntityClassNormalizer(Protocol):
+    """
+    protocol describing methods a normalizer should implement
+    """
+
+    def is_symbol_like(self, original_string: str) -> bool:
+        ...
+
+    def normalize_symbol(self, original_string: str) -> str:
+        ...
+
+    def normalize_noun_phrase(self, original_string: str) -> str:
+        ...
+
+
+class DefaultStringNormalizer(EntityClassNormalizer):
+    """
+    normalize a biomedical string for search. Suitable for most use cases
     """
 
     allowed_additional_chars = {" ", "(", ")", "+", "-", "‐"}
@@ -47,108 +99,57 @@ class StringNormalizer:
     symbol_number_split = re.compile(r"(\d+)$")
     trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
 
-    @classmethod
-    def is_symbol_like(cls, debug, original_string) -> Optional[str]:
-        # TODO: rename method
+    def is_symbol_like(self, original_string: str) -> bool:
         # True if all upper, all alphanum, no spaces,
-
         for char in original_string:
             if char.islower() or not char.isalnum():
-                return None
+                return False
         else:
-            splits = [x.strip() for x in re.split(cls.symbol_number_split, original_string)]
-            string = " ".join(splits).strip()
-            if debug:
-                print(string)
-            return string
+            return True
+
+    def normalize_symbol(self, original_string: str) -> str:
+        return original_string.strip()
+
+    def normalize_noun_phrase(self, original_string: str) -> str:
+        string = self.replace_substrings(original_string)
+        # split up numbers
+        string = self.split_on_numbers(string)
+        # replace greek
+        string = self.replace_greek(string)
+
+        # strip non alphanum
+        string = self.replace_non_alphanum(string)
+
+        string = self.depluralize(string)
+
+        string = self.sub_greek_char_abbreviations(string)
+
+        string = string.strip()
+        return string.upper()
 
     @staticmethod
-    def is_probably_symbol_like(original_string: str) -> bool:
-        """
-        a more forgiving version of is_symbol_like, designed to improve symbol recall on natural text
-        looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
-        upper case or integers is higher, assume it's a symbol
-        :param original_string:
-        :return:
-        """
-
-        upper_count = 0
-        lower_count = 0
-        numeric_count = 0
-
-        for char in original_string:
-            if char.isalpha():
-                if char.isupper():
-                    upper_count += 1
-                else:
-                    lower_count += 1
-            elif char.isnumeric():
-                numeric_count += 1
-
-        if upper_count > lower_count:
-            return True
-        elif numeric_count > (upper_count + lower_count):
-            return True
-        else:
-            return False
-
-    @classmethod
-    @lru_cache(maxsize=5000, typed=False)
-    def normalize(cls, original_string: str, debug: bool = False):
-        original_string = original_string.strip()
-        symbol_like = cls.is_symbol_like(debug, original_string)
-        if symbol_like:
-            return cls.replace_substrings(debug, original_string).upper()
-        else:
-            string = cls.replace_substrings(debug, original_string)
-
-            # split up numbers
-            string = cls.split_on_numbers(debug, string)
-            # replace greek
-            string = cls.replace_greek(debug, string)
-
-            # strip non alphanum
-            string = cls.replace_non_alphanum(debug, string)
-
-            string = cls.depluralize(debug, string)
-            # strip modifying lowercase prefixes
-            string = cls.handle_lower_case_prefixes(debug, string)
-
-            string = cls.sub_greek_char_abbreviations(debug, string)
-
-            string = string.strip()
-            if debug:
-                print(string)
-            return string
-
-    @staticmethod
-    def depluralize(debug, string):
+    def depluralize(string):
         if len(string) > 3:
             string = depluralize(string)[0]
-        if debug:
-            print(string)
         return string
 
     @classmethod
-    def sub_greek_char_abbreviations(cls, debug, string):
+    def sub_greek_char_abbreviations(cls, string):
         for re_sub, replace in cls.re_subs_2.items():
             string = re.sub(re_sub, replace, string)
-            if debug:
-                print(string)
         return string
 
     @staticmethod
-    def to_upper(debug, string):
+    def to_upper(string):
         string = string.upper()
-        if debug:
-            print(string)
         return string
 
     @staticmethod
-    def handle_lower_case_prefixes(debug, string):
+    def handle_lower_case_prefixes(string):
         """
         preserve case only if first char of contiguous subsequence is lower case, and is alphanum, and upper
-        case detected in rest of part
+        case detected in rest of part. Currently unused as it causes problems with normalisation of e.g. erbB2, which
+        is a commonly used form of the symbol
         :param debug:
         :param string:
         :return:
@@ -168,45 +169,115 @@ class StringNormalizer:
                     else:
                         new_parts.append(part.upper())
         string = " ".join(new_parts)
-        if debug:
-            print(string)
         return string
 
     @classmethod
-    def replace_non_alphanum(cls, debug, string):
+    def replace_non_alphanum(cls, string):
         string = "".join(x for x in string if (x.isalnum() or x in cls.allowed_additional_chars))
-        if debug:
-            print(string)
+
         return string
 
     @classmethod
-    def replace_greek(cls, debug, string):
+    def replace_greek(cls, string):
         for substr, replace in cls.greek_subs_upper.items():
             if substr in string:
                 string = string.replace(substr, replace)
-                if debug:
-                    print(string)
         return string
 
     @classmethod
-    def split_on_numbers(cls, debug, string):
+    def split_on_numbers(cls, string):
         splits = [x.strip() for x in re.split(cls.number_split_pattern, string)]
         string = " ".join(splits)
-        if debug:
-            print(string)
         return string
 
     @classmethod
-    def replace_substrings(cls, debug, original_string):
+    def replace_substrings(cls, original_string):
         string = original_string
         # replace substrings
         for substr, replace in cls.other_subs.items():
             if substr in string:
                 string = string.replace(substr, replace)
-                if debug:
-                    print(string)
         for re_sub, replace in cls.re_subs.items():
             string = re.sub(re_sub, replace, string)
-            if debug:
-                print(string)
         return string
+
+
+class GeneStringNormalizer(EntityClassNormalizer):
+    """
+    contrary to other entity classes,  gene symbols require special handling because of their highly unusual nature
+    :param original_string:
+    :param debug:
+    :param entity_class:
+    :return:
+    """
+
+    default_normalizer = DefaultStringNormalizer()
+
+    def is_symbol_like(self, original_string: str) -> bool:
+        string = replace_dashes(original_string, " ")
+        tokens = string.split(" ")
+        if len(tokens) == 1:
+            # single tokens are likely gene symbols, or can be easily classified as gene symbols - can't trust
+            # capitalisation e.g. mTOR, erbBB2, egfr vs EGFR, Insulin
+            # in part because of convention to camel case animal homologous gene symbols
+            return True
+        else:
+            return all(len(x) < 4 or natural_text_symbol_classifier(x) for x in tokens)
+
+    def remove_training_lowercase_s(self, string):
+        if string[-1] == "s":
+            return string[:-1]
+        else:
+            return string
+
+    def normalize_symbol(self, original_string: str, entity_class: Optional[str] = None) -> str:
+
+        string = self.remove_training_lowercase_s(original_string)
+        string = self.default_normalizer.replace_substrings(string)
+        # split up numbers
+        string = self.default_normalizer.split_on_numbers(string)
+        # replace greek
+        string = self.default_normalizer.replace_greek(string)
+
+        # strip non alphanum
+        string = self.default_normalizer.replace_non_alphanum(string)
+
+        string = self.default_normalizer.sub_greek_char_abbreviations(string)
+
+        string = string.strip()
+        return string.upper()
+
+    def normalize_noun_phrase(
+        self, original_string: str, entity_class: Optional[str] = None
+    ) -> str:
+        return self.default_normalizer.normalize_noun_phrase(original_string)
+
+
+class StringNormalizer:
+    """
+    call custom entity class normalizers, or a default normalizer if none is available
+    """
+
+    default_normalizer = DefaultStringNormalizer()
+    normalizers: Dict[Optional[str], EntityClassNormalizer] = {"gene": GeneStringNormalizer()}
+
+    @staticmethod
+    @lru_cache(maxsize=5000)
+    def classify_symbolic(original_string: str, entity_class: Optional[str] = None) -> bool:
+        return StringNormalizer.normalizers.get(
+            entity_class, StringNormalizer.default_normalizer
+        ).is_symbol_like(original_string)
+
+    @staticmethod
+    @lru_cache(maxsize=5000)
+    def normalize(original_string: str, entity_class: Optional[str] = None) -> str:
+        if StringNormalizer.normalizers.get(
+            entity_class, StringNormalizer.default_normalizer
+        ).is_symbol_like(original_string):
+            return StringNormalizer.normalizers.get(
+                entity_class, StringNormalizer.default_normalizer
+            ).normalize_symbol(original_string)
+        else:
+            return StringNormalizer.normalizers.get(
+                entity_class, DefaultStringNormalizer()
+            ).normalize_noun_phrase(original_string)
