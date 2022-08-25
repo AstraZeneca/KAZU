@@ -34,10 +34,10 @@ class AutoNameEnum(Enum):
 
 
 class LinkRanks(AutoNameEnum):
-    HIGHLY_LIKELY = auto() #almost certain to be correct
-    PROBABLE = auto() #on the balance of probabilities, will be correct
-    POSSIBLE = auto() # high degree of uncertainty
-    AMBIGUOUS = auto() #likely ambiguous
+    HIGHLY_LIKELY = auto()  # almost certain to be correct
+    PROBABLE = auto()  # on the balance of probabilities, will be correct
+    POSSIBLE = auto()  # high degree of uncertainty
+    AMBIGUOUS = auto()  # likely ambiguous
 
 
 def remove_empty_elements(d):
