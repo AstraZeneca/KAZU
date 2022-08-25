@@ -1,0 +1,161 @@
+_target_: kazu.steps.linking.mapping_step.MappingStep
+depends_on: ~
+strategy_runner:
+  _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
+  ner_namespace_processing_order:
+    - TransformersModelForTokenClassificationNerStep
+    - ExplosionNERStep
+  symbol_classifier_lookup:
+    gene:
+      _target_: kazu.modelling.language.symbol_classification.GeneSymbolClassifier
+  symbolic_strategies:
+
+    TransformersModelForTokenClassificationNerStep:
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      default_strategies:
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+          confidence: HIGHLY_LIKELY
+          disambiguation_strategies: ${DisambiguationStrategies.default}
+
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.SymbolMatchStringMatchingStrategy
+          confidence: PROBABLE
+          disambiguation_strategies: ${DisambiguationStrategies.default}
+
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.TermNormIsSubStringStringMatchingStrategy
+          confidence: PROBABLE
+          disambiguation_strategies: ${DisambiguationStrategies.default}
+
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.StrongMatchStringMatchingStrategy
+          confidence: POSSIBLE
+          disambiguation_strategies: ${DisambiguationStrategies.default}
+          symbolic_only: True
+      ent_class_strategies:
+        gene:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            confidence: HIGHLY_LIKELY
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.SymbolMatchStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.TermNormIsSubStringStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.StrongMatchStringMatchingStrategy
+            confidence: POSSIBLE
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+            symbolic_only: True
+            search_threshold: 90.0
+        disease:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            confidence: HIGHLY_LIKELY
+            disambiguation_strategies: ${DisambiguationStrategies.default}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.SymbolMatchStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.default}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.TermNormIsSubStringStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.StrongMatchStringMatchingStrategy
+            confidence: POSSIBLE
+            disambiguation_strategies: ${DisambiguationStrategies.default}
+            symbolic_only: True
+        cell_line:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            confidence: HIGHLY_LIKELY
+            disambiguation_strategies: ${DisambiguationStrategies.cell_line}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.SymbolMatchStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.cell_line}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.TermNormIsSubStringStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.cell_line}
+
+    ExplosionNERStep:
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      default_strategies:
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.DefinedElsewhereInDocumentStringMatchingStrategy
+          confidence: HIGHLY_LIKELY
+          disambiguation_strategies:
+            - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+      ent_class_strategies:
+        _target_: builtins.dict
+
+
+  non_symbolic_strategies:
+
+    TransformersModelForTokenClassificationNerStep:
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      default_strategies:
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+          confidence: HIGHLY_LIKELY
+          disambiguation_strategies: ${DisambiguationStrategies.default}
+
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.StrongMatchStringMatchingStrategy
+          confidence: POSSIBLE
+          disambiguation_strategies: ${DisambiguationStrategies.default}
+          symbolic_only: False
+      ent_class_strategies:
+        gene:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            confidence: HIGHLY_LIKELY
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.StrongMatchStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
+            symbolic_only: False
+        disease:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            confidence: HIGHLY_LIKELY
+            disambiguation_strategies: ${DisambiguationStrategies.default}
+
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.StrongMatchWithEmbeddingConfirmationStringMatchingStrategy
+            confidence: POSSIBLE
+            disambiguation_strategies: ${DisambiguationStrategies.default}
+            symbolic_only: False
+            complex_string_scorer: ${StringScorers.sapbert}
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            confidence: HIGHLY_LIKELY
+            disambiguation_strategies: ${DisambiguationStrategies.cell_line}
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.SymbolMatchStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.cell_line}
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.TermNormIsSubStringStringMatchingStrategy
+            confidence: PROBABLE
+            disambiguation_strategies: ${DisambiguationStrategies.cell_line}
+    ExplosionNERStep:
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      default_strategies:
+        - _target_: kazu.steps.linking.post_processing.string_matching.strategies.DefinedElsewhereInDocumentStringMatchingStrategy
+          disambiguation_strategies:
+            - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+          confidence: HIGHLY_LIKELY
+      ent_class_strategies:
+        anatomy:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            disambiguation_strategies:
+              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+            confidence: HIGHLY_LIKELY
+        go_bp:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            disambiguation_strategies:
+              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+            confidence: HIGHLY_LIKELY
+        go_cc:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            disambiguation_strategies:
+              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+            confidence: HIGHLY_LIKELY
+        go_mf:
+          - _target_: kazu.steps.linking.post_processing.string_matching.strategies.ExactMatchStringMatchingStrategy
+            disambiguation_strategies:
+              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+            confidence: HIGHLY_LIKELY
