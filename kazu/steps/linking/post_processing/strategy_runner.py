@@ -18,11 +18,22 @@ EntityClassStrategy = Dict[str, List[StringMatchingStrategy]]
 
 
 class NamespaceStrategyList:
+    """
+    simple container class to manage per ent_class strategies (EntityClassStrategy), and default strategies if no
+    ent class strategy is configured. Could be managed with a Dict, but makes __init__ signature of StrategyRunner
+    even more complicated than it already is?
+    """
+
     def __init__(
         self,
         ent_class_strategies: EntityClassStrategy,
         default_strategies: List[StringMatchingStrategy],
     ):
+        """
+
+        :param ent_class_strategies: per class strategies
+        :param default_strategies: default strategies
+        """
         self.default_strategies = default_strategies
         self.ent_class_strategies = ent_class_strategies
 
@@ -31,6 +42,36 @@ class NamespaceStrategyList:
 
 
 class StrategyRunner:
+    """
+    This is a complex class, designed to co-ordinate the running of various strategies over a document, with the end
+    result producing mappings (grounding) for entities. Strategies that produce mappings may depend on the changing
+    state of the Document, depending on whether other strategies are successful or not, hence why their precise
+    co-ordination is crucial. Specifically we want the strategies that have higher precision to run before lower
+    precision ones.
+
+    Beound the precision of the strategy itself, the variables to consider are:
+
+    1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
+        entity spans
+    2) whether an entity is symbolic or not (generally speaking, noun phrases should be easier to normalise than
+        symbolic mentions, as there is more information to work with
+    3) what SynonymTerms are associated with the entity, and from which parser they originated from
+
+    This __call__ method of this class operates as follows:
+
+    1) group entities by order of NER namespace
+    2) sub-group these entities by whether they are symbolic or not
+    3) sub-group these entities again by Entity.match and Entity.entity_class
+    4) get the appropriate list of strategies to run against this sub group
+    5) group the SynonymTermWithMetrics associated with this subgroup by their parser_name, filtered by any mappings
+        from this parser_name already attached to the Entity
+    6) run the next strategy in this list for every group of SynonymTermWithMetrics, and attach any resulting mappings
+        to the relevant entity group
+    7) repeat 5)-6) for every entity group from 4), until either a) mappings are produced for each parser_name
+        associated with the SynonymTermWithMetrics attached to the Entity, or b) there are no more strategies to run
+
+    """
+
     def __init__(
         self,
         symbolic_strategies: Dict[str, NamespaceStrategyList],
@@ -39,9 +80,8 @@ class StrategyRunner:
     ):
         """
 
-        :param non_symbolic_strategies:
-        :param symbolic_strategies:
-        :param symbol_classifier_lookup:
+        :param non_symbolic_strategies: mapping of NER namespace to a NamespaceStrategyList for non symbolic entities
+        :param symbolic_strategies: mapping of NER namespace to a NamespaceStrategyList for symbolic entities
         :param ner_namespace_processing_order: Entities will be mapped in this namespace order. This is
             useful if you have a high precision, low recall NER namespace, combined with a low precision high recall
             namespace, as the mapping info derived from the high precision NER namespace can be used with a high
@@ -76,7 +116,12 @@ class StrategyRunner:
         return symbolic, non_symbolic
 
     def __call__(self, doc: Document):
-
+        """
+        group entities by configured namespace order, split by symbolism, then run
+            self.execute_hit_post_processing_strategies
+        :param doc:
+        :return:
+        """
         if self.ner_namespace_processing_order is None:
             entities_grouped_by_namespace_order = sort_then_group(
                 doc.get_entities(), key_func=lambda x: x.namespace
@@ -105,10 +150,10 @@ class StrategyRunner:
         namespace_strategy_list: NamespaceStrategyList,
     ):
         """
-
-
-        :param entitites:
-        :param query_mat:
+        This method executes parts 3 -7 in the class DocString
+        :param ents_needing_mappings:
+        :param document:
+        :param namespace_strategy_list:
         :return:
         """
 
