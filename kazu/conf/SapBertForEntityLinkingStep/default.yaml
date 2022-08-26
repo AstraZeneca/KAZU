@@ -13,6 +13,7 @@ trainer:
   _target_: pytorch_lightning.Trainer
   enable_progress_bar: False
   accelerator: "auto"
+  devices: 1
   logger: False
 entity_class_to_ontology_mappings: ${entity_class_to_ontology_map}
 indices:
