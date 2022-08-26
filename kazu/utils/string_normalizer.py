@@ -16,11 +16,6 @@ class EntityClassNormalizer(Protocol):
     def is_symbol_like(original_string: str) -> bool:
         """
         method to determine whether a string is a symbol (e.g. "AD") or a noun phrase (e.g. "Alzheimers Disease")
-        The intention is that this method should perform well on predefined single tokens or noun phrases.
-        If running on natural text (e.g. via the results of an NER classifier), symbol_found_in_text should be used
-        as these string may not fit the above criteria
-
-
         :param original_string:
         :return:
         """
@@ -87,6 +82,11 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
+        """
+        checks for ratio of upper to lower case characters, and numeric to alpha characters.
+        :param original_string:
+        :return:
+        """
         upper_count = 0
         lower_count = 0
         numeric_count = 0
@@ -110,7 +110,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        return original_string.strip()
+        return original_string.upper().strip()
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
@@ -225,19 +225,6 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
 
 class GeneStringNormalizer(EntityClassNormalizer):
-    @classmethod
-    def symbol_found_in_text(cls, original_string: str) -> bool:
-        string = original_string.replace("gene", "")
-        string = replace_dashes(string, " ")
-        tokens = string.split(" ")
-        if len(tokens) == 1:
-            # single tokens are likely gene symbols, or can be easily classified as gene symbols - can't trust
-            # capitalisation e.g. mTOR, erbBB2, egfr vs EGFR, Insulin
-            # in part because of convention to camel case animal homologous gene symbols
-            return True
-        else:
-            return all(len(x) < 4 or cls.is_symbol_like(x) for x in tokens)
-
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
         """
@@ -252,13 +239,22 @@ class GeneStringNormalizer(EntityClassNormalizer):
         string = original_string.replace("gene", "")
         string = replace_dashes(string, " ")
         tokens = string.split(" ")
-
-        return all(
-            len(tok) < 4 or GeneStringNormalizer.gene_token_classifier(tok) for tok in tokens
-        )
+        if len(tokens) == 1:
+            # single tokens are likely gene symbols, or can be easily classified as gene symbols - can't trust
+            # capitalisation e.g. mTOR, erbBB2, egfr vs EGFR, Insulin
+            # in part because of convention to camel case animal homologous gene symbols
+            return True
+        else:
+            return all(len(x) < 4 or GeneStringNormalizer.gene_token_classifier(x) for x in tokens)
 
     @staticmethod
     def gene_token_classifier(original_string):
+        """
+        slightly modified version of DefaultStringNormalizer.is_symbol_like, designed to work on single tokens. Checks
+        if the casing of the symbol changes from lower to upper (if so, is likely to be symbolic, e.g. erbB2)
+        :param original_string:
+        :return:
+        """
         upper_count = 0
         lower_count = 0
         numeric_count = 0
