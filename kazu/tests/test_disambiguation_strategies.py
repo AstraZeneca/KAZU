@@ -1,6 +1,6 @@
 import tempfile
 from itertools import chain
-from typing import Tuple, Set
+from typing import Tuple, Set, List
 
 import pytest
 
@@ -61,7 +61,18 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
 
     text1 = "p27 is often confused, but in this context it's Autoantigen p27"
     text2 = ", and definitely not CDKN1B"
-    doc = Document.create_simple_document(text1 + text2)
+
+    def create_doc_with_ents(ent_list: List[Entity]) -> Document:
+        """
+        we need s fresh document for every test, as the cache on .prepare will otherwise be full
+        :param ent_list:
+        :return:
+        """
+
+        doc = Document.create_simple_document(text1 + text2)
+        doc.sections[0].entities.extend(ent_list)
+        return doc
+
     autoantip27_ent = Entity.load_contiguous_entity(
         start=len(text1) - len("Autoantigen p27"),
         end=len("Autoantigen p27"),
@@ -80,16 +91,14 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     )
     p27_ent.update_terms(terms)
 
-    doc.sections[0].entities.append(autoantip27_ent)
-    doc.sections[0].entities.append(p27_ent)
-
+    doc = create_doc_with_ents([autoantip27_ent, p27_ent])
     strategy = DefinedElsewhereInDocumentDisambiguationStrategy()
 
     # first check no mappings are produced until we add the 'good' mapping info
     check_ids_are_represented(ids_to_check=set(), strategy=strategy, doc=doc, parser=parser)
 
     # now add a good mapping, that should be selected from the set of terms
-    target_term = next(filter(lambda x: x.term_norm == "AUTOANTIGEN p 27", terms))
+    target_term = next(filter(lambda x: x.term_norm == "AUTOANTIGEN P 27", terms))
     target_id_set_for_good_mapping = next(
         filter(lambda x: "3" in x.ids, target_term.associated_id_sets)
     )
@@ -104,6 +113,8 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         )
     )
     autoantip27_ent.mappings.update(target_mappings)
+
+    doc = create_doc_with_ents([autoantip27_ent, p27_ent])
     check_ids_are_represented(ids_to_check={"3"}, strategy=strategy, doc=doc, parser=parser)
 
     #     finally, we'll add another entity with a relevant mapping. Since two relevant entities with mappings now occur in
@@ -132,8 +143,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         )
     )
     cdkn1b_ent.mappings.update(target_mappings)
-
-    doc.sections[0].entities.append(cdkn1b_ent)
+    doc = create_doc_with_ents([autoantip27_ent, p27_ent, cdkn1b_ent])
 
     check_ids_are_represented(ids_to_check={"3", "1"}, strategy=strategy, doc=doc, parser=parser)
 
