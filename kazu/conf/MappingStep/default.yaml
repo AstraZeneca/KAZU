@@ -5,9 +5,6 @@ strategy_runner:
   ner_namespace_processing_order:
     - TransformersModelForTokenClassificationNerStep
     - ExplosionNERStep
-  symbol_classifier_lookup:
-    gene:
-      _target_: kazu.modelling.language.symbol_classification.GeneSymbolClassifier
   symbolic_strategies:
 
     TransformersModelForTokenClassificationNerStep:
