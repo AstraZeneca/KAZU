@@ -16,7 +16,7 @@ from kazu.modelling.ontology_preprocessing.base import (
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 from kazu.steps.linking.post_processing.strategy_runner import StrategyRunner, NamespaceStrategyList
-from kazu.steps.linking.post_processing.string_matching.strategies import StringMatchingStrategy
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
 from kazu.tests.utils import DummyParser, make_dummy_parser
 
 
@@ -33,9 +33,9 @@ def populate_databases() -> Tuple[DummyParser, DummyParser]:
     return parser1, parser2
 
 
-class TestStrategy(StringMatchingStrategy):
+class TestStrategy(MappingStrategy):
     """
-    Implementation of StringMatchingStrategy for testing.
+    Implementation of MappingStrategy for testing.
     """
 
     def __init__(
@@ -149,7 +149,7 @@ def build_runner(
             TestDisambiguationStrategy(expected_id=next(iter(expected_id_groups["test_4"]))),
         ],
     )
-    fifth_test_strategy = StringMatchingStrategy(LinkRanks.HIGHLY_LIKELY)
+    fifth_test_strategy = MappingStrategy(LinkRanks.HIGHLY_LIKELY)
 
     default_strategy = TestStrategy(
         LinkRanks.HIGHLY_LIKELY,

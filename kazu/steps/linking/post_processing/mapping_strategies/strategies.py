@@ -86,12 +86,16 @@ class MappingFactory:
         )
 
 
-class StringMatchingStrategy:
+class MappingStrategy:
     """
-    the purpose of a string matching strategy is to filter the set of SynonymTermWithMetrics
-    associated with an Entity down to the most appropriate ones. Given that one or more SynonymTermWithMetrics can
-    be ambiguous, these classes can optionally be combined with a list of DisambiguationStrategy.
-    Implementations should override .filter_terms and .prepare.
+    the purpose of a MappingStrategy is two fold:
+
+    1) Filter the set of SynonymTermWithMetrics associated with an Entity down to the most appropriate ones,
+        (e.g. based on string similarity).
+
+    2) If required, apply any configured DisambiguationStrategy to the filtered instances of EquivalentIdSet
+
+
 
     """
 
@@ -105,10 +109,10 @@ class StringMatchingStrategy:
         :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
             for human users, and has no bearing on the actual algorithm. Note, if after term filtering and (optional)
             disambiguation, if multiple EquivalentIdSets still remain, they will all receive the confidence label of
-            'ambiguous'
-        :param disambiguation_strategies: Optional[List[DisambiguationStrategy]] which are triggered if the filtered
-            SynonymTermWithMetrics appear to be ambiguous, or multiple SynonymTermWithMetrics are returned from the
-            filter_terms method
+            LinkRanks.AMBIGUOUS
+        :param disambiguation_strategies: Optional[List[DisambiguationStrategy]] which are triggered if any of the
+            filtered SynonymTermWithMetrics are .ambiguous, or multiple SynonymTermWithMetrics remain after the
+            filter_terms method is called
         """
 
         self.confidence = confidence
@@ -116,7 +120,8 @@ class StringMatchingStrategy:
 
     def prepare(self, document: Document):
         """
-        perform any setup that needs to run once per document
+        perform any setup that needs to run once per document. Care should be taken if trying to cache this step,
+        as the Document state is liable to change between executions.
         :param document:
         :return:
         """
@@ -132,17 +137,17 @@ class StringMatchingStrategy:
     ) -> Set[SynonymTermWithMetrics]:
         """
 
-        String matching algorithms should override this method to return a set of the 'best' SynonymTermWithMetrics
+        Algorithms should override this method to return a set of the 'best' SynonymTermWithMetrics
         for a given query string. Ideally, this will be a set with a single element. However, it may not be possible to
         identify a single best match. In this scenario, the id sets of multiple SynonymTermWithMetrics will be carried
         forward for disambiguation (if configured)
 
-        :param ent_match:
-        :param ent_match_norm:
-        :param document:
+        :param ent_match: Entity.match
+        :param ent_match_norm: normalised version of Entity.match
+        :param document: originating Document
         :param terms: terms to filter
-        :param parser_name:
-        :return: defaults to set(terms) (i.e. a no op)
+        :param parser_name: parser name associated with these terms
+        :return: defaults to set(terms) (i.e. no filtering)
         """
         return set(terms)
 
@@ -152,9 +157,9 @@ class StringMatchingStrategy:
         """
         applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
         of the SynonymTermWithMetrics are ambiguous
-        :param filtered_terms:
-        :param document:
-        :param parser_name:
+        :param filtered_terms: terms to disambiguate
+        :param document: originating Document
+        :param parser_name: parser name associated with these terms
         :return:
         """
 
@@ -186,8 +191,8 @@ class StringMatchingStrategy:
     ) -> Iterable[Mapping]:
         """
 
-        :param ent_match: unnormalised NER string match
-        :param ent_match_norm: normalised NER string match
+        :param ent_match: unnormalised NER string match (i.e. Entity.match)
+        :param ent_match_norm: normalised NER string match (i.e. Entity.match_norm)
         :param document: originating document
         :param terms: set of terms to consider
         :return:
@@ -215,7 +220,7 @@ class StringMatchingStrategy:
                 )
 
 
-class ExactMatchStringMatchingStrategy(StringMatchingStrategy, metaclass=Singleton):
+class ExactMatchMappingStrategy(MappingStrategy, metaclass=Singleton):
     """
     returns any exact matches
     """
@@ -231,7 +236,7 @@ class ExactMatchStringMatchingStrategy(StringMatchingStrategy, metaclass=Singlet
         return set(filter(lambda x: x.exact_match, terms))
 
 
-class SymbolMatchStringMatchingStrategy(StringMatchingStrategy):
+class SymbolMatchMappingStrategy(MappingStrategy):
     """
     split both query and reference terms by whitespace. select the term with the most splits as the 'query'. Check
     all of these tokens (and no more) are within the other term. Useful for symbol matching
@@ -278,7 +283,7 @@ class SymbolMatchStringMatchingStrategy(StringMatchingStrategy):
         return set(term for term in terms if self.match_symbols(ent_match_norm, term.term_norm))
 
 
-class TermNormIsSubStringStringMatchingStrategy(StringMatchingStrategy):
+class TermNormIsSubStringMappingStrategy(MappingStrategy):
     """
     see if any terms are substrings of the match norm. If exactly one is returned, prefer it. Works best on symbolic
     entities, e.g. "TESTIN gene" ->"TESTIN"
@@ -321,7 +326,7 @@ class TermNormIsSubStringStringMatchingStrategy(StringMatchingStrategy):
         return set()
 
 
-class StrongMatchStringMatchingStrategy(StringMatchingStrategy):
+class StrongMatchMappingStrategy(MappingStrategy):
     """
     1) sort SynonymTermWithMetrics by highest scoring search match t identify the highest scoring match
     2) query remaining matches to see whether their scores are greater than this best score - the differential
@@ -404,7 +409,7 @@ class StrongMatchStringMatchingStrategy(StringMatchingStrategy):
         return set(selected_terms)
 
 
-class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchStringMatchingStrategy):
+class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMappingStrategy):
     """
     1) same as parent class, but a complex string scorer with a predefined threshold is used to confirm that the
         ent_match is broadly similar to one of the terms attached to the SynonymTermWithMetrics. useful for refining
@@ -458,7 +463,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchStri
         return selected_terms
 
 
-class DefinedElsewhereInDocumentStringMatchingStrategy(StringMatchingStrategy):
+class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
     """
     1) look for entities on the document that have mappings
     2) see if any of these mappings correspond to ay ids in the EquivalentIdSets on each SynonymTermWithMetrics

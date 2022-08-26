@@ -11,12 +11,12 @@ from kazu.data.data import (
     Entity,
     SynonymTermWithMetrics,
 )
-from kazu.steps.linking.post_processing.string_matching.strategies import (
-    ExactMatchStringMatchingStrategy,
-    SymbolMatchStringMatchingStrategy,
-    TermNormIsSubStringStringMatchingStrategy,
-    DefinedElsewhereInDocumentStringMatchingStrategy,
-    StrongMatchStringMatchingStrategy,
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
+    ExactMatchMappingStrategy,
+    SymbolMatchMappingStrategy,
+    TermNormIsSubStringMappingStrategy,
+    DefinedElsewhereInDocumentMappingStrategy,
+    StrongMatchMappingStrategy,
     StrongMatchWithEmbeddingConfirmationStringMatchingStrategy,
     MappingFactory,
 )
@@ -79,7 +79,7 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
     p27_ent.update_terms(terms)
 
     doc.sections[0].entities.append(p27_ent)
-    strategy = ExactMatchStringMatchingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
+    strategy = ExactMatchMappingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
     strategy.prepare(doc)
     mappings = list(
         strategy(
@@ -113,7 +113,7 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
     p27_ent.update_terms(terms)
 
     doc.sections[0].entities.append(p27_ent)
-    strategy = SymbolMatchStringMatchingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
+    strategy = SymbolMatchMappingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
     strategy.prepare(doc)
     mappings = list(
         strategy(
@@ -147,7 +147,7 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     p27_ent.update_terms(terms)
 
     doc.sections[0].entities.append(p27_ent)
-    strategy = TermNormIsSubStringStringMatchingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
+    strategy = TermNormIsSubStringMappingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
     strategy.prepare(doc)
     mappings = list(
         strategy(
@@ -195,7 +195,7 @@ def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
     cdkn1b_ent.mappings.update(mappings)
     doc.sections[0].entities.append(cdkn1b_ent)
 
-    strategy = DefinedElsewhereInDocumentStringMatchingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
+    strategy = DefinedElsewhereInDocumentMappingStrategy(confidence=LinkRanks.HIGHLY_LIKELY)
     strategy.prepare(doc)
     mappings = list(
         strategy(
@@ -243,7 +243,7 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
     p27_ent.update_terms(terms_with_scores)
 
     doc.sections[0].entities.append(p27_ent)
-    strategy = StrongMatchStringMatchingStrategy(
+    strategy = StrongMatchMappingStrategy(
         confidence=LinkRanks.HIGHLY_LIKELY,
         search_threshold=search_threshold,
         differential=differential,

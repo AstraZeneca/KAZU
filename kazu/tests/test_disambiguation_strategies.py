@@ -20,7 +20,7 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
     TfIdfDisambiguationStrategy,
     AnnotationLevelDisambiguationStrategy,
 )
-from kazu.steps.linking.post_processing.string_matching.strategies import MappingFactory
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 from kazu.tests.utils import DummyParser, make_dummy_parser
 from kazu.utils.utils import get_cache_dir
 

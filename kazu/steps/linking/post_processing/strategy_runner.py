@@ -7,14 +7,14 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase
-from kazu.steps.linking.post_processing.string_matching.strategies import StringMatchingStrategy
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 
 logger = logging.getLogger(__name__)
 
 
-EntityClassStrategy = Dict[str, List[StringMatchingStrategy]]
+EntityClassStrategy = Dict[str, List[MappingStrategy]]
 
 
 class NamespaceStrategyList:
@@ -27,7 +27,7 @@ class NamespaceStrategyList:
     def __init__(
         self,
         ent_class_strategies: EntityClassStrategy,
-        default_strategies: List[StringMatchingStrategy],
+        default_strategies: List[MappingStrategy],
     ):
         """
 
@@ -37,7 +37,7 @@ class NamespaceStrategyList:
         self.default_strategies = default_strategies
         self.ent_class_strategies = ent_class_strategies
 
-    def get_strategies_for_entity_class(self, entity_class: str) -> List[StringMatchingStrategy]:
+    def get_strategies_for_entity_class(self, entity_class: str) -> List[MappingStrategy]:
         return self.ent_class_strategies.get(entity_class, self.default_strategies)
 
 
@@ -189,7 +189,7 @@ class StrategyRunner:
             ), entities_this_group in groups.items():
 
                 strategy_list: List[
-                    StringMatchingStrategy
+                    MappingStrategy
                 ] = namespace_strategy_list.get_strategies_for_entity_class(entity_class)
                 if i > len(strategy_list) - 1:
                     logger.debug("no more strategies this class")
