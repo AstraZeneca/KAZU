@@ -50,3 +50,7 @@ def test_normalizer():
     original = "MPNs"
     expected = "MPN"
     check_case(original, expected, "gene")
+
+    original = "TESTIN gene"
+    expected = "TESTIN GENE"
+    check_case(original, expected, "gene")
