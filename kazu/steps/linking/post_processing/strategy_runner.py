@@ -7,9 +7,9 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase
-from kazu.modelling.language.symbol_classification import SymbolClassifier, DefaultSymbolClassifier
 from kazu.steps.linking.post_processing.string_matching.strategies import StringMatchingStrategy
 from kazu.utils.grouping import sort_then_group
+from kazu.utils.string_normalizer import StringNormalizer
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,6 @@ class StrategyRunner:
         self,
         symbolic_strategies: Dict[str, NamespaceStrategyList],
         non_symbolic_strategies: Dict[str, NamespaceStrategyList],
-        symbol_classifier_lookup: Dict[str, SymbolClassifier],
         ner_namespace_processing_order: List[str],
     ):
         """
@@ -51,8 +50,6 @@ class StrategyRunner:
         self.non_symbolic_strategies = non_symbolic_strategies
         self.symbolic_strategies = symbolic_strategies
         self.ner_namespace_processing_order = ner_namespace_processing_order
-        self.symbol_classifier_lookup = symbol_classifier_lookup
-        self.default_symbol_classifier = DefaultSymbolClassifier()
         self.metadata_db = MetadataDatabase()
 
     def sort_entities_by_symbolism(
@@ -72,10 +69,7 @@ class StrategyRunner:
             ),
         )
         for (match_str, entity_class), ent_iter in grouped_by_match:
-            classifier: SymbolClassifier = self.symbol_classifier_lookup.get(
-                entity_class, self.default_symbol_classifier
-            )
-            if classifier.is_symbolic(match_str):
+            if StringNormalizer.classify_symbolic(match_str, entity_class=entity_class):
                 symbolic.extend(list(ent_iter))
             else:
                 non_symbolic.extend(list(ent_iter))
