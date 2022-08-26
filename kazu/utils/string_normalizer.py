@@ -9,29 +9,24 @@ from kazu.modelling.language.language_phenomena import GREEK_SUBS
 
 def natural_text_symbol_classifier(original_string: str) -> bool:
     """
-    a symbol classifier that is designed to improve recall on natural text, especially gene symbols
+    a symbol classifier that is designed to improve recall on natural text.
+
     looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
     upper case or integers is higher, assume it's a symbol. Also if the first char is lower case, and any
     subsequent characters are upper case, it's probably a symbol (e.g. erbB2)
     :param original_string:
     :return:
     """
-
     upper_count = 0
     lower_count = 0
     numeric_count = 0
-    first_char_is_lower = False
 
-    for i, char in enumerate(original_string):
+    for char in original_string:
         if char.isalpha():
             if char.isupper():
                 upper_count += 1
-                if first_char_is_lower:
-                    return True
             else:
                 lower_count += 1
-                if i == 0:
-                    first_char_is_lower = True
 
         elif char.isnumeric():
             numeric_count += 1
@@ -52,7 +47,7 @@ class EntityClassNormalizer(Protocol):
     @classmethod
     def is_symbol_like(cls, original_string: str) -> bool:
         """
-        method to determine whether a string is a symbol (e.g. "AD") or a noun phrase (e.g. "ALzheimers Disease")
+        method to determine whether a string is a symbol (e.g. "AD") or a noun phrase (e.g. "Alzheimers Disease")
         :param original_string:
         :return:
         """
@@ -248,23 +243,13 @@ class GeneStringNormalizer(EntityClassNormalizer):
     def remove_trailing_s_if_otherwise_capitalised(cls, string: str):
         """
         frustratingly, some gene symbols are pluralised like ERBBs. we can't jsut remove trailing s as this breaks
-        genuine symbols like 'MDH-s' and 'GASP10ps'
+        genuine symbols like 'MDH-s' and 'GASP10ps'. So, we only strip the trailing 's' if the char before is upper
+        case
         :param string:
         :return:
         """
-        alpha_count = 0
-        capital_count = 0
-        for i, char in enumerate(reversed(string)):
-            if i == 0 and char != "s":
-                return string
-            elif i > 0:
-                if char.isupper and char.isalpha:
-                    capital_count += 1
-                    alpha_count += 1
-                elif char.isalpha:
-                    alpha_count += 1
-        if capital_count == alpha_count:
-            return string.removesuffix("s")
+        if len(string)>=3 and string[-2].isupper() and string[-1]=='s':
+            return string.removesuffix('s')
         else:
             return string
 
@@ -285,6 +270,42 @@ class GeneStringNormalizer(EntityClassNormalizer):
         string = DefaultStringNormalizer.sub_greek_char_abbreviations(string)
         string = string.strip()
         return string.upper()
+
+    @staticmethod
+    def gene_text_symbol_classifier(original_string: str) -> bool:
+        """
+        a symbol classifier that is designed to improve recall on natural text, especially gene symbols
+        looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
+        upper case or integers is higher, assume it's a symbol. Also if the first char is lower case, and any
+        subsequent characters are upper case, it's probably a symbol (e.g. erbB2)
+        :param original_string:
+        :return:
+        """
+        upper_count = 0
+        lower_count = 0
+        numeric_count = 0
+        first_char_is_lower = False
+
+        for i, char in enumerate(original_string):
+            if char.isalpha():
+                if char.isupper():
+                    upper_count += 1
+                    if first_char_is_lower:
+                        return True
+                else:
+                    lower_count += 1
+                    if i == 0:
+                        first_char_is_lower = True
+
+            elif char.isnumeric():
+                numeric_count += 1
+
+        if upper_count > lower_count:
+            return True
+        elif numeric_count > (upper_count + lower_count):
+            return True
+        else:
+            return False
 
     @classmethod
     def normalize_noun_phrase(cls, original_string: str) -> str:
