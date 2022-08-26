@@ -3,8 +3,6 @@ import logging
 import urllib
 from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
 
-import functools
-
 from kazu.data.data import (
     Document,
     Mapping,
@@ -476,8 +474,12 @@ class DefinedElsewhereInDocumentStringMatchingStrategy(StringMatchingStrategy):
         super().__init__(confidence, disambiguation_strategies)
         self.found_equivalent_ids: Set[Tuple[str, str, str]] = set()
 
-    @functools.lru_cache(maxsize=1)
     def prepare(self, document: Document):
+        """
+        can't be cached: document state may change between executions
+        :param document:
+        :return:
+        """
         self.found_equivalent_ids.clear()
         entities = document.get_entities()
         for ent in entities:
