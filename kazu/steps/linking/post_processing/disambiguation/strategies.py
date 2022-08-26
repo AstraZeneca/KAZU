@@ -121,9 +121,25 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         )
         self.synonym_db = SynonymDatabase()
         self.scorer_manager = scorer_manager
+        self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
 
+    @functools.lru_cache(maxsize=1)
     def prepare(self, document: Document):
-        pass
+        """
+        build document representations by parser names here, and store in a dict. This method is cached so
+        we don't need to call it multiple times per document
+        :param document:
+        :return:
+        """
+        parser_names = set(
+            term.parser_name
+            for ent in document.get_entities()
+            for term in ent.syn_term_to_synonym_terms.keys()
+        )
+        self.parser_name_to_doc_representation = {
+            parser_name: self.build_document_representation(parser_name, document)
+            for parser_name in parser_names
+        }
 
     def build_document_representation(self, parser_name: str, doc: Document) -> np.ndarray:
         strings = " ".join([x.match_norm for x in doc.get_entities()])
@@ -155,7 +171,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         if scorer is None:
             return set()
         else:
-            document_query_matrix = self.build_document_representation(parser_name, document)
+            document_query_matrix = self.parser_name_to_doc_representation[parser_name]
             id_set_representation = self.build_id_set_representation(parser_name, id_sets)
             if len(id_set_representation) > 0:
                 indexed_non_ambiguous_syns = list(id_set_representation.keys())
