@@ -176,7 +176,6 @@ def build_runner(
     runner = StrategyRunner(
         symbolic_strategies=symbolic_strategies,
         non_symbolic_strategies=non_symbolic_strategies,
-        symbol_classifier_lookup={},
         ner_namespace_processing_order=ner_namespaces,
     )
     return runner
