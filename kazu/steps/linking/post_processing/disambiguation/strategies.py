@@ -12,7 +12,10 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorerManager
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
+    TfIdfScorerManager,
+    TfIdfDocumentScorer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -131,19 +134,32 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :param document:
         :return:
         """
+        self.parser_name_to_doc_representation.clear()
         parser_names = set(
             term.parser_name
             for ent in document.get_entities()
             for term in ent.syn_term_to_synonym_terms.keys()
         )
-        self.parser_name_to_doc_representation = {
-            parser_name: self.build_document_representation(parser_name, document)
-            for parser_name in parser_names
-        }
+        for parser_name in parser_names:
+            scorer = self.scorer_manager.parser_to_scorer[parser_name]
+            self.parser_name_to_doc_representation[
+                parser_name
+            ] = self.cacheable_build_document_representation(scorer=scorer, doc=document)
 
-    def build_document_representation(self, parser_name: str, doc: Document) -> np.ndarray:
+    @staticmethod
+    @functools.lru_cache(maxsize=1)
+    def cacheable_build_document_representation(
+        scorer: TfIdfDocumentScorer, doc: Document
+    ) -> np.ndarray:
+        """
+        static cached method so we don't need to recalculate document representation between different instances
+        of TfIdfDisambiguationStrategy
+        :param scorer:
+        :param doc:
+        :return:
+        """
         strings = " ".join([x.match_norm for x in doc.get_entities()])
-        return self.scorer_manager.parser_to_scorer[parser_name].transform(strings=[strings])
+        return scorer.transform(strings=[strings])
 
     def build_id_set_representation(
         self,
