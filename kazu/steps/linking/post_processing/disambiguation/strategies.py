@@ -147,7 +147,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             ] = self.cacheable_build_document_representation(scorer=scorer, doc=document)
 
     @staticmethod
-    @functools.lru_cache(maxsize=1)
+    @functools.lru_cache(maxsize=20)
     def cacheable_build_document_representation(
         scorer: TfIdfDocumentScorer, doc: Document
     ) -> np.ndarray:
