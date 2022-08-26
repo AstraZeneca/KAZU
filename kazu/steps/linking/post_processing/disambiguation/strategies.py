@@ -48,8 +48,12 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     ):
         self.found_equivalent_ids: Set[Tuple[str, str, str]] = set()
 
-    @functools.lru_cache(maxsize=1)
     def prepare(self, document: Document):
+        """
+        note, this method can't be cached, as the state of the document may change between executions
+        :param document:
+        :return:
+        """
         self.found_equivalent_ids.clear()
         entities = document.get_entities()
         for ent in entities:
