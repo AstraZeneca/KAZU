@@ -18,7 +18,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
-from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -220,7 +219,7 @@ class MappingStrategy:
                 )
 
 
-class ExactMatchMappingStrategy(MappingStrategy, metaclass=Singleton):
+class ExactMatchMappingStrategy(MappingStrategy):
     """
     returns any exact matches
     """
