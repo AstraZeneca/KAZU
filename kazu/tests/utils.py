@@ -75,6 +75,7 @@ def ner_simple_test_cases():
         ("EGFR is a gene", "gene"),
         ("CAT1 is a gene", "gene"),
         ("my cat sat on the mat", "species"),
+        ("For the treatment of anorexia nervosa.", "disease"),
     ]
     return texts
 
