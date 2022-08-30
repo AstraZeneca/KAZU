@@ -258,8 +258,8 @@ class GeneStringNormalizer(EntityClassNormalizer):
         upper_count = 0
         lower_count = 0
         numeric_count = 0
-        first_char_is_lower = False
-        for i, char in enumerate(original_string):
+        first_char_is_lower = len(original_string) > 0 and original_string[0].islower()
+        for char in original_string:
             if char.isalpha():
                 if char.isupper():
                     upper_count += 1
@@ -267,9 +267,6 @@ class GeneStringNormalizer(EntityClassNormalizer):
                         return True
                 else:
                     lower_count += 1
-                    if i == 0:
-                        first_char_is_lower = True
-
             elif char.isnumeric():
                 numeric_count += 1
         if upper_count > lower_count:
