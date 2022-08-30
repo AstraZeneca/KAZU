@@ -99,20 +99,35 @@ class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
 
 
 class ComplexStringComparisonScorer(metaclass=Singleton):
+    """
+    for some string comparison methods, we need some heavy duty modelling. Since these can be memory expensive, we use
+    singletons, so that only one instance of the model is loaded. Implementations should implement _calc_similarity,
+    which should return a float. If this is bigger than self.similarity_threshold, the result of the calculation is
+    True
+    """
+
     def __init__(
         self,
         similarity_threshold: float = 0.55,
     ):
+        """
+        :param similarity_threshold: if the _calc_similarity method returns a value equal or greater than this, then
+            the check passes
+        """
         self.similarity_threshold = similarity_threshold
 
-    def calc_similarity(self, s1: str, s2: str) -> float:
+    def _calc_similarity(self, s1: str, s2: str) -> float:
         raise NotImplementedError()
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
+        return self._calc_similarity(reference_term, query_term) >= self.similarity_threshold
 
 
 class SapbertStringSimilarityScorer(ComplexStringComparisonScorer, metaclass=Singleton):
+    """
+    Sapbert implementation of ComplexStringComparisonScorer
+    """
+
     def __init__(
         self, sapbert: PLSapbertModel, trainer: Trainer, similarity_threshold: float = 0.55
     ):
@@ -122,7 +137,7 @@ class SapbertStringSimilarityScorer(ComplexStringComparisonScorer, metaclass=Sin
         self.cos = CosineSimilarity(dim=0)
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
 
-    def calc_similarity(self, s1: str, s2: str) -> float:
+    def _calc_similarity(self, s1: str, s2: str) -> float:
         if s1 == s2:
             return 1.0
         else:
