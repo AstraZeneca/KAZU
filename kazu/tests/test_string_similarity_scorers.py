@@ -50,7 +50,7 @@ def test_EntityNounModifierStringSimilarityScorer():
     syn_term_1 = make_term_for_scorer_test(["CPI17-like"])
     syn_term_2 = make_term_for_scorer_test(["CPI17"])
 
-    scorer = EntityNounModifierStringSimilarityScorer()
+    scorer = EntityNounModifierStringSimilarityScorer(noun_modifier_phrases=["LIKE"])
     ent_match = "CPI17 like"
 
     assert scorer(
@@ -63,7 +63,7 @@ def test_EntityNounModifierStringSimilarityScorer():
     syn_term_1 = make_term_for_scorer_test(["CPI17"])
     syn_term_2 = make_term_for_scorer_test(["CPI17 pseudogene"])
 
-    scorer = EntityNounModifierStringSimilarityScorer()
+    scorer = EntityNounModifierStringSimilarityScorer(noun_modifier_phrases=["PSEUDOGENE"])
     ent_match = "CPI17"
     assert scorer(
         reference_term=StringNormalizer.normalize(ent_match), query_term=syn_term_1.term_norm
@@ -75,7 +75,7 @@ def test_EntityNounModifierStringSimilarityScorer():
     syn_term_1 = make_term_for_scorer_test(["epidermal growth factor receptor"])
     syn_term_2 = make_term_for_scorer_test(["epidermal growth factor"])
 
-    scorer = EntityNounModifierStringSimilarityScorer()
+    scorer = EntityNounModifierStringSimilarityScorer(["RECEPTOR"])
     ent_match = "EGF receptor"
     assert scorer(
         reference_term=StringNormalizer.normalize(ent_match), query_term=syn_term_1.term_norm
