@@ -1,8 +1,9 @@
-from typing import List, Tuple, Set
-
+import os
+from typing import List,Tuple, Set
 import pytest
 from hydra import compose, initialize_config_dir
 
+from kazu.data.data import Document
 from kazu.data.data import SynonymTermWithMetrics
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
@@ -57,3 +58,15 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
         for term in SynonymDatabase().get_all(parser.name).values()
     )
     return terms_with_metrics, parser
+
+
+@pytest.fixture(scope="session")
+def acceptance_test_docs() -> List[Document]:
+    docs = []
+    with open(os.environ["KAZU_GOLD_STANDARD"], "r") as f:
+        data = f.readlines()
+        for item in data:
+            docs.append(Document.from_json(item))
+
+    return docs
+
