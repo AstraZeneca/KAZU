@@ -1,0 +1,7 @@
+# @package _global_
+pipeline:
+  steps:
+    - ExplosionNERStep
+    - TransformersModelForTokenClassificationNerStep
+    - DictionaryEntityLinkingStep
+    - MappingStep
