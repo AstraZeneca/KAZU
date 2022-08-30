@@ -21,14 +21,33 @@ logger = logging.getLogger(__name__)
 
 
 class DisambiguationStrategy(ABC):
+    """
+    The job of a DisambiguationStrategy is to filter a Set[EquivalentIdSet] into a (hopefully) smaller set.
+    A .prepare method is available, which can be cached in the event of any duplicated preprocessing work that may
+    be required (see StrategyRunner for how the complexities of how MappingStrategy and DisambiguationStrategy are
+    coordinated).
+    """
+
     @abstractmethod
     def prepare(self, document: Document):
+        """
+        perform any preprocessing required
+        :param document:
+        :return:
+        """
         pass
 
     @abstractmethod
     def disambiguate(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
     ) -> Set[EquivalentIdSet]:
+        """
+        subset a Set[EquivalentIdSet]
+        :param id_sets:
+        :param document:
+        :param parser_name:
+        :return:
+        """
         pass
 
     def __call__(
