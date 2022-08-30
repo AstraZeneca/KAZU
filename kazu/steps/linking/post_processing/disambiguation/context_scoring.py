@@ -33,6 +33,11 @@ def create_word_and_char_ngrams(
 
 
 class TfIdfScorerManager(metaclass=Singleton):
+    """
+    THis class manages a set of TFIDF models (via the TfIdfDocumentScorer class) . It's a singleton, so that the
+    models can be accessed in multiple locations without the need to load them into memory multiple times
+    """
+
     # singleton so we don't have to use multiple instances of same model
     def __init__(self, path: Path):
         self.synonym_db = SynonymDatabase()
@@ -60,20 +65,28 @@ class TfIdfScorerManager(metaclass=Singleton):
 
 
 class TfIdfDocumentScorer:
+    """
+    wrapper class for TfidfVectorizer, to simplify loading/saving/transforming strings
+    """
+
     def __init__(self):
         self.vectoriser: TfidfVectorizer
 
-    def __call__(
-        self, synonyms: List[str], document_representation: np.ndarray
-    ) -> Iterable[Tuple[str, float]]:
-        if len(synonyms) == 1:
-            yield synonyms[0], 100.0
+    def __call__(self, strings: List[str], matrix: np.ndarray) -> Iterable[Tuple[str, float]]:
+        """
+        transform a list of strings with self.vectoriser and score against a matrix
+        :param strings:
+        :param matrix:
+        :return: Iterable Tuple of best matching string, and score
+        """
+        if len(strings) == 1:
+            yield strings[0], 100.0
         else:
-            mat = self.vectoriser.transform(synonyms)
-            score_matrix = np.squeeze(-np.asarray(mat.dot(document_representation.T).todense()))
+            mat = self.vectoriser.transform(strings)
+            score_matrix = np.squeeze(-np.asarray(mat.dot(matrix.T).todense()))
             neighbours = score_matrix.argsort()
             for neighbour in neighbours:
-                yield synonyms[neighbour], -score_matrix[neighbour]
+                yield strings[neighbour], -score_matrix[neighbour]
 
     def transform(self, strings: List[str]) -> np.ndarray:
         return self.vectoriser.transform(strings)
@@ -87,6 +100,6 @@ class TfIdfDocumentScorer:
         with open(path, "wb") as f:
             pickle.dump(self, f)
 
-    def build_vectoriser(self, synonyms: List[str]):
+    def build_vectoriser(self, strings: List[str]):
         self.vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
-        self.vectoriser.fit(synonyms)
+        self.vectoriser.fit(strings)
