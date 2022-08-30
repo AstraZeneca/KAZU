@@ -235,9 +235,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         :param original_string:
         :return:
         """
-        # the word 'gene' often occurs, so we get rid of it as it will confuse the symbol classifier
-        string = original_string.replace("gene", "")
-        string = replace_dashes(string, " ")
+        string = replace_dashes(original_string, " ")
         tokens = string.split(" ")
         if len(tokens) == 1:
             # single tokens are likely gene symbols, or can be easily classified as gene symbols - can't trust
