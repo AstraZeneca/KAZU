@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, Type
 
 from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
@@ -464,10 +464,71 @@ class Document:
             entities.extend(section.entities)
         return entities
 
-    def json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False, **kwargs):
+    @staticmethod
+    def from_json(json_str: str) -> "Document":
+        """
+        json to Document
+
+        :param json_dict:
+        :return:
+        """
+        json_dict = json.loads(json_str)
+        idx = json_dict.pop("idx")
+        sections = json_dict.pop("sections")
+        new_sections = []
+        for section in sections:
+            new_ents = []
+            section.pop("offset_map")
+            ents = section.pop("entities")
+            for ent in ents:
+                mappings = ent.pop("mappings")
+                new_mappings = set()
+                for mapping in mappings:
+                    new_mappings.add(
+                        Mapping(
+                            default_label=mapping["default_label"],
+                            source=mapping["source"],
+                            parser_name=mapping["parser_name"],
+                            confidence=mapping["confidence"],
+                            metadata=mapping["metadata"],
+                            idx=mapping["idx"],
+                            mapping_strategy="gold",
+                            disambiguation_strategy="gold"
+                        )
+                    )
+                ent.pop("start")
+                ent.pop("end")
+                ent.pop("match_norm")
+                ent.pop("synonym_terms")
+
+                spans = ent.pop("spans")
+                new_spans = []
+                for span in spans:
+                    new_spans.append(CharSpan(start=span["start"], end=span["end"]))
+                new_ents.append(
+                    Entity(
+                        spans=frozenset(new_spans),
+                        mappings=new_mappings,
+                        **ent,
+                        syn_term_to_synonym_terms={},
+                    )
+                )
+            new_section = Section(entities=new_ents, **section)
+            new_sections.append(new_section)
+        return Document(sections=new_sections, idx=idx)
+
+    def json(
+        self,
+        drop_unmapped_ents: bool = False,
+        drop_terms: bool = False,
+        encoder: Optional[Type[json.JSONEncoder]] = None,
+        **kwargs,
+    ):
         """
         custom encoder needed to handle serialisation issues with our data model
-
+        :param: drop_unmapped_ents: drop any entities that have no mappings
+        :param: drop_terms: drop the synonym term dict field
+        :param: encoder: use a custom Json encoder. If None, the kazu native one will be used
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
@@ -482,7 +543,8 @@ class Document:
                         ent.syn_term_to_synonym_terms.clear()
                 section.entities = ents_to_keep
 
-        return json.dumps(self, cls=DocumentEncoder, **kwargs)
+        encoder = encoder if encoder is not None else DocumentEncoder
+        return json.dumps(self, cls=encoder, **kwargs)
 
     def as_minified_json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> str:
         as_dict_minified = self.as_minified_dict(drop_unmapped_ents, drop_terms)
