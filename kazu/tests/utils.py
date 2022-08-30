@@ -30,13 +30,23 @@ BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
 
 CONFIG_DIR = Path(__file__).parent.parent.joinpath("conf")
 
-SKIP_MESSAGE = """
+SKIP_MESSAGE_NO_MODEL_PACK = """
 skipping acceptance test as KAZU_MODEL_PACK is not provided as an environment variable. This should be the path 
 to the kazu model pack root
 """  # noqa
 
 requires_model_pack = pytest.mark.skipif(
-    os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE
+    os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE_NO_MODEL_PACK
+)
+
+
+SKIP_MESSAGE_NO_GOLD_STANDARD = """
+skipping acceptance test as KAZU_GOLD_STANDARD is not provided as an environment variable. This should be the path 
+to the kazu godl standard pickle file
+"""  # noqa
+
+requires_gold_standard = pytest.mark.skipif(
+    os.environ.get("KAZU_GOLD_STANDARD") is None, reason=SKIP_MESSAGE_NO_GOLD_STANDARD
 )
 
 
