@@ -57,27 +57,3 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
         for term in SynonymDatabase().get_all(parser.name).values()
     )
     return terms_with_metrics, parser
-
-
-@pytest.fixture(scope="session")
-def set_up_disease_mapping_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
-
-    dummy_data = {
-        IDX: ["1", "1", "2"],
-        DEFAULT_LABEL: ["Heck's disease", "Heck's disease", "Neck Disease"],
-        SYN: [
-            "Heck's disease",
-            "Heck disease",
-            "Neck Disease",
-        ],
-        MAPPING_TYPE: ["", "", ""],
-    }
-    parser = make_dummy_parser(
-        in_path="", data=dummy_data, name="test_tfidf_parsr", source="test_tfidf_parsr"
-    )
-    parser.populate_databases()
-    terms_with_metrics = set(
-        SynonymTermWithMetrics.from_synonym_term(term)
-        for term in SynonymDatabase().get_all(parser.name).values()
-    )
-    return terms_with_metrics, parser
