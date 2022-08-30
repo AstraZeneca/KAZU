@@ -288,7 +288,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         :param string:
         :return:
         """
-        if len(string) >= 3 and string[-2].isupper() and string[-1] == "s":
+        if len(string) >= 3 and string[-2].isupper():
             return string.removesuffix("s")
         else:
             return string
