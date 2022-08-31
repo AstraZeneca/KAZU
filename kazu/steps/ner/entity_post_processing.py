@@ -33,10 +33,10 @@ class SplitOnConjunctionPattern:
 
     def __call__(self, entity: Entity, text: str) -> List[Entity]:
         doc = self.nlp(entity.match)
-        ents = []
         if any((x in entity.match for x in [" and ", " or ", " nor "])):
-            ents = self.run_conjunction_rules(doc, entity, text)
-        return ents
+            return self.run_conjunction_rules(doc, entity, text)
+        else:
+            return []
 
     def run_conjunction_rules(self, doc, entity, text):
         ents = []
