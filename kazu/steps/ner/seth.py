@@ -50,7 +50,9 @@ class SethStep(BaseStep):
         if not os.path.exists(seth_fatjar_path):
             raise RuntimeError(f"required jar: {seth_fatjar_path} not found")
         self.gateway = JavaGateway.launch_gateway(
-            classpath=seth_fatjar_path, die_on_exit=True, java_path=f"{java_home}/bin/java"
+            classpath=seth_fatjar_path,
+            die_on_exit=True,
+            java_path=os.path.join(java_home, "bin", "java"),
         )
         self.seth = self.gateway.jvm.com.astrazeneca.kazu.SethRunner()
         self.entity_class = entity_class
