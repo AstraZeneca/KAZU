@@ -2,7 +2,15 @@ default:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
     aggregation_strategies_to_build_id_set_representation:
-      - UNAMBIGUOUS
+      - _target_: kazu.data.data.EquivalentIdAggregationStrategy
+        _args_:
+          - UNAMBIGUOUS
+      - _target_: kazu.data.data.EquivalentIdAggregationStrategy
+        _args_:
+          - RESOLVED_BY_SIMILARITY
+      - _target_: kazu.data.data.EquivalentIdAggregationStrategy
+        _args_:
+          - MERGED_AS_NON_SYMBOLIC
     scorer_manager:
       _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
       path:
@@ -14,7 +22,9 @@ gene:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
     aggregation_strategies_to_build_id_set_representation:
-      - CUSTOM
+      - _target_: kazu.data.data.EquivalentIdAggregationStrategy
+        _args_:
+          - CUSTOM
     scorer_manager:
       _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
       path:
@@ -27,7 +37,9 @@ cell_line:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
     aggregation_strategies_to_build_id_set_representation:
-      - CUSTOM
+      - _target_: kazu.data.data.EquivalentIdAggregationStrategy
+        _args_:
+          - CUSTOM
     scorer_manager:
       _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
       path:
