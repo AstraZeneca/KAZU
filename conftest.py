@@ -1,5 +1,5 @@
 import os
-from typing import List,Tuple, Set
+from typing import List, Tuple, Set
 import pytest
 from hydra import compose, initialize_config_dir
 
@@ -69,4 +69,3 @@ def acceptance_test_docs() -> List[Document]:
             docs.append(Document.from_json(item))
 
     return docs
-
