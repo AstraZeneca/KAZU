@@ -140,7 +140,11 @@ class SynonymDatabase:
                     result.update(syn_dict.get(idx, set()))
             else:
                 for agg_strategy in strategy_filters:
-                    result.update(self.syns_by_aggregation_strategy[name][agg_strategy][idx])
+                    result.update(
+                        self.syns_by_aggregation_strategy[name]
+                        .get(agg_strategy, dict())
+                        .get(idx, set())
+                    )
             return result
 
         def get_syns_sharing_id(
