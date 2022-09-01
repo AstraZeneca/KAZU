@@ -40,6 +40,7 @@ setup(
             "pytest-timeout",
             "sphinx",
             "myst_parser",
+            "furo",
         ],
     },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
