@@ -2,9 +2,12 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="#" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/><title>Search - Kazu  documentation</title><link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+        <title>&lt;no title&gt; - Kazu documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
@@ -145,7 +148,7 @@
   
   <span class="sidebar-brand-text">Kazu  documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="#" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
@@ -191,17 +194,17 @@
           </label>
         </div>
         <article role="main">
-          
-<noscript>
-<div class="admonition error">
-  <p class="admonition-title">Error</p>
-  <p>
-    Please activate JavaScript to enable the search functionality.
-  </p>
-</div>
-</noscript>
+          <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</span> <span class="kn">import</span> <span class="n">SciSpacyAbbreviationExpansionStep</span>
 
-<div id="search-results"></div>
+<span class="c1"># creates a document with a single section</span>
+<span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_simple_document</span><span class="p">(</span><span class="s2">&quot;EGFR (Epidermal Growth Factor Receptor) is a gene&quot;</span><span class="p">)</span>
+<span class="n">step</span> <span class="o">=</span> <span class="n">SciSpacyAbbreviationExpansionStep</span><span class="p">([])</span>
+<span class="c1"># a step may fail to process a document, so it returns two lists, successes and failures</span>
+<span class="n">succeeded</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">step</span><span class="p">([</span><span class="n">doc</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">succeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
+</pre></div>
+</div>
 
         </article>
       </div>
@@ -242,8 +245,5 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/scripts/furo.js"></script>
-    
-<script src="_static/searchtools.js"></script>
-<script src="_static/language_data.js"></script>
-<script src="searchindex.js"></script></body>
+    </body>
 </html>
