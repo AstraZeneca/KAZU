@@ -12,4 +12,6 @@ See docs at https://psychic-chainsaw-f197cc2b.pages.github.io/_build/html/index.
 
 Licensed under [Apache 2.0](LICENSE).
 
-Note that some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](kazu/modelling/ontology_matching/README.md).
+Kazu includes elements under compatible licenses:
+- some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](kazu/modelling/ontology_matching/README.md).
+- the doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](docs/NUMPY_LICENSE.txt)
