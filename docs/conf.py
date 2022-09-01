@@ -112,5 +112,9 @@ def linkcode_resolve(domain, info):
         ["git", "config", "--get", "remote.origin.url"], capture_output=True, encoding="utf-8"
     )
     remote_base_url = remote_process.stdout.strip().removesuffix(".git")
-    assert remote_base_url.startswith("https://github.com/")
+
+    if not remote_base_url.startswith("https://github.com/"):
+        # something weird has happened, and the link structure below will probably be wrong
+        # so don't try to use it.
+        return None
     return f"{remote_base_url}/blob/main/kazu/{fn_filepath}{linespec}"
