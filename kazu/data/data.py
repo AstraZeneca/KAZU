@@ -1,18 +1,14 @@
 import dataclasses
 import json
-import tempfile
 import uuid
-import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
-from itertools import cycle, chain
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
 from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
-from spacy import displacy
 
 IS_SUBSPAN = "is_subspan"
 # BIO schema
@@ -401,36 +397,6 @@ class Section:
             return self.text
         else:
             return self.preprocessed_text
-
-    def render(self):
-        ordered_ends = sorted(self.entities, key=lambda x: x.start)
-        colours = cycle(
-            ["#00f518", "#84fa90", "#ff0000", "#fc7979", "#7d81ff", "#384cff", "#ff96f5", "#ff96f3"]
-        )
-        classes = set(chain(*[[x.entity_class, f"{x.entity_class}_linked"] for x in self.entities]))
-        colour_map = {k: next(colours) for k in classes}
-        linked = {k: f"{k}_linked" for k in classes}
-
-        def label_colors(entity: Entity):
-            if len(entity.mappings) > 0:
-                return linked[entity.entity_class]
-            else:
-                return entity.entity_class
-
-        ex = [
-            {
-                "text": self.get_text(),
-                "ents": [
-                    {"start": x.start, "end": x.end, "label": label_colors(x)} for x in ordered_ends
-                ],
-                "title": None,
-            }
-        ]
-        html = displacy.render(ex, style="ent", options={"colors": colour_map}, manual=True)
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as f:
-            url = "file://" + f.name
-            f.write(html)
-        webbrowser.open(url, new=2)
 
 
 class DocumentEncoder(json.JSONEncoder):
