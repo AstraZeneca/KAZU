@@ -9,10 +9,11 @@ def get_existing_model_pack_paths(model_packs_dir):
 
 
 def get_git_commit_hashes():
-    full_cmd = subprocess.Popen(["awk", "{print $1}"],
-                                stdout=subprocess.PIPE,
-                                stdin=subprocess.Popen(["git", "log", "--format=oneline"],
-                                                       stdout=subprocess.PIPE).stdout)
+    full_cmd = subprocess.Popen(
+        ["awk", "{print $1}"],
+        stdout=subprocess.PIPE,
+        stdin=subprocess.Popen(["git", "log", "--format=oneline"], stdout=subprocess.PIPE).stdout,
+    )
 
     return [line.decode("utf-8").strip() for line in full_cmd.stdout.readlines()]
 
@@ -20,8 +21,9 @@ def get_git_commit_hashes():
 def get_latest_model_pack_path(model_packs_dir):
     model_pack_paths = get_existing_model_pack_paths(model_packs_dir)
     model_pack_git_hashes = [path.split("_")[1] for path in model_pack_paths]
-    model_pack_git_hashes_to_idx = {commit_hash: i
-                                    for i, commit_hash in enumerate(model_pack_git_hashes)}
+    model_pack_git_hashes_to_idx = {
+        commit_hash: i for i, commit_hash in enumerate(model_pack_git_hashes)
+    }
 
     for git_hash in get_git_commit_hashes():
         if git_hash in model_pack_git_hashes_to_idx:
