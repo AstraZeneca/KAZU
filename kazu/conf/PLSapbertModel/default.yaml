@@ -1,2 +1,2 @@
 _target_: kazu.modelling.linking.sapbert.train.PLSapbertModel
-model_name_or_path: ${oc.env:KAZU_MODEL_PACK}/sapbert/SapBERT-from-PubMedBERT-fulltext
+model_name_or_path: ${oc.env:KAZU_MODEL_PACK}/sapbert-tiny
