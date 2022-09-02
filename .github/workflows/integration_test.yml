@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       model-pack-path:
-        description: Path in the github runner VM's filesystem to find the model pack for this test run. If not set,
-        the test runner will search for the
+        description: Path in the github runner VM's filesystem to find the model pack for this test run. If not set, the test runner will search for the a suitable model pack
         required: false
       model-packs-dir:
         description: Path to where model packs are stored on the VM's filesystem
