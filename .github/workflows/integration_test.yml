@@ -27,7 +27,7 @@ jobs:
         run: |
           if [ -z "$model_pack_path"]
           then
-            echo $(python3 .github/latest_model_pack_path.py)
+            echo $(python3 .github/workflows/latest_model_pack_path.py)
           else
             echo $model_pack_path
           fi
