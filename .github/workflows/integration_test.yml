@@ -28,9 +28,9 @@ jobs:
           if [ -z "$model_pack_path"]
           then
             output=$(python3 .github/workflows/latest_model_pack_path.py ${{ env.model_packs_dir }})
-            echo "::set-output model_pack_path=$output"
+            echo "::set-output name=model_pack_path::$output"
           else
-            echo "::set-output model_pack_path=$model_pack_path"
+            echo "::set-output name=model_pack_path::$model_pack_path"
           fi
         env:
           model_pack_path: ${{ inputs.model-pack-path }}
