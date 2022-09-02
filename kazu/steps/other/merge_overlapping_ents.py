@@ -3,7 +3,7 @@ import traceback
 from collections import defaultdict
 from typing import List, Tuple, Optional, DefaultDict, Set, Dict
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Section
+from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
 from kazu.steps import BaseStep
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ class MergeOverlappingEntsStep(BaseStep):
         self,
         depends_on: Optional[List[str]],
         ent_class_preferred_order: List[str],
+        ignore_non_contiguous: bool = True,
     ):
         """
 
@@ -46,10 +47,12 @@ class MergeOverlappingEntsStep(BaseStep):
         :param ent_class_preferred_order: order of namespaces to prefer. Any partially overlapped entities are
             eliminated according to this ordering (first = higher priority). If an entity class is not specified, it's
             assumed to have a priority of 0 (a.k.a lowest)
+        :param ignore_non_contiguous: should non-contiguous entities be excluded from the merge process?
         """
 
         super().__init__(depends_on)
         # store as dict for lookup speed
+        self.ignore_non_contiguous = ignore_non_contiguous
         self.ent_class_preferred_order = {
             namespace: i for i, namespace in enumerate(reversed(ent_class_preferred_order))
         }
@@ -94,8 +97,18 @@ class MergeOverlappingEntsStep(BaseStep):
             try:
                 for section in doc.sections:
                     if len(section.entities) > 0:
-                        locations_overlapped = self.group_entities_by_location(section)
+                        ents_to_merge, non_contig_ents = [], []
+                        if self.ignore_non_contiguous:
+                            for ent in section.entities:
+                                ents_to_merge.append(ent) if len(
+                                    ent.spans
+                                ) == 1 else non_contig_ents.append(ent)
+                        else:
+                            ents_to_merge = section.entities
+
+                        locations_overlapped = self.group_entities_by_location(ents_to_merge)
                         section.entities = self.filter_ents_across_class(locations_overlapped)
+                        section.entities.extend(non_contig_ents)
 
             except Exception:
                 message = f"doc failed: affected ids: {doc.idx}\n" + traceback.format_exc()
@@ -103,16 +116,17 @@ class MergeOverlappingEntsStep(BaseStep):
                 failed_docs.append(doc)
         return docs, failed_docs
 
-    def group_entities_by_location(self, section: Section) -> Dict[Tuple[int, int], Set[Entity]]:
+    def group_entities_by_location(
+        self, entities: List[Entity]
+    ) -> Dict[Tuple[int, int], Set[Entity]]:
         """
 
         :param section:
         :return: dict of locations to Set[Entity]
         """
-        if len(section.entities) == 0:
+        if len(entities) == 0:
             return {}
-
-        locations_by_start = sorted(section.entities, key=lambda x: x.start)
+        locations_by_start = sorted(entities, key=lambda x: x.start)
         locations_overlapped: DefaultDict[Tuple[int, int], Set[Entity]] = defaultdict(set)
         ents_this_group = set()
         start = locations_by_start[0].start
