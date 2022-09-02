@@ -83,17 +83,14 @@ class NerScoring:
 
     def calculate_ner_matches(self):
         combos = itertools.product(self.gold_ents, self.test_ents)
-        for combo in combos:
-            gold_ent, test_ent = combo
+        for (gold_ent, test_ent) in combos:
             # exact matches
-            if (
-                gold_ent.start == test_ent.start
-                and gold_ent.end == test_ent.end
-                and gold_ent.entity_class == test_ent.entity_class
-            ):
+            if gold_ent.spans == test_ent.spans and gold_ent.entity_class == test_ent.entity_class:
                 self.gold_to_test_ent_hard_mapping[gold_ent].add(test_ent)
                 self.ner_fp_hard.discard(test_ent)
                 self.ner_fn_hard.discard(gold_ent)
+                self.ner_fp_soft.discard(test_ent)
+                self.ner_fn_soft.discard(gold_ent)
             # partial matches (a superset of exact matches)
             if (
                 gold_ent.is_partially_overlapped(test_ent)
@@ -219,30 +216,36 @@ def check_ner_results_meet_threshold(
         fn_soft = results[key]["fn_soft"]
         prec = precision(tp=tp_soft, fp=fp_soft)
         rec = recall(tp=tp_soft, fn=fn_soft)
+        fp_ents = itertools.chain.from_iterable(
+            scorer.ner_fp_soft for scorer in ner_scorer_dict[key]
+        )
+        fp_matches = Counter(ent.match for ent in fp_ents)
+        message = "\n".join(
+            f"{k} <missed {v} times>" for k, v in fp_matches.most_common(len(fp_matches))
+        )
         if prec < threshold["precision"]:
-            fp_ents = itertools.chain.from_iterable(
-                scorer.ner_fp_soft for scorer in ner_scorer_dict[key]
-            )
-            fp_matches = Counter(ent.match for ent in fp_ents)
-            message = "\n".join(
-                f"{k} <missed {v} times>" for k, v in fp_matches.most_common(len(fp_matches))
-            )
-
             pytest.fail(
                 f"{key} failed to meet precision threshold: {prec}. {tp_soft} / {fp_soft +tp_soft} \n{message}"
             )
-        if rec < threshold["recall"]:
+        else:
+            print(
+                f"{key} passed precision threshold: {prec}. {tp_soft} / {fp_soft +tp_soft} \n{message}"
+            )
 
-            missed_ents = itertools.chain.from_iterable(
-                scorer.ner_fn_soft for scorer in ner_scorer_dict[key]
-            )
-            missed_matches = Counter(ent.match for ent in missed_ents)
-            message = "\n".join(
-                f"{k} <missed {v} times>"
-                for k, v in missed_matches.most_common(len(missed_matches))
-            )
+        missed_ents = itertools.chain.from_iterable(
+            scorer.ner_fn_soft for scorer in ner_scorer_dict[key]
+        )
+        missed_matches = Counter(ent.match for ent in missed_ents)
+        message = "\n".join(
+            f"{k} <missed {v} times>" for k, v in missed_matches.most_common(len(missed_matches))
+        )
+        if rec < threshold["recall"]:
             pytest.fail(
                 f"{key} failed to meet recall threshold: {rec}. {tp_soft} / {fn_soft +tp_soft} \n{message}"
+            )
+        else:
+            print(
+                f"{key} passed recall threshold: {rec}. {tp_soft} / {fn_soft +tp_soft} \n{message}"
             )
 
 
