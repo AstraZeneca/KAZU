@@ -10,111 +10,6 @@ from kazu.utils.grouping import sort_then_group
 
 
 class LabelStudioDocumentEncoder(json.JSONEncoder):
-    """
-    Since the Document model can't be directly serialised to JSON, we need a custom encoder/decoder
-        <View>
-      <Labels name="label" toName="text">
-        <Label value="cell_line" background="red"/>
-        <Label value="cell_type" background="darkorange"/>
-        <Label value="disease" background="orange"/>
-        <Label value="drug" background="yellow"/>
-        <Label value="gene" background="green"/>
-        <Label value="species" background="purple"/>
-      </Labels>
-      <TextArea name="linking" toName="text" editable="true" perRegion="true" required="true" maxSubmissions="1" rows="15" placeholder="KB Info" displayMode="region-list"/>
-      <Text name="text" value="$text"/>
-    </View>
-
-
-    api payload:
-    {
-    "data":{"text": "Personal experience in the diagnosis and therapy of pulmonary infarct"},
-    "annotations":[
-      {
-        "id": 3,
-        "completed_by": 1,
-        "result": [
-          {
-            "value": {
-              "start": 52,
-              "end": 69,
-              "text": "pulmonary infarct",
-              "labels": [
-                "Chemical Drug"
-              ]
-            },
-            "id": "ZDm3mvpKVn",
-            "from_name": "label",
-            "to_name": "text",
-            "type": "labels",
-            "origin": "manual"
-          },
-        {
-          "value": {
-            "start": 0,
-            "end": 8,
-            "text": "Personal",
-            "taxonomy": [
-              [
-                "MONDO",
-                "cervical cancer"
-              ]
-            ]
-          },
-          "id": "RcEgng8KYo",
-          "from_name": "taxonomy",
-          "to_name": "text",
-          "type": "taxonomy",
-          "origin": "manual"
-        }
-        ],
-        "was_cancelled": false,
-        "ground_truth": false,
-        "created_at": "2022-08-11T11:21:33.117228Z",
-        "updated_at": "2022-08-11T11:21:33.117267Z",
-        "lead_time": 27.931,
-        "prediction": {
-          "id": 16498,
-          "model_version": "gold",
-          "created_ago": "0 minutes",
-          "result": [
-            {
-              "id": 0,
-              "from_name": "label",
-              "to_name": "text",
-              "type": "labels",
-              "value": {
-                "start": 52,
-                "end": 69,
-                "score": 1.0,
-                "text": "pulmonary infarct",
-                "labels": [
-                  "disease"
-                ]
-              }
-            }
-          ],
-          "score": 1.0,
-          "cluster": null,
-          "neighbors": null,
-          "mislabeling": 0.0,
-          "created_at": "2022-08-11T11:21:03.000377Z",
-          "updated_at": "2022-08-11T11:21:03.000388Z",
-          "task": 2019
-        },
-        "result_count": 0,
-        "task": 2019,
-        "parent_prediction": null,
-        "parent_annotation": null
-      }
-    ]
-    }
-
-
-
-
-    """
-
     def default(self, obj):
         if isinstance(obj, Document):
             result = []
@@ -177,7 +72,7 @@ class LabelStudioDocumentEncoder(json.JSONEncoder):
                 region_ids.append(region_id)
                 result_ner_value = {
                     "id": region_id,
-                    "from_name": "label",
+                    "from_name": "ner",
                     "to_name": "text",
                     "type": "labels",
                     "origin": "manual",
@@ -187,10 +82,25 @@ class LabelStudioDocumentEncoder(json.JSONEncoder):
                         "score": 1.0,
                         "text": spans_and_match[1],
                         "labels": list(ner_labels),
-                        "meta": {"is_contig_ent": True if len(spans) == 1 else False},
                     },
                 }
                 result_values.append(result_ner_value)
+                result_is_contig_value = {
+                    "id": region_id,
+                    "from_name": "contig",
+                    "to_name": "text",
+                    "type": "choices",
+                    "origin": "manual",
+                    "value": {
+                        "start": span.start,
+                        "end": span.end,
+                        "score": 1.0,
+                        "text": spans_and_match[1],
+                        "choices": ["True" if len(spans) == 1 else "False"],
+                    },
+                }
+                result_values.append(result_is_contig_value)
+
                 result_normalisation_value = {
                     "id": region_id,
                     "from_name": "taxonomy",
@@ -308,6 +218,11 @@ class LabelStudioJsonToKazuDocumentEncoder:
                         text=text,
                     )
                     for tax in id_to_tax[span_idx]:
+                        if len(tax) != 2:
+                            print(
+                                f"warning! malformed taxonomy label (prob not a low level term): {tax}"
+                            )
+                            continue
                         source, idx_str = tax
                         default_label, idx = idx_str.split("|")
                         mapping = Mapping(
@@ -337,6 +252,11 @@ class LabelStudioJsonToKazuDocumentEncoder:
                         text=text,
                     )
                     for tax in id_to_tax[from_id]:
+                        if len(tax) != 2:
+                            print(
+                                f"warning! malformed taxonomy label (prob not a low level term): {tax}"
+                            )
+                            continue
                         source, idx_str = tax
                         default_label, idx = idx_str.split("|")
                         mapping = Mapping(
@@ -361,14 +281,18 @@ class LabelStudioJsonToKazuDocumentEncoder:
         non_contig: Dict[str, Set[str]] = defaultdict(set)
         contig_ents = set()
         for result_data in result:
-            if result_data["type"] == "labels" or result_data["type"] == "taxonomy":
+            if (
+                result_data["type"] == "labels"
+                or result_data["type"] == "taxonomy"
+                or result_data["type"] == "choices"
+            ):
                 idx = result_data["id"]
                 id_to_charspan[idx] = result_data["value"]["start"], result_data["value"]["end"]
                 if result_data["type"] == "labels":
-                    is_contig = result_data["value"]["meta"]["is_contig_ent"]
-                    if is_contig:
-                        contig_ents.add(idx)
                     id_to_labels[idx].update(result_data["value"]["labels"])
+                elif result_data["type"] == "choices":
+                    if "True" in result_data["value"]["choices"]:
+                        contig_ents.add(idx)
                 elif result_data["type"] == "taxonomy":
                     id_to_tax[idx].extend(result_data["value"]["taxonomy"])
             elif result_data["type"] == "relation":
