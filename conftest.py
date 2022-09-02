@@ -5,6 +5,7 @@ from hydra import compose, initialize_config_dir
 
 from kazu.data.data import Document
 from kazu.data.data import SynonymTermWithMetrics
+from kazu.modelling.annotation.label_studio import LabelStudioJsonToKazuDocumentEncoder
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.tests.utils import CONFIG_DIR, DummyParser, make_dummy_parser
@@ -62,10 +63,14 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
 
 @pytest.fixture(scope="session")
 def acceptance_test_docs() -> List[Document]:
-    docs = []
-    with open(os.environ["KAZU_GOLD_STANDARD"], "r") as f:
-        data = f.readlines()
-        for item in data:
-            docs.append(Document.from_json(item))
 
+    label_studio_url_and_port = os.environ["LS_URL_PORT"]
+    headers = {
+        "Authorization": f"Token {os.environ['LS_TOKEN']}",
+        "Content-Type": "application/json",
+    }
+    ls_project = os.environ["LS_PROJECT_NAME"]
+    docs = LabelStudioJsonToKazuDocumentEncoder(
+        url=label_studio_url_and_port, project_name=ls_project, headers=headers
+    ).get_docs()
     return docs
