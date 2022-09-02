@@ -1,0 +1,74 @@
+name: Integration tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      model-pack-path:
+        description: Path in the github runner VM's filesystem to find the model pack for this test run. If not set,
+        the test runner will search for the
+        required: false
+      model-packs-dir:
+        description: Path to where model packs are stored on the VM's filesystem
+        required: true
+        default: /home/nlp/data/kazu_model_packs
+
+jobs:
+  model-pack-tests:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9" ]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Set model_pack path
+        id: get_model_pack
+        run: |
+          if [ -z "$model_pack_path"]
+          then
+            echo $(python3 .github/latest_model_pack_path.py)
+          else
+            echo $model_pack_path
+          fi
+        env:
+          model_pack_path: ${{ inputs.model-pack-path }}
+          model_packs_dir: ${{ inputs.model-packs-dir }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ hashFiles('setup.py') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Check precommit
+        run: |
+          pre-commit run --all-files
+
+      - name: Test with pytest
+        run: |
+          pytest
+        env:
+          KAZU_MODEL_PACK: ${{ steps.get_model_pack.outputs.stdout }}
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Setup and execute Gradle 'test' task
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
+          build-root-directory: kazu-jvm/
