@@ -5,7 +5,7 @@ from typing import Dict, Tuple, Set, List
 
 import requests
 
-from kazu.data.data import Document, Section, Entity, Mapping, LinkRanks
+from kazu.data.data import Document, Section, Entity, Mapping, LinkRanks, CharSpan
 from kazu.utils.grouping import sort_then_group
 
 
@@ -170,12 +170,13 @@ class LabelStudioDocumentEncoder(json.JSONEncoder):
                 for mapping in ent.mappings
             )
 
-            span_ids = []
-            for span in spans_and_match[0]:
-                span_id = f"{idx}_{namespace}_{span}"
-                span_ids.append(span_id)
+            region_ids = []
+            spans: Set[CharSpan] = spans_and_match[0]
+            for span in spans:
+                region_id = f"{idx}_{namespace}_{span}"
+                region_ids.append(region_id)
                 result_ner_value = {
-                    "id": span_id,
+                    "id": region_id,
                     "from_name": "label",
                     "to_name": "text",
                     "type": "labels",
@@ -186,11 +187,12 @@ class LabelStudioDocumentEncoder(json.JSONEncoder):
                         "score": 1.0,
                         "text": spans_and_match[1],
                         "labels": list(ner_labels),
+                        "meta": {"is_contig_ent": True if len(spans) == 1 else False},
                     },
                 }
                 result_values.append(result_ner_value)
                 result_normalisation_value = {
-                    "id": span_id,
+                    "id": region_id,
                     "from_name": "taxonomy",
                     "to_name": "text",
                     "type": "taxonomy",
@@ -203,8 +205,8 @@ class LabelStudioDocumentEncoder(json.JSONEncoder):
                     },
                 }
                 result_values.append(result_normalisation_value)
-            if len(span_ids) > 1:
-                for combo in itertools.combinations(span_ids, r=2):
+            if len(spans) > 1:
+                for combo in itertools.combinations(region_ids, r=2):
                     result_discontiguous_value = {
                         "from_id": combo[0],
                         "to_id": combo[1],
@@ -273,6 +275,7 @@ class LabelStudioJsonToKazuDocumentEncoder:
                         id_to_labels,
                         id_to_tax,
                         non_contig,
+                        contig_ents,
                     ) = self._populate_task_id_lookups(section_task)
 
                     self._resolve_non_contigs(
@@ -280,18 +283,16 @@ class LabelStudioJsonToKazuDocumentEncoder:
                     )
 
                     self._resolve_contigs(
-                        id_to_charspan, id_to_labels, id_to_tax, non_contig, section, text
+                        id_to_charspan, id_to_labels, id_to_tax, contig_ents, section, text
                     )
                     doc.sections.append(section)
             docs.append(doc)
 
         return docs
 
-    def _resolve_contigs(self, id_to_charspan, id_to_labels, id_to_tax, non_contig, section, text):
+    def _resolve_contigs(self, id_to_charspan, id_to_labels, id_to_tax, contig_ents, section, text):
         for span_idx, (start, end) in id_to_charspan.items():
-            if span_idx in non_contig:
-                continue
-            else:
+            if span_idx in contig_ents:
                 labels = id_to_labels[span_idx]
                 for label in labels:
                     ent = Entity.from_spans(
@@ -323,29 +324,31 @@ class LabelStudioJsonToKazuDocumentEncoder:
     def _resolve_non_contigs(
         self, id_to_charspan, id_to_labels, id_to_tax, non_contig, section, text
     ):
-        for from_id, to_id in non_contig.items():
-            labels = id_to_labels[from_id]
-            for label in labels:
-                ent = Entity.from_spans(
-                    spans=[id_to_charspan[from_id], id_to_charspan[to_id]],
-                    join_str=" ",
-                    namespace="gold",
-                    entity_class=label,
-                    text=text,
-                )
-                for tax in id_to_tax[from_id]:
-                    source, idx_str = tax
-                    default_label, idx = idx_str.split("|")
-                    mapping = Mapping(
-                        default_label=default_label,
-                        source=source,
-                        parser_name="gold",
-                        idx=idx,
-                        strategy="gold",
-                        confidence=LinkRanks.HIGHLY_LIKELY,
+        for from_id, to_id_set in non_contig.items():
+            for to_id in to_id_set:
+                # we need to check from_id and to_id have matching labels
+                labels = id_to_labels[from_id].intersection(id_to_labels[to_id])
+                for label in labels:
+                    ent = Entity.from_spans(
+                        spans=[id_to_charspan[to_id], id_to_charspan[from_id]],
+                        join_str=" ",
+                        namespace="gold",
+                        entity_class=label,
+                        text=text,
                     )
-                    ent.mappings.add(mapping)
-                section.metadata["gold_entities"].append(ent)
+                    for tax in id_to_tax[from_id]:
+                        source, idx_str = tax
+                        default_label, idx = idx_str.split("|")
+                        mapping = Mapping(
+                            default_label=default_label,
+                            source=source,
+                            parser_name="gold",
+                            idx=idx,
+                            strategy="gold",
+                            confidence=LinkRanks.HIGHLY_LIKELY,
+                        )
+                        ent.mappings.add(mapping)
+                    section.metadata["gold_entities"].append(ent)
 
     def _populate_task_id_lookups(self, section_task):
         if len(section_task["annotations"]) > 1:
@@ -355,16 +358,19 @@ class LabelStudioJsonToKazuDocumentEncoder:
         id_to_charspan: Dict[str, Tuple[int, int]] = {}
         id_to_labels: Dict[str, Set[str]] = defaultdict(set)
         id_to_tax: Dict[str, List[List[str]]] = defaultdict(list)
-        non_contig: Dict[str, str] = {}
+        non_contig: Dict[str, Set[str]] = defaultdict(set)
+        contig_ents = set()
         for result_data in result:
             if result_data["type"] == "labels" or result_data["type"] == "taxonomy":
                 idx = result_data["id"]
                 id_to_charspan[idx] = result_data["value"]["start"], result_data["value"]["end"]
                 if result_data["type"] == "labels":
+                    is_contig = result_data["value"]["meta"]["is_contig_ent"]
+                    if is_contig:
+                        contig_ents.add(idx)
                     id_to_labels[idx].update(result_data["value"]["labels"])
                 elif result_data["type"] == "taxonomy":
                     id_to_tax[idx].extend(result_data["value"]["taxonomy"])
             elif result_data["type"] == "relation":
-                non_contig[result_data["from_id"]] = result_data["to_id"]
-                non_contig[result_data["to_id"]] = result_data["from_id"]
-        return id_to_charspan, id_to_labels, id_to_tax, non_contig
+                non_contig[result_data["from_id"]].add(result_data["to_id"])
+        return id_to_charspan, id_to_labels, id_to_tax, non_contig, contig_ents
