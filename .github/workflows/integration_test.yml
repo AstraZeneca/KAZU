@@ -27,9 +27,9 @@ jobs:
         run: |
           if [ -z "$model_pack_path"]
           then
-            echo $(python3 .github/workflows/latest_model_pack_path.py)
+            echo $(python3 .github/workflows/latest_model_pack_path.py ${{ env.model_packs_dir }})
           else
-            echo $model_pack_path
+            echo ${{ env.model_pack_path }}
           fi
         env:
           model_pack_path: ${{ inputs.model-pack-path }}
