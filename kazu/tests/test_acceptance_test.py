@@ -132,12 +132,8 @@ def analyse_ner(
             for entity_class, ents in sort_then_group(
                 section.entities, key_func=lambda x: x.entity_class
             ):
-                gold_ents, test_ents = [], []
-                for ent in ents:
-                    if ent.namespace == "gold":
-                        gold_ents.append(ent)
-                    else:
-                        test_ents.append(ent)
+                gold_ents = section.metadata["gold_entities"]
+                test_ents = section.entities
                 scorer = NerScoring(gold_ents=gold_ents, test_ents=test_ents)
                 result[entity_class].append(scorer)
 
