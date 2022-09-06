@@ -60,6 +60,12 @@ autodoc_default_options = {
     "members": True,
 }
 
+# put type hints in the description rather than the function signature, where it all ends up on one line and looks very ugly
+autodoc_typehints = "description"
+
+# Don't show class signature with the class' name.
+autodoc_class_signature = "separated"
+
 # used by both linkcode_resolve and furo's edit button
 
 # get the configured git remote. Get the url this way rather than hardcoding since
