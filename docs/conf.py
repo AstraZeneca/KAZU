@@ -66,6 +66,9 @@ autodoc_typehints = "description"
 # Don't show class signature with the class' name.
 autodoc_class_signature = "separated"
 
+# ignore kazu for sorting modules, since everything starts with this
+modindex_common_prefix = ["kazu."]
+
 # used by both linkcode_resolve and furo's edit button
 
 # get the configured git remote. Get the url this way rather than hardcoding since
