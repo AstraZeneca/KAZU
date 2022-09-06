@@ -32,8 +32,13 @@ author = "Korea University, AstraZeneca"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.doctest", "sphinx.ext.linkcode", "myst_parser"]
-
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.linkcode",
+    "myst_parser",
+    "sphinx.ext.autosummary",
+]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -48,6 +53,12 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
 # a list of builtin themes.
 #
 html_theme = "furo"
+
+
+# we use this to get module and class members documented as part of the autosummary-generated pages
+autodoc_default_options = {
+    "members": True,
+}
 
 # used by both linkcode_resolve and furo's edit button
 
@@ -76,6 +87,13 @@ import os
 kazu_config_missing = os.environ.get("KAZU_CONFIG_DIR") is None
 kazu_model_pack_missing = os.environ.get("KAZU_MODEL_PACK") is None
 """
+
+# this means we don't try to generate docs for the conf or tests modules
+# For me, this didn't work as expected with the 'autodoc-skip-member'
+# event and a configured handler:
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#event-autodoc-skip-member
+# or using exclude_patterns
+autodoc_mock_imports = ["kazu.conf", "kazu.tests"]
 
 
 # this function is modified from the corresponding one in pandas, which in turn is modified from numpy

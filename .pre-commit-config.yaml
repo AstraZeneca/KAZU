@@ -26,6 +26,7 @@ repos:
       \\.parquet$|\
       \\.inv$|\
       ^docs/_build|\
+      ^docs/_autosummary|\
       ^kazu/tests/test_assets/tinybern"
 
 -   repo: https://github.com/pre-commit/mirrors-mypy

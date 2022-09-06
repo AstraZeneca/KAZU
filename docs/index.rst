@@ -11,14 +11,20 @@ Welcome to Kazu's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Table of Contents
+   :caption: Guides and Tutorials
 
    quickstart
    data model <datamodel>
    pipeline steps <steps>
    model training <training>
-   apidocs
 
+
+
+
+.. toctree::
+   :caption: API Documentation
+
+   _autosummary/kazu
 
 
 Site index
