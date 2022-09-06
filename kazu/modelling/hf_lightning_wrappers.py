@@ -8,6 +8,7 @@ class PLAutoModelForTokenClassification(LightningModule):
     def __init__(self, model: AutoModelForTokenClassification, *args: Any, **kwargs: Any):
         """
         very simple Lightning wrapper for AutoModelForTokenClassification
+
         :param model: instance of AutoModelForTokenClassification
         :param args:
         :param kwargs:
@@ -23,6 +24,7 @@ class PLAutoModel(LightningModule):
     def __init__(self, model: AutoModel, *args: Any, **kwargs: Any):
         """
         very simple Lightning wrapper for AutoModel
+
         :param model: instance of AutoModel
         :param args:
         :param kwargs:

@@ -523,6 +523,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
     ):
         """
         A class for sequence tagging (task-specific) intermediate-layer (Transformer, Embedding) distillation step
+
         :param temperature:
         :param warmup_steps:
         :param learning_rate:

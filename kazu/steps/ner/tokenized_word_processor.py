@@ -67,6 +67,7 @@ class SpanFinder:
         """
         return a set of Tuple[<BIO label>,Optional[<class label>]] for a TokenizedWord. Optional[<class label>] is None
         if the BIO label is "O".
+
         :param word:
         :return:
         """
@@ -78,6 +79,7 @@ class SpanFinder:
     ):
         """
         based upon some logic, determine whether a span should continue or not
+
         :param word:
         :param bio_and_class_labels:
         :return:
@@ -90,6 +92,7 @@ class SpanFinder:
         """
         updates any active spans. If a B label is detected in an active span, make a copy and add to closed spans,
         as it's likely the start of another entity of the same class (but we still want to keep the original span open)
+
         :param bio_and_class_labels: BIO and optional class label set
         :param word:
         :return:
@@ -112,6 +115,7 @@ class SpanFinder:
     ):
         """
         start a new TokWordSpan if a B label is detected
+
         :param bio_and_class_labels:
         :param word:
         :return:
@@ -124,7 +128,6 @@ class SpanFinder:
     def close_spans(self):
         """
         close any active spans
-        :return:
         """
         for active_span in self.active_spans:
             if len(active_span.tok_words) > 0:
@@ -134,6 +137,7 @@ class SpanFinder:
     def process_next_word(self, word: TokenizedWord):
         """
         process the next word in the sequence, according to some logic
+
         :param word:
         :return:
         """
@@ -184,6 +188,7 @@ class SimpleSpanFinder(SpanFinder):
         A potential entity span will end if any of the following conditions are met:
         1. any of the BIO classes for word are O
         2. The previous character to the word is in the set of self.span_breaking_chars
+
         :param word:
         :return:
         """
@@ -196,6 +201,7 @@ class SimpleSpanFinder(SpanFinder):
     def process_next_word(self, word: TokenizedWord):
         """
         process the next word in the sequence, updating span information accordingly
+
         :param word:
         :return:
         """
@@ -227,6 +233,7 @@ class SmartSpanFinder(SpanFinder):
     def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         """
         returns bio and class labels if their confidence is above the configured threshold
+
         :param word:
         :return:
         """
@@ -261,6 +268,7 @@ class SmartSpanFinder(SpanFinder):
         A potential entity span must continue if any of the following conditions are met:
         1. The previous character to the word is not in the set of self.span_breaking_chars
         2. There are any entity class assignments in any of the tokens in the TokenizedWord under consideration.
+
         :param word:
         :return:
         """
@@ -277,6 +285,7 @@ class SmartSpanFinder(SpanFinder):
     def process_next_word(self, word: TokenizedWord):
         """
         process the next word in the sequence, updating span information accordingly
+
         :param word:
         :return:
         """
@@ -364,6 +373,7 @@ class TokenizedWordProcessor:
     ) -> List[Entity]:
         """
         convert spans to instances of Entity, adding in namespace info as appropriate
+
         :param spans: list of TokWordSpan to consider
         :param text: original text
         :param namespace: namespace to add to Entity

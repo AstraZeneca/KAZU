@@ -62,6 +62,7 @@ class CharSpan:
     def is_completely_overlapped(self, other):
         """
         True if other completely overlaps this span
+
         :param other:
         :return:
         """
@@ -70,6 +71,7 @@ class CharSpan:
     def is_partially_overlapped(self, other):
         """
         True if other partially overlaps this span
+
         :param other:
         :return:
         """
@@ -243,6 +245,7 @@ class Entity:
     def is_completely_overlapped(self, other):
         """
         True if all CharSpan instances are completely encompassed by all other CharSpan instances
+
         :param other:
         :return:
         """
@@ -315,6 +318,7 @@ class Entity:
     def add_mapping(self, mapping: Mapping):
         """
         deprecated
+
         :param mapping:
         :return:
         """
@@ -325,6 +329,7 @@ class Entity:
         """
         create an instance of Entity from a list of character indices. A text string of underlying doc is
         also required to produce a representative match
+
         :param spans:
         :param text:
         :param join_str: a string used to join the spans together
@@ -391,7 +396,6 @@ class Section:
         """
         rather than accessing text or preprocessed_text directly, this method provides a convenient wrapper to get
         preprocessed_text if available, or text if not.
-        :return:
         """
         if self.preprocessed_text is None:
             return self.text
@@ -453,7 +457,6 @@ class Document:
     def get_entities(self) -> List[Entity]:
         """
         get all entities in this document
-        :return:
         """
         entities = []
         for section in self.sections:
@@ -463,6 +466,7 @@ class Document:
     def json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False, **kwargs):
         """
         custom encoder needed to handle serialisation issues with our data model
+
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
@@ -492,6 +496,7 @@ class Document:
     def create_simple_document(cls, text: str) -> "Document":
         """
         create an instance of document from a text string. The idx field will be generated from uuid.uuid4().hex
+
         :param text:
         :return:
         """

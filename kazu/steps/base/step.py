@@ -19,7 +19,6 @@ class BaseStep(ABC):
         """
         the namespace is a piece of metadata to describe the step, and is used in various places.
         defaults to  cls.__name__
-        :return:
         """
         return cls.__name__
 
@@ -36,6 +35,7 @@ class BaseStep(ABC):
         the main method to implement. Takes a list of docs, and returns a Tuple[List[Document], List[Document]]
         the first list should be succeeded docs, the second the ones that failed to process. The logic of
         determining these two lists is the responsibility of the implementation
+
         :param docs:
         :return:
         """

@@ -41,6 +41,7 @@ class MergeOverlappingEntsStep(BaseStep):
             3) prefer entities as configured by ent_class_preferred_order (see param description below)
             4) If the proscribed entity class order is also equal, the preferred entity is selected on the basis of
                 the entity class name (reverse alphabetically ordered). Warning: This last sort criteria is arbitrary
+
         :param depends_on:
         :param ent_class_preferred_order: order of namespaces to prefer. Any partially overlapped entities are
         eliminated according to this ordering (first = higher priority). If an entity class is not specified, it's
@@ -73,6 +74,7 @@ class MergeOverlappingEntsStep(BaseStep):
     def filter_ents_across_class(self, ents: Dict[Tuple[int, int], Set[Entity]]) -> List[Entity]:
         """
         choose the best entities per location
+
         :param ents:
         :return:
         """

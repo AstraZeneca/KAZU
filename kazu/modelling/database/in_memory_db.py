@@ -50,6 +50,7 @@ class MetadataDatabase:
     def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
         """
         get the metadata associated with an ontology and id
+
         :param name: name of ontology to query
         :param idx: idx to query
         :return:
@@ -64,6 +65,7 @@ class MetadataDatabase:
     def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
         """
         get all metadata associated with an ontology
+
         :param name: name of ontology
         :return:
         """
@@ -74,7 +76,6 @@ class MetadataDatabase:
     def loaded_parsers(self) -> Set[ParserName]:
         """
         get the names of all loaded parsers
-        :return:
         """
         assert self.instance is not None
         return self.instance.loaded_parsers
@@ -83,6 +84,7 @@ class MetadataDatabase:
         """
         add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
         override any existing entries with associated with the keys in the metadata dict
+
         :param name: name of ontology to add to
         :param metadata: dict in format {idx:metadata}
         :return:
@@ -149,6 +151,7 @@ class SynonymDatabase:
         ) -> Set[NormalisedSynonymStr]:
             """
             get all other syns for a synonym in a kb
+
             :param name: parser name
             :param synonym: synonym
             :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
@@ -176,6 +179,7 @@ class SynonymDatabase:
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
         """
         get a set of EquivalentIdSets associated with an ontology and synonym string
+
         :param name: name of ontology to query
         :param synonym: idx to query
         :return:
@@ -204,6 +208,7 @@ class SynonymDatabase:
     def get_all(self, name: ParserName) -> Dict[NormalisedSynonymStr, SynonymTerm]:
         """
         get all synonyms associated with an ontology
+
         :param name: name of ontology
         :return:
         """
@@ -217,6 +222,7 @@ class SynonymDatabase:
     def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
         """
         add synonyms to the database.
+
         :param name: name of ontology to add to
         :param synonyms: iterable of SynonymTerms to add
         :return:

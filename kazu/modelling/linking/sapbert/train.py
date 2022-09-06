@@ -67,6 +67,7 @@ class SapbertDataCollatorWithPadding:
 def init_hf_collate_fn(tokenizer: Callable) -> Callable:
     """
     get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST
+
     :param tokenizer:
     :return:
     """
@@ -93,6 +94,7 @@ class HFSapbertInferenceDataset(Dataset):
     def __init__(self, encodings: BatchEncoding):
         """
         simple implementation of IterableDataset, producing HF tokenizer input_id
+
         :param encodings:
         """
         self.encodings = encodings
@@ -154,6 +156,7 @@ def get_embedding_dataloader_from_strings(
     """
     get a dataloader with dataset HFSapbertInferenceDataset and DataCollatorWithPadding. This should be used to
     generate embeddings for strings of interest
+
     :param texts: strings to use in the dataset
     :param tokenizer:
     :param batch_size:
@@ -296,6 +299,7 @@ class PLSapbertModel(LightningModule):
     def forward(self, batch):
         """
         for inference
+
         :param batch: standard bert input, with an additional 'indices' for representing the location of the embedding
         :return:
         """
@@ -374,8 +378,8 @@ class PLSapbertModel(LightningModule):
     def get_embeddings(self, output: List[Dict[int, torch.Tensor]]) -> torch.Tensor:
         """
         get a tensor of embeddings in original order
-        :param output: List[Dict[int, torch.Tensor]] int is the original index of the input (i.e. what comes out of
-                        self.forward
+
+        :param output: List[Dict[int, torch.Tensor]] int is the original index of the input (i.e. what comes out of self.forward)
         :return:
         """
         full_dict = {}
@@ -392,6 +396,7 @@ class PLSapbertModel(LightningModule):
         lightning override
         generate new embeddings for each SapbertEvaluationDataset.ontology_source, and query them with
         SapbertEvaluationDataset.query_source
+
         :param outputs:
         :return:
         """
@@ -407,6 +412,7 @@ class PLSapbertModel(LightningModule):
     def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
         """
         for a dataframe of candidates, return a List[Candidate]
+
         :param np_candidates:
         :param golden_iri:
         :return:
@@ -426,6 +432,7 @@ class PLSapbertModel(LightningModule):
         """
         for a List[GoldStandardExample], get a dictionary of accuracy results at different levels of k
         (nearest neighbours)
+
         :param queries:
         :return:
         """
@@ -446,6 +453,7 @@ class PLSapbertModel(LightningModule):
     ) -> torch.Tensor:
         """
         convenience function: for a list of strings, generate embeddings
+
         :param texts:
         :param trainer: an optional PL Trainer to use. If not specified, uses the default one
         :param batch size: optional batch size to use. If not specified, use 16
@@ -463,6 +471,7 @@ class PLSapbertModel(LightningModule):
     def get_embeddings_from_dataloader(self, loader: DataLoader, trainer: Trainer) -> torch.Tensor:
         """
         get the cls token output from all data in a dataloader as a 2d tensor
+
         :param loader:
         :param trainer: the PL Trainer to use
         :return: 2d tensor of cls  output

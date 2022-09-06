@@ -99,6 +99,7 @@ class OntologyParser(ABC):
     def find_kb(self, string: str) -> str:
         """
         split an IDX somehow to find the ontology SOURCE reference
+
         :param string: the IDX string to process
         :return:
         """
@@ -319,7 +320,6 @@ class OntologyParser(ABC):
     def populate_metadata_database(self):
         """
         populate the metadata database with this ontology
-        :return:
         """
         MetadataDatabase().add_parser(self.name, self.export_metadata())
 
@@ -327,7 +327,6 @@ class OntologyParser(ABC):
         """
         generate synonyms based on configured synonym generator. Note, this method also calls
         populate_databases(), as the metadata db must be populated for appropriate synonym resolution
-        :return:
         """
         self.populate_databases()
         synonym_data = set(SynonymDatabase().get_all(self.name).values())
@@ -343,7 +342,6 @@ class OntologyParser(ABC):
     def populate_synonym_database(self):
         """
         populate the synonym database
-        :return:
         """
 
         SynonymDatabase().add(self.name, self.export_synonym_terms())
@@ -368,24 +366,22 @@ class OntologyParser(ABC):
         IDX: the ontology id
         DEFAULT_LABEL: the preferred label
         SYN: a synonym of the concept
-        MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by
-                    the ontology
+        MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by the ontology
 
         Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.
-        :return:
         """
         raise NotImplementedError()
 
     def format_training_table(self) -> pd.DataFrame:
         """
         generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)
-        :return:
         """
         raise NotImplementedError()
 
     def select_pos_pairs(self, df: pd.Series):
         """
         select synonym pair combinations for alignment. Capped at 50 to prevent overfitting
+
         :param df:
         :return:
         """
@@ -394,6 +390,7 @@ class OntologyParser(ABC):
     def write_training_pairs(self, out_path: str):
         """
         write training pairs to a directory.
+
         :param out_path: directory to write to
         :return:
         """
@@ -422,6 +419,7 @@ class JsonLinesOntologyParser(OntologyParser):
         for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
         structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
         IDX. All other keys are used as mapping metadata
+
         :param jsons_gen: iterator of python dict representing json objects
         :return: pd.DataFrame
         """
@@ -488,6 +486,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
         all synonym resolution, and rely on disambiguation to decide on 'true' mappings. Answers on a postcard if anyone
         has a better idea on how to do this!
+
         :param ids:
         :param id_to_source:
         :param is_symbolic:
@@ -601,7 +600,6 @@ class RDFGraphParser(OntologyParser):
         """
         subclasses should override this. Returns a List[str] of rdf predicates used to select synonyms from the owl
         graph
-        :return:
         """
         raise NotImplementedError()
 
@@ -826,6 +824,7 @@ class EnsemblOntologyParser(OntologyParser):
     """
     input is a json from HGNC
      e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
+
     :return:
     """
 
@@ -982,6 +981,7 @@ class CellosaurusOntologyParser(OntologyParser):
     ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
         """
         treat all synonyms as seperate cell lines
+
         :param ids:
         :param id_to_source:
         :param is_symbolic:
@@ -1063,7 +1063,6 @@ class MeddraOntologyParser(OntologyParser):
     """
     input is an unzipped directory to a MEddra release (Note, requires licence). This
     should contain the files 'mdhier.asc' and 'llt.asc'
-    :return:
     """
 
     _mdhier_asc_col_names = (

@@ -69,6 +69,7 @@ class Index(ABC):
     def load(self, cache_path: Path):
         """
         load from disk
+
         :param cache_path: the path to the cached files. Normally created via .save
         :return:
         """
@@ -94,6 +95,7 @@ class Index(ABC):
         """
         concrete implementations should implement this to save any data specific to the implementation. This method is
         called by self.save
+
         :param path:
         :return:
         """
@@ -113,6 +115,7 @@ class Index(ABC):
         """
         concrete implementations should implement this to add data to the index - e.g. synonym or embedding info. This
         method is called by self.add
+
         :param data:
         :return:
         """
@@ -121,6 +124,7 @@ class Index(ABC):
     def add(self, data: Any, metadata: Dict[str, Dict[str, SimpleValue]]):
         """
         add data to the index
+
         :param data:
         :return:
         """
@@ -130,14 +134,12 @@ class Index(ABC):
     def __len__(self) -> int:
         """
         should return the size of the index
-        :return:
         """
         return len(self.metadata_db.get_all(self.parser.name))
 
     def load_or_build_cache(self, force_rebuild_cache: bool = False):
         """
         build the index, or if a cached version is available, load it instead
-        :return:
         """
         cache_dir = get_cache_dir(
             self.parser.in_path,
@@ -165,6 +167,7 @@ class Index(ABC):
     def _build_ontology_cache(self, cache_dir: Path):
         """
         Implementations should implement this method to determine how an index gets built for a given parser
+
         :param cache_dir:
         :return:
         """
@@ -246,6 +249,7 @@ class DictionaryIndex(Index):
     def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
         """
         search the index
+
         :param top_n: return a maximum of top_n SynonymTermWithMetrics
         :param query: a string of text
         :return:
@@ -301,6 +305,7 @@ class EmbeddingIndex(Index):
         set the embedding model to be used to generate target ontology embeddings when the cache is generated
         (currently only PLSapbertModel supported). Also, optionally set a PL Trainer that should be used (a Trainer
         configured with default params will be used otherwise)
+
         :param embedding_model:
         :param trainer:
         :return:
@@ -323,6 +328,7 @@ class EmbeddingIndex(Index):
     def _add_embeddings(self, embeddings: torch.Tensor):
         """
         concrete implementations should implement this method to add embeddings to the index
+
         :param embeddings:
         :return:
         """
@@ -343,6 +349,7 @@ class EmbeddingIndex(Index):
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         should be implemented
+
         :param query: a string of text
         :param score_cutoff:
         :param top_n: return up to this many results
@@ -408,6 +415,7 @@ class EmbeddingIndex(Index):
     ) -> Iterable[Tuple[int, Dict[str, Dict[str, SimpleValue]]]]:
         """
         generator to split up a dataframe into partitions
+
         :param name: ontology name to query the metadata database with
         :param chunk_size: size of partittions to create
         :return:
@@ -423,6 +431,7 @@ class EmbeddingIndex(Index):
         """
         since embeddings are memory hungry, we use a generator to partition an input dataframe into manageable chucks,
         and add them to the index sequentially
+
         :param name: name of ontology
         :return: partition number, metadata and embeddings
         """

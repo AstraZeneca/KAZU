@@ -16,6 +16,7 @@ class EntityClassNormalizer(Protocol):
     def is_symbol_like(original_string: str) -> bool:
         """
         method to determine whether a string is a symbol (e.g. "AD") or a noun phrase (e.g. "Alzheimers Disease")
+
         :param original_string:
         :return:
         """
@@ -25,6 +26,7 @@ class EntityClassNormalizer(Protocol):
     def normalize_symbol(original_string: str) -> str:
         """
         method for normalising a symbol
+
         :param original_string:
         :return:
         """
@@ -34,6 +36,7 @@ class EntityClassNormalizer(Protocol):
     def normalize_noun_phrase(original_string: str) -> str:
         """
         method for normalising a noun phrase
+
         :param original_string:
         :return:
         """
@@ -84,6 +87,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def is_symbol_like(original_string: str) -> bool:
         """
         checks for ratio of upper to lower case characters, and numeric to alpha characters.
+
         :param original_string:
         :return:
         """
@@ -127,6 +131,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def depluralize(string):
         """
         apply some depluralisation rules
+
         :param string:
         :return:
         """
@@ -138,6 +143,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def sub_greek_char_abbreviations(string):
         """
         substitute single characters for alphanumeric representation - e.g. A -> ALPHA B--> BETA
+
         :param string:
         :return:
         """
@@ -151,6 +157,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         preserve case only if first char of contiguous subsequence is lower case, and is alphanum, and upper
         case detected in rest of part. Currently unused as it causes problems with normalisation of e.g. erbB2, which
         is a commonly used form of the symbol
+
         :param debug:
         :param string:
         :return:
@@ -176,6 +183,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def remove_non_alphanum(string):
         """
         removes all non alphanumeric characters
+
         :param string:
         :return:
         """
@@ -189,6 +197,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def replace_greek(string):
         """
         replaces greek characters with string representation
+
         :param string:
         :return:
         """
@@ -201,6 +210,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def split_on_numbers(string):
         """
         splits a string on numbers, for consistency
+
         :param string:
         :return:
         """
@@ -212,6 +222,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
     def replace_substrings(original_string):
         """
         replaces a range of other strings that might be confusing to a classifier, such as roman numerals
+
         :param original_string:
         :return:
         """
@@ -232,6 +243,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
         upper case or integers is higher, assume it's a symbol. Also if the first char is lower case, and any
         subsequent characters are upper case, it's probably a symbol (e.g. erbB2)
+
         :param original_string:
         :return:
         """
@@ -250,6 +262,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         """
         slightly modified version of DefaultStringNormalizer.is_symbol_like, designed to work on single tokens. Checks
         if the casing of the symbol changes from lower to upper (if so, is likely to be symbolic, e.g. erbB2)
+
         :param original_string:
         :return:
         """
@@ -280,6 +293,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         frustratingly, some gene symbols are pluralised like ERBBs. we can't jsut remove trailing s as this breaks
         genuine symbols like 'MDH-s' and 'GASP10ps'. So, we only strip the trailing 's' if the char before is upper
         case
+
         :param string:
         :return:
         """
@@ -310,6 +324,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
     def normalize_noun_phrase(original_string: str) -> str:
         """
         revert to DefaultStringNormalizer.normalize_noun_phrase for non symbolic genes
+
         :param original_string:
         :return:
         """

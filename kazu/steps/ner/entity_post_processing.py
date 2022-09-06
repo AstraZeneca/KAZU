@@ -27,6 +27,7 @@ class SplitOnConjunctionPattern:
     def __init__(self, spacy_pipeline: SpacyPipeline):
         """
         analyse
+
         :param pattern:
         """
         self.nlp = spacy_pipeline.nlp
@@ -101,6 +102,7 @@ class SplitOnNumericalListPatternWithPrefix:
     def __init__(self, pattern: str = "/"):
         """
         pattern to split the string on (typically "/")
+
         :param pattern:
         """
         self.pattern = pattern

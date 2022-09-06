@@ -191,6 +191,7 @@ class AbbreviationDetector:
     def find_abbreviations(self, doc: Doc) -> None:
         """
         add matcher rules based on abbreviations found
+
         :param doc:
         """
         matches = self.matcher(doc)

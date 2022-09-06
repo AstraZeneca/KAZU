@@ -12,6 +12,7 @@ def accuracy(preds, labels):
 def numeric_label_f1_score(preds: List[List[int]], golds: List[List[int]], label_list) -> float:
     """
         Function to calculate F1 score using seqeval and numerical format labels.
+
     :param preds: 2d array of predicted label ids
     :param golds: 2d array of gold standard ids
     :param label_list: list of strings, for mappingids to labels
