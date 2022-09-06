@@ -49,6 +49,25 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
 #
 html_theme = "furo"
 
+# used by both linkcode_resolve and furo's edit button
+
+# get the configured git remote. Get the url this way rather than hardcoding since
+# we don't want this to give internal links when we open source. We will need to consider
+# docs and hosting/linking more generally when open sourcing - this is just a basic precaution.
+remote_process = subprocess.run(
+    ["git", "config", "--get", "remote.origin.url"], capture_output=True, encoding="utf-8"
+)
+remote_base_url = remote_process.stdout.strip().removesuffix(".git")
+
+
+# config for edit button
+html_theme_options = {
+    "source_repository": remote_base_url,
+    "source_branch": "main",
+    "source_directory": "docs/",
+}
+
+
 # set these variables everywhere to avoid repeating
 # to decide whether we skip tests in docs
 doctest_global_setup = """
@@ -104,14 +123,6 @@ def linkcode_resolve(domain, info):
         linespec = ""
 
     fn_filepath = os.path.relpath(fn_filepath, start=os.path.dirname(kazu.__file__))
-
-    # get the configured git remote. Get the url this way rather than hardcoding since
-    # we don't want this to give internal links when we open source. We will need to consider
-    # docs and hosting/linking more generally when open sourcing - this is just a basic precaution.
-    remote_process = subprocess.run(
-        ["git", "config", "--get", "remote.origin.url"], capture_output=True, encoding="utf-8"
-    )
-    remote_base_url = remote_process.stdout.strip().removesuffix(".git")
 
     if not remote_base_url.startswith("https://github.com/"):
         # something weird has happened, and the link structure below will probably be wrong
