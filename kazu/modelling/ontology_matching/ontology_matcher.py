@@ -69,9 +69,9 @@ class OntologyMatcher:
         """
         Create an OntologyMatcher.
 
-        span_key (str): the key for doc.spans to store the matches in
-        entry_filter (Callable): a function deciding whether a given ontology row/entry is valid
-        variant_generator (Callable): a function generating variants for a given synonym
+        :param span_key: the key for doc.spans to store the matches in
+        :param entry_filter: a function deciding whether a given ontology row/entry is valid
+        :param variant_generator: a function generating variants for a given synonym
         """
         self.nlp = nlp
         self.name = name
@@ -112,7 +112,7 @@ class OntologyMatcher:
 
     @property
     def labels(self) -> List[str]:
-        """RETURNS (List[str]): The labels currently processed by this component."""
+        """The labels currently processed by this component."""
         return self.cfg.labels
 
     @property
@@ -375,8 +375,8 @@ class OntologyMatcher:
     ) -> None:
         """Serialize the pipe to disk.
 
-        path (str / Path): Path to a directory.
-        exclude (Iterable[str]): String names of serialization fields to exclude.
+        :param path: Path to serialize the pipeline to.
+        :param exclude: String names of serialization fields to exclude.
         """
 
         def pickle_matcher(p, strict):
