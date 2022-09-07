@@ -912,12 +912,12 @@ class EnsemblOntologyParser(OntologyParser):
 
 
 class ChemblOntologyParser(OntologyParser):
-    name = "CHEMBL"
     """
     input is a sqllite dump from Chembl, e.g.
     https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz
-    :return:
     """
+
+    name = "CHEMBL"
 
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
@@ -961,12 +961,12 @@ class CLOOntologyParser(RDFGraphParser):
 
 
 class CellosaurusOntologyParser(OntologyParser):
-    name = "CELLOSAURUS"
     """
     input is an obo file from cellosaurus, e.g.
     https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo
-    :return:
     """
+
+    name = "CELLOSAURUS"
     cell_line_re = re.compile("cell line", re.IGNORECASE)
 
     def find_kb(self, string: str) -> str:
@@ -1059,11 +1059,12 @@ class CellosaurusOntologyParser(OntologyParser):
 
 
 class MeddraOntologyParser(OntologyParser):
-    name = "MEDDRA_DISEASE"
     """
     input is an unzipped directory to a MEddra release (Note, requires licence). This
     should contain the files 'mdhier.asc' and 'llt.asc'
     """
+
+    name = "MEDDRA_DISEASE"
 
     _mdhier_asc_col_names = (
         "pt_code",
