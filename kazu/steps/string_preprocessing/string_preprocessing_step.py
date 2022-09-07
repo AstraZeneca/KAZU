@@ -108,9 +108,9 @@ class StringPreprocessorStep(BaseStep):
         """
         implementations should return a List[Tuple[Charspan,str]] of the modifications you want to make
         the Charspan refers to the span in the Section.get_text() that you want to modify. The str is the text that you
-         want to insert (i.e. use '' for deletion).Note, that Section.get_text() is an accessor for Section.text,
-         returning either an already preprocessed string if available, or the original if not. This allows you to chain
-         together multiple modifiers, while retaining a reference to the original text via Section.offset_map
+        want to insert (i.e. use '' for deletion).Note, that Section.get_text() is an accessor for Section.text,
+        returning either an already preprocessed string if available, or the original if not. This allows you to chain
+        together multiple modifiers, while retaining a reference to the original text via Section.offset_map
 
         :param section:
         :return:

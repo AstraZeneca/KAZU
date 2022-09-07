@@ -823,7 +823,7 @@ class EnsemblOntologyParser(OntologyParser):
     name = "ENSEMBL"
     """
     input is a json from HGNC
-     e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
+    e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
 
     :return:
     """
