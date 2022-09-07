@@ -6,8 +6,7 @@
 Welcome to Kazu's documentation!
 ================================
 
-
-
+|
 
 .. toctree::
    :maxdepth: 2
@@ -18,8 +17,7 @@ Welcome to Kazu's documentation!
    pipeline steps <steps>
    model training <training>
 
-
-
+|
 
 .. toctree::
    :caption: API Documentation
