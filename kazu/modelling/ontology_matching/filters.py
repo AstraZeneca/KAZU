@@ -91,7 +91,7 @@ PROBLEMATIC_GENE_NAMES_RE = [re.compile(x) for x in PROBLEMATIC_GENE_NAMES]
 
 def is_valid_ontology_entry(syn: str, idx_str: str) -> Tuple[bool, bool]:
     """Returns a tuple of two bools:
-    whether to add an case-sensitive match and whether to add a case-invariant match.
+    whether to add a case-sensitive match and whether to add a case-invariant match.
     We don't need a case-sensitive match rule if there's a case-invariant one,
     so returning (True, True) is an invalid input
     """

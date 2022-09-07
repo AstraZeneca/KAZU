@@ -763,7 +763,7 @@ class MondoOntologyParser(OntologyParser):
     name = "MONDO"
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(MONDO|HP)_[0-9]+$")
     """
-    input should be an MONDO json file
+    input should be a MONDO json file
     e.g.
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """

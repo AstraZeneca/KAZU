@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class TransformersModelForTokenClassificationNerStep(BaseStep):
     """
-    An wrapper for :class:`transformers.AutoModelForTokenClassification'. This implementation uses a sliding
+    A wrapper for :class:`transformers.AutoModelForTokenClassification'. This implementation uses a sliding
     window concept to process large documents that don't fit into the maximum sequence length allowed by a model.
     Resulting token labels are then post processed by
     :py:class:`kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor`.
