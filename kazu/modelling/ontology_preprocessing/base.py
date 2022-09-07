@@ -421,7 +421,7 @@ class JsonLinesOntologyParser(OntologyParser):
         IDX. All other keys are used as mapping metadata
 
         :param jsons_gen: iterator of python dict representing json objects
-        :return: pd.DataFrame
+        :return:
         """
         raise NotImplementedError()
 
