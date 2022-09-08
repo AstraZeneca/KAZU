@@ -58,6 +58,7 @@ html_theme = "furo"
 # we use this to get module and class members documented as part of the autosummary-generated pages
 autodoc_default_options = {
     "members": True,
+    "undoc-members": True,
 }
 
 # put type hints in the description rather than the function signature, where it all ends up on one line and looks very ugly
