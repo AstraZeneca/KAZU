@@ -429,10 +429,9 @@ class PLSapbertModel(LightningModule):
             )
         return candidates_filtered
 
-    def evaluate_topk_acc(self, queries: List[GoldStandardExample]):
+    def evaluate_topk_acc(self, queries: List[GoldStandardExample]) -> Dict[str, float]:
         """
-        for a List[GoldStandardExample], get a dictionary of accuracy results at different levels of k
-        (nearest neighbours)
+        get a dictionary of accuracy results at different levels of k (nearest neighbours)
 
         :param queries:
         :return:
