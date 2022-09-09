@@ -178,9 +178,9 @@ class StrategyRunner:
                 terms,
             ), entities_this_group in groups.items():
 
-                strategy_list: List[
-                    MappingStrategy
-                ] = namespace_strategy_list.get_strategies_for_entity_class(entity_class)
+                strategy_list = namespace_strategy_list.get_strategies_for_entity_class(
+                    entity_class
+                )
                 if i > len(strategy_list) - 1:
                     logger.debug("no more strategies this class")
                     continue
