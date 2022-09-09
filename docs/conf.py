@@ -60,6 +60,7 @@ html_theme = "furo"
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
+    "show-inheritance": True,
 }
 
 # put type hints in the description rather than the function signature, where it all ends up on one line and looks very ugly
