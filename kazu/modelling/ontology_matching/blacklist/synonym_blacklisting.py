@@ -34,6 +34,7 @@ class BlackLister(Protocol):
 
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         """
+        :meta public:
 
         :param synonym: synonym to test
         :return: tuple of whether synonym is good True|False, and the reason for the decision

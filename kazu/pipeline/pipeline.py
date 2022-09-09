@@ -63,6 +63,7 @@ class FailedDocsHandler:
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
         """
+        :meta public:
 
         :param step_docs_map: a dict of step namespace and the docs that failed for it
         :return:
@@ -170,6 +171,8 @@ class Pipeline:
 
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
+        :meta public:
+
         run the pipeline
 
         :param docs: Docs to process
