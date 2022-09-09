@@ -165,19 +165,9 @@ class StrategyRunner:
             + [len(namespace_strategy_list.default_strategies)]
         )
 
-        def _get_key_to_group_ent_on_hits(
-            e: Entity,
-        ) -> Tuple[str, str, str, FrozenSet[SynonymTermWithMetrics]]:
-            return (
-                e.match,
-                e.match_norm,
-                e.entity_class,
-                frozenset(e.syn_term_to_synonym_terms.values()),
-            )
-
         groups = {
             k: list(v)
-            for k, v in sort_then_group(ents_needing_mappings, _get_key_to_group_ent_on_hits)
+            for k, v in sort_then_group(ents_needing_mappings, self._get_key_to_group_ent_on_hits)
         }
 
         for i in range(0, strategy_max_index):
@@ -232,3 +222,14 @@ class StrategyRunner:
                                 entity_match,
                                 mapping,
                             )
+
+    @staticmethod
+    def _get_key_to_group_ent_on_hits(
+        e: Entity,
+    ) -> Tuple[str, str, str, FrozenSet[SynonymTermWithMetrics]]:
+        return (
+            e.match,
+            e.match_norm,
+            e.entity_class,
+            frozenset(e.syn_term_to_synonym_terms.values()),
+        )
