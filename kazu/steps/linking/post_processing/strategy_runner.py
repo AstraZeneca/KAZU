@@ -197,7 +197,7 @@ class StrategyRunner:
                     # we keep track of which entities have resolved mappings to specific parsers, so we don't run lower
                     # ranked strategies if we don't need to
 
-                    query_entity = next(iter(entities_this_group))
+                    query_entity = entities_this_group[0]
                     resolved_parsers = set(mapping.parser_name for mapping in query_entity.mappings)
                     terms_to_consider = filter(
                         lambda x: x.parser_name not in resolved_parsers,
