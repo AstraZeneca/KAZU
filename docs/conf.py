@@ -107,6 +107,9 @@ kazu_model_pack_missing = os.environ.get("KAZU_MODEL_PACK") is None
 # or using exclude_patterns
 autodoc_mock_imports = ["kazu.conf", "kazu.tests"]
 
+# groups 'members' together by type, e.g. attributes, methods etc.
+autodoc_member_order = "groupwise"
+
 intersphinx_mapping = {
     "transformers": ("https://huggingface.co/docs/transformers/master/en/", None),
     "pytorch_lightning": ("https://pytorch-lightning.readthedocs.io/en/stable/", None),
