@@ -379,7 +379,7 @@ class PLSapbertModel(LightningModule):
         """
         get a tensor of embeddings in original order
 
-        :param output: List[Dict[int, torch.Tensor]] int is the original index of the input (i.e. what comes out of self.forward)
+        :param output: int is the original index of the input (i.e. what comes out of self.forward)
         :return:
         """
         full_dict = {}
@@ -411,7 +411,8 @@ class PLSapbertModel(LightningModule):
 
     def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
         """
-        for a dataframe of candidates, return a List[:class:`Candidate`]
+        Convert rows in a dataframe representing candidate KB entries into a corresponding
+        :class:`Candidate` per row
 
         :param np_candidates:
         :param golden_iri:

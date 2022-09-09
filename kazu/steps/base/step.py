@@ -32,9 +32,9 @@ class BaseStep(ABC):
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
-        the main method to implement. Takes a list of docs, and returns a Tuple[List[Document], List[Document]]
-        the first list should be succeeded docs, the second the ones that failed to process. The logic of
-        determining these two lists is the responsibility of the implementation
+        the main method to implement. Takes a list of docs, and returns a tuple where the first element
+        is the succeeded docs, the second are the docs that failed to process. The logic of determining
+        these two lists is the responsibility of the implementation.
 
         :param docs:
         :return:

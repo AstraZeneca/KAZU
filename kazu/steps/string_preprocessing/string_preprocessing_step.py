@@ -30,7 +30,7 @@ class StringPreprocessorStep(BaseStep):
         the number of characters added by previous modifications in the string
 
         :param offset_map: map of modified: original offsets. usually :attr:`kazu.data.data.Section.offset_map`
-        :param shifts: a dict of [CharSpan:int], representing the shift direction caused by the charspan
+        :param shifts: an int per charspan representing the shift (direction and size) caused by the charspan
         :return:
         """
         recalc_offset_map = {}

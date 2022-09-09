@@ -29,8 +29,9 @@ def main(
     config, and an OntologyMatcher based on the input parameters. The pipeline is
     written to disk, and also returned to the caller.
 
-    :param parsers: :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` instances used to build the spacy pipeline
-    :param blacklisters: a dictionary from parser names to :class:`kazu.modelling.ontology_matching.blacklist.synonym_blacklisting.BlackLister` instances for determining which synonyms should be blacklisted.
+    :param parsers: parsers provided to build pipeline from using their associated synonyms.
+    :param blacklisters: the blacklister that should be used for a given parser (key is parser name).
+        Any parsers not specified will not have any synonyms blacklisted via this method.
     :param parser_name_to_entity_type: a dictionary from parser names to the entity class we want to associate them with.
     :param labels: the entity class labels that the :class:`kazu.steps.ner.explosion.ExplosionNERStep` can recognise - this affects the matchers that are generated.
     :param output_dir: the output directory to write the pipeline into.

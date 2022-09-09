@@ -90,7 +90,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         :class:`transformers.DataCollatorWithPadding`\\ .
 
         :param docs:
-        :return: a tuple of dataloader, and a dict of int:Section. The int maps to overflow_to_sample_mapping in the
+        :return: The returned dict's keys map to overflow_to_sample_mapping in the
                 underlying batch encoding, allowing the processing of docs longer than can fit within the maximum
                 sequence length of a transformer
         """
