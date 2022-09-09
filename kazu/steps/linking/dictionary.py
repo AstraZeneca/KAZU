@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class DictionaryEntityLinkingStep(BaseStep):
     """
-    Uses DictionaryIndex to match entities to ontologies.
+    Uses :class:`kazu.utils.link_index.DictionaryIndex` to match entities to ontologies.
     """
 
     def __init__(
@@ -33,7 +33,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         :param entity_class_to_ontology_mappings: mapping of entity class to appropriate ontologies for this entity
             class
         :param lookup_cache_size: the size of the Least Recently Used lookup cache to maintain
-        :param top_n: keep the top_n results for the query (passed to DictionaryIndex)
+        :param top_n: keep the top_n results for the query (passed to :class:`kazu.utils.link_index.DictionaryIndex`)
         """
         super().__init__(depends_on=depends_on)
 
@@ -68,7 +68,7 @@ class DictionaryEntityLinkingStep(BaseStep):
 
         1) first obtain an entity list from all docs
         2) check the lookup LRUCache to see if an entity has been recently processed
-        3) if the cache misses, run a string similarity search using the configured DictionaryIndex 's
+        3) if the cache misses, run a string similarity search using the configured :class:`kazu.utils.link_index.DictionaryIndex` 's
 
         :param docs:
         :return:

@@ -30,15 +30,21 @@ class SeqTagProcessor(DataProcessor):
     """Base class for data converters for sequence tagging data sets."""
 
     def get_train_examples(self, data_dir) -> List[InputExample]:
-        """Gets a collection of `InputExample`s for the train set."""
+        """Gets a collection of :class:`transformers.InputExample` for the train set.
+
+        :rtype: typing.List[~transformers.InputExample]"""
         raise NotImplementedError()
 
     def get_dev_examples(self, data_dir) -> List[InputExample]:
-        """Gets a collection of `InputExample`s for the dev set."""
+        """Gets a collection of :class:`transformers.InputExample` for the dev set.
+
+        :rtype: typing.List[~transformers.InputExample]"""
         raise NotImplementedError()
 
     def get_aug_examples(self, data_dir) -> List[InputExample]:
-        """Gets a collection of `InputExample`s for the dev set."""
+        """Gets a collection of :class:`transformers.InputExample` for the dev set.
+
+        :rtype: typing.List[~transformers.InputExample]"""
         raise NotImplementedError()
 
 

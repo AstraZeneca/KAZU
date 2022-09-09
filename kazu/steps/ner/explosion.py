@@ -182,5 +182,5 @@ class ExplosionNERStep(BaseStep):
         """Return key information about a span excluding mapping information.
 
         This includes the entity_class (stored in span.label_) since this is
-        stored on Kazu's Entity concept rather than Mapping."""
+        stored on Kazu's :class:`kazu.data.data.Entity` concept rather than :class:`kazu.data.data.Mapping`"""
         return (span.start_char, span.end_char, span.text, span.label_)

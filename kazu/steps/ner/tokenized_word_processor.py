@@ -321,9 +321,9 @@ class TokenizedWordProcessor:
     ):
         """
 
-        :param confidence_threshold: optional threshold if using SmartSpanFinder. Ignored is detect_subspans is false
+        :param confidence_threshold: optional threshold if using :class:`SmartSpanFinder`\\ . Ignored is detect_subspans is false
         :param id2label: mapping of label int id to str label
-        :param detect_subspans: use SmartSpanFinder if True. A confidence_threshold must be provided
+        :param detect_subspans: use :class:`SmartSpanFinder` if True. A confidence_threshold must be provided
         """
 
         self.id2label = id2label

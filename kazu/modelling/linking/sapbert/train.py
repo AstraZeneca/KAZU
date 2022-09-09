@@ -394,8 +394,8 @@ class PLSapbertModel(LightningModule):
     def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         """
         lightning override
-        generate new embeddings for each SapbertEvaluationDataset.ontology_source, and query them with
-        SapbertEvaluationDataset.query_source
+        generate new embeddings for each :attr:`SapbertEvaluationDataset.ontology_source` and query them with
+        :attr:`SapbertEvaluationDataset.query_source`
 
         :param outputs:
         :return:
@@ -411,7 +411,7 @@ class PLSapbertModel(LightningModule):
 
     def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
         """
-        for a dataframe of candidates, return a List[Candidate]
+        for a dataframe of candidates, return a List[:class:`Candidate`]
 
         :param np_candidates:
         :param golden_iri:

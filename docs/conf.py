@@ -38,6 +38,7 @@ extensions = [
     "sphinx.ext.linkcode",
     "myst_parser",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
 ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -104,6 +105,15 @@ kazu_model_pack_missing = os.environ.get("KAZU_MODEL_PACK") is None
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#event-autodoc-skip-member
 # or using exclude_patterns
 autodoc_mock_imports = ["kazu.conf", "kazu.tests"]
+
+intersphinx_mapping = {
+    "transformers": ("https://huggingface.co/docs/transformers/master/en/", None),
+    "pytorch_lightning": ("https://pytorch-lightning.readthedocs.io/en/stable/", None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "python": ("https://docs.python.org/3", None),
+}
 
 
 # this function is modified from the corresponding one in pandas, which in turn is modified from numpy
