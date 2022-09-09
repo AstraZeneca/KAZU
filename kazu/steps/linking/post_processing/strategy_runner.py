@@ -54,7 +54,7 @@ class StrategyRunner:
     1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
         entity spans
     2) whether an entity is symbolic or not (generally speaking, noun phrases should be easier to normalise than
-        symbolic mentions, as there is more information to work with
+        symbolic mentions, as there is more information to work with)
     3) what SynonymTerms are associated with the entity, and from which parser they originated from
 
     This __call__ method of this class operates as follows:
