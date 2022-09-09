@@ -465,7 +465,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
 class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
     """
     1) look for entities on the document that have mappings
-    2) see if any of these mappings correspond to ay ids in the EquivalentIdSets on each SynonymTermWithMetrics
+    2) see if any of these mappings correspond to any ids in the EquivalentIdSets on each SynonymTermWithMetrics
     3) filter the synonym terms according to detected mappings
     """
 
