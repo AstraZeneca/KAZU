@@ -60,8 +60,8 @@ class StrategyRunner:
     This __call__ method of this class operates as follows:
 
     1) group entities by order of NER namespace
-    2) sub-group these entities by whether they are symbolic or not
-    3) sub-group these entities again by Entity.match and Entity.entity_class
+    2) sub-group these entities again by Entity.match and Entity.entity_class
+    3) divide these entities by whether they are symbolic or not
     4) get the appropriate list of strategies to run against this sub group
     5) group the SynonymTermWithMetrics associated with this subgroup by their parser_name, filtered by any mappings
         from this parser_name already attached to the Entity
@@ -150,7 +150,8 @@ class StrategyRunner:
         namespace_strategy_list: NamespaceStrategyList,
     ):
         """
-        This method executes parts 3 -7 in the class DocString
+        This method executes parts 5 - 7 in the class DocString
+
         :param ents_needing_mappings:
         :param document:
         :param namespace_strategy_list:
