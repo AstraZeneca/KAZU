@@ -49,7 +49,7 @@ class StrategyRunner:
     co-ordination is crucial. Specifically we want the strategies that have higher precision to run before lower
     precision ones.
 
-    Beound the precision of the strategy itself, the variables to consider are:
+    Beyound the precision of the strategy itself, the variables to consider are:
 
     1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
         entity spans
