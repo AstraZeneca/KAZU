@@ -187,7 +187,10 @@ class StrategyRunner:
                 else:
                     strategy = strategy_list[i]
                     logger.debug(
-                        f"running strategy {strategy.__class__.__name__} on class :<{entity_class}>, match: <{entity_match}> "
+                        "running strategy %s on class :<%s>, match: <%s> ",
+                        strategy.__class__.__name__,
+                        entity_class,
+                        entity_match,
                     )
                     strategy.prepare(document)
 
