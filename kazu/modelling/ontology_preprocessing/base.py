@@ -126,7 +126,7 @@ class OntologyParser(ABC):
             if len(syn_set) > 1:
                 logger.debug(f"normaliser has merged {syn_set} into a single term: {syn_norm}")
 
-            is_symbolic = any(
+            is_symbolic = all(
                 StringNormalizer.classify_symbolic(x, self.entity_class) for x in syn_set
             )
 
