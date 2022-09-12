@@ -55,6 +55,11 @@ class OntologyMatcherConfig:
     },
 )
 class OntologyMatcher:
+    """String matching to synonyms.
+
+    Core strict matching is done by Spacy's `PhraseMatcher <https://spacy.io/api/phrasematcher>`_.
+    """
+
     def __init__(
         self,
         nlp: Language,
@@ -67,7 +72,6 @@ class OntologyMatcher:
         parser_name_to_entity_type: Dict[str, str],
     ):
         """
-        Create an OntologyMatcher.
 
         :param span_key: the key for doc.spans to store the matches in
         :param entry_filter: a function deciding whether a given ontology row/entry is valid
