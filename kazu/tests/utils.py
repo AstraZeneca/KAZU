@@ -41,12 +41,16 @@ requires_model_pack = pytest.mark.skipif(
 
 
 SKIP_MESSAGE_NO_GOLD_STANDARD = """
-skipping acceptance test as KAZU_GOLD_STANDARD is not provided as an environment variable. This should be the path 
-to the kazu godl standard pickle file
+skipping acceptance test as either LS_PROJECT_NAME, LS_URL_PORT or LS_TOKEN are not provided as an environment variable
+This should indicate the project name and connection/auth information required to retrieve annotations from a 
+Label Studio server where the gold standard annotations are stored.
 """  # noqa
 
 requires_gold_standard = pytest.mark.skipif(
-    os.environ.get("KAZU_GOLD_STANDARD") is None, reason=SKIP_MESSAGE_NO_GOLD_STANDARD
+    os.environ.get("LS_PROJECT_NAME") is None
+    or os.environ.get("LS_URL_PORT") is None
+    or os.environ.get("LS_TOKEN") is None,
+    reason=SKIP_MESSAGE_NO_GOLD_STANDARD,
 )
 
 
