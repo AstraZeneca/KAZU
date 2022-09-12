@@ -66,9 +66,9 @@ class DictionaryEntityLinkingStep(BaseStep):
         """
         logic of entity linker:
 
-        1) first obtain an entity list from all docs
-        2) check the lookup LRUCache to see if an entity has been recently processed
-        3) if the cache misses, run a string similarity search using the configured :class:`kazu.utils.link_index.DictionaryIndex` 's
+        1. first obtain an entity list from all docs
+        2. check the lookup LRUCache to see if an entity has been recently processed
+        3. if the cache misses, run a string similarity search using the configured :class:`kazu.utils.link_index.DictionaryIndex` 's
 
         :param docs:
         :return:

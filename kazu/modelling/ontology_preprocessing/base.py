@@ -178,12 +178,12 @@ class OntologyParser(ABC):
 
         The default algorithm (which can be overridden by concrete parser implementations) works as follows:
 
-        1) If no SpacyPipeline is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
-            not recommended)
-        2) If only one ID is referenced, or the associated normalised synonym string is not symbolic, group the
-            ids into a single EquivalentIdSet (strategy UNAMBIGUOUS)
-        3) otherwise, compare the default label associated with each ID to every other default label. If it's above
-            self.synonym_merge_threshold, merge into one EquivalentIdSet, if not, create a new one
+        1. If no SpacyPipeline is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
+           not recommended)
+        2. If only one ID is referenced, or the associated normalised synonym string is not symbolic, group the
+           ids into a single EquivalentIdSet (strategy UNAMBIGUOUS)
+        3. otherwise, compare the default label associated with each ID to every other default label. If it's above
+           self.synonym_merge_threshold, merge into one EquivalentIdSet, if not, create a new one
 
         recommendation: Use the scispacy large model for comparison, as this uses 600k word vectors. Sapbert might also
         be a good choice

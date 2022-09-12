@@ -87,11 +87,11 @@ class SapBertForEntityLinkingStep(BaseStep):
         """
         logic of entity linker:
 
-        1) first obtain an entity list from all docs
-        2) check the lookup LRUCache to see if it's been recently processed
-        3) generate embeddings for the entities based on the value of Entity.match
-        4) query this embedding against configured EmbeddingIndex 's to determine the best matches
-        5) update entity SynonymTermWithMetrics as appropriate
+        1. first obtain an entity list from all docs
+        2. check the lookup LRUCache to see if it's been recently processed
+        3. generate embeddings for the entities based on the value of Entity.match
+        4. query this embedding against configured EmbeddingIndex 's to determine the best matches
+        5. update entity SynonymTermWithMetrics as appropriate
 
         :param docs:
         :return:

@@ -186,6 +186,7 @@ class SimpleSpanFinder(SpanFinder):
     ):
         """
         A potential entity span will end if any of the following conditions are met:
+
         1. any of the BIO classes for word are O
         2. The previous character to the word is in the set of self.span_breaking_chars
 
@@ -266,6 +267,7 @@ class SmartSpanFinder(SpanFinder):
     ):
         """
         A potential entity span must continue if any of the following conditions are met:
+
         1. The previous character to the word is not in the set of self.span_breaking_chars
         2. There are any entity class assignments in any of the tokens in the TokenizedWord under consideration.
 

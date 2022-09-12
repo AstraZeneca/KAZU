@@ -22,30 +22,30 @@ class MergeOverlappingEntsStep(BaseStep):
     ):
         """
 
-
         The algorithm for selecting an entity span is as follows:
 
-        1) group entities by location
+        1. group entities by location
 
-            In this context, a location is a span of text represented by a start and end char index tuple. A location
-            represents all contiguous and non-contiguous entities that in some way overlap, even if not directly. E.g.
+           In this context, a location is a span of text represented by a start and end char index tuple. A location
+           represents all contiguous and non-contiguous entities that in some way overlap, even if not directly. E.g.
 
-            A overlaps B but not C. B overlaps C.
+           A overlaps B but not C. B overlaps C.
 
-            entities A, B and C are all considered to be part of the same location
+           entities A, B and C are all considered to be part of the same location
 
-        2) sort entities within each location, picking the best according to the following sort logic:
+        2. sort entities within each location, picking the best according to the following sort logic:
 
-            1) prefer entities with mappings
-            2) prefer longest spans
-            3) prefer entities as configured by ent_class_preferred_order (see param description below)
-            4) If the proscribed entity class order is also equal, the preferred entity is selected on the basis of
-                the entity class name (reverse alphabetically ordered). Warning: This last sort criteria is arbitrary
+           1. prefer entities with mappings
+           2. prefer longest spans
+           3. prefer entities as configured by ent_class_preferred_order (see param description below)
+           4. If the proscribed entity class order is also equal, the preferred entity is selected on the basis of
+              the entity class name (reverse alphabetically ordered). Warning: This last sort criteria is arbitrary
+
 
         :param depends_on:
         :param ent_class_preferred_order: order of namespaces to prefer. Any partially overlapped entities are
-        eliminated according to this ordering (first = higher priority). If an entity class is not specified, it's
-        assumed to have a priority of 0 (a.k.a lowest)
+            eliminated according to this ordering (first = higher priority). If an entity class is not specified, it's
+            assumed to have a priority of 0 (a.k.a lowest)
         """
 
         super().__init__(depends_on)
