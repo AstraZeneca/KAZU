@@ -91,12 +91,24 @@ class SplitOnConjunctionPattern:
 
 class SplitOnNumericalListPatternWithPrefix:
     """
-    split a string of numerically incrementing parts, e.g.
-    BRACA1/2 ->
-    [
-        Entity(match="BRACA1"),
-        Entity(match="BRACA2")
-    ]
+    split a string of numerically incrementing parts:
+
+    .. testsetup::
+
+        from kazu.steps.ner.entity_post_processing import SplitOnNumericalListPatternWithPrefix
+        from kazu.data.data import Entity
+
+    .. testcode::
+
+        splitter = SplitOnNumericalListPatternWithPrefix()
+        ent = Entity.load_contiguous_entity(start=0, end=8, namespace="test", entity_class="gene", match="BRCA1/2/3")
+        print(splitter(ent, "BRCA1/2/3 are oncogenes"))
+
+    .. testoutput::
+
+        [BRCA1:gene:test:0:5, BRCA2:gene:test:0:7, BRCA3:gene:test:0:9]
+
+
     """
 
     def __init__(self, pattern: str = "/"):
