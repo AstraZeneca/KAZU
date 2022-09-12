@@ -14,6 +14,7 @@ class LabelStudioDocumentEncoder(json.JSONEncoder):
         if isinstance(obj, Document):
             result = []
             doc_id = obj.idx
+
             for i, section in enumerate(obj.sections):
                 idx = f"{doc_id}_{section.name}_{i}"
                 data = {}
@@ -145,15 +146,19 @@ class LabelStudioJsonToKazuDocumentEncoder:
             )
         )[0]["id"]
 
-    def _get_tasks(self):
+    def get_all_tasks(self):
         tasks = json.loads(
             requests.get(
-                f"{self.url}/api/tasks/?project={self.project_id}", headers=self.headers
+                f"{self.url}/api/tasks?page_size=1000000&project={self.project_id}",
+                headers=self.headers,
             ).text
         )
+        ids = [task["id"] for task in tasks["tasks"]]
+        return self.get_tasks(ids)
+
+    def get_tasks(self, ids: List[int]):
         task_data = []
-        for task in tasks["tasks"]:
-            idx = task["id"]
+        for idx in ids:
             task_data.append(
                 json.loads(
                     requests.get(
@@ -164,9 +169,8 @@ class LabelStudioJsonToKazuDocumentEncoder:
             )
         return task_data
 
-    def get_docs(self):
-        tasks = self._get_tasks()
-
+    @staticmethod
+    def ls_json_to_doc(tasks):
         # group by first part of doc ID to get sections of multi part docs
         by_doc_id = sort_then_group(tasks, key_func=lambda x: x["data"]["id"].split("_")[0])
         docs = []
@@ -178,7 +182,9 @@ class LabelStudioJsonToKazuDocumentEncoder:
             for (section_name, section_part_id), section_tasks_iter in by_section:
                 for section_task in section_tasks_iter:
                     text = section_task["data"]["text"]
-                    section = Section(text=text, name=f"{section_name}_{section_part_id}")
+                    task_data_id = section_task["data"]["id"]
+                    section = Section(text=text, name=section_task["id"])
+                    section.metadata["task_data_id"] = task_data_id
                     section.metadata["gold_entities"] = []
                     (
                         id_to_charspan,
@@ -186,21 +192,40 @@ class LabelStudioJsonToKazuDocumentEncoder:
                         id_to_tax,
                         non_contig,
                         contig_ents,
-                    ) = self._populate_task_id_lookups(section_task)
+                    ) = LabelStudioJsonToKazuDocumentEncoder._populate_task_id_lookups(section_task)
 
-                    self._resolve_non_contigs(
-                        id_to_charspan, id_to_labels, id_to_tax, non_contig, section, text
+                    LabelStudioJsonToKazuDocumentEncoder._resolve_non_contigs(
+                        id_to_charspan,
+                        id_to_labels,
+                        id_to_tax,
+                        non_contig,
+                        section,
+                        text,
+                        task_data_id,
                     )
 
-                    self._resolve_contigs(
-                        id_to_charspan, id_to_labels, id_to_tax, contig_ents, section, text
+                    LabelStudioJsonToKazuDocumentEncoder._resolve_contigs(
+                        id_to_charspan,
+                        id_to_labels,
+                        id_to_tax,
+                        contig_ents,
+                        section,
+                        text,
+                        task_data_id,
                     )
                     doc.sections.append(section)
             docs.append(doc)
 
         return docs
 
-    def _resolve_contigs(self, id_to_charspan, id_to_labels, id_to_tax, contig_ents, section, text):
+    def get_docs(self):
+        tasks = self.get_all_tasks()
+        return self.ls_json_to_doc(tasks)
+
+    @staticmethod
+    def _resolve_contigs(
+        id_to_charspan, id_to_labels, id_to_tax, contig_ents, section, text, task_id
+    ):
         for span_idx, (start, end) in id_to_charspan.items():
             if span_idx in contig_ents:
                 labels = id_to_labels[span_idx]
@@ -220,7 +245,7 @@ class LabelStudioJsonToKazuDocumentEncoder:
                     for tax in id_to_tax[span_idx]:
                         if len(tax) != 2:
                             print(
-                                f"warning! malformed taxonomy label (prob not a low level term): {tax}"
+                                f"warning! malformed taxonomy label (prob not a low level term): {tax} <{task_id}>"
                             )
                             continue
                         source, idx_str = tax
@@ -236,8 +261,9 @@ class LabelStudioJsonToKazuDocumentEncoder:
                         ent.mappings.add(mapping)
                     section.metadata["gold_entities"].append(ent)
 
+    @staticmethod
     def _resolve_non_contigs(
-        self, id_to_charspan, id_to_labels, id_to_tax, non_contig, section, text
+        id_to_charspan, id_to_labels, id_to_tax, non_contig, section, text, task_id
     ):
         for from_id, to_id_set in non_contig.items():
             for to_id in to_id_set:
@@ -254,7 +280,7 @@ class LabelStudioJsonToKazuDocumentEncoder:
                     for tax in id_to_tax[from_id]:
                         if len(tax) != 2:
                             print(
-                                f"warning! malformed taxonomy label (prob not a low level term): {tax}"
+                                f"warning! malformed taxonomy label (prob not a low level term): {tax} <{task_id}>"
                             )
                             continue
                         source, idx_str = tax
@@ -270,7 +296,8 @@ class LabelStudioJsonToKazuDocumentEncoder:
                         ent.mappings.add(mapping)
                     section.metadata["gold_entities"].append(ent)
 
-    def _populate_task_id_lookups(self, section_task):
+    @staticmethod
+    def _populate_task_id_lookups(section_task):
         if len(section_task["annotations"]) > 1:
             print("warning: more than one annotation section")
         annotation = section_task["annotations"][0]
