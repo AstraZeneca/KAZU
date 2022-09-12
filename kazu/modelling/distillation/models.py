@@ -566,10 +566,10 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         Computes attention based distillation loss and hidden states based distillation loss.
 
         :param batch: The output of DataLoader.
-        :type batch: [type]
         :return: A tuple of tensors. (rep_loss, att_loss)
-        rep_loss: hidden states based distillation loss (includes embedding-layer distillation)
-        att_loss: attention based distillation loss
+
+            rep_loss: hidden states based distillation loss (includes embedding-layer distillation)
+            att_loss: attention based distillation loss
         """
         student_logits, student_atts, student_reps = self.student_model(
             input_ids=batch["input_ids"],
