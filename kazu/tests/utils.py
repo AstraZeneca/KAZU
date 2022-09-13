@@ -40,17 +40,17 @@ requires_model_pack = pytest.mark.skipif(
 )
 
 
-SKIP_MESSAGE_NO_GOLD_STANDARD = """
+SKIP_MESSAGE_NO_LABEL_STUDIO = """
 skipping acceptance test as either LS_PROJECT_NAME, LS_URL_PORT or LS_TOKEN are not provided as an environment variable
 This should indicate the project name and connection/auth information required to retrieve annotations from a 
 Label Studio server where the gold standard annotations are stored.
 """  # noqa
 
-requires_gold_standard = pytest.mark.skipif(
+requires_label_studio = pytest.mark.skipif(
     os.environ.get("LS_PROJECT_NAME") is None
     or os.environ.get("LS_URL_PORT") is None
     or os.environ.get("LS_TOKEN") is None,
-    reason=SKIP_MESSAGE_NO_GOLD_STANDARD,
+    reason=SKIP_MESSAGE_NO_LABEL_STUDIO,
 )
 
 
