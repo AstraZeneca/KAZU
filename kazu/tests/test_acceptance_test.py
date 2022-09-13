@@ -5,7 +5,7 @@ from typing import List, Iterable, Dict, Set, Tuple, DefaultDict
 import pytest
 from kazu.data.data import Entity, Document
 from kazu.pipeline import Pipeline, load_steps
-from kazu.tests.utils import requires_model_pack, requires_gold_standard
+from kazu.tests.utils import requires_model_pack, requires_label_studio
 
 # this applies the require_model_pack mark to all tests in this module
 from kazu.utils.grouping import sort_then_group
@@ -14,16 +14,16 @@ pytestmark = requires_model_pack
 
 
 NER_THRESHOLDS = {
-    "gene": {"precision": 0.30, "recall": 0.30},
-    "disease": {"precision": 0.30, "recall": 0.30},
-    # "drug": {"precision": 0.30, "recall": 0.30},
+    "gene": {"precision": 0.80, "recall": 0.80},
+    "disease": {"precision": 0.70, "recall": 0.80},
+    "drug": {"precision": 0.80, "recall": 0.80},
 }
 
 LINKING_THRESHOLDS = {
-    "MONDO": {"precision": 0.30, "recall": 0.30},
-    "MEDDRA": {"precision": 0.30, "recall": 0.30},
-    # "CHEMBL": {"precision": 0.30, "recall": 0.30},
-    "ENSEMBL": {"precision": 0.30, "recall": 0.30},
+    "MONDO": {"precision": 0.80, "recall": 0.80},
+    "MEDDRA": {"precision": 0.80, "recall": 0.80},
+    "CHEMBL": {"precision": 0.80, "recall": 0.80},
+    "ENSEMBL": {"precision": 0.80, "recall": 0.80},
 }
 
 
@@ -126,12 +126,18 @@ def analyse_ner(
     result = defaultdict(list)
     for doc in docs:
         for section in doc.sections:
-            for entity_class, ents in sort_then_group(
+            gold_ents_by_class = {
+                k: list(v)
+                for k, v in sort_then_group(
+                    section.metadata["gold_entities"], key_func=lambda x: x.entity_class
+                )
+            }
+            for entity_class, test_ents in sort_then_group(
                 section.entities, key_func=lambda x: x.entity_class
             ):
-                gold_ents = section.metadata["gold_entities"]
-                test_ents = section.entities
-                scorer = NerScoring(gold_ents=gold_ents, test_ents=test_ents)
+                scorer = NerScoring(
+                    gold_ents=gold_ents_by_class.get(entity_class, []), test_ents=list(test_ents)
+                )
                 result[entity_class].append(scorer)
 
     return dict(result)
@@ -167,8 +173,11 @@ def aggregate_ner_results(
 
 def aggregate_linking_results(
     class_and_scorers: Dict[str, List[NerScoring]]
-) -> Dict[str, Dict[str, int]]:
+) -> Tuple[Dict[str, Dict[str, int]], DefaultDict[str, DefaultDict[str, Counter[str]]]]:
     result: DefaultDict[str, DefaultDict[str, int]] = defaultdict(lambda: defaultdict(lambda: 0))
+    result_detailed: DefaultDict[str, DefaultDict[str, Counter[str]]] = defaultdict(
+        lambda: defaultdict(lambda: Counter())
+    )
     for _, scorers in class_and_scorers.items():
         for scorer in scorers:
             for (
@@ -178,7 +187,10 @@ def aggregate_linking_results(
                 result[source]["tp"] = result[source]["tp"] + len(results["tp"])
                 result[source]["fp"] = result[source]["fp"] + len(results["fp"])
                 result[source]["fn"] = result[source]["fn"] + len(results["fn"])
-    return dict(result)
+                result_detailed[source]["tp"].update({k: 1 for k in results["tp"]})
+                result_detailed[source]["fp"].update({k: 1 for k in results["fp"]})
+                result_detailed[source]["fn"].update({k: 1 for k in results["fn"]})
+    return dict(result), result_detailed
 
 
 def group_mappings_by_source(gold_ent: Entity, test_ents: Iterable[Entity]):
@@ -221,7 +233,7 @@ def check_ner_results_meet_threshold(
         )
         fp_matches = Counter(ent.match for ent in fp_ents)
         message = "\n".join(
-            f"{k} <missed {v} times>" for k, v in fp_matches.most_common(len(fp_matches))
+            f"{k} <incorrect {v} times>" for k, v in fp_matches.most_common(len(fp_matches))
         )
         if prec < threshold["precision"]:
             pytest.fail(
@@ -229,7 +241,7 @@ def check_ner_results_meet_threshold(
             )
         else:
             print(
-                f"{key} passed precision threshold: {prec}. {tp_soft} / {fp_soft +tp_soft} \n{message}"
+                f"{key} passed precision threshold: {prec}. {tp_soft} / {fp_soft +tp_soft} \n{message}\n\n"
             )
 
         missed_ents = itertools.chain.from_iterable(
@@ -245,11 +257,11 @@ def check_ner_results_meet_threshold(
             )
         else:
             print(
-                f"{key} passed recall threshold: {rec}. {tp_soft} / {fn_soft +tp_soft} \n{message}"
+                f"{key} passed recall threshold: {rec}. {tp_soft} / {fn_soft +tp_soft} \n{message}\n\n"
             )
 
 
-def check_linking_results_meet_threshold(results: Dict[str, Dict[str, int]]):
+def check_linking_results_meet_threshold(results: Dict[str, Dict[str, int]], results_detailed):
 
     for source, threshold in LINKING_THRESHOLDS.items():
         tp = results[source]["tp"]
@@ -259,8 +271,24 @@ def check_linking_results_meet_threshold(results: Dict[str, Dict[str, int]]):
         rec = recall(tp=tp, fn=fn)
         if prec < threshold["precision"] and fp > 0:
             pytest.fail(f"{source} failed to meet precision threshold: {prec}. {tp} / {fp +tp}")
+        else:
+            message = "\n".join(
+                f"{k} <incorrect {v} times>"
+                for k, v in results_detailed[source]["fp"].most_common(
+                    len(results_detailed[source]["fp"])
+                )
+            )
+            print(f"{source} passed precision threshold: {prec}. {tp} / {fp +tp} \n{message}\n\n")
         if rec < threshold["recall"] and fn > 0:
             pytest.fail(f"{source} failed to meet recall threshold: {rec}. {tp} / {fn +tp}")
+        else:
+            message = "\n".join(
+                f"{k} <missed {v} times>"
+                for k, v in results_detailed[source]["fn"].most_common(
+                    len(results_detailed[source]["fn"])
+                )
+            )
+            print(f"{source} passed recall threshold: {rec}. {tp} / {fn +tp} \n{message}\n\n")
 
 
 def analyse_full_pipeline(pipeline: Pipeline, docs: List[Document]):
@@ -271,13 +299,13 @@ def analyse_full_pipeline(pipeline: Pipeline, docs: List[Document]):
         results=ner_results, thresholds=NER_THRESHOLDS, ner_scorer_dict=ner_dict
     )
 
-    linking_results = aggregate_linking_results(ner_dict)
-    check_linking_results_meet_threshold(linking_results)
+    linking_results, linking_results_detailed = aggregate_linking_results(ner_dict)
+    check_linking_results_meet_threshold(linking_results, linking_results_detailed)
 
 
-@requires_gold_standard
+@requires_label_studio
 @requires_model_pack
-def test_full_pipeline(override_kazu_test_config, acceptance_test_docs):
+def test_full_pipeline(override_kazu_test_config, label_studio_manager):
 
     cfg = override_kazu_test_config(
         overrides=["pipeline=acceptance_test"],
@@ -285,4 +313,114 @@ def test_full_pipeline(override_kazu_test_config, acceptance_test_docs):
 
     # TODO - needs futher work/testing
     pipeline = Pipeline(load_steps(cfg=cfg))
-    analyse_full_pipeline(pipeline, acceptance_test_docs)
+    analyse_full_pipeline(pipeline, label_studio_manager)
+
+
+def check_annotation_consistency(docs: List[Document]):
+    all_ents = []
+    ent_to_task_lookup = {}
+    for doc in docs:
+        for section in doc.sections:
+            ents = section.metadata["gold_entities"]
+            all_ents.extend(ents)
+            ent_to_task_lookup.update(
+                {ent: str(section.metadata["label_studio_task_id"]) for ent in ents}
+            )
+
+    all_messages = defaultdict(set)
+    for match_str, ents_iter in sort_then_group(all_ents, lambda x: x.match):
+        ents = list(ents_iter)
+        for doc_id, messages in check_ent_match_abnormalities(
+            ent_to_task_lookup, ents, match_str
+        ).items():
+            all_messages[doc_id].update(messages)
+        for doc_id, messages in check_ent_class_consistency(
+            ent_to_task_lookup, ents, match_str
+        ).items():
+            all_messages[doc_id].update(messages)
+        for doc_id, messages in check_ent_mapping_consistency(
+            ent_to_task_lookup, ents, match_str
+        ).items():
+            all_messages[doc_id].update(messages)
+
+    print(f"{len(all_messages)} tasks with issues:\n")
+    for doc_id in sorted(all_messages):
+        print(f"\ntask id: {doc_id}\n" + "*" * 20 + "\n" + "\n".join(all_messages[doc_id]))
+
+
+def check_ent_match_abnormalities(ent_to_doc_lookup, ents, match_str: str):
+    task_and_messages = defaultdict(set)
+    if len(match_str) == 1 or (
+        len(match_str) == 2 and not all(char.isalnum() for char in match_str)
+    ):
+        for ent in ents:
+            task_and_messages[ent_to_doc_lookup[ent]].add(
+                f"WARNING: ent string <{match_str}> is abnormal (single char entity)"
+            )
+    return task_and_messages
+
+
+def check_ent_class_consistency(ent_to_doc_lookup, ents, match_str):
+    task_and_messages = defaultdict(set)
+    by_class = defaultdict(set)
+    by_ent = defaultdict(set)
+    for ent in ents:
+        by_class[ent.entity_class].add(ent)
+        by_ent[ent].add(ent.entity_class)
+
+    if len(by_class) > 1:
+        by_doc = defaultdict(set)
+        for ent in ents:
+            by_doc[ent_to_doc_lookup[ent]].update(by_ent[ent])
+        message = "\n".join(f"{doc_id}:{classes}" for doc_id, classes in by_doc.items())
+        for doc_id, classes in by_doc.items():
+            task_and_messages[doc_id].add(
+                f"WARNING: ent string <{match_str}> is class confused in the following documents:\n{message}"
+            )
+    return task_and_messages
+
+
+def check_ent_mapping_consistency(ent_to_doc_lookup, ents, match_str):
+    task_and_messages = defaultdict(set)
+    mappings_to_doc_id = defaultdict(set)
+    for ent in ents:
+        mappings_to_doc_id[frozenset(ent.mappings)].add(ent_to_doc_lookup[ent])
+
+    if len(mappings_to_doc_id) > 1:
+        group_definitions = set()
+        doc_id_to_groups = defaultdict(set)
+        for i, (mappings, doc_ids) in enumerate(mappings_to_doc_id.items()):
+            group_key = f"group_{i}:\n"
+            group_msg = (
+                "\n".join(
+                    f"{mapping.source}|{mapping.default_label}|{mapping.idx}"
+                    for mapping in mappings
+                )
+                if len(mappings) > 0
+                else "<NONE>"
+            )
+            group_msg = group_key + group_msg + "\n"
+            group_definitions.add(group_msg)
+            for doc_id in doc_ids:
+                doc_id_to_groups[doc_id].add(group_key)
+
+        group_definition_message = "\n".join(group_definitions)
+        confused_docs_message = "\n".join(
+            f"{doc_id}:{sorted(groups)}" for doc_id, groups in sorted(doc_id_to_groups.items())
+        )
+
+        for doc_id in doc_id_to_groups:
+            message = (
+                f"WARNING: ent string <{match_str}> has inconsistent mappings. This may be a genuine ambiguity or "
+                f"a mistake in annotation: \n\n {group_definition_message} \n\naffected tasks:"
+                f"\n {confused_docs_message}\n"
+            )
+
+            task_and_messages[doc_id].add(message)
+
+    return task_and_messages
+
+
+@requires_label_studio
+def test_gold_standard_consistency(label_studio_manager):
+    check_annotation_consistency(label_studio_manager.export_from_ls())
