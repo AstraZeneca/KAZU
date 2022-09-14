@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 import itertools
 import json
 import logging
@@ -19,9 +20,19 @@ _TAX_NON_CONTIG_NAME = "tax-non-contig"
 _IS_CONTIG = "is-contig"
 
 
+@dataclasses.dataclass
+class EntityRegionLabels:
+    is_contig: bool
+    mappings: Set[Tuple[str, str]]
+    entity_class: str
+    namespace: str
+
+
 class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
     """
     json.JSONEncoder that converts a kazu Document into Label Studio tasks
+    since LS is region based, we need ot create a new region for every CharSpan (even overlapping ones),
+    and add entity information (class, mappings etc) to the region.
     """
 
     def default(self, obj):
@@ -35,94 +46,74 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
                 data["text"] = section.text
                 data["id"] = idx
                 annotations = []
-                result_values = self._extract_result_values(section.entities, idx, section.text)
+                result_values = self._create_label_studio_labels(section.entities, section.text)
                 annotation = {"id": idx, "result": result_values}
                 annotations.append(annotation)
                 result.append({"data": data, "annotations": annotations})
             return result
 
     @staticmethod
-    def create_region_id_to_entity_map(entities: List[Entity]) -> Dict[int, Entity]:
-        hash_to_ent = {}
-
-        for ent in entities:
-            hash_to_ent[hash(ent)] = ent
-        return hash_to_ent
-
-    @staticmethod
-    def _extract_result_values(entities: List[Entity], idx: str, text: str) -> List[Dict]:
-        """
-        since label studio uses a region based system (i.e contiguous regions of text, equivalent to a CharSpan),
-        we need to produce labels based on each charspan an entity produces
-        :param entities:
-        :param idx:
-        :param namespace:
-        :return:
-        """
-
-        hash_to_ent = {hash(ent): ent for ent in entities}
-        return KazuToLabelStudioDocumentEncoder.create_region_labels(hash_to_ent, text)
-
-    @staticmethod
-    def create_region_labels(
-        hash_to_ent: Dict[int, Entity],
+    def _create_label_studio_labels(
+        entities: List[Entity],
         text: str,
     ) -> List[Dict]:
         result_values: List[Dict] = []
-        for ent_hash, ent in hash_to_ent.items():
+        for ent in entities:
             region_ids = []
             for span in ent.spans:
-                region_id_str = f"{ent_hash}_{span}"
+                region_id_str = f"{hash(ent)}_{span}"
                 region_ids.append(region_id_str)
                 match = text[span.start : span.end]
-                is_contig = len(ent.spans) == 1
-                (
-                    region_labels_dict,
-                    region_mappings_dict,
-                ) = KazuToLabelStudioDocumentEncoder.extract_labels_from_region(ent)
-                ner_labels: Set[str] = region_labels_dict["ner"]
-                ner_region = KazuToLabelStudioDocumentEncoder.create_ner_region(
-                    ner_labels, region_id_str, span, match
+                entity_region_labels = (
+                    KazuToLabelStudioDocumentEncoder._extract_region_labels_from_entity(ent)
+                )
+                ner_region = KazuToLabelStudioDocumentEncoder._create_ner_region(
+                    entity_region_labels.entity_class, region_id_str, span, match
                 )
                 result_values.append(ner_region)
 
-                contig_status_region = KazuToLabelStudioDocumentEncoder.create_contig_status_region(
-                    region_id=region_id_str, span=span, match=match, is_contig=is_contig
+                contig_status_region = (
+                    KazuToLabelStudioDocumentEncoder._create_contig_status_region(
+                        region_id=region_id_str,
+                        span=span,
+                        match=match,
+                        is_contig=entity_region_labels.is_contig,
+                    )
                 )
                 result_values.append(contig_status_region)
 
-                result_contig_normalisation_value = (
-                    KazuToLabelStudioDocumentEncoder.create_mapping_region(
-                        region_mappings_dict.get(_TAX_CONTIG_NAME, {}),
-                        region_id_str,
-                        span,
-                        match,
-                        _TAX_CONTIG_NAME,
+                if entity_region_labels.is_contig:
+                    result_normalisation_value = (
+                        KazuToLabelStudioDocumentEncoder._create_mapping_region(
+                            entity_region_labels.mappings,
+                            region_id_str,
+                            span,
+                            match,
+                            _TAX_CONTIG_NAME,
+                        )
                     )
-                )
-                result_values.append(result_contig_normalisation_value)
-
-                result_non_contig_normalisation_value = (
-                    KazuToLabelStudioDocumentEncoder.create_mapping_region(
-                        region_mappings_dict.get(_TAX_NON_CONTIG_NAME, {}),
-                        region_id_str,
-                        span,
-                        match,
-                        _TAX_NON_CONTIG_NAME,
+                else:
+                    result_normalisation_value = (
+                        KazuToLabelStudioDocumentEncoder._create_mapping_region(
+                            entity_region_labels.mappings,
+                            region_id_str,
+                            span,
+                            match,
+                            _TAX_NON_CONTIG_NAME,
+                        )
                     )
-                )
-                result_values.append(result_non_contig_normalisation_value)
+                result_values.append(result_normalisation_value)
             if len(region_ids) > 1:
                 for from_id, to_id in itertools.combinations(region_ids, r=2):
                     result_values.append(
-                        KazuToLabelStudioDocumentEncoder.create_non_contig_entity_links(
+                        KazuToLabelStudioDocumentEncoder._create_non_contig_entity_links(
                             from_id, to_id
                         )
                     )
         return result_values
 
     @staticmethod
-    def create_non_contig_entity_links(from_id: str, to_id: str):
+    def _create_non_contig_entity_links(from_id: str, to_id: str):
         result_discontiguous_value = {
             "from_id": from_id,
             "to_id": to_id,
@@ -133,7 +124,16 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
         return result_discontiguous_value
 
     @staticmethod
-    def create_contig_status_region(region_id: str, span: CharSpan, match: str, is_contig: bool):
+    def _create_contig_status_region(region_id: str, span: CharSpan, match: str, is_contig: bool):
+        """
+        we need a special label to indicate whether a region is a contiguous or non-contiguous entity, in order
+        to reconsitute entities correction in the conversion from LS ->Kazu
+        :param region_id:
+        :param span:
+        :param match:
+        :param is_contig:
+        :return:
+        """
         return {
             "id": region_id,
             "from_name": _IS_CONTIG,
@@ -150,13 +150,22 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
         }
 
     @staticmethod
-    def create_mapping_region(
+    def _create_mapping_region(
         mappings: Iterable[Tuple[str, str]],
         region_id: str,
         span: CharSpan,
         match: str,
         from_name: str,
     ):
+        """
+        mappings need to be attached to either a contig or non-contig "from_name", otherwise it's not
+        :param mappings:
+        :param region_id:
+        :param span:
+        :param match:
+        :param from_name:
+        :return:
+        """
         return {
             "id": region_id,
             "from_name": from_name,
@@ -180,7 +189,7 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
         }
 
     @staticmethod
-    def create_ner_region(ner_labels: Set[str], region_id: str, span: CharSpan, match: str):
+    def _create_ner_region(ner_label: str, region_id: str, span: CharSpan, match: str):
         return {
             "id": region_id,
             "from_name": "ner",
@@ -192,34 +201,28 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
                 "end": span.end,
                 "score": 1.0,
                 "text": match,
-                "labels": list(ner_labels),
+                "labels": [ner_label],
             },
         }
 
     @staticmethod
-    def extract_labels_from_region(
+    def _extract_region_labels_from_entity(
         ent: Entity,
-    ) -> Tuple[Dict[str, Set[str]], Dict[str, Set[Tuple[str, str]]]]:
-        result: DefaultDict[str, Set[str]] = defaultdict(set)
-        result_mappings: DefaultDict[str, Set[Tuple[str, str]]] = defaultdict(set)
-        result["ner"].add(ent.entity_class)
-        result["namespace"].add(ent.namespace)
-        if len(ent.spans) > 1:
-            for mapping in ent.mappings:
-                result_mappings[_TAX_NON_CONTIG_NAME].add(
-                    (mapping.source, f"{mapping.default_label}|{mapping.idx}")
-                )
-        else:
-            for mapping in ent.mappings:
-                result_mappings[_TAX_CONTIG_NAME].add(
-                    (mapping.source, f"{mapping.default_label}|{mapping.idx}")
-                )
-        return dict(result), dict(result_mappings)
+    ) -> EntityRegionLabels:
+        mappings = {
+            (mapping.source, f"{mapping.default_label}|{mapping.idx}") for mapping in ent.mappings
+        }
+        return EntityRegionLabels(
+            is_contig=len(ent.spans) == 1,
+            mappings=mappings,
+            entity_class=ent.entity_class,
+            namespace=ent.namespace,
+        )
 
 
 class LSToKazuConversion:
-    def __init__(self, task: Dict, ent_class_to_ontology_map: Dict[str, List[str]]):
-        self.ent_class_to_ontology_map = ent_class_to_ontology_map
+    def __init__(self, task: Dict):
+        # self.ent_class_to_ontology_map = ent_class_to_ontology_map
         self._populate_lookups(task)
 
     def _populate_lookups(self, task: Dict):
@@ -330,18 +333,17 @@ class LSToKazuConversion:
                 )
                 continue
             source, idx_str = tax
-            if source in self.ent_class_to_ontology_map:
-                default_label, idx = idx_str.split("|")
-                mappings.append(
-                    Mapping(
-                        default_label=default_label,
-                        source=source,
-                        parser_name="gold",
-                        idx=idx,
-                        strategy="gold",
-                        confidence=LinkRanks.HIGHLY_LIKELY,
-                    )
+            default_label, idx = idx_str.split("|")
+            mappings.append(
+                Mapping(
+                    default_label=default_label,
+                    source=source,
+                    parser_name="gold",
+                    idx=idx,
+                    strategy="gold",
+                    confidence=LinkRanks.HIGHLY_LIKELY,
                 )
+            )
         return mappings
 
     def create_contig_ents(self) -> List[Entity]:
@@ -365,13 +367,8 @@ class LSToKazuConversion:
                     entities.append(ent)
         return entities
 
-
-class LabelStudioJsonToKazuDocumentEncoder:
-    def __init__(self, ent_class_to_ontology_map: Dict[str, List[str]]):
-
-        self.ent_class_to_ontology_map = ent_class_to_ontology_map
-
-    def convert(self, tasks: Dict) -> List[Document]:
+    @staticmethod
+    def convert_tasks_to_docs(tasks: Dict) -> List[Document]:
         # group by first part of doc ID to get sections of multi part docs
         by_doc_id = sort_then_group(tasks, key_func=lambda x: x["data"]["id"].split("_")[0])
         docs = []
@@ -382,7 +379,7 @@ class LabelStudioJsonToKazuDocumentEncoder:
             )
             for _, section_tasks_iter in by_section:
                 for section_task in section_tasks_iter:
-                    converter = LSToKazuConversion(section_task, self.ent_class_to_ontology_map)
+                    converter = LSToKazuConversion(section_task)
                     section = Section(text=converter.text, name=converter.task_data_id)
                     section.metadata["label_studio_task_id"] = converter.label_studio_task_id
 
@@ -391,6 +388,31 @@ class LabelStudioJsonToKazuDocumentEncoder:
             docs.append(doc)
 
         return docs
+
+
+# class LabelStudioJsonToKazuDocumentEncoder:
+#
+#
+#     def convert(self, tasks: Dict) -> List[Document]:
+#         # group by first part of doc ID to get sections of multi part docs
+#         by_doc_id = sort_then_group(tasks, key_func=lambda x: x["data"]["id"].split("_")[0])
+#         docs = []
+#         for doc_id, tasks_iter in by_doc_id:
+#             doc = Document(idx=doc_id)
+#             by_section = sort_then_group(
+#                 tasks_iter, key_func=lambda x: tuple(x["data"]["id"].split("_")[1:])
+#             )
+#             for _, section_tasks_iter in by_section:
+#                 for section_task in section_tasks_iter:
+#                     converter = LSToKazuConversion(section_task)
+#                     section = Section(text=converter.text, name=converter.task_data_id)
+#                     section.metadata["label_studio_task_id"] = converter.label_studio_task_id
+#
+#                     section.metadata["gold_entities"] = converter.create_entities()
+#                     doc.sections.append(section)
+#             docs.append(doc)
+#
+#         return docs
 
 
 class LabelStudioAnnotationView:
@@ -651,6 +673,6 @@ class LabelStudioManager:
             )
         return task_data
 
-    def export_from_ls(self, encoder: LabelStudioJsonToKazuDocumentEncoder) -> List[Document]:
+    def export_from_ls(self) -> List[Document]:
         tasks = self.get_all_tasks()
-        return encoder.convert(tasks)
+        return LSToKazuConversion.convert_tasks_to_docs(tasks)
