@@ -313,7 +313,7 @@ def test_full_pipeline(override_kazu_test_config, label_studio_manager):
 
     # TODO - needs futher work/testing
     pipeline = Pipeline(load_steps(cfg=cfg))
-    analyse_full_pipeline(pipeline, label_studio_manager)
+    analyse_full_pipeline(pipeline, label_studio_manager.export_from_ls())
 
 
 def check_annotation_consistency(docs: List[Document]):
@@ -422,5 +422,5 @@ def check_ent_mapping_consistency(ent_to_doc_lookup, ents, match_str):
 
 
 @requires_label_studio
-def test_gold_standard_consistency(label_studio_manager):
+def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
     check_annotation_consistency(label_studio_manager.export_from_ls())
