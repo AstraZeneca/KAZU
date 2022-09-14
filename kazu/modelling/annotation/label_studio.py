@@ -1,10 +1,9 @@
 import copy
-import dataclasses
 import itertools
 import json
 import logging
 from collections import defaultdict
-from typing import Dict, Tuple, Set, List, Iterable, DefaultDict, Optional
+from typing import Dict, Tuple, Set, List, Iterable, Optional
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
@@ -15,17 +14,7 @@ from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
 
-_TAX_CONTIG_NAME = "tax-contig"
-_TAX_NON_CONTIG_NAME = "tax-non-contig"
-_IS_CONTIG = "is-contig"
-
-
-@dataclasses.dataclass
-class EntityRegionLabels:
-    is_contig: bool
-    mappings: Set[Tuple[str, str]]
-    entity_class: str
-    namespace: str
+_TAX_NAME = "taxonomy"
 
 
 class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
@@ -60,48 +49,20 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
         result_values: List[Dict] = []
         for ent in entities:
             region_ids = []
+            ent_hash = hash(ent)
             for span in ent.spans:
-                region_id_str = f"{hash(ent)}_{span}"
+                region_id_str = f"{ent_hash}_{span}"
                 region_ids.append(region_id_str)
                 match = text[span.start : span.end]
-                entity_region_labels = (
-                    KazuToLabelStudioDocumentEncoder._extract_region_labels_from_entity(ent)
-                )
                 ner_region = KazuToLabelStudioDocumentEncoder._create_ner_region(
-                    entity_region_labels.entity_class, region_id_str, span, match
+                    ent, region_id_str, span, match
                 )
                 result_values.append(ner_region)
-
-                contig_status_region = (
-                    KazuToLabelStudioDocumentEncoder._create_contig_status_region(
-                        region_id=region_id_str,
-                        span=span,
-                        match=match,
-                        is_contig=entity_region_labels.is_contig,
+                result_normalisation_value = (
+                    KazuToLabelStudioDocumentEncoder._create_mapping_region(
+                        ent, region_id_str, span, match
                     )
                 )
-                result_values.append(contig_status_region)
-
-                if entity_region_labels.is_contig:
-                    result_normalisation_value = (
-                        KazuToLabelStudioDocumentEncoder._create_mapping_region(
-                            entity_region_labels.mappings,
-                            region_id_str,
-                            span,
-                            match,
-                            _TAX_CONTIG_NAME,
-                        )
-                    )
-                else:
-                    result_normalisation_value = (
-                        KazuToLabelStudioDocumentEncoder._create_mapping_region(
-                            entity_region_labels.mappings,
-                            region_id_str,
-                            span,
-                            match,
-                            _TAX_NON_CONTIG_NAME,
-                        )
-                    )
                 result_values.append(result_normalisation_value)
             if len(region_ids) > 1:
                 for from_id, to_id in itertools.combinations(region_ids, r=2):
@@ -114,61 +75,19 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
 
     @staticmethod
     def _create_non_contig_entity_links(from_id: str, to_id: str):
-        result_discontiguous_value = {
+        return {
             "from_id": from_id,
             "to_id": to_id,
             "type": "relation",
             "direction": "right",
             "labels": ["non-contig"],
         }
-        return result_discontiguous_value
 
     @staticmethod
-    def _create_contig_status_region(region_id: str, span: CharSpan, match: str, is_contig: bool):
-        """
-        we need a special label to indicate whether a region is a contiguous or non-contiguous entity, in order
-        to reconsitute entities correction in the conversion from LS ->Kazu
-        :param region_id:
-        :param span:
-        :param match:
-        :param is_contig:
-        :return:
-        """
+    def _create_mapping_region(ent: Entity, region_id: str, span: CharSpan, match: str):
         return {
             "id": region_id,
-            "from_name": _IS_CONTIG,
-            "to_name": "text",
-            "type": "choices",
-            "origin": "manual",
-            "value": {
-                "start": span.start,
-                "end": span.end,
-                "score": 1.0,
-                "text": match,
-                "choices": ["True" if is_contig else "False"],
-            },
-        }
-
-    @staticmethod
-    def _create_mapping_region(
-        mappings: Iterable[Tuple[str, str]],
-        region_id: str,
-        span: CharSpan,
-        match: str,
-        from_name: str,
-    ):
-        """
-        mappings need to be attached to either a contig or non-contig "from_name", otherwise it's not
-        :param mappings:
-        :param region_id:
-        :param span:
-        :param match:
-        :param from_name:
-        :return:
-        """
-        return {
-            "id": region_id,
-            "from_name": from_name,
+            "from_name": _TAX_NAME,
             "to_name": "text",
             "type": "taxonomy",
             "origin": "manual",
@@ -177,19 +96,14 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
                 "end": span.end,
                 "text": match,
                 "taxonomy": sorted(
-                    set(
-                        (
-                            mapping[0],
-                            mapping[1],
-                        )
-                        for mapping in mappings
-                    )
+                    (mapping.source, f"{mapping.default_label}|{mapping.idx}")
+                    for mapping in ent.mappings
                 ),
             },
         }
 
     @staticmethod
-    def _create_ner_region(ner_label: str, region_id: str, span: CharSpan, match: str):
+    def _create_ner_region(ent: Entity, region_id: str, span: CharSpan, match: str):
         return {
             "id": region_id,
             "from_name": "ner",
@@ -201,23 +115,9 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
                 "end": span.end,
                 "score": 1.0,
                 "text": match,
-                "labels": [ner_label],
+                "labels": [ent.entity_class],
             },
         }
-
-    @staticmethod
-    def _extract_region_labels_from_entity(
-        ent: Entity,
-    ) -> EntityRegionLabels:
-        mappings = {
-            (mapping.source, f"{mapping.default_label}|{mapping.idx}") for mapping in ent.mappings
-        }
-        return EntityRegionLabels(
-            is_contig=len(ent.spans) == 1,
-            mappings=mappings,
-            entity_class=ent.entity_class,
-            namespace=ent.namespace,
-        )
 
 
 class LSToKazuConversion:
@@ -230,25 +130,18 @@ class LSToKazuConversion:
         self.task_data_id = task["data"]["id"]
         self.label_studio_task_id = task["id"]
         if len(task["annotations"]) > 1:
-            print("warning: more than one annotation section")
+            logger.warning(
+                f"warning: more than one annotation section. Will only use annotations from {task['annotations'][0]['id']}"
+            )
 
         annotation = task["annotations"][0]
         result = annotation["result"]
 
         self.id_to_charspan: Dict[str, CharSpan] = {}
         self.id_to_labels: Dict[str, Set[str]] = defaultdict(set)
-        self.non_contig_span_to_labels: Dict[CharSpan, Set[str]] = defaultdict(set)
-        self.id_to_contig_mappings: Dict[str, Set[Mapping]] = defaultdict(set)
-        self.id_to_noncontig_mappings: Dict[str, Set[Mapping]] = defaultdict(set)
+        self.id_to_mappings: Dict[str, Set[Mapping]] = defaultdict(set)
         self.non_contig_id_map: Dict[str, Set[str]] = defaultdict(set)
-
-        self.id_is_contig: Dict[str, bool] = {}
-
-        # first identify whether the region is part of a contig ent or not
-        for result_data in filter(
-            lambda x: (x["type"] == "choices" and x["from_name"] == _IS_CONTIG), result
-        ):
-            self.id_is_contig[result_data["id"]] = "True" in result_data["value"]["choices"]
+        self.non_contig_regions = set()
 
         for is_region, result_iter in sort_then_group(result, key_func=lambda x: "id" in x):
             if is_region:
@@ -263,64 +156,21 @@ class LSToKazuConversion:
                         self.id_to_charspan[region_id] = span
                         if data_type == "labels":
                             self.id_to_labels[region_id].update(result_data["value"]["labels"])
-                        elif data_type == "choices":
-                            self.id_is_contig[region_id] = "True" in result_data["value"]["choices"]
-                        elif result_data["from_name"] == _TAX_CONTIG_NAME:
-                            self.id_to_contig_mappings[region_id].update(
-                                self.create_mappings(result_data["value"]["taxonomy"], region_id)
-                            )
-                        elif result_data["from_name"] == _TAX_NON_CONTIG_NAME:
-                            self.id_to_noncontig_mappings[region_id].update(
+                        elif data_type == "taxonomy":
+                            self.id_to_mappings[region_id].update(
                                 self.create_mappings(result_data["value"]["taxonomy"], region_id)
                             )
             else:
                 for result_data in result_iter:
                     self.non_contig_id_map[result_data["from_id"]].add(result_data["to_id"])
+                    self.non_contig_regions.add(result_data["from_id"])
+                    self.non_contig_regions.add(result_data["to_id"])
 
     def create_section(self) -> Section:
         section = Section(text=self.text, name=self.task_data_id)
         section.metadata["label_studio_task_id"] = self.label_studio_task_id
-        section.metadata["gold_entities"] = self.create_entities()
+        section.metadata["gold_entities"] = self.create_ents()
         return section
-
-    def create_entities(
-        self,
-    ) -> List[Entity]:
-
-        entities = self.create_non_contig_ents()
-        entities.extend(self.create_contig_ents())
-        return entities
-
-    def create_non_contig_ents(
-        self,
-    ) -> List[Entity]:
-        entities = []
-        for from_id, to_id_set in self.non_contig_id_map.items():
-            for to_id in to_id_set:
-                from_span = self.id_to_charspan[from_id]
-                to_span = self.id_to_charspan[to_id]
-                # we need to check from_id and to_id have matching labels
-                labels = self.id_to_labels[from_id].intersection(self.id_to_labels[to_id])
-                for label in labels:
-                    ent = Entity.from_spans(
-                        spans=[
-                            (
-                                to_span.start,
-                                to_span.end,
-                            ),
-                            (
-                                from_span.start,
-                                from_span.end,
-                            ),
-                        ],
-                        join_str=" ",
-                        namespace="gold",
-                        entity_class=label,
-                        text=self.text,
-                    )
-                    ent.mappings = copy.deepcopy(self.id_to_noncontig_mappings.get(from_id, set()))
-                    entities.append(ent)
-        return entities
 
     def create_mappings(
         self, taxonomy_hits: Iterable[Tuple[str, str]], task_id: str
@@ -346,29 +196,67 @@ class LSToKazuConversion:
             )
         return mappings
 
-    def create_contig_ents(self) -> List[Entity]:
+    def create_ents(self) -> List[Entity]:
         entities = []
         for region_id, span in self.id_to_charspan.items():
-            if self.id_is_contig[region_id]:
+            if region_id not in self.non_contig_regions:
                 for label in self.id_to_labels[region_id]:
-                    ent = Entity.from_spans(
-                        spans=[
-                            (
-                                span.start,
-                                span.end,
-                            )
-                        ],
-                        join_str=" ",
-                        namespace="gold",
-                        entity_class=label,
-                        text=self.text,
-                    )
-                    ent.mappings = copy.deepcopy(self.id_to_contig_mappings.get(region_id, set()))
+                    ent = self._create_contiguous_entity(label, region_id, span)
                     entities.append(ent)
+            elif region_id in self.non_contig_id_map:
+                entities.extend(self._create_non_contiguous_entities(region_id))
         return entities
 
+    def _create_non_contiguous_entities(self, region_id: str) -> List[Entity]:
+        non_contig_entities = []
+        for to_id in self.non_contig_id_map[region_id]:
+            from_span = self.id_to_charspan[region_id]
+            to_span = self.id_to_charspan[to_id]
+            # we need to check from_id and to_id have matching labels
+            labels = self.id_to_labels[region_id].intersection(self.id_to_labels[to_id])
+            for label in labels:
+                ent = Entity.from_spans(
+                    spans=[
+                        (
+                            to_span.start,
+                            to_span.end,
+                        ),
+                        (
+                            from_span.start,
+                            from_span.end,
+                        ),
+                    ],
+                    join_str=" ",
+                    namespace="gold",
+                    entity_class=label,
+                    text=self.text,
+                )
+                # since independent regions might have different mapping values, we merge them all
+                # ideally this wouldn't happen if human annotation is consistent
+                mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
+                mappings.update(copy.deepcopy(self.id_to_mappings.get(to_id, set())))
+                ent.mappings = mappings
+                non_contig_entities.append(ent)
+        return non_contig_entities
+
+    def _create_contiguous_entity(self, label, region_id, span):
+        ent = Entity.from_spans(
+            spans=[
+                (
+                    span.start,
+                    span.end,
+                )
+            ],
+            join_str=" ",
+            namespace="gold",
+            entity_class=label,
+            text=self.text,
+        )
+        ent.mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
+        return ent
+
     @staticmethod
-    def convert_tasks_to_docs(tasks: Dict) -> List[Document]:
+    def convert_tasks_to_docs(tasks: List[Dict]) -> List[Document]:
         # group by first part of doc ID to get sections of multi part docs
         by_doc_id = sort_then_group(tasks, key_func=lambda x: x["data"]["id"].split("_")[0])
         docs = []
@@ -382,37 +270,11 @@ class LSToKazuConversion:
                     converter = LSToKazuConversion(section_task)
                     section = Section(text=converter.text, name=converter.task_data_id)
                     section.metadata["label_studio_task_id"] = converter.label_studio_task_id
-
-                    section.metadata["gold_entities"] = converter.create_entities()
+                    section.metadata["gold_entities"] = converter.create_ents()
                     doc.sections.append(section)
             docs.append(doc)
 
         return docs
-
-
-# class LabelStudioJsonToKazuDocumentEncoder:
-#
-#
-#     def convert(self, tasks: Dict) -> List[Document]:
-#         # group by first part of doc ID to get sections of multi part docs
-#         by_doc_id = sort_then_group(tasks, key_func=lambda x: x["data"]["id"].split("_")[0])
-#         docs = []
-#         for doc_id, tasks_iter in by_doc_id:
-#             doc = Document(idx=doc_id)
-#             by_section = sort_then_group(
-#                 tasks_iter, key_func=lambda x: tuple(x["data"]["id"].split("_")[1:])
-#             )
-#             for _, section_tasks_iter in by_section:
-#                 for section_task in section_tasks_iter:
-#                     converter = LSToKazuConversion(section_task)
-#                     section = Section(text=converter.text, name=converter.task_data_id)
-#                     section.metadata["label_studio_task_id"] = converter.label_studio_task_id
-#
-#                     section.metadata["gold_entities"] = converter.create_entities()
-#                     doc.sections.append(section)
-#             docs.append(doc)
-#
-#         return docs
 
 
 class LabelStudioAnnotationView:
@@ -445,24 +307,6 @@ class LabelStudioAnnotationView:
 
     @classmethod
     def build_labels(cls, dom: XMLDocument, element: Element):
-        """
-              <Labels name="label" toName="text" choice="multiple">
-            <Label value="cell_line" background="red"/>
-            <Label value="cell_type" background="darkorange"/>
-            <Label value="disease" background="orange"/>
-            <Label value="drug" background="yellow"/>
-            <Label value="gene" background="green"/>
-            <Label value="species" background="purple"/>
-            <Label value="anatomy" background="pink"/>
-            <Label value="go_mf" background="grey"/>
-            <Label value="go_cc" background="blue"/>
-            <Label value="go_bp" background="brown"/>
-          </Labels>
-
-        :param dom:
-        :param element:
-        :return:
-        """
         labels = dom.createElement("Labels")
         labels.setAttribute("name", "ner")
         labels.setAttribute("toName", "text")
@@ -476,20 +320,6 @@ class LabelStudioAnnotationView:
 
     @staticmethod
     def build_taxonomy(dom: XMLDocument, element: Element, tasks: List[Dict], name: str):
-        """
-            <Taxonomy visibleWhen="region-selected" name="taxonomy" toName="text" perRegion="true">
-          <Choice value="Archaea" />
-          <Choice value="Bacteria" />
-          <Choice value="Eukarya">
-            <Choice value="Human" />
-            <Choice value="Oppossum" />
-            <Choice value="Extraterrestial" />
-          </Choice>
-        </Taxonomy>
-         :param dom:
-         :param element:
-         :return:
-        """
         taxonomy = dom.createElement("Taxonomy")
         element.appendChild(taxonomy)
         taxonomy.setAttribute("visibleWhen", "region-selected")
@@ -505,7 +335,9 @@ class LabelStudioAnnotationView:
                         tax_data = result["value"]["taxonomy"]
                         for tax in tax_data:
                             if len(tax) != 2:
-                                print(f"needs source: {task['data']['id']}, {tax}")
+                                logger.warning(
+                                    f"taxonomy data malformed: {task['data']['id']}, {tax}"
+                                )
                             else:
                                 label, idx = tax[1].split("|")
                                 things_to_map.add(
@@ -538,19 +370,6 @@ class LabelStudioAnnotationView:
         view3i = dom.createElement("View")
         view2.appendChild(view3i)
 
-        choices = dom.createElement("Choices")
-        view3i.appendChild(choices)
-        choices.setAttribute("name", _IS_CONTIG)
-        choices.setAttribute("toName", "text")
-        choices.setAttribute("perRegion", "true")
-        choices.setAttribute("required", "true")
-        choice1 = dom.createElement("Choice")
-        choice2 = dom.createElement("Choice")
-        choice1.setAttribute("value", "True")
-        choice2.setAttribute("value", "False")
-        choices.appendChild(choice1)
-        choices.appendChild(choice2)
-
         relations = dom.createElement("Relations")
         view3i.appendChild(relations)
         relation = dom.createElement("Relation")
@@ -568,8 +387,7 @@ class LabelStudioAnnotationView:
         view3iii = dom.createElement("View")
         view2.appendChild(view3iii)
 
-        LabelStudioAnnotationView.build_taxonomy(dom, view3iii, tasks, _TAX_CONTIG_NAME)
-        LabelStudioAnnotationView.build_taxonomy(dom, view3iii, tasks, _TAX_NON_CONTIG_NAME)
+        LabelStudioAnnotationView.build_taxonomy(dom, view3iii, tasks, _TAX_NAME)
 
         view3iiii = dom.createElement("View")
         view2.appendChild(view3iiii)
