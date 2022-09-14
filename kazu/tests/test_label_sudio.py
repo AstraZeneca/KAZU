@@ -3,10 +3,7 @@ import os
 import pytest
 
 from kazu.data.data import Document, Entity, Mapping, LinkRanks
-from kazu.modelling.annotation.label_studio import (
-    LabelStudioManager,
-    LabelStudioJsonToKazuDocumentEncoder,
-)
+from kazu.modelling.annotation.label_studio import LabelStudioManager
 from kazu.tests.utils import requires_label_studio
 from kazu.utils.grouping import sort_then_group
 
@@ -78,9 +75,7 @@ def test_kau_doc_to_label_studio():
     tasks = manager.convert_docs_to_tasks([doc_1])
     manager.create_linking_project(tasks)
 
-    docs = manager.export_from_ls(
-        LabelStudioJsonToKazuDocumentEncoder({"gene": ["test1", "test2"], "disease": ["test3"]})
-    )
+    docs = manager.export_from_ls()
     assert len(docs) == 1
     doc = docs[0]
     for ent_class, ents_iter in sort_then_group(
