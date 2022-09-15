@@ -19,8 +19,8 @@ NER_THRESHOLDS = {
 }
 
 LINKING_THRESHOLDS = {
-    "MONDO": {"precision": 0.80, "recall": 0.80},
-    "MEDDRA": {"precision": 0.80, "recall": 0.80},
+    "MONDO": {"precision": 0.70, "recall": 0.70},
+    "MEDDRA": {"precision": 0.70, "recall": 0.70},
     "CHEMBL": {"precision": 0.80, "recall": 0.80},
     "ENSEMBL": {"precision": 0.80, "recall": 0.80},
 }
@@ -88,7 +88,9 @@ class SectionScorer:
             gold_mappings_by_source, test_mappings_by_source = self.group_mappings_by_source(
                 gold_ent, test_ents
             )
-            for source, gold_mappings in gold_mappings_by_source.items():
+            sources = set(gold_mappings_by_source.keys()).union(test_mappings_by_source.keys())
+            for source in sources:
+                gold_mappings = gold_mappings_by_source.get(source, set())
                 test_mappings_set = test_mappings_by_source.get(source, set())
                 tp = gold_mappings.intersection(test_mappings_set)
                 fn = gold_mappings - test_mappings_set
