@@ -58,7 +58,7 @@ class SectionScorer:
             gold_mappings_by_source[mapping.source].add(
                 (
                     mapping.source,
-                    mapping.idx,
+                    f"{mapping.default_label}|{mapping.idx}",
                 )
             )
         test_mappings_by_source = defaultdict(set)
@@ -67,7 +67,7 @@ class SectionScorer:
                 test_mappings_by_source[mapping.source].add(
                     (
                         mapping.source,
-                        mapping.idx,
+                        f"{mapping.default_label}|{mapping.idx}",
                     )
                 )
         return dict(gold_mappings_by_source), dict(test_mappings_by_source)
