@@ -88,7 +88,7 @@ class SectionScorer:
             gold_mappings_by_source, test_mappings_by_source = self.group_mappings_by_source(
                 gold_ent, test_ents
             )
-            for source, gold_mappings in gold_mappings_by_source:
+            for source, gold_mappings in gold_mappings_by_source.items():
                 test_mappings_set = test_mappings_by_source.get(source, set())
                 tp = gold_mappings.intersection(test_mappings_set)
                 fn = gold_mappings - test_mappings_set
