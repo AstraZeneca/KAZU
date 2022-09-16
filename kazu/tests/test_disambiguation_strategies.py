@@ -107,7 +107,8 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
             parser_name=target_term.parser_name,
-            strategy="test",
+            mapping_strategy="test",
+            disambiguation_strategy=None,
             confidence=LinkRanks.HIGHLY_LIKELY,
             additional_metadata=None,
         )
@@ -137,7 +138,8 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
             parser_name=target_term.parser_name,
-            strategy="test",
+            mapping_strategy="test",
+            disambiguation_strategy=None,
             confidence=LinkRanks.HIGHLY_LIKELY,
             additional_metadata=None,
         )
