@@ -8,7 +8,8 @@ strategy_runner:
   symbolic_strategies:
 
     TransformersModelForTokenClassificationNerStep:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           confidence: HIGHLY_LIKELY
@@ -76,7 +77,8 @@ strategy_runner:
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
 
     ExplosionNERStep:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.DefinedElsewhereInDocumentMappingStrategy
           confidence: HIGHLY_LIKELY
@@ -89,7 +91,8 @@ strategy_runner:
   non_symbolic_strategies:
 
     TransformersModelForTokenClassificationNerStep:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           confidence: HIGHLY_LIKELY
@@ -133,7 +136,8 @@ strategy_runner:
             confidence: PROBABLE
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
     ExplosionNERStep:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyList
+      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.DefinedElsewhereInDocumentMappingStrategy
           disambiguation_strategies:
