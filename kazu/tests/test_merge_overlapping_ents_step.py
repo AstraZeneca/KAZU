@@ -24,7 +24,8 @@ def test_merge_overlapping_step_case_1(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -59,7 +60,8 @@ def test_merge_overlapping_step_case_2(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -76,7 +78,8 @@ def test_merge_overlapping_step_case_2(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -103,7 +106,8 @@ def test_merge_overlapping_step_case_3(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -119,7 +123,8 @@ def test_merge_overlapping_step_case_3(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
                 confidence=LinkRanks.HIGHLY_LIKELY,
             )
         },
@@ -147,7 +152,8 @@ def test_merge_overlapping_step_case_4(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -164,7 +170,8 @@ def test_merge_overlapping_step_case_4(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -180,7 +187,8 @@ def test_merge_overlapping_step_case_4(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -207,7 +215,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -224,7 +233,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -240,7 +250,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -257,7 +268,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
@@ -274,7 +286,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 parser_name="test",
                 idx="test",
                 confidence=LinkRanks.HIGHLY_LIKELY,
-                strategy="test",
+                mapping_strategy="test",
+                disambiguation_strategy=None,
             )
         },
     )
