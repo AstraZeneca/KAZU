@@ -157,7 +157,7 @@ class SapbertStringSimilarityScorer(ComplexStringComparisonScorer, metaclass=Sin
                 )
                 s1_embedding = embeddings[0]
                 self.embedding_cache[s1] = s1_embedding
-            else:
+            elif s2_embedding is None:
                 embeddings = self.sapbert.get_embeddings_for_strings(
                     [s2], batch_size=1, trainer=self.trainer
                 )
