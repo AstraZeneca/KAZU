@@ -190,7 +190,8 @@ class LSToKazuConversion:
                     source=source,
                     parser_name="gold",
                     idx=idx,
-                    strategy="gold",
+                    mapping_strategy="gold",
+                    disambiguation_strategy=None,
                     confidence=LinkRanks.HIGHLY_LIKELY,
                 )
             )
