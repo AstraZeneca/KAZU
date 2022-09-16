@@ -1,7 +1,7 @@
 import copy
 import logging
 from itertools import groupby
-from typing import List, Tuple, Iterable, Dict, FrozenSet, Set
+from typing import List, Tuple, Iterable, Dict, FrozenSet, Set, Optional
 
 from kazu.data.data import (
     Document,
@@ -11,6 +11,7 @@ from kazu.data.data import (
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
+from kazu.steps.linking.post_processing.xref_manager import CrossReferenceManager
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 
@@ -184,6 +185,7 @@ class StrategyRunner:
         symbolic_strategies: Dict[str, NamespaceStrategyExecution],
         non_symbolic_strategies: Dict[str, NamespaceStrategyExecution],
         ner_namespace_processing_order: List[str],
+        cross_ref_manager: Optional[CrossReferenceManager] = None,
     ):
         """
 
@@ -196,6 +198,7 @@ class StrategyRunner:
             namespace, as the mapping info derived from the high precision NER namespace can be used with a high
             precision strategy for the low precision NER namespace
         """
+        self.cross_ref_manager = cross_ref_manager
         self.non_symbolic_strategies = non_symbolic_strategies
         self.symbolic_strategies = symbolic_strategies
         self.ner_namespace_processing_order = ner_namespace_processing_order
@@ -308,10 +311,21 @@ class StrategyRunner:
                     strategy_index=i,
                     document=document,
                 ):
+
+                    if self.cross_ref_manager is not None:
+                        xref_mappings = set(self.cross_ref_manager.create_xref_mappings(
+                                mapping=mapping
+                        ))
+                    else:
+                        xref_mappings = None
+
                     for entity in entity_group:
                         entity.mappings.add(copy.deepcopy(mapping))
+                        if xref_mappings is not None:
+                            entity.mappings.update(copy.deepcopy(xref_mappings))
                     logger.debug(
-                        "mapping created: original string: %s, mapping: %s",
+                        "mapping created: original string: %s, mapping: %s, cross-references: %s",
                         reference_entity.match,
                         mapping,
+                        xref_mappings
                     )
