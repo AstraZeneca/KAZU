@@ -215,7 +215,8 @@ def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
     mappings = MappingFactory.create_mapping_from_id_set(
         next(iter(target_term.associated_id_sets)),
         parser_name=parser.name,
-        strategy="test",
+        mapping_strategy="test",
+        disambiguation_strategy=None,
         confidence=LinkRanks.HIGHLY_LIKELY,
     )
     cdkn1b_ent.mappings.update(mappings)
