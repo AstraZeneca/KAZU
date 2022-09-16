@@ -15,7 +15,10 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
-from kazu.steps.linking.post_processing.strategy_runner import StrategyRunner, NamespaceStrategyList
+from kazu.steps.linking.post_processing.strategy_runner import (
+    StrategyRunner,
+    NamespaceStrategyExecution,
+)
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
 from kazu.tests.utils import DummyParser, make_dummy_parser
 
@@ -157,7 +160,7 @@ def build_runner(
         expected_ids=expected_id_groups["test_default"],
     )
     symbolic_strategies = {
-        namespace: NamespaceStrategyList(
+        namespace: NamespaceStrategyExecution(
             ent_class_strategies={
                 "test_class": [
                     first_test_strategy,
