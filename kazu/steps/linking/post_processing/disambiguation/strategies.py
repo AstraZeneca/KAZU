@@ -76,17 +76,17 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
         :param document:
         :return:
         """
-        self.found_equivalent_ids.clear()
+        self.found_equivalent_ids = set()
         entities = document.get_entities()
-        for ent in entities:
-            for mapping in ent.mappings:
-                self.found_equivalent_ids.add(
-                    (
-                        mapping.parser_name,
-                        mapping.source,
-                        mapping.idx,
-                    )
-                )
+        self.found_equivalent_ids.update(
+            (
+                mapping.parser_name,
+                mapping.source,
+                mapping.idx,
+            )
+            for ent in entities
+            for mapping in ent.mappings
+        )
 
     def disambiguate(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
