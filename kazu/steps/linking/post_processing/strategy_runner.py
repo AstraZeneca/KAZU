@@ -1,10 +1,13 @@
+import copy
 import logging
-from typing import List, Tuple, Iterable, Dict, FrozenSet
+from collections import defaultdict
+from typing import List, Tuple, Iterable, Dict, FrozenSet, DefaultDict, Set
 
 from kazu.data.data import (
     Document,
     Entity,
     SynonymTermWithMetrics,
+    Mapping,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
@@ -17,28 +20,129 @@ logger = logging.getLogger(__name__)
 EntityClassStrategy = Dict[str, List[MappingStrategy]]
 
 
-class NamespaceStrategyList:
+# hashable representation of all identical (for the purposes of mapping) entities in the document
+EntityKey = Tuple[str, str, str, FrozenSet[SynonymTermWithMetrics]]
+
+
+def entity_to_entity_key(
+    e: Entity,
+) -> EntityKey:
+    return (
+        e.match,
+        e.match_norm,
+        e.entity_class,
+        frozenset(e.syn_term_to_synonym_terms.values()),
+    )
+
+
+class NamespaceStrategyExecution:
     """
-    simple container class to manage per ent_class strategies (EntityClassStrategy), and default strategies if no
-    ent class strategy is configured. Could be managed with a Dict, but makes __init__ signature of StrategyRunner
-    even more complicated than it already is?
+    The role of a NamespaceStrategyExecution is to track which entities have had mappings successfully resolved,
+    and which require the application of further strategies. This is handled via tracking a dictionary of
+    EntityKey:Set[<parser name>]. See further details in the __call__ docstring
     """
 
     def __init__(
         self,
         ent_class_strategies: EntityClassStrategy,
         default_strategies: List[MappingStrategy],
+        stop_on_success: bool = False,
     ):
         """
 
         :param ent_class_strategies: per class strategies
         :param default_strategies: default strategies
         """
+        self.stop_on_success = stop_on_success
         self.default_strategies = default_strategies
         self.ent_class_strategies = ent_class_strategies
+        self.resolved_parsers: DefaultDict[EntityKey, Set[str]] = defaultdict(set)
+        self.required_parsers: Dict[EntityKey, Set[str]] = {}
+
+    @property
+    def longest_mapping_strategy_list_size(self):
+        return max(
+            [len(strategies) for strategies in self.ent_class_strategies.values()]
+            + [len(self.default_strategies)]
+        )
 
     def get_strategies_for_entity_class(self, entity_class: str) -> List[MappingStrategy]:
         return self.ent_class_strategies.get(entity_class, self.default_strategies)
+
+    def _get_required_parsers(self, entity_key: EntityKey, entity: Entity) -> Set[str]:
+        maybe_required_parsers = self.required_parsers.get(entity_key, None)
+        if maybe_required_parsers is None:
+            required_parsers = set(x.parser_name for x in entity.syn_term_to_synonym_terms.values())
+            self.required_parsers[entity_key] = required_parsers
+            return required_parsers
+        else:
+            return maybe_required_parsers
+
+    def __call__(
+        self, entity: Entity, strategy_index: int, document: Document
+    ) -> Iterable[Mapping]:
+        """
+        conditionally execute a mapping strategy over an entity
+        :param entity: entity to process
+        :param strategy_index: index of strategy to run that is configured for this entity class
+        :param document: originating Document
+        :return:
+        """
+        strategy_list: List[MappingStrategy] = self.get_strategies_for_entity_class(
+            entity_class=entity.entity_class
+        )
+        if strategy_index > len(strategy_list) - 1:
+            logger.debug("no more strategies this class")
+        else:
+            strategy = strategy_list[strategy_index]
+            entity_key = entity_to_entity_key(entity)
+            # we keep track of which entities have resolved mappings to specific parsers, so we don't run lower
+            # ranked strategies if we don't need to
+            resolved_parsers = self.resolved_parsers.get(entity_key, set())
+            required_parsers = self._get_required_parsers(entity_key=entity_key, entity=entity)
+            if len(required_parsers.difference(resolved_parsers)) == 0:
+                logger.debug(
+                    f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
+                    f"<{entity.match}> as all parsers have been resolved"
+                )
+            elif len(resolved_parsers) > 0 and self.stop_on_success:
+                logger.debug(
+                    f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
+                    f"<{entity.match}> as entity has been resolved to another parser and stop_on_success: "
+                    f"{self.stop_on_success}"
+                )
+            else:
+                logger.debug(
+                    f"running strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
+                    f"<{entity.match}> "
+                )
+                strategy.prepare(document)
+                terms_to_consider = filter(
+                    lambda x: x.parser_name not in resolved_parsers,
+                    entity.syn_term_to_synonym_terms.values(),
+                )
+                terms_by_parser = sort_then_group(
+                    terms_to_consider, key_func=lambda x: x.parser_name
+                )
+
+                for parser_name, hits_this_parser in terms_by_parser:
+                    terms_this_parser_set = frozenset(hits_this_parser)
+                    for mapping in strategy(
+                        ent_match=entity.match,
+                        ent_match_norm=entity.match_norm,
+                        terms=terms_this_parser_set,
+                        document=document,
+                    ):
+                        self.resolved_parsers[entity_key].add(mapping.parser_name)
+                        yield mapping
+
+    def reset(self):
+        """
+        clear state, ready for another execution. Should be called between Documents
+        :return:
+        """
+        self.resolved_parsers.clear()
+        self.required_parsers.clear()
 
 
 class StrategyRunner:
@@ -49,7 +153,7 @@ class StrategyRunner:
     co-ordination is crucial. Specifically we want the strategies that have higher precision to run before lower
     precision ones.
 
-    Beyound the precision of the strategy itself, the variables to consider are:
+    Beyond the precision of the strategy itself, the variables to consider are:
 
     1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
         entity spans
@@ -62,20 +166,19 @@ class StrategyRunner:
     1) group entities by order of NER namespace
     2) sub-group these entities again by Entity.match and Entity.entity_class
     3) divide these entities by whether they are symbolic or not
-    4) get the appropriate list of strategies to run against this sub group
-    5) group the SynonymTermWithMetrics associated with this subgroup by their parser_name, filtered by any mappings
-        from this parser_name already attached to the Entity
-    6) run the next strategy in this list for every group of SynonymTermWithMetrics, and attach any resulting mappings
-        to the relevant entity group
-    7) repeat 5)-6) for every entity group from 4), until either a) mappings are produced for each parser_name
-        associated with the SynonymTermWithMetrics attached to the Entity, or b) there are no more strategies to run
-
+    4) identify the maximum number of strategies that 'could' run
+    5) get the appropriate NamespaceStrategyExecution to run against this sub group
+    6) group the entities from 5) by EntityKey (i.e. a hashable representation of unique information required for
+        mapping
+    7) conditionally execute the next strategy out of the maximum possible (from 4), and attach any resulting mappings
+        to the relevant entity group. Note, the NamespaceStrategyExecution is responsible for deciding whether a
+        strategy is executed or not.
     """
 
     def __init__(
         self,
-        symbolic_strategies: Dict[str, NamespaceStrategyList],
-        non_symbolic_strategies: Dict[str, NamespaceStrategyList],
+        symbolic_strategies: Dict[str, NamespaceStrategyExecution],
+        non_symbolic_strategies: Dict[str, NamespaceStrategyExecution],
         ner_namespace_processing_order: List[str],
     ):
         """
@@ -147,93 +250,35 @@ class StrategyRunner:
         self,
         ents_needing_mappings: List[Entity],
         document: Document,
-        namespace_strategy_list: NamespaceStrategyList,
+        namespace_strategy_execution: NamespaceStrategyExecution,
     ):
         """
         This method executes parts 5 - 7 in the class DocString
 
         :param ents_needing_mappings:
         :param document:
-        :param namespace_strategy_list:
+        :param namespace_strategy_execution:
         :return:
         """
-
-        strategy_max_index = max(
-            [
-                len(strategies)
-                for strategies in namespace_strategy_list.ent_class_strategies.values()
-            ]
-            + [len(namespace_strategy_list.default_strategies)]
-        )
+        namespace_strategy_execution.reset()
+        strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
 
         groups = {
-            k: list(v)
-            for k, v in sort_then_group(ents_needing_mappings, self._get_key_to_group_ent_on_hits)
+            k: list(v) for k, v in sort_then_group(ents_needing_mappings, entity_to_entity_key)
         }
 
         for i in range(0, strategy_max_index):
-            for (
-                entity_match,
-                entity_match_norm,
-                entity_class,
-                terms,
-            ), entities_this_group in groups.items():
-
-                strategy_list = namespace_strategy_list.get_strategies_for_entity_class(
-                    entity_class
-                )
-                if i > len(strategy_list) - 1:
-                    logger.debug("no more strategies this class")
-                    continue
-                else:
-                    strategy = strategy_list[i]
+            for entity_key, entities_this_group in groups.items():
+                reference_entity = next(iter(entities_this_group))
+                for mapping in namespace_strategy_execution(
+                    entity=reference_entity,
+                    strategy_index=i,
+                    document=document,
+                ):
+                    for entity in entities_this_group:
+                        entity.mappings.add(copy.deepcopy(mapping))
                     logger.debug(
-                        "running strategy %s on class :<%s>, match: <%s> ",
-                        strategy.__class__.__name__,
-                        entity_class,
-                        entity_match,
+                        "mapping created: original string: %s, mapping: %s",
+                        reference_entity.match,
+                        mapping,
                     )
-                    strategy.prepare(document)
-
-                    # we keep track of which entities have resolved mappings to specific parsers, so we don't run lower
-                    # ranked strategies if we don't need to
-
-                    query_entity = entities_this_group[0]
-                    resolved_parsers = set(mapping.parser_name for mapping in query_entity.mappings)
-                    terms_to_consider = filter(
-                        lambda x: x.parser_name not in resolved_parsers,
-                        terms,
-                    )
-                    terms_by_parser = sort_then_group(
-                        terms_to_consider, key_func=lambda x: x.parser_name
-                    )
-
-                    for parser_name, hits_this_parser in terms_by_parser:
-                        terms_this_parser_set = frozenset(hits_this_parser)
-                        if len(terms_this_parser_set) == 0:
-                            continue
-                        for mapping in strategy(
-                            ent_match=entity_match,
-                            ent_match_norm=entity_match_norm,
-                            terms=terms_this_parser_set,
-                            document=document,
-                        ):
-                            # add mappings to the entity
-                            for entity in entities_this_group:
-                                entity.mappings.add(mapping)
-                            logger.debug(
-                                "mapping created: original string: %s, mapping: %s",
-                                entity_match,
-                                mapping,
-                            )
-
-    @staticmethod
-    def _get_key_to_group_ent_on_hits(
-        e: Entity,
-    ) -> Tuple[str, str, str, FrozenSet[SynonymTermWithMetrics]]:
-        return (
-            e.match,
-            e.match_norm,
-            e.entity_class,
-            frozenset(e.syn_term_to_synonym_terms.values()),
-        )
