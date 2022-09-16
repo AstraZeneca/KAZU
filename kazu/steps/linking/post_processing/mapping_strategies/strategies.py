@@ -486,15 +486,15 @@ class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
         """
         self.found_equivalent_ids.clear()
         entities = document.get_entities()
-        for ent in entities:
-            for mapping in ent.mappings:
-                self.found_equivalent_ids.add(
-                    (
-                        mapping.parser_name,
-                        mapping.source,
-                        mapping.idx,
-                    )
-                )
+        self.found_equivalent_ids.update(
+            (
+                mapping.parser_name,
+                mapping.source,
+                mapping.idx,
+            )
+            for ent in entities
+            for mapping in ent.mappings
+        )
 
     def filter_terms(
         self,
