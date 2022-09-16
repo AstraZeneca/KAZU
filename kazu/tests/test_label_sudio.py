@@ -38,7 +38,8 @@ def test_kau_doc_to_label_studio():
             source="test1",
             parser_name="test1",
             idx="1",
-            strategy="test",
+            mapping_strategy="test",
+            disambiguation_strategy=None,
             confidence=LinkRanks.HIGHLY_LIKELY,
             metadata={},
         )
@@ -49,7 +50,8 @@ def test_kau_doc_to_label_studio():
             source="test2",
             parser_name="test2",
             idx="2",
-            strategy="test",
+            mapping_strategy="test",
+            disambiguation_strategy=None,
             confidence=LinkRanks.HIGHLY_LIKELY,
             metadata={},
         )
@@ -61,7 +63,8 @@ def test_kau_doc_to_label_studio():
             source="test3",
             parser_name="test3",
             idx="3",
-            strategy="test",
+            mapping_strategy="test",
+            disambiguation_strategy=None,
             confidence=LinkRanks.HIGHLY_LIKELY,
             metadata={},
         )
