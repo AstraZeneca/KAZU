@@ -464,59 +464,6 @@ class Document:
             entities.extend(section.entities)
         return entities
 
-    @staticmethod
-    def from_json(json_str: str) -> "Document":
-        """
-        json to Document
-
-        :param json_dict:
-        :return:
-        """
-        json_dict = json.loads(json_str)
-        idx = json_dict.pop("idx")
-        sections = json_dict.pop("sections")
-        new_sections = []
-        for section in sections:
-            new_ents = []
-            section.pop("offset_map")
-            ents = section.pop("entities")
-            for ent in ents:
-                mappings = ent.pop("mappings")
-                new_mappings = set()
-                for mapping in mappings:
-                    new_mappings.add(
-                        Mapping(
-                            default_label=mapping["default_label"],
-                            source=mapping["source"],
-                            parser_name=mapping["parser_name"],
-                            confidence=mapping["confidence"],
-                            metadata=mapping["metadata"],
-                            idx=mapping["idx"],
-                            mapping_strategy="gold",
-                            disambiguation_strategy="gold"
-                        )
-                    )
-                ent.pop("start")
-                ent.pop("end")
-                ent.pop("match_norm")
-                ent.pop("synonym_terms")
-
-                spans = ent.pop("spans")
-                new_spans = []
-                for span in spans:
-                    new_spans.append(CharSpan(start=span["start"], end=span["end"]))
-                new_ents.append(
-                    Entity(
-                        spans=frozenset(new_spans),
-                        mappings=new_mappings,
-                        **ent,
-                        syn_term_to_synonym_terms={},
-                    )
-                )
-            new_section = Section(entities=new_ents, **section)
-            new_sections.append(new_section)
-        return Document(sections=new_sections, idx=idx)
-
     def json(
         self,
         drop_unmapped_ents: bool = False,
