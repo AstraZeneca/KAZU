@@ -118,7 +118,8 @@ class Mapping:
     source: str  # the knowledgebase/database/ontology name
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
-    strategy: str  # the strategy used to create the mapping
+    mapping_strategy: str  # the strategy used to create the mapping
+    disambiguation_strategy: Optional[str]  # the strategy used to disambiguate
     confidence: LinkRanks
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
