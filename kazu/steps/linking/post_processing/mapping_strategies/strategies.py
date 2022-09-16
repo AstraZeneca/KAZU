@@ -33,7 +33,8 @@ class MappingFactory:
     def create_mapping_from_id_set(
         id_set: EquivalentIdSet,
         parser_name: str,
-        strategy: str,
+        mapping_strategy: str,
+        disambiguation_strategy: Optional[str],
         confidence: LinkRanks,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
@@ -44,7 +45,8 @@ class MappingFactory:
                 parser_name=parser_name,
                 source=source,
                 idx=idx,
-                strategy=strategy,
+                mapping_strategy=mapping_strategy,
+                disambiguation_strategy=disambiguation_strategy,
                 confidence=confidence,
                 additional_metadata=additional_metadata if additional_metadata is not None else {},
                 strip_url=strip_url,
@@ -55,7 +57,8 @@ class MappingFactory:
         parser_name: str,
         source: str,
         idx: str,
-        strategy: str,
+        mapping_strategy: str,
+        disambiguation_strategy: Optional[str],
         confidence: LinkRanks,
         additional_metadata: Optional[Dict],
         strip_url: bool = True,
@@ -78,7 +81,8 @@ class MappingFactory:
             default_label=default_label,
             idx=new_idx,
             source=source,
-            strategy=strategy,
+            mapping_strategy=mapping_strategy,
+            disambiguation_strategy=disambiguation_strategy,
             confidence=confidence,
             parser_name=parser_name,
             metadata=metadata,
@@ -152,7 +156,7 @@ class MappingStrategy:
 
     def disambiguate_if_required(
         self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+    ) -> Tuple[Set[EquivalentIdSet], Optional[str]]:
         """
         applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
         of the SynonymTermWithMetrics are ambiguous
@@ -175,11 +179,11 @@ class MappingStrategy:
                     id_sets=all_id_sets, document=document, parser_name=parser_name
                 )
                 if len(filtered_id_sets) == 1:
-                    return filtered_id_sets
+                    return filtered_id_sets, strategy.__class__.__name__
             else:
-                return all_id_sets
+                return all_id_sets, None
         else:
-            return all_id_sets
+            return all_id_sets, None
 
     def __call__(
         self,
@@ -206,7 +210,9 @@ class MappingStrategy:
             parser_name=parser_name,
         )
 
-        id_sets = self.disambiguate_if_required(filtered_terms, document, parser_name)
+        id_sets, successful_disambiguation_strategy = self.disambiguate_if_required(
+            filtered_terms, document, parser_name
+        )
         for id_set in id_sets:
             for idx in id_set.ids:
                 yield MappingFactory.create_mapping(
@@ -215,7 +221,8 @@ class MappingStrategy:
                     idx=idx,
                     confidence=self.confidence if len(id_sets) == 1 else LinkRanks.AMBIGUOUS,
                     additional_metadata=None,
-                    strategy=self.__class__.__name__,
+                    mapping_strategy=self.__class__.__name__,
+                    disambiguation_strategy=successful_disambiguation_strategy,
                 )
 
 
