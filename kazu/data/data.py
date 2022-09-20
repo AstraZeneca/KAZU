@@ -119,8 +119,9 @@ class Mapping:
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
     mapping_strategy: str  # the strategy used to create the mapping
-    disambiguation_strategy: Optional[str]  # the strategy used to disambiguate
     confidence: LinkRanks
+    disambiguation_strategy: Optional[str] = None  # the strategy used to disambiguate
+    xref_source_parser_name: Optional[str] = None  # source parser name if mapping is an XREF
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
 
