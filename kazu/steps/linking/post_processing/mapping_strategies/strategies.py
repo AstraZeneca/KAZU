@@ -9,7 +9,7 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
     LinkRanks,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase
+from kazu.modelling.database.in_memory_db import MetadataDatabase, Metadata
 from kazu.modelling.language.string_similarity_scorers import (
     BooleanStringSimilarityScorer,
 )
@@ -72,30 +72,35 @@ class MappingFactory:
             )
 
     @staticmethod
+    def _get_default_label_and_metadata_from_parser(
+        parser_name: str, idx: str
+    ) -> Tuple[str, Metadata]:
+        metadata = MappingFactory.metadata_db.get_by_idx(name=parser_name, idx=idx)
+        default_label = metadata.pop(DEFAULT_LABEL)
+        assert isinstance(default_label, str)
+        return default_label, metadata
+
+    @staticmethod
     def create_mapping(
         parser_name: str,
         source: str,
         idx: str,
         mapping_strategy: str,
-        disambiguation_strategy: Optional[str],
         confidence: LinkRanks,
-        additional_metadata: Optional[Dict],
+        disambiguation_strategy: Optional[str] = None,
+        additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
+        xref_source_parser_name: Optional[str] = None,
     ) -> Mapping:
-        metadata = MappingFactory.metadata_db.get_by_idx(name=parser_name, idx=idx)
+        default_label, metadata = MappingFactory._get_default_label_and_metadata_from_parser(
+            parser_name, idx
+        )
         if additional_metadata:
             metadata.update(additional_metadata)
         if strip_url:
-            url = urllib.parse.urlparse(idx)
-            if url.scheme == "":
-                # not a url
-                new_idx = idx
-            else:
-                new_idx = url.path.split("/")[-1]
+            new_idx = MappingFactory._strip_url(idx)
         else:
             new_idx = idx
-        default_label = metadata.pop(DEFAULT_LABEL)
-        assert isinstance(default_label, str)
         return Mapping(
             default_label=default_label,
             idx=new_idx,
@@ -105,7 +110,18 @@ class MappingFactory:
             confidence=confidence,
             parser_name=parser_name,
             metadata=metadata,
+            xref_source_parser_name=xref_source_parser_name,
         )
+
+    @staticmethod
+    def _strip_url(idx):
+        url = urllib.parse.urlparse(idx)
+        if url.scheme == "":
+            # not a url
+            new_idx = idx
+        else:
+            new_idx = url.path.split("/")[-1]
+        return new_idx
 
 
 class MappingStrategy:
