@@ -172,13 +172,29 @@ class CrossReferenceManager:
     def create_xref_mappings(self, mapping: Mapping, strip_url: bool = True) -> Iterable[Mapping]:
         xref_lookup: Dict[str, Dict] = self.xref_db.get(mapping.source, {})
         for (target_source, target_idx) in xref_lookup.get(mapping.idx, []):
-            yield MappingFactory.create_mapping(
-                parser_name=mapping.parser_name,
-                source=target_source,
-                idx=target_idx,
-                mapping_strategy=mapping.mapping_strategy,
-                disambiguation_strategy=mapping.disambiguation_strategy,
-                confidence=mapping.confidence,
-                additional_metadata=mapping.metadata,
-                strip_url=strip_url,
-            )
+            metadata_parser_name = self.source_to_parser_metadata_lookup.get(target_source)
+            if metadata_parser_name is None:
+                logger.warning(
+                    f"source_to_parser_metadata_lookup not configured for target source: {metadata_parser_name}"
+                )
+            else:
+                try:
+                    xref_mapping = MappingFactory.create_mapping(
+                        parser_name=metadata_parser_name,
+                        xref_source_parser_name=mapping.parser_name,
+                        source=target_source,
+                        idx=target_idx,
+                        mapping_strategy=self.__class__.__name__,
+                        disambiguation_strategy=mapping.disambiguation_strategy,
+                        confidence=mapping.confidence,
+                        additional_metadata=mapping.metadata,
+                        strip_url=strip_url,
+                    )
+                    yield xref_mapping
+                except IndexError:
+                    logger.warning(
+                        f"failed to create xref mapping for "
+                        f"{mapping.parser_name}->{metadata_parser_name}:{mapping.idx}->{target_idx}. "
+                        f"This is most likely due to a versioning inconsistence between the EBI OXO service"
+                        f"and the loaded ontologies"
+                    )
