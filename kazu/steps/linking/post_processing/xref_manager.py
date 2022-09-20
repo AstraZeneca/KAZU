@@ -169,7 +169,7 @@ class CrossReferenceManager:
         with open(path, "w") as f:
             json.dump(results, f)
 
-    def create_xref_mappings(self, mapping: Mapping, strip_url: bool = True) -> Iterable[Mapping]:
+    def create_xref_mappings(self, mapping: Mapping) -> Iterable[Mapping]:
         xref_lookup: Dict[str, Dict] = self.xref_db.get(mapping.source, {})
         for (target_source, target_idx) in xref_lookup.get(mapping.idx, []):
             metadata_parser_name = self.source_to_parser_metadata_lookup.get(target_source)
@@ -188,13 +188,13 @@ class CrossReferenceManager:
                         disambiguation_strategy=mapping.disambiguation_strategy,
                         confidence=mapping.confidence,
                         additional_metadata=mapping.metadata,
-                        strip_url=strip_url,
                     )
                     yield xref_mapping
-                except IndexError:
-                    logger.warning(
-                        f"failed to create xref mapping for "
-                        f"{mapping.parser_name}->{metadata_parser_name}:{mapping.idx}->{target_idx}. "
-                        f"This is most likely due to a versioning inconsistence between the EBI OXO service"
-                        f"and the loaded ontologies"
+                except KeyError:
+                    logger.debug(
+                        "failed to create xref mapping for %s->%s:%s->%s. Metadata not found.",
+                        mapping.parser_name,
+                        metadata_parser_name,
+                        mapping.idx,
+                        target_idx,
                     )
