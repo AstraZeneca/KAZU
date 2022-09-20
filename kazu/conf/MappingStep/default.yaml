@@ -4,6 +4,10 @@ strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
   cross_ref_manager:
     _target_: kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager
+    source_to_parser_metadata_lookup:
+      MEDDRA: MEDDRA_DISEASE
+      MONDO: MONDO
+      HP: MONDO
     path:
       _target_: pathlib.Path
       _args_:
