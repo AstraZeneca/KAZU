@@ -25,11 +25,26 @@ def _serialize_sets(obj):
 
 class CrossReferenceManager:
     oxo_kazu_name_mapping = {"MedDRA": "MEDDRA"}
+    uri_prefixes = {
+        "MONDO": "http://purl.obolibrary.org/obo/",
+        "HP": "http://purl.obolibrary.org/obo/",
+    }
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, source_to_parser_metadata_lookup: Dict[str, str]):
+        """
+
+        :param path: path to oxo mappings dump. Will look for a file called oxo_dump.json in this directory.
+            If it doesn't exist, it will try to download it from EBI OXO service
+        :param source_to_parser_metadata_lookup: when producing cross-referenced instances of Mapping, we need a
+            reference in the MetadataDatabase to the target ontology, in order to look up the default label info etc.
+            This lookup dict tells the cross reference manager what underlying parser it should use for a given source,
+            since different parsers may hold sub sets or supersets of ids of each other. For example, a MedDRA hit
+            might map to specific MONDO id. Since MONDO ids are held in both OpenTargetsDiseaseOntologyParser and
+            MondoOntologyParser, we need to specify which one we want to use to generate the mapping
+        """
         self.oxo_url = "https://www.ebi.ac.uk/spot/oxo/api/search"
         self.headers = {"Content-Type": "application/json", "Accept": "application/json"}
-
+        self.source_to_parser_metadata_lookup = source_to_parser_metadata_lookup
         self.load_or_build_cache(path)
 
     def load_or_build_cache(self, path: Path, force_rebuild_cache: bool = False):
@@ -70,7 +85,7 @@ class CrossReferenceManager:
 
     def _normalise_idx(self, oxo_idx: str, source: str) -> str:
         if source in {"MONDO", "HP"}:
-            return f"{source}_{oxo_idx}"
+            return f"{self.uri_prefixes.get(source,'')}{source}_{oxo_idx}"
         else:
             return oxo_idx
 
