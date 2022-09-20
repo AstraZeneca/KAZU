@@ -7,7 +7,7 @@ strategy_runner:
     source_to_parser_metadata_lookup:
       MEDDRA: MEDDRA_DISEASE
       MONDO: MONDO
-      HP: MONDO
+      HP: OPENTARGETS_DISEASE
     path:
       _target_: pathlib.Path
       _args_:
