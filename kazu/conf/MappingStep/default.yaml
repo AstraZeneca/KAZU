@@ -2,16 +2,16 @@ _target_: kazu.steps.linking.mapping_step.MappingStep
 depends_on: ~
 strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
-  cross_ref_manager:
-    _target_: kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager
-    source_to_parser_metadata_lookup:
-      MEDDRA: MEDDRA_DISEASE
-      MONDO: MONDO
-      HP: OPENTARGETS_DISEASE
-    path:
-      _target_: pathlib.Path
-      _args_:
-        - ${oc.env:KAZU_MODEL_PACK}/mapping_step/oxo_dump
+  cross_ref_managers:
+    - _target_: kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager
+      source_to_parser_metadata_lookup:
+        MEDDRA: MEDDRA_DISEASE
+        MONDO: MONDO
+        HP: OPENTARGETS_DISEASE
+      path:
+        _target_: pathlib.Path
+        _args_:
+          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/oxo_dump
   ner_namespace_processing_order:
     - TransformersModelForTokenClassificationNerStep
     - ExplosionNERStep
