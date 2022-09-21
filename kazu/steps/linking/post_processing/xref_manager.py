@@ -77,7 +77,7 @@ class CrossReferenceManager(ABC):
             logger.info(f"loading cached file from {cache_dir}")
             self.load(cache_dir)
         else:
-            logger.info("No ontology cache file found. Building a new one")
+            logger.info("No cache file found. Building a new one")
             xref_db = self.build_xref_cache(path)
             self.save(cache_dir, xref_db)
             self.load(cache_dir)
