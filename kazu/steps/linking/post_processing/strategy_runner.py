@@ -185,7 +185,7 @@ class StrategyRunner:
         symbolic_strategies: Dict[str, NamespaceStrategyExecution],
         non_symbolic_strategies: Dict[str, NamespaceStrategyExecution],
         ner_namespace_processing_order: List[str],
-        cross_ref_manager: Optional[CrossReferenceManager] = None,
+        cross_ref_managers: Optional[List[CrossReferenceManager]] = None,
     ):
         """
 
@@ -198,7 +198,7 @@ class StrategyRunner:
             namespace, as the mapping info derived from the high precision NER namespace can be used with a high
             precision strategy for the low precision NER namespace
         """
-        self.cross_ref_manager = cross_ref_manager
+        self.cross_ref_managers = cross_ref_managers
         self.non_symbolic_strategies = non_symbolic_strategies
         self.symbolic_strategies = symbolic_strategies
         self.ner_namespace_processing_order = ner_namespace_processing_order
@@ -312,8 +312,10 @@ class StrategyRunner:
                     document=document,
                 ):
 
-                    if self.cross_ref_manager is not None:
-                        xref_mappings = set(self.cross_ref_manager.create_xref_mappings(
+                    if self.cross_ref_managers is not None:
+                        xref_mappings = set()
+                        for xref_manager in self.cross_ref_managers:
+                            xref_mappings.update(xref_manager.create_xref_mappings(
                                 mapping=mapping
                         ))
                     else:
