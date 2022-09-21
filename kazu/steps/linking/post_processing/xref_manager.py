@@ -162,12 +162,11 @@ class OxoCrossReferenceManager(CrossReferenceManager):
             no prefix will be used
         :param oxo_query: mapping of OXO source to target sources that will be used to construct the OXO API request
         """
-        super().__init__(source_to_parser_metadata_lookup, path)
+
         self.oxo_query = oxo_query
         self.uri_prefixes = uri_prefixes
         self.oxo_kazu_name_mapping = oxo_kazu_name_mapping
-        self.oxo_url = "https://www.ebi.ac.uk/spot/oxo/api/search"
-        self.headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        super().__init__(source_to_parser_metadata_lookup, path)
 
     def build_xref_cache(self, path: Path) -> XrefDatabase:
         oxo_dump_path = path.joinpath("oxo_dump.json")
