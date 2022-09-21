@@ -146,19 +146,26 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
     """
 
-    oxo_kazu_name_mapping = {"MedDRA": "MEDDRA"}
-    uri_prefixes = {
-        "MONDO": "http://purl.obolibrary.org/obo/",
-        "HP": "http://purl.obolibrary.org/obo/",
-    }
-
-    def __init__(self, source_to_parser_metadata_lookup: Dict[str, str], path: Path):
+    def __init__(
+        self,
+        source_to_parser_metadata_lookup: Dict[str, str],
+        path: Path,
+        oxo_kazu_name_mapping: Dict[str, str],
+        uri_prefixes: Dict[str, str],
+        oxo_query: Dict[str, List[str]],
+    ):
         """
 
-        :param path: path to oxo mappings dump. Will look for a file called oxo_dump.json in this directory.
-            If it doesn't exist, it will try to download it from EBI OXO service
+        :param oxo_kazu_name_mapping: mapping of OXO source names to Kazu names, to covert OXO format to Kazu. If
+            not specified, the OXO version will be used
+        :param uri_prefixes: mapping of KAZU sources to URI prefixes, to correctly reconstruct ids. If not specified,
+            no prefix will be used
+        :param oxo_query: mapping of OXO source to target sources that will be used to construct the OXO API request
         """
         super().__init__(source_to_parser_metadata_lookup, path)
+        self.oxo_query = oxo_query
+        self.uri_prefixes = uri_prefixes
+        self.oxo_kazu_name_mapping = oxo_kazu_name_mapping
         self.oxo_url = "https://www.ebi.ac.uk/spot/oxo/api/search"
         self.headers = {"Content-Type": "application/json", "Accept": "application/json"}
 
@@ -172,10 +179,10 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         xref_db = self.parse_oxo_dump(oxo_dump_path)
         return xref_db
 
-    def _map_oxo_source(self, oxo_source: str) -> str:
+    def _convert_oxo_source_string(self, oxo_source: str) -> str:
         return self.oxo_kazu_name_mapping.get(oxo_source, oxo_source)
 
-    def _normalise_idx(self, oxo_idx: str, source: str) -> str:
+    def _add_kazu_uri_prefix(self, oxo_idx: str, source: str) -> str:
         if source in {"MONDO", "HP"}:
             return f"{self.uri_prefixes.get(source,'')}{source}_{oxo_idx}"
         else:
@@ -190,12 +197,12 @@ class OxoCrossReferenceManager(CrossReferenceManager):
             for oxo_page in oxo_dump:
                 for search_result in oxo_page["_embedded"]["searchResults"]:
                     source, idx = search_result["curie"].split(":")
-                    source = self._map_oxo_source(source)
-                    idx = self._normalise_idx(idx, source)
+                    source = self._convert_oxo_source_string(source)
+                    idx = self._add_kazu_uri_prefix(idx, source)
                     for mapping_response in search_result["mappingResponseList"]:
                         target_source, target_idx = mapping_response["curie"].split(":")
-                        target_source = self._map_oxo_source(target_source)
-                        target_idx = self._normalise_idx(target_idx, target_source)
+                        target_source = self._convert_oxo_source_string(target_source)
+                        target_idx = self._add_kazu_uri_prefix(target_idx, target_source)
 
                         xref_db_default_dict[source][idx].add((target_source, target_idx))
         xref_db = {}
@@ -205,8 +212,7 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
     def create_oxo_dump(self, path: Path):
         results = []
-        query = {"MONDO": ["MedDRA"], "MedDRA": ["MONDO", "HP"], "HP": ["MedDRA"]}
-        for input_source, mapping_target in query.items():
+        for input_source, mapping_target in self.oxo_query.items():
             data = {
                 "ids": [],
                 "inputSource": input_source,
