@@ -41,7 +41,7 @@ class CrossReferenceManager(ABC):
             since different parsers may hold sub sets or supersets of ids of each other. For example, a MedDRA hit
             might map to specific MONDO id. Since MONDO ids are held in both OpenTargetsDiseaseOntologyParser and
             MondoOntologyParser, we need to specify which one we want to use to generate the mapping
-        :param path: optional path to cross ref mapping resources required by this manager
+        :param path: path to cross ref mapping resources required by this manager
         """
         self.source_to_parser_metadata_lookup = source_to_parser_metadata_lookup
         self.load_or_build_cache(path)
