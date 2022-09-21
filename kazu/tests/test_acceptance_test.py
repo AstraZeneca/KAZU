@@ -29,6 +29,7 @@ LINKING_THRESHOLDS = {
 class SectionScorer:
     def __init__(
         self,
+        task: str,
         gold_ents: List[Entity],
         test_ents: List[Entity],
     ):
@@ -36,6 +37,7 @@ class SectionScorer:
         :param gold_ents:
         :param test_ents:
         """
+        self.task = task
         self.test_ents = test_ents
         self.gold_ents = gold_ents
         self.gold_to_test_ent_soft: Dict[Entity, Set[Entity]] = defaultdict(set)
@@ -125,7 +127,9 @@ def score_sections(
                 section.entities, key_func=lambda x: x.entity_class
             ):
                 scorer = SectionScorer(
-                    gold_ents=gold_ents_by_class.get(entity_class, []), test_ents=list(test_ents)
+                    task=section.metadata["label_studio_task_id"],
+                    gold_ents=gold_ents_by_class.get(entity_class, []),
+                    test_ents=list(test_ents),
                 )
                 result[entity_class].append(scorer)
 
@@ -136,7 +140,19 @@ def score_sections(
 class AggregatedAccuracyResult:
     tp: int = 0
     fp_items: List[Any] = dataclasses.field(default_factory=list)
+    fp_tasks: List[str] = dataclasses.field(default_factory=list)
     fn_items: List[Any] = dataclasses.field(default_factory=list)
+    fn_tasks: List[str] = dataclasses.field(default_factory=list)
+
+    def tasks_for_fp(self, items: List[Any]) -> Iterable[str]:
+        for i, fp_item in enumerate(self.fp_items):
+            if fp_item in items:
+                yield self.fp_tasks[i]
+
+    def tasks_for_fn(self, items: List[Any]) -> Iterable[str]:
+        for i, fn_item in enumerate(self.fn_items):
+            if fn_item in items:
+                yield self.fn_tasks[i]
 
     @property
     def fp(self):
@@ -180,7 +196,9 @@ def aggregate_ner_results(
         for scorer in scorers:
             acc_result.tp += len(scorer.gold_to_test_ent_soft)
             acc_result.fn_items.extend(ent.match for ent in scorer.ner_fn_soft)
+            acc_result.fn_tasks.extend(scorer.task for _ in range(len(scorer.ner_fn_soft)))
             acc_result.fp_items.extend(ent.match for ent in scorer.ner_fp_soft)
+            acc_result.fp_tasks.extend(scorer.task for _ in range(len(scorer.ner_fp_soft)))
         result[ent_class] = acc_result
     return result
 
@@ -198,7 +216,13 @@ def aggregate_linking_results(
             ), mapping_result in scorer.gold_to_test_mappings.items():
                 result[source].tp += len(mapping_result["tp"])
                 result[source].fn_items.extend(mapping_result["fn"])
+                result[source].fn_tasks.extend(
+                    scorer.task for _ in range(len(mapping_result["fn"]))
+                )
                 result[source].fp_items.extend(mapping_result["fp"])
+                result[source].fp_tasks.extend(
+                    scorer.task for _ in range(len(mapping_result["fp"]))
+                )
     return dict(result)
 
 
