@@ -146,6 +146,9 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
     """
 
+    oxo_url = "https://www.ebi.ac.uk/spot/oxo/api/search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+
     def __init__(
         self,
         source_to_parser_metadata_lookup: Dict[str, str],
