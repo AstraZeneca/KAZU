@@ -1,12 +1,14 @@
-from collections import defaultdict
-from typing import Tuple, List, Optional, Set, Dict
+import copy
+import itertools
+import logging
 
-from spacy.matcher import Matcher
-from spacy.tokens import Span, Doc
+from kazu.data.data import Document, Entity, Section
+from kazu.utils.grouping import sort_then_group
 
 """
 Original Credit:
 https://github.com/allenai/scispacy
+https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
 @inproceedings{neumann-etal-2019-scispacy,
 title = "{S}cispa{C}y: {F}ast and {R}obust {M}odels for {B}iomedical {N}atural {L}anguage {P}rocessing",
 author = "Neumann, Mark  and
@@ -25,27 +27,44 @@ eprint = {arXiv:1902.07669},
 }
 """
 
+from typing import Tuple, List, Optional, Set, Dict
+from collections import defaultdict
+from spacy.tokens import Span, Doc
+from spacy.matcher import Matcher
+from spacy.language import Language
+
+logger = logging.getLogger(__name__)
+
+SectionAndLongToShortCandidates = Tuple[Section, Span, Span]
+SectionToSpacyDoc = Dict[Section, Doc]
+SectionToCharacterIndexedEntities = Dict[Section, Dict[Tuple[int, int], Set[Entity]]]
+
 
 def find_abbreviation(
     long_form_candidate: Span, short_form_candidate: Span
 ) -> Tuple[Span, Optional[Span]]:
     """
+    from https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+
     Implements the abbreviation detection algorithm in "A simple algorithm
     for identifying abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
-
     The algorithm works by enumerating the characters in the short form of the abbreviation,
     checking that they can be matched against characters in a candidate text for the long form
     in order, as well as requiring that the first letter of the abbreviated form matches the
     _beginning_ letter of a word.
-
-    :param long_form_candidate:
-    :param short_form_candidate:
-    :return: A Tuple[Span, Optional[Span]], representing the short form abbreviation and the span corresponding to the
-        long form expansion, or None if a match is not found.
+    Parameters
+    ----------
+    long_form_candidate: Span, required.
+        The spaCy span for the long form candidate of the definition.
+    short_form_candidate: Span, required.
+        The spaCy span for the abbreviation candidate.
+    Returns
+    -------
+    A Tuple[Span, Optional[Span]], representing the short form abbreviation and the
+    span corresponding to the long form expansion, or None if a match is not found.
     """
-
-    long_form = " ".join(x.text for x in long_form_candidate)
-    short_form = " ".join(x.text for x in short_form_candidate)
+    long_form = " ".join([x.text for x in long_form_candidate])
+    short_form = " ".join([x.text for x in short_form_candidate])
 
     long_index = len(long_form) - 1
     short_index = len(short_form) - 1
@@ -58,10 +77,11 @@ def find_abbreviation(
             continue
 
             # Does the character match at this position? ...
+        while (
+            (long_index >= 0 and long_form[long_index].lower() != current_char)
+            or (short_index == 0 and long_index > 0 and long_form[long_index - 1].isalnum())
             # .... or if we are checking the first character of the abbreviation, we enforce
             # to be the _starting_ character of a span.
-        while (long_index >= 0 and long_form[long_index].lower() != current_char) or (
-            short_index == 0 and long_index > 0 and long_form[long_index - 1].isalnum()
         ):
             long_index -= 1
 
@@ -91,7 +111,17 @@ def find_abbreviation(
     return short_form_candidate, long_form_candidate[starting_index:]
 
 
-def filter_matches(matcher_output: List[Tuple[int, int, int]], doc: Doc) -> List[Tuple[Span, Span]]:
+def filter_matches(
+    section: Section, matcher_output: List[Tuple[int, int, int]], doc: Doc
+) -> List[Tuple[Section, Span, Span]]:
+    """
+    from https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+
+    :param section:
+    :param matcher_output:
+    :param doc:
+    :return:
+    """
     # Filter into two cases:
     # 1. <Short Form> ( <Long Form> )
     # 2. <Long Form> (<Short Form>) [this case is most common].
@@ -120,12 +150,19 @@ def filter_matches(matcher_output: List[Tuple[int, int, int]], doc: Doc) -> List
 
         # add candidate to candidates if candidates pass filters
         if short_form_filter(short_form_candidate):
-            candidates.append((long_form_candidate, short_form_candidate))
+            candidates.append((section, long_form_candidate, short_form_candidate))
 
     return candidates
 
 
 def short_form_filter(span: Span) -> bool:
+    """
+    from https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+
+    :param span:
+    :return:
+    """
+
     # All words are between length 2 and 10
     if not all([2 <= len(x) < 10 for x in span]):
         return False
@@ -140,61 +177,144 @@ def short_form_filter(span: Span) -> bool:
     return True
 
 
-class AbbreviationDetector:
+class KazuAbbreviationDetector:
     """
+    Modified version of https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+
+    see top of file for original implementation credit
+
     Detects abbreviations using the algorithm in "A simple algorithm for identifying
     abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
 
-    This class sets the `._.abbreviations` attribute on spaCy Doc.
+    if an abbreviation is detected, a new instance of :class:`Entity` is generated, copying information from the
+    originating long span. If no entity is detected at the originating long span, the entity is removed. In the latter
+    case, you can force the class to not delete entities by providing a list of strings to exclude_abbrvs.
+    For instance, this might be wise for abbreviations that are very common and therefore not defined (e.g. 'NSCLC').
+    Note, however, that the abbreviation detection is always preferred, so if a long form entity is detected, that
+    will always be chosen
 
-    The abbreviations attribute is a `List[Span]` where each Span has the `Span._.long_form`
-    attribute set to the long form definition of the abbreviation.
-
-    Note that this class does not replace the spans, or merge them.
-
-    Original Credit:
-    https://github.com/allenai/scispacy
-    @inproceedings{neumann-etal-2019-scispacy,
-    title = "{S}cispa{C}y: {F}ast and {R}obust {M}odels for {B}iomedical {N}atural {L}anguage {P}rocessing",
-    author = "Neumann, Mark  and
-      King, Daniel  and
-      Beltagy, Iz  and
-      Ammar, Waleed",
-    booktitle = "Proceedings of the 18th BioNLP Workshop and Shared Task",
-    month = aug,
-    year = "2019",
-    address = "Florence, Italy",
-    publisher = "Association for Computational Linguistics",
-    url = "https://www.aclweb.org/anthology/W19-5034",
-    doi = "10.18653/v1/W19-5034",
-    pages = "319--327",
-    eprint = {arXiv:1902.07669},
-    }
     """
 
-    def __init__(self, nlp) -> None:
-        Doc.set_extension("abbreviations", default=[], force=True)
-        Span.set_extension("long_form", default=None, force=True)
+    def __init__(
+        self,
+        nlp: Language,
+        namespace: str,
+        exclude_abbrvs: Optional[List[str]] = None,
+    ) -> None:
+        """
+
+        :param nlp: spacy model to use
+        :param namespace: the namespace to give any generated entities
+        :param exclude_abbrvs: detected abbreviations matching this list will not be removed, even if no source
+            entities are found
+        """
+        self.namespace = namespace
+        self.exclude_abbrvs: Set[str] = set(exclude_abbrvs) if exclude_abbrvs is not None else set()
         self.nlp = nlp
         self.matcher = Matcher(nlp.vocab)
         self.matcher.add("parenthesis", [[{"ORTH": "("}, {"OP": "+"}, {"ORTH": ")"}]])
-        self.global_matcher = Matcher(nlp.vocab)
-        self.rules: Dict[str, Span] = {}
-        self.to_remove: Set[str] = set()
 
-    def find_abbreviations(self, doc: Doc) -> None:
-        """
-        add matcher rules based on abbreviations found
+    def __call__(self, document: Document):
+        (
+            section_and_long_to_short_candidates,
+            section_to_ents_by_char_index,
+            section_to_spacy_doc,
+        ) = self._find_candidates_and_index_sections(document)
 
-        :param doc:
-        """
-        matches = self.matcher(doc)
-        matches_no_brackets = [(x[0], x[1] + 1, x[2] - 1) for x in matches]
-        filtered = filter_matches(matches_no_brackets, doc)
+        (
+            global_matcher,
+            long_form_string_to_source_ents,
+        ) = self._build_matcher_and_identify_source_entities(
+            section_and_long_to_short_candidates, section_to_ents_by_char_index
+        )
+        self._find_abbreviations_and_override_entities(
+            global_matcher,
+            long_form_string_to_source_ents,
+            section_to_ents_by_char_index,
+            section_to_spacy_doc,
+        )
+
+    def _find_abbreviations_and_override_entities(
+        self,
+        global_matcher: Matcher,
+        long_form_string_to_source_ents: Dict[str, Set[Entity]],
+        section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
+        section_to_spacy_doc: SectionToSpacyDoc,
+    ):
+        for section, spacy_doc in section_to_spacy_doc.items():
+            global_matches = global_matcher(spacy_doc)
+            for match, start, end in global_matches:
+                string_key = global_matcher.vocab.strings[match]
+                abbrv_span: Span = spacy_doc[start:end]
+                abbrv_char_index_key = (
+                    abbrv_span.start_char,
+                    abbrv_span.end_char,
+                )
+                for source_ent in long_form_string_to_source_ents.get(string_key, set()):
+                    new_ent = self._create_ent_from_span_and_source_ent(
+                        abbrv_span, section, source_ent
+                    )
+                    section.entities.append(new_ent)
+                    section_to_ents_by_char_index[section][abbrv_char_index_key].add(new_ent)
+
+                abbrv_ents_at_index_by_namespace = {
+                    k: set(v)
+                    for k, v in sort_then_group(
+                        section_to_ents_by_char_index[section].get(abbrv_char_index_key, set()),
+                        key_func=lambda x: x.namespace,
+                    )
+                }
+
+                # multiple abbrv ents at index. if one is generated by self.namespace, keep that one.
+                if self.namespace in abbrv_ents_at_index_by_namespace:
+                    abbrv_ents_at_index_by_namespace.pop(self.namespace)
+                    for ent_to_remove in itertools.chain.from_iterable(
+                        abbrv_ents_at_index_by_namespace.values()
+                    ):
+                        section.entities.remove(ent_to_remove)
+                else:
+                    # Else, remove others unless they are in exclude list
+                    for ent_to_remove in itertools.chain.from_iterable(
+                        abbrv_ents_at_index_by_namespace.values()
+                    ):
+                        if ent_to_remove.match not in self.exclude_abbrvs:
+                            section.entities.remove(ent_to_remove)
+
+    def _create_ent_from_span_and_source_ent(
+        self, abbrv_span: Span, section: Section, source_ent: Entity
+    ) -> Entity:
+        new_ent_data: Dict = copy.deepcopy(source_ent.__dict__)
+        new_ent_data.pop("start")
+        new_ent_data.pop("end")
+        new_ent_data.pop("spans")
+        new_ent_data.pop("match_norm")
+        new_ent_data.pop("match")
+        new_ent_data.pop("namespace")
+        new_ent = Entity.from_spans(
+            text=section.get_text(),
+            spans=[
+                (
+                    abbrv_span.start_char,
+                    abbrv_span.end_char,
+                )
+            ],
+            namespace=self.namespace,
+            join_str="",
+            **new_ent_data,
+        )
+        return new_ent
+
+    def _build_matcher_and_identify_source_entities(
+        self,
+        section_and_long_to_short_candidates: List[SectionAndLongToShortCandidates],
+        section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
+    ) -> Tuple[Matcher, Dict[str, Set[Entity]]]:
+        global_matcher = Matcher(self.nlp.vocab)
         all_occurences: Dict[Span, Set[Span]] = defaultdict(set)
         already_seen_long: Set[str] = set()
         already_seen_short: Set[str] = set()
-        for (long_candidate, short_candidate) in filtered:
+        long_form_string_to_source_ents: Dict[str, Set[Entity]] = {}
+        for (section, long_candidate, short_candidate) in section_and_long_to_short_candidates:
             short, long = find_abbreviation(long_candidate, short_candidate)
             # We need the long and short form definitions to be unique, because we need
             # to store them so we can look them up later. This is a bit of a
@@ -202,45 +322,46 @@ class AbbreviationDetector:
             # defined twice in a document. There's not much we can do about this,
             # but at least the case which is discarded will be picked up below by
             # the global matcher. So it's likely that things will work out ok most of the time.
-            new_long = str(long) not in already_seen_long if long else False
-            new_short = str(short) not in already_seen_short
+            new_long = long.text not in already_seen_long if long else False
+            new_short = short.text not in already_seen_short
             if long is not None and new_long and new_short:
-                already_seen_long.add(str(long))
-                already_seen_short.add(str(short))
+                char_index_key = (
+                    long.start_char,
+                    long.end_char,
+                )
+                already_seen_long.add(long.text)
+                already_seen_short.add(short.text)
                 all_occurences[long].add(short)
-                self.rules[str(long)] = long
                 # Add a rule to a matcher to find exactly this substring.
-                self.global_matcher.add(str(long), [[{"ORTH": x.text}] for x in short])
+                global_matcher.add(long.text, [[{"ORTH": x.text} for x in short]])
+                long_form_string_to_source_ents[long.text] = section_to_ents_by_char_index[
+                    section
+                ].get(char_index_key, set())
+        return global_matcher, long_form_string_to_source_ents
 
-    def run_rules(self, doc: Doc) -> Doc:
-        """
-        apply abbreviation matcher rules to a spacy doc
+    def _find_candidates_and_index_sections(
+        self, document: Document
+    ) -> Tuple[
+        List[SectionAndLongToShortCandidates], SectionToCharacterIndexedEntities, SectionToSpacyDoc
+    ]:
+        long_to_short_candidates: List[Tuple[Section, Span, Span]] = []
+        section_to_spacy_doc = {}
+        section_to_ents_by_char_index = {}
+        for section in document.sections:
+            spacy_doc = self.nlp(section.get_text())
+            matches = self.matcher(spacy_doc)
+            matches_no_brackets = [(x[0], x[1] + 1, x[2] - 1) for x in matches]
 
-        :param doc:
-        """
-        all_occurences: Dict[Span, Set[Span]] = defaultdict(set)
-        global_matches = self.global_matcher(doc)
-        for match, start, end in global_matches:
-            string_key = self.global_matcher.vocab.strings[match]
-            self.to_remove.add(string_key)
-            all_occurences[self.rules[string_key]].add(doc[start:end])
-
-        occurences = list((k, v) for k, v in all_occurences.items())
-        for (long_form, short_forms) in occurences:
-            for short in short_forms:
-                short._.long_form = long_form
-                doc._.abbreviations.append(short)
-        return doc
-
-    def reset(self):
-        """
-        in this implementation, the matcher rules retains state, allowing the rules learnt from one section to be
-        applied to another. Calling reset removes this state, allowing new rules to be learnt (i.e. when processing
-        another document)
-        """
-        keys = [self.to_remove.pop() for _ in range(len(self.to_remove))]
-        for key in keys:
-            # Clean up the global matcher.
-            self.global_matcher.remove(key)
-        self.rules.clear()
-        self.global_matcher = Matcher(self.nlp.vocab)
+            long_to_short_candidates.extend(filter_matches(section, matches_no_brackets, spacy_doc))
+            section_to_spacy_doc[section] = spacy_doc
+            section_to_ents_by_char_index[section] = {
+                k: set(v)
+                for k, v in sort_then_group(
+                    filter(lambda x: len(x.spans) == 1, section.entities),
+                    key_func=lambda x: (
+                        x.start,
+                        x.end,
+                    ),
+                )
+            }
+        return long_to_short_candidates, section_to_ents_by_char_index, section_to_spacy_doc
