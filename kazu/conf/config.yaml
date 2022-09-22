@@ -5,7 +5,7 @@ defaults:
   - PLSapbertModel: default
   - SpacyPipeline: default
   - StanzaPipeline: default
-  - SciSpacyAbbreviationExpansionStep: default
+  - AbbreviationFinderStep: default
   - SpacyNerStep: default
   - TransformersModelForTokenClassificationNerStep: default
   - NerDeDuplicationStep: default
