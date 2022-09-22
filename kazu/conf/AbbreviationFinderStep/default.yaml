@@ -1,2 +1,8 @@
 _target_: kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep
 depends_on: ~
+exclude_abbrvs:
+  - COPD
+  - NSCLC
+  - mCRC
+  - NHL
+  - DEND
