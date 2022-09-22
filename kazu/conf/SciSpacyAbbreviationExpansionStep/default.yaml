@@ -1,2 +1,0 @@
-_target_: kazu.steps.string_preprocessing.scispacy_abbreviation_expansion.SciSpacyAbbreviationExpansionStep
-depends_on: ~
