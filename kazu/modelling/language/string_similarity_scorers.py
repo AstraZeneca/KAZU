@@ -5,8 +5,7 @@ from typing import Protocol, List
 from cachetools import LFUCache
 from pytorch_lightning import Trainer
 from rapidfuzz import fuzz
-from torch import Tensor
-from torch.nn import CosineSimilarity
+from torch import Tensor, cosine_similarity
 
 from kazu.data.data import NumericMetric
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
@@ -107,7 +106,6 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
         self.similarity_threshold = similarity_threshold
         self.trainer = trainer
         self.sapbert = sapbert
-        self.cos = CosineSimilarity(dim=0)
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
 
     def calc_similarity(self, s1: str, s2: str) -> float:
@@ -137,7 +135,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
                 s2_embedding = embeddings[0]
                 self.embedding_cache[s2] = s2_embedding
 
-            return self.cos(s1_embedding, s2_embedding)
+            return cosine_similarity(s1_embedding, s2_embedding, dim=0)
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
         return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
