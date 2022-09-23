@@ -111,31 +111,31 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
     def calc_similarity(self, s1: str, s2: str) -> float:
         if s1 == s2:
             return 1.0
-        else:
-            s1_embedding = self.embedding_cache.get(s1)
-            s2_embedding = self.embedding_cache.get(s2)
-            if s1_embedding is None and s2_embedding is None:
-                embeddings = self.sapbert.get_embeddings_for_strings(
-                    [s1, s2], batch_size=2, trainer=self.trainer
-                )
-                s1_embedding = embeddings[0]
-                s2_embedding = embeddings[1]
-                self.embedding_cache[s1] = s1_embedding
-                self.embedding_cache[s2] = s2_embedding
-            elif s1_embedding is None:
-                embeddings = self.sapbert.get_embeddings_for_strings(
-                    [s1], batch_size=1, trainer=self.trainer
-                )
-                s1_embedding = embeddings[0]
-                self.embedding_cache[s1] = s1_embedding
-            elif s2_embedding is None:
-                embeddings = self.sapbert.get_embeddings_for_strings(
-                    [s2], batch_size=1, trainer=self.trainer
-                )
-                s2_embedding = embeddings[0]
-                self.embedding_cache[s2] = s2_embedding
 
-            return cosine_similarity(s1_embedding, s2_embedding, dim=0)
+        s1_embedding = self.embedding_cache.get(s1)
+        s2_embedding = self.embedding_cache.get(s2)
+        if s1_embedding is None and s2_embedding is None:
+            embeddings = self.sapbert.get_embeddings_for_strings(
+                [s1, s2], batch_size=2, trainer=self.trainer
+            )
+            s1_embedding = embeddings[0]
+            s2_embedding = embeddings[1]
+            self.embedding_cache[s1] = s1_embedding
+            self.embedding_cache[s2] = s2_embedding
+        elif s1_embedding is None:
+            embeddings = self.sapbert.get_embeddings_for_strings(
+                [s1], batch_size=1, trainer=self.trainer
+            )
+            s1_embedding = embeddings[0]
+            self.embedding_cache[s1] = s1_embedding
+        elif s2_embedding is None:
+            embeddings = self.sapbert.get_embeddings_for_strings(
+                [s2], batch_size=1, trainer=self.trainer
+            )
+            s2_embedding = embeddings[0]
+            self.embedding_cache[s2] = s2_embedding
+
+        return cosine_similarity(s1_embedding, s2_embedding, dim=0)
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
         return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
