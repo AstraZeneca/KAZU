@@ -6,3 +6,4 @@ pipeline:
     - DictionaryEntityLinkingStep
     - MappingStep
     - MergeOverlappingEntsStep
+    - AbbreviationFinderStep
