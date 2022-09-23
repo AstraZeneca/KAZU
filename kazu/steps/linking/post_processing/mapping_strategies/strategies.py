@@ -475,14 +475,7 @@ class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
     3) filter the synonym terms according to detected mappings
     """
 
-    def __init__(
-        self,
-        confidence: LinkRanks,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
-    ):
-
-        super().__init__(confidence, disambiguation_strategies)
-        self.found_equivalent_ids: Set[Tuple[str, str, str]] = set()
+    found_equivalent_ids: Set[Tuple[str, str, str]]
 
     def prepare(self, document: Document):
         """
@@ -490,15 +483,13 @@ class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
         :param document:
         :return:
         """
-        self.found_equivalent_ids.clear()
-        entities = document.get_entities()
-        self.found_equivalent_ids.update(
+        self.found_equivalent_ids = set(
             (
                 mapping.parser_name,
                 mapping.source,
                 mapping.idx,
             )
-            for ent in entities
+            for ent in document.get_entities()
             for mapping in ent.mappings
         )
 
