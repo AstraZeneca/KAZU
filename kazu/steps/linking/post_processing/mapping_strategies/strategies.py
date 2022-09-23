@@ -19,7 +19,6 @@ from kazu.modelling.ontology_preprocessing.base import (
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 
-logger = logging.getLogger(__name__)
 
 
 class MappingFactory:
