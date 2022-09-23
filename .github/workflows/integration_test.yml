@@ -22,6 +22,11 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
 
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - name: Set model_pack path
         id: get_model_pack
         run: |
@@ -36,10 +41,6 @@ jobs:
           model_pack_path: ${{ inputs.model-pack-path }}
           model_packs_dir: ${{ inputs.model-packs-dir }}
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - uses: actions/cache@v2
         with:
