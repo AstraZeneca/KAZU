@@ -6,8 +6,7 @@ from typing import List, Tuple, Dict, Iterable
 import numpy as np
 
 from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.utils.link_index import create_char_ngrams
-from kazu.utils.utils import create_word_ngrams, Singleton
+from kazu.utils.utils import create_char_ngrams, create_word_ngrams, Singleton
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
