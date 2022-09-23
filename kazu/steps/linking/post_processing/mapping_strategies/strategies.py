@@ -12,7 +12,7 @@ from kazu.data.data import (
 from kazu.data.data import LinkRanks
 from kazu.modelling.database.in_memory_db import MetadataDatabase
 from kazu.modelling.language.string_similarity_scorers import (
-    ComplexStringComparisonScorer,
+    BooleanStringSimilarityScorer,
 )
 from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
@@ -425,7 +425,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
     def __init__(
         self,
         confidence: LinkRanks,
-        complex_string_scorer: ComplexStringComparisonScorer,
+        complex_string_scorer: BooleanStringSimilarityScorer,
         search_threshold: float = 80.0,
         symbolic_only: bool = False,
         differential: float = 2.0,
