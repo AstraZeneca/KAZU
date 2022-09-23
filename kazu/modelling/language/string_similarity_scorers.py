@@ -1,5 +1,4 @@
 import re
-from abc import ABC, abstractmethod
 from collections import Counter
 from typing import Protocol, List
 
@@ -14,22 +13,21 @@ from kazu.modelling.linking.sapbert.train import PLSapbertModel
 from kazu.utils.utils import Singleton
 
 
-class StringSimilarityScorer(ABC):
+class StringSimilarityScorer(Protocol):
     """
     calculates a NumericMetric based on a string match or a normalised string match and a normalised term
     """
 
-    @abstractmethod
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        raise NotImplementedError()
+        ...
 
 
-class BooleanStringSimilarityScorer(Protocol):
+class BooleanStringSimilarityScorer(StringSimilarityScorer, Protocol):
     def __call__(self, reference_term: str, query_term: str) -> bool:
         ...
 
 
-class NumberMatchStringSimilarityScorer(StringSimilarityScorer):
+class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
     """
     checks all numbers in reference_term are represented in term_norm
     """
@@ -42,7 +40,7 @@ class NumberMatchStringSimilarityScorer(StringSimilarityScorer):
         return reference_term_number_count == query_term_number_count
 
 
-class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
+class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
     """
     checks all TYPE x mentions in match norm are represented in term norm
     """
@@ -69,7 +67,7 @@ class EntitySubtypeStringSimilarityScorer(StringSimilarityScorer):
         )
 
 
-class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
+class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
     """
     checks all modifier phrases in reference_term are represented in term_norm
     """
@@ -88,7 +86,7 @@ class EntityNounModifierStringSimilarityScorer(StringSimilarityScorer):
 class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
     """
     uses rapid fuzz to calculate string similarity. Note, if the token count >4 and reference_term has
-    more than 10 chars, token_sort_ratio is used. Otherwise WRatio is used
+    more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used
     """
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
@@ -98,46 +96,21 @@ class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
             return fuzz.WRatio(reference_term, query_term)
 
 
-class ComplexStringComparisonScorer(metaclass=Singleton):
+class SapbertStringSimilarityScorer(metaclass=Singleton):
     """
-    for some string comparison methods, we need some heavy duty modelling. Since these can be memory expensive, we use
-    singletons, so that only one instance of the model is loaded. Implementations should implement _calc_similarity,
-    which should return a float. If this is bigger than self.similarity_threshold, the result of the calculation is
-    True
-    """
-
-    def __init__(
-        self,
-        similarity_threshold: float = 0.55,
-    ):
-        """
-        :param similarity_threshold: if the _calc_similarity method returns a value equal or greater than this, then
-            the check passes
-        """
-        self.similarity_threshold = similarity_threshold
-
-    def _calc_similarity(self, s1: str, s2: str) -> float:
-        raise NotImplementedError()
-
-    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        return self._calc_similarity(reference_term, query_term) >= self.similarity_threshold
-
-
-class SapbertStringSimilarityScorer(ComplexStringComparisonScorer, metaclass=Singleton):
-    """
-    Sapbert implementation of ComplexStringComparisonScorer
+    note this is an implementation of the StringSimilarityScorer Protocol, but as a Singleton we can't inherit it
     """
 
     def __init__(
         self, sapbert: PLSapbertModel, trainer: Trainer, similarity_threshold: float = 0.55
     ):
-        super().__init__(similarity_threshold)
+        self.similarity_threshold = similarity_threshold
         self.trainer = trainer
         self.sapbert = sapbert
         self.cos = CosineSimilarity(dim=0)
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
 
-    def _calc_similarity(self, s1: str, s2: str) -> float:
+    def calc_similarity(self, s1: str, s2: str) -> float:
         if s1 == s2:
             return 1.0
         else:
@@ -165,3 +138,6 @@ class SapbertStringSimilarityScorer(ComplexStringComparisonScorer, metaclass=Sin
                 self.embedding_cache[s2] = s2_embedding
 
             return self.cos(s1_embedding, s2_embedding)
+
+    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
+        return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
