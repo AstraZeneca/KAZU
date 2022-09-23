@@ -428,7 +428,15 @@ class JsonLinesOntologyParser(OntologyParser):
 
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     name = "OPENTARGETS_DISEASE"
-    allowed_sources = {"OGMS", "FBbt", "MONDO", "Orphanet", "EFO", "OTAR", "HP"}
+    # Just use IDs that are in MONDO, since that's all people in general care about.
+    # if we want to expand this out, other sources are:
+    # "OGMS", "FBbt", "Orphanet", "EFO", "OTAR"
+    # but we did have these in previously, and EFO introduced a lot of noise as it
+    # has non-disease terms like 'dose' that occur frequently.
+    # we could make the allowed sources a config option but we don't need to configure
+    # currently, and easy to change later (and provide the current value as a default if
+    # not present in config)
+    allowed_sources = {"MONDO", "HP"}
 
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
