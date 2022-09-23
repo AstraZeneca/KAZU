@@ -101,7 +101,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
     """
 
     def __init__(
-        self, sapbert: PLSapbertModel, trainer: Trainer, similarity_threshold: float = 0.55
+        self, sapbert: PLSapbertModel, trainer: Trainer, similarity_threshold: float = 0.60
     ):
         self.similarity_threshold = similarity_threshold
         self.trainer = trainer
