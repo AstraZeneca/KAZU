@@ -17,29 +17,32 @@ logger = logging.getLogger(__name__)
 _TAX_NAME = "taxonomy"
 
 
-class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
+class KazuToLabelStudioConverter:
     """
     json.JSONEncoder that converts a kazu Document into Label Studio tasks
     since LS is region based, we need ot create a new region for every CharSpan (even overlapping ones),
     and add entity information (class, mappings etc) to the region.
     """
 
-    def default(self, obj):
-        # ignore any objects that aren't the Document (i.e. the top level container)
-        if isinstance(obj, Document):
-            result = []
-            doc_id = obj.idx
-            for i, section in enumerate(obj.sections):
-                idx = f"{doc_id}_{section.name}_{i}"
-                data = {}
-                data["text"] = section.text
-                data["id"] = idx
-                annotations = []
-                result_values = self._create_label_studio_labels(section.entities, section.text)
-                annotation = {"id": idx, "result": result_values}
-                annotations.append(annotation)
-                result.append({"data": data, "annotations": annotations})
-            return result
+    @classmethod
+    def convert_single_doc_to_tasks(cls, doc: Document) -> Iterable[Dict]:
+        doc_id = doc.idx
+        for i, section in enumerate(doc.sections):
+            idx = f"{doc_id}_{section.name}_{i}"
+            data = {}
+            data["text"] = section.text
+            data["id"] = idx
+            annotations = []
+            result_values = cls._create_label_studio_labels(section.entities, section.text)
+            annotation = {"id": idx, "result": result_values}
+            annotations.append(annotation)
+            yield {"data": data, "annotations": annotations}
+
+    @classmethod
+    def convert_docs_to_tasks(cls, docs: List[Document]) -> List[Dict]:
+        return [task for doc in docs for task in cls.convert_single_doc_to_tasks(doc)]
+
+        # ignore anything other than a Document or list of Documents
 
     @staticmethod
     def _create_label_studio_labels(
@@ -54,22 +57,18 @@ class KazuToLabelStudioDocumentEncoder(json.JSONEncoder):
                 region_id_str = f"{ent_hash}_{span}"
                 region_ids.append(region_id_str)
                 match = text[span.start : span.end]
-                ner_region = KazuToLabelStudioDocumentEncoder._create_ner_region(
+                ner_region = KazuToLabelStudioConverter._create_ner_region(
                     ent, region_id_str, span, match
                 )
                 result_values.append(ner_region)
-                result_normalisation_value = (
-                    KazuToLabelStudioDocumentEncoder._create_mapping_region(
-                        ent, region_id_str, span, match
-                    )
+                result_normalisation_value = KazuToLabelStudioConverter._create_mapping_region(
+                    ent, region_id_str, span, match
                 )
                 result_values.append(result_normalisation_value)
             if len(region_ids) > 1:
                 for from_id, to_id in itertools.combinations(region_ids, r=2):
                     result_values.append(
-                        KazuToLabelStudioDocumentEncoder._create_non_contig_entity_links(
-                            from_id, to_id
-                        )
+                        KazuToLabelStudioConverter._create_non_contig_entity_links(from_id, to_id)
                     )
         return result_values
 
@@ -456,15 +455,8 @@ class LabelStudioManager:
             == 201
         )
 
-    def convert_docs_to_tasks(self, docs: List[Document]):
-        return list(
-            itertools.chain.from_iterable(
-                json.loads(doc.json(encoder=KazuToLabelStudioDocumentEncoder)) for doc in docs
-            )
-        )
-
     def import_to_ls(self, docs: List[Document]):
-        tasks = self.convert_docs_to_tasks(docs)
+        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         return requests.post(
             f"{self.url}/api/projects/{self.project_id}/import", json=tasks, headers=self.headers
         )
