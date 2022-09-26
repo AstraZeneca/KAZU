@@ -99,6 +99,6 @@ class TfIdfDocumentScorer:
         with open(path, "wb") as f:
             pickle.dump(self, f)
 
-    def build_vectoriser(self, strings: List[str]):
+    def build_vectoriser(self, strings: Iterable[str]):
         self.vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
         self.vectoriser.fit(strings)
