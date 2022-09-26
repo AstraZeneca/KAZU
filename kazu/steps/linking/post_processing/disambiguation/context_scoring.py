@@ -52,15 +52,17 @@ class TfIdfScorerManager(metaclass=Singleton):
     def build_scorers(self, path: Path):
         path.mkdir(parents=True)
         for parser_name in self.synonym_db.loaded_parsers:
-            synonyms = list(self.synonym_db.get_all(parser_name).keys())
+            synonyms = self.synonym_db.get_all(parser_name).keys()
             scorer = TfIdfDocumentScorer()
             scorer.build_vectoriser(synonyms)
             scorer.save(path.joinpath(parser_name))
-        self.load_scorers(path)
+            self.parser_to_scorer[parser_name] = scorer
 
     def load_scorers(self, path: Path):
-        for parser_path in path.iterdir():
-            self.parser_to_scorer[str(parser_path.name)] = TfIdfDocumentScorer.load(parser_path)
+        self.parser_to_scorer.update({
+            parser_path.name: TfIdfDocumentScorer.load(parser_path)
+            for parser_path in path.iterdir()
+        })
 
 
 class TfIdfDocumentScorer:
