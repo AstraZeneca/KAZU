@@ -88,13 +88,16 @@ class MappingFactory:
 
 class MappingStrategy:
     """
-    the purpose of a MappingStrategy is two fold:
+    A MappingStrategy is responsible for actualising instances of :class:`Mapping`
 
-    1) Filter the set of SynonymTermWithMetrics associated with an Entity down to the most appropriate ones,
+    This is performed in two steps:
+
+    1) Filter the set of :class:`SynonymTermWithMetrics` associated with an Entity down to the most appropriate ones,
         (e.g. based on string similarity).
 
-    2) If required, apply any configured DisambiguationStrategy to the filtered instances of EquivalentIdSet
+    2) If required, apply any configured DisambiguationStrategy to the filtered instances of :class:`EquivalentIdSet`
 
+    selected instances of :class:`EquivalentIdSet` are converted to :class:`Mapping`
 
 
     """
