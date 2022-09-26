@@ -376,48 +376,6 @@ class StrongMatchMappingStrategy(MappingStrategy):
         self.symbolic_only = symbolic_only
         self.search_threshold = search_threshold
 
-    def filter_and_sort_by_differential(
-        self, terms: FrozenSet[SynonymTermWithMetrics]
-    ) -> List[SynonymTermWithMetrics]:
-        filtered_terms_list: List[SynonymTermWithMetrics] = []
-
-        if self.symbolic_only:
-            all_scores = [
-                x.search_score for x in terms if x.search_score is not None and x.is_symbolic
-            ]
-            # note, we need this check as max will throw an exception if sequence is empty
-            if len(all_scores) == 0:
-                return filtered_terms_list
-            else:
-                best_symbolic: float = max(all_scores)
-                filtered_terms_list.extend(
-                    sorted(
-                        filter(
-                            lambda x: x.search_score >= self.search_threshold  # type: ignore[arg-type,return-value,union-attr,operator]
-                            and best_symbolic - x.search_score <= self.differential  # type: ignore[arg-type,return-value,union-attr,operator]
-                            and x.is_symbolic,  # type: ignore[arg-type,return-value,union-attr,operator]
-                            terms,
-                        ),
-                        key=lambda x: x.search_score,  # type: ignore[arg-type,return-value,union-attr,operator]
-                        reverse=True,
-                    )
-                )  # type: ignore[arg-type]
-        else:
-            best_all: float = max(x.search_score for x in terms)  # type: ignore[arg-type,return-value,union-attr,operator,type-var,assignment]
-            filtered_terms_list.extend(
-                sorted(
-                    filter(
-                        lambda x: x.search_score >= self.search_threshold  # type: ignore[arg-type,return-value,union-attr,operator,type-var,assignment]
-                        and best_all - x.search_score <= self.differential,  # type: ignore[arg-type,return-value,union-attr,operator]
-                        terms,
-                    ),
-                    key=lambda x: x.search_score,  # type: ignore[arg-type,return-value,union-attr,operator]
-                    reverse=True,
-                )
-            )  # type: ignore[arg-type]  # type: ignore[arg-type]
-
-        return filtered_terms_list
-
     def filter_terms(
         self,
         ent_match: str,
@@ -426,9 +384,26 @@ class StrongMatchMappingStrategy(MappingStrategy):
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
+        if self.symbolic_only:
+            relevant_terms_with_scores = [
+                (term, score)
+                for term in terms if term.is_symbolic and (score := term.search_score) is not None
+            ]
+        else:
+            relevant_terms_with_scores = [
+                (term, score)
+                for term in terms if (score := term.search_score) is not None
+            ]
 
-        selected_terms = self.filter_and_sort_by_differential(terms)
-        return set(selected_terms)
+        if len(relevant_terms_with_scores) == 0:
+            return []
+
+        best_score = max((score for _, score in relevant_terms_with_scores))
+
+        return set(
+            term for term, score in relevant_terms_with_scores
+            if score >= self.search_threshold and best_score - score <= self.differential
+        )
 
 
 class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMappingStrategy):
