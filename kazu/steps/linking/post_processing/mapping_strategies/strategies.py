@@ -449,7 +449,9 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
-        synonym_term_sorted_by_score = self.filter_and_sort_by_differential(terms)
+        synonym_term_sorted_by_score = sorted(
+            super().filter_terms(terms), key=lambda x: x.search_score, reverse=True
+        )
         selected_id_sets = set()
         selected_terms = set()
         for term in synonym_term_sorted_by_score:
