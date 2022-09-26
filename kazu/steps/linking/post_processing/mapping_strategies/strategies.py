@@ -27,6 +27,28 @@ class MappingFactory:
     metadata_db = MetadataDatabase()
 
     @staticmethod
+    def create_mapping_from_id_sets(
+        id_sets: Set[EquivalentIdSet],
+        parser_name: str,
+        mapping_strategy: str,
+        disambiguation_strategy: Optional[str],
+        confidence: LinkRanks,
+        additional_metadata: Optional[Dict] = None,
+        strip_url: bool = True,
+    ) -> Iterable[Mapping]:
+
+        for id_set in id_sets:
+            yield from MappingFactory.create_mapping_from_id_set(
+                id_set=id_set,
+                parser_name=parser_name,
+                mapping_strategy=mapping_strategy,
+                disambiguation_strategy=disambiguation_strategy,
+                confidence=confidence,
+                additional_metadata=additional_metadata,
+                strip_url=strip_url,
+            )
+
+    @staticmethod
     def create_mapping_from_id_set(
         id_set: EquivalentIdSet,
         parser_name: str,
@@ -213,17 +235,14 @@ class MappingStrategy:
         id_sets, successful_disambiguation_strategy = self.disambiguate_if_required(
             filtered_terms, document, parser_name
         )
-        for id_set in id_sets:
-            for idx in id_set.ids:
-                yield MappingFactory.create_mapping(
-                    source=id_set.ids_to_source[idx],
-                    parser_name=parser_name,
-                    idx=idx,
-                    confidence=self.confidence if len(id_sets) == 1 else LinkRanks.AMBIGUOUS,
-                    additional_metadata=None,
-                    mapping_strategy=self.__class__.__name__,
-                    disambiguation_strategy=successful_disambiguation_strategy,
-                )
+        yield from MappingFactory.create_mapping_from_id_sets(
+            id_sets=id_sets,
+            parser_name=parser_name,
+            confidence=self.confidence if len(id_sets) == 1 else LinkRanks.AMBIGUOUS,
+            additional_metadata=None,
+            mapping_strategy=self.__class__.__name__,
+            disambiguation_strategy=successful_disambiguation_strategy,
+        )
 
 
 class ExactMatchMappingStrategy(MappingStrategy):
