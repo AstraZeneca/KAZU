@@ -237,5 +237,5 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
                     best_equiv_id_sets = {id_set}
                 elif score == best_score:
                     best_equiv_id_sets.add(id_set)
-        
+
         return best_equiv_id_sets
