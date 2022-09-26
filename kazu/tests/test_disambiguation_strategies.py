@@ -175,9 +175,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
         strategy = TfIdfDisambiguationStrategy(
             TfIdfScorerManager(path=cache_dir),
             context_threshold=0.0,
-            relevant_aggregation_strategies=[
-                EquivalentIdAggregationStrategy.NO_STRATEGY
-            ],
+            relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
         )
 
         check_ids_are_represented(ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser)
