@@ -50,7 +50,7 @@ class TfIdfScorerManager(metaclass=Singleton):
             self.build_scorers(path)
 
     def build_scorers(self, path: Path):
-        path.mkdir()
+        path.mkdir(parents=True)
         for parser_name in self.synonym_db.loaded_parsers:
             synonyms = list(self.synonym_db.get_all(parser_name).keys())
             scorer = TfIdfDocumentScorer()
