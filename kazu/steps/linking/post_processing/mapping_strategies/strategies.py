@@ -449,7 +449,15 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
         synonym_term_sorted_by_score = sorted(
-            super().filter_terms(terms), key=lambda x: x.search_score, reverse=True
+            super().filter_terms(
+                ent_match=ent_match,
+                ent_match_norm=ent_match_norm,
+                document=document,
+                terms=terms,
+                parser_name=parser_name,
+            ),
+            key=lambda x: x.search_score,  # type: ignore[arg-type,return-value,union-attr,operator,type-var,assignment]
+            reverse=True,
         )
         selected_id_sets = set()
         selected_terms = set()
