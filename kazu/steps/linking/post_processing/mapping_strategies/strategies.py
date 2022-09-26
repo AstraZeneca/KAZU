@@ -314,8 +314,8 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
     def __init__(
         self,
         confidence: LinkRanks,
-        min_term_norm_len_to_consider: int = 3,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        min_term_norm_len_to_consider: int = 3,
     ):
         super().__init__(confidence, disambiguation_strategies)
         self.min_term_norm_len_to_consider = min_term_norm_len_to_consider
@@ -328,7 +328,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
-        norm_tokens = ent_match_norm.split(" ")
+        norm_tokens = set(ent_match_norm.split(" "))
 
         filtered_terms_and_len = [
             (
@@ -336,7 +336,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
                 len(term.term_norm),
             )
             for term in terms
-            if any(term.term_norm == norm_token for norm_token in norm_tokens)
+            if term.term_norm in norm_tokens
             and len(term.term_norm) >= self.min_term_norm_len_to_consider
         ]
         filtered_terms_and_len.sort(key=lambda x: x[1], reverse=True)
