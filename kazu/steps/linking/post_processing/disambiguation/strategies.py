@@ -231,7 +231,9 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
 
         for id_set in id_sets:
             for idx in id_set.ids:
-                score = self.metadata_db.get_by_idx(parser_name, idx).get("annotation_score", 0)
+                score = int(
+                    self.metadata_db.get_by_idx(parser_name, idx).get("annotation_score", 0)
+                )
                 if score > best_score:
                     best_score = score
                     best_equiv_id_sets = {id_set}
