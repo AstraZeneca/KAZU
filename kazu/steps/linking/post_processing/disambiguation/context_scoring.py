@@ -40,70 +40,51 @@ class TfIdfScorerManager(metaclass=Singleton):
     # singleton so we don't have to use multiple instances of same model
     def __init__(self, path: Path):
         self.synonym_db = SynonymDatabase()
-        self.parser_to_scorer: Dict[str, TfIdfDocumentScorer] = {}
-        self.build_or_load_scorers(path)
+        self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = {}
+        self.build_or_load_vectorizers(path)
 
-    def build_or_load_scorers(self, path: Path):
+    def build_or_load_vectorizers(self, path: Path):
         if path.exists():
-            self.load_scorers(path)
+            self.load_vectorizers(path)
         else:
-            self.build_scorers(path)
+            self.build_vectorizers(path)
 
-    def build_scorers(self, path: Path):
+    def build_vectorizers(self, path: Path):
         path.mkdir(parents=True)
         for parser_name in self.synonym_db.loaded_parsers:
             synonyms = self.synonym_db.get_all(parser_name).keys()
-            scorer = TfIdfDocumentScorer()
-            scorer.build_vectoriser(synonyms)
-            scorer.save(path.joinpath(parser_name))
-            self.parser_to_scorer[parser_name] = scorer
+            vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
+            vectoriser.fit(synonyms)
+            with path.joinpath(parser_name).open(mode="wb") as vectorizer_f:
+                pickle.dump(self, vectorizer_f)
+            self.parser_to_vectorizer[parser_name] = vectoriser
 
-    def load_scorers(self, path: Path):
-        self.parser_to_scorer.update(
-            {
-                parser_path.name: TfIdfDocumentScorer.load(parser_path)
-                for parser_path in path.iterdir()
-            }
+    def load_vectorizers(self, path: Path):
+        self.parser_to_vectorizer.update(
+            {parser_path.name: self.load_vectorizer(parser_path) for parser_path in path.iterdir()}
         )
 
+    @staticmethod
+    def load_vectorizer(path: Path) -> TfidfVectorizer:
+        with open(path, "rb") as f:
+            return pickle.load(f)
 
-class TfIdfDocumentScorer:
-    """
-    wrapper class for TfidfVectorizer, to simplify loading/saving/transforming strings
-    """
-
-    def __init__(self):
-        self.vectoriser: TfidfVectorizer
-
-    def __call__(self, strings: List[str], matrix: np.ndarray) -> Iterable[Tuple[str, float]]:
+    def __call__(
+        self, strings: List[str], matrix: np.ndarray, parser: str
+    ) -> Iterable[Tuple[str, float]]:
         """
-        transform a list of strings with self.vectoriser and score against a matrix
+        transform a list of strings with a parser-specific vectorizer and score against a matrix
 
         :param strings:
         :param matrix:
+        :param parser:
         :return: matching strings and their score sorted by best score
         """
         if len(strings) == 1:
             yield strings[0], 100.0
         else:
-            mat = self.vectoriser.transform(strings)
+            mat = self.parser_to_vectorizer[parser].transform(strings)
             score_matrix = np.squeeze(-np.asarray(mat.dot(matrix.T).todense()))
             neighbours = score_matrix.argsort()
             for neighbour in neighbours:
                 yield strings[neighbour], -score_matrix[neighbour]
-
-    def transform(self, strings: List[str]) -> np.ndarray:
-        return self.vectoriser.transform(strings)
-
-    @staticmethod
-    def load(path: Path) -> "TfIdfDocumentScorer":
-        with open(path, "rb") as f:
-            return pickle.load(f)
-
-    def save(self, path: Path):
-        with open(path, "wb") as f:
-            pickle.dump(self, f)
-
-    def build_vectoriser(self, strings: Iterable[str]):
-        self.vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
-        self.vectoriser.fit(strings)
