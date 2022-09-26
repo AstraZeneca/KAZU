@@ -213,8 +213,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             for best_syn, score in scorer(indexed_non_ambiguous_syns, document_query_matrix):
                 if score >= self.context_threshold and len(id_set_representation[best_syn]) == 1:
                     return id_set_representation[best_syn]
-            else:
-                return set()
+            return set()
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
