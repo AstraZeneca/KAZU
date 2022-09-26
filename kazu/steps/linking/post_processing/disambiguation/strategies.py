@@ -218,11 +218,10 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
+    metadata_db = MetadataDatabase()
+
     def prepare(self, document: Document):
         pass
-
-    def __init__(self):
-        self.metadata_db = MetadataDatabase()
 
     def disambiguate(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
