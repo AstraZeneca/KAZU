@@ -250,8 +250,9 @@ class ExactMatchMappingStrategy(MappingStrategy):
     returns any exact matches
     """
 
+    @classmethod
     def filter_terms(
-        self,
+        cls,
         ent_match: str,
         ent_match_norm: str,
         document: Document,
@@ -293,15 +294,16 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
         return shortest.strip() == ""
 
+    @classmethod
     def filter_terms(
-        self,
+        cls,
         ent_match: str,
         ent_match_norm: str,
         document: Document,
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
-        return set(term for term in terms if self.match_symbols(ent_match_norm, term.term_norm))
+        return set(term for term in terms if cls.match_symbols(ent_match_norm, term.term_norm))
 
 
 class TermNormIsSubStringMappingStrategy(MappingStrategy):
