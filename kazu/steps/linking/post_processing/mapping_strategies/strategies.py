@@ -306,8 +306,8 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 class TermNormIsSubStringMappingStrategy(MappingStrategy):
     """
-    see if any terms are substrings of the match norm. If exactly one is returned, prefer it. Works best on symbolic
-    entities, e.g. "TESTIN gene" ->"TESTIN"
+    for a Set[SynonymTermWithMetrics], see if any of their .term_norm are substrings of the match_norm. If exactly one
+    SynonymTermWithMetrics is matches, prefer it. Works best on symbolic entities, e.g. "TESTIN gene" ->"TESTIN"
     """
 
     def __init__(
