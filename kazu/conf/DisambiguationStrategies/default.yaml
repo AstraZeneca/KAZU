@@ -1,7 +1,7 @@
 default:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    aggregation_strategies_to_build_id_set_representation:
+    relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
           - UNAMBIGUOUS
@@ -21,7 +21,7 @@ default:
 gene:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    aggregation_strategies_to_build_id_set_representation:
+    relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
           - CUSTOM
@@ -36,7 +36,7 @@ gene:
 cell_line:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    aggregation_strategies_to_build_id_set_representation:
+    relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
           - CUSTOM
