@@ -1,7 +1,6 @@
 import copy
 import logging
-from collections import defaultdict
-from typing import List, Tuple, Iterable, Dict, FrozenSet, DefaultDict, Set
+from typing import List, Tuple, Iterable, Dict, FrozenSet, Set
 
 from kazu.data.data import (
     Document,
@@ -62,7 +61,7 @@ class NamespaceStrategyExecution:
     def longest_mapping_strategy_list_size(self):
         return max(
             len(self.default_strategies),
-            *(len(strategies) for strategies in self.ent_class_strategies.values())
+            *(len(strategies) for strategies in self.ent_class_strategies.values()),
         )
 
     def get_strategies_for_entity_class(self, entity_class: str) -> List[MappingStrategy]:
@@ -70,7 +69,7 @@ class NamespaceStrategyExecution:
 
     def _get_unresolved_parsers(self, entity_key: EntityKey, entity: Entity) -> Set[str]:
 
-        unresolved_parsers = self.required_parsers.get(entity_key, None)
+        unresolved_parsers = self.unresolved_parsers.get(entity_key, None)
         if unresolved_parsers is not None:
             return unresolved_parsers
 
@@ -96,7 +95,7 @@ class NamespaceStrategyExecution:
             entity_key = entity_to_entity_key(entity)
             # we keep track of which entities have resolved mappings to specific parsers, so we don't run lower
             # ranked strategies if we don't need to
-            unresolved_parsers = self._get_unresolved_parsers(entity_key)
+            unresolved_parsers = self._get_unresolved_parsers(entity_key, entity)
             if len(unresolved_parsers) == 0:
                 logger.debug(
                     f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
@@ -115,7 +114,8 @@ class NamespaceStrategyExecution:
                 )
                 strategy.prepare(document)
                 terms_to_consider = (
-                    t for t in entity.syn_term_to_synonym_terms
+                    t
+                    for t in entity.syn_term_to_synonym_terms
                     if t.parser_name in unresolved_parsers
                 )
                 terms_by_parser = sort_then_group(
@@ -153,9 +153,7 @@ class StrategyRunner:
 
     1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
         entity spans
-    2) whether an entity is symbolic or not (generally speaking, noun phrases should be easier to normalise than
-        symbolic mentions, as there is more information to work with)
-    3) what SynonymTerms are associated with the entity, and from which parser they originated from
+    2) what SynonymTerms are associated with the entity, and from which parser they originated from
 
     This __call__ method of this class operates as follows:
 
@@ -216,8 +214,9 @@ class StrategyRunner:
 
     def __call__(self, doc: Document):
         """
-        group entities by configured namespace order, split by symbolism, then run
-            self.execute_hit_post_processing_strategies
+        generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
+        information to work with. Therefore, we group entities by configured namespace order, split by symbolism, then
+        run self.execute_hit_post_processing_strategies
         :param doc:
         :return:
         """
