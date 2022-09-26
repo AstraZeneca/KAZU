@@ -70,11 +70,13 @@ class NamespaceStrategyExecution:
 
     def _get_unresolved_parsers(self, entity_key: EntityKey, entity: Entity) -> Set[str]:
 
-        unresolved_parsers = self.unresolved_parsers.get(entity_key, None)
-        if unresolved_parsers is not None:
+        maybe_unresolved_parsers = self.unresolved_parsers.get(entity_key, None)
+        if maybe_unresolved_parsers is not None:
+            return maybe_unresolved_parsers
+        else:
+            unresolved_parsers = set(x.parser_name for x in entity.syn_term_to_synonym_terms)
+            self.unresolved_parsers[entity_key] = unresolved_parsers
             return unresolved_parsers
-
-        return set(x.parser_name for x in entity.syn_term_to_synonym_terms)
 
     def __call__(
         self, entity: Entity, strategy_index: int, document: Document
