@@ -11,7 +11,11 @@ from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
+from kazu.modelling.database.in_memory_db import (
+    MetadataDatabase,
+    SynonymDatabase,
+    NormalisedSynonymStr,
+)
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     TfIdfScorerManager,
     TfIdfDocumentScorer,
@@ -181,7 +185,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         self,
         parser_name: str,
         id_sets: Set[EquivalentIdSet],
-    ) -> Dict[str, Set[EquivalentIdSet]]:
+    ) -> Dict[NormalisedSynonymStr, Set[EquivalentIdSet]]:
         result = defaultdict(set)
         for id_set in id_sets:
             for idx in id_set.ids:
