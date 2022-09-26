@@ -194,7 +194,7 @@ class SynonymDatabase:
     def get_syns_for_id(
         self,
         name: ParserName,
-        idx: NormalisedSynonymStr,
+        idx: Idx,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> Set[NormalisedSynonymStr]:
         assert self.instance is not None
