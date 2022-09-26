@@ -206,15 +206,15 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
         document_query_matrix = self.parser_name_to_doc_representation[parser_name]
         id_set_representation = self.build_id_set_representation(parser_name, id_sets)
-        if len(id_set_representation) > 0:
+        if len(id_set_representation) == 0:
+            return set()
+        else:
             indexed_non_ambiguous_syns = list(id_set_representation.keys())
             for best_syn, score in scorer(indexed_non_ambiguous_syns, document_query_matrix):
                 if score >= self.context_threshold and len(id_set_representation[best_syn]) == 1:
                     return id_set_representation[best_syn]
             else:
                 return set()
-        else:
-            return set()
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
