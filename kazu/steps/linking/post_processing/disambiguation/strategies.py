@@ -154,7 +154,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         parser_names = set(
             term.parser_name
             for ent in document.get_entities()
-            for term in ent.syn_term_to_synonym_terms.keys()
+            for term in ent.syn_term_to_synonym_terms
         )
         for parser_name in parser_names:
             scorer = self.scorer_manager.parser_to_scorer[parser_name]
