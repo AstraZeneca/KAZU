@@ -31,7 +31,7 @@ def entity_to_entity_key(
         e.match,
         e.match_norm,
         e.entity_class,
-        frozenset(e.syn_term_to_synonym_terms.values()),
+        frozenset(e.syn_term_to_synonym_terms),
     )
 
 
@@ -56,27 +56,25 @@ class NamespaceStrategyExecution:
         self.stop_on_success = stop_on_success
         self.default_strategies = default_strategies
         self.ent_class_strategies = ent_class_strategies
-        self.resolved_parsers: DefaultDict[EntityKey, Set[str]] = defaultdict(set)
-        self.required_parsers: Dict[EntityKey, Set[str]] = {}
+        self.unresolved_parsers: Dict[EntityKey, Set[str]] = {}
 
     @property
     def longest_mapping_strategy_list_size(self):
         return max(
-            [len(strategies) for strategies in self.ent_class_strategies.values()]
-            + [len(self.default_strategies)]
+            len(self.default_strategies),
+            *(len(strategies) for strategies in self.ent_class_strategies.values())
         )
 
     def get_strategies_for_entity_class(self, entity_class: str) -> List[MappingStrategy]:
         return self.ent_class_strategies.get(entity_class, self.default_strategies)
 
-    def _get_required_parsers(self, entity_key: EntityKey, entity: Entity) -> Set[str]:
-        maybe_required_parsers = self.required_parsers.get(entity_key, None)
-        if maybe_required_parsers is None:
-            required_parsers = set(x.parser_name for x in entity.syn_term_to_synonym_terms.values())
-            self.required_parsers[entity_key] = required_parsers
-            return required_parsers
-        else:
-            return maybe_required_parsers
+    def _get_unresolved_parsers(self, entity_key: EntityKey, entity: Entity) -> Set[str]:
+
+        unresolved_parsers = self.required_parsers.get(entity_key, None)
+        if unresolved_parsers is not None:
+            return unresolved_parsers
+
+        return set(x.parser_name for x in entity.syn_term_to_synonym_terms)
 
     def __call__(
         self, entity: Entity, strategy_index: int, document: Document
@@ -98,14 +96,13 @@ class NamespaceStrategyExecution:
             entity_key = entity_to_entity_key(entity)
             # we keep track of which entities have resolved mappings to specific parsers, so we don't run lower
             # ranked strategies if we don't need to
-            resolved_parsers = self.resolved_parsers.get(entity_key, set())
-            required_parsers = self._get_required_parsers(entity_key=entity_key, entity=entity)
-            if len(required_parsers.difference(resolved_parsers)) == 0:
+            unresolved_parsers = self._get_unresolved_parsers(entity_key)
+            if len(unresolved_parsers) == 0:
                 logger.debug(
                     f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
                     f"<{entity.match}> as all parsers have been resolved"
                 )
-            elif len(resolved_parsers) > 0 and self.stop_on_success:
+            elif self.stop_on_success:
                 logger.debug(
                     f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
                     f"<{entity.match}> as entity has been resolved to another parser and stop_on_success: "
@@ -117,23 +114,23 @@ class NamespaceStrategyExecution:
                     f"<{entity.match}> "
                 )
                 strategy.prepare(document)
-                terms_to_consider = filter(
-                    lambda x: x.parser_name not in resolved_parsers,
-                    entity.syn_term_to_synonym_terms.values(),
+                terms_to_consider = (
+                    t for t in entity.syn_term_to_synonym_terms
+                    if t.parser_name in unresolved_parsers
                 )
                 terms_by_parser = sort_then_group(
                     terms_to_consider, key_func=lambda x: x.parser_name
                 )
 
-                for parser_name, hits_this_parser in terms_by_parser:
-                    terms_this_parser_set = frozenset(hits_this_parser)
+                for parser_name, terms_this_parser in terms_by_parser:
+                    terms_this_parser_set = frozenset(terms_this_parser)
                     for mapping in strategy(
                         ent_match=entity.match,
                         ent_match_norm=entity.match_norm,
                         terms=terms_this_parser_set,
                         document=document,
                     ):
-                        self.resolved_parsers[entity_key].add(mapping.parser_name)
+                        self.unresolved_parsers[entity_key].discard(mapping.parser_name)
                         yield mapping
 
     def reset(self):
@@ -141,8 +138,7 @@ class NamespaceStrategyExecution:
         clear state, ready for another execution. Should be called between Documents
         :return:
         """
-        self.resolved_parsers.clear()
-        self.required_parsers.clear()
+        self.unresolved_parsers.clear()
 
 
 class StrategyRunner:
