@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 def create_word_and_char_ngrams(
     s: str,
-    words: Tuple[int, int] = (
+    words: Iterable[int] = (
         1,
         2,
     ),
-    chars: Tuple[int, int] = (
+    chars: Iterable[int] = (
         2,
         3,
     ),
