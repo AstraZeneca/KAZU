@@ -1,5 +1,6 @@
 import copy
 import logging
+from itertools import groupby
 from typing import List, Tuple, Iterable, Dict, FrozenSet, Set
 
 from kazu.data.data import (
@@ -198,23 +199,24 @@ class StrategyRunner:
             self.get_namespace_sort_key = lambda ns: ns
 
     @staticmethod
-   def group_entities_by_symbolism(
-       entities: Iterable[Entity]
-   ) -> Tuple[List[Entity], List[Entity]]:
-       """
-       groups entities into symbolic and non-symbolic forms, so they can be processed separately.
+    def group_entities_by_symbolism(
+        entities: Iterable[Entity],
+    ) -> Tuple[List[Entity], List[Entity]]:
+        """
+        groups entities into symbolic and non-symbolic forms, so they can be processed separately.
 
-       Expects an already sorted list of entities, since we only call this after a sort is required
-       elsewhere. However, it will still work with an unsorted list, it will just call
-       :meth:`StringNormalizer.classify_symbolic` more times than necessary.
+        Expects an already sorted list of entities, since we only call this after a sort is required
+        elsewhere. However, it will still work with an unsorted list, it will just call
+        :meth:`StringNormalizer.classify_symbolic` more times than necessary.
 
         :param entities:
         :return:
         """
-        symbolic, non_symbolic = [], []
+        symbolic: List[Entity] = []
+        non_symbolic: List[Entity] = []
         grouped_by_match = groupby(
             entities,
-            key_func=lambda x: (
+            key=lambda x: (
                 x.match,
                 x.entity_class,
             ),
@@ -237,14 +239,19 @@ class StrategyRunner:
         # do a separate sorted and groupby call (rather than our sort_then_group utility)
         # so we can do all the sorting we need in one go
         sorted_entities = sorted(
-            doc.get_entities(), key=lambda ent: (
-                self.get_namespace_sort_key(ent.namespace), *entity_to_entity_key(ent)
-            )
+            doc.get_entities(),
+            key=lambda ent: (
+                self.get_namespace_sort_key(ent.namespace),
+                *entity_to_entity_key(ent),
+            ),
         )
         # add in ent.namespace so we have it available in the group key.
         # It won't affect the sorting since the first element of the tuple will be the same
         # for all ents with the same namespace
-        entities_grouped_by_namespace_order = groupby(sorted_entities, key=lambda ent: (self.get_namespace_sort_key(ent.namespace), ent.namespace))
+        entities_grouped_by_namespace_order = groupby(
+            sorted_entities,
+            key=lambda ent: (self.get_namespace_sort_key(ent.namespace), ent.namespace),
+        )
 
         for (_namespace_sort_key, namespace), entities in entities_grouped_by_namespace_order:
             logger.debug("mapping entities for namespace %s", namespace)
@@ -274,7 +281,8 @@ class StrategyRunner:
         strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
 
         groups = [
-            list(ents) for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
+            list(ents)
+            for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
         ]
 
         for i in range(0, strategy_max_index):
