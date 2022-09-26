@@ -121,7 +121,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         self,
         scorer_manager: TfIdfScorerManager,
         context_threshold: float = 0.7,
-        aggregation_strategies_to_build_id_set_representation: Optional[
+        relevant_aggregation_strategies: Optional[
             List[EquivalentIdAggregationStrategy]
         ] = None,
     ):
@@ -131,15 +131,16 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :param id_filters:
         :param threshold: only consider terms above this search threshold
         :param differential: only consider terms with a search score within x of the best hit
-        :param aggregation_strategies_to_build_id_set_representation:
+        :param relevant_aggregation_strategies: Only consider these strategies when selecting synonyms from the
+            synonym database, when building a representation. If none, all strategies will be considered
         """
         self.context_threshold = context_threshold
-        self.aggregation_strategies_to_build_id_set_representation: Set[
+        self.relevant_aggregation_strategies: Set[
             EquivalentIdAggregationStrategy
         ] = (
             {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
-            if aggregation_strategies_to_build_id_set_representation is None
-            else set(aggregation_strategies_to_build_id_set_representation)
+            if relevant_aggregation_strategies is None
+            else set(relevant_aggregation_strategies)
         )
         self.synonym_db = SynonymDatabase()
         self.scorer_manager = scorer_manager
@@ -193,7 +194,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
                 syns_this_id = self.synonym_db.get_syns_for_id(
                     parser_name,
                     idx,
-                    self.aggregation_strategies_to_build_id_set_representation,
+                    self.relevant_aggregation_strategies,
                 )
                 for syn in syns_this_id:
                     result[syn].add(id_set)
