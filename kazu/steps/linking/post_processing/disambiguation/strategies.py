@@ -135,11 +135,10 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             synonym database, when building a representation. If none, all strategies will be considered
         """
         self.context_threshold = context_threshold
-        self.relevant_aggregation_strategies: Set[EquivalentIdAggregationStrategy] = (
-            {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
-            if relevant_aggregation_strategies is None
-            else set(relevant_aggregation_strategies)
-        )
+        if relevant_aggregation_strategies is None:
+            self.relevant_aggregation_strategies = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
+        else:
+            self.relevant_aggregation_strategies = set(relevant_aggregation_strategies)
         self.synonym_db = SynonymDatabase()
         self.scorer_manager = scorer_manager
         self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
