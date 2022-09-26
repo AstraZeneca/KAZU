@@ -129,10 +129,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     ):
         """
 
-        :param path:
-        :param id_filters:
-        :param threshold: only consider terms above this search threshold
-        :param differential: only consider terms with a search score within x of the best hit
+        :param scorer_manager: manager to handle scoring of contexts
+        :param context_threshold: only consider terms above this search threshold
         :param relevant_aggregation_strategies: Only consider these strategies when selecting synonyms from the
             synonym database, when building a representation. If none, all strategies will be considered
         """
@@ -205,21 +203,18 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         scorer = self.scorer_manager.parser_to_scorer.get(parser_name)
         if scorer is None:
             return set()
-        else:
-            document_query_matrix = self.parser_name_to_doc_representation[parser_name]
-            id_set_representation = self.build_id_set_representation(parser_name, id_sets)
-            if len(id_set_representation) > 0:
-                indexed_non_ambiguous_syns = list(id_set_representation.keys())
-                for best_syn, score in scorer(indexed_non_ambiguous_syns, document_query_matrix):
-                    if (
-                        score >= self.context_threshold
-                        and len(id_set_representation[best_syn]) == 1
-                    ):
-                        return id_set_representation[best_syn]
-                else:
-                    return set()
+
+        document_query_matrix = self.parser_name_to_doc_representation[parser_name]
+        id_set_representation = self.build_id_set_representation(parser_name, id_sets)
+        if len(id_set_representation) > 0:
+            indexed_non_ambiguous_syns = list(id_set_representation.keys())
+            for best_syn, score in scorer(indexed_non_ambiguous_syns, document_query_matrix):
+                if score >= self.context_threshold and len(id_set_representation[best_syn]) == 1:
+                    return id_set_representation[best_syn]
             else:
                 return set()
+        else:
+            return set()
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
