@@ -2,11 +2,9 @@ import functools
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Tuple, Optional, Set, Dict, Iterable
+from typing import Tuple, Optional, Set, Dict, Iterable, FrozenSet
 
 import numpy as np
-
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 from kazu.data.data import (
     Document,
@@ -150,32 +148,35 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :param document:
         :return:
         """
-        self.parser_name_to_doc_representation.clear()
-        parser_names = set(
+        parser_names = frozenset(
             term.parser_name
             for ent in document.get_entities()
             for term in ent.syn_term_to_synonym_terms
         )
-        for parser_name in parser_names:
-            vectorizer = self.scorer_manager.parser_to_vectorizer[parser_name]
-            self.parser_name_to_doc_representation[
-                parser_name
-            ] = self.cacheable_build_document_representation(vectorizer=vectorizer, doc=document)
+        self.parser_name_to_doc_representation = self.cacheable_build_document_representation(
+            scorer_manager=self.scorer_manager, doc=document, parsers=parser_names
+        )
 
     @staticmethod
     @functools.lru_cache(maxsize=20)
     def cacheable_build_document_representation(
-        vectorizer: TfidfVectorizer, doc: Document
-    ) -> np.ndarray:
+        scorer_manager: TfIdfScorerManager, doc: Document, parsers: FrozenSet[str]
+    ) -> Dict[str, np.ndarray]:
         """
         static cached method so we don't need to recalculate document representation between different instances
         of TfIdfDisambiguationStrategy
         :param vectorizer:
         :param doc:
+        :param parsers: technically this only has to be a hashable iterable of string - but it should also be
+            unique otherwise duplicate work will be done and thrown away, so pragmatically a frozenset makes sense.
         :return:
         """
-        strings = " ".join(x.match_norm for x in doc.get_entities())
-        return vectorizer.transform([strings])
+        res = {}
+        for parser in parsers:
+            vectorizer = scorer_manager.parser_to_vectorizer[parser]
+            strings = " ".join(x.match_norm for x in doc.get_entities())
+            res[parser] = vectorizer.transform([strings])
+        return res
 
     def build_id_set_representation(
         self,
