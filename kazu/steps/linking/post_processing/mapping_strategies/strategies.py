@@ -1,5 +1,4 @@
 import itertools
-import logging
 import urllib
 from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
 
@@ -18,7 +17,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
-
 
 
 class MappingFactory:
