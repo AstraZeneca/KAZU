@@ -174,7 +174,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :param doc:
         :return:
         """
-        strings = " ".join([x.match_norm for x in doc.get_entities()])
+        strings = " ".join(x.match_norm for x in doc.get_entities())
         return scorer.transform(strings=[strings])
 
     def build_id_set_representation(
