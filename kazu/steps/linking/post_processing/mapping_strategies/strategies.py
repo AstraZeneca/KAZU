@@ -278,17 +278,12 @@ class SymbolMatchMappingStrategy(MappingStrategy):
         # the pattern should either be in both or neither
         reference_term_tokens = s1.split(" ")
         query_term_tokens = s2.split(" ")
-        longest, shortest = (
-            (
-                reference_term_tokens,
-                s2,
-            )
-            if len(reference_term_tokens) > len(query_term_tokens)
-            else (
-                query_term_tokens,
-                s1,
-            )
-        )
+        if len(reference_term_tokens) > len(query_term_tokens):
+            longest = reference_term_tokens
+            shortest = s2
+        else:
+            longest = query_term_tokens
+            shortest = s1
 
         for tok in longest:
             if tok not in shortest:
