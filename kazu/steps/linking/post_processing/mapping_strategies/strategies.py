@@ -350,7 +350,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
 
 class StrongMatchMappingStrategy(MappingStrategy):
     """
-    1) sort SynonymTermWithMetrics by highest scoring search match t identify the highest scoring match
+    1) sort SynonymTermWithMetrics by highest scoring search match to identify the highest scoring match
     2) query remaining matches to see whether their scores are greater than this best score - the differential
         (i.e. there are many close string matches)
     """
@@ -358,18 +358,18 @@ class StrongMatchMappingStrategy(MappingStrategy):
     def __init__(
         self,
         confidence: LinkRanks,
+        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold=80.0,
         symbolic_only: bool = False,
         differential: float = 2.0,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
     ):
         """
 
         :param confidence:
+        :param disambiguation_strategies:
         :param search_threshold: only consider synonym terms above this search threshold
         :param symbolic_only: only consider terms that are symbolic
         :param differential: only consider terms with search scores equal or greater to the best match minus this value
-        :param disambiguation_strategies:
         """
         super().__init__(confidence, disambiguation_strategies)
         self.differential = differential
