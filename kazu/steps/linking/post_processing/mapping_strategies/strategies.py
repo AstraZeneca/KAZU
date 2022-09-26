@@ -387,21 +387,22 @@ class StrongMatchMappingStrategy(MappingStrategy):
         if self.symbolic_only:
             relevant_terms_with_scores = [
                 (term, score)
-                for term in terms if term.is_symbolic and (score := term.search_score) is not None
+                for term in terms
+                if term.is_symbolic and (score := term.search_score) is not None
             ]
         else:
             relevant_terms_with_scores = [
-                (term, score)
-                for term in terms if (score := term.search_score) is not None
+                (term, score) for term in terms if (score := term.search_score) is not None
             ]
 
         if len(relevant_terms_with_scores) == 0:
-            return []
+            return set()
 
         best_score = max((score for _, score in relevant_terms_with_scores))
 
         return set(
-            term for term, score in relevant_terms_with_scores
+            term
+            for term, score in relevant_terms_with_scores
             if score >= self.search_threshold and best_score - score <= self.differential
         )
 
@@ -417,21 +418,19 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         self,
         confidence: LinkRanks,
         complex_string_scorer: BooleanStringSimilarityScorer,
+        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold: float = 80.0,
         symbolic_only: bool = False,
         differential: float = 2.0,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
     ):
         """
-
         :param confidence:
         :param complex_string_scorer: only consider synonym terms passing this string scorer call
+        :param disambiguation_strategies:
         :param search_threshold: only consider synonym terms above this search threshold
         :param symbolic_only: only consider terms that are symbolic
         :param differential: only consider terms with search scores equal or greater to the best match minus this value
-        :param disambiguation_strategies:
         """
-
         super().__init__(
             confidence=confidence,
             search_threshold=search_threshold,
