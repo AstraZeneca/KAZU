@@ -33,7 +33,7 @@ def create_word_and_char_ngrams(
 
 class TfIdfScorerManager(metaclass=Singleton):
     """
-    THis class manages a set of TFIDF models (via the TfIdfDocumentScorer class) . It's a singleton, so that the
+    This class manages a set of TFIDF models (via the :class:`TfIdfDocumentScorer` class) . It's a singleton, so that the
     models can be accessed in multiple locations without the need to load them into memory multiple times
     """
 
