@@ -258,7 +258,7 @@ class ExactMatchMappingStrategy(MappingStrategy):
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
-        return set(filter(lambda x: x.exact_match, terms))
+        return set(term for term in terms if term.exact_match)
 
 
 class SymbolMatchMappingStrategy(MappingStrategy):
