@@ -188,24 +188,24 @@ class MappingStrategy:
         :return:
         """
 
-        all_id_sets: Set[EquivalentIdSet] = set()
-        disambiguation_required = len(filtered_terms) > 1
-        for term in filtered_terms:
-            all_id_sets.update(term.associated_id_sets)
-            if term.is_ambiguous:
-                disambiguation_required = True
+        all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
 
-        if disambiguation_required and self.disambiguation_strategies is not None:
-            for strategy in self.disambiguation_strategies:
-                filtered_id_sets = strategy(
-                    id_sets=all_id_sets, document=document, parser_name=parser_name
-                )
-                if len(filtered_id_sets) == 1:
-                    return filtered_id_sets, strategy.__class__.__name__
-            else:
-                return all_id_sets, None
-        else:
+        if self.disambiguation_strategies is None:
             return all_id_sets, None
+        elif len(filtered_terms) == 1:
+            only_term = next(iter(filtered_terms))
+            if not only_term.is_ambiguous:
+                # there's a single term that isn't ambiguous, no need to disambiguate
+                return all_id_sets, None
+
+        for strategy in self.disambiguation_strategies:
+            filtered_id_sets = strategy(
+                id_sets=all_id_sets, document=document, parser_name=parser_name
+            )
+            if len(filtered_id_sets) == 1:
+                return filtered_id_sets, strategy.__class__.__name__
+
+        return all_id_sets, None
 
     def __call__(
         self,
