@@ -197,12 +197,12 @@ class MappingStrategy:
         :param ent_match: unnormalised NER string match (i.e. Entity.match)
         :param ent_match_norm: normalised NER string match (i.e. Entity.match_norm)
         :param document: originating document
-        :param terms: set of terms to consider
+        :param terms: set of terms to consider. Note, terms from different parsers should not be mixed.
         :return:
         """
         parser_name = next(iter(terms)).parser_name
 
-        filtered_terms: Set[SynonymTermWithMetrics] = self.filter_terms(
+        filtered_terms = self.filter_terms(
             ent_match=ent_match,
             ent_match_norm=ent_match_norm,
             document=document,
