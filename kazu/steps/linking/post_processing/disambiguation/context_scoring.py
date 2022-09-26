@@ -59,10 +59,12 @@ class TfIdfScorerManager(metaclass=Singleton):
             self.parser_to_scorer[parser_name] = scorer
 
     def load_scorers(self, path: Path):
-        self.parser_to_scorer.update({
-            parser_path.name: TfIdfDocumentScorer.load(parser_path)
-            for parser_path in path.iterdir()
-        })
+        self.parser_to_scorer.update(
+            {
+                parser_path.name: TfIdfDocumentScorer.load(parser_path)
+                for parser_path in path.iterdir()
+            }
+        )
 
 
 class TfIdfDocumentScorer:
