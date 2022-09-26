@@ -189,16 +189,30 @@ class StrategyRunner:
         self.ner_namespace_processing_order = ner_namespace_processing_order
         self.metadata_db = MetadataDatabase()
 
-    def sort_entities_by_symbolism(
-        self, entities: Iterable[Entity]
-    ) -> Tuple[List[Entity], List[Entity]]:
-        """
-        sorts entities into symbolic and non-symbolic forms, so they can be processed separately
+        if self.ner_namespace_processing_order is not None:
+            self.ner_namespace_to_index = {
+                ns: ind for ind, ns in enumerate(self.ner_namespace_processing_order)
+            }
+            self.get_namespace_sort_key = lambda ns: self.ner_namespace_to_index[ns]
+        else:
+            self.get_namespace_sort_key = lambda ns: ns
+
+    @staticmethod
+   def group_entities_by_symbolism(
+       entities: Iterable[Entity]
+   ) -> Tuple[List[Entity], List[Entity]]:
+       """
+       groups entities into symbolic and non-symbolic forms, so they can be processed separately.
+
+       Expects an already sorted list of entities, since we only call this after a sort is required
+       elsewhere. However, it will still work with an unsorted list, it will just call
+       :meth:`StringNormalizer.classify_symbolic` more times than necessary.
+
         :param entities:
         :return:
         """
         symbolic, non_symbolic = [], []
-        grouped_by_match = sort_then_group(
+        grouped_by_match = groupby(
             entities,
             key_func=lambda x: (
                 x.match,
@@ -207,9 +221,9 @@ class StrategyRunner:
         )
         for (match_str, entity_class), ent_iter in grouped_by_match:
             if StringNormalizer.classify_symbolic(match_str, entity_class=entity_class):
-                symbolic.extend(list(ent_iter))
+                symbolic.extend(ent_iter)
             else:
-                non_symbolic.extend(list(ent_iter))
+                non_symbolic.extend(ent_iter)
         return symbolic, non_symbolic
 
     def __call__(self, doc: Document):
@@ -220,20 +234,21 @@ class StrategyRunner:
         :param doc:
         :return:
         """
-        if self.ner_namespace_processing_order is None:
-            entities_grouped_by_namespace_order = sort_then_group(
-                doc.get_entities(), key_func=lambda x: x.namespace
+        # do a separate sorted and groupby call (rather than our sort_then_group utility)
+        # so we can do all the sorting we need in one go
+        sorted_entities = sorted(
+            doc.get_entities(), key=lambda ent: (
+                self.get_namespace_sort_key(ent.namespace), *entity_to_entity_key(ent)
             )
-        else:
-            entities_grouped_by_namespace_order = sort_then_group(
-                doc.get_entities(),
-                key_func=lambda x: self.ner_namespace_processing_order.index(x.namespace),
-            )
+        )
+        # add in ent.namespace so we have it available in the group key.
+        # It won't affect the sorting since the first element of the tuple will be the same
+        # for all ents with the same namespace
+        entities_grouped_by_namespace_order = groupby(sorted_entities, key=lambda ent: (self.get_namespace_sort_key(ent.namespace), ent.namespace))
 
-        for namespace_index, entities in entities_grouped_by_namespace_order:
-            namespace = self.ner_namespace_processing_order[namespace_index]
+        for (_namespace_sort_key, namespace), entities in entities_grouped_by_namespace_order:
             logger.debug("mapping entities for namespace %s", namespace)
-            symbolic_entities, non_symbolic_entities = self.sort_entities_by_symbolism(entities)
+            symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(entities)
             self.execute_hit_post_processing_strategies(
                 non_symbolic_entities, doc, self.non_symbolic_strategies[namespace]
             )
@@ -250,7 +265,7 @@ class StrategyRunner:
         """
         This method executes parts 5 - 7 in the class DocString
 
-        :param ents_needing_mappings:
+        :param ents_needing_mappings: Expects entities to already be sorted based on :func:`entity_to_entity_key`
         :param document:
         :param namespace_strategy_execution:
         :return:
@@ -258,19 +273,19 @@ class StrategyRunner:
         namespace_strategy_execution.reset()
         strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
 
-        groups = {
-            k: list(v) for k, v in sort_then_group(ents_needing_mappings, entity_to_entity_key)
-        }
+        groups = [
+            list(ents) for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
+        ]
 
         for i in range(0, strategy_max_index):
-            for entity_key, entities_this_group in groups.items():
-                reference_entity = next(iter(entities_this_group))
+            for entity_group in groups:
+                reference_entity = next(iter(entity_group))
                 for mapping in namespace_strategy_execution(
                     entity=reference_entity,
                     strategy_index=i,
                     document=document,
                 ):
-                    for entity in entities_this_group:
+                    for entity in entity_group:
                         entity.mappings.add(copy.deepcopy(mapping))
                     logger.debug(
                         "mapping created: original string: %s, mapping: %s",
