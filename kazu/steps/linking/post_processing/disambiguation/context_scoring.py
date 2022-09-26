@@ -76,9 +76,10 @@ class TfIdfDocumentScorer:
     def __call__(self, strings: List[str], matrix: np.ndarray) -> Iterable[Tuple[str, float]]:
         """
         transform a list of strings with self.vectoriser and score against a matrix
+
         :param strings:
         :param matrix:
-        :return: Iterable Tuple of best matching string, and score
+        :return: matching strings and their score sorted by best score
         """
         if len(strings) == 1:
             yield strings[0], 100.0
