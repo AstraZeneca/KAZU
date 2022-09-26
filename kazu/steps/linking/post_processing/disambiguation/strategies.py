@@ -2,7 +2,7 @@ import functools
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import List, Tuple, Optional, Set, Dict
+from typing import Tuple, Optional, Set, Dict, Iterable
 
 import numpy as np
 
@@ -121,9 +121,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         self,
         scorer_manager: TfIdfScorerManager,
         context_threshold: float = 0.7,
-        relevant_aggregation_strategies: Optional[
-            List[EquivalentIdAggregationStrategy]
-        ] = None,
+        relevant_aggregation_strategies: Optional[Iterable[EquivalentIdAggregationStrategy]] = None,
     ):
         """
 
@@ -135,9 +133,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             synonym database, when building a representation. If none, all strategies will be considered
         """
         self.context_threshold = context_threshold
-        self.relevant_aggregation_strategies: Set[
-            EquivalentIdAggregationStrategy
-        ] = (
+        self.relevant_aggregation_strategies: Set[EquivalentIdAggregationStrategy] = (
             {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
             if relevant_aggregation_strategies is None
             else set(relevant_aggregation_strategies)
