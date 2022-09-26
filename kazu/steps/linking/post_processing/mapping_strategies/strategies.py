@@ -273,7 +273,8 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
     """
 
-    def match_symbols(self, s1: str, s2: str) -> bool:
+    @staticmethod
+    def match_symbols(s1: str, s2: str) -> bool:
         # the pattern should either be in both or neither
         reference_term_tokens = s1.split(" ")
         query_term_tokens = s2.split(" ")
