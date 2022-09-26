@@ -182,7 +182,6 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         parser_name: str,
         id_sets: Set[EquivalentIdSet],
     ) -> Dict[str, Set[EquivalentIdSet]]:
-        # all normalised syns should be in the database
         result = defaultdict(set)
         for id_set in id_sets:
             for idx in id_set.ids:
