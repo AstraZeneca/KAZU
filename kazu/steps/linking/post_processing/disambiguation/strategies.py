@@ -226,11 +226,16 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
     def disambiguate(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
     ) -> Set[EquivalentIdSet]:
-        score_to_id_set = defaultdict(set)
+        best_score = 0
+        best_equiv_id_sets = set()
+
         for id_set in id_sets:
             for idx in id_set.ids:
                 score = self.metadata_db.get_by_idx(parser_name, idx).get("annotation_score", 0)
-                score_to_id_set[score].add(id_set)
-        best = max(score_to_id_set.keys())
-
-        return score_to_id_set[best]
+                if score > best_score:
+                    best_score = score
+                    best_equiv_id_sets = {id_set}
+                elif score == best_score:
+                    best_equiv_id_sets.add(id_set)
+        
+        return best_equiv_id_sets
