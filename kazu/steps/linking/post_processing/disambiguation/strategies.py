@@ -68,7 +68,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     def __init__(
         self,
     ):
-        self.found_equivalent_ids: Set[Tuple[str, str, str]] = set()
+        self.mapped_ids: Set[Tuple[str, str, str]] = set()
 
     def prepare(self, document: Document):
         """
@@ -76,9 +76,9 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
         :param document:
         :return:
         """
-        self.found_equivalent_ids = set()
+        self.mapped_ids = set()
         entities = document.get_entities()
-        self.found_equivalent_ids.update(
+        self.mapped_ids.update(
             (
                 mapping.parser_name,
                 mapping.source,
@@ -98,7 +98,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
                     parser_name,
                     id_set.ids_to_source[idx],
                     idx,
-                ) in self.found_equivalent_ids:
+                ) in self.mapped_ids:
                     found_id_sets.add(id_set)
                     break
         return found_id_sets
