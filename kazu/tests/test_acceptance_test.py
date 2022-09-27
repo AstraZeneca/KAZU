@@ -35,12 +35,11 @@ def test_full_pipeline(capsys, override_kazu_test_config, label_studio_manager):
     analyse_full_pipeline(capsys, pipeline, label_studio_manager.export_from_ls())
 
 
-def test_gold_standard_consistency(capsys, label_studio_manager, kazu_test_config):
+def test_gold_standard_consistency(capsys, label_studio_manager):
     """
     a test that always passes, but reports potential inconsistencies in the gold standard
 
     :param label_studio_manager:
-    :param kazu_test_config:
     :return:
     """
     check_annotation_consistency(capsys, label_studio_manager.export_from_ls())
