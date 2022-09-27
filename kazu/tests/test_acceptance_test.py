@@ -9,7 +9,7 @@ from kazu.pipeline import Pipeline, load_steps
 from kazu.tests.utils import requires_model_pack, requires_label_studio
 from kazu.utils.grouping import sort_then_group
 
-pytestmark = requires_model_pack
+pytestmark = [requires_model_pack, requires_label_studio]
 
 
 NER_THRESHOLDS = {
@@ -26,7 +26,6 @@ LINKING_THRESHOLDS = {
 }
 
 
-@requires_label_studio
 def test_full_pipeline(override_kazu_test_config, label_studio_manager):
 
     cfg = override_kazu_test_config(
@@ -36,7 +35,6 @@ def test_full_pipeline(override_kazu_test_config, label_studio_manager):
     analyse_full_pipeline(pipeline, label_studio_manager.export_from_ls())
 
 
-@requires_label_studio
 def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
     """
     a test that always passes, but reports potential inconsistencies in the gold standard
