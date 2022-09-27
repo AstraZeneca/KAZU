@@ -256,23 +256,23 @@ def check_results_meet_threshold(
         if prec < threshold["precision"]:
             pytest.fail(
                 f"{key} failed to meet precision threshold: {prec}. "
-                f"{aggregated_result.tp} / {aggregated_result.fp +aggregated_result.tp} \n{message}"
+                f"{aggregated_result.tp} / {aggregated_result.fp + aggregated_result.tp} \n{message}"
             )
         with capsys.disabled():
             print(
                 f"{key} passed precision threshold: {prec}. "
-                f"{aggregated_result.tp} / {aggregated_result.fp +aggregated_result.tp} \n{message}\n\n"
+                f"{aggregated_result.tp} / {aggregated_result.fp + aggregated_result.tp} \n{message}\n\n"
             )
         message = "\n".join(f"{k} <missed {v} times>" for k, v in aggregated_result.fn_info)
         if rec < threshold["recall"]:
             pytest.fail(
                 f"{key} failed to meet recall threshold: {rec}. "
-                f"{aggregated_result.tp} / {aggregated_result.fn +aggregated_result.tp} \n{message}"
+                f"{aggregated_result.tp} / {aggregated_result.fn + aggregated_result.tp} \n{message}"
             )
         with capsys.disabled():
             print(
                 f"{key} passed recall threshold: {rec}. "
-                f"{aggregated_result.tp} / {aggregated_result.fn +aggregated_result.tp} \n{message}\n\n"
+                f"{aggregated_result.tp} / {aggregated_result.fn + aggregated_result.tp} \n{message}\n\n"
             )
 
 
