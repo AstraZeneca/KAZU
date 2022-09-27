@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from kazu.data.data import Document, Entity, Mapping, LinkRanks
@@ -8,20 +6,8 @@ from kazu.tests.utils import requires_label_studio
 from kazu.utils.grouping import sort_then_group
 
 
-def create_test_manager():
-    label_studio_url_and_port = os.environ["LS_URL_PORT"]
-    headers = {
-        "Authorization": f"Token {os.environ['LS_TOKEN']}",
-        "Content-Type": "application/json",
-    }
-    ls_project = "kazu_integration_test"
-    return LabelStudioManager(
-        project_name=ls_project, headers=headers, url=label_studio_url_and_port
-    )
-
-
 @requires_label_studio
-def test_kau_doc_to_label_studio():
+def test_kau_doc_to_label_studio(make_label_studio_manager):
     text = "the cat sat on the mat"
     doc_1 = Document.create_simple_document(text)
     e1 = Entity.from_spans(
@@ -73,7 +59,7 @@ def test_kau_doc_to_label_studio():
     doc_1.sections[0].entities.append(e2)
     doc_1.sections[0].entities.append(e3)
 
-    manager = create_test_manager()
+    manager: LabelStudioManager = make_label_studio_manager(project_name="kazu_integration_test")
     manager.delete_project_if_exists()
     tasks = KazuToLabelStudioConverter.convert_docs_to_tasks([doc_1])
     manager.create_linking_project(tasks)

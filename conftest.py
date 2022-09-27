@@ -64,15 +64,26 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
 
 
 @pytest.fixture(scope="session")
-def label_studio_manager() -> LabelStudioManager:
+def make_label_studio_manager():
+    # using a 'factory fixture' here gives us the ability to share code when
+    # we need to make a label studio manager which is the same except for a custom project.
+    def _make_label_studio_manager(
+        project_name: str = os.environ["LS_PROJECT_NAME"],
+    ) -> LabelStudioManager:
 
-    label_studio_url_and_port = os.environ["LS_URL_PORT"]
-    headers = {
-        "Authorization": f"Token {os.environ['LS_TOKEN']}",
-        "Content-Type": "application/json",
-    }
-    ls_project = os.environ["LS_PROJECT_NAME"]
-    manager = LabelStudioManager(
-        project_name=ls_project, headers=headers, url=label_studio_url_and_port
-    )
-    return manager
+        label_studio_url_and_port = os.environ["LS_URL_PORT"]
+        headers = {
+            "Authorization": f"Token {os.environ['LS_TOKEN']}",
+            "Content-Type": "application/json",
+        }
+        manager = LabelStudioManager(
+            project_name=project_name, headers=headers, url=label_studio_url_and_port
+        )
+        return manager
+
+    return _make_label_studio_manager
+
+
+@pytest.fixture(scope="session")
+def label_studio_manager(make_label_studio_manager) -> LabelStudioManager:
+    return make_label_studio_manager()
