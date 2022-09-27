@@ -90,11 +90,11 @@ class DrugBlackLister:
 
     @cached_property
     def gene_syns(self):
-        return _build_synonym_set(self.db, self.gene_synonym_sources)
+        return _build_synonym_set(self.syn_db, self.gene_synonym_sources)
 
     @cached_property
     def anat_syns(self):
-        return _build_synonym_set(self.db, self.anatomy_synonym_sources)
+        return _build_synonym_set(self.syn_db, self.anatomy_synonym_sources)
 
     def clear_caches(self):
         del self.gene_syns
@@ -131,11 +131,11 @@ class GeneBlackLister:
 
     @cached_property
     def disease_syns(self):
-        return _build_synonym_set(self.db, self.disease_synonym_sources)
+        return _build_synonym_set(self.syn_db, self.disease_synonym_sources)
 
     @cached_property
     def gene_syns(self):
-        return _build_synonym_set(self.db, self.gene_synonym_sources)
+        return _build_synonym_set(self.syn_db, self.gene_synonym_sources)
 
     def clear_caches(self):
         del self.disease_syns
@@ -164,7 +164,7 @@ class DiseaseBlackLister:
 
     @cached_property
     def disease_syns(self):
-        return _build_synonym_set(self.db, self.disease_synonym_sources)
+        return _build_synonym_set(self.syn_db, self.disease_synonym_sources)
 
     def clear_caches(self):
         del self.disease_syns
