@@ -1,10 +1,10 @@
 # @package _global_
 pipeline:
   steps:
-    - SciSpacyAbbreviationExpansionStep
     - ExplosionNERStep
     - StanzaStep
     - TransformersModelForTokenClassificationNerStep
     - SethStep
     - DictionaryEntityLinkingStep
     - MappingStep
+    - AbbreviationFinderStep
