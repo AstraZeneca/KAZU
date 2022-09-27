@@ -23,16 +23,17 @@ logger = logging.getLogger(__name__)
 
 class DisambiguationStrategy(ABC):
     """
-    The job of a DisambiguationStrategy is to filter a Set[EquivalentIdSet] into a (hopefully) smaller set.
-    A .prepare method is available, which can be cached in the event of any duplicated preprocessing work that may
-    be required (see StrategyRunner for how the complexities of how MappingStrategy and DisambiguationStrategy are
-    coordinated).
+    The job of a DisambiguationStrategy is to filter a Set of :class:`.EquivalentIdSet` into a (hopefully) smaller set.
+    A :meth:`prepare` method is available, which can be cached in the event of any duplicated preprocessing work that
+    may be required (see :class:`kazu.steps.linking.post_processing.strategy_runner.StrategyRunner` for how the
+    complexities of how MappingStrategy and DisambiguationStrategy are coordinated).
     """
 
     @abstractmethod
     def prepare(self, document: Document):
         """
         perform any preprocessing required
+
         :param document:
         :return:
         """
@@ -43,7 +44,8 @@ class DisambiguationStrategy(ABC):
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
     ) -> Set[EquivalentIdSet]:
         """
-        subset a Set[EquivalentIdSet]
+        subset a Set of :class:`.EquivalentIdSet`
+
         :param id_sets:
         :param document:
         :param parser_name:
@@ -61,9 +63,7 @@ class DisambiguationStrategy(ABC):
 class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     """
     1) look for entities on the document that have mappings
-    2) see if any of these mappings correspond to ay ids in the EquivalentIdSets on each hit
-    3) if only a single hit is found, create a new mapping from the matched hit
-    4) if more than one hit is found, create multiple mappings, with the AMBIGUOUS flag
+    2) see if any of these mappings correspond to any ids in the :class:`.EquivalentIdSet` on each hit
     """
 
     def __init__(
@@ -74,6 +74,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     def prepare(self, document: Document):
         """
         note, this method can't be cached, as the state of the document may change between executions
+
         :param document:
         :return:
         """
@@ -107,7 +108,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
 
 class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     """
-    1) retrieve all synonyms associated with an equivalent ID set, and filter out ambiguous ones
+    1) retrieve all synonyms associated with a :class:`.EquivalentIdSet`, filter out ambiguous ones
         and build a query matrix with the unambiguous ones
     2) retrieve a list of all detected entity strings from the document, regardless of source and
         build a document representation matrix of these
@@ -145,6 +146,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         """
         build document representations by parser names here, and store in a dict. This method is cached so
         we don't need to call it multiple times per document
+
         :param document:
         :return:
         """
@@ -163,9 +165,10 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         scorer: TfIdfScorer, doc: Document, parsers: FrozenSet[str]
     ) -> Dict[str, np.ndarray]:
         """
-        static cached method so we don't need to recalculate document representation between different instances
-        of TfIdfDisambiguationStrategy
-        :param vectorizer:
+        static cached method, so we don't need to recalculate document representation between different instances
+        of this class
+
+        :param scorer:
         :param doc:
         :param parsers: technically this only has to be a hashable iterable of string - but it should also be
             unique otherwise duplicate work will be done and thrown away, so pragmatically a frozenset makes sense.
@@ -219,6 +222,14 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
+    """
+    certain entities are often mentioned by some colloquial name, even if it's technically incorrect. In these cases,
+    we may have an annotation_score field in the metadata_db, as a proxy of how widely studied the entity is. We
+    use this annotation score as a proxy for 'given a random mention of the entity, how likely is it that the
+    author is referring to instance x vs instance y'. Naturally, this is a pretty unsophisticated disambiguation
+    strategy, so should generally only be used as a last resort!
+    """
+
     metadata_db = MetadataDatabase()
 
     def prepare(self, document: Document):
