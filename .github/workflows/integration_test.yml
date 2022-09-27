@@ -67,6 +67,7 @@ jobs:
           pytest
         env:
           KAZU_MODEL_PACK: ${{ steps.get_model_pack.outputs.model_pack_path }}
+          TOKENIZERS_PARALLELISM: false
 
       - name: Setup and execute Gradle 'test' task
         uses: gradle/gradle-build-action@v2
