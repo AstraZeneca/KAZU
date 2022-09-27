@@ -31,7 +31,7 @@ def create_word_and_char_ngrams(
     return strings
 
 
-class TfIdfScorerManager(metaclass=Singleton):
+class TfIdfScorer(metaclass=Singleton):
     """
     This class manages a set of TFIDF models (via :class:`sklearn.feature_extraction.text.TfidfVectorizer` ) . It's a
     singleton, so that the models can be accessed in multiple locations without the need to load them into memory

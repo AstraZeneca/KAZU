@@ -16,7 +16,7 @@ from kazu.modelling.database.in_memory_db import (
     SynonymDatabase,
     NormalisedSynonymStr,
 )
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorerManager
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
 
 logger = logging.getLogger(__name__)
 
@@ -120,13 +120,13 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     def __init__(
         self,
-        scorer_manager: TfIdfScorerManager,
+        scorer: TfIdfScorer,
         context_threshold: float = 0.7,
         relevant_aggregation_strategies: Optional[Iterable[EquivalentIdAggregationStrategy]] = None,
     ):
         """
 
-        :param scorer_manager: manager to handle scoring of contexts
+        :param scorer: handles scoring of contexts
         :param context_threshold: only consider terms above this search threshold
         :param relevant_aggregation_strategies: Only consider these strategies when selecting synonyms from the
             synonym database, when building a representation. If none, all strategies will be considered
@@ -137,7 +137,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         else:
             self.relevant_aggregation_strategies = set(relevant_aggregation_strategies)
         self.synonym_db = SynonymDatabase()
-        self.scorer_manager = scorer_manager
+        self.scorer = scorer
         self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
 
     @functools.lru_cache(maxsize=1)
@@ -154,13 +154,13 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             for term in ent.syn_term_to_synonym_terms
         )
         self.parser_name_to_doc_representation = self.cacheable_build_document_representation(
-            scorer_manager=self.scorer_manager, doc=document, parsers=parser_names
+            scorer=self.scorer, doc=document, parsers=parser_names
         )
 
     @staticmethod
     @functools.lru_cache(maxsize=20)
     def cacheable_build_document_representation(
-        scorer_manager: TfIdfScorerManager, doc: Document, parsers: FrozenSet[str]
+        scorer: TfIdfScorer, doc: Document, parsers: FrozenSet[str]
     ) -> Dict[str, np.ndarray]:
         """
         static cached method so we don't need to recalculate document representation between different instances
@@ -174,7 +174,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         strings = " ".join(x.match_norm for x in doc.get_entities())
         res = {}
         for parser in parsers:
-            vectorizer = scorer_manager.parser_to_vectorizer[parser]    
+            vectorizer = scorer.parser_to_vectorizer[parser]
             res[parser] = vectorizer.transform([strings])
         return res
 
@@ -199,7 +199,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     def disambiguate(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
     ) -> Set[EquivalentIdSet]:
-        if parser_name not in self.scorer_manager.parser_to_vectorizer:
+        if parser_name not in self.scorer.parser_to_vectorizer:
             return set()
 
         document_query_matrix = self.parser_name_to_doc_representation[parser_name]
@@ -208,7 +208,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             return set()
         else:
             indexed_non_ambiguous_syns = list(id_set_representation.keys())
-            for best_syn, score in self.scorer_manager(
+            for best_syn, score in self.scorer(
                 strings=indexed_non_ambiguous_syns,
                 matrix=document_query_matrix,
                 parser=parser_name,

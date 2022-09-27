@@ -11,8 +11,8 @@ default:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
           - MERGED_AS_NON_SYMBOLIC
-    scorer_manager:
-      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
+    scorer:
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
       path:
         _target_: pathlib.Path
         _args_:
@@ -25,8 +25,8 @@ gene:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
           - CUSTOM
-    scorer_manager:
-      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
+    scorer:
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
       path:
         _target_: pathlib.Path
         _args_:
@@ -40,8 +40,8 @@ cell_line:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
           - CUSTOM
-    scorer_manager:
-      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorerManager
+    scorer:
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
       path:
         _target_: pathlib.Path
         _args_:

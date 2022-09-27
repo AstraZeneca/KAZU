@@ -13,7 +13,7 @@ from kazu.data.data import (
     EquivalentIdSet,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorerManager
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
 from kazu.steps.linking.post_processing.disambiguation.strategies import (
     DisambiguationStrategy,
     DefinedElsewhereInDocumentDisambiguationStrategy,
@@ -173,7 +173,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
         )
 
         strategy = TfIdfDisambiguationStrategy(
-            TfIdfScorerManager(path=cache_dir),
+            TfIdfScorer(path=cache_dir),
             context_threshold=0.0,
             relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
         )
