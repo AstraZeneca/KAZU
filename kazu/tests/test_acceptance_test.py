@@ -184,19 +184,19 @@ class AggregatedAccuracyResult:
 
     @property
     def precision(self):
-        div = float(self.fp) + float(self.tp)
-        if div == 0.0:
+        div = self.fp + self.tp
+        if div == 0:
             return 0.0
         else:
-            return float(self.tp) / div
+            return float(self.tp / div)
 
     @property
     def recall(self):
-        div = float(self.fn) + float(self.tp)
-        if div == 0.0:
+        div = self.fn + self.tp
+        if div == 0:
             return 0.0
         else:
-            return float(self.tp) / div
+            return float(self.tp / div)
 
     @property
     def fp_info(self):
