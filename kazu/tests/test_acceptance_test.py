@@ -56,8 +56,8 @@ class SectionScorer:
         :param test_ents:
         """
         self.task = task
-        self.test_ents = test_ents
         self.gold_ents = gold_ents
+        self.test_ents = test_ents
         self.gold_to_test_ent_soft: Dict[Entity, Set[Entity]] = defaultdict(set)
 
         self.ner_fp_soft: Set[Entity] = set(test_ents)
