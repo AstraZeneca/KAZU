@@ -110,16 +110,17 @@ class MappingFactory:
 
 class MappingStrategy:
     """
-    A MappingStrategy is responsible for actualising instances of :class:`Mapping`
+    A MappingStrategy is responsible for actualising instances of :class:`.Mapping`
 
     This is performed in two steps:
 
-    1) Filter the set of :class:`SynonymTermWithMetrics` associated with an Entity down to the most appropriate ones,
-        (e.g. based on string similarity).
+    1) Filter the set of :class:`.SynonymTermWithMetrics` associated with an :class:`.Entity` down to the most
+       appropriate ones, (e.g. based on string similarity).
 
-    2) If required, apply any configured DisambiguationStrategy to the filtered instances of :class:`EquivalentIdSet`
+    2) If required, apply any configured :class:`.DisambiguationStrategy` to the filtered instances of
+       :class:`.EquivalentIdSet`
 
-    selected instances of :class:`EquivalentIdSet` are converted to :class:`Mapping`
+    Selected instances of :class:`.EquivalentIdSet` are converted to :class:`.Mapping`
 
 
     """
@@ -133,11 +134,10 @@ class MappingStrategy:
 
         :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
             for human users, and has no bearing on the actual algorithm. Note, if after term filtering and (optional)
-            disambiguation, if multiple EquivalentIdSets still remain, they will all receive the confidence label of
-            LinkRanks.AMBIGUOUS
-        :param disambiguation_strategies: Optional[List[DisambiguationStrategy]] which are triggered if any of the
-            filtered SynonymTermWithMetrics are .ambiguous, or multiple SynonymTermWithMetrics remain after the
-            filter_terms method is called
+            disambiguation, if multiple :class:`.EquivalentIdSet` still remain, they will all receive the confidence
+            label of :attr:`.LinkRanks.AMBIGUOUS`
+        :param disambiguation_strategies: after :meth:`filter_terms` is called, these strategies are triggered if either
+            multiple instances of :class:`.SynonymTermWithMetrics` remain, and/or any of them are ambiguous
         """
 
         self.confidence = confidence
@@ -147,6 +147,7 @@ class MappingStrategy:
         """
         perform any setup that needs to run once per document. Care should be taken if trying to cache this step,
         as the Document state is liable to change between executions.
+
         :param document:
         :return:
         """
@@ -161,18 +162,17 @@ class MappingStrategy:
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
         """
-
-        Algorithms should override this method to return a set of the 'best' SynonymTermWithMetrics
+        Algorithms should override this method to return a set of the "best" :class:`.SynonymTermWithMetrics`
         for a given query string. Ideally, this will be a set with a single element. However, it may not be possible to
-        identify a single best match. In this scenario, the id sets of multiple SynonymTermWithMetrics will be carried
-        forward for disambiguation (if configured)
+        identify a single best match. In this scenario, the id sets of multiple :class:`.SynonymTermWithMetrics` will be
+        carried forward for disambiguation (if configured)
 
-        :param ent_match: Entity.match
-        :param ent_match_norm: normalised version of Entity.match
+        :param ent_match: the raw entity string
+        :param ent_match_norm: normalised version of the entity string
         :param document: originating Document
         :param terms: terms to filter
         :param parser_name: parser name associated with these terms
-        :return: defaults to set(terms) (i.e. no filtering)
+        :return: defaults to set(terms) (i.e. no filtering).
         """
         return set(terms)
 
@@ -181,7 +181,8 @@ class MappingStrategy:
     ) -> Tuple[Set[EquivalentIdSet], Optional[str]]:
         """
         applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
-        of the SynonymTermWithMetrics are ambiguous
+        of the filtered_terms are ambiguous
+
         :param filtered_terms: terms to disambiguate
         :param document: originating Document
         :param parser_name: parser name associated with these terms
@@ -216,8 +217,8 @@ class MappingStrategy:
     ) -> Iterable[Mapping]:
         """
 
-        :param ent_match: unnormalised NER string match (i.e. Entity.match)
-        :param ent_match_norm: normalised NER string match (i.e. Entity.match_norm)
+        :param ent_match: unnormalised NER string match (i.e. :attr:`.Entity.match`)
+        :param ent_match_norm: normalised NER string match (i.e. :attr:`.Entity.match_norm`)
         :param document: originating document
         :param terms: set of terms to consider. Note, terms from different parsers should not be mixed.
         :return:
@@ -266,12 +267,7 @@ class SymbolMatchMappingStrategy(MappingStrategy):
     """
     split both query and reference terms by whitespace. select the term with the most splits as the 'query'. Check
     all of these tokens (and no more) are within the other term. Useful for symbol matching
-    e.g.
-
-    MAP K8 (longest)
-    vs
-    MAPK8 (shortest)
-
+    e.g. "MAP K8" (longest) vs "MAPK8" (shortest)
     """
 
     @staticmethod
@@ -308,9 +304,9 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 class TermNormIsSubStringMappingStrategy(MappingStrategy):
     """
-    for a Set[SynonymTermWithMetrics], see if any of their .term_norm are string matches of the match_norm tokens based
-    on whitespace tokenisation. If exactly one SynonymTermWithMetrics is matches, prefer it. Works best on
-    symbolic entities, e.g. "TESTIN gene" ->"TESTIN"
+    for a set of :class:`.SynonymTermWithMetrics`, see if any of their .term_norm are string matches of the match_norm
+    tokens based on whitespace tokenisation. If exactly one :class:`.SynonymTermWithMetrics` is matches, prefer it.
+    Works best on symbolic entities, e.g. "TESTIN gene" ->"TESTIN"
     """
 
     def __init__(
@@ -319,6 +315,13 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         min_term_norm_len_to_consider: int = 3,
     ):
+        """
+
+        :param confidence:
+        :param disambiguation_strategies:
+        :param min_term_norm_len_to_consider: only consider instances of :class:`.SynonymTermWithMetrics` where the
+            length of :attr:`.SynonymTermWithMetrics.term_norm` is equal to or greater than this value.
+        """
         super().__init__(confidence, disambiguation_strategies)
         self.min_term_norm_len_to_consider = min_term_norm_len_to_consider
 
@@ -352,9 +355,9 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
 
 class StrongMatchMappingStrategy(MappingStrategy):
     """
-    1) sort SynonymTermWithMetrics by highest scoring search match to identify the highest scoring match
+    1) sort :class:`.SynonymTermWithMetrics` by highest scoring search match to identify the highest scoring match
     2) query remaining matches to see whether their scores are greater than this best score - the differential
-        (i.e. there are many close string matches)
+       (i.e. there are many close string matches)
     """
 
     def __init__(
@@ -411,9 +414,9 @@ class StrongMatchMappingStrategy(MappingStrategy):
 
 class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMappingStrategy):
     """
-    1) same as parent class, but a complex string scorer with a predefined threshold is used to confirm that the
-        ent_match is broadly similar to one of the terms attached to the SynonymTermWithMetrics. useful for refining
-        non symbolic close string matches (e.g. Heck disease and Heck disease)
+    Same as parent class, but a complex string scorer with a predefined threshold is used to confirm that the
+    ent_match is broadly similar to one of the terms attached to the :class:`.SynonymTermWithMetrics` . Useful for
+    refining non-symbolic close string matches (e.g. "Neck disease" and "Heck disease")
     """
 
     def __init__(
@@ -474,7 +477,8 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
 class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
     """
     1) look for entities on the document that have mappings
-    2) see if any of these mappings correspond to any ids in the EquivalentIdSets on each SynonymTermWithMetrics
+    2) see if any of these mappings correspond to any ids in the :class:`.EquivalentIdSet` on each
+       :class:`.SynonymTermWithMetrics`
     3) filter the synonym terms according to detected mappings
     """
 
@@ -483,6 +487,7 @@ class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
     def prepare(self, document: Document):
         """
         can't be cached: document state may change between executions
+
         :param document:
         :return:
         """
