@@ -355,16 +355,13 @@ def check_ent_class_consistency(
     :param messages:
     :return:
     """
-    by_class = defaultdict(set)
-    by_ent = defaultdict(set)
+    by_doc = defaultdict(set)
+    all_entity_classes = set()
     for ent in ents:
-        by_class[ent.entity_class].add(ent)
-        by_ent[ent].add(ent.entity_class)
+        by_doc[ent_to_task_lookup[ent]].add(ent.entity_class)
+        all_entity_classes.add(ent.entity_class)
 
-    if len(by_class) > 1:
-        by_doc = defaultdict(set)
-        for ent in ents:
-            by_doc[ent_to_task_lookup[ent]].update(by_ent[ent])
+    if len(all_entity_classes) > 1:
         message = "\n".join(f"{doc_id}:{classes}" for doc_id, classes in by_doc.items())
         for doc_id, classes in by_doc.items():
             messages[doc_id].add(
