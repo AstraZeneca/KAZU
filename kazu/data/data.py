@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, Type
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
 
 from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
@@ -468,14 +468,13 @@ class Document:
         self,
         drop_unmapped_ents: bool = False,
         drop_terms: bool = False,
-        encoder: Optional[Type[json.JSONEncoder]] = None,
         **kwargs,
     ):
         """
         custom encoder needed to handle serialisation issues with our data model
+
         :param: drop_unmapped_ents: drop any entities that have no mappings
         :param: drop_terms: drop the synonym term dict field
-        :param: encoder: use a custom Json encoder. If None, the kazu native one will be used
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
@@ -490,8 +489,7 @@ class Document:
                         ent.syn_term_to_synonym_terms.clear()
                 section.entities = ents_to_keep
 
-        encoder = encoder if encoder is not None else DocumentEncoder
-        return json.dumps(self, cls=encoder, **kwargs)
+        return json.dumps(self, cls=DocumentEncoder, **kwargs)
 
     def as_minified_json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> str:
         as_dict_minified = self.as_minified_dict(drop_unmapped_ents, drop_terms)
