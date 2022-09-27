@@ -41,20 +41,6 @@ class BlackLister(Protocol):
         """
         ...
 
-    def clear_caches(self) -> None:
-        """Delete caches that aren't needed when synonym generation is done.
-
-        At the moment, this just refers to caches of synonyms for other entity types. However, we
-        want to be able to call this on all blacklisters, so we need a no-op implementation in the base
-        class to be overriden.
-
-        We would need this even for blacklisters that don't have stored synonyms so that we can just call it on all
-        blacklisters (since the blacklisters used are dynamic depending on config).
-
-        It would seem like this is a good use case for context managers, but python doesn't support a variable
-        number of context managers based on an iterable as we would want in this case."""
-        ...
-
 
 def _build_synonym_set(database: SynonymDatabase, synonym_sources: Collection[str]) -> Set[str]:
     """Build a set of all synonyms from the given source parsers.
@@ -96,10 +82,6 @@ class DrugBlackLister:
     def anat_syns(self):
         return _build_synonym_set(self.syn_db, self.anatomy_synonym_sources)
 
-    def clear_caches(self):
-        del self.gene_syns
-        del self.anat_syns
-
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         lookup_result = self.annotation_lookup(synonym)
         if lookup_result:
@@ -137,10 +119,6 @@ class GeneBlackLister:
     def gene_syns(self):
         return _build_synonym_set(self.syn_db, self.gene_synonym_sources)
 
-    def clear_caches(self):
-        del self.disease_syns
-        del self.gene_syns
-
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         lookup_result = self.annotation_lookup(synonym)
         if lookup_result:
@@ -165,9 +143,6 @@ class DiseaseBlackLister:
     @cached_property
     def disease_syns(self):
         return _build_synonym_set(self.syn_db, self.disease_synonym_sources)
-
-    def clear_caches(self):
-        del self.disease_syns
 
     def __call__(self, synonym: str) -> Tuple[bool, str]:
         lookup_result = self.annotation_lookup(synonym)
