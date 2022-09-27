@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+from os import getenv
 from typing import List, Tuple, Dict, Optional
 
 import pandas as pd
@@ -36,7 +36,7 @@ to the kazu model pack root
 """  # noqa
 
 requires_model_pack = pytest.mark.skipif(
-    os.environ.get("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE_NO_MODEL_PACK
+    getenv("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE_NO_MODEL_PACK
 )
 
 
@@ -47,9 +47,7 @@ Label Studio server where the gold standard annotations are stored.
 """  # noqa
 
 requires_label_studio = pytest.mark.skipif(
-    os.environ.get("LS_PROJECT_NAME") is None
-    or os.environ.get("LS_URL_PORT") is None
-    or os.environ.get("LS_TOKEN") is None,
+    any(getenv(varname) is None for varname in ("LS_PROJECT_NAME", "LS_URL_PORT", "LS_TOKEN")),
     reason=SKIP_MESSAGE_NO_LABEL_STUDIO,
 )
 
@@ -253,7 +251,7 @@ def add_whole_document_entity(doc: Document, entity_class: str):
 
 
 def get_TransformersModelForTokenClassificationNerStep_model_path():
-    return os.getenv("TransformersModelForTokenClassificationPath")
+    return getenv("TransformersModelForTokenClassificationPath")
 
 
 class DummyParser(OntologyParser):
