@@ -26,16 +26,16 @@ LINKING_THRESHOLDS = {
 }
 
 
-def test_full_pipeline(override_kazu_test_config, label_studio_manager):
+def test_full_pipeline(capsys, override_kazu_test_config, label_studio_manager):
 
     cfg = override_kazu_test_config(
         overrides=["pipeline=acceptance_test"],
     )
     pipeline = Pipeline(load_steps(cfg=cfg))
-    analyse_full_pipeline(pipeline, label_studio_manager.export_from_ls())
+    analyse_full_pipeline(capsys, pipeline, label_studio_manager.export_from_ls())
 
 
-def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
+def test_gold_standard_consistency(capsys, label_studio_manager, kazu_test_config):
     """
     a test that always passes, but reports potential inconsistencies in the gold standard
 
@@ -43,7 +43,7 @@ def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
     :param kazu_test_config:
     :return:
     """
-    check_annotation_consistency(label_studio_manager.export_from_ls())
+    check_annotation_consistency(capsys, label_studio_manager.export_from_ls())
 
 
 class SectionScorer:
@@ -248,6 +248,7 @@ def aggregate_linking_results(
 
 
 def check_results_meet_threshold(
+    capsys,
     results: Dict[str, AggregatedAccuracyResult],
     thresholds: Dict[str, Dict[str, float]],
 ):
@@ -262,7 +263,7 @@ def check_results_meet_threshold(
                 f"{key} failed to meet precision threshold: {prec}. "
                 f"{aggregated_result.tp} / {aggregated_result.fp +aggregated_result.tp} \n{message}"
             )
-        else:
+        with capsys.disabled():
             print(
                 f"{key} passed precision threshold: {prec}. "
                 f"{aggregated_result.tp} / {aggregated_result.fp +aggregated_result.tp} \n{message}\n\n"
@@ -273,24 +274,24 @@ def check_results_meet_threshold(
                 f"{key} failed to meet recall threshold: {rec}. "
                 f"{aggregated_result.tp} / {aggregated_result.fn +aggregated_result.tp} \n{message}"
             )
-        else:
+        with capsys.disabled():
             print(
                 f"{key} passed recall threshold: {rec}. "
                 f"{aggregated_result.tp} / {aggregated_result.fn +aggregated_result.tp} \n{message}\n\n"
             )
 
 
-def analyse_full_pipeline(pipeline: Pipeline, docs: List[Document]):
+def analyse_full_pipeline(capsys, pipeline: Pipeline, docs: List[Document]):
     pipeline(docs)
     ner_dict = score_sections(docs)
     ner_results = aggregate_ner_results(ner_dict)
-    check_results_meet_threshold(results=ner_results, thresholds=NER_THRESHOLDS)
+    check_results_meet_threshold(capsys, results=ner_results, thresholds=NER_THRESHOLDS)
 
     linking_results = aggregate_linking_results(ner_dict)
-    check_results_meet_threshold(results=linking_results, thresholds=LINKING_THRESHOLDS)
+    check_results_meet_threshold(capsys, results=linking_results, thresholds=LINKING_THRESHOLDS)
 
 
-def check_annotation_consistency(docs: List[Document]):
+def check_annotation_consistency(capsys, docs: List[Document]):
     all_ents = []
     ent_to_task_lookup: Dict[Entity, int] = {}  # used for reporting task id that may have issues
     for doc in docs:
@@ -309,9 +310,10 @@ def check_annotation_consistency(docs: List[Document]):
         check_ent_class_consistency(ent_to_task_lookup, ents, match_str, messages)
         check_ent_mapping_consistency(ent_to_task_lookup, ents, match_str, messages)
 
-    print(f"{len(messages)} tasks with issues:\n")
-    for doc_id in sorted(messages):
-        print(f"\ntask id: {doc_id}\n" + "*" * 20 + "\n" + "\n".join(messages[doc_id]))
+    with capsys.disabled():
+        print(f"{len(messages)} tasks with issues:\n")
+        for doc_id in sorted(messages):
+            print(f"\ntask id: {doc_id}\n" + "*" * 20 + "\n" + "\n".join(messages[doc_id]))
 
 
 def check_ent_match_abnormalities(
