@@ -95,7 +95,6 @@ class SectionScorer:
     def calculate_ner_matches(self):
         combos = itertools.product(self.gold_ents, self.test_ents)
         for (gold_ent, test_ent) in combos:
-            # exact matches
             if (
                 gold_ent.spans == test_ent.spans or gold_ent.is_partially_overlapped(test_ent)
             ) and gold_ent.entity_class == test_ent.entity_class:
