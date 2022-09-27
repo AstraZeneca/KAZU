@@ -146,28 +146,38 @@ def score_sections(
 @dataclasses.dataclass
 class AggregatedAccuracyResult:
     tp: int = 0
-    fp_items: List[Any] = dataclasses.field(default_factory=list)
-    fp_tasks: List[str] = dataclasses.field(default_factory=list)
-    fn_items: List[Any] = dataclasses.field(default_factory=list)
-    fn_tasks: List[str] = dataclasses.field(default_factory=list)
+    fp: int = 0
+    fn: int = 0
+    fp_counter: Counter = dataclasses.field(default_factory=Counter)
+    fn_counter: Counter = dataclasses.field(default_factory=Counter)
+    fp_items_to_tasks: Dict[Any, set[str]] = dataclasses.field(default_factory=dict)
+    fn_items_to_tasks: Dict[Any, set[str]] = dataclasses.field(default_factory=dict)
+
+    def add_fp(self, item: Any, task: str) -> None:
+        self.fp += 1
+        self.fp_counter[item] += 1
+        self.fp_items_to_tasks.setdefault(item, set()).add(task)
+
+    def add_fn(self, item: Any, task: str) -> None:
+        self.fn += 1
+        self.fn_counter[item] += 1
+        self.fn_items_to_tasks.setdefault(item, set()).add(task)
 
     def tasks_for_fp(self, items: List[Any]) -> Iterable[str]:
-        for i, fp_item in enumerate(self.fp_items):
-            if fp_item in items:
-                yield self.fp_tasks[i]
+        return (
+            task
+            for item, tasks in self.fp_items_to_tasks.items()
+            for task in tasks
+            if item in items
+        )
 
     def tasks_for_fn(self, items: List[Any]) -> Iterable[str]:
-        for i, fn_item in enumerate(self.fn_items):
-            if fn_item in items:
-                yield self.fn_tasks[i]
-
-    @property
-    def fp(self):
-        return len(self.fp_items)
-
-    @property
-    def fn(self):
-        return len(self.fn_items)
+        return (
+            task
+            for item, tasks in self.fn_items_to_tasks.items()
+            for task in tasks
+            if item in items
+        )
 
     @property
     def precision(self):
@@ -187,11 +197,11 @@ class AggregatedAccuracyResult:
 
     @property
     def fp_info(self):
-        return Counter(self.fp_items).most_common()
+        return self.fp_counter.most_common()
 
     @property
     def fn_info(self):
-        return Counter(self.fn_items).most_common()
+        return self.fn_counter.most_common()
 
 
 def aggregate_ner_results(
@@ -202,10 +212,10 @@ def aggregate_ner_results(
         acc_result = AggregatedAccuracyResult()
         for scorer in scorers:
             acc_result.tp += len(scorer.gold_to_test_ent_soft)
-            acc_result.fn_items.extend(ent.match for ent in scorer.ner_fn_soft)
-            acc_result.fn_tasks.extend([scorer.task] * len(scorer.ner_fn_soft))
-            acc_result.fp_items.extend(ent.match for ent in scorer.ner_fp_soft)
-            acc_result.fp_tasks.extend([scorer.task] * len(scorer.ner_fp_soft))
+            for ent in scorer.ner_fn_soft:
+                acc_result.add_fn(item=ent.match, task=scorer.task)
+            for ent in scorer.ner_fp_soft:
+                acc_result.add_fp(item=ent.match, task=scorer.task)
         result[ent_class] = acc_result
     return result
 
@@ -221,11 +231,12 @@ def aggregate_linking_results(
                 _,
                 source,
             ), mapping_result in scorer.gold_to_test_mappings.items():
-                result[source].tp += len(mapping_result["tp"])
-                result[source].fn_items.extend(mapping_result["fn"])
-                result[source].fn_tasks.extend([scorer.task] * len(mapping_result["fn"]))
-                result[source].fp_items.extend(mapping_result["fp"])
-                result[source].fp_tasks.extend([scorer.task] * len(mapping_result["fp"]))
+                acc_result = result[source]
+                acc_result.tp += len(mapping_result["tp"])
+                for fn_item in mapping_result["fn"]:
+                    acc_result.add_fn(item=fn_item, task=scorer.task)
+                for fp_item in mapping_result["fp"]:
+                    acc_result.add_fp(item=fp_item, task=scorer.task)
     return dict(result)
 
 
