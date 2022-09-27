@@ -216,9 +216,9 @@ def aggregate_ner_results(
         for scorer in scorers:
             acc_result.tp += len(scorer.gold_to_test_ent_soft)
             acc_result.fn_items.extend(ent.match for ent in scorer.ner_fn_soft)
-            acc_result.fn_tasks.extend(scorer.task for _ in range(len(scorer.ner_fn_soft)))
+            acc_result.fn_tasks.extend([scorer.task] * len(scorer.ner_fn_soft))
             acc_result.fp_items.extend(ent.match for ent in scorer.ner_fp_soft)
-            acc_result.fp_tasks.extend(scorer.task for _ in range(len(scorer.ner_fp_soft)))
+            acc_result.fp_tasks.extend([scorer.task] * len(scorer.ner_fp_soft))
         result[ent_class] = acc_result
     return result
 
@@ -236,13 +236,9 @@ def aggregate_linking_results(
             ), mapping_result in scorer.gold_to_test_mappings.items():
                 result[source].tp += len(mapping_result["tp"])
                 result[source].fn_items.extend(mapping_result["fn"])
-                result[source].fn_tasks.extend(
-                    scorer.task for _ in range(len(mapping_result["fn"]))
-                )
+                result[source].fn_tasks.extend([scorer.task] * len(mapping_result["fn"]))
                 result[source].fp_items.extend(mapping_result["fp"])
-                result[source].fp_tasks.extend(
-                    scorer.task for _ in range(len(mapping_result["fp"]))
-                )
+                result[source].fp_tasks.extend([scorer.task] * len(mapping_result["fp"]))
     return dict(result)
 
 
