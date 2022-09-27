@@ -27,7 +27,6 @@ LINKING_THRESHOLDS = {
 
 
 @requires_label_studio
-@requires_model_pack
 def test_full_pipeline(override_kazu_test_config, label_studio_manager):
 
     cfg = override_kazu_test_config(
