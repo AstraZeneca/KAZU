@@ -26,6 +26,29 @@ LINKING_THRESHOLDS = {
 }
 
 
+@requires_label_studio
+@requires_model_pack
+def test_full_pipeline(override_kazu_test_config, label_studio_manager):
+
+    cfg = override_kazu_test_config(
+        overrides=["pipeline=acceptance_test"],
+    )
+    pipeline = Pipeline(load_steps(cfg=cfg))
+    analyse_full_pipeline(pipeline, label_studio_manager.export_from_ls())
+
+
+@requires_label_studio
+def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
+    """
+    a test that always passes, but reports potential inconsistencies in the gold standard
+
+    :param label_studio_manager:
+    :param kazu_test_config:
+    :return:
+    """
+    check_annotation_consistency(label_studio_manager.export_from_ls())
+
+
 class SectionScorer:
     def __init__(
         self,
@@ -270,17 +293,6 @@ def analyse_full_pipeline(pipeline: Pipeline, docs: List[Document]):
     check_results_meet_threshold(results=linking_results, thresholds=LINKING_THRESHOLDS)
 
 
-@requires_label_studio
-@requires_model_pack
-def test_full_pipeline(override_kazu_test_config, label_studio_manager):
-
-    cfg = override_kazu_test_config(
-        overrides=["pipeline=acceptance_test"],
-    )
-    pipeline = Pipeline(load_steps(cfg=cfg))
-    analyse_full_pipeline(pipeline, label_studio_manager.export_from_ls())
-
-
 def check_annotation_consistency(docs: List[Document]):
     all_ents = []
     ent_to_task_lookup: Dict[Entity, int] = {}  # used for reporting task id that may have issues
@@ -410,15 +422,3 @@ def check_ent_mapping_consistency(
             )
 
             messages[doc_id].add(message)
-
-
-@requires_label_studio
-def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
-    """
-    a test that always passes, but reports potential inconsistencies in the gold standard
-
-    :param label_studio_manager:
-    :param kazu_test_config:
-    :return:
-    """
-    check_annotation_consistency(label_studio_manager.export_from_ls())
