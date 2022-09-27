@@ -83,6 +83,7 @@ class NamespaceStrategyExecution:
     ) -> Iterable[Mapping]:
         """
         conditionally execute a mapping strategy over an entity
+
         :param entity: entity to process
         :param strategy_index: index of strategy to run that is configured for this entity class
         :param document: originating Document
@@ -138,7 +139,8 @@ class NamespaceStrategyExecution:
 
     def reset(self):
         """
-        clear state, ready for another execution. Should be called between Documents
+        clear state, ready for another execution. Should be called when the underlying :class:`.Document` has changed
+
         :return:
         """
         self.unresolved_parsers.clear()
@@ -155,21 +157,21 @@ class StrategyRunner:
     Beyond the precision of the strategy itself, the variables to consider are:
 
     1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
-        entity spans
-    2) what SynonymTerms are associated with the entity, and from which parser they originated from
+       entity spans.
+    2) what SynonymTerms are associated with the entity, and from which parser they originated from.
 
-    This __call__ method of this class operates as follows:
+    The __call__ method of this class operates as follows:
 
-    1) group entities by order of NER namespace
-    2) sub-group these entities again by Entity.match and Entity.entity_class
-    3) divide these entities by whether they are symbolic or not
-    4) identify the maximum number of strategies that 'could' run
-    5) get the appropriate NamespaceStrategyExecution to run against this sub group
-    6) group the entities from 5) by EntityKey (i.e. a hashable representation of unique information required for
-        mapping
+    1) group entities by order of NER namespace.
+    2) sub-group these entities again by :attr:`.Entity.match` and :attr:`.Entity.entity_class`.
+    3) divide these entities by whether they are symbolic or not.
+    4) identify the maximum number of strategies that 'could' run.
+    5) get the appropriate :class:`.NamespaceStrategyExecution` to run against this sub group
+    6) group the entities from 5) by EntityKey (i.e. a hashable representation of unique information .required for
+       mapping.
     7) conditionally execute the next strategy out of the maximum possible (from 4), and attach any resulting mappings
-        to the relevant entity group. Note, the NamespaceStrategyExecution is responsible for deciding whether a
-        strategy is executed or not.
+       to the relevant entity group. Note, the :class:`NamespaceStrategyExecution` is responsible for deciding whether
+       a strategy is executed or not.
     """
 
     def __init__(
@@ -180,8 +182,10 @@ class StrategyRunner:
     ):
         """
 
-        :param non_symbolic_strategies: mapping of NER namespace to a NamespaceStrategyList for non symbolic entities
-        :param symbolic_strategies: mapping of NER namespace to a NamespaceStrategyList for symbolic entities
+        :param non_symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for
+            non-symbolic entities
+        :param symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for symbolic
+            entities
         :param ner_namespace_processing_order: Entities will be mapped in this namespace order. This is
             useful if you have a high precision, low recall NER namespace, combined with a low precision high recall
             namespace, as the mapping info derived from the high precision NER namespace can be used with a high
@@ -206,10 +210,9 @@ class StrategyRunner:
     ) -> Tuple[List[Entity], List[Entity]]:
         """
         groups entities into symbolic and non-symbolic forms, so they can be processed separately.
-
         Expects an already sorted list of entities, since we only call this after a sort is required
         elsewhere. However, it will still work with an unsorted list, it will just call
-        :meth:`StringNormalizer.classify_symbolic` more times than necessary.
+        :meth:`.StringNormalizer.classify_symbolic` more times than necessary.
 
         :param entities:
         :return:
@@ -234,7 +237,8 @@ class StrategyRunner:
         """
         generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
         information to work with. Therefore, we group entities by configured namespace order, split by symbolism, then
-        run self.execute_hit_post_processing_strategies
+        run :meth:`execute_hit_post_processing_strategies`
+
         :param doc:
         :return:
         """
@@ -247,7 +251,7 @@ class StrategyRunner:
                 *entity_to_entity_key(ent),
             ),
         )
-        # add in ent.namespace so we have it available in the group key.
+        # add in ent.namespace, so we have it available in the group key.
         # It won't affect the sorting since the first element of the tuple will be the same
         # for all ents with the same namespace
         entities_grouped_by_namespace_order = groupby(
