@@ -110,8 +110,9 @@ def score_sections(
 ) -> Dict[str, List[SectionScorer]]:
     """
     score a list of documents by Section
+
     :param docs:
-    :return: Dict[<enitty_class>:List[Scorer (one per Section]]
+    :return: dict of entity class to one scorer per section
     """
 
     result = defaultdict(list)
@@ -312,6 +313,7 @@ def check_ent_match_abnormalities(
 ):
     """
     checks to see if any gold standard spans look a bit weird
+
     :param ent_to_task_lookup:
     :param ents:
     :param match_str:
@@ -335,6 +337,7 @@ def check_ent_class_consistency(
 ):
     """
     checks to see if any match strings have different entity_class information
+
     :param ent_to_task_lookup:
     :param ents:
     :param match_str:
@@ -366,6 +369,7 @@ def check_ent_mapping_consistency(
 ):
     """
     checks to see if any entity string matches have inconsistent mapping information
+
     :param ent_to_task_lookup:
     :param ents:
     :param match_str:
@@ -412,6 +416,7 @@ def check_ent_mapping_consistency(
 def test_gold_standard_consistency(label_studio_manager, kazu_test_config):
     """
     a test that always passes, but reports potential inconsistencies in the gold standard
+
     :param label_studio_manager:
     :param kazu_test_config:
     :return:
