@@ -171,10 +171,10 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             unique otherwise duplicate work will be done and thrown away, so pragmatically a frozenset makes sense.
         :return:
         """
+        strings = " ".join(x.match_norm for x in doc.get_entities())
         res = {}
         for parser in parsers:
-            vectorizer = scorer_manager.parser_to_vectorizer[parser]
-            strings = " ".join(x.match_norm for x in doc.get_entities())
+            vectorizer = scorer_manager.parser_to_vectorizer[parser]    
             res[parser] = vectorizer.transform([strings])
         return res
 
