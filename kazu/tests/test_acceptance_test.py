@@ -410,11 +410,10 @@ def check_ent_mapping_consistency(
             f"{doc_id}:{sorted(groups)}" for doc_id, groups in sorted(doc_id_to_groups.items())
         )
 
+        overall_message = (
+            f"WARNING: ent string <{match_str}> has inconsistent mappings. This may be a genuine ambiguity or "
+            f"a mistake in annotation: \n\n {group_definition_message} \n\naffected tasks:"
+            f"\n {confused_docs_message}\n"
+        )
         for doc_id in doc_id_to_groups:
-            message = (
-                f"WARNING: ent string <{match_str}> has inconsistent mappings. This may be a genuine ambiguity or "
-                f"a mistake in annotation: \n\n {group_definition_message} \n\naffected tasks:"
-                f"\n {confused_docs_message}\n"
-            )
-
-            messages[doc_id].add(message)
+            messages[doc_id].add(overall_message)
