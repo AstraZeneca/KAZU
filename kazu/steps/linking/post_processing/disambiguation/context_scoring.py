@@ -23,6 +23,13 @@ def create_word_and_char_ngrams(
         3,
     ),
 ) -> List[str]:
+    """
+    function to create char and word ngrams
+    :param s: string to process
+    :param words: create n words
+    :param chars: create n chars
+    :return: list of strings comprised of words and chars
+    """
     strings = []
     for ngram_word in words:
         strings.extend(create_word_ngrams(s, ngram_word))
@@ -33,7 +40,7 @@ def create_word_and_char_ngrams(
 
 class TfIdfScorer(metaclass=Singleton):
     """
-    This class manages a set of TFIDF models (via :class:`sklearn.feature_extraction.text.TfidfVectorizer` ) . It's a
+    This class manages a set of TFIDF models (via :class:`sklearn.feature_extraction.text.TfidfVectorizer` ). It's a
     singleton, so that the models can be accessed in multiple locations without the need to load them into memory
     multiple times
     """
