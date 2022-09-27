@@ -1,4 +1,4 @@
-kazu.steps.linking
+﻿kazu.steps.linking
 ==================
 
 .. automodule:: kazu.steps.linking
@@ -28,5 +28,7 @@ kazu.steps.linking
    :recursive:
 
    kazu.steps.linking.dictionary
+   kazu.steps.linking.mapping_step
+   kazu.steps.linking.post_processing
    kazu.steps.linking.sapbert
 

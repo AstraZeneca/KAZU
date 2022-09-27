@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.web" href="kazu.web.html" /><link rel="prev" title="kazu.utils.string_normalizer" href="kazu.utils.string_normalizer.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>kazu.utils.utils - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -227,10 +227,24 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.context_scoring.html">kazu.steps.linking.post_processing.disambiguation.context_scoring</a></li>
+<li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.strategies.html">kazu.steps.linking.post_processing.disambiguation.strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.html">kazu.steps.linking.post_processing.mapping_strategies</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.strategies.html">kazu.steps.linking.post_processing.mapping_strategies.strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.strategy_runner.html">kazu.steps.linking.post_processing.strategy_runner</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html">kazu.steps.ner.entity_post_processing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.explosion.html">kazu.steps.ner.explosion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.hf_token_classification.html">kazu.steps.ner.hf_token_classification</a></li>
@@ -239,19 +253,19 @@
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html">kazu.steps.ner.tokenized_word_processor</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.other.html">kazu.steps.other</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.other.html">kazu.steps.other</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.merge_overlapping_ents.html">kazu.steps.other.merge_overlapping_ents</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.stanza.html">kazu.steps.other.stanza</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.string_preprocessing.html">kazu.steps.string_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.string_preprocessing.html">kazu.steps.string_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.string_preprocessing.scispacy_abbreviation_expansion.html">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.string_preprocessing.string_preprocessing_step.html">kazu.steps.string_preprocessing.string_preprocessing_step</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
@@ -262,7 +276,7 @@
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">kazu.utils.utils</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -360,6 +374,9 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.utils.EntityClassFilter" title="kazu.utils.utils.EntityClassFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EntityClassFilter</span></code></a></p></td>
 <td><p>A condition that returns True if a document has any entities that match the class of the required_entity_classes</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.utils.Singleton" title="kazu.utils.utils.Singleton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Singleton</span></code></a></p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -378,6 +395,12 @@
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kazu.utils.utils.Singleton">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.utils.</span></span><span class="sig-name descname"><span class="pre">Singleton</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/utils.py#L188-L194"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.utils.Singleton" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -581,10 +604,10 @@
                 </div>
                 <div class="title">kazu.web</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="kazu.utils.string_normalizer.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

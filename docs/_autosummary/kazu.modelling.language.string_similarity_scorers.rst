@@ -1,4 +1,4 @@
-kazu.modelling.language.string\_similarity\_scorers
+﻿kazu.modelling.language.string\_similarity\_scorers
 ===================================================
 
 .. automodule:: kazu.modelling.language.string_similarity_scorers
@@ -22,6 +22,7 @@ kazu.modelling.language.string\_similarity\_scorers
       EntitySubtypeStringSimilarityScorer
       NumberMatchStringSimilarityScorer
       RapidFuzzStringSimilarityScorer
+      SapbertStringSimilarityScorer
       StringSimilarityScorer
    
    
