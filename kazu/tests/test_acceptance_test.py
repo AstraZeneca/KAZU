@@ -200,11 +200,11 @@ class AggregatedAccuracyResult:
 
     @property
     def fp_info(self):
-        return Counter(self.fp_items).most_common(len(self.fp_items))
+        return Counter(self.fp_items).most_common()
 
     @property
     def fn_info(self):
-        return Counter(self.fn_items).most_common(len(self.fn_items))
+        return Counter(self.fn_items).most_common()
 
 
 def aggregate_ner_results(
