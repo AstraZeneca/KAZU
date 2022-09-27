@@ -70,27 +70,17 @@ class SectionScorer:
         self.calculate_linking_matches()
 
     @staticmethod
-    def group_mappings_by_source(
-        gold_ent: Entity, test_ents: Iterable[Entity]
-    ) -> Tuple[Dict[str, Set[Tuple[str, str]]], Dict[str, Set[Tuple[str, str]]]]:
-        gold_mappings_by_source = defaultdict(set)
-        for mapping in gold_ent.mappings:
-            gold_mappings_by_source[mapping.source].add(
-                (
-                    mapping.source,
-                    f"{mapping.default_label}|{mapping.idx}",
-                )
-            )
-        test_mappings_by_source = defaultdict(set)
-        for test_ent in test_ents:
-            for mapping in test_ent.mappings:
-                test_mappings_by_source[mapping.source].add(
+    def group_mappings_by_source(ents: Iterable[Entity]) -> Dict[str, Set[Tuple[str, str]]]:
+        mappings_by_source = defaultdict(set)
+        for ent in ents:
+            for mapping in ent.mappings:
+                mappings_by_source[mapping.source].add(
                     (
                         mapping.source,
                         f"{mapping.default_label}|{mapping.idx}",
                     )
                 )
-        return dict(gold_mappings_by_source), dict(test_mappings_by_source)
+        return dict(mappings_by_source)
 
     def calculate_ner_matches(self):
         combos = itertools.product(self.gold_ents, self.test_ents)
@@ -104,9 +94,8 @@ class SectionScorer:
 
     def calculate_linking_matches(self):
         for gold_ent, test_ents in self.gold_to_test_ent_soft.items():
-            gold_mappings_by_source, test_mappings_by_source = self.group_mappings_by_source(
-                gold_ent, test_ents
-            )
+            gold_mappings_by_source = self.group_mappings_by_source([gold_ent])
+            test_mappings_by_source = self.group_mappings_by_source(test_ents)
             sources = set(gold_mappings_by_source.keys()).union(test_mappings_by_source.keys())
             for source in sources:
                 gold_mappings = gold_mappings_by_source.get(source, set())
