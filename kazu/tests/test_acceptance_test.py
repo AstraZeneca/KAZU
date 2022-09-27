@@ -252,25 +252,24 @@ def check_results_meet_threshold(
         prec = aggregated_result.precision
         rec = aggregated_result.recall
         message = "\n".join(f"{k} <incorrect {v} times>" for k, v in aggregated_result.fp_info)
-        assert prec >= threshold["precision"], (
-            f"{key} failed to meet precision threshold: {prec}. "
+        prec_message = (
             f"{aggregated_result.tp} / {aggregated_result.fp + aggregated_result.tp} \n{message}"
         )
+        assert (
+            prec >= threshold["precision"]
+        ), f"{key} failed to meet precision threshold: {prec}. {prec_message}"
         with capsys.disabled():
-            print(
-                f"{key} passed precision threshold: {prec}. "
-                f"{aggregated_result.tp} / {aggregated_result.fp + aggregated_result.tp} \n{message}\n\n"
-            )
+            print(f"{key} passed precision threshold: {prec}. {prec_message}\n\n")
+
         message = "\n".join(f"{k} <missed {v} times>" for k, v in aggregated_result.fn_info)
-        assert rec >= threshold["recall"], (
-            f"{key} failed to meet recall threshold: {rec}. "
+        rec_message = (
             f"{aggregated_result.tp} / {aggregated_result.fn + aggregated_result.tp} \n{message}"
         )
+        assert (
+            rec >= threshold["recall"]
+        ), f"{key} failed to meet recall threshold: {rec}. {rec_message}"
         with capsys.disabled():
-            print(
-                f"{key} passed recall threshold: {rec}. "
-                f"{aggregated_result.tp} / {aggregated_result.fn + aggregated_result.tp} \n{message}\n\n"
-            )
+            print(f"{key} passed recall threshold: {rec}. {rec_message}\n\n")
 
 
 def analyse_full_pipeline(capsys, pipeline: Pipeline, docs: List[Document]):
