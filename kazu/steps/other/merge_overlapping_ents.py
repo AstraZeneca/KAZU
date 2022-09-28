@@ -100,9 +100,10 @@ class MergeOverlappingEntsStep(BaseStep):
                         ents_to_merge, non_contig_ents = [], []
                         if self.ignore_non_contiguous:
                             for ent in section.entities:
-                                ents_to_merge.append(ent) if len(
-                                    ent.spans
-                                ) == 1 else non_contig_ents.append(ent)
+                                if len(ent.spans) == 1:
+                                    ents_to_merge.append(ent)
+                                else:
+                                    non_contig_ents.append(ent)
                         else:
                             ents_to_merge = section.entities
 
