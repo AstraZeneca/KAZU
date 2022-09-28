@@ -38,8 +38,11 @@ def entity_to_entity_key(
 class NamespaceStrategyExecution:
     """
     The role of a NamespaceStrategyExecution is to track which entities have had mappings successfully resolved,
-    and which require the application of further strategies. This is handled via tracking a dictionary of
-    EntityKey:Set[<parser name>]. See further details in the __call__ docstring
+    and which require the application of further strategies.
+
+    This is handled via tracking a dictionary of EntityKey to sets of parser names.
+
+    See further details in the __call__ docstring.
     """
 
     def __init__(
@@ -82,7 +85,8 @@ class NamespaceStrategyExecution:
         self, entity: Entity, strategy_index: int, document: Document
     ) -> Iterable[Mapping]:
         """
-        conditionally execute a mapping strategy over an entity
+
+        Conditionally execute a mapping strategy over an entity.
 
         :param entity: entity to process
         :param strategy_index: index of strategy to run that is configured for this entity class
@@ -139,7 +143,9 @@ class NamespaceStrategyExecution:
 
     def reset(self):
         """
-        clear state, ready for another execution. Should be called when the underlying :class:`.Document` has changed
+        clear state, ready for another execution.
+
+        Should be called when the underlying :class:`~kazu.data.data.Document` has changed.
 
         :return:
         """
@@ -156,20 +162,21 @@ class StrategyRunner:
 
     Beyond the precision of the strategy itself, the variables to consider are:
 
-    1) the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
+    1. the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
        entity spans.
-    2) what SynonymTerms are associated with the entity, and from which parser they originated from.
+    2. what SynonymTerms are associated with the entity, and from which parser they originated from.
 
     The __call__ method of this class operates as follows:
 
-    1) group entities by order of NER namespace.
-    2) sub-group these entities again by :attr:`.Entity.match` and :attr:`.Entity.entity_class`.
-    3) divide these entities by whether they are symbolic or not.
-    4) identify the maximum number of strategies that 'could' run.
-    5) get the appropriate :class:`.NamespaceStrategyExecution` to run against this sub group
-    6) group the entities from 5) by EntityKey (i.e. a hashable representation of unique information .required for
+    1. group entities by order of NER namespace.
+    2. sub-group these entities again by :attr:`~kazu.data.data.Entity.match` and
+       :attr:`~kazu.data.data.Entity.entity_class`\\ .
+    3. divide these entities by whether they are symbolic or not.
+    4. identify the maximum number of strategies that 'could' run.
+    5. get the appropriate :class:`NamespaceStrategyExecution` to run against this sub group.
+    6. group the entities from 5. by EntityKey (i.e. a hashable representation of unique information required for
        mapping.
-    7) conditionally execute the next strategy out of the maximum possible (from 4), and attach any resulting mappings
+    7. conditionally execute the next strategy out of the maximum possible (from 4), and attach any resulting mappings
        to the relevant entity group. Note, the :class:`NamespaceStrategyExecution` is responsible for deciding whether
        a strategy is executed or not.
     """
@@ -210,9 +217,10 @@ class StrategyRunner:
     ) -> Tuple[List[Entity], List[Entity]]:
         """
         groups entities into symbolic and non-symbolic forms, so they can be processed separately.
+
         Expects an already sorted list of entities, since we only call this after a sort is required
         elsewhere. However, it will still work with an unsorted list, it will just call
-        :meth:`.StringNormalizer.classify_symbolic` more times than necessary.
+        :meth:`kazu.utils.string_normalizer.StringNormalizer.classify_symbolic` more times than necessary.
 
         :param entities:
         :return:
@@ -235,9 +243,12 @@ class StrategyRunner:
 
     def __call__(self, doc: Document):
         """
-        generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
+
+        Run relevant strategies to decide what mappings to create.
+
+        Generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
         information to work with. Therefore, we group entities by configured namespace order, split by symbolism, then
-        run :meth:`execute_hit_post_processing_strategies`
+        run :meth:`execute_hit_post_processing_strategies`\\ .
 
         :param doc:
         :return:
@@ -276,9 +287,9 @@ class StrategyRunner:
         namespace_strategy_execution: NamespaceStrategyExecution,
     ):
         """
-        This method executes parts 5 - 7 in the class DocString
+        This method executes parts 5 - 7 in the class Docstring.
 
-        :param ents_needing_mappings: Expects entities to already be sorted based on :func:`entity_to_entity_key`
+        :param ents_needing_mappings: Expects entities to already be sorted based on :func:`entity_to_entity_key`\\ .
         :param document:
         :param namespace_strategy_execution:
         :return:

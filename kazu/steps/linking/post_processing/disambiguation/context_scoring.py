@@ -25,6 +25,7 @@ def create_word_and_char_ngrams(
 ) -> List[str]:
     """
     function to create char and word ngrams
+
     :param s: string to process
     :param words: create n words
     :param chars: create n chars
@@ -40,17 +41,19 @@ def create_word_and_char_ngrams(
 
 class TfIdfScorer(metaclass=Singleton):
     """
-    This class manages a set of TFIDF models (via :class:`sklearn.feature_extraction.text.TfidfVectorizer` ). It's a
-    singleton, so that the models can be accessed in multiple locations without the need to load them into memory
-    multiple times
+    This class manages a set of TFIDF models (via
+    :class:`sklearn.feature_extraction.text.TfidfVectorizer`\\ ).
+
+    It's a singleton, so that the models can be accessed in multiple locations without the need to
+    load them into memory multiple times.
     """
 
     def __init__(self, path: Path):
         """
 
         :param path: to a directory of files containing serialised
-            :class:`sklearn.feature_extraction.text.TfidfVectorizer`. The individual filenames are used to map the
-            models to the relevant parser
+            :class:`sklearn.feature_extraction.text.TfidfVectorizer`\\ . The individual filenames
+            are used to map the models to the relevant parser
         """
         self.synonym_db = SynonymDatabase()
         self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = {}
@@ -86,7 +89,7 @@ class TfIdfScorer(metaclass=Singleton):
         self, strings: List[str], matrix: np.ndarray, parser: str
     ) -> Iterable[Tuple[str, float]]:
         """
-        transform a list of strings with a parser-specific vectorizer and score against a matrix
+        Transform a list of strings with a parser-specific vectorizer and score against a matrix.
 
         :param strings:
         :param matrix:
