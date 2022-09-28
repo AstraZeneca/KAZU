@@ -1,5 +1,4 @@
 import copy
-import itertools
 import json
 import logging
 from collections import defaultdict
@@ -51,11 +50,19 @@ class KazuToLabelStudioConverter:
     ) -> List[Dict]:
         result_values: List[Dict] = []
         for ent in entities:
-            region_ids = []
             ent_hash = hash(ent)
+            prev_region_id = None
+            if len(ent.spans) > 2:
+                logger.warning(
+                    """Currently we can't handle entities with 3 spans.
+                    Problems would occur when we convert back to Kazu Ents for the comparison
+                    (see LSToKazuConversion._create_non_contiguous_entities).
+                    This is because we don't anticipate 3-span entities actually occuring, and
+                    it would complicate the code to handle these.
+                    Adding this warning as a safeguard"""
+                )
             for span in ent.spans:
                 region_id_str = f"{ent_hash}_{span}"
-                region_ids.append(region_id_str)
                 match = text[span.start : span.end]
                 ner_region = KazuToLabelStudioConverter._create_ner_region(
                     ent, region_id_str, span, match
@@ -65,11 +72,13 @@ class KazuToLabelStudioConverter:
                     ent, region_id_str, span, match
                 )
                 result_values.append(result_normalisation_value)
-            if len(region_ids) > 1:
-                for from_id, to_id in itertools.combinations(region_ids, r=2):
+                if prev_region_id is not None:
                     result_values.append(
-                        KazuToLabelStudioConverter._create_non_contig_entity_links(from_id, to_id)
+                        KazuToLabelStudioConverter._create_non_contig_entity_links(
+                            prev_region_id, region_id_str
+                        )
                     )
+                prev_region_id = region_id_str
         return result_values
 
     @staticmethod
