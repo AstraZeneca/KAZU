@@ -27,6 +27,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # This step outputs a model pack path to be used in the pytest below.
+      # If defined, it will simply output the model_pack_path input argument.
+      # Otherwise, it will run  latest_model_pack_path.py to find a suitable model_pack_{git commit hash} on
+      # the runner by examining the git commit log.
       - name: Set model_pack path
         id: get_model_pack
         run: |
@@ -62,6 +66,9 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      # Runs the tests and sets a model pack so @require_model_pack tests will also be run
+      # Note that these tests won't build caches as part of their operation and will likely
+      # re-use existing cached data.
       - name: Test with pytest
         run: |
           pytest

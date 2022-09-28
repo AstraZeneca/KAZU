@@ -19,6 +19,16 @@ def get_git_commit_hashes():
 
 
 def get_latest_model_pack_path(model_packs_dir):
+    """
+    Given a directory of model packs, where each model pack path is of the form model_pack_{git commit hash},
+    this function finds the latest commit hash in the git history for which there is a matching model_pack_{}
+    and returns its path.
+
+    If no matching model pack is found, the most recently created model_pack_{} will be used.
+    :param model_packs_dir:
+    :return: the path to the latest model_pack_{git commit hash} in model_packs_dir, based on git commit history,
+    or (if none found) the latest model_pack_{} by creation time.
+    """
     model_pack_paths = get_existing_model_pack_paths(model_packs_dir)
     model_pack_git_hashes = [path.split("_")[1] for path in model_pack_paths]
     model_pack_git_hashes_to_idx = {
