@@ -183,8 +183,10 @@ class LSToKazuConversion:
         mappings = []
         for tax in taxonomy_hits:
             if len(tax) != 2:
-                print(
-                    f"warning! malformed taxonomy label (prob not a low level term): {tax} <{task_id}>"
+                logger.warning(
+                    "warning! malformed taxonomy label (prob not a low level term): %s <%s>",
+                    tax,
+                    task_id,
                 )
                 continue
             source, idx_str = tax
