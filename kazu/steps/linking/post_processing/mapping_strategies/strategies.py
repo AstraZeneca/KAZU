@@ -7,8 +7,8 @@ from kazu.data.data import (
     Mapping,
     EquivalentIdSet,
     SynonymTermWithMetrics,
+    LinkRanks,
 )
-from kazu.data.data import LinkRanks
 from kazu.modelling.database.in_memory_db import MetadataDatabase
 from kazu.modelling.language.string_similarity_scorers import (
     BooleanStringSimilarityScorer,
