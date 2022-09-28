@@ -1,5 +1,4 @@
 import copy
-import json
 import logging
 from collections import defaultdict
 from typing import Dict, Tuple, Set, List, Iterable
@@ -397,13 +396,8 @@ class LabelStudioManager:
             )
             if resp.status_code != 204:
                 resp.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except (requests.exceptions.HTTPError, ValueError) as e:
             logger.warning(f"failed to delete project {self.project_name}. Maybe it doesn't exist?")
-            logger.exception(e)
-        except ValueError as e:
-            logger.warning(
-                f"failed to delete project {self.project_name}. Maybe it doesn't exist? {e}"
-            )
             logger.exception(e)
 
     def create_linking_project(self, tasks, view: LabelStudioAnnotationView):
