@@ -315,8 +315,8 @@ class LabelStudioAnnotationView:
         for task in tasks:
             for annotation in task["annotations"]:
                 for result in annotation["result"]:
-                    if "taxonomy" in result.get("value", {}):
-                        tax_data = result["value"]["taxonomy"]
+                    tax_data = result.get("value", {}).get("taxonomy")
+                    if tax_data is not None:
                         for tax in tax_data:
                             if len(tax) != 2:
                                 logger.warning(
