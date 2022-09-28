@@ -74,10 +74,9 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: |
-            test
             -Dhttp.proxyHost=azpzen.astrazeneca.net
             -Dhttp.proxyPort=9480
             -Dhttps.proxyHost=azpzen.astrazeneca.net
             -Dhttps.proxyPort=9480
-            -DsystemProperty=bar
+            test
           build-root-directory: kazu-jvm/
