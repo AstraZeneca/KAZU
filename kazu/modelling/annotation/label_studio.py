@@ -310,7 +310,7 @@ class LabelStudioAnnotationView:
         taxonomy.setAttribute("name", name)
         taxonomy.setAttribute("toName", "text")
         taxonomy.setAttribute("perRegion", "true")
-        things_to_map = set()
+        source_to_choice_element: Dict[str, Element] = {}
 
         for task in tasks:
             for annotation in task["annotations"]:
@@ -323,25 +323,16 @@ class LabelStudioAnnotationView:
                                     f"taxonomy data malformed: {task['data']['id']}, {tax}"
                                 )
                             else:
-                                label, idx = tax[1].split("|")
-                                things_to_map.add(
-                                    (
-                                        tax[0],
-                                        label,
-                                        idx,
-                                    )
-                                )
-
-        for source, tup_iter in sort_then_group(things_to_map, key_func=lambda x: x[0]):
-            source_choice = dom.createElement("Choice")
-            source_choice.setAttribute("value", source)
-            taxonomy.appendChild(source_choice)
-
-            # tups = list(tup_iter)
-            for tup in tup_iter:
-                choice = dom.createElement("Choice")
-                choice.setAttribute("value", f"{tup[1]}|{tup[2]}")
-                source_choice.appendChild(choice)
+                                source, label_and_idx = tax[0], tax[1]
+                                source_choice = source_to_choice_element.get(source)
+                                if source_choice is None:
+                                    source_choice = dom.createElement("Choice")
+                                    source_choice.setAttribute("value", source)
+                                    taxonomy.appendChild(source_choice)
+                                    source_to_choice_element[source] = source_choice
+                                choice = dom.createElement("Choice")
+                                choice.setAttribute("value", label_and_idx)
+                                source_choice.appendChild(choice)
 
     def create_main_view(self, tasks: List[Dict]) -> str:
         dom = LabelStudioAnnotationView.getDOM()
