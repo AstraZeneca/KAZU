@@ -374,14 +374,13 @@ class LabelStudioManager:
 
     @property
     def project_id(self) -> int:
-        project_ids = list(
-            filter(
-                lambda x: x["title"] == self.project_name,
-                json.loads(requests.get(f"{self.url}/api/projects", headers=self.headers).text)[
-                    "results"
-                ],
-            )
-        )
+        project_ids = [
+            result
+            for result in requests.get(f"{self.url}/api/projects", headers=self.headers).json()[
+                "results"
+            ]
+            if result["title"] == self.project_name
+        ]
         if len(project_ids) == 0:
             raise ValueError(f"no project with name: {self.project_name} found in Label Studio")
         elif len(project_ids) == 1:
