@@ -368,8 +368,8 @@ class LabelStudioAnnotationView:
 
 class LabelStudioManager:
     def __init__(self, project_name: str, headers, url: str = "http://localhost:8080"):
-        self.headers = headers
         self.project_name = project_name
+        self.headers = headers
         self.url = url
 
     @property
