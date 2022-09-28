@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.linking.sapbert" href="kazu.steps.linking.sapbert.html" /><link rel="prev" title="kazu.steps.linking.post_processing.mapping_strategies.strategies" href="kazu.steps.linking.post_processing.mapping_strategies.strategies.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
         <title>kazu.steps.linking.post_processing.strategy_runner - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -352,14 +352,15 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.strategy_runner.</span></span><span class="sig-name descname"><span class="pre">NamespaceStrategyExecution</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L38-L146"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.strategy_runner.</span></span><span class="sig-name descname"><span class="pre">NamespaceStrategyExecution</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L38-L152"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The role of a NamespaceStrategyExecution is to track which entities have had mappings successfully resolved,
-and which require the application of further strategies. This is handled via tracking a dictionary of
-EntityKey:Set[&lt;parser name&gt;]. See further details in the __call__ docstring</p>
+and which require the application of further strategies.</p>
+<p>This is handled via tracking a dictionary of EntityKey to sets of parser names.</p>
+<p>See further details in the __call__ docstring.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent_class_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_on_success</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L45-L59"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent_class_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_on_success</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L48-L62"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -373,7 +374,7 @@ EntityKey:Set[&lt;parser name&gt;]. See further details in the __call__ docstrin
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.get_strategies_for_entity_class">
-<span class="sig-name descname"><span class="pre">get_strategies_for_entity_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L68-L69"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.get_strategies_for_entity_class" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_strategies_for_entity_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L71-L72"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.get_strategies_for_entity_class" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>entity_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
@@ -386,8 +387,9 @@ EntityKey:Set[&lt;parser name&gt;]. See further details in the __call__ docstrin
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L140-L146"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.reset" title="Permalink to this definition">#</a></dt>
-<dd><p>clear state, ready for another execution. Should be called when the underlying <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a> has changed</p>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L144-L152"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.reset" title="Permalink to this definition">#</a></dt>
+<dd><p>clear state, ready for another execution.</p>
+<p>Should be called when the underlying <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a> has changed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
@@ -404,7 +406,7 @@ EntityKey:Set[&lt;parser name&gt;]. See further details in the __call__ docstrin
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.StrategyRunner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.strategy_runner.</span></span><span class="sig-name descname"><span class="pre">StrategyRunner</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L149-L308"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.strategy_runner.</span></span><span class="sig-name descname"><span class="pre">StrategyRunner</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L155-L319"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>This is a complex class, designed to co-ordinate the running of various strategies over a document, with the end
 result producing mappings (grounding) for entities. Strategies that produce mappings may depend on the changing
@@ -420,11 +422,12 @@ entity spans.</p></li>
 <p>The __call__ method of this class operates as follows:</p>
 <ol class="arabic simple">
 <li><p>group entities by order of NER namespace.</p></li>
-<li><p>sub-group these entities again by <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity.match" title="kazu.data.data.Entity.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Entity.match</span></code></a> and <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity.entity_class" title="kazu.data.data.Entity.entity_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Entity.entity_class</span></code></a>.</p></li>
+<li><p>sub-group these entities again by <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity.match" title="kazu.data.data.Entity.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">match</span></code></a> and
+<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity.entity_class" title="kazu.data.data.Entity.entity_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">entity_class</span></code></a>.</p></li>
 <li><p>divide these entities by whether they are symbolic or not.</p></li>
 <li><p>identify the maximum number of strategies that ‘could’ run.</p></li>
-<li><p>get the appropriate <a class="reference internal" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution" title="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamespaceStrategyExecution</span></code></a> to run against this sub group</p></li>
-<li><p>group the entities from 5) by EntityKey (i.e. a hashable representation of unique information .required for
+<li><p>get the appropriate <a class="reference internal" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution" title="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamespaceStrategyExecution</span></code></a> to run against this sub group.</p></li>
+<li><p>group the entities from 5. by EntityKey (i.e. a hashable representation of unique information required for
 mapping.</p></li>
 <li><p>conditionally execute the next strategy out of the maximum possible (from 4), and attach any resulting mappings
 to the relevant entity group. Note, the <a class="reference internal" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution" title="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamespaceStrategyExecution</span></code></a> is responsible for deciding whether
@@ -432,7 +435,7 @@ a strategy is executed or not.</p></li>
 </ol>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_symbolic_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ner_namespace_processing_order</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L177-L205"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_symbolic_strategies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ner_namespace_processing_order</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L184-L212"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -451,12 +454,12 @@ precision strategy for the low precision NER namespace</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.execute_hit_post_processing_strategies">
-<span class="sig-name descname"><span class="pre">execute_hit_post_processing_strategies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ents_needing_mappings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace_strategy_execution</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L272-L308"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.execute_hit_post_processing_strategies" title="Permalink to this definition">#</a></dt>
-<dd><p>This method executes parts 5 - 7 in the class DocString</p>
+<span class="sig-name descname"><span class="pre">execute_hit_post_processing_strategies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ents_needing_mappings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace_strategy_execution</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L283-L319"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.execute_hit_post_processing_strategies" title="Permalink to this definition">#</a></dt>
+<dd><p>This method executes parts 5 - 7 in the class Docstring.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ents_needing_mappings</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – Expects entities to already be sorted based on <a class="reference internal" href="#kazu.steps.linking.post_processing.strategy_runner.entity_to_entity_key" title="kazu.steps.linking.post_processing.strategy_runner.entity_to_entity_key"><code class="xref py py-func docutils literal notranslate"><span class="pre">entity_to_entity_key()</span></code></a></p></li>
+<li><p><strong>ents_needing_mappings</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – Expects entities to already be sorted based on <a class="reference internal" href="#kazu.steps.linking.post_processing.strategy_runner.entity_to_entity_key" title="kazu.steps.linking.post_processing.strategy_runner.entity_to_entity_key"><code class="xref py py-func docutils literal notranslate"><span class="pre">entity_to_entity_key()</span></code></a>.</p></li>
 <li><p><strong>document</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>) – </p></li>
 <li><p><strong>namespace_strategy_execution</strong> (<a class="reference internal" href="#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution" title="kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution"><em>NamespaceStrategyExecution</em></a>) – </p></li>
 </ul>
@@ -469,11 +472,11 @@ precision strategy for the low precision NER namespace</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.group_entities_by_symbolism">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_entities_by_symbolism</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L207-L234"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.group_entities_by_symbolism" title="Permalink to this definition">#</a></dt>
-<dd><p>groups entities into symbolic and non-symbolic forms, so they can be processed separately.
-Expects an already sorted list of entities, since we only call this after a sort is required
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_entities_by_symbolism</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/post_processing/strategy_runner.py#L214-L242"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.group_entities_by_symbolism" title="Permalink to this definition">#</a></dt>
+<dd><p>groups entities into symbolic and non-symbolic forms, so they can be processed separately.</p>
+<p>Expects an already sorted list of entities, since we only call this after a sort is required
 elsewhere. However, it will still work with an unsorted list, it will just call
-<a class="reference internal" href="kazu.utils.string_normalizer.html#kazu.utils.string_normalizer.StringNormalizer.classify_symbolic" title="kazu.utils.string_normalizer.StringNormalizer.classify_symbolic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">StringNormalizer.classify_symbolic()</span></code></a> more times than necessary.</p>
+<a class="reference internal" href="kazu.utils.string_normalizer.html#kazu.utils.string_normalizer.StringNormalizer.classify_symbolic" title="kazu.utils.string_normalizer.StringNormalizer.classify_symbolic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.utils.string_normalizer.StringNormalizer.classify_symbolic()</span></code></a> more times than necessary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – </p>
@@ -516,10 +519,10 @@ elsewhere. However, it will still work with an unsorted list, it will just call
                 </div>
                 <div class="title">kazu.steps.linking.sapbert</div>
               </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <svg><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="kazu.steps.linking.post_processing.mapping_strategies.strategies.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

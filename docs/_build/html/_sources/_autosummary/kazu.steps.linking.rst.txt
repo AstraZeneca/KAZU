@@ -1,4 +1,4 @@
-﻿kazu.steps.linking
+kazu.steps.linking
 ==================
 
 .. automodule:: kazu.steps.linking
