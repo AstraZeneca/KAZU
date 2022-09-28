@@ -121,16 +121,16 @@ class KazuToLabelStudioConverter:
 
 class LSToKazuConversion:
     def __init__(self, task: Dict):
-        # self.ent_class_to_ontology_map = ent_class_to_ontology_map
+        self.text = task["data"]["text"]
         self._populate_lookups(task)
 
     def _populate_lookups(self, task: Dict):
-        self.text = task["data"]["text"]
         self.task_data_id = task["data"]["id"]
         self.label_studio_task_id = task["id"]
         if len(task["annotations"]) > 1:
             logger.warning(
-                f"warning: more than one annotation section. Will only use annotations from {task['annotations'][0]['id']}"
+                "warning: more than one annotation section. Will only use annotations from %s",
+                task["annotations"][0]["id"],
             )
 
         annotation = task["annotations"][0]
