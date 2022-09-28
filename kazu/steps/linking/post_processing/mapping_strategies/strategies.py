@@ -330,7 +330,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
         :param disambiguation_strategies:
         :param min_term_norm_len_to_consider: only consider instances of
             :class:`~kazu.data.data.SynonymTermWithMetrics` where the length of
-            :attr:`~kazu.data.data.SynonymTermWithMetrics.term_norm` is equal to or greater than
+            :attr:`~kazu.data.data.SynonymTerm.term_norm` is equal to or greater than
             this value.
         """
         super().__init__(confidence, disambiguation_strategies)
