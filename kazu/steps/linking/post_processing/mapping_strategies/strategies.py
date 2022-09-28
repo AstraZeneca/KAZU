@@ -461,7 +461,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
                 terms=terms,
                 parser_name=parser_name,
             ),
-            key=lambda x: x.search_score,  # type: ignore[arg-type,return-value,union-attr,operator,type-var,assignment]
+            key=lambda x: x.search_score,  # type: ignore[arg-type,return-value]
             reverse=True,
         )
         selected_id_sets = set()
