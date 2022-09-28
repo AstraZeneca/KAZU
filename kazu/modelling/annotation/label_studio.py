@@ -276,9 +276,7 @@ class LSToKazuConversion:
             for _, section_tasks_iter in by_section:
                 for section_task in section_tasks_iter:
                     converter = LSToKazuConversion(section_task)
-                    section = Section(text=converter.text, name=converter.task_data_id)
-                    section.metadata["label_studio_task_id"] = converter.label_studio_task_id
-                    section.metadata["gold_entities"] = converter.create_ents()
+                    section = converter.create_section()
                     doc.sections.append(section)
             docs.append(doc)
 
