@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from collections import defaultdict
-from typing import Dict, Tuple, Set, List, Iterable, Optional
+from typing import Dict, Tuple, Set, List, Iterable
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
@@ -373,7 +373,7 @@ class LabelStudioManager:
         self.url = url
 
     @property
-    def project_id(self) -> Optional[int]:
+    def project_id(self) -> int:
         project_ids = list(
             filter(
                 lambda x: x["title"] == self.project_name,
