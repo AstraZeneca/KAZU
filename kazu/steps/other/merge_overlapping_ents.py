@@ -122,7 +122,7 @@ class MergeOverlappingEntsStep(BaseStep):
     ) -> Dict[Tuple[int, int], Set[Entity]]:
         """
 
-        :param section:
+        :param entities:
         :return: dict of locations to Set[Entity]
         """
         if len(entities) == 0:
