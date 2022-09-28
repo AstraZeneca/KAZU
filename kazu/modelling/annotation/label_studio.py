@@ -336,39 +336,33 @@ class LabelStudioAnnotationView:
 
     def create_main_view(self, tasks: List[Dict]) -> str:
         dom = LabelStudioAnnotationView.getDOM()
-        # <View style="display: flex;">
-        view1 = dom.documentElement
-        view1.setAttribute("style", "display: flex;")
-        view2 = dom.createElement("View")
-        view1.appendChild(view2)
-        view3i = dom.createElement("View")
-        view2.appendChild(view3i)
-
+        root = dom.documentElement
+        root.setAttribute("style", "display: flex;")
+        parent_view = dom.createElement("View")
+        root.appendChild(parent_view)
+        relations_view = dom.createElement("View")
+        parent_view.appendChild(relations_view)
         relations = dom.createElement("Relations")
-        view3i.appendChild(relations)
+        relations_view.appendChild(relations)
         relation = dom.createElement("Relation")
         relation.setAttribute("value", "non-contig")
         relations.appendChild(relation)
-
-        self.build_labels(dom, view3i)
-
-        view3ii = dom.createElement("View")
-        view2.appendChild(view3ii)
+        self.build_labels(dom, relations_view)
+        text_view = dom.createElement("View")
+        parent_view.appendChild(text_view)
         text = dom.createElement("Text")
         text.setAttribute("name", "text")
         text.setAttribute("value", "$text")
-        view3ii.appendChild(text)
-        view3iii = dom.createElement("View")
-        view2.appendChild(view3iii)
-
-        LabelStudioAnnotationView.build_taxonomy(dom, view3iii, tasks, _TAX_NAME)
-
-        view3iiii = dom.createElement("View")
-        view2.appendChild(view3iiii)
-        view3iiii.setAttribute("style", "width: 100%; display: block")
+        text_view.appendChild(text)
+        taxonomy_view = dom.createElement("View")
+        parent_view.appendChild(taxonomy_view)
+        LabelStudioAnnotationView.build_taxonomy(dom, taxonomy_view, tasks, _TAX_NAME)
+        header_view = dom.createElement("View")
+        parent_view.appendChild(header_view)
+        header_view.setAttribute("style", "width: 100%; display: block")
         header = dom.createElement("Header")
         header.setAttribute("value", "Select span after creation to go next")
-        view3iiii.appendChild(header)
+        header_view.appendChild(header)
         return dom.toxml()
 
 
