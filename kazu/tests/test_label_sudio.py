@@ -1,5 +1,9 @@
 from kazu.data.data import Document, Entity, Mapping, LinkRanks
-from kazu.modelling.annotation.label_studio import LabelStudioManager, KazuToLabelStudioConverter
+from kazu.modelling.annotation.label_studio import (
+    LabelStudioManager,
+    KazuToLabelStudioConverter,
+    LabelStudioAnnotationView,
+)
 from kazu.tests.utils import requires_label_studio
 from kazu.utils.grouping import sort_then_group
 
@@ -58,7 +62,21 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
     manager: LabelStudioManager = make_label_studio_manager(project_name="kazu_integration_test")
     manager.delete_project_if_exists()
     tasks = KazuToLabelStudioConverter.convert_docs_to_tasks([doc_1])
-    manager.create_linking_project(tasks)
+    view = LabelStudioAnnotationView(
+        ner_labels={
+            "cell_line": "red",
+            "cell_type": "darkblue",
+            "disease": "orange",
+            "drug": "yellow",
+            "gene": "green",
+            "species": "purple",
+            "anatomy": "pink",
+            "go_mf": "grey",
+            "go_cc": "blue",
+            "go_bp": "brown",
+        }
+    )
+    manager.create_linking_project(tasks, view)
 
     docs = manager.export_from_ls()
     assert len(docs) == 1
