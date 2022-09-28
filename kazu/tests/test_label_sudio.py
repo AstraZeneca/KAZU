@@ -64,7 +64,7 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
     assert len(docs) == 1
     doc = docs[0]
     for ent_class, ents_iter in sort_then_group(
-        doc.get_entities(), key_func=lambda x: x.entity_class
+        doc.sections[0].metadata["gold_entities"], key_func=lambda x: x.entity_class
     ):
         ents = list(ents_iter)
         assert len(ents) == 1
