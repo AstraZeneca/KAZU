@@ -1,6 +1,8 @@
 name: Integration tests
 
 on:
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       model-pack-path:
@@ -9,7 +11,7 @@ on:
       model-packs-dir:
         description: Path to where model packs are stored on the VM's filesystem
         required: true
-        default: /home/nlp/data/kazu_model_packs
+        default: /home/github/runner/.kazu_data
 
 jobs:
   model-pack-tests:
