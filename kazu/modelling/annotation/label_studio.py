@@ -268,18 +268,13 @@ class LSToKazuConversion:
 
 
 class LabelStudioAnnotationView:
-    ner_labels = {
-        "cell_line": "red",
-        "cell_type": "darkblue",
-        "disease": "orange",
-        "drug": "yellow",
-        "gene": "green",
-        "species": "purple",
-        "anatomy": "pink",
-        "go_mf": "grey",
-        "go_cc": "blue",
-        "go_bp": "brown",
-    }
+    def __init__(self, ner_labels: Dict[str, str]):
+        """
+
+        :param ner_labels: a mapping of ner label (i.e. :attr:`.Entity.entity_class`) to a valid colour
+        """
+
+        self.ner_labels = ner_labels
 
     @staticmethod
     def getDOM() -> XMLDocument:
@@ -295,13 +290,12 @@ class LabelStudioAnnotationView:
             raise RuntimeError("failed to create document")
         return doc
 
-    @classmethod
-    def build_labels(cls, dom: XMLDocument, element: Element):
+    def build_labels(self, dom: XMLDocument, element: Element):
         labels = dom.createElement("Labels")
         labels.setAttribute("name", "ner")
         labels.setAttribute("toName", "text")
         labels.setAttribute("choice", "multiple")
-        for k, v in cls.ner_labels.items():
+        for k, v in self.ner_labels.items():
             label = dom.createElement("Label")
             label.setAttribute("value", k)
             label.setAttribute("background", v)
@@ -349,8 +343,7 @@ class LabelStudioAnnotationView:
                 choice.setAttribute("value", f"{tup[1]}|{tup[2]}")
                 source_choice.appendChild(choice)
 
-    @staticmethod
-    def create_main_view(tasks: List[Dict]) -> str:
+    def create_main_view(self, tasks: List[Dict]) -> str:
         dom = LabelStudioAnnotationView.getDOM()
         # <View style="display: flex;">
         view1 = dom.documentElement
@@ -366,7 +359,7 @@ class LabelStudioAnnotationView:
         relation.setAttribute("value", "non-contig")
         relations.appendChild(relation)
 
-        LabelStudioAnnotationView.build_labels(dom, view3i)
+        self.build_labels(dom, view3i)
 
         view3ii = dom.createElement("View")
         view2.appendChild(view3ii)
@@ -424,10 +417,10 @@ class LabelStudioManager:
         except (AssertionError, ValueError):
             logger.warning(f"failed to delete project {self.project_name}. Maybe it doesn't exist?")
 
-    def create_linking_project(self, tasks):
+    def create_linking_project(self, tasks, view: LabelStudioAnnotationView):
         payload = {
             "title": self.project_name,
-            "label_config": LabelStudioAnnotationView.create_main_view(tasks),
+            "label_config": view.create_main_view(tasks),
         }
 
         assert (
