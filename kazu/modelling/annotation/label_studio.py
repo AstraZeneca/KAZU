@@ -392,14 +392,19 @@ class LabelStudioManager:
 
     def delete_project_if_exists(self):
         try:
-            assert (
-                requests.delete(
-                    f"{self.url}/api/projects/{self.project_id}", headers=self.headers
-                ).status_code
-                == 201
+            resp = requests.delete(
+                f"{self.url}/api/projects/{self.project_id}", headers=self.headers
             )
-        except (AssertionError, ValueError):
+            if resp.status_code != 204:
+                resp.raise_for_status()
+        except requests.exceptions.HTTPError as e:
             logger.warning(f"failed to delete project {self.project_name}. Maybe it doesn't exist?")
+            logger.exception(e)
+        except ValueError as e:
+            logger.warning(
+                f"failed to delete project {self.project_name}. Maybe it doesn't exist? {e}"
+            )
+            logger.exception(e)
 
     def create_linking_project(self, tasks, view: LabelStudioAnnotationView):
         payload = {
@@ -407,20 +412,25 @@ class LabelStudioManager:
             "label_config": view.create_main_view(tasks),
         }
 
-        assert (
-            requests.post(
-                f"{self.url}/api/projects", json=payload, headers=self.headers
-            ).status_code
-            == 201
-        )
-        assert (
-            requests.post(
+        try:
+            resp = requests.post(f"{self.url}/api/projects", json=payload, headers=self.headers)
+            if resp.status_code != 201:
+                resp.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"failed to create project {self.project_name}")
+            raise e
+
+        try:
+            resp = requests.post(
                 f"{self.url}/api/projects/{self.project_id}/import",
                 json=tasks,
                 headers=self.headers,
-            ).status_code
-            == 201
-        )
+            )
+            if resp.status_code != 201:
+                resp.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"failed to load data for project {self.project_name}")
+            raise e
 
     def import_to_ls(self, docs: List[Document]):
         tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
