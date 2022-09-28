@@ -251,9 +251,8 @@ class ExactMatchMappingStrategy(MappingStrategy):
     returns any exact matches
     """
 
-    @classmethod
+    @staticmethod
     def filter_terms(
-        cls,
         ent_match: str,
         ent_match_norm: str,
         document: Document,
