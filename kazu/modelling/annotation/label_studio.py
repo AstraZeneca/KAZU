@@ -20,7 +20,7 @@ _TAX_NAME = "taxonomy"
 class KazuToLabelStudioConverter:
     """
     json.JSONEncoder that converts a kazu Document into Label Studio tasks
-    since LS is region based, we need ot create a new region for every CharSpan (even overlapping ones),
+    since LS is region based, we need to create a new region for every CharSpan (even overlapping ones),
     and add entity information (class, mappings etc) to the region.
     """
 
