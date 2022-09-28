@@ -151,28 +151,25 @@ class LSToKazuConversion:
         self.non_contig_id_map: Dict[str, Set[str]] = defaultdict(set)
         self.non_contig_regions = set()
 
-        for is_region, result_iter in sort_then_group(result, key_func=lambda x: "id" in x):
+        for result_data in result:
+            is_region = "id" in result_data
             if is_region:
-                for region_id, region_result_data in sort_then_group(
-                    result_iter, key_func=lambda x: x["id"]
-                ):
-                    for result_data in region_result_data:
-                        data_type = result_data["type"]
-                        span = CharSpan(
-                            start=result_data["value"]["start"], end=result_data["value"]["end"]
-                        )
-                        self.id_to_charspan[region_id] = span
-                        if data_type == "labels":
-                            self.id_to_labels[region_id].update(result_data["value"]["labels"])
-                        elif data_type == "taxonomy":
-                            self.id_to_mappings[region_id].update(
-                                self.create_mappings(result_data["value"]["taxonomy"], region_id)
-                            )
+                region_id = result_data["id"]
+                data_type = result_data["type"]
+                span = CharSpan(
+                    start=result_data["value"]["start"], end=result_data["value"]["end"]
+                )
+                self.id_to_charspan[region_id] = span
+                if data_type == "labels":
+                    self.id_to_labels[region_id].update(result_data["value"]["labels"])
+                elif data_type == "taxonomy":
+                    self.id_to_mappings[region_id].update(
+                        self.create_mappings(result_data["value"]["taxonomy"], region_id)
+                    )
             else:
-                for result_data in result_iter:
-                    self.non_contig_id_map[result_data["from_id"]].add(result_data["to_id"])
-                    self.non_contig_regions.add(result_data["from_id"])
-                    self.non_contig_regions.add(result_data["to_id"])
+                self.non_contig_id_map[result_data["from_id"]].add(result_data["to_id"])
+                self.non_contig_regions.add(result_data["from_id"])
+                self.non_contig_regions.add(result_data["to_id"])
 
     def create_section(self) -> Section:
         section = Section(text=self.text, name=self.task_data_id)
