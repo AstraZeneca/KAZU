@@ -146,8 +146,6 @@ class NamespaceStrategyExecution:
         clear state, ready for another execution.
 
         Should be called when the underlying :class:`.Document` has changed.
-
-        :return:
         """
         self.unresolved_parsers.clear()
 
