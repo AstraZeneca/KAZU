@@ -1,5 +1,3 @@
-import pytest
-
 from kazu.data.data import Document, Entity, Mapping, LinkRanks
 from kazu.modelling.annotation.label_studio import LabelStudioManager, KazuToLabelStudioConverter
 from kazu.tests.utils import requires_label_studio
@@ -7,7 +5,7 @@ from kazu.utils.grouping import sort_then_group
 
 
 @requires_label_studio
-def test_kau_doc_to_label_studio(make_label_studio_manager):
+def test_kazu_doc_to_label_studio(make_label_studio_manager):
     text = "the cat sat on the mat"
     doc_1 = Document.create_simple_document(text)
     e1 = Entity.from_spans(
@@ -55,9 +53,7 @@ def test_kau_doc_to_label_studio(make_label_studio_manager):
             metadata={},
         )
     )
-    doc_1.sections[0].entities.append(e1)
-    doc_1.sections[0].entities.append(e2)
-    doc_1.sections[0].entities.append(e3)
+    doc_1.sections[0].entities.extend((e1, e2, e3))
 
     manager: LabelStudioManager = make_label_studio_manager(project_name="kazu_integration_test")
     manager.delete_project_if_exists()
@@ -73,25 +69,17 @@ def test_kau_doc_to_label_studio(make_label_studio_manager):
         ents = list(ents_iter)
         assert len(ents) == 1
 
-        mapping_sources = set(mapping.source for mapping in ents[0].mappings)
-        mapping_ids = set(mapping.idx for mapping in ents[0].mappings)
+        ent = ents[0]
+        mapping_sources = set(mapping.source for mapping in ent.mappings)
+        mapping_ids = set(mapping.idx for mapping in ent.mappings)
         if ent_class == "gene":
-            assert ents[0].match == "cat mat"
-            assert len(mapping_sources) == 2
-            assert "test1" in mapping_sources
-            assert "test2" in mapping_sources
-            assert "1" in mapping_ids
-            assert "2" in mapping_ids
+            assert ent.match == "cat mat"
+            assert {"test1", "test2"} == mapping_sources
+            assert {"1", "2"} == mapping_ids
         elif ent_class == "disease":
-            assert ents[0].match == "mat"
-            assert len(mapping_sources) == 1
-            assert "test3" in mapping_sources
-            assert "3" in mapping_ids
+            assert ent.match == "mat"
+            assert {"test3"} == mapping_sources
+            assert {"3"} == mapping_ids
         elif ent_class == "drug":
-            assert ents[0].match == "cat"
-            assert len(mapping_sources) == 0
-            assert len(mapping_ids) == 0
-        else:
-            pytest.fail(f"{ent_class} should not exist")
-
+            assert ent.match == "cat"
     manager.delete_project_if_exists()
