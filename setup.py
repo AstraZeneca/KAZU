@@ -14,6 +14,7 @@ setup(
         "transformers==4.12.5",
         "ray[serve]==1.13.0",
         "rdflib==6.0.2",
+        "requests==2.28.1",
         "hydra-core==1.1.1",
         "pytorch-lightning==1.7.0",
         "pydash==5.1.0",
