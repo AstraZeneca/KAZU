@@ -145,7 +145,7 @@ class NamespaceStrategyExecution:
         """
         clear state, ready for another execution.
 
-        Should be called when the underlying :class:`~kazu.data.data.Document` has changed.
+        Should be called when the underlying :class:`.Document` has changed.
 
         :return:
         """
@@ -169,8 +169,8 @@ class StrategyRunner:
     The __call__ method of this class operates as follows:
 
     1. group entities by order of NER namespace.
-    2. sub-group these entities again by :attr:`~kazu.data.data.Entity.match` and
-       :attr:`~kazu.data.data.Entity.entity_class`\\ .
+    2. sub-group these entities again by :attr:`.Entity.match` and
+       :attr:`.Entity.entity_class`\\ .
     3. divide these entities by whether they are symbolic or not.
     4. identify the maximum number of strategies that 'could' run.
     5. get the appropriate :class:`NamespaceStrategyExecution` to run against this sub group.
@@ -220,7 +220,7 @@ class StrategyRunner:
 
         Expects an already sorted list of entities, since we only call this after a sort is required
         elsewhere. However, it will still work with an unsorted list, it will just call
-        :meth:`kazu.utils.string_normalizer.StringNormalizer.classify_symbolic` more times than necessary.
+        :meth:`.StringNormalizer.classify_symbolic` more times than necessary.
 
         :param entities:
         :return:

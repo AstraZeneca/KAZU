@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 class MappingStep(BaseStep):
     """
-    A wrapper for :class:`~kazu.steps.linking.post_processing.strategy_runner.StrategyRunner`,
-    so it can be used in a pipeline.
+    A wrapper for :class:`.StrategyRunner`, so it can be used in a pipeline.
     """
 
     def __init__(self, depends_on: Optional[List[str]], strategy_runner: StrategyRunner):

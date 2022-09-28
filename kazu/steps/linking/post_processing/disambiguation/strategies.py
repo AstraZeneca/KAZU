@@ -23,11 +23,12 @@ logger = logging.getLogger(__name__)
 
 class DisambiguationStrategy(ABC):
     """
-    The job of a DisambiguationStrategy is to filter a Set of :class:`~kazu.data.data.EquivalentIdSet` into a (hopefully) smaller set.
+    The job of a DisambiguationStrategy is to filter a Set of :class:`.EquivalentIdSet` into a
+    (hopefully) smaller set.
 
-    A prepare method is available, which can be cached in the event of any duplicated preprocessing work that
-    may be required (see :class:`~kazu.steps.linking.post_processing.strategy_runner.StrategyRunner` for the
-    complexities of how MappingStrategy and DisambiguationStrategy are coordinated).
+    A :meth:`prepare` method is available, which can be cached in the event of any duplicated
+    preprocessing work that may be required (see :class:`.StrategyRunner` for the complexities of
+    how MappingStrategy and DisambiguationStrategy are coordinated).
     """
 
     @abstractmethod
@@ -45,7 +46,7 @@ class DisambiguationStrategy(ABC):
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
     ) -> Set[EquivalentIdSet]:
         """
-        subset a set of :class:`~kazu.data.data.EquivalentIdSet`\\ .
+        subset a set of :class:`.EquivalentIdSet`\\ .
 
         :param id_sets:
         :param document:
@@ -64,8 +65,8 @@ class DisambiguationStrategy(ABC):
 class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     """
     1. look for entities on the document that have mappings
-    2. see if any of these mappings correspond to any ids in the
-    :class:`~kazu.data.data.EquivalentIdSet` on each hit
+    2. see if any of these mappings correspond to any ids in the :class:`.EquivalentIdSet` on each
+       hit
     """
 
     def __init__(
@@ -110,7 +111,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
 
 class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     """
-    1. retrieve all synonyms associated with a :class:`~kazu.data.data.EquivalentIdSet`, filter out ambiguous ones
+    1. retrieve all synonyms associated with a :class:`.EquivalentIdSet`, filter out ambiguous ones
        and build a query matrix with the unambiguous ones.
     2. retrieve a list of all detected entity strings from the document, regardless of source and
        build a document representation matrix of these.
