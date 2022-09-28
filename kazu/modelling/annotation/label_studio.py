@@ -433,12 +433,10 @@ class LabelStudioManager:
         )
 
     def get_all_tasks(self):
-        tasks = json.loads(
-            requests.get(
-                f"{self.url}/api/tasks?page_size=1000000&project={self.project_id}",
-                headers=self.headers,
-            ).text
-        )
+        tasks = requests.get(
+            f"{self.url}/api/tasks?page_size=1000000&project={self.project_id}",
+            headers=self.headers,
+        ).json()
         ids = [task["id"] for task in tasks["tasks"]]
         return self.get_tasks(ids)
 
@@ -446,12 +444,10 @@ class LabelStudioManager:
         task_data = []
         for idx in ids:
             task_data.append(
-                json.loads(
-                    requests.get(
-                        f"{self.url}/api/tasks/{idx}?project={self.project_id}",
-                        headers=self.headers,
-                    ).text
-                )
+                requests.get(
+                    f"{self.url}/api/tasks/{idx}?project={self.project_id}",
+                    headers=self.headers,
+                ).json()
             )
         return task_data
 
