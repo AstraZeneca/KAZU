@@ -215,53 +215,37 @@ class LSToKazuConversion:
                 entities.extend(self._create_non_contiguous_entities(region_id))
         return entities
 
-    def _create_non_contiguous_entities(self, region_id: str) -> List[Entity]:
-        non_contig_entities = []
+    def _create_non_contiguous_entities(self, region_id: str) -> Iterable[Entity]:
         for to_id in self.non_contig_id_map[region_id]:
             from_span = self.id_to_charspan[region_id]
             to_span = self.id_to_charspan[to_id]
             # we need to check from_id and to_id have matching labels
             labels = self.id_to_labels[region_id].intersection(self.id_to_labels[to_id])
+            match = f"{self.text[to_span.start:to_span.end]} {self.text[from_span.start : from_span.end]}"
+            spans = frozenset([to_span, from_span])
+            # since independent regions might have different mapping values, we merge them all
+            # ideally this wouldn't happen if human annotation is consistent
+            mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
+            mappings.update(self.id_to_mappings.get(to_id, set()))
             for label in labels:
-                ent = Entity.from_spans(
-                    spans=[
-                        (
-                            to_span.start,
-                            to_span.end,
-                        ),
-                        (
-                            from_span.start,
-                            from_span.end,
-                        ),
-                    ],
-                    join_str=" ",
-                    namespace="gold",
+                yield Entity(
+                    match=match,
                     entity_class=label,
-                    text=self.text,
+                    spans=spans,
+                    namespace="gold",
+                    mappings=mappings,
                 )
-                # since independent regions might have different mapping values, we merge them all
-                # ideally this wouldn't happen if human annotation is consistent
-                mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
-                mappings.update(copy.deepcopy(self.id_to_mappings.get(to_id, set())))
-                ent.mappings = mappings
-                non_contig_entities.append(ent)
-        return non_contig_entities
 
     def _create_contiguous_entity(self, label, region_id, span):
-        ent = Entity.from_spans(
-            spans=[
-                (
-                    span.start,
-                    span.end,
-                )
-            ],
-            join_str=" ",
-            namespace="gold",
+        single_span = frozenset([span])
+        mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
+        return Entity(
+            match=self.text[span.start : span.end],
             entity_class=label,
-            text=self.text,
+            spans=single_span,
+            namespace="gold",
+            mappings=mappings,
         )
-        ent.mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
-        return ent
 
     @staticmethod
     def convert_tasks_to_docs(tasks: List[Dict]) -> List[Document]:
