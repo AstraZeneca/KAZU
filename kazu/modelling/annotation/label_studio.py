@@ -129,9 +129,6 @@ class KazuToLabelStudioConverter:
 class LSToKazuConversion:
     def __init__(self, task: Dict):
         self.text = task["data"]["text"]
-        self._populate_lookups(task)
-
-    def _populate_lookups(self, task: Dict):
         self.task_data_id = task["data"]["id"]
         self.label_studio_task_id = task["id"]
         if len(task["annotations"]) > 1:
