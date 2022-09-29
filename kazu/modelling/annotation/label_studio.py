@@ -41,8 +41,6 @@ class KazuToLabelStudioConverter:
     def convert_docs_to_tasks(cls, docs: List[Document]) -> List[Dict]:
         return [task for doc in docs for task in cls.convert_single_doc_to_tasks(doc)]
 
-        # ignore anything other than a Document or list of Documents
-
     @staticmethod
     def _create_label_studio_labels(
         entities: List[Entity],
