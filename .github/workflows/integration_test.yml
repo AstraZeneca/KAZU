@@ -45,7 +45,7 @@ jobs:
           fi
         env:
           model_pack_path: ${{ inputs.model-pack-path }}
-          model_packs_dir: ${{ inputs.model-packs-dir || "/home/github/runner/.kazu_data" }}
+          model_packs_dir: ${{ inputs.model-packs-dir || '/home/github/runner/.kazu_data' }}
 
 
       - uses: actions/cache@v2
