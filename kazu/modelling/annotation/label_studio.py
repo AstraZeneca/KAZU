@@ -333,7 +333,7 @@ class LabelStudioAnnotationView:
                                 source_choice.appendChild(choice)
 
     def create_main_view(self, tasks: List[Dict]) -> str:
-        dom = LabelStudioAnnotationView.getDOM()
+        dom = self.getDOM()
         root = dom.documentElement
         root.setAttribute("style", "display: flex;")
         parent_view = dom.createElement("View")
@@ -354,7 +354,7 @@ class LabelStudioAnnotationView:
         text_view.appendChild(text)
         taxonomy_view = dom.createElement("View")
         parent_view.appendChild(taxonomy_view)
-        LabelStudioAnnotationView.build_taxonomy(dom, taxonomy_view, tasks, _TAX_NAME)
+        self.build_taxonomy(dom, taxonomy_view, tasks, _TAX_NAME)
         header_view = dom.createElement("View")
         parent_view.appendChild(header_view)
         header_view.setAttribute("style", "width: 100%; display: block")
