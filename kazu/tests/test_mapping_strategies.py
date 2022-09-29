@@ -3,6 +3,7 @@ from typing import Tuple, Set, List
 
 import pytest
 from hydra.utils import instantiate
+from pytorch_lightning import Trainer
 
 from kazu.data.data import (
     Document,
@@ -12,6 +13,7 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
+from kazu.modelling.language.string_similarity_scorers import SapbertStringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     ExactMatchMappingStrategy,
@@ -301,7 +303,11 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
     kazu_test_config, set_up_disease_mapping_test_case, text, ent_match, target_string
 ):
 
-    sapbert_string_scorer = instantiate(kazu_test_config.StringScorers.sapbert)
+    sapbert_model = instantiate(kazu_test_config.PLSapbertModel)
+    string_scorer = SapbertStringSimilarityScorer(
+        sapbert=sapbert_model,
+        trainer=Trainer(enable_progress_bar=False, accelerator="cpu", logger=False),
+    )
 
     terms, parser = set_up_disease_mapping_test_case
     terms_with_scores = set()
@@ -328,7 +334,7 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
         confidence=LinkRanks.HIGHLY_LIKELY,
         search_threshold=90.0,
         differential=0.0,
-        complex_string_scorer=sapbert_string_scorer,
+        complex_string_scorer=string_scorer,
     )
 
     strategy.prepare(doc)
