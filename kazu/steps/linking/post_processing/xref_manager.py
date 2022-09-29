@@ -52,7 +52,6 @@ class CrossReferenceManager(ABC):
         build a XrefDatabase suitable for caching
 
         :param path:
-        :param cache_path:
         :return:
         """
         raise NotImplementedError()
@@ -60,6 +59,10 @@ class CrossReferenceManager(ABC):
     def load_or_build_cache(self, path: Path, force_rebuild_cache: bool = False):
         """
         build the index, or if a cached version is available, load it instead
+
+        :param path:
+        :param force_rebuild_cache:
+        :return:
         """
         cache_dir = get_cache_dir(
             path,
@@ -86,9 +89,9 @@ class CrossReferenceManager(ABC):
         """
         save to disk. Makes a directory at the path location with all the index assets
 
-        :param directory: a dir to save the index.
-        :param overwrite: should the directory be deleted before attempting to save? (CAREFUL!)
-        :return: a Path to where the index was saved
+        :param cache_path: a dir to save the index.
+        :param xref_db: data to save
+        :return: a Path to where the data was saved
         """
         if cache_path.exists():
             raise RuntimeError(f"{cache_path} already exists")
@@ -109,6 +112,12 @@ class CrossReferenceManager(ABC):
             self.xref_db = json.load(f)
 
     def create_xref_mappings(self, mapping: Mapping) -> Iterable[Mapping]:
+        """
+        attempt to create additional xref mappings from a source mapping
+
+        :param mapping:
+        :return:
+        """
         xref_lookup: ToSourceAndIDXMap = self.xref_db.get(mapping.source, {})
         for (target_source, target_idx) in xref_lookup.get(mapping.idx, []):
             metadata_parser_name = self.source_to_parser_metadata_lookup.get(target_source)
@@ -159,6 +168,8 @@ class OxoCrossReferenceManager(CrossReferenceManager):
     ):
         """
 
+        :param source_to_parser_metadata_lookup:
+        :param path:
         :param oxo_kazu_name_mapping: mapping of OXO source names to Kazu names, to covert OXO format to Kazu. If
             not specified, the OXO version will be used
         :param uri_prefixes: mapping of KAZU sources to URI prefixes, to correctly reconstruct ids. If not specified,
