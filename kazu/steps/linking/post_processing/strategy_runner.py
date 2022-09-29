@@ -189,14 +189,17 @@ class StrategyRunner:
     ):
         """
 
-        :param non_symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for
-            non-symbolic entities
+
         :param symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for symbolic
             entities
+        :param non_symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for
+            non-symbolic entities
         :param ner_namespace_processing_order: Entities will be mapped in this namespace order. This is
             useful if you have a high precision, low recall NER namespace, combined with a low precision high recall
             namespace, as the mapping info derived from the high precision NER namespace can be used with a high
             precision strategy for the low precision NER namespace
+        :param cross_ref_managers: list of managers that will be applied to any created mappings, attempting to create
+            xreferences
         """
         self.cross_ref_managers = cross_ref_managers
         self.non_symbolic_strategies = non_symbolic_strategies
