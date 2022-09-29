@@ -1,4 +1,4 @@
-kazu.modelling
+﻿kazu.modelling
 ==============
 
 .. automodule:: kazu.modelling
@@ -27,6 +27,7 @@ kazu.modelling
    :toctree:
    :recursive:
 
+   kazu.modelling.annotation
    kazu.modelling.database
    kazu.modelling.distillation
    kazu.modelling.hf_lightning_wrappers

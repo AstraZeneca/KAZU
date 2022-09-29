@@ -1,0 +1,654 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.database" href="kazu.modelling.database.html" /><link rel="prev" title="kazu.modelling.annotation" href="kazu.modelling.annotation.html" />
+
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+        <title>kazu.modelling.annotation.label_studio - Kazu documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Kazu  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Kazu  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Guides and Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datamodel.html">data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../steps.html">pipeline steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../training.html">model training</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="kazu.html">kazu</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.data.html">kazu.data</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="kazu.data.data.html">kazu.data.data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.data.pytorch.html">kazu.data.pytorch</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="kazu.modelling.html">kazu.modelling</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.modelling.annotation.html">kazu.modelling.annotation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">kazu.modelling.annotation.label_studio</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.database.html">kazu.modelling.database</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.database.in_memory_db.html">kazu.modelling.database.in_memory_db</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.models.html">kazu.modelling.distillation.models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.tiny_transformers.html">kazu.modelling.distillation.tiny_transformers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.train.html">kazu.modelling.distillation.train</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.modelling.hf_lightning_wrappers.html">kazu.modelling.hf_lightning_wrappers</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.language.html">kazu.modelling.language</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.language.language_phenomena.html">kazu.modelling.language.language_phenomena</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.language.string_similarity_scorers.html">kazu.modelling.language.string_similarity_scorers</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.linking.html">kazu.modelling.linking</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.modelling.linking.sapbert.html">kazu.modelling.linking.sapbert</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="kazu.modelling.linking.sapbert.train.html">kazu.modelling.linking.sapbert.train</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_matching.html">kazu.modelling.ontology_matching</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.assemble_pipeline.html">kazu.modelling.ontology_matching.assemble_pipeline</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.modelling.ontology_matching.blacklist.html">kazu.modelling.ontology_matching.blacklist</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="kazu.modelling.ontology_matching.blacklist.synonym_blacklisting.html">kazu.modelling.ontology_matching.blacklist.synonym_blacklisting</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.filters.html">kazu.modelling.ontology_matching.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.ontology_matcher.html">kazu.modelling.ontology_matching.ontology_matcher</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.variants.html">kazu.modelling.ontology_matching.variants</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.pipeline.html">kazu.pipeline</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="kazu.pipeline.pipeline.html">kazu.pipeline.pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kazu.runner.html">kazu.runner</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.steps.html">kazu.steps</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.base.html">kazu.steps.base</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.base.step.html">kazu.steps.base.step</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.context_scoring.html">kazu.steps.linking.post_processing.disambiguation.context_scoring</a></li>
+<li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.strategies.html">kazu.steps.linking.post_processing.disambiguation.strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.html">kazu.steps.linking.post_processing.mapping_strategies</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.strategies.html">kazu.steps.linking.post_processing.mapping_strategies.strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.strategy_runner.html">kazu.steps.linking.post_processing.strategy_runner</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html">kazu.steps.ner.entity_post_processing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.explosion.html">kazu.steps.ner.explosion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.hf_token_classification.html">kazu.steps.ner.hf_token_classification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.seth.html">kazu.steps.ner.seth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.spacy_ner.html">kazu.steps.ner.spacy_ner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html">kazu.steps.ner.tokenized_word_processor</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.other.html">kazu.steps.other</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.merge_overlapping_ents.html">kazu.steps.other.merge_overlapping_ents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.stanza.html">kazu.steps.other.stanza</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.string_preprocessing.html">kazu.steps.string_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.string_preprocessing.scispacy_abbreviation_expansion.html">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.string_preprocessing.string_preprocessing_step.html">kazu.steps.string_preprocessing.string_preprocessing_step</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.stanza_pipeline.html">kazu.utils.stanza_pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.stopwatch.html">kazu.utils.stopwatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.string_normalizer.html">kazu.utils.string_normalizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.utils.html">kazu.utils.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.modelling.annotation.label_studio.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-kazu.modelling.annotation.label_studio">
+<span id="kazu-modelling-annotation-label-studio"></span><h1>kazu.modelling.annotation.label_studio<a class="headerlink" href="#module-kazu.modelling.annotation.label_studio" title="Permalink to this heading">#</a></h1>
+<p class="rubric">Classes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter" title="kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KazuToLabelStudioConverter</span></code></a></p></td>
+<td><p>converts a Kazu <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a> into Label Studio tasks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion" title="kazu.modelling.annotation.label_studio.LSToKazuConversion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LSToKazuConversion</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelStudioAnnotationView</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager" title="kazu.modelling.annotation.label_studio.LabelStudioManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelStudioManager</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">KazuToLabelStudioConverter</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L18-L126"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>converts a Kazu <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a> into Label Studio tasks.</p>
+<p>Since LS is region based, we need to create a new region for every CharSpan (even overlapping ones),
+and add entity information (class, mappings etc) to the region.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_docs_to_tasks">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_docs_to_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L40-L42"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_docs_to_tasks" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>docs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_single_doc_to_tasks">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_single_doc_to_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L26-L38"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_single_doc_to_tasks" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>doc</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LSToKazuConversion">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LSToKazuConversion</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L129-L262"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LSToKazuConversion.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L130-L167"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.__init__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>task</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LSToKazuConversion.convert_tasks_to_docs">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_tasks_to_docs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L245-L262"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.convert_tasks_to_docs" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tasks</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LSToKazuConversion.create_ents">
+<span class="sig-name descname"><span class="pre">create_ents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L202-L211"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_ents" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LSToKazuConversion.create_mappings">
+<span class="sig-name descname"><span class="pre">create_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxonomy_hits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L175-L200"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_mappings" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>taxonomy_hits</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>task_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Mapping" title="kazu.data.data.Mapping"><em>Mapping</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LSToKazuConversion.create_section">
+<span class="sig-name descname"><span class="pre">create_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L169-L173"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_section" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><em>Section</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LabelStudioAnnotationView</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L265-L361"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ner_labels</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L266-L272"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.__init__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ner_labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – a mapping of ner label (i.e. <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity.entity_class" title="kazu.data.data.Entity.entity_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Entity.entity_class</span></code></a>) to a valid colour</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels">
+<span class="sig-name descname"><span class="pre">build_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L288-L298"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dom</strong> (<em>Document</em>) – </p></li>
+<li><p><strong>element</strong> (<em>Element</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_taxonomy">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_taxonomy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L300-L330"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_taxonomy" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dom</strong> (<em>Document</em>) – </p></li>
+<li><p><strong>element</strong> (<em>Element</em>) – </p></li>
+<li><p><strong>tasks</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>]</em>) – </p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.create_main_view">
+<span class="sig-name descname"><span class="pre">create_main_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L332-L361"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.create_main_view" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tasks</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.getDOM">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDOM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L274-L286"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.getDOM" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Document</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LabelStudioManager</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L364-L452"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://localhost:8080'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L365-L368"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.__init__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.create_linking_project">
+<span class="sig-name descname"><span class="pre">create_linking_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L399-L423"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.create_linking_project" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>view</strong> (<a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView"><em>LabelStudioAnnotationView</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.delete_project_if_exists">
+<span class="sig-name descname"><span class="pre">delete_project_if_exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L388-L397"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.delete_project_if_exists" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.export_from_ls">
+<span class="sig-name descname"><span class="pre">export_from_ls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L450-L452"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.export_from_ls" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.get_all_tasks">
+<span class="sig-name descname"><span class="pre">get_all_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L431-L437"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_all_tasks" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.get_tasks">
+<span class="sig-name descname"><span class="pre">get_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L439-L448"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_tasks" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.import_to_ls">
+<span class="sig-name descname"><span class="pre">import_to_ls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/annotation/label_studio.py#L425-L429"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.import_to_ls" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>docs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.project_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">project_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.project_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="kazu.modelling.database.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">kazu.modelling.database</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="kazu.modelling.annotation.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">kazu.modelling.annotation</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021, Korea University, AstraZeneca
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    </body>
+</html>
