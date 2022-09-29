@@ -311,13 +311,11 @@ class StrategyRunner:
                     strategy_index=i,
                     document=document,
                 ):
-
+                    xref_mappings: Optional[Set[Mapping]]
                     if self.cross_ref_managers is not None:
                         xref_mappings = set()
                         for xref_manager in self.cross_ref_managers:
-                            xref_mappings.update(xref_manager.create_xref_mappings(
-                                mapping=mapping
-                        ))
+                            xref_mappings.update(xref_manager.create_xref_mappings(mapping=mapping))
                     else:
                         xref_mappings = None
 
@@ -329,5 +327,5 @@ class StrategyRunner:
                         "mapping created: original string: %s, mapping: %s, cross-references: %s",
                         reference_entity.match,
                         mapping,
-                        xref_mappings
+                        xref_mappings,
                     )
