@@ -214,8 +214,8 @@ class OxoCrossReferenceManager(CrossReferenceManager):
                     for mapping_response in search_result["mappingResponseList"]
                 )
         xref_db = {}
-        for k, v in xref_db_default_dict.items():
-            xref_db[k] = {k1: list(v1) for k1, v1 in v.items()}
+        for source, id_to_xref in xref_db_default_dict.items():
+            xref_db[source] = {idx: list(xref) for idx, xref in id_to_xref.items()}
         return xref_db
 
     def create_oxo_dump(self, path: Path) -> List[Dict]:
