@@ -65,17 +65,15 @@ class CrossReferenceManager(ABC):
             logger.info("forcing a rebuild of the cache")
             if cache_dir.exists():
                 shutil.rmtree(cache_dir)
-            xref_db = self.build_xref_cache(path)
-            self.save(cache_dir, xref_db)
-            self.load(cache_dir)
+            self.xref_db = self.build_xref_cache(path)
+            self.save(cache_dir, self.xref_db)
         elif cache_dir.exists():
             logger.info(f"loading cached file from {cache_dir}")
             self.load(cache_dir)
         else:
             logger.info("No cache file found. Building a new one")
-            xref_db = self.build_xref_cache(path)
-            self.save(cache_dir, xref_db)
-            self.load(cache_dir)
+            self.xref_db = self.build_xref_cache(path)
+            self.save(cache_dir, self.xref_db)
 
     def save(self, cache_path: Path, xref_db: XrefDatabase) -> Path:
         """
