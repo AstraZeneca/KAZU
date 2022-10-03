@@ -180,11 +180,14 @@ class OxoCrossReferenceManager(CrossReferenceManager):
     def build_xref_cache(self, path: Path) -> XrefDatabase:
         oxo_dump_path = path.joinpath("oxo_dump.json")
         logger.info(f"looking for oxo dump at {oxo_dump_path}")
-        if not oxo_dump_path.exists():
+        if oxo_dump_path.exists():
+            with open(oxo_dump_path, "r") as f:
+                oxo_dump = json.load(f)
+        else:
             logger.info(f"oxo dump not found. Attempting to download from {self.oxo_url}")
-            self.create_oxo_dump(oxo_dump_path)
+            oxo_dump = self.create_oxo_dump(oxo_dump_path)
         logger.info(f"loading from oxo dump at {oxo_dump_path}")
-        xref_db = self.parse_oxo_dump(oxo_dump_path)
+        xref_db = self.parse_oxo_dump(oxo_dump)
         return xref_db
 
     def _convert_oxo_source_string(self, oxo_source: str) -> str:
@@ -196,12 +199,10 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         else:
             return oxo_idx
 
-    def parse_oxo_dump(self, path: Path) -> XrefDatabase:
+    def parse_oxo_dump(self, oxo_dump: List[Dict]) -> XrefDatabase:
         xref_db_default_dict: DefaultDict[
             str, DefaultDict[str, Set[Tuple[str, str]]]
         ] = defaultdict(lambda: defaultdict(set))
-        with open(path, "r") as f:
-            oxo_dump = json.load(f)
 
         for oxo_page in oxo_dump:
             for search_result in oxo_page["_embedded"]["searchResults"]:
@@ -219,7 +220,7 @@ class OxoCrossReferenceManager(CrossReferenceManager):
             xref_db[k] = {k1: list(v1) for k1, v1 in v.items()}
         return xref_db
 
-    def create_oxo_dump(self, path: Path):
+    def create_oxo_dump(self, path: Path) -> List[Dict]:
         results = []
         for input_source, mapping_target in self.oxo_query.items():
             data = {
@@ -247,3 +248,5 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
         with open(path, "w") as f:
             json.dump(results, f)
+
+        return results
