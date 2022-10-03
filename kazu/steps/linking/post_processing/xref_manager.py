@@ -202,17 +202,18 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         ] = defaultdict(lambda: defaultdict(set))
         with open(path, "r") as f:
             oxo_dump = json.load(f)
-            for oxo_page in oxo_dump:
-                for search_result in oxo_page["_embedded"]["searchResults"]:
-                    source, idx = search_result["curie"].split(":")
-                    source = self._convert_oxo_source_string(source)
-                    idx = self._add_kazu_uri_prefix(idx, source)
-                    for mapping_response in search_result["mappingResponseList"]:
-                        target_source, target_idx = mapping_response["curie"].split(":")
-                        target_source = self._convert_oxo_source_string(target_source)
-                        target_idx = self._add_kazu_uri_prefix(target_idx, target_source)
 
-                        xref_db_default_dict[source][idx].add((target_source, target_idx))
+        for oxo_page in oxo_dump:
+            for search_result in oxo_page["_embedded"]["searchResults"]:
+                source, idx = search_result["curie"].split(":")
+                source = self._convert_oxo_source_string(source)
+                idx = self._add_kazu_uri_prefix(idx, source)
+                for mapping_response in search_result["mappingResponseList"]:
+                    target_source, target_idx = mapping_response["curie"].split(":")
+                    target_source = self._convert_oxo_source_string(target_source)
+                    target_idx = self._add_kazu_uri_prefix(target_idx, target_source)
+
+                    xref_db_default_dict[source][idx].add((target_source, target_idx))
         xref_db = {}
         for k, v in xref_db_default_dict.items():
             xref_db[k] = {k1: list(v1) for k1, v1 in v.items()}
