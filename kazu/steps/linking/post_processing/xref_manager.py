@@ -190,11 +190,17 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         xref_db = self.parse_oxo_dump(oxo_dump)
         return xref_db
 
-    def _convert_oxo_source_string(self, oxo_source: str) -> str:
-        return self.oxo_kazu_name_mapping.get(oxo_source, oxo_source)
+    def _split_and_convert_curie(self, curie: str) -> Tuple[str, str]:
+        """
+        :param curie: a Compact uniform resource identifier, or CURIE. This is essentially a
+            prefix followed by a colon (:) followed by a local ID
+        :return: A source and idx, converted according to the class's oxo_kazu_name_mapping and uri_prefixes
+        """
+        oxo_source, oxo_idx = curie.split(":")
+        converted_source = self.oxo_kazu_name_mapping.get(oxo_source, oxo_source)
+        converted_idx = f"{self.uri_prefixes.get(converted_source,'')}{oxo_idx}"
 
-    def _add_kazu_uri_prefix(self, oxo_idx: str, source: str) -> str:
-        return f"{self.uri_prefixes.get(source,'')}{oxo_idx}"
+        return converted_source, converted_idx
 
     def parse_oxo_dump(self, oxo_dump: List[Dict]) -> XrefDatabase:
         xref_db_default_dict: DefaultDict[
@@ -203,15 +209,11 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
         for oxo_page in oxo_dump:
             for search_result in oxo_page["_embedded"]["searchResults"]:
-                source, idx = search_result["curie"].split(":")
-                source = self._convert_oxo_source_string(source)
-                idx = self._add_kazu_uri_prefix(idx, source)
-                for mapping_response in search_result["mappingResponseList"]:
-                    target_source, target_idx = mapping_response["curie"].split(":")
-                    target_source = self._convert_oxo_source_string(target_source)
-                    target_idx = self._add_kazu_uri_prefix(target_idx, target_source)
-
-                    xref_db_default_dict[source][idx].add((target_source, target_idx))
+                source, idx = self._split_and_convert_curie(search_result["curie"])
+                xref_db_default_dict[source][idx].update(
+                    self._split_and_convert_curie(mapping_response["curie"])
+                    for mapping_response in search_result["mappingResponseList"]
+                )
         xref_db = {}
         for k, v in xref_db_default_dict.items():
             xref_db[k] = {k1: list(v1) for k1, v1 in v.items()}
