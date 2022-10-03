@@ -15,8 +15,6 @@ from kazu.utils.utils import get_cache_dir
 
 logger = logging.getLogger(__name__)
 
-XRefDB = Dict[str, Dict[str, List[Tuple[str, str]]]]
-
 
 SourceOntology = str
 SourceIdx = str
