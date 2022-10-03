@@ -194,10 +194,7 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         return self.oxo_kazu_name_mapping.get(oxo_source, oxo_source)
 
     def _add_kazu_uri_prefix(self, oxo_idx: str, source: str) -> str:
-        if source in {"MONDO", "HP"}:
-            return f"{self.uri_prefixes.get(source,'')}{source}_{oxo_idx}"
-        else:
-            return oxo_idx
+        return f"{self.uri_prefixes.get(source,'')}{oxo_idx}"
 
     def parse_oxo_dump(self, oxo_dump: List[Dict]) -> XrefDatabase:
         xref_db_default_dict: DefaultDict[

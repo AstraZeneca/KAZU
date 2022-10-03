@@ -8,8 +8,8 @@ strategy_runner:
       oxo_kazu_name_mapping:
         MedDRA: MEDDRA
       uri_prefixes:
-        MONDO: http://purl.obolibrary.org/obo/
-        HP: http://purl.obolibrary.org/obo/
+        MONDO: http://purl.obolibrary.org/obo/MONDO_
+        HP: http://purl.obolibrary.org/obo/HP_
       oxo_query:
           MONDO:
             - MedDRA
