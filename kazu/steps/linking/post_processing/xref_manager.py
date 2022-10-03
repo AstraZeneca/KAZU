@@ -25,6 +25,9 @@ XrefDatabase = Dict[SourceOntology, ToSourceAndIDXMap]
 
 
 class CrossReferenceManager(ABC):
+
+    xref_db: XrefDatabase
+
     def __init__(self, source_to_parser_metadata_lookup: Dict[str, str], path: Path):
         """
         :param source_to_parser_metadata_lookup: when producing cross-referenced instances of Mapping, we need a
@@ -108,7 +111,7 @@ class CrossReferenceManager(ABC):
         :param mapping:
         :return:
         """
-        xref_lookup: ToSourceAndIDXMap = self.xref_db.get(mapping.source, {})
+        xref_lookup = self.xref_db.get(mapping.source, {})
         for (target_source, target_idx) in xref_lookup.get(mapping.idx, []):
             metadata_parser_name = self.source_to_parser_metadata_lookup.get(target_source)
             if metadata_parser_name is None:
