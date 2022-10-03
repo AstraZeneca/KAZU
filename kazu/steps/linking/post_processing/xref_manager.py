@@ -18,12 +18,6 @@ logger = logging.getLogger(__name__)
 XRefDB = Dict[str, Dict[str, List[Tuple[str, str]]]]
 
 
-def _serialize_sets(obj):
-    if isinstance(obj, set):
-        return list(obj)
-    return obj
-
-
 SourceOntology = str
 SourceIdx = str
 
@@ -98,7 +92,7 @@ class CrossReferenceManager(ABC):
 
         os.makedirs(cache_path, exist_ok=False)
         with open(cache_path.joinpath("xref_db.json"), "w") as f:
-            json.dump(xref_db, f, default=_serialize_sets)
+            json.dump(xref_db, f)
         return cache_path
 
     def load(self, cache_path: Path):
