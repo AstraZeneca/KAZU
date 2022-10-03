@@ -119,27 +119,28 @@ class CrossReferenceManager(ABC):
                 logger.warning(
                     f"source_to_parser_metadata_lookup not configured for target source: {metadata_parser_name}"
                 )
-            else:
-                try:
-                    xref_mapping = MappingFactory.create_mapping(
-                        parser_name=metadata_parser_name,
-                        xref_source_parser_name=mapping.parser_name,
-                        source=target_source,
-                        idx=target_idx,
-                        mapping_strategy=self.__class__.__name__,
-                        disambiguation_strategy=mapping.disambiguation_strategy,
-                        confidence=mapping.confidence,
-                        additional_metadata=mapping.metadata,
-                    )
-                    yield xref_mapping
-                except KeyError:
-                    logger.debug(
-                        "failed to create xref mapping for %s->%s:%s->%s. Metadata not found.",
-                        mapping.parser_name,
-                        metadata_parser_name,
-                        mapping.idx,
-                        target_idx,
-                    )
+                continue
+
+            try:
+                xref_mapping = MappingFactory.create_mapping(
+                    parser_name=metadata_parser_name,
+                    xref_source_parser_name=mapping.parser_name,
+                    source=target_source,
+                    idx=target_idx,
+                    mapping_strategy=self.__class__.__name__,
+                    disambiguation_strategy=mapping.disambiguation_strategy,
+                    confidence=mapping.confidence,
+                    additional_metadata=mapping.metadata,
+                )
+                yield xref_mapping
+            except KeyError:
+                logger.debug(
+                    "failed to create xref mapping for %s->%s:%s->%s. Metadata not found.",
+                    mapping.parser_name,
+                    metadata_parser_name,
+                    mapping.idx,
+                    target_idx,
+                )
 
 
 class OxoCrossReferenceManager(CrossReferenceManager):
