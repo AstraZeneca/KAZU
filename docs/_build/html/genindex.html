@@ -241,6 +241,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="_autosummary/kazu.steps.linking.post_processing.strategy_runner.html">kazu.steps.linking.post_processing.strategy_runner</a></li>
+<li class="toctree-l5"><a class="reference internal" href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
@@ -321,7 +322,7 @@
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#Q"><strong>Q</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#Q"><strong>Q</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a> | <a href="#X"><strong>X</strong></a></div>
 </section>
 <section id="_" class="genindex-section">
   <h2>_</h2>
@@ -447,6 +448,10 @@
           <li><a href="_autosummary/kazu.steps.linking.post_processing.strategy_runner.html#kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution.__init__">(kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution method)</a>
 </li>
           <li><a href="_autosummary/kazu.steps.linking.post_processing.strategy_runner.html#kazu.steps.linking.post_processing.strategy_runner.StrategyRunner.__init__">(kazu.steps.linking.post_processing.strategy_runner.StrategyRunner method)</a>
+</li>
+          <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.__init__">(kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager method)</a>
+</li>
+          <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.__init__">(kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager method)</a>
 </li>
           <li><a href="_autosummary/kazu.steps.linking.sapbert.html#kazu.steps.linking.sapbert.SapBertForEntityLinkingStep.__init__">(kazu.steps.linking.sapbert.SapBertForEntityLinkingStep method)</a>
 </li>
@@ -609,10 +614,10 @@
 </li>
         <li><a href="_autosummary/kazu.modelling.language.string_similarity_scorers.html#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer">BooleanStringSimilarityScorer (class in kazu.modelling.language.string_similarity_scorers)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="_autosummary/kazu.steps.linking.post_processing.disambiguation.strategies.html#kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy.build_id_set_representation">build_id_set_representation() (kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="_autosummary/kazu.modelling.annotation.label_studio.html#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels">build_labels() (kazu.modelling.annotation.label_studio.LabelStudioAnnotationView method)</a>
 </li>
         <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.build_ontology_cache">build_ontology_cache() (kazu.utils.link_index.Index method)</a>
@@ -625,6 +630,12 @@
 </li>
         <li><a href="_autosummary/kazu.steps.linking.post_processing.disambiguation.context_scoring.html#kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer.build_vectorizers">build_vectorizers() (kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer method)</a>
 </li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.build_xref_cache">build_xref_cache() (kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager method)</a>
+
+        <ul>
+          <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.build_xref_cache">(kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager method)</a>
+</li>
+        </ul></li>
     </ul></td>
   </tr></table>
 </section>
@@ -691,10 +702,10 @@
           <li><a href="_autosummary/kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.PLSapbertModel.configure_optimizers">(kazu.modelling.linking.sapbert.train.PLSapbertModel method)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="_autosummary/kazu.steps.linking.post_processing.disambiguation.strategies.html#kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy.CONTEXT_SCORE">CONTEXT_SCORE (kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="_autosummary/kazu.modelling.annotation.label_studio.html#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_docs_to_tasks">convert_docs_to_tasks() (kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter class method)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.annotation.label_studio.html#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_single_doc_to_tasks">convert_single_doc_to_tasks() (kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter class method)</a>
@@ -729,6 +740,8 @@
           <li><a href="steps.html#kazu.steps.StringPreprocessorStep.create_modifications">(kazu.steps.StringPreprocessorStep method)</a>
 </li>
         </ul></li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.create_oxo_dump">create_oxo_dump() (kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager method)</a>
+</li>
         <li><a href="_autosummary/kazu.modelling.ontology_matching.ontology_matcher.html#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_phrasematchers">create_phrasematchers() (kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher method)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.annotation.label_studio.html#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_section">create_section() (kazu.modelling.annotation.label_studio.LSToKazuConversion method)</a>
@@ -742,6 +755,10 @@
         <li><a href="_autosummary/kazu.steps.linking.post_processing.disambiguation.context_scoring.html#kazu.steps.linking.post_processing.disambiguation.context_scoring.create_word_and_char_ngrams">create_word_and_char_ngrams() (in module kazu.steps.linking.post_processing.disambiguation.context_scoring)</a>
 </li>
         <li><a href="_autosummary/kazu.utils.utils.html#kazu.utils.utils.create_word_ngrams">create_word_ngrams() (in module kazu.utils.utils)</a>
+</li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.create_xref_mappings">create_xref_mappings() (kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager method)</a>
+</li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager">CrossReferenceManager (class in kazu.steps.linking.post_processing.xref_manager)</a>
 </li>
         <li><a href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdAggregationStrategy.CUSTOM">CUSTOM (kazu.data.data.EquivalentIdAggregationStrategy attribute)</a>
 </li>
@@ -1155,10 +1172,12 @@
 </li>
         <li><a href="_autosummary/kazu.steps.base.step.html#kazu.steps.base.step.StepMetadata.has_run">has_run (kazu.steps.base.step.StepMetadata attribute)</a>
 </li>
-        <li><a href="_autosummary/kazu.data.pytorch.html#kazu.data.pytorch.HFDataset">HFDataset (class in kazu.data.pytorch)</a>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.headers">headers (kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager attribute)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="_autosummary/kazu.data.pytorch.html#kazu.data.pytorch.HFDataset">HFDataset (class in kazu.data.pytorch)</a>
+</li>
         <li><a href="_autosummary/kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.HFSapbertInferenceDataset">HFSapbertInferenceDataset (class in kazu.modelling.linking.sapbert.train)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.HFSapbertPairwiseDataset">HFSapbertPairwiseDataset (class in kazu.modelling.linking.sapbert.train)</a>
@@ -1533,8 +1552,6 @@
           <li><a href="_autosummary/kazu.steps.html#module-kazu.steps">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     kazu.steps.base
 
@@ -1542,6 +1559,8 @@
           <li><a href="_autosummary/kazu.steps.base.html#module-kazu.steps.base">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     kazu.steps.base.step
 
@@ -1617,6 +1636,13 @@
 
         <ul>
           <li><a href="_autosummary/kazu.steps.linking.post_processing.strategy_runner.html#module-kazu.steps.linking.post_processing.strategy_runner">module</a>
+</li>
+        </ul></li>
+        <li>
+    kazu.steps.linking.post_processing.xref_manager
+
+        <ul>
+          <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#module-kazu.steps.linking.post_processing.xref_manager">module</a>
 </li>
         </ul></li>
         <li>
@@ -1823,16 +1849,24 @@
 </li>
         <li><a href="_autosummary/kazu.data.data.html#kazu.data.data.LinkRanks">LinkRanks (class in kazu.data.data)</a>
 </li>
-        <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.load">load() (kazu.utils.link_index.Index method)</a>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load">load() (kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager method)</a>
+
+        <ul>
+          <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.load">(kazu.utils.link_index.Index method)</a>
 </li>
+        </ul></li>
         <li><a href="_autosummary/kazu.modelling.distillation.lightning_plugins.html#kazu.modelling.distillation.lightning_plugins.StudentModelCheckpointIO.load_checkpoint">load_checkpoint() (kazu.modelling.distillation.lightning_plugins.StudentModelCheckpointIO method)</a>
 </li>
         <li><a href="_autosummary/kazu.data.data.html#kazu.data.data.Entity.load_contiguous_entity">load_contiguous_entity() (kazu.data.data.Entity class method)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.load_go">load_go() (kazu.modelling.ontology_preprocessing.base.GeneOntologyParser method)</a>
 </li>
-        <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.load_or_build_cache">load_or_build_cache() (kazu.utils.link_index.Index method)</a>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load_or_build_cache">load_or_build_cache() (kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager method)</a>
+
+        <ul>
+          <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.load_or_build_cache">(kazu.utils.link_index.Index method)</a>
 </li>
+        </ul></li>
         <li><a href="steps.html#kazu.steps.DictionaryEntityLinkingStep.load_or_build_caches">load_or_build_caches() (kazu.steps.DictionaryEntityLinkingStep method)</a>
 
         <ul>
@@ -2063,6 +2097,8 @@
 </li>
           <li><a href="_autosummary/kazu.steps.linking.post_processing.strategy_runner.html#module-kazu.steps.linking.post_processing.strategy_runner">kazu.steps.linking.post_processing.strategy_runner</a>
 </li>
+          <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#module-kazu.steps.linking.post_processing.xref_manager">kazu.steps.linking.post_processing.xref_manager</a>
+</li>
           <li><a href="_autosummary/kazu.steps.linking.sapbert.html#module-kazu.steps.linking.sapbert">kazu.steps.linking.sapbert</a>
 </li>
           <li><a href="_autosummary/kazu.steps.ner.html#module-kazu.steps.ner">kazu.steps.ner</a>
@@ -2234,10 +2270,10 @@
 </li>
         <li><a href="_autosummary/kazu.modelling.ontology_matching.ontology_matcher.html#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig">OntologyMatcherConfig (class in kazu.modelling.ontology_matching.ontology_matcher)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser">OntologyParser (class in kazu.modelling.ontology_preprocessing.base)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser">OpenTargetsDiseaseOntologyParser (class in kazu.modelling.ontology_preprocessing.base)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser">OpenTargetsMoleculeOntologyParser (class in kazu.modelling.ontology_preprocessing.base)</a>
@@ -2245,6 +2281,10 @@
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser">OpenTargetsTargetOntologyParser (class in kazu.modelling.ontology_preprocessing.base)</a>
 </li>
         <li><a href="_autosummary/kazu.utils.string_normalizer.html#kazu.utils.string_normalizer.DefaultStringNormalizer.other_subs">other_subs (kazu.utils.string_normalizer.DefaultStringNormalizer attribute)</a>
+</li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.oxo_url">oxo_url (kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager attribute)</a>
+</li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager">OxoCrossReferenceManager (class in kazu.steps.linking.post_processing.xref_manager)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -2257,6 +2297,8 @@
         <li><a href="_autosummary/kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.pad_to_multiple_of">pad_to_multiple_of (kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding attribute)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.padding">padding (kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding attribute)</a>
+</li>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.parse_oxo_dump">parse_oxo_dump() (kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager method)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.parse_to_dataframe">parse_to_dataframe() (kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser method)</a>
 
@@ -2482,8 +2524,12 @@
 </li>
         <li><a href="_autosummary/kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.SapbertTrainingParams">SapbertTrainingParams (class in kazu.modelling.linking.sapbert.train)</a>
 </li>
-        <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.save">save() (kazu.utils.link_index.Index method)</a>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.save">save() (kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager method)</a>
+
+        <ul>
+          <li><a href="_autosummary/kazu.utils.link_index.html#kazu.utils.link_index.Index.save">(kazu.utils.link_index.Index method)</a>
 </li>
+        </ul></li>
         <li><a href="_autosummary/kazu.modelling.distillation.lightning_plugins.html#kazu.modelling.distillation.lightning_plugins.StudentModelCheckpointIO.save_checkpoint">save_checkpoint() (kazu.modelling.distillation.lightning_plugins.StudentModelCheckpointIO method)</a>
 </li>
         <li><a href="steps.html#kazu.steps.SciSpacyAbbreviationExpansionStep">SciSpacyAbbreviationExpansionStep (class in kazu.steps)</a>
@@ -2855,6 +2901,24 @@
         <li><a href="_autosummary/kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWord.word_id">word_id (kazu.steps.ner.tokenized_word_processor.TokenizedWord attribute)</a>
 </li>
         <li><a href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.write_training_pairs">write_training_pairs() (kazu.modelling.ontology_preprocessing.base.OntologyParser method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="X" class="genindex-section">
+  <h2>X</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.xref_db">xref_db (kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager attribute)</a>
+
+        <ul>
+          <li><a href="_autosummary/kazu.steps.linking.post_processing.xref_manager.html#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.xref_db">(kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager attribute)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="_autosummary/kazu.data.data.html#kazu.data.data.Mapping.xref_source_parser_name">xref_source_parser_name (kazu.data.data.Mapping attribute)</a>
 </li>
     </ul></td>
   </tr></table>
