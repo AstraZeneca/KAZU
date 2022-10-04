@@ -4,6 +4,7 @@ strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
   cross_ref_managers:
     - _target_: kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager
+      # this stops parameters that are themselves dictionaries from becoming Structured Configs, which breaks behaviour at runtime.
       _convert_: 'partial'
       oxo_kazu_name_mapping:
         MedDRA: MEDDRA
