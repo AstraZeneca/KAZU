@@ -201,9 +201,9 @@ class StrategyRunner:
         :param cross_ref_managers: list of managers that will be applied to any created mappings, attempting to create
             xreferences
         """
-        self.cross_ref_managers = cross_ref_managers
-        self.non_symbolic_strategies = non_symbolic_strategies
         self.symbolic_strategies = symbolic_strategies
+        self.non_symbolic_strategies = non_symbolic_strategies
+        self.cross_ref_managers = cross_ref_managers
         self.ner_namespace_processing_order = ner_namespace_processing_order
         self.metadata_db = MetadataDatabase()
 
