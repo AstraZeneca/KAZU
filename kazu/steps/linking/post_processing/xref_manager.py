@@ -133,6 +133,9 @@ class CrossReferenceManager(ABC):
                 )
                 yield xref_mapping
             except KeyError:
+                # note, we've set this to debug, as xref mapping sources (e.g. OXO) generally aren't version aware
+                # i.e. this will probably fire a lot, and overload the logs if set anything higher than debug.
+                # a custom log config at some point would probably help...
                 logger.debug(
                     "failed to create xref mapping for %s->%s:%s->%s. Metadata not found.",
                     mapping.parser_name,
