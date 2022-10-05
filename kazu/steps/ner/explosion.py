@@ -85,10 +85,8 @@ class ExplosionNERStep(BaseStep):
         # error when we try iterating further though, or we might get stuck in a loop.
         except Exception:
             affected_doc_ids = [doc.idx for doc in docs]
+            message = f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
             for doc in docs:
-                message = (
-                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
-                )
                 doc.metadata[PROCESSING_EXCEPTION] = message
                 failed_docs.append(doc)
         return docs, failed_docs
