@@ -1,7 +1,6 @@
 import logging
 import traceback
-from collections import defaultdict
-from typing import Dict, Iterator, List, Optional, Set, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 import spacy
 
@@ -49,7 +48,6 @@ class ExplosionNERStep(BaseStep):
                 (section.get_text(), (section, doc)) for doc in docs for section in doc.sections
             )
 
-            doc_to_processed_sections: Dict[Document, Set[Section]] = defaultdict(set)
             # TODO: multiprocessing within the pipe command?
             spacy_result: Iterator[
                 Tuple[spacy.tokens.Doc, Tuple[Section, Document]]
@@ -81,7 +79,7 @@ class ExplosionNERStep(BaseStep):
                 # if one section of a doc fails after others have succeeded, this will leave failed docs
                 # in a partially processed state. It's actually unclear to me whether this is desireable or not.
                 section.entities.extend(entities)
-                doc_to_processed_sections[doc].add(section)
+
         # this will give up on all docs as soon as one fails - we could have an additional
         # try-except inside the loop. We'd probably need to handle the case when the iterator raises an
         # error when we try iterating further though, or we might get stuck in a loop.
