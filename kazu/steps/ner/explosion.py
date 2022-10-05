@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
 import spacy
+
 from kazu.data.data import CharSpan, Document, Section, Entity, PROCESSING_EXCEPTION
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
@@ -12,7 +13,6 @@ from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.steps import BaseStep
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import as_path, PathLike
-from spacy.tokens import Span as spacy_span
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +178,7 @@ class ExplosionNERStep(BaseStep):
         return docs, failed_docs
 
     @staticmethod
-    def _mapping_invariant_span(span: spacy_span) -> Tuple[int, int, str, str]:
+    def _mapping_invariant_span(span: spacy.tokens.Span) -> Tuple[int, int, str, str]:
         """Return key information about a span excluding mapping information.
 
         This includes the entity_class (stored in span.label_) since this is
