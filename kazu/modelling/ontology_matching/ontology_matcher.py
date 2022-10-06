@@ -1,3 +1,4 @@
+import json
 import logging
 import pickle
 from dataclasses import dataclass, asdict
@@ -10,6 +11,7 @@ import srsly
 from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.utils.utils import PathLike
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
@@ -120,6 +122,30 @@ class OntologyMatcher:
     def set_context_matchers(self):
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
+
+    def create_exact_phrasematcher_from_curated_list(self, curated_list: PathLike) -> PhraseMatcher:
+        if self.strict_matcher is not None or self.lowercase_matcher is not None:
+            logging.warning("Phrase matchers are being redefined - is this by intention?")
+
+        strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
+
+        with open(curated_list, mode="r") as jsonlf:
+            curated_synonyms = (json.loads(line) for line in jsonlf)
+
+        # TODO: confirm that 'keep' is the only one we care about
+        synonyms_to_add = (item for item in curated_synonyms if item["action"] == "keep")
+
+        patterns = self.nlp.tokenizer.pipe(item["term"] for item in synonyms_to_add)
+
+        for item, pattern in zip(curated_synonyms, patterns):
+            # a generated synonym can have different term_norms for different parsers,
+            # since the string normalizer's output depends on the entity class
+            for parser_name, term_norm in item["term_norm_mapping"].items():
+                match_id = parser_name + self.match_id_sep + term_norm
+                strict_matcher.add(match_id, pattern)
+
+        self.strict_matcher = strict_matcher
+        return strict_matcher
 
     def create_phrasematchers(
         self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]
