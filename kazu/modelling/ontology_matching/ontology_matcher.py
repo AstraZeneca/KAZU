@@ -3,13 +3,12 @@ import pickle
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Callable, Iterable, Tuple, Set
+from typing import List, Dict, Union, Callable, Iterable, Tuple
 
 import spacy
 import srsly
 from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
 from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
-from kazu.modelling.ontology_matching.variants import create_variants
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
@@ -25,11 +24,6 @@ ENTITY = "entity"
 
 SPAN_KEY = "RAW_HITS"
 MATCH_ID_SEP = ":::"
-
-
-@spacy.registry.misc("arizona.variant_generator.v1")
-def create_variant_generator() -> Callable[[str], Set[str]]:
-    return create_variants
 
 
 @spacy.registry.misc("arizona.entry_filter_blacklist.v1")
@@ -51,7 +45,6 @@ class OntologyMatcherConfig:
         "span_key": SPAN_KEY,
         "match_id_sep": MATCH_ID_SEP,
         "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
-        "variant_generator": {"@misc": "arizona.variant_generator.v1"},
     },
 )
 class OntologyMatcher:
@@ -68,19 +61,16 @@ class OntologyMatcher:
         span_key: str = SPAN_KEY,
         match_id_sep: str = MATCH_ID_SEP,
         entry_filter: Callable[[str, str], Tuple[bool, bool]],
-        variant_generator: Callable[[str], Set[str]],
         parser_name_to_entity_type: Dict[str, str],
     ):
         """
 
         :param span_key: the key for doc.spans to store the matches in
         :param entry_filter: a function deciding whether a given ontology row/entry is valid
-        :param variant_generator: a function generating variants for a given synonym
         """
         self.nlp = nlp
         self.name = name
         self.entry_filter = entry_filter
-        self.variant_generator = variant_generator
         self.cfg = OntologyMatcherConfig(
             span_key=span_key,
             match_id_sep=match_id_sep,
