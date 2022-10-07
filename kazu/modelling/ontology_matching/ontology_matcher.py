@@ -298,9 +298,8 @@ class OntologyMatcher:
 
     def _set_span_attributes(self, spans):
         for span in spans:
-            # would this be better as the 'source' of the synonyms rather than parser name?
-            parser_name, span.kb_id_ = span.label_.split(self.match_id_sep, maxsplit=1)
-            span.label_ = self.parser_name_to_entity_type[parser_name]
+            span.parser_name_, span.term_norm_ = span.label_.split(self.match_id_sep, maxsplit=1)
+            span.label_ = self.parser_name_to_entity_type[span.parser_name_]
         return spans
 
     def _create_token_matchers(self):
