@@ -16,7 +16,6 @@ defaults:
   - DistillationTraining: default
   - SethStep: default
   - SynonymGeneration: default
-  - BlackListers: default
   - ExplosionNERStep: default
   - MergeOverlappingEntsStep: default
   - StanzaStep: default

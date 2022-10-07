@@ -8,8 +8,7 @@ from typing import List, Dict, Union, Callable, Iterable, Tuple
 
 import spacy
 import srsly
-from kazu.modelling.ontology_matching.blacklist.synonym_blacklisting import BlackLister
-from kazu.modelling.ontology_matching.filters import is_valid_ontology_entry
+
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.utils import PathLike
 from spacy import Language
@@ -28,11 +27,6 @@ SPAN_KEY = "RAW_HITS"
 MATCH_ID_SEP = ":::"
 
 
-@spacy.registry.misc("arizona.entry_filter_blacklist.v1")
-def create_blacklist_filter() -> Callable[[str, str], Tuple[bool, bool]]:
-    return is_valid_ontology_entry
-
-
 @dataclass
 class OntologyMatcherConfig:
     span_key: str
@@ -46,7 +40,6 @@ class OntologyMatcherConfig:
     default_config={
         "span_key": SPAN_KEY,
         "match_id_sep": MATCH_ID_SEP,
-        "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
     },
 )
 class OntologyMatcher:
@@ -147,16 +140,16 @@ class OntologyMatcher:
         self.strict_matcher = strict_matcher
         return strict_matcher
 
-    def create_phrasematchers(
-        self, parsers: List[OntologyParser], blacklisters: Dict[str, BlackLister]
-    ):
+    def create_lowercase_phrasematcher_from_parsers(
+        self,
+        parsers: List[OntologyParser],
+    ) -> PhraseMatcher:
         """Initialize the phrase matchers when creating this component.
         This method should not be run on an existing or deserialized pipeline.
         """
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
 
-        strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         for parser in parsers:
             synonym_terms = parser.generate_synonyms()
@@ -169,38 +162,23 @@ class OntologyMatcher:
                     [term for synonym in synonym_terms for term in synonym.terms]
                 )
             )
-
-            blacklister = blacklisters.get(parser_name)
             for i, synonym_term in enumerate(synonym_terms):
+                match_id = parser_name + self.match_id_sep + synonym_term.term_norm
                 for syn in synonym_term.terms:
-                    for equiv_id_set in synonym_term.associated_id_sets:
-                        for idx in equiv_id_set.ids:
-                            # TODO: combine entry_filter and blacklisters
-                            if blacklister is None:
-                                passes_blacklist = True
-                            else:
-                                passes_blacklist = blacklister(syn)[0]
+                    try:
+                        # if we're adding to the lowercase matcher, we don't need to add
+                        # to the exact case matcher as well, since we'll definitely get
+                        # the hit, so would just be a waste of memory and compute.
+                        lowercase_matcher.add(match_id, [patterns[i]])
 
-                            if passes_blacklist:
-                                add_case_sens_pat, add_case_insens_pat = self.entry_filter(syn, idx)
-                                # should not both be true - we only need to add the pattern
-                                # in a single matcher
-                                assert not (add_case_sens_pat and add_case_insens_pat)
-                                try:
-                                    match_id = parser_name + self.match_id_sep + str(idx)
-                                    if add_case_sens_pat:
-                                        strict_matcher.add(match_id, [patterns[i]])
-                                    elif add_case_insens_pat:
-                                        lowercase_matcher.add(match_id, [patterns[i]])
-                                except KeyError as e:
-                                    logging.warning(
-                                        f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
-                                        e,
-                                    )
+                    except KeyError as e:
+                        logging.warning(
+                            f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
+                            e,
+                        )
 
-        self.strict_matcher = strict_matcher
         self.lowercase_matcher = lowercase_matcher
-        return strict_matcher, lowercase_matcher
+        return lowercase_matcher
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
