@@ -324,8 +324,10 @@ class OntologyParser(ABC):
 
     def generate_synonyms(self) -> Set[SynonymTerm]:
         """
-        generate synonyms based on configured synonym generator. Note, this method also calls
-        populate_databases(), as the metadata db must be populated for appropriate synonym resolution
+        Generate synonyms based on configured synonym generator.
+
+        Note, this method also calls populate_databases(), as the metadata db must be populated
+        for appropriate synonym resolution.
         """
         self.populate_databases()
         synonym_data = set(SynonymDatabase().get_all(self.name).values())
