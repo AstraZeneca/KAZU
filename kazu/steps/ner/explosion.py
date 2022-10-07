@@ -15,7 +15,7 @@ from kazu.data.data import (
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.steps import BaseStep
 from kazu.utils.grouping import sort_then_group
-from kazu.utils.utils import as_path, PathLike
+from kazu.utils.utils import PathLike
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +40,12 @@ class ExplosionNERStep(BaseStep):
 
         super().__init__(depends_on=depends_on)
         self.include_sentence_offsets = include_sentence_offsets
-        self.path = as_path(path)
+        self.path = path
 
         # TODO: config override for when how we map parser names to entity types has changed since the last pipeline buid
         # think about how this affects OntologyMatcher._set_span_attributes lookup of parser names in case they
         # are not there in the new config.
-        self.spacy_pipeline = spacy.load(self.path)
+        self.spacy_pipeline = spacy.load(path)
         self.span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
 
         self.synonym_db = SynonymDatabase()
