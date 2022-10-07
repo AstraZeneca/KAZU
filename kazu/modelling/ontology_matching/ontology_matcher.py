@@ -116,11 +116,14 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
-    def create_exact_phrasematcher_from_curated_list(self, curated_list: PathLike) -> PhraseMatcher:
+    def create_phrasematchers_from_curated_list(
+        self, curated_list: PathLike
+    ) -> Tuple[PhraseMatcher, PhraseMatcher]:
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
 
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
+        lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
 
         with open(curated_list, mode="r") as jsonlf:
             curated_synonyms = (json.loads(line) for line in jsonlf)
@@ -128,24 +131,39 @@ class OntologyMatcher:
         # TODO: confirm that 'keep' is the only one we care about
         synonyms_to_add = (item for item in curated_synonyms if item["action"] == "keep")
 
-        patterns = self.nlp.tokenizer.pipe(item["term"] for item in synonyms_to_add)
+        patterns = self.nlp.tokenizer.pipe(
+            # we need it lowercased for the case insensitive matcher
+            item["term"] if item["case_sensitive"] else item["term"].lower()
+            for item in synonyms_to_add
+        )
 
         for item, pattern in zip(curated_synonyms, patterns):
             # a generated synonym can have different term_norms for different parsers,
             # since the string normalizer's output depends on the entity class
             for parser_name, term_norm in item["term_norm_mapping"].items():
                 match_id = parser_name + self.match_id_sep + term_norm
-                strict_matcher.add(match_id, pattern)
+                if item["case_sensitive"]:
+                    matcher = strict_matcher
+                else:
+                    matcher = lowercase_matcher
 
-        self.strict_matcher = strict_matcher
-        return strict_matcher
+                matcher.add(match_id, pattern)
+
+        # only set the phrasematcher if we have any rules for them
+        # this lets us skip running a phrasematcher if it has no rules when we come
+        # to calling OntologyMatcher
+        self.strict_matcher = strict_matcher if len(strict_matcher) != 0 else None
+        self.lowercase_matcher = lowercase_matcher if len(lowercase_matcher) != 0 else None
+        return strict_matcher, lowercase_matcher
 
     def create_lowercase_phrasematcher_from_parsers(
-        self,
-        parsers: List[OntologyParser],
-    ) -> PhraseMatcher:
+        self, parsers: List[OntologyParser]
+    ) -> Tuple[PhraseMatcher, None]:
         """Initialize the phrase matchers when creating this component.
         This method should not be run on an existing or deserialized pipeline.
+
+        Returns the lowercase phrasematcher and None - so it matches the return shape of
+        :meth:`create_phrasematchers_from_curated_list`\\ .
         """
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
@@ -176,7 +194,7 @@ class OntologyMatcher:
                         )
 
         self.lowercase_matcher = lowercase_matcher
-        return lowercase_matcher
+        return lowercase_matcher, None
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
