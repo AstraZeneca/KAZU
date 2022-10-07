@@ -128,7 +128,6 @@ class OntologyMatcher:
         with open(curated_list, mode="r") as jsonlf:
             curated_synonyms = (json.loads(line) for line in jsonlf)
 
-        # TODO: confirm that 'keep' is the only one we care about
         synonyms_to_add = (item for item in curated_synonyms if item["action"] == "keep")
 
         patterns = self.nlp.tokenizer.pipe(
