@@ -185,16 +185,26 @@ class OntologyMatcher:
                 "Did you initialize the labels and the phrase matchers?"
             )
 
-        assert self.strict_matcher is not None
-        assert self.lowercase_matcher is not None
-        strict_matches = set(self.strict_matcher(doc))
-        lower_matches = set(self.lowercase_matcher(doc))
-        combined_matches = strict_matches.union(lower_matches)
-        combined_spans = set(
-            Span(doc, start, end, label=key) for key, start, end in combined_matches
-        )
-        combined_spans = self._set_span_attributes(combined_spans)
-        final_spans = self.filter_by_contexts(doc, combined_spans)
+        # implied by above - strict_matcher is None implies self.nr_strict_rules
+        # and equivalent for lowercase matches
+        # mypy is happier having this assertion
+        assert self.strict_matcher is not None or self.lowercase_matcher is not None
+
+        # at least one phrasematcher will now be set.
+        # normally, this will only be one: either a strict matcher if constructed by curated list,
+        # or a lowercase matcher if constructed 'from scrach' using the parsers - currently just an
+        # initial step in building a curation-based phrasematcher
+
+        if self.strict_matcher is not None and self.lowercase_matcher is not None:
+            matches = set(self.strict_matcher(doc)).union(set(self.lowercase_matcher(doc)))
+        elif self.strict_matcher is not None:
+            matches = set(self.strict_matcher(doc))
+        elif self.lowercase_matcher is not None:
+            matches = set(self.lowercase_matcher(doc))
+
+        spans = set(Span(doc, start, end, label=key) for key, start, end in matches)
+        spans = self._set_span_attributes(spans)
+        final_spans = self.filter_by_contexts(doc, spans)
         self.set_annotations(doc, final_spans)
         return doc
 
