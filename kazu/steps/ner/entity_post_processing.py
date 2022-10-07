@@ -147,7 +147,10 @@ class SplitOnNumericalListPatternWithPrefix:
                     else:
                         new_spans = [
                             (input_ent_start, input_ent_start + len(prefix)),
-                            (span_offset, span_offset + len(part)),
+                            (
+                                input_ent_start + span_offset,
+                                input_ent_start + span_offset + len(part),
+                            ),
                         ]
                         span_offset += len(self.pattern) + len(part)
                         new_ents.append(

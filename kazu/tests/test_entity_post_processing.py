@@ -12,7 +12,7 @@ from kazu.tests.utils import requires_model_pack
 
 simple_conjunction_example = "skin, lung and breast cancer are common forms."
 complex_conjunction_example = "skin, lung and triple negative breast cancer are common forms."
-numerical_slash_example = "BRCA1/2/3 are oncogenes"
+numerical_slash_example = "everyone knows BRCA1/2/3 are oncogenes"
 numerical_slash_example2 = "Monoclonal antibody D8/17 is a thing"
 
 
@@ -35,7 +35,7 @@ def test_non_contiguous_entity_splitter(kazu_test_config):
     )
 
     numerical_slash_ent = Entity.load_contiguous_entity(
-        start=0, end=8, namespace="test", entity_class="gene", match="BRCA1/2/3"
+        start=15, end=24, namespace="test", entity_class="gene", match="BRCA1/2/3"
     )
 
     ents = splitter(numerical_slash_ent, numerical_slash_example)
