@@ -1,16 +1,16 @@
 from typing import Dict, Iterable, Union, List
 
 import spacy
+
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.utils import PathLike
-from spacy.util import compile_infix_regex
 
 
 def custom_tokenizer(nlp):
     custom_infixes = [r"\(", "/"]
     infixes = custom_infixes + nlp.Defaults.infixes
-    infix_re = compile_infix_regex(infixes)
+    infix_re = spacy.util.compile_infix_regex(infixes)
     nlp.tokenizer.infix_finditer = infix_re.finditer
 
 
