@@ -157,19 +157,17 @@ class OntologyMatcher:
             logging.info(
                 f"generating {sum(len(x.terms) for x in synonym_terms)} patterns for {parser_name}"
             )
-            patterns = list(
-                self.nlp.tokenizer.pipe(
-                    [term for synonym in synonym_terms for term in synonym.terms]
-                )
+            patterns = self.nlp.tokenizer.pipe(
+                term for synonym in synonym_terms for term in synonym.terms
             )
-            for i, synonym_term in enumerate(synonym_terms):
+            for synonym_term, pattern in zip(synonym_terms, patterns):
                 match_id = parser_name + self.match_id_sep + synonym_term.term_norm
                 for syn in synonym_term.terms:
                     try:
                         # if we're adding to the lowercase matcher, we don't need to add
                         # to the exact case matcher as well, since we'll definitely get
                         # the hit, so would just be a waste of memory and compute.
-                        lowercase_matcher.add(match_id, [patterns[i]])
+                        lowercase_matcher.add(match_id, [pattern])
 
                     except KeyError as e:
                         logging.warning(
