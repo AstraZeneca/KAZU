@@ -34,7 +34,7 @@ def test_generates_correct_spans(kazu_test_config):
 def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     st_step: BaseStep = instantiate(kazu_test_config.StanzaStep)
     ex_step: BaseStep = instantiate(
-        kazu_test_config.ExplosionNERStep, include_sentence_offsets=True
+        kazu_test_config.ExplosionStringMatchingStep, include_sentence_offsets=True
     )
 
     docs: List[Document] = [
@@ -53,7 +53,7 @@ def test_multiple_sentence_splitters_causes_error(kazu_test_config):
 def test_equivalent_to_explosion_for_simple_sents(kazu_test_config):
     st_step: BaseStep = instantiate(kazu_test_config.StanzaStep)
     ex_step: BaseStep = instantiate(
-        kazu_test_config.ExplosionNERStep, include_sentence_offsets=True
+        kazu_test_config.ExplosionStringMatchingStep, include_sentence_offsets=True
     )
 
     docs: List[Document] = [

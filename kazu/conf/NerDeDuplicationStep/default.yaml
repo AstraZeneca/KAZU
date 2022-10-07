@@ -3,4 +3,4 @@ depends_on: ~
 namespace_preferred_order:
   - TransformersModelForTokenClassificationNerStep
   - SpacyNerStep
-  - ExplosionNERStep
+  - ExplosionStringMatchingStep

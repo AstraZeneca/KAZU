@@ -16,7 +16,7 @@ defaults:
   - DistillationTraining: default
   - SethStep: default
   - SynonymGeneration: default
-  - ExplosionNERStep: default
+  - ExplosionStringMatchingStep: default
   - MergeOverlappingEntsStep: default
   - StanzaStep: default
   - MappingStep: default

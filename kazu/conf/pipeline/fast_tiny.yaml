@@ -1,5 +1,5 @@
 # @package _global_
 pipeline:
   steps:
-    - ExplosionNERStep
+    - ExplosionStringMatchingStep
     - StanzaStep

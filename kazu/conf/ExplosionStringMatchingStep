@@ -1,4 +1,4 @@
-_target_: kazu.steps.ner.explosion.ExplosionNERStep
+_target_: kazu.steps.ner.explosion.ExplosionStringMatchingStep
 depends_on: ~
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 include_sentence_offsets: False

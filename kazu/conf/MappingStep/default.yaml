@@ -29,7 +29,7 @@ strategy_runner:
           - ${oc.env:KAZU_MODEL_PACK}/mapping_step/oxo_dump
   ner_namespace_processing_order:
     - TransformersModelForTokenClassificationNerStep
-    - ExplosionNERStep
+    - ExplosionStringMatchingStep
   symbolic_strategies:
 
     TransformersModelForTokenClassificationNerStep:
@@ -101,7 +101,7 @@ strategy_runner:
             confidence: PROBABLE
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
 
-    ExplosionNERStep:
+    ExplosionStringMatchingStep:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:
@@ -162,7 +162,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: PROBABLE
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-    ExplosionNERStep:
+    ExplosionStringMatchingStep:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:

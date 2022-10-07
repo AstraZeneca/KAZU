@@ -13,7 +13,7 @@ def merge_step(kazu_test_config) -> MergeOverlappingEntsStep:
 def test_merge_overlapping_step_case_1(merge_step):
     # should filter longer span with no mappings
     explosion_ent = Entity(
-        namespace="ExplosionNERStep",
+        namespace="ExplosionStringMatchingStep",
         match="Baclofen",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=8)]),
@@ -49,7 +49,7 @@ def test_merge_overlapping_step_case_1(merge_step):
 def test_merge_overlapping_step_case_2(merge_step):
     # should filter shorter span, as longer span has a mapping
     explosion_ent = Entity(
-        namespace="ExplosionNERStep",
+        namespace="ExplosionStringMatchingStep",
         match="Baclofen",
         entity_class="drug",
         spans=frozenset([CharSpan(start=0, end=8)]),
@@ -95,7 +95,7 @@ def test_merge_overlapping_step_case_2(merge_step):
 def test_merge_overlapping_step_case_3(merge_step):
     # two spans the same length. One should be kept as it's a preferred class (according to config)
     explosion_ent = Entity(
-        namespace="ExplosionNERStep",
+        namespace="ExplosionStringMatchingStep",
         match="Baclofen",
         entity_class="anatomy",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=0, end=8)]),
@@ -141,7 +141,7 @@ def test_merge_overlapping_step_case_3(merge_step):
 def test_merge_overlapping_step_case_4(merge_step):
     # multiple overlapping non contained spans. Longest should be kept
     explosion_ent = Entity(
-        namespace="ExplosionNERStep",
+        namespace="ExplosionStringMatchingStep",
         match="Baclofen",
         entity_class="anatomy",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=0, end=8)]),
@@ -204,7 +204,7 @@ def test_merge_overlapping_step_case_4(merge_step):
 def test_merge_overlapping_step_case_5(merge_step):
     # a more complex case involving multiple locations
     explosion_ent = Entity(
-        namespace="ExplosionNERStep",
+        namespace="ExplosionStringMatchingStep",
         match="Baclofen",
         entity_class="anatomy",  # <- deliberately wrong
         spans=frozenset([CharSpan(start=0, end=8)]),

@@ -20,7 +20,7 @@ from kazu.utils.utils import PathLike
 logger = logging.getLogger(__name__)
 
 
-class ExplosionNERStep(BaseStep):
+class ExplosionStringMatchingStep(BaseStep):
     """
     A wrapper for the explosion ontology-based entity matcher and linker
     """
