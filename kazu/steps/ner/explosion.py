@@ -4,7 +4,15 @@ from typing import Iterator, List, Optional, Tuple
 
 import spacy
 
-from kazu.data.data import CharSpan, Document, Section, Entity, PROCESSING_EXCEPTION
+from kazu.data.data import (
+    CharSpan,
+    Document,
+    Section,
+    Entity,
+    SynonymTermWithMetrics,
+    PROCESSING_EXCEPTION,
+)
+from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.steps import BaseStep
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import as_path, PathLike
@@ -40,6 +48,8 @@ class ExplosionNERStep(BaseStep):
         self.spacy_pipeline = spacy.load(self.path)
         self.span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
 
+        self.synonym_db = SynonymDatabase()
+
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
 
@@ -68,6 +78,16 @@ class ExplosionNERStep(BaseStep):
                         namespace=self.namespace(),
                     )
                     entities.append(e)
+
+                    terms = (
+                        self.synonym_db.get(span.parser_name_, span.term_norm_)
+                        for span in span_group
+                    )
+                    terms_with_metrics = (
+                        SynonymTermWithMetrics.from_synonym_term(term, exact_match=True)
+                        for term in terms
+                    )
+                    e.update_terms(terms_with_metrics)
 
                 # add sentence offsets
                 if self.include_sentence_offsets:
