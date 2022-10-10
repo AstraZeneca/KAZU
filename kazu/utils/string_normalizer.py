@@ -236,6 +236,8 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
 
 class GeneStringNormalizer(EntityClassNormalizer):
+    gene_name_suffixes = {"in", "ase", "an", "gen", "gon"}
+
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
         """
@@ -249,7 +251,9 @@ class GeneStringNormalizer(EntityClassNormalizer):
         """
         string = replace_dashes(original_string, " ")
         tokens = string.split(" ")
-        if len(tokens) == 1:
+        if len(tokens) == 1 and not any(
+            tokens[0].endswith(suffix) for suffix in GeneStringNormalizer.gene_name_suffixes
+        ):
             # single tokens are likely gene symbols, or can be easily classified as gene symbols - can't trust
             # capitalisation e.g. mTOR, erbBB2, egfr vs EGFR, Insulin
             # in part because of convention to camel case animal homologous gene symbols
