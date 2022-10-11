@@ -144,11 +144,7 @@ class StopWordRemover(SynonymGenerator):
     """
 
     def __init__(self, spacy_pipeline: SpacyPipeline):
-        self.all_stopwords = copy.deepcopy(spacy_pipeline.nlp.Defaults.stop_words)
-        # treating "i" as a stop word means stripping trailing roman numeral 1
-        # e.g. in 'grade I' which gives the incorrect synonym 'grade' when using this
-        # for NER
-        self.all_stopwords.remove("i")
+        self.all_stopwords = {"of", "and", "in", "to", "with", "caused", "involved", "by", "the"}
 
     def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
         new_terms = set()
