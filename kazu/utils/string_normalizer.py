@@ -98,6 +98,9 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         tokens = original_string.split(" ")
         token_count = len(tokens)
 
+        if token_count == 1 and len(original_string) <= 3:
+            return True
+
         for i, char in enumerate(original_string):
             if char.isalpha():
                 if char.isupper():
@@ -245,6 +248,65 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return string
 
 
+class DiseaseStringNormalizer(EntityClassNormalizer):
+    known_disease_short_nouns = {"flu"}
+
+    @staticmethod
+    def is_symbol_like(original_string: str) -> bool:
+        # anatomy tends not to have symbolic representations
+        if original_string.lower() in DiseaseStringNormalizer.known_disease_short_nouns:
+            return False
+        else:
+            return DefaultStringNormalizer.is_symbol_like(original_string)
+
+    @staticmethod
+    def normalize_symbol(original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_symbol
+
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_symbol(original_string)
+
+    @staticmethod
+    def normalize_noun_phrase(original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_noun_phrase
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_noun_phrase(original_string)
+
+
+class AnatomyStringNormalizer(EntityClassNormalizer):
+    @staticmethod
+    def is_symbol_like(original_string: str) -> bool:
+        # anatomy tends not to have symbolic representations
+        return False
+
+    @staticmethod
+    def normalize_symbol(original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_noun_phrase (note, since
+        all anatomy is non-symbolic, this is theoretically superfluous, but we
+        include it anyway)
+
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_noun_phrase(original_string)
+
+    @staticmethod
+    def normalize_noun_phrase(original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_noun_phrase
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_noun_phrase(original_string)
+
+
 class GeneStringNormalizer(EntityClassNormalizer):
     gene_name_suffixes = {"in", "ase", "an", "gen", "gon"}
 
@@ -350,7 +412,11 @@ class StringNormalizer:
     call custom entity class normalizers, or a default normalizer if none is available
     """
 
-    normalizers: Dict[Optional[str], Type[EntityClassNormalizer]] = {"gene": GeneStringNormalizer}
+    normalizers: Dict[Optional[str], Type[EntityClassNormalizer]] = {
+        "gene": GeneStringNormalizer,
+        "anatomy": AnatomyStringNormalizer,
+        "disease": DiseaseStringNormalizer,
+    }
 
     @staticmethod
     @lru_cache(maxsize=5000)
