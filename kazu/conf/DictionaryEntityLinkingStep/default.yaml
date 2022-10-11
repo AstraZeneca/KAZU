@@ -3,6 +3,8 @@ depends_on: ~
 lookup_cache_size: 50000
 top_n: 20
 entity_class_to_ontology_mappings: ${entity_class_to_ontology_map}
+skip_ner_namespaces:
+  - ExplosionStringMatchingStep
 indices:
   - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.chembl_parser}
