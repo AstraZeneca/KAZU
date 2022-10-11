@@ -24,7 +24,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         entity_class_to_ontology_mappings: Dict[str, List[str]],
         lookup_cache_size: int = 5000,
         top_n: int = 20,
-        skip_ner_namespaces: Optional[Set[str]] = None
+        skip_ner_namespaces: Optional[Set[str]] = None,
     ):
         """
 
@@ -42,7 +42,7 @@ class DictionaryEntityLinkingStep(BaseStep):
         self.entity_class_to_ontology_mappings = entity_class_to_ontology_mappings
         self.entity_class_to_indices: Dict[str, Set[DictionaryIndex]] = {}
         self.top_n = top_n
-        self.skip_ner_namespaces = skip_ner_namespaces
+        self.skip_ner_namespaces = skip_ner_namespaces if skip_ner_namespaces is not None else set()
         self.indices = indices
         self.load_or_build_caches()
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
@@ -77,7 +77,12 @@ class DictionaryEntityLinkingStep(BaseStep):
         :return:
         """
         failed_docs: List[Document] = []
-        entities = (ent for doc in docs for ent in doc.get_entities() if ent.namespace not in self.skip_ner_namespaces)
+        entities = (
+            ent
+            for doc in docs
+            for ent in doc.get_entities()
+            if ent.namespace not in self.skip_ner_namespaces
+        )
         ents_by_match_and_class = {
             k: list(v) for k, v in sort_then_group(entities, lambda x: (x.match, x.entity_class))
         }
