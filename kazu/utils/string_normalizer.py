@@ -95,19 +95,29 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         lower_count = 0
         numeric_count = 0
 
-        for char in original_string:
+        tokens = original_string.split(" ")
+        token_count = len(tokens)
+
+        for i, char in enumerate(original_string):
             if char.isalpha():
                 if char.isupper():
                     upper_count += 1
+                    if i > 0 and token_count == 1:
+                        # if is single token, and any char apart from first is upper, assume symbol
+                        return True
+
                 else:
                     lower_count += 1
 
             elif char.isnumeric():
+                if token_count == 1:
+                    # if is single token and has a number in it, assume symbol
+                    return True
                 numeric_count += 1
 
-        if upper_count > lower_count:
+        if upper_count >= lower_count:
             return True
-        elif numeric_count > (upper_count + lower_count):
+        elif numeric_count >= (upper_count + lower_count):
             return True
         else:
             return False
@@ -284,9 +294,9 @@ class GeneStringNormalizer(EntityClassNormalizer):
                     lower_count += 1
             elif char.isnumeric():
                 numeric_count += 1
-        if upper_count > lower_count:
+        if upper_count >= lower_count:
             return True
-        elif numeric_count > (upper_count + lower_count):
+        elif numeric_count >= (upper_count + lower_count):
             return True
         else:
             return False
