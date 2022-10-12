@@ -6,8 +6,10 @@
     # creates a document with a single section
     doc = Document.create_simple_document("Epidermal Growth Factor Receptor (EGFR) is a gene.")
     # create an Entity for the span "Epidermal Growth Factor Receptor"
-    entity = Entity.from_spans(spans=[(0,32,)],namespace='example',entity_class='gene',join_str="",
-                               text=doc.sections[0].get_text())
+    entity = Entity.load_contiguous_entity(
+        start=0, end=32, namespace='example', entity_class='gene', join_str="",
+        text=doc.sections[0].get_text()
+    )
 
 
 
@@ -19,7 +21,7 @@
     # a step may fail to process a document, so it returns two lists, successes and failures
     succeeded, failed = step([doc])
     # check that a new entity has been created, attached to the EGFR span
-    egfr_entity = next(iter(filter(lambda x:x.match=='EGFR',doc.get_entities())))
+    egfr_entity = next(iter(filter(lambda x: x.match == 'EGFR', doc.get_entities())))
     assert egfr_entity.entity_class =='gene'
     print(egfr_entity.match)
 
