@@ -93,7 +93,7 @@ def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_genera
 def test_StopWordRemover():
     generator = StopWordRemover()
     check_generator_result(
-        input_str="The cat sat on the mat", expected_syns={"cat sat mat"}, generator=generator
+        input_str="The cat sat in the mat", expected_syns={"cat sat mat"}, generator=generator
     )
 
 
