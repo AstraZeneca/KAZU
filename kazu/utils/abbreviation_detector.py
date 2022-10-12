@@ -345,7 +345,7 @@ class KazuAbbreviationDetector:
     ) -> Tuple[
         List[SectionAndLongToShortCandidates], SectionToCharacterIndexedEntities, SectionToSpacyDoc
     ]:
-        long_to_short_candidates: List[Tuple[Section, Span, Span]] = []
+        long_to_short_candidates: List[SectionAndLongToShortCandidates] = []
         section_to_spacy_doc = {}
         section_to_ents_by_char_index = {}
         for section in document.sections:
