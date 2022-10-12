@@ -90,10 +90,8 @@ def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_genera
     check_generator_result(input_str, expected_syns, separator_expansion_generator)
 
 
-@requires_model_pack
-def test_StopWordRemover(kazu_test_config):
-    spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
-    generator = StopWordRemover(spacy_pipeline=spacy_pipeline)
+def test_StopWordRemover():
+    generator = StopWordRemover()
     check_generator_result(
         input_str="The cat sat on the mat", expected_syns={"cat sat mat"}, generator=generator
     )
