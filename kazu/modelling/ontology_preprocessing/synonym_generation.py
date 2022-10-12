@@ -143,8 +143,7 @@ class StopWordRemover(SynonymGenerator):
     remove stopwords from a string
     """
 
-    def __init__(self, spacy_pipeline: SpacyPipeline):
-        self.all_stopwords = {"of", "and", "in", "to", "with", "caused", "involved", "by", "the"}
+    all_stopwords = {"of", "and", "in", "to", "with", "caused", "involved", "by", "the"}
 
     def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
         new_terms = set()
