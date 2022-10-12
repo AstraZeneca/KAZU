@@ -249,12 +249,12 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
 
 class DiseaseStringNormalizer(EntityClassNormalizer):
-    known_disease_short_nouns = {"flu"}
+    known_disease_short_nouns = {"flu", "Flu", "HIV", "STI", "NSCLC"}
 
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
         # anatomy tends not to have symbolic representations
-        if original_string.lower() in DiseaseStringNormalizer.known_disease_short_nouns:
+        if original_string in DiseaseStringNormalizer.known_disease_short_nouns:
             return False
         else:
             return DefaultStringNormalizer.is_symbol_like(original_string)
