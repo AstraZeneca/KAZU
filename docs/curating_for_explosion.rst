@@ -24,14 +24,14 @@ In Kazu, we take the following approach:
                                 output_dir='~/noisy_spacy_pipeline')
 
 2) we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
-    is for illustration only - you'll probably want a more sophisticated set up when doing this on a large document set!
+is for illustration only - you'll probably want a more sophisticated set up when doing this on a large document set!
 
 >>> from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
     from dataclasses import dataclass, field
     from typing import List
     import json
 
-    @dataclass
+>>> @dataclass
     class AnnotatedPhrase():
         term:str
         action:str
@@ -40,23 +40,20 @@ In Kazu, we take the following approach:
         term_norm_mapping:dict[str,str] = field(default_factory=dict)
         examples:list[str] = field(default_factory=list)
 
-    class AnnotatedPhraseEncoder(json.JSONEncoder):
+>>> class AnnotatedPhraseEncoder(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, AnnotatedPhrase):
                 return obj.__dict__
             # Base class default() raises TypeError:
             return json.JSONEncoder.default(self, obj)
 
-    def save(path,data):
+>>> def save(path,data):
         with open(path,'w') as f:
             f.writelines([f"{json.dumps(x,cls=AnnotatedPhraseEncoder)}\n" for x in data])
 
-    noisy_step = ExplosionStringMatchingStep(path='~/noisy_spacy_pipeline')
+>>> noisy_step = ExplosionStringMatchingStep(path='~/noisy_spacy_pipeline')
     docs:List[Document] = get_docs()
     noisy_step(docs)
-
-
-
     curatable_phrases = []
     for doc in docs:
         for section in doc.sections:
@@ -73,7 +70,7 @@ In Kazu, we take the following approach:
                 )
                 curatable_phrases.append(to_curate)
 
-    save('~/phrases_to_curate.jsonl')
+ >>> save('~/phrases_to_curate.jsonl')
 
 
 3) we curate the phrases_to_curate.jsonl file, according to whether they look like good matches or not for a given parser, and whether case matters
