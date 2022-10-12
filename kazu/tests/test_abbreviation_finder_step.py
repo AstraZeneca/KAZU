@@ -74,3 +74,6 @@ def test_AbbreviationFinderStep_remove_ents(exclude_abbr):
         assert len(ents) == 0
     else:
         assert len(ents) == 2
+        for ent in ents:
+            assert ent.match == "AML"
+            assert ent.entity_class in  {"disease", "gene"}
