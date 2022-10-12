@@ -29,6 +29,5 @@ def test_skips_prelinked_entities(tmp_path):
 
     step([doc])
     assert (
-        len(ents[0].syn_term_to_synonym_terms) == 0
-        and len(ents[1].syn_term_to_synonym_terms) > 0
+        len(ents[0].syn_term_to_synonym_terms) == 0 and len(ents[1].syn_term_to_synonym_terms) > 0
     )
