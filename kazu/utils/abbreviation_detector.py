@@ -1,10 +1,13 @@
 import copy
 import itertools
 import logging
-
 from kazu.data.data import Document, Entity, Section
 from kazu.utils.grouping import sort_then_group
-
+from typing import Tuple, List, Optional, Set, Dict, DefaultDict
+from collections import defaultdict
+from spacy.tokens import Span, Doc
+from spacy.matcher import Matcher
+from spacy.language import Language
 """
 Original Credit:
 https://github.com/allenai/scispacy
@@ -27,11 +30,7 @@ eprint = {arXiv:1902.07669},
 }
 """
 
-from typing import Tuple, List, Optional, Set, Dict
-from collections import defaultdict
-from spacy.tokens import Span, Doc
-from spacy.matcher import Matcher
-from spacy.language import Language
+
 
 logger = logging.getLogger(__name__)
 
