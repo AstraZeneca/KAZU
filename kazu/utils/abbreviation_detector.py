@@ -124,7 +124,7 @@ def filter_matches(
     """
     # Filter into two cases:
     # 1. <Short Form> ( <Long Form> )
-    # 2. <Long Form> (<Short Form>) [this case is most common].
+    # 2. <Long Form> ( <Long Form> ) [this case is most common].
     candidates = []
     for match in matcher_output:
         start = match[1]
