@@ -145,13 +145,14 @@ class StopWordRemover(SynonymGenerator):
 
     all_stopwords = {"of", "and", "in", "to", "with", "caused", "involved", "by", "the"}
 
-    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+    @classmethod
+    def call(cls, synonym: SynonymTerm) -> Optional[SynonymTerm]:
         new_terms = set()
         for text in synonym.terms:
             lst = []
             detected = False
             for token in text.split():
-                if token.lower() in self.all_stopwords:
+                if token.lower() in cls.all_stopwords:
                     detected = True
                 else:
                     lst.append(token)
