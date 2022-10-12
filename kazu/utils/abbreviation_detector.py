@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 SectionAndLongToShortCandidates = Tuple[Section, Span, Span]
 SectionToSpacyDoc = Dict[Section, Doc]
-SectionToCharacterIndexedEntities = Dict[Section, Dict[Tuple[int, int], Set[Entity]]]
+SectionToCharacterIndexedEntities = DefaultDict[Section, DefaultDict[Tuple[int, int], Set[Entity]]]
 
 
 def find_abbreviation(
@@ -349,7 +349,9 @@ class KazuAbbreviationDetector:
     ]:
         long_to_short_candidates: List[SectionAndLongToShortCandidates] = []
         section_to_spacy_doc = {}
-        section_to_ents_by_char_index = {}
+        section_to_ents_by_char_index: SectionToCharacterIndexedEntities = defaultdict(
+            lambda: defaultdict(set)
+        )
         for section in document.sections:
             spacy_doc = self.nlp(section.get_text())
             matches = self.matcher(spacy_doc)
@@ -357,14 +359,8 @@ class KazuAbbreviationDetector:
 
             long_to_short_candidates.extend(filter_matches(section, matches_no_brackets, spacy_doc))
             section_to_spacy_doc[section] = spacy_doc
-            section_to_ents_by_char_index[section] = {
-                k: set(v)
-                for k, v in sort_then_group(
-                    filter(lambda x: len(x.spans) == 1, section.entities),
-                    key_func=lambda x: (
-                        x.start,
-                        x.end,
-                    ),
-                )
-            }
+            for ent in section.entities:
+                if len(ent.spans) == 1:
+                    section_to_ents_by_char_index[section][(ent.start, ent.end)].add(ent)
+
         return long_to_short_candidates, section_to_ents_by_char_index, section_to_spacy_doc
