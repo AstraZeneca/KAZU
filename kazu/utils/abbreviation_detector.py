@@ -255,8 +255,11 @@ class KazuAbbreviationDetector:
                         abbrv_span, section, source_ent
                     )
                     section.entities.append(new_ent)
-                    if abbrv_char_index_key in section_to_ents_by_char_index[section]:
-                        section_to_ents_by_char_index[section][abbrv_char_index_key].add(new_ent)
+                    possible_ents_for_char_indices = section_to_ents_by_char_index[section].get(
+                        abbrv_char_index_key
+                    )
+                    if possible_ents_for_char_indices is not None:
+                        possible_ents_for_char_indices.add(new_ent)
 
                 abbrv_ents_at_index_by_namespace = {
                     k: set(v)
