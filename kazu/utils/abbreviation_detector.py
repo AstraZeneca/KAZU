@@ -63,8 +63,8 @@ def find_abbreviation(
     A Tuple[Span, Optional[Span]], representing the short form abbreviation and the
     span corresponding to the long form expansion, or None if a match is not found.
     """
-    long_form = " ".join([x.text for x in long_form_candidate])
-    short_form = " ".join([x.text for x in short_form_candidate])
+    long_form = " ".join(x.text for x in long_form_candidate)
+    short_form = " ".join(x.text for x in short_form_candidate)
 
     long_index = len(long_form) - 1
     short_index = len(short_form) - 1
@@ -164,11 +164,11 @@ def short_form_filter(span: Span) -> bool:
     """
 
     # All words are between length 2 and 10
-    if not all([2 <= len(x) < 10 for x in span]):
+    if not all(2 <= len(x) < 10 for x in span):
         return False
 
     # At least 50% of the short form should be alpha
-    if (sum([c.isalpha() for c in span.text]) / len(span.text)) < 0.5:
+    if (sum(c.isalpha() for c in span.text) / len(span.text)) < 0.5:
         return False
 
     # The first character of the short form should be alpha
