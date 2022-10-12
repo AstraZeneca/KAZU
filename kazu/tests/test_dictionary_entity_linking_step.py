@@ -17,7 +17,7 @@ def test_skips_prelinked_entities():
             skip_ner_namespaces={mock_skip_namespace},
         )
 
-        text = 'The word "one", recognised in a joint ner-linking step. But also the word "one" somehow only recongised in a different, purely ner, step.'
+        text = 'The word "one", recognised in a joint ner-linking step. But also the word "one" somehow only recognised in a different, purely ner, step.'
         ents = [
             Entity.from_spans(
                 spans=[(10, 13)], text=text, entity_class="int", namespace=mock_skip_namespace
