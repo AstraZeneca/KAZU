@@ -253,7 +253,6 @@ class DiseaseStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
-        # anatomy tends not to have symbolic representations
         if original_string in DiseaseStringNormalizer.known_disease_short_nouns:
             return False
         else:
