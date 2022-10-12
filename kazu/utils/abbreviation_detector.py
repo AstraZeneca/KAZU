@@ -143,7 +143,7 @@ def filter_matches(
             short_form_candidate = doc[start:end]
 
             # Sum character lengths of contents of parens.
-            abbreviation_length = sum([len(x) for x in short_form_candidate])
+            abbreviation_length = sum(len(x) for x in short_form_candidate)
             max_words = min(abbreviation_length + 5, abbreviation_length * 2)
             # Look up to max_words backwards
             long_form_candidate = doc[max(start - max_words - 1, 0) : start - 1]
