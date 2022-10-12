@@ -16,6 +16,7 @@ Welcome to Kazu's documentation!
    data model <datamodel>
    pipeline steps <steps>
    model training <training>
+   curating an ontology for NER <curating_for_explosion>
 
 |
 
