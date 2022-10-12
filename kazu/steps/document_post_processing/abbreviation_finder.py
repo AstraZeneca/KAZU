@@ -27,7 +27,6 @@ class AbbreviationFinderStep(BaseStep):
 
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
-        we need to override _run, as we need to calculate abbreviations over all sections in a document
 
         :param docs:
         :return:
