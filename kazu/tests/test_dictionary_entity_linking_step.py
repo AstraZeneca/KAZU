@@ -19,11 +19,11 @@ def test_skips_prelinked_entities():
 
         text = 'The word "one", recognised in a joint ner-linking step. But also the word "one" somehow only recognised in a different, purely ner, step.'
         ents = [
-            Entity.from_spans(
-                spans=[(10, 13)], text=text, entity_class="int", namespace=mock_skip_namespace
+            Entity.load_contiguous_entity(
+                start=10, end=13, text=text, entity_class="int", namespace=mock_skip_namespace
             ),
-            Entity.from_spans(
-                spans=[(75, 78)], text=text, entity_class="int", namespace=mock_noskip_namespace
+            Entity.load_contiguous_entity(
+                start=75, end=78, text=text, entity_class="int", namespace=mock_noskip_namespace
             ),
         ]
         doc = Document.create_simple_document(text)
