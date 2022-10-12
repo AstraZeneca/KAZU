@@ -43,7 +43,6 @@ def test_AbbreviationFinderStep_copy_ents():
     sec4.entities.append(ent5)
     doc = Document(idx="test removal of entity data", sections=[sec3, sec4])
 
-    step = AbbreviationFinderStep([])
 
     success, failure = step([doc])
     assert len(failure) == 0
