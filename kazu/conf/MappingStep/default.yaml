@@ -167,15 +167,31 @@ strategy_runner:
       stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-          disambiguation_strategies:
-            - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
+          disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: HIGHLY_LIKELY
       ent_class_strategies:
-        disease:
+        # we don't expect any value from the disambiguation strategies for these ontologies, so save the effort
+        anatomy:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            disambiguation_strategies: ~
             confidence: HIGHLY_LIKELY
-            disambiguation_strategies: ${DisambiguationStrategies.default}
-        drug:
+        go_bp:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            confidence: PROBABLE
-            disambiguation_strategies: ${DisambiguationStrategies.default}
+            disambiguation_strategies: ~
+            confidence: HIGHLY_LIKELY
+        go_cc:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            disambiguation_strategies: ~
+            confidence: HIGHLY_LIKELY
+        go_mf:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            disambiguation_strategies: ~
+            confidence: HIGHLY_LIKELY
+        cell_line:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            disambiguation_strategies: ~
+            confidence: HIGHLY_LIKELY
+        cell_type:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            disambiguation_strategies: ~
+            confidence: HIGHLY_LIKELY
