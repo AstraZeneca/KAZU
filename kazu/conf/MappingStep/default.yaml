@@ -166,48 +166,15 @@ strategy_runner:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:
-        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.DefinedElsewhereInDocumentMappingStrategy
+        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           disambiguation_strategies:
             - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
           confidence: HIGHLY_LIKELY
       ent_class_strategies:
-        anatomy:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies:
-              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-            confidence: HIGHLY_LIKELY
-        go_bp:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies:
-              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-            confidence: HIGHLY_LIKELY
-        go_cc:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies:
-              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-            confidence: HIGHLY_LIKELY
-        go_mf:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies:
-              - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-            confidence: HIGHLY_LIKELY
         disease:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: HIGHLY_LIKELY
             disambiguation_strategies: ${DisambiguationStrategies.default}
-
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchWithEmbeddingConfirmationStringMatchingStrategy
-            confidence: PROBABLE
-            disambiguation_strategies: ${DisambiguationStrategies.default}
-            symbolic_only: False
-            complex_string_scorer:
-              _target_: kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer
-              sapbert: ${PLSapbertModel}
-              trainer:
-                _target_: pytorch_lightning.Trainer
-                enable_progress_bar: False
-                accelerator: "cpu"
-                logger: False
         drug:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: PROBABLE
