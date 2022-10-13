@@ -7,3 +7,4 @@ pipeline:
     - SethStep
     - DictionaryEntityLinkingStep
     - MappingStep
+    - CleanupStep

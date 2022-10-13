@@ -1,0 +1,4 @@
+DropUnmappedExplosionEnts:
+  _target_: kazu.steps.other.cleanup.DropUnmappedExplosionEnts
+  explosion_step_namespace:
+    _target_: kazu.steps.ner.explosion.ExplosionNERStep.namespace

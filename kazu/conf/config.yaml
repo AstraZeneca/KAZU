@@ -23,3 +23,5 @@ defaults:
   - MappingStep: default
   - DisambiguationStrategies: default
   - StringScorers: default
+  - CleanupStep: default
+  - CleanupActions: default
