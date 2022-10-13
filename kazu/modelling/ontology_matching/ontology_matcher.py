@@ -4,7 +4,7 @@ import pickle
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Callable, Iterable, Tuple
+from typing import List, Dict, Union, Iterable, Tuple
 
 import spacy
 import srsly
@@ -55,17 +55,14 @@ class OntologyMatcher:
         *,
         span_key: str = SPAN_KEY,
         match_id_sep: str = MATCH_ID_SEP,
-        entry_filter: Callable[[str, str], Tuple[bool, bool]],
         parser_name_to_entity_type: Dict[str, str],
     ):
         """
 
         :param span_key: the key for doc.spans to store the matches in
-        :param entry_filter: a function deciding whether a given ontology row/entry is valid
         """
         self.nlp = nlp
         self.name = name
-        self.entry_filter = entry_filter
         self.cfg = OntologyMatcherConfig(
             span_key=span_key,
             match_id_sep=match_id_sep,
