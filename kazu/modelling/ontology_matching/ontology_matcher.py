@@ -126,7 +126,7 @@ class OntologyMatcher:
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
 
         with open(curated_list, mode="r") as jsonlf:
-            curated_synonyms = (json.loads(line) for line in jsonlf)
+            curated_synonyms = [json.loads(line) for line in jsonlf]
 
         synonyms_to_add = (item for item in curated_synonyms if item["action"] == "keep")
 
