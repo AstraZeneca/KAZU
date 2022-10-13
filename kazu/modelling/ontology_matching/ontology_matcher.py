@@ -200,11 +200,6 @@ class OntologyMatcher:
                 "Did you initialize the labels and the phrase matchers?"
             )
 
-        # implied by above - strict_matcher is None implies self.nr_strict_rules
-        # and equivalent for lowercase matches
-        # mypy is happier having this assertion
-        assert self.strict_matcher is not None or self.lowercase_matcher is not None
-
         # at least one phrasematcher will now be set.
         # normally, this will only be one: either a strict matcher if constructed by curated list,
         # or a lowercase matcher if constructed 'from scrach' using the parsers - currently just an
@@ -216,6 +211,10 @@ class OntologyMatcher:
             matches = set(self.strict_matcher(doc))
         elif self.lowercase_matcher is not None:
             matches = set(self.lowercase_matcher(doc))
+        else:
+            # this isn't possible since if both of them were None,
+            # the if clause at the start of this function would raise an error
+            raise AssertionError()
 
         spans = set(Span(doc, start, end, label=key) for key, start, end in matches)
         spans = self._set_span_attributes(spans)
