@@ -352,21 +352,22 @@ class KazuAbbreviationDetector:
             # defined twice in a document. There's not much we can do about this,
             # but at least the case which is discarded will be picked up below by
             # the global matcher. So it's likely that things will work out ok most of the time.
-            new_long = long.text not in already_seen_long if long else False
-            new_short = short.text not in already_seen_short
-            if long is not None and new_long and new_short:
-                char_index_key = (
-                    long.start_char,
-                    long.end_char,
-                )
-                already_seen_long.add(long.text)
-                already_seen_short.add(short.text)
-                all_occurences[long].add(short)
-                # Add a rule to a matcher to find exactly this substring.
-                global_matcher.add(long.text, [[{"ORTH": x.text} for x in short]])
-                long_form_string_to_source_ents[long.text] = section_to_ents_by_char_index[
-                    section
-                ].get(char_index_key, set())
+            if long is not None:
+                new_long = long.text not in already_seen_long if long else False
+                new_short = short.text not in already_seen_short
+                if new_long and new_short:
+                    char_index_key = (
+                        long.start_char,
+                        long.end_char,
+                    )
+                    already_seen_long.add(long.text)
+                    already_seen_short.add(short.text)
+                    all_occurences[long].add(short)
+                    # Add a rule to a matcher to find exactly this substring.
+                    global_matcher.add(long.text, [[{"ORTH": x.text} for x in short]])
+                    long_form_string_to_source_ents[long.text] = section_to_ents_by_char_index[
+                        section
+                    ].get(char_index_key, set())
         return global_matcher, long_form_string_to_source_ents
 
     def _find_candidates_and_index_sections(
