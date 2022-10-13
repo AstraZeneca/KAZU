@@ -1,7 +1,7 @@
 import copy
 import logging
 from collections import defaultdict
-from typing import Tuple, List, Optional, Set, Dict, DefaultDict
+from typing import Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
 
 from spacy.language import Language
 from spacy.matcher import Matcher
@@ -198,7 +198,7 @@ class KazuAbbreviationDetector:
         self,
         nlp: Language,
         namespace: str,
-        exclude_abbrvs: Optional[List[str]] = None,
+        exclude_abbrvs: Optional[Iterable[str]] = None,
     ) -> None:
         """
 
