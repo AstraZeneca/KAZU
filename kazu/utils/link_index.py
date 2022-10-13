@@ -217,8 +217,8 @@ class DictionaryIndex(Index):
             return [term_with_metrics]
 
         else:
-            # TODO: this seems to not be using sparse mat mul, and can be a lot faster. See TfIdfDocumentScorer
-            # TODO: for example code on how to reimplement with sparse
+            # benchmarking suggests converting to dense is faster than usign the
+            # csr_matrix version. Strange...
             query = self.vectorizer.transform([match_norm]).todense()
             # minus to negate, so arg sort works in correct order
             score_matrix = np.squeeze(-np.asarray(self.tf_idf_matrix.dot(query.T)))
