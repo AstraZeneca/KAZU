@@ -142,11 +142,9 @@ class OntologyMatcher:
             for parser_name, term_norm in item["term_norm_mapping"].items():
                 match_id = parser_name + self.match_id_sep + term_norm
                 if item["case_sensitive"]:
-                    matcher = strict_matcher
+                    strict_matcher.add(match_id, [pattern])
                 else:
-                    matcher = lowercase_matcher
-
-                matcher.add(match_id, pattern)
+                    lowercase_matcher.add(match_id, [pattern])
 
         # only set the phrasematcher if we have any rules for them
         # this lets us skip running a phrasematcher if it has no rules when we come
