@@ -43,7 +43,6 @@ def test_AbbreviationFinderStep_copy_ents():
     sec4.entities.append(ent5)
     doc = Document(idx="test removal of entity data", sections=[sec3, sec4])
 
-
     success, failure = step([doc])
     assert len(failure) == 0
 
@@ -76,4 +75,4 @@ def test_AbbreviationFinderStep_remove_ents(exclude_abbr):
         assert len(ents) == 2
         for ent in ents:
             assert ent.match == "AML"
-            assert ent.entity_class in  {"disease", "gene"}
+            assert ent.entity_class in {"disease", "gene"}
