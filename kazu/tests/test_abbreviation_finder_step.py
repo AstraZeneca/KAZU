@@ -5,7 +5,9 @@ from kazu.steps.document_post_processing.abbreviation_finder import Abbreviation
 
 
 def test_AbbreviationFinderStep_copy_ents():
-    sec1 = Section(text="Acute Mylenoid Leukaemia (AML) is a form of cancer", name="part1")
+    sec1 = Section(
+        text="Acute Mylenoid Leukaemia (AML) is a form of cancer. AML is treatable.", name="part1"
+    )
     ent1 = Entity.load_contiguous_entity(
         match="Acute Mylenoid Leukaemia", entity_class="disease", start=0, end=24, namespace="test"
     )
@@ -25,9 +27,10 @@ def test_AbbreviationFinderStep_copy_ents():
     success, failure = step([doc])
     assert len(failure) == 0
 
-    ents = doc.get_entities()
-    assert len(ents) == 3
-    for ent in ents:
+    assert len(sec1.entities) == 3
+    assert len(sec2.entities) == 1
+
+    for ent in doc.get_entities():
         assert ent.match in {"AML", "Acute Mylenoid Leukaemia"}
         assert ent.entity_class == "disease"
 
