@@ -61,8 +61,8 @@ class OntologyMatcher:
 
         :param span_key: the key for doc.spans to store the matches in
         """
-        Span.set_extension("parser_name_",default=None)
-        Span.set_extension("term_norm_",default=None)
+        Span.set_extension("parser_name_", default=None)
+        Span.set_extension("term_norm_", default=None)
         self.nlp = nlp
         self.name = name
         self.cfg = OntologyMatcherConfig(
