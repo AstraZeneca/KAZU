@@ -1,6 +1,5 @@
 # @package _global_
 pipeline:
   steps:
-    - SciSpacyAbbreviationExpansionStep
     - ExplosionNERStep
     - StanzaStep
