@@ -13,6 +13,7 @@ from kazu.data.data import (
     PROCESSING_EXCEPTION,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.steps import BaseStep
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
@@ -46,7 +47,8 @@ class ExplosionStringMatchingStep(BaseStep):
         # think about how this affects OntologyMatcher._set_span_attributes lookup of parser names in case they
         # are not there in the new config.
         self.spacy_pipeline = spacy.load(path)
-        self.span_key = self.spacy_pipeline.get_pipe("ontology_matcher").span_key
+        matcher: OntologyMatcher = self.spacy_pipeline.get_pipe("ontology_matcher")
+        self.span_key = matcher.span_key
 
         self.synonym_db = SynonymDatabase()
 
