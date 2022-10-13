@@ -241,7 +241,6 @@ class KazuAbbreviationDetector:
         section_to_spacy_doc: SectionToSpacyDoc,
     ):
         for section, spacy_doc in section_to_spacy_doc.items():
-            # section_entities = set(section.entities)
             global_matches = global_matcher(spacy_doc)
             for spacy_match_int, start, end in global_matches:
                 # span of the detected abbreviation
