@@ -20,7 +20,6 @@ class AbbreviationFinderStep(BaseStep):
     def __init__(self, depends_on: List[str], exclude_abbrvs: Optional[List[str]] = None):
         super().__init__(depends_on)
         self.nlp = English(max_length=10**8)
-        self.nlp.add_pipe("sentencizer")
         self.detector = KazuAbbreviationDetector(
             self.nlp, namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs
         )
