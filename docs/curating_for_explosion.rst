@@ -9,7 +9,7 @@ However, the terms in ontologies tend to be noisy when taken 'wholesale', and ne
 
 In Kazu, we take the following approach:
 
-1) generate synonym candidates from the raw ontology to build a putative pipeline
+1. generate synonym candidates from the raw ontology to build a putative pipeline.
 
 .. code-block::
 
@@ -32,8 +32,8 @@ In Kazu, we take the following approach:
         output_dir="~/noisy_spacy_pipeline",
     )
 
-2) we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
-is for illustration only - you'll probably want a more sophisticated set up when doing this on a large document set!
+2. we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
+   is for illustration only - you'll probably want a more sophisticated set up when doing this on a large document set!
 
 .. code-block::
 
@@ -93,9 +93,9 @@ is for illustration only - you'll probably want a more sophisticated set up when
     save("~/phrases_to_curate.jsonl", curatable_phrases)
 
 
-3) we curate the phrases_to_curate.jsonl file, according to whether they look like good matches or not for a given parser, and whether case matters
+3. we curate the phrases_to_curate.jsonl file, according to whether they look like good matches or not for a given parser, and whether case matters.
 
-4) Now, the final pipeline can be generated as follows:
+4. Now, the final pipeline can be generated as follows:
 
 .. code-block::
 
