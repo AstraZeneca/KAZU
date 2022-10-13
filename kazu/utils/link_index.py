@@ -217,7 +217,7 @@ class DictionaryIndex(Index):
             return [term_with_metrics]
 
         else:
-            # benchmarking suggests converting to dense is faster than usign the
+            # benchmarking suggests converting to dense is faster than using the
             # csr_matrix version. Strange...
             query = self.vectorizer.transform([match_norm]).todense()
             # minus to negate, so arg sort works in correct order
