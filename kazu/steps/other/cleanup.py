@@ -10,9 +10,9 @@ class CleanupAction(Protocol):
         raise NotImplementedError
 
 
-class DropUnmappedExplosionEnts:
-    def __init__(self, explosion_step_namespace: str):
-        self.explosion_step_namespace = explosion_step_namespace
+class DropUnmappedEnts:
+    def __init__(self, from_ent_namespaces: List[str]):
+        self.from_ent_namespaces = set(from_ent_namespaces)
 
     def __call__(self, doc: Document):
         for section in doc.sections:
@@ -20,7 +20,7 @@ class DropUnmappedExplosionEnts:
             drop_entities = set(
                 ent
                 for ent in section_entities
-                if ent.namespace == self.explosion_step_namespace and len(ent.mappings) == 0
+                if ent.namespace in self.from_ent_namespaces and len(ent.mappings) == 0
             )
             section_entities.difference_update(drop_entities)
             section.entities = list(section_entities)

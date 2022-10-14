@@ -1,4 +1,4 @@
 _target_: kazu.steps.other.cleanup.CleanupStep
 depends_on: ~
 cleanup_actions:
-  - ${CleanupActions.DropUnmappedExplosionEnts}
+  - ${CleanupActions.DropUnmappedEnts}

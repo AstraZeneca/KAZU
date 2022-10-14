@@ -9,7 +9,7 @@ def test_DropUnmappedExplosionEnts_action(kazu_test_config):
     explosion_step_namespace = ExplosionNERStep.namespace()
     mock_other_ner_namespace = "mock_other_ner_namespace"
 
-    action = instantiate(kazu_test_config.CleanupActions.DropUnmappedExplosionEnts)
+    action = instantiate(kazu_test_config.CleanupActions.DropUnmappedEnts)
     doc = Document.create_simple_document(
         "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
         "ABC9 is picked up by a different NER step and also not mapped."
