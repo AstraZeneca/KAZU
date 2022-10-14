@@ -1,7 +1,6 @@
 import itertools
 import traceback
-from typing import List, Tuple, Optional, Protocol, Callable, Iterable, TypeVar
-from functools import reduce
+from typing import List, Tuple, Optional, Protocol, Callable, TypeVar
 from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION
 from kazu.steps import BaseStep
 
@@ -21,7 +20,14 @@ class EntityFilterFnProvider(Protocol):
 
 class EntityFilterCleanupAction:
     def __init__(self, filter_fns: List[EntityFilterFn]):
-        self.filter_fns = filter_fns
+        self.combined_filter_fn = EntityFilterCleanupAction.combine_filter_fns(filter_fns)
+
+    @staticmethod
+    def combine_filter_fns(filter_fns: List[EntityFilterFn]) -> EntityFilterFn:
+        def combined_filter_fn(ent: Entity) -> bool:
+            return any(filter_fn(ent) for filter_fn in filter_fns)
+
+        return combined_filter_fn
 
     @staticmethod
     def from_filter_fn_providers(
@@ -37,11 +43,7 @@ class EntityFilterCleanupAction:
     def cleanup(self, doc: Document):
         for section in doc.sections:
             section_ents = set(section.entities)
-
-            filter_combiner: Callable[
-                [Iterable[Entity], EntityFilterFn], Iterable[Entity]
-            ] = lambda _filtered_ents, filter_fn: filter(filter_fn, _filtered_ents)
-            filtered_ents = set(reduce(filter_combiner, self.filter_fns, section_ents))
+            filtered_ents = set(filter(self.combined_filter_fn, section_ents))
 
             section_ents.difference_update(filtered_ents)
             section.entities = list(section_ents)
