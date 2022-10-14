@@ -72,7 +72,7 @@ class TfIdfScorer(metaclass=Singleton):
             vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
             vectoriser.fit(synonyms)
             with path.joinpath(parser_name).open(mode="wb") as vectorizer_f:
-                pickle.dump(self, vectorizer_f)
+                pickle.dump(vectoriser, vectorizer_f)
             self.parser_to_vectorizer[parser_name] = vectoriser
 
     def load_vectorizers(self, path: Path):
