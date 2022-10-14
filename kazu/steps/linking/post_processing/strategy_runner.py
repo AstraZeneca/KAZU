@@ -65,8 +65,10 @@ class NamespaceStrategyExecution:
     @property
     def longest_mapping_strategy_list_size(self):
         return max(
-            len(self.default_strategies),
-            *(len(strategies) for strategies in self.ent_class_strategies.values()),
+            (
+                len(self.default_strategies),
+                *(len(strategies) for strategies in self.ent_class_strategies.values()),
+            )
         )
 
     def get_strategies_for_entity_class(self, entity_class: str) -> List[MappingStrategy]:
