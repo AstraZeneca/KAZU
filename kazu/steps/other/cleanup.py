@@ -1,17 +1,16 @@
-import abc
 import traceback
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Protocol
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import BaseStep
 
 
-class CleanupAction(abc.ABC):
+class CleanupAction(Protocol):
     def __call__(self, doc: Document):
         raise NotImplementedError
 
 
-class DropUnmappedExplosionEnts(CleanupAction):
+class DropUnmappedExplosionEnts:
     def __init__(self, explosion_step_namespace: str):
         self.explosion_step_namespace = explosion_step_namespace
 

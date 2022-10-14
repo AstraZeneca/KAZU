@@ -1,4 +1,4 @@
-from kazu.steps.other.cleanup import CleanupStep, CleanupAction
+from kazu.steps.other.cleanup import CleanupStep
 from kazu.data.data import Document, Entity, Section, Mapping, LinkRanks
 from kazu.steps.ner.explosion import ExplosionNERStep
 
@@ -49,14 +49,14 @@ def test_DropUnmappedExplosionEnts_action(kazu_test_config):
 
 
 def test_cleanup_step(kazu_test_config):
-    class MockCleanupAction1(CleanupAction):
+    class MockCleanupAction1:
         def __call__(self, doc: Document):
             doc_sections = set(doc.sections)
             drop_sections = set([section for section in doc_sections if len(section.text) < 3])
             doc_sections.difference_update(drop_sections)
             doc.sections = list(doc_sections)
 
-    class MockCleanupAction2(CleanupAction):
+    class MockCleanupAction2:
         def __call__(self, doc: Document):
             for ent in doc.get_entities():
                 if ent.namespace == "tricky_ent_step":
