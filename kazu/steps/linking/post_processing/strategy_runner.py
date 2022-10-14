@@ -61,6 +61,7 @@ class NamespaceStrategyExecution:
         self.default_strategies = default_strategies
         self.ent_class_strategies = ent_class_strategies
         self.unresolved_parsers: Dict[EntityKey, Set[str]] = {}
+        self.entity_mapped: Dict[EntityKey, bool] = {}
 
     @property
     def longest_mapping_strategy_list_size(self):
@@ -112,7 +113,7 @@ class NamespaceStrategyExecution:
                     f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
                     f"<{entity.match}> as all parsers have been resolved"
                 )
-            elif self.stop_on_success:
+            elif self.stop_on_success and self.entity_mapped.get(entity_key, False):
                 logger.debug(
                     f"will not run strategy {strategy.__class__.__name__} on class :<{entity.entity_class}>, match: "
                     f"<{entity.match}> as entity has been resolved to another parser and stop_on_success: "
@@ -142,6 +143,7 @@ class NamespaceStrategyExecution:
                         document=document,
                     ):
                         self.unresolved_parsers[entity_key].discard(mapping.parser_name)
+                        self.entity_mapped[entity_key] = True
                         yield mapping
 
     def reset(self):
@@ -151,6 +153,7 @@ class NamespaceStrategyExecution:
         Should be called when the underlying :class:`.Document` has changed.
         """
         self.unresolved_parsers.clear()
+        self.entity_mapped.clear()
 
 
 class StrategyRunner:
