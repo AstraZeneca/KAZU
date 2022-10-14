@@ -1,4 +1,6 @@
-DropUnmappedEnts:
-  _target_: kazu.steps.other.cleanup.DropUnmappedEnts
-  from_ent_namespaces:
-    - _target_: kazu.steps.ner.explosion.ExplosionNERStep.namespace
+EntityFilterCleanupAction:
+  _target_: kazu.steps.other.cleanup.EntityFilterCleanupAction.from_filter_fn_providers
+  filter_providers:
+    - _target_: kazu.steps.other.cleanup.DropUnmappedEntsEntityFilters
+      from_ent_namespaces:
+        - _target_: kazu.steps.ner.explosion.ExplosionNERStep.namespace

@@ -5,11 +5,11 @@ from kazu.steps.ner.explosion import ExplosionNERStep
 from hydra.utils import instantiate
 
 
-def test_DropUnmappedExplosionEnts_action(kazu_test_config):
+def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_config):
     explosion_step_namespace = ExplosionNERStep.namespace()
     mock_other_ner_namespace = "mock_other_ner_namespace"
 
-    action = instantiate(kazu_test_config.CleanupActions.DropUnmappedEnts)
+    action = instantiate(kazu_test_config.CleanupActions.EntityFilterCleanupAction)
     doc = Document.create_simple_document(
         "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
         "ABC9 is picked up by a different NER step and also not mapped."
@@ -44,20 +44,20 @@ def test_DropUnmappedExplosionEnts_action(kazu_test_config):
 
     doc.sections[0].entities.extend(ents)
     assert len(doc.get_entities()) == 3
-    action(doc)
+    action.cleanup(doc)
     assert len(doc.get_entities()) == 2
 
 
 def test_cleanup_step(kazu_test_config):
     class MockCleanupAction1:
-        def __call__(self, doc: Document):
+        def cleanup(self, doc: Document):
             doc_sections = set(doc.sections)
             drop_sections = set([section for section in doc_sections if len(section.text) < 3])
             doc_sections.difference_update(drop_sections)
             doc.sections = list(doc_sections)
 
     class MockCleanupAction2:
-        def __call__(self, doc: Document):
+        def cleanup(self, doc: Document):
             for ent in doc.get_entities():
                 if ent.namespace == "tricky_ent_step":
                     raise Exception(f"{self.__class__} fails on ents from {ent.namespace}!")
