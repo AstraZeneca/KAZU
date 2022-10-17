@@ -138,7 +138,7 @@ class OntologyMatcher:
         # )
 
         # for item, pattern in zip(curated_synonyms, patterns):
-        for item in curated_synonyms:
+        for item in synonyms_to_add:
             pattern = self.nlp.tokenizer(
                 # we need it lowercased for the case insensitive matcher
                 item["term"] if item["case_sensitive"] else item["term"].lower()
