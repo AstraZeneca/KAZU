@@ -4,7 +4,9 @@ pipeline:
     - ExplosionStringMatchingStep
     - StanzaStep
     - TransformersModelForTokenClassificationNerStep
-    - SethStep
     - DictionaryEntityLinkingStep
     - MappingStep
+    - SethStep
+    - MergeOverlappingEntsStep
     - AbbreviationFinderStep
+    - CleanupStep
