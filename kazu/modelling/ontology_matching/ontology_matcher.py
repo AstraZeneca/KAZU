@@ -1,6 +1,7 @@
 import json
 import logging
 import pickle
+from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
@@ -10,6 +11,7 @@ import spacy
 import srsly
 
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
@@ -42,6 +44,7 @@ class OntologyMatcherConfig:
         "match_id_sep": MATCH_ID_SEP,
     },
 )
+
 class OntologyMatcher:
     """String matching to synonyms.
 
@@ -61,8 +64,7 @@ class OntologyMatcher:
 
         :param span_key: the key for doc.spans to store the matches in
         """
-        Span.set_extension("parser_name_", default=None)
-        Span.set_extension("term_norm_", default=None)
+        Span.set_extension("ontology_dict_", default=dict(),force=True)
         self.nlp = nlp
         self.name = name
         self.cfg = OntologyMatcherConfig(
@@ -129,13 +131,18 @@ class OntologyMatcher:
 
         synonyms_to_add = (item for item in curated_synonyms if item["action"] == "keep")
 
-        patterns = self.nlp.tokenizer.pipe(
-            # we need it lowercased for the case insensitive matcher
-            item["term"] if item["case_sensitive"] else item["term"].lower()
-            for item in synonyms_to_add
-        )
+        # patterns = self.nlp.tokenizer.pipe(
+        #     # we need it lowercased for the case insensitive matcher
+        #     item["term"] if item["case_sensitive"] else item["term"].lower()
+        #     for item in synonyms_to_add
+        # )
 
-        for item, pattern in zip(curated_synonyms, patterns):
+        # for item, pattern in zip(curated_synonyms, patterns):
+        for item in curated_synonyms:
+            pattern = self.nlp.tokenizer(
+                # we need it lowercased for the case insensitive matcher
+                item["term"] if item["case_sensitive"] else item["term"].lower()
+            )
             # a generated synonym can have different term_norms for different parsers,
             # since the string normalizer's output depends on the entity class
             for parser_name, term_norm in item["term_norm_mapping"].items():
@@ -215,8 +222,18 @@ class OntologyMatcher:
             # the if clause at the start of this function would raise an error
             raise AssertionError()
 
-        spans = set(Span(doc, start, end, label=key) for key, start, end in matches)
-        spans = self._set_span_attributes(spans)
+        spans = []
+        for (start, end), matches_grp in sort_then_group(matches,key_func=lambda x:(x[1], x[2],)):
+            data = defaultdict(set)
+            for mat in matches_grp:
+                parser_name,term_norm = self.nlp.vocab.strings.as_string(mat[0]).split(self.match_id_sep, maxsplit=1)
+                ent_class = self.parser_name_to_entity_type[parser_name]
+                data[ent_class].add((parser_name,term_norm,))
+
+            for ent_class in data:
+                new_span = Span(doc, start, end,label=ent_class)
+                new_span._.set("ontology_dict_",data)
+                spans.append(new_span)
         final_spans = self.filter_by_contexts(doc, spans)
         self.set_annotations(doc, final_spans)
         return doc
@@ -310,9 +327,14 @@ class OntologyMatcher:
         return False
 
     def _set_span_attributes(self, spans):
+        ontology_dict = {}
         for span in spans:
-            span.parser_name_, span.term_norm_ = span.label_.split(self.match_id_sep, maxsplit=1)
-            span.label_ = self.parser_name_to_entity_type[span.parser_name_]
+            parser_name,term_norm = span.label_.split(
+                self.match_id_sep, maxsplit=1
+            )
+            ontology_dict[parser_name] = term_norm
+            span._.set("ontology_dict_",ontology_dict)
+            span.label_ = self.parser_name_to_entity_type[parser_name]
         return spans
 
     def _create_token_matchers(self):
