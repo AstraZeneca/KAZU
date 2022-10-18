@@ -7,3 +7,4 @@ pipeline:
     - MappingStep
     - MergeOverlappingEntsStep
     - AbbreviationFinderStep
+    - CleanupStep
