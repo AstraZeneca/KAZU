@@ -1,14 +1,28 @@
 import traceback
 from typing import List, Tuple, Optional, Protocol, Callable, Iterable
-from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION
+from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Mapping, LinkRanks
 from kazu.steps import BaseStep
 
 EntityFilterFn = Callable[[Entity], bool]
+MappingFilterFn = Callable[[Mapping], bool]
 
 
 class CleanupAction(Protocol):
     def cleanup(self, doc: Document):
         raise NotImplementedError
+
+
+class MappingFilterCleanupAction:
+    def __init__(self, filter_fns: List[MappingFilterFn]):
+        self.filter_fns = filter_fns
+
+    def cleanup(self, doc: Document):
+        for entity in doc.get_entities():
+            entity.mappings = {
+                mapping
+                for mapping in entity.mappings
+                if not any(f(mapping) for f in self.filter_fns)
+            }
 
 
 class EntityFilterCleanupAction:
@@ -20,6 +34,14 @@ class EntityFilterCleanupAction:
             section.entities = [
                 entity for entity in section.entities if not any(f(entity) for f in self.filter_fns)
             ]
+
+
+class DropMappingsByConfidenceMappingFilter:
+    def __init__(self, ranks_to_drop: Iterable[LinkRanks]):
+        self.ranks_to_drop = set(ranks_to_drop)
+
+    def __call__(self, mapping: Mapping) -> bool:
+        return mapping.confidence in self.ranks_to_drop
 
 
 class DropUnmappedEntityFilter:
