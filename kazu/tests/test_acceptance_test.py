@@ -28,7 +28,8 @@ LINKING_THRESHOLDS = {
 def test_full_pipeline(capsys, override_kazu_test_config, label_studio_manager):
 
     cfg = override_kazu_test_config(
-        overrides=["pipeline=acceptance_test"],
+        # we don't want to test xref mappings, as we have no control over quality
+        overrides=["pipeline=acceptance_test", "MappingStep=no_xref"],
     )
     pipeline = Pipeline(load_steps(cfg=cfg))
     analyse_full_pipeline(capsys, pipeline, label_studio_manager.export_from_ls())
