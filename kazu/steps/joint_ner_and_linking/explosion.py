@@ -82,7 +82,7 @@ class ExplosionStringMatchingStep(BaseStep):
                     entities.append(e)
                     terms = []
                     for span in span_group:
-                        for parser_name,term_norm in span._.ontology_dict_[span.label_]:
+                        for parser_name, term_norm in span._.ontology_dict_[span.label_]:
                             term = self.synonym_db.get(parser_name, term_norm)
                             terms.append(term)
                     terms_with_metrics = (
