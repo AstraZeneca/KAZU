@@ -23,5 +23,6 @@ defaults:
   - MappingStep: default
   - DisambiguationStrategies: default
   - StringScorers: default
+  - SapbertStringSimilarityScorer: default
   - CleanupStep: default
   - CleanupActions: default
