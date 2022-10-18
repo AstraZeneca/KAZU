@@ -19,8 +19,8 @@ from kazu.data.data import (
 
 # dataframe column keys
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
-from kazu.utils.spacy_pipeline import SpacyPipeline
 from kazu.utils.string_normalizer import StringNormalizer
 
 DEFAULT_LABEL = "default_label"
@@ -54,17 +54,18 @@ class OntologyParser(ABC):
     def __init__(
         self,
         in_path: str,
-        spacy_pipeline: Optional[SpacyPipeline] = None,
-        synonym_merge_threshold: float = 0.65,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         entity_class: Optional[str] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
-        :param spacy_pipeline: Optional instance of SpacyPipeline.  Used for resolving ambiguous symbolic synonyms via
-            similarity calculation of the default label associated with the conflicted labels. If no instance is
-            provided, all synonym conflicts will be assumed to refer to different concepts. This is not recommended!
+        :param string_scorer: Optional protocol of StringSimilarityScorer.  Used for resolving ambiguous symbolic
+            synonyms via similarity calculation of the default label associated with the conflicted labels. If no
+            instance is provided, all synonym conflicts will be assumed to refer to different concepts. This is not
+            recommended!
         :param synonym_merge_threshold: similarity threshold to trigger a merge of conflicted synonyms into a single
             EquivalentIdSet. See docs for score_and_group_ids for further details
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different
@@ -85,9 +86,9 @@ class OntologyParser(ABC):
             implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)
 
         """
-        if spacy_pipeline is None:
-            logger.warning("no spacy pipeline configured. Synonym resolution disabled.")
-        self.spacy_pipeline = spacy_pipeline
+        if string_scorer is None:
+            logger.warning("no string scorer configured. Synonym resolution disabled.")
+        self.string_scorer = string_scorer
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
@@ -178,15 +179,14 @@ class OntologyParser(ABC):
 
         The default algorithm (which can be overridden by concrete parser implementations) works as follows:
 
-        1. If no SpacyPipeline is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
+        1. If no StringScorer is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
            not recommended)
         2. If only one ID is referenced, or the associated normalised synonym string is not symbolic, group the
            ids into a single EquivalentIdSet (strategy UNAMBIGUOUS)
         3. otherwise, compare the default label associated with each ID to every other default label. If it's above
            self.synonym_merge_threshold, merge into one EquivalentIdSet, if not, create a new one
 
-        recommendation: Use the scispacy large model for comparison, as this uses 600k word vectors. Sapbert might also
-        be a good choice
+        recommendation: Use the SapbertStringSimilarityScorer for comparison
 
         IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
         DEFAULT_LABEL
@@ -197,7 +197,7 @@ class OntologyParser(ABC):
         :param original_syn_set: original synonyms associated with ids
         :return:
         """
-        if not isinstance(self.spacy_pipeline, SpacyPipeline):
+        if self.string_scorer is None:
             # the NO_STRATEGY aggregation strategy assumes all synonyms are ambiguous
             return (
                 frozenset(
@@ -250,9 +250,7 @@ class OntologyParser(ABC):
                     best_score = 0.0
                     for id_and_default_label_set in id_list:
                         sim = max(
-                            self.spacy_pipeline.nlp(default_label.lower()).similarity(
-                                self.spacy_pipeline.nlp(other_label.lower())
-                            )
+                            self.string_scorer(default_label, other_label)
                             for other_label in id_and_default_label_set[1]
                         )
                         if sim > self.synonym_merge_threshold and sim > best_score:
