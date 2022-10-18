@@ -44,7 +44,6 @@ class OntologyMatcherConfig:
         "match_id_sep": MATCH_ID_SEP,
     },
 )
-
 class OntologyMatcher:
     """String matching to synonyms.
 
@@ -64,7 +63,7 @@ class OntologyMatcher:
 
         :param span_key: the key for doc.spans to store the matches in
         """
-        Span.set_extension("ontology_dict_", default=dict(),force=True)
+        Span.set_extension("ontology_dict_", default=dict(), force=True)
         self.nlp = nlp
         self.name = name
         self.cfg = OntologyMatcherConfig(
@@ -141,7 +140,9 @@ class OntologyMatcher:
         for item in synonyms_to_add:
             pattern = self.nlp.tokenizer(
                 # we need it lowercased for the case insensitive matcher
-                item["term"] if item["case_sensitive"] else item["term"].lower()
+                item["term"]
+                if item["case_sensitive"]
+                else item["term"].lower()
             )
             # a generated synonym can have different term_norms for different parsers,
             # since the string normalizer's output depends on the entity class
@@ -223,16 +224,29 @@ class OntologyMatcher:
             raise AssertionError()
 
         spans = []
-        for (start, end), matches_grp in sort_then_group(matches,key_func=lambda x:(x[1], x[2],)):
+        for (start, end), matches_grp in sort_then_group(
+            matches,
+            key_func=lambda x: (
+                x[1],
+                x[2],
+            ),
+        ):
             data = defaultdict(set)
             for mat in matches_grp:
-                parser_name,term_norm = self.nlp.vocab.strings.as_string(mat[0]).split(self.match_id_sep, maxsplit=1)
+                parser_name, term_norm = self.nlp.vocab.strings.as_string(mat[0]).split(
+                    self.match_id_sep, maxsplit=1
+                )
                 ent_class = self.parser_name_to_entity_type[parser_name]
-                data[ent_class].add((parser_name,term_norm,))
+                data[ent_class].add(
+                    (
+                        parser_name,
+                        term_norm,
+                    )
+                )
 
             for ent_class in data:
-                new_span = Span(doc, start, end,label=ent_class)
-                new_span._.set("ontology_dict_",data)
+                new_span = Span(doc, start, end, label=ent_class)
+                new_span._.set("ontology_dict_", data)
                 spans.append(new_span)
         final_spans = self.filter_by_contexts(doc, spans)
         self.set_annotations(doc, final_spans)
@@ -329,11 +343,9 @@ class OntologyMatcher:
     def _set_span_attributes(self, spans):
         ontology_dict = {}
         for span in spans:
-            parser_name,term_norm = span.label_.split(
-                self.match_id_sep, maxsplit=1
-            )
+            parser_name, term_norm = span.label_.split(self.match_id_sep, maxsplit=1)
             ontology_dict[parser_name] = term_norm
-            span._.set("ontology_dict_",ontology_dict)
+            span._.set("ontology_dict_", ontology_dict)
             span.label_ = self.parser_name_to_entity_type[parser_name]
         return spans
 
