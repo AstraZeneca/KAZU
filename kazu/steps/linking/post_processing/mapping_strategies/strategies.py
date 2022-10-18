@@ -450,6 +450,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         complex_string_scorer: BooleanStringSimilarityScorer,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold: float = 80.0,
+        embedding_threshold: float = 60.0,
         symbolic_only: bool = False,
         differential: float = 2.0,
     ):
@@ -458,6 +459,8 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         :param complex_string_scorer: only consider synonym terms passing this string scorer call
         :param disambiguation_strategies:
         :param search_threshold: only consider synonym terms above this search threshold
+        :param embedding_threshold: the Entity.match and one of the SynonymTermWithMetrics.terms must be
+            above this threshold (according to the complex_string_scorer) for the term to be valid
         :param symbolic_only: only consider terms that are symbolic
         :param differential: only consider terms with search scores equal or greater to the best match minus this value
         """
@@ -468,6 +471,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
             symbolic_only=symbolic_only,
             disambiguation_strategies=disambiguation_strategies,
         )
+        self.embedding_threshold = embedding_threshold
         self.complex_string_scorer = complex_string_scorer
 
     def filter_terms(
