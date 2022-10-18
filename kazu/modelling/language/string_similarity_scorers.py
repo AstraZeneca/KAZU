@@ -109,27 +109,27 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
         if reference_term == query_term:
             return 1.0
 
-        s1_embedding = self.embedding_cache.get(reference_term)
-        s2_embedding = self.embedding_cache.get(query_term)
-        if s1_embedding is None and s2_embedding is None:
+        ref_embedding = self.embedding_cache.get(reference_term)
+        query_embedding = self.embedding_cache.get(query_term)
+        if ref_embedding is None and query_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
                 [reference_term, query_term], batch_size=2, trainer=self.trainer
             )
-            s1_embedding = embeddings[0]
-            s2_embedding = embeddings[1]
-            self.embedding_cache[reference_term] = s1_embedding
-            self.embedding_cache[query_term] = s2_embedding
-        elif s1_embedding is None:
+            ref_embedding = embeddings[0]
+            query_embedding = embeddings[1]
+            self.embedding_cache[reference_term] = ref_embedding
+            self.embedding_cache[query_term] = query_embedding
+        elif ref_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
                 [reference_term], batch_size=1, trainer=self.trainer
             )
-            s1_embedding = embeddings[0]
-            self.embedding_cache[reference_term] = s1_embedding
-        elif s2_embedding is None:
+            ref_embedding = embeddings[0]
+            self.embedding_cache[reference_term] = ref_embedding
+        elif query_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
                 [query_term], batch_size=1, trainer=self.trainer
             )
-            s2_embedding = embeddings[0]
-            self.embedding_cache[query_term] = s2_embedding
+            query_embedding = embeddings[0]
+            self.embedding_cache[query_term] = query_embedding
 
-        return cosine_similarity(s1_embedding, s2_embedding, dim=0).item()
+        return cosine_similarity(ref_embedding, query_embedding, dim=0).item()
