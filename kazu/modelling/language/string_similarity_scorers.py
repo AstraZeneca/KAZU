@@ -100,10 +100,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
     note this is an implementation of the StringSimilarityScorer Protocol, but as a Singleton we can't inherit it
     """
 
-    def __init__(
-        self, sapbert: PLSapbertModel, trainer: Trainer, similarity_threshold: float = 0.60
-    ):
-        self.similarity_threshold = similarity_threshold
+    def __init__(self, sapbert: PLSapbertModel, trainer: Trainer):
         self.trainer = trainer
         self.sapbert = sapbert
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
@@ -138,4 +135,4 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
         return cosine_similarity(s1_embedding, s2_embedding, dim=0).item()
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
+        return self.calc_similarity(reference_term, query_term)
