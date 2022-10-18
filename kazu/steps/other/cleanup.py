@@ -50,7 +50,7 @@ class EntityFilterCleanupAction:
 
 
 class DropUnmappedEntsEntityFilters:
-    def __init__(self, from_ent_namespaces: List[str]):
+    def __init__(self, from_ent_namespaces: Iterable[str]):
         self.from_ent_namespaces = set(from_ent_namespaces)
 
     def filter_fns(self) -> List[EntityFilterFn]:
