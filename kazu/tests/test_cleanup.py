@@ -4,17 +4,59 @@ from kazu.steps.ner.explosion import ExplosionNERStep
 
 from hydra.utils import instantiate
 
+doc_text = "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
+"ABC9 is picked up by a different NER step and also not mapped."
+"But EFGR was picked up by explosion step and mapped."
+
+
+def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config):
+    action = instantiate(kazu_test_config.CleanupActions.MappingFilterCleanupAction)
+    doc = Document.create_simple_document(doc_text)
+    ents = [
+        Entity.load_contiguous_entity(
+            start=135,
+            end=139,
+            match="EFGR",
+            entity_class="gene",
+            namespace="test",
+            mappings={
+                Mapping(
+                    default_label="EFGR",
+                    source="test",
+                    parser_name="test",
+                    idx="test",
+                    confidence=LinkRanks.HIGHLY_LIKELY,
+                    mapping_strategy="test",
+                    disambiguation_strategy=None,
+                ),
+                Mapping(
+                    default_label="EFGR",
+                    source="test",
+                    parser_name="test",
+                    idx="test",
+                    confidence=LinkRanks.AMBIGUOUS,
+                    mapping_strategy="test",
+                    disambiguation_strategy=None,
+                ),
+            },
+        ),
+    ]
+
+    doc.sections[0].entities.extend(ents)
+    assert len(doc.get_entities()) == 1
+    action.cleanup(doc)
+    ent = doc.get_entities()[0]
+    assert len(ent.mappings) == 1
+    mapping = next(iter(ent.mappings))
+    assert mapping.confidence == LinkRanks.HIGHLY_LIKELY
+
 
 def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_config):
     explosion_step_namespace = ExplosionNERStep.namespace()
     mock_other_ner_namespace = "mock_other_ner_namespace"
 
     action = instantiate(kazu_test_config.CleanupActions.EntityFilterCleanupAction)
-    doc = Document.create_simple_document(
-        "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
-        "ABC9 is picked up by a different NER step and also not mapped."
-        "But EFGR was picked up by explosion step and mapped."
-    )
+    doc = Document.create_simple_document(doc_text)
     ents = [
         Entity.load_contiguous_entity(
             start=0, end=4, match="XYZ1", entity_class="gene", namespace=explosion_step_namespace
