@@ -105,34 +105,31 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
         self.sapbert = sapbert
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
 
-    def calc_similarity(self, s1: str, s2: str) -> float:
-        if s1 == s2:
+    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
+        if reference_term == query_term:
             return 1.0
 
-        s1_embedding = self.embedding_cache.get(s1)
-        s2_embedding = self.embedding_cache.get(s2)
+        s1_embedding = self.embedding_cache.get(reference_term)
+        s2_embedding = self.embedding_cache.get(query_term)
         if s1_embedding is None and s2_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
-                [s1, s2], batch_size=2, trainer=self.trainer
+                [reference_term, query_term], batch_size=2, trainer=self.trainer
             )
             s1_embedding = embeddings[0]
             s2_embedding = embeddings[1]
-            self.embedding_cache[s1] = s1_embedding
-            self.embedding_cache[s2] = s2_embedding
+            self.embedding_cache[reference_term] = s1_embedding
+            self.embedding_cache[query_term] = s2_embedding
         elif s1_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
-                [s1], batch_size=1, trainer=self.trainer
+                [reference_term], batch_size=1, trainer=self.trainer
             )
             s1_embedding = embeddings[0]
-            self.embedding_cache[s1] = s1_embedding
+            self.embedding_cache[reference_term] = s1_embedding
         elif s2_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
-                [s2], batch_size=1, trainer=self.trainer
+                [query_term], batch_size=1, trainer=self.trainer
             )
             s2_embedding = embeddings[0]
-            self.embedding_cache[s2] = s2_embedding
+            self.embedding_cache[query_term] = s2_embedding
 
         return cosine_similarity(s1_embedding, s2_embedding, dim=0).item()
-
-    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        return self.calc_similarity(reference_term, query_term)
