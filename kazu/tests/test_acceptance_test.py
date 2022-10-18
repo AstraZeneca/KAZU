@@ -3,6 +3,7 @@ import itertools
 from collections import defaultdict, Counter
 from typing import List, Iterable, Dict, Set, Tuple, DefaultDict, Any
 
+import pytest
 from kazu.data.data import Entity, Document
 from kazu.pipeline import Pipeline, load_steps
 from kazu.tests.utils import requires_model_pack, requires_label_studio
@@ -255,21 +256,21 @@ def check_results_meet_threshold(
         prec_message = (
             f"{aggregated_result.tp} / {aggregated_result.fp + aggregated_result.tp} \n{message}"
         )
-        assert (
-            prec >= threshold["precision"]
-        ), f"{key} failed to meet precision threshold: {prec}. {prec_message}"
-        with capsys.disabled():
-            print(f"{key} passed precision threshold: {prec}. {prec_message}\n\n")
+        if prec >= threshold["precision"]:
+            with capsys.disabled():
+                print(f"{key} passed precision threshold: {prec}. {prec_message}\n\n")
+        else:
+            pytest.fail(f"{key} failed to meet precision threshold: {prec}. {prec_message}")
 
         message = "\n".join(f"{k} <missed {v} times>" for k, v in aggregated_result.fn_info)
         rec_message = (
             f"{aggregated_result.tp} / {aggregated_result.fn + aggregated_result.tp} \n{message}"
         )
-        assert (
-            rec >= threshold["recall"]
-        ), f"{key} failed to meet recall threshold: {rec}. {rec_message}"
-        with capsys.disabled():
-            print(f"{key} passed recall threshold: {rec}. {rec_message}\n\n")
+        if rec >= threshold["recall"]:
+            with capsys.disabled():
+                print(f"{key} passed recall threshold: {rec}. {rec_message}\n\n")
+        else:
+            pytest.fail(f"{key} failed to meet recall threshold: {rec}. {rec_message}")
 
 
 def analyse_full_pipeline(capsys, pipeline: Pipeline, docs: List[Document]):
