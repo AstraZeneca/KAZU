@@ -51,10 +51,7 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
 def test_cleanup_step(kazu_test_config):
     class MockCleanupAction1:
         def cleanup(self, doc: Document):
-            doc_sections = set(doc.sections)
-            drop_sections = set([section for section in doc_sections if len(section.text) < 3])
-            doc_sections.difference_update(drop_sections)
-            doc.sections = list(doc_sections)
+            doc.sections = [section for section in doc.sections if len(section.text) >= 3]
 
     class MockCleanupAction2:
         def cleanup(self, doc: Document):
