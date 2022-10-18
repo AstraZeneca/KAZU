@@ -135,7 +135,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
             s2_embedding = embeddings[0]
             self.embedding_cache[s2] = s2_embedding
 
-        return cosine_similarity(s1_embedding, s2_embedding, dim=0)
+        return cosine_similarity(s1_embedding, s2_embedding, dim=0).item()
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
         return self.calc_similarity(reference_term, query_term) >= self.similarity_threshold
