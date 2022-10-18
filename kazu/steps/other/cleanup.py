@@ -11,11 +11,6 @@ class CleanupAction(Protocol):
         raise NotImplementedError
 
 
-class EntityFilterFnProvider(Protocol):
-    def filter_fns(self) -> List[EntityFilterFn]:
-        raise NotImplementedError
-
-
 class EntityFilterCleanupAction:
     def __init__(self, filter_fns: List[EntityFilterFn]):
         self.filter_fns = filter_fns
