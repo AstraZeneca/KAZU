@@ -498,7 +498,10 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         for term in synonym_term_sorted_by_score:
             if term.associated_id_sets not in selected_id_sets:
                 selected_id_sets.add(term.associated_id_sets)
-                if self.complex_string_scorer(ent_match, next(iter(term.terms))):
+                if any(
+                    self.complex_string_scorer(ent_match, original_term) >= self.embedding_threshold
+                    for original_term in term.terms
+                ):
                     selected_terms.add(term)
         return selected_terms
 
