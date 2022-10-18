@@ -255,6 +255,7 @@ class OntologyParser(ABC):
                         )
                         if sim > self.synonym_merge_threshold and sim > best_score:
                             most_similar_id_set = id_and_default_label_set
+                            best_score = sim
 
                     # for the first label, the above for loop is a no-op as id_sets is empty
                     # and the below if statement will be true.
