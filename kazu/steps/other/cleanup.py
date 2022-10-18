@@ -20,7 +20,7 @@ class EntityFilterFnProvider(Protocol):
 
 class EntityFilterCleanupAction:
     def __init__(self, filter_fns: List[EntityFilterFn]):
-        self.combined_filter_fn = EntityFilterCleanupAction.combine_filter_fns(filter_fns)
+        self.combined_filter_fn = self.combine_filter_fns(filter_fns)
 
     @staticmethod
     def combine_filter_fns(filter_fns: List[EntityFilterFn]) -> EntityFilterFn:
