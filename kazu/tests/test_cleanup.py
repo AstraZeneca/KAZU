@@ -1,6 +1,6 @@
 from kazu.steps.other.cleanup import CleanupStep
 from kazu.data.data import Document, Entity, Section, Mapping, LinkRanks
-from kazu.steps.ner.explosion import ExplosionNERStep
+from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
 
 from hydra.utils import instantiate
 
@@ -52,7 +52,7 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
 
 
 def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_config):
-    explosion_step_namespace = ExplosionNERStep.namespace()
+    explosion_step_namespace = ExplosionStringMatchingStep.namespace()
     mock_other_ner_namespace = "mock_other_ner_namespace"
 
     action = instantiate(kazu_test_config.CleanupActions.EntityFilterCleanupAction)
