@@ -450,7 +450,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         complex_string_scorer: BooleanStringSimilarityScorer,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold: float = 80.0,
-        embedding_threshold: float = 60.0,
+        embedding_threshold: float = 0.60,
         symbolic_only: bool = False,
         differential: float = 2.0,
     ):
