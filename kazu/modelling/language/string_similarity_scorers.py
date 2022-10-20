@@ -105,7 +105,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
         self.sapbert = sapbert
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
 
-    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
+    def __call__(self, reference_term: str, query_term: str) -> float:
         if reference_term == query_term:
             return 1.0
 
