@@ -128,22 +128,15 @@ class OntologyMatcher:
         with open(curated_list, mode="r") as jsonlf:
             curated_synonyms = [json.loads(line) for line in jsonlf]
 
-        synonyms_to_add = (item for item in curated_synonyms if item["action"] == "keep")
+        synonyms_to_add = [item for item in curated_synonyms if item["action"] == "keep"]
 
-        # patterns = self.nlp.tokenizer.pipe(
-        #     # we need it lowercased for the case insensitive matcher
-        #     item["term"] if item["case_sensitive"] else item["term"].lower()
-        #     for item in synonyms_to_add
-        # )
+        patterns = self.nlp.tokenizer.pipe(
+            # we need it lowercased for the case insensitive matcher
+            item["term"] if item["case_sensitive"] else item["term"].lower()
+            for item in synonyms_to_add
+        )
 
-        # for item, pattern in zip(curated_synonyms, patterns):
-        for item in synonyms_to_add:
-            pattern = self.nlp.tokenizer(
-                # we need it lowercased for the case insensitive matcher
-                item["term"]
-                if item["case_sensitive"]
-                else item["term"].lower()
-            )
+        for item, pattern in zip(synonyms_to_add, patterns):
             # a generated synonym can have different term_norms for different parsers,
             # since the string normalizer's output depends on the entity class
             for parser_name, term_norm in item["term_norm_mapping"].items():
