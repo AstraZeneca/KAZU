@@ -5,9 +5,9 @@ from kazu.tests.utils import ner_simple_test_cases, requires_model_pack
 
 
 @requires_model_pack
-def test_ExplosionNERStep(kazu_test_config):
+def test_ExplosionStringMatchingStep(kazu_test_config):
     # note, here we just test that the step is functional. Model performance is tested via an acceptance test
-    step = instantiate(kazu_test_config.ExplosionNERStep)
+    step = instantiate(kazu_test_config.ExplosionStringMatchingStep)
     docs = [Document.create_simple_document(x[0]) for x in ner_simple_test_cases()]
     successes, failures = step(docs)
     assert len(successes) == len(docs) and len(failures) == 0
