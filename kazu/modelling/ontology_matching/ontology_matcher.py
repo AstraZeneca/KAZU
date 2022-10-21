@@ -242,13 +242,9 @@ class OntologyMatcher:
                 new_span._.set("ontology_dict_", data)
                 spans.append(new_span)
         final_spans = self.filter_by_contexts(doc, spans)
-        self.set_annotations(doc, final_spans)
+        span_group = SpanGroup(doc, name=self.span_key, spans=final_spans)
+        doc.spans[self.span_key] = span_group
         return doc
-
-    def set_annotations(self, doc, spans):
-        span_key = self.span_key
-        span_group = SpanGroup(doc, name=span_key, spans=spans)
-        doc.spans[span_key] = span_group
 
     def filter_by_contexts(self, doc, spans):
         """These filters work best when there is sentence segmentation available."""
