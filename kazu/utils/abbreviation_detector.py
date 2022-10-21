@@ -51,16 +51,11 @@ def find_abbreviation(
     checking that they can be matched against characters in a candidate text for the long form
     in order, as well as requiring that the first letter of the abbreviated form matches the
     _beginning_ letter of a word.
-    Parameters
-    ----------
-    long_form_candidate: Span, required.
-        The spaCy span for the long form candidate of the definition.
-    short_form_candidate: Span, required.
-        The spaCy span for the abbreviation candidate.
-    Returns
-    -------
-    A Tuple[Span, Optional[Span]], representing the short form abbreviation and the
-    span corresponding to the long form expansion, or None if a match is not found.
+
+    :param long_form_candidate: The spaCy span for the long form candidate of the definition
+    :param short_form_candidate: The spaCy span for the abbreviation candidate
+    :return: The short form abbreviation and the span corresponding to the long form expansion,
+        or None if a match is not found
     """
     long_form = " ".join(x.text for x in long_form_candidate)
     short_form = " ".join(x.text for x in short_form_candidate)
