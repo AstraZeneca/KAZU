@@ -24,7 +24,9 @@ In Kazu, we take the following approach:
     syn_generator = CombinatorialSynonymGenerator(
         [StopWordRemover(), StringReplacement(include_greek=True)]
     )
-    parser = MondoOntologyParser(in_path="", data_origin="test", synonym_generator=syn_generator)
+    parser = MondoOntologyParser(
+        in_path="", data_origin="test", synonym_generator=syn_generator
+    )
     nlp = assemble_pipeline.main(
         parser_name_to_entity_type={parser.name: "disease"},
         parsers=[parser],
