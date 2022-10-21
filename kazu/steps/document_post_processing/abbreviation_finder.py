@@ -12,9 +12,10 @@ class AbbreviationFinderStep(BaseStep):
     """
     Detects abbreviations using the algorithm in "A simple algorithm for identifying
     abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
+
     Uses a modified version of the scispacy abbreviation finder rules, to expand abbreviations (see
-    :class:`kazu.utils.abbreviation_detector.KazuAbbreviationDetector`). In this implementation, abbreviations learnt in
-     one section will be applied throughout the others
+    :class:`kazu.utils.abbreviation_detector.KazuAbbreviationDetector`\\ ). In this implementation,
+    abbreviations learnt in one section will be applied throughout the others.
     """
 
     def __init__(self, depends_on: List[str], exclude_abbrvs: Optional[List[str]] = None):
