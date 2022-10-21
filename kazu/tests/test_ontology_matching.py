@@ -12,8 +12,6 @@ def test_constructor():
     nlp = English()
     default_config = {
         "span_key": "my_results",
-        "entry_filter": {"@misc": "arizona.entry_filter_blacklist.v1"},
-        "variant_generator": {"@misc": "arizona.variant_generator.v1"},
         "parser_name_to_entity_type": {},
     }
     ontology_matcher = OntologyMatcher(nlp, **default_config)
@@ -67,47 +65,57 @@ example_text = (
 
 
 @pytest.mark.parametrize(
-    ("labels", "match_len", "match_texts", "match_entity_classes", "match_kb_ids"),
+    (
+        "labels",
+        "match_len",
+        "match_texts",
+        "match_ontology_dicts",
+    ),
     [
-        ([], 0, set(), set(), set()),
+        ([], 0, set(), []),
         (
             ["ent_type_1"],
             2,
             {"Q42_syn"},
-            {"ent_type_1"},
-            {"http://purl.obolibrary.org/obo/UBERON_042"},
+            [
+                {"ent_type_1": {("first_mock_parser", "Q42_SYN")}},
+                {"ent_type_1": {("first_mock_parser", "Q42_SYN")}},
+            ],
         ),
         (
             ["ent_type_2"],
             1,
             {"Q8_syn"},
-            {"ent_type_2"},
-            {"http://purl.obolibrary.org/obo/MONDO_08"},
+            [{"ent_type_2": {("second_mock_parser", "Q8_SYN")}}],
         ),
         (
             ["ent_type_1", "ent_type_2"],
             3,
             {"Q42_syn", "Q8_syn"},
-            {"ent_type_1", "ent_type_2"},
-            {
-                "http://purl.obolibrary.org/obo/UBERON_042",
-                "http://purl.obolibrary.org/obo/MONDO_08",
-            },
+            [
+                {"ent_type_1": {("first_mock_parser", "Q42_SYN")}},
+                {"ent_type_1": {("first_mock_parser", "Q42_SYN")}},
+                {"ent_type_2": {("second_mock_parser", "Q8_SYN")}},
+            ],
         ),
         (
             ["RANDOM LABEL", "ent_type_1", "ent_type_2"],
             3,
             {"Q42_syn", "Q8_syn"},
-            {"ent_type_1", "ent_type_2"},
-            {
-                "http://purl.obolibrary.org/obo/UBERON_042",
-                "http://purl.obolibrary.org/obo/MONDO_08",
-            },
+            [
+                {"ent_type_1": {("first_mock_parser", "Q42_SYN")}},
+                {"ent_type_1": {("first_mock_parser", "Q42_SYN")}},
+                {"ent_type_2": {("second_mock_parser", "Q8_SYN")}},
+            ],
         ),
     ],
 )
 def test_results_and_serialization(
-    tmp_path, labels, match_len, match_texts, match_entity_classes, match_kb_ids
+    tmp_path,
+    labels,
+    match_len,
+    match_texts,
+    match_ontology_dicts,
 ):
     TEST_SPAN_KEY = "my_hits"
     TEST_OUTPUT_DIR = tmp_path / "ontology_pipeline"
@@ -117,7 +125,6 @@ def test_results_and_serialization(
     }
     nlp = assemble_pipeline(
         parsers=[parser_1, parser_2],
-        blacklisters={},
         parser_name_to_entity_type=parser_name_to_entity_type,
         labels=labels,
         output_dir=TEST_OUTPUT_DIR,
@@ -127,22 +134,21 @@ def test_results_and_serialization(
     doc = nlp(example_text)
     matches = doc.spans[TEST_SPAN_KEY]
 
-    assert_matches(matches, match_len, match_texts, match_entity_classes, match_kb_ids)
+    assert_matches(matches, match_len, match_texts, match_ontology_dicts)
 
     nlp2 = spacy.load(TEST_OUTPUT_DIR)
 
     doc2 = nlp2(example_text)
     matches2 = doc2.spans[TEST_SPAN_KEY]
 
-    assert_matches(matches2, match_len, match_texts, match_entity_classes, match_kb_ids)
+    assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
 
     assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
         (m.start_char, m.end_char, m.text) for m in matches
     )
 
 
-def assert_matches(matches, match_len, match_texts, match_entity_classes, match_kb_ids):
+def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
     assert len(matches) == match_len
     assert set(m.text for m in matches) == match_texts
-    assert set(m.label_ for m in matches) == match_entity_classes
-    assert set(m.kb_id_ for m in matches) == match_kb_ids
+    assert [m._.ontology_dict_ for m in matches] == match_ontology_dicts
