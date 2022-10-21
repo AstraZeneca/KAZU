@@ -333,15 +333,6 @@ class OntologyMatcher:
             return False
         return False
 
-    def _set_span_attributes(self, spans):
-        ontology_dict = {}
-        for span in spans:
-            parser_name, term_norm = span.label_.split(self.match_id_sep, maxsplit=1)
-            ontology_dict[parser_name] = term_norm
-            span._.set("ontology_dict_", ontology_dict)
-            span.label_ = self.parser_name_to_entity_type[parser_name]
-        return spans
-
     def _create_token_matchers(self):
         tp_matchers = {}
         fp_matchers = {}

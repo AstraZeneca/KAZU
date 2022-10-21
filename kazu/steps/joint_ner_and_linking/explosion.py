@@ -43,8 +43,8 @@ class ExplosionStringMatchingStep(BaseStep):
         self.include_sentence_offsets = include_sentence_offsets
         self.path = path
 
-        # TODO: config override for when how we map parser names to entity types has changed since the last pipeline buid
-        # think about how this affects OntologyMatcher._set_span_attributes lookup of parser names in case they
+        # TODO: config override for when how we map parser names to entity types has changed since the last pipeline build
+        # think about how this affects the OntologyMatcher's lookup of parser names in case they
         # are not there in the new config.
         self.spacy_pipeline = spacy.load(path)
         matcher: OntologyMatcher = self.spacy_pipeline.get_pipe("ontology_matcher")
