@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class ExplosionStringMatchingStep(BaseStep):
     """
-    A wrapper for the explosion ontology-based entity matcher and linker
+    A wrapper for the explosion ontology-based entity matcher and linker.
     """
 
     def __init__(
