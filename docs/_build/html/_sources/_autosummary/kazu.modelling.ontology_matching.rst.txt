@@ -28,8 +28,5 @@ kazu.modelling.ontology\_matching
    :recursive:
 
    kazu.modelling.ontology_matching.assemble_pipeline
-   kazu.modelling.ontology_matching.blacklist
-   kazu.modelling.ontology_matching.filters
    kazu.modelling.ontology_matching.ontology_matcher
-   kazu.modelling.ontology_matching.variants
 

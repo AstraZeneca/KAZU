@@ -28,6 +28,8 @@ kazu.steps
    :recursive:
 
    kazu.steps.base
+   kazu.steps.document_post_processing
+   kazu.steps.joint_ner_and_linking
    kazu.steps.linking
    kazu.steps.ner
    kazu.steps.other

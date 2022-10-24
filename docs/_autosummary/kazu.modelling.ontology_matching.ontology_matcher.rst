@@ -9,13 +9,6 @@ kazu.modelling.ontology\_matching.ontology\_matcher
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      create_blacklist_filter
-      create_variant_generator
-   
    
 
    

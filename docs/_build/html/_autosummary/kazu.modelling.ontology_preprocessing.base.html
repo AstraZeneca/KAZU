@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.ontology_preprocessing.synonym_generation" href="kazu.modelling.ontology_preprocessing.synonym_generation.html" /><link rel="prev" title="kazu.modelling.ontology_preprocessing" href="kazu.modelling.ontology_preprocessing.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
         <title>kazu.modelling.ontology_preprocessing.base - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -158,8 +158,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">data model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../steps.html">pipeline steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../training.html">model training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">curating an ontology for NER</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -203,42 +203,44 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_matching.html">kazu.modelling.ontology_matching</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.assemble_pipeline.html">kazu.modelling.ontology_matching.assemble_pipeline</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.modelling.ontology_matching.blacklist.html">kazu.modelling.ontology_matching.blacklist</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="kazu.modelling.ontology_matching.blacklist.synonym_blacklisting.html">kazu.modelling.ontology_matching.blacklist.synonym_blacklisting</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.filters.html">kazu.modelling.ontology_matching.filters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.ontology_matcher.html">kazu.modelling.ontology_matching.ontology_matcher</a></li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_matching.variants.html">kazu.modelling.ontology_matching.variants</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">kazu.modelling.ontology_preprocessing.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.pipeline.html">kazu.pipeline</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.pipeline.html">kazu.pipeline</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.pipeline.pipeline.html">kazu.pipeline.pipeline</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="kazu.runner.html">kazu.runner</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.steps.html">kazu.steps</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.base.html">kazu.steps.base</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.steps.html">kazu.steps</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.base.html">kazu.steps.base</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.base.step.html">kazu.steps.base.step</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.document_post_processing.html">kazu.steps.document_post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.document_post_processing.abbreviation_finder.html">kazu.steps.document_post_processing.abbreviation_finder</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.joint_ner_and_linking.html">kazu.steps.joint_ner_and_linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.joint_ner_and_linking.explosion.html">kazu.steps.joint_ner_and_linking.explosion</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.context_scoring.html">kazu.steps.linking.post_processing.disambiguation.context_scoring</a></li>
 <li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.strategies.html">kazu.steps.linking.post_processing.disambiguation.strategies</a></li>
 </ul>
 </li>
-<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.html">kazu.steps.linking.post_processing.mapping_strategies</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.html">kazu.steps.linking.post_processing.mapping_strategies</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l6"><a class="reference internal" href="kazu.steps.linking.post_processing.mapping_strategies.strategies.html">kazu.steps.linking.post_processing.mapping_strategies.strategies</a></li>
 </ul>
 </li>
@@ -249,28 +251,28 @@
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html">kazu.steps.ner.entity_post_processing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.explosion.html">kazu.steps.ner.explosion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.hf_token_classification.html">kazu.steps.ner.hf_token_classification</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.seth.html">kazu.steps.ner.seth</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.spacy_ner.html">kazu.steps.ner.spacy_ner</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html">kazu.steps.ner.tokenized_word_processor</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.other.html">kazu.steps.other</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.other.html">kazu.steps.other</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.cleanup.html">kazu.steps.other.cleanup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.merge_overlapping_ents.html">kazu.steps.other.merge_overlapping_ents</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.stanza.html">kazu.steps.other.stanza</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.string_preprocessing.html">kazu.steps.string_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.string_preprocessing.scispacy_abbreviation_expansion.html">kazu.steps.string_preprocessing.scispacy_abbreviation_expansion</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.string_preprocessing.html">kazu.steps.string_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.string_preprocessing.string_preprocessing_step.html">kazu.steps.string_preprocessing.string_preprocessing_step</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
@@ -281,7 +283,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.utils.html">kazu.utils.utils</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -392,7 +394,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">BiologicalProcessGeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L697-L712"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">BiologicalProcessGeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L698-L713"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser" title="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneOntologyParser</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser.name">
@@ -408,11 +410,11 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CLOOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CLOOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L952-L968"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CLOOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CLOOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L953-L969"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CLOOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser" title="kazu.modelling.ontology_preprocessing.base.RDFGraphParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">RDFGraphParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CLOOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L960-L961"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CLOOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L961-L962"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CLOOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -436,13 +438,13 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CellosaurusOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L971-L1066"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CellosaurusOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L972-L1067"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <p>input is an obo file from cellosaurus, e.g.
 <a class="reference external" href="https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo">https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo</a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L980-L981"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L981-L982"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -459,7 +461,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1014-L1054"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1015-L1055"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -470,14 +472,14 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.score_and_group_ids">
-<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L983-L1009"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L984-L1010"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
 <dd><p>treat all synonyms as seperate cell lines</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -511,7 +513,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CellularComponentGeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L733-L748"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CellularComponentGeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L734-L749"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser" title="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneOntologyParser</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser.name">
@@ -527,13 +529,13 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">ChemblOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L922-L949"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">ChemblOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L923-L950"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <p>input is a sqllite dump from Chembl, e.g.
 <a class="reference external" href="https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz">https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz</a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L930-L931"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L931-L932"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -550,7 +552,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L933-L949"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L934-L950"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -561,7 +563,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -575,18 +577,19 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">EnsemblOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L830-L919"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">EnsemblOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L831-L920"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_syns_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L842-L847"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_syns_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L843-L848"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>in_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Path to some resource that should be processed (e.g. owl file, db config, tsv etc)</p></li>
-<li><p><strong>spacy_pipeline</strong> – Optional instance of SpacyPipeline.  Used for resolving ambiguous symbolic synonyms via
-similarity calculation of the default label associated with the conflicted labels. If no instance is
-provided, all synonym conflicts will be assumed to refer to different concepts. This is not recommended!</p></li>
+<li><p><strong>string_scorer</strong> – Optional protocol of StringSimilarityScorer.  Used for resolving ambiguous symbolic
+synonyms via similarity calculation of the default label associated with the conflicted labels. If no
+instance is provided, all synonym conflicts will be assumed to refer to different concepts. This is not
+recommended!</p></li>
 <li><p><strong>synonym_merge_threshold</strong> – similarity threshold to trigger a merge of conflicted synonyms into a single
 EquivalentIdSet. See docs for score_and_group_ids for further details</p></li>
 <li><p><strong>data_origin</strong> – The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different
@@ -612,7 +615,7 @@ implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L839-L840"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L840-L841"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -629,7 +632,7 @@ implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L849-L919"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L850-L920"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.EnsemblOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -640,7 +643,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -661,11 +664,11 @@ e.g. <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/gene
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">GeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L655-L694"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">GeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L656-L695"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L665-L666"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L666-L667"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -682,12 +685,12 @@ e.g. <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/gene
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.load_go">
-<span class="sig-name descname"><span class="pre">load_go</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L660-L663"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.load_go" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">load_go</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L661-L664"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.load_go" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L668-L694"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L669-L695"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -698,7 +701,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -717,13 +720,13 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">JsonLinesOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L400-L426"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">JsonLinesOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L401-L427"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <p>A parser for a jsonlines dataset. Assumes one kb entry per line (i.e. json object)
 implemetations should implement json_dict_to_parser_dict (see method notes for details</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.json_dict_to_parser_dataframe">
-<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L415-L426"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L416-L427"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
 structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
 IDX. All other keys are used as mapping metadata</p>
@@ -735,14 +738,14 @@ IDX. All other keys are used as mapping metadata</p>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L412-L413"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L413-L414"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -755,7 +758,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L406-L410"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.read" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L407-L411"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser.read" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
@@ -770,13 +773,13 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">MeddraOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1069-L1169"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">MeddraOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1070-L1170"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <p>input is an unzipped directory to a MEddra release (Note, requires licence). This
 should contain the files ‘mdhier.asc’ and ‘llt.asc’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1110-L1111"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1111-L1112"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -793,7 +796,7 @@ should contain the files ‘mdhier.asc’ and ‘llt.asc’</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1113-L1169"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1114-L1170"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MeddraOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -804,7 +807,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -818,7 +821,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">MolecularFunctionGeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L715-L730"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">MolecularFunctionGeneOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L716-L731"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.GeneOntologyParser" title="kazu.modelling.ontology_preprocessing.base.GeneOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneOntologyParser</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser.name">
@@ -827,7 +830,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser.parsed_dataframe">
-<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -839,11 +842,11 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MondoOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">MondoOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L770-L827"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">MondoOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L771-L828"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L779-L784"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L780-L785"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -857,7 +860,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.is_valid_iri">
-<span class="sig-name descname"><span class="pre">is_valid_iri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L825-L827"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.is_valid_iri" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_valid_iri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L826-L828"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.is_valid_iri" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
@@ -870,7 +873,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L786-L823"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L787-L824"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.MondoOntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -881,7 +884,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -895,7 +898,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L37-L397"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L37-L398"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking.
 Implementations should have a class attribute ‘name’ to something suitably representative.
@@ -905,14 +908,15 @@ for further processing.</p>
 source. This is important for composite resources that contain identifiers from different seed sources</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacy_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_merge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L54-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_scorer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_merge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L54-L98"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>in_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Path to some resource that should be processed (e.g. owl file, db config, tsv etc)</p></li>
-<li><p><strong>spacy_pipeline</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference internal" href="kazu.utils.spacy_pipeline.html#kazu.utils.spacy_pipeline.SpacyPipeline" title="kazu.utils.spacy_pipeline.SpacyPipeline"><em>SpacyPipeline</em></a><em>]</em>) – Optional instance of SpacyPipeline.  Used for resolving ambiguous symbolic synonyms via
-similarity calculation of the default label associated with the conflicted labels. If no instance is
-provided, all synonym conflicts will be assumed to refer to different concepts. This is not recommended!</p></li>
+<li><p><strong>string_scorer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference internal" href="kazu.modelling.language.string_similarity_scorers.html#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer"><em>StringSimilarityScorer</em></a><em>]</em>) – Optional protocol of StringSimilarityScorer.  Used for resolving ambiguous symbolic
+synonyms via similarity calculation of the default label associated with the conflicted labels. If no
+instance is provided, all synonym conflicts will be assumed to refer to different concepts. This is not
+recommended!</p></li>
 <li><p><strong>synonym_merge_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – similarity threshold to trigger a merge of conflicted synonyms into a single
 EquivalentIdSet. See docs for score_and_group_ids for further details</p></li>
 <li><p><strong>data_origin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different
@@ -937,7 +941,7 @@ implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.export_metadata">
-<span class="sig-name descname"><span class="pre">export_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L296-L306"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_metadata" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">export_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L295-L305"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_metadata" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]]]</p>
@@ -947,7 +951,7 @@ implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.export_synonym_terms">
-<span class="sig-name descname"><span class="pre">export_synonym_terms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L308-L318"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_synonym_terms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">export_synonym_terms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L307-L317"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_synonym_terms" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
@@ -957,7 +961,7 @@ implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L99-L106"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L100-L107"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -974,20 +978,21 @@ implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.format_training_table">
-<span class="sig-name descname"><span class="pre">format_training_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L375-L379"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.format_training_table" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">format_training_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L376-L380"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.format_training_table" title="Permalink to this definition">#</a></dt>
 <dd><p>generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms">
-<span class="sig-name descname"><span class="pre">generate_synonyms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L326-L340"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms" title="Permalink to this definition">#</a></dt>
-<dd><p>generate synonyms based on configured synonym generator. Note, this method also calls
-populate_databases(), as the metadata db must be populated for appropriate synonym resolution</p>
+<span class="sig-name descname"><span class="pre">generate_synonyms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L325-L341"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate synonyms based on configured synonym generator.</p>
+<p>Note, this method also calls populate_databases(), as the metadata db must be populated
+for appropriate synonym resolution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
@@ -997,7 +1002,7 @@ populate_databases(), as the metadata db must be populated for appropriate synon
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L358-L373"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L359-L374"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -1008,35 +1013,35 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases">
-<span class="sig-name descname"><span class="pre">populate_databases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L349-L356"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">populate_databases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L350-L357"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases" title="Permalink to this definition">#</a></dt>
 <dd><p>populate the databases with the results of the parser</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_metadata_database">
-<span class="sig-name descname"><span class="pre">populate_metadata_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L320-L324"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_metadata_database" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">populate_metadata_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L319-L323"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_metadata_database" title="Permalink to this definition">#</a></dt>
 <dd><p>populate the metadata database with this ontology</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_synonym_database">
-<span class="sig-name descname"><span class="pre">populate_synonym_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L342-L347"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_synonym_database" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">populate_synonym_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L343-L348"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_synonym_database" title="Permalink to this definition">#</a></dt>
 <dd><p>populate the synonym database</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.resolve_synonyms">
-<span class="sig-name descname"><span class="pre">resolve_synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_df</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L108-L157"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.resolve_synonyms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">resolve_synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_df</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L109-L158"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.resolve_synonyms" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym_df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
@@ -1046,7 +1051,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids">
-<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L159-L285"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L160-L284"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
 <dd><p>for a given data source, one normalised synonym may map to one or more id. In some cases, the ID may be
 duplicate/redundant (e.g. there are many chembl ids for paracetamol). In other cases, the ID may refer to
 distinct concepts (e.g. COX 1 could be ‘ENSG00000095303’ OR ‘ENSG00000198804’).</p>
@@ -1057,15 +1062,14 @@ whether the concept is ambiguous or not)</p>
 produced.</p>
 <p>The default algorithm (which can be overridden by concrete parser implementations) works as follows:</p>
 <ol class="arabic simple">
-<li><p>If no SpacyPipeline is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
+<li><p>If no StringScorer is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
 not recommended)</p></li>
 <li><p>If only one ID is referenced, or the associated normalised synonym string is not symbolic, group the
 ids into a single EquivalentIdSet (strategy UNAMBIGUOUS)</p></li>
 <li><p>otherwise, compare the default label associated with each ID to every other default label. If it’s above
 self.synonym_merge_threshold, merge into one EquivalentIdSet, if not, create a new one</p></li>
 </ol>
-<p>recommendation: Use the scispacy large model for comparison, as this uses 600k word vectors. Sapbert might also
-be a good choice</p>
+<p>recommendation: Use the SapbertStringSimilarityScorer for comparison</p>
 <p>IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
 DEFAULT_LABEL</p>
 <dl class="field-list simple">
@@ -1088,11 +1092,11 @@ DEFAULT_LABEL</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.select_pos_pairs">
-<span class="sig-name descname"><span class="pre">select_pos_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L381-L388"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.select_pos_pairs" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">select_pos_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L382-L389"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.select_pos_pairs" title="Permalink to this definition">#</a></dt>
 <dd><p>select synonym pair combinations for alignment. Capped at 50 to prevent overfitting</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0)"><em>Series</em></a>) – </p>
+<dd class="field-odd"><p><strong>df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.1)"><em>Series</em></a>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -1102,7 +1106,7 @@ DEFAULT_LABEL</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.write_training_pairs">
-<span class="sig-name descname"><span class="pre">write_training_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L390-L397"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.write_training_pairs" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">write_training_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L391-L398"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.write_training_pairs" title="Permalink to this definition">#</a></dt>
 <dd><p>write training pairs to a directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1133,11 +1137,11 @@ DEFAULT_LABEL</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OpenTargetsDiseaseOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L429-L467"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OpenTargetsDiseaseOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L430-L468"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser" title="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLinesOntologyParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L441-L442"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L442-L443"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1154,7 +1158,7 @@ DEFAULT_LABEL</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.json_dict_to_parser_dataframe">
-<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L444-L459"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L445-L460"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
 structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
 IDX. All other keys are used as mapping metadata</p>
@@ -1166,14 +1170,14 @@ IDX. All other keys are used as mapping metadata</p>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.look_for_mondo">
-<span class="sig-name descname"><span class="pre">look_for_mondo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ot_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_xrefs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L461-L467"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.look_for_mondo" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">look_for_mondo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ot_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_xrefs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L462-L468"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.look_for_mondo" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1196,18 +1200,18 @@ IDX. All other keys are used as mapping metadata</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.parsed_dataframe">
-<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OpenTargetsMoleculeOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L559-L586"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OpenTargetsMoleculeOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L560-L587"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser" title="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLinesOntologyParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L562-L563"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L563-L564"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1224,7 +1228,7 @@ IDX. All other keys are used as mapping metadata</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.json_dict_to_parser_dataframe">
-<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L565-L586"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L566-L587"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
 structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
 IDX. All other keys are used as mapping metadata</p>
@@ -1236,7 +1240,7 @@ IDX. All other keys are used as mapping metadata</p>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1248,18 +1252,18 @@ IDX. All other keys are used as mapping metadata</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.parsed_dataframe">
-<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OpenTargetsTargetOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L470-L556"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OpenTargetsTargetOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L471-L557"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser" title="kazu.modelling.ontology_preprocessing.base.JsonLinesOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLinesOntologyParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L516-L517"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L517-L518"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1276,7 +1280,7 @@ IDX. All other keys are used as mapping metadata</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.json_dict_to_parser_dataframe">
-<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L519-L556"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">json_dict_to_parser_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsons_gen</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L520-L557"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.json_dict_to_parser_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
 structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
 IDX. All other keys are used as mapping metadata</p>
@@ -1288,14 +1292,14 @@ IDX. All other keys are used as mapping metadata</p>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><em>Iterable</em></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.score_and_group_ids">
-<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L486-L514"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L487-L515"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
 <dd><p>since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
 all synonym resolution, and rely on disambiguation to decide on ‘true’ mappings. Answers on a postcard if anyone
 has a better idea on how to do this!</p>
@@ -1329,19 +1333,19 @@ has a better idea on how to do this!</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.parsed_dataframe">
-<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.RDFGraphParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">RDFGraphParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L589-L652"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">RDFGraphParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L590-L653"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a></p>
 <p>Parser for Owl files.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.RDFGraphParser.is_valid_iri">
-<span class="sig-name descname"><span class="pre">is_valid_iri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L645-L652"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser.is_valid_iri" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_valid_iri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L646-L653"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser.is_valid_iri" title="Permalink to this definition">#</a></dt>
 <dd><p>Check if input string is a valid IRI for the ontology being parsed.</p>
 <p>Uses <cite>self._uri_regex</cite> to define valid IRIs</p>
 <dl class="field-list simple">
@@ -1356,7 +1360,7 @@ has a better idea on how to do this!</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.RDFGraphParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L614-L643"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L615-L644"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -1367,7 +1371,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 <p>Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><em>DataFrame</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><em>DataFrame</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1379,18 +1383,18 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.RDFGraphParser.parsed_dataframe">
-<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.UberonOntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">UberonOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L751-L767"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.UberonOntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">UberonOntologyParser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L752-L768"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.UberonOntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.RDFGraphParser" title="kazu.modelling.ontology_preprocessing.base.RDFGraphParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">RDFGraphParser</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.UberonOntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L766-L767"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.UberonOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_preprocessing/base.py#L767-L768"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.UberonOntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1412,7 +1416,7 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.UberonOntologyParser.parsed_dataframe">
-<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.UberonOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parsed_dataframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.UberonOntologyParser.parsed_dataframe" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1431,10 +1435,10 @@ MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exa
                 </div>
                 <div class="title">kazu.modelling.ontology_preprocessing.synonym_generation</div>
               </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <svg><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="kazu.modelling.ontology_preprocessing.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

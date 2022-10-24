@@ -27,6 +27,7 @@ kazu.steps.other
    :toctree:
    :recursive:
 
+   kazu.steps.other.cleanup
    kazu.steps.other.merge_overlapping_ents
    kazu.steps.other.stanza
 

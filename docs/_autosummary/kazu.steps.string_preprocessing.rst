@@ -27,6 +27,5 @@ kazu.steps.string\_preprocessing
    :toctree:
    :recursive:
 
-   kazu.steps.string_preprocessing.scispacy_abbreviation_expansion
    kazu.steps.string_preprocessing.string_preprocessing_step
 

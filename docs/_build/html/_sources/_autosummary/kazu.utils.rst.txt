@@ -27,6 +27,7 @@ kazu.utils
    :toctree:
    :recursive:
 
+   kazu.utils.abbreviation_detector
    kazu.utils.caching
    kazu.utils.grouping
    kazu.utils.link_index

@@ -1,4 +1,4 @@
-﻿kazu.modelling
+kazu.modelling
 ==============
 
 .. automodule:: kazu.modelling
