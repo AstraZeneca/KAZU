@@ -180,7 +180,7 @@ class KazuAbbreviationDetector:
     Detects abbreviations using the algorithm in "A simple algorithm for identifying
     abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
 
-    If an abbreviation is detected, a new instance of :class:`Entity` is generated, copying information from the
+    If an abbreviation is detected, a new instance of :class:`.Entity` is generated, copying information from the
     originating long span. If the original long span was not an entity, the abbreviation entity is removed. In the latter
     case, you can force the class to not delete entities by providing a list of strings to exclude_abbrvs.
     For instance, this might be wise for abbreviations that are very common and therefore not defined (e.g. 'NSCLC').
