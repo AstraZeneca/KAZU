@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Iterable, Tuple
+from typing import List, Dict, Union, Iterable, Tuple, Optional
 
 import spacy
 import srsly
@@ -118,7 +118,7 @@ class OntologyMatcher:
 
     def create_phrasematchers_from_curated_list(
         self, curated_list: PathLike
-    ) -> Tuple[PhraseMatcher, PhraseMatcher]:
+    ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
 
@@ -151,7 +151,7 @@ class OntologyMatcher:
         # to calling OntologyMatcher
         self.strict_matcher = strict_matcher if len(strict_matcher) != 0 else None
         self.lowercase_matcher = lowercase_matcher if len(lowercase_matcher) != 0 else None
-        return strict_matcher, lowercase_matcher
+        return self.strict_matcher, self.lowercase_matcher
 
     def create_lowercase_phrasematcher_from_parsers(
         self, parsers: List[OntologyParser]
