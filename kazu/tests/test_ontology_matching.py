@@ -59,9 +59,31 @@ parser_2 = make_dummy_parser(
     },
 )
 
-example_text = (
-    "There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms."
+parser_3 = make_dummy_parser(
+    in_path="",
+    name="third_mock_parser",
+    source="test",
+    data={
+        IDX: [
+            "http://my.fake.ontology/synonym_term_id_123",
+            "http://my.fake.ontology/complex_disease_123",
+            "http://my.fake.ontology/complex_disease_123",
+            "http://my.fake.ontology_amongst_id_123",
+        ],
+        DEFAULT_LABEL: [
+            "SynonymTerm",
+            "Complex Disease Alpha VII",
+            "Complex Disease Alpha VII",
+            "Amongst",
+        ],
+        SYN: ["SynonymTerm", "complex 7 disease alpha", "complexVII disease\u03B1", "amongst"],
+        MAPPING_TYPE: ["test", "test", "test", "test"],
+    },
 )
+
+example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
+    This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
+    like for complex 7 disease alpha a.k.a complexVII disease\u03B1 amongst others."""
 
 
 @pytest.mark.parametrize(
@@ -108,6 +130,17 @@ example_text = (
                 {"ent_type_2": {("second_mock_parser", "Q8_SYN")}},
             ],
         ),
+        (
+            ["ent_type_3"],
+            4,
+            {"SynonymTerm", "complex 7 disease alpha", "complexVII disease\u03B1", "amongst"},
+            [
+                {"ent_type_3": {("third_mock_parser", "SYNONYMTERM")}},
+                {"ent_type_3": {("third_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+                {"ent_type_3": {("third_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+                {"ent_type_3": {("third_mock_parser", "AMONGST")}},
+            ],
+        ),
     ],
 )
 def test_results_and_serialization(
@@ -122,9 +155,10 @@ def test_results_and_serialization(
     parser_name_to_entity_type = {
         parser_1.name: "ent_type_1",
         parser_2.name: "ent_type_2",
+        parser_3.name: "ent_type_3",
     }
     nlp = assemble_pipeline(
-        parsers=[parser_1, parser_2],
+        parsers=[parser_1, parser_2, parser_3],
         parser_name_to_entity_type=parser_name_to_entity_type,
         labels=labels,
         output_dir=TEST_OUTPUT_DIR,
