@@ -513,6 +513,12 @@ class Document:
         sections = [Section(text=text, name="na")]
         return cls(idx=idx, sections=sections)
 
+    @classmethod
+    def from_section_texts(cls, texts: List[str]) -> "Document":
+        idx = uuid.uuid4().hex
+        sections = [Section(text=text, name="na") for text in texts]
+        return cls(idx=idx, sections=sections)
+
     def __len__(self):
         length = 0
         for section in self.sections:

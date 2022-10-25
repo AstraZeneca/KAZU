@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Callable
+from typing import Callable, Union, List
 
 import hydra
 import ray
@@ -18,6 +18,10 @@ app = FastAPI()
 
 
 class WebDocument(BaseModel):
+    sections: List[str]
+
+
+class SimpleWebDocument(BaseModel):
     text: str
 
 
@@ -42,9 +46,12 @@ class KazuWebApp:
         return "Welcome to KAZU."
 
     @app.post(f"/{KAZU}")
-    def ner(self, doc: WebDocument):
+    def ner(self, doc: Union[SimpleWebDocument, WebDocument]):
         logger.info(f"received request: {doc}")
-        result = self.pipeline([Document.create_simple_document(doc.text)])
+        if isinstance(doc, SimpleWebDocument):
+            result = self.pipeline([Document.create_simple_document(doc.text)])
+        else:
+            result = self.pipeline([Document.from_section_texts(doc.sections)])
         return result[0].json()
 
 
