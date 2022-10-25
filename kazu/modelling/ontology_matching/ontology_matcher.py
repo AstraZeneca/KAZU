@@ -172,23 +172,26 @@ class OntologyMatcher:
             logging.info(
                 f"generating {sum(len(x.terms) for x in synonym_terms)} patterns for {parser_name}"
             )
-            patterns = self.nlp.tokenizer.pipe(
-                term for synonym in synonym_terms for term in synonym.terms
-            )
-            for synonym_term, pattern in zip(synonym_terms, patterns):
-                match_id = parser_name + self.match_id_sep + synonym_term.term_norm
-                for syn in synonym_term.terms:
-                    try:
-                        # if we're adding to the lowercase matcher, we don't need to add
-                        # to the exact case matcher as well, since we'll definitely get
-                        # the hit, so would just be a waste of memory and compute.
-                        lowercase_matcher.add(match_id, [pattern])
+            synonyms_and_terms = [
+                (term, synonym_term)
+                for synonym_term in synonym_terms
+                for term in synonym_term.terms
+            ]
+            patterns = self.nlp.tokenizer.pipe(term for (term, _synonym_term) in synonyms_and_terms)
 
-                    except KeyError as e:
-                        logging.warning(
-                            f"failed to add '{syn}'. StringStore is {len(self.nlp.vocab.strings)} ",
-                            e,
-                        )
+            for (term, synonym_term), pattern in zip(synonyms_and_terms, patterns):
+                match_id = parser_name + self.match_id_sep + synonym_term.term_norm
+                try:
+                    # if we're adding to the lowercase matcher, we don't need to add
+                    # to the exact case matcher as well, since we'll definitely get
+                    # the hit, so would just be a waste of memory and compute.
+                    lowercase_matcher.add(match_id, [pattern])
+
+                except KeyError as e:
+                    logging.warning(
+                        f"failed to add '{term}'. StringStore is {len(self.nlp.vocab.strings)} ",
+                        e,
+                    )
 
         self.lowercase_matcher = lowercase_matcher
         return lowercase_matcher, None
