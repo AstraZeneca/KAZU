@@ -194,6 +194,11 @@ class OntologyMatcher:
                     )
 
         self.lowercase_matcher = lowercase_matcher
+
+        if len(lowercase_matcher) == 0:
+            raise RuntimeError(
+                "No rules have been added to the PhraseMatcher. Has the OntologyMatcher been given parsers with synonyms?"
+            )
         return lowercase_matcher, None
 
     def __call__(self, doc: Doc) -> Doc:
