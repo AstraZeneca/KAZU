@@ -18,7 +18,7 @@ Welcome to Kazu's documentation!
    Kazu Data Model <datamodel>
    Deep Dive: Kazu Steps <steps>
    Visualising results in Label Studio <label_studio_integration>
-   Writing a custom OntologyParser <ontology_parser>
+   The OntologyParser <ontology_parser>
    Scaling with Ray <scaling_kazu>
    Kazu as a WebService <kazu_webservice>
 

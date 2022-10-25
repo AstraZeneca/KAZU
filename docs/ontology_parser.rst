@@ -1,4 +1,4 @@
-Writing a custom OntologyParser
+The OntologyParser
 ================================
 
 *Ontologies are not designed for NLP* - Angus Roberts
@@ -31,7 +31,8 @@ handle all three scenarios.
 Enter the Kazu :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`. The job of the OntologyParser is to transform an Ontology or Knowledgebase
 into a set of :class:`kazu.data.data.SynonymTerm`. A :class:`kazu.data.data.SynonymTerm` is a container for a synonym, which understands what set of IDs the
 synoynm may refer to, whether they refer to a single group of closely related concepts or multiple separate ones, and various other pieces of useful information
-such as whether the term is symbolic (a.k.a. an abbreviation or some other identifier).
+such as whether the term is symbolic (a.k.a. an abbreviation or some other identifier). This is handled by the attribute
+:attr:`kazu.data.data.EquivalentIdSet.associated_id_sets`.
 
 How does it work? When an ambiguous term is detected in the ontology, the parser must decide whether it should group the confused IDs into the same
 :class:`kazu.data.data.EquivalentIdSet`, or different ones. The algorithm for doing this works as follows:
@@ -45,19 +46,29 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
     result:
         EquivalentIdSetAggregationStrategy.MERGED_AS_NON_SYMBOLIC
 
-2) if the term is symbolic, use the configured string scorer to determine if the default label associated with each instance of the term is above some predefined threshold.
+2) If the term is symbolic, use the configured string scorer to determine if the default label associated with each instance of the term is above some predefined threshold.
     The idea here is that we can use embeddings to check if semantically, the confused symbol is referring to either a very similar concept, or something completely different
     in the knowledgebase. Typically, we use a distilled form of the `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
 
     example:
-        "OFD" -> either osteofibrous dysplasia (MONDO_0011806) or orofaciodigital syndrome (MONDO_0015375).
+        "OFD" -> either "osteofibrous dysplasia (MONDO_0011806)" or "orofaciodigital syndrome (MONDO_0015375)".
     result:
         sapbert similarity: 0.4532. Threshold: 0.70. Decision -> split into two instances of :class:`kazu.data.data.EquivalentIdSet`
 
     example:
-        "XLOA" -> either X-linked recessive ocular albinism (MONDO_0021019 )or ocular albinism (MONDO_0017304)
+        "XLOA" -> either "X-linked recessive ocular albinism (MONDO_0021019)" or "ocular albinism (MONDO_0017304)"
     result:
         sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`kazu.data.data.EquivalentIdSet`
+
+Naturally, this behaviour may not always be desired. You may want two instances of :class:`kazu.data.data.SynonymTerm` for the term "XLOA" (despite the MONDO ontology
+suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`kazu.data.data.SynonymTerm` is most appropriate.
+In this case, you can override this behaviour with :method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids`
+
+
+Writing a Custom Parser
+-------------------------
+
+TBA
 
 
 
