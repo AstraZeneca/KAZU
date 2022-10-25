@@ -68,10 +68,85 @@ In this case, you can override this behaviour with :method:`kazu.modelling.ontol
 Writing a Custom Parser
 -------------------------
 
-TBA
+Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an OntologyParser. Fortunately, this is generally
+quite easy to do. Let's take the example of the :class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
+
+There are two methods you need to override :method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe` and
+:method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb`. Let's look at the first of these:
+
+.. code-block:: python
+    DEFAULT_LABEL = "default_label"
+    IDX = "idx"
+    SYN = "syn"
+    MAPPING_TYPE = "mapping_type"
+    SOURCE = "source"
+    DATA_ORIGIN = "data_origin"
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        """
+        the objective of this method is to create a long, thin pandas dataframe of terms and associated metadata.
+        We need at the very least, to extract an id and a default label. Normally, we'd also be looking to extract any
+        synonyms and the type of mapping as well
+        """
+
+        #fortunately, Chembl comes as and sqlite DB, which lends itself very well to this tabular structure
+        conn = sqlite3.connect(self.in_path)
+        query = f"""
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
+            FROM molecule_dictionary AS md
+                     JOIN molecule_synonyms ms ON md.molregno = ms.molregno
+            UNION ALL
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE}
+            FROM molecule_dictionary
+        """  # noqa
+        df = pd.read_sql(query, conn)
+        # eliminate anything without a pref_name, as will be too big otherwise
+        df = df.dropna(subset=[DEFAULT_LABEL])
+
+        df.drop_duplicates(inplace=True)
+
+        return df
+
+secondly, we need to write the :method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb` method
+
+.. code-block:: python
+
+    def find_kb(self, string: str) -> str:
+        """
+        in our case, this is very simple, as everything in the Chembl DB has a chembl based identifier
+        Other ontologies may use composite identifiers, i.e. MONDO could contain native MONDO_xxxxx identifiers
+        or HP_xxxxxxx identifiers. In this scenario, we'd need to parse the 'string' parameter of this method
+        to extract the relevant KB identifier
+        """
+        return "CHEMBL"
 
 
+finally, we need to set the class field, so the full class looks like:
 
+.. code-block:: python
+    class ChemblOntologyParser(OntologyParser):
 
+        name = "CHEMBL"
 
+        def find_kb(self, string: str) -> str:
+            return "CHEMBL"
+
+        def parse_to_dataframe(self) -> pd.DataFrame:
+            conn = sqlite3.connect(self.in_path)
+            query = f"""
+                SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
+                FROM molecule_dictionary AS md
+                         JOIN molecule_synonyms ms ON md.molregno = ms.molregno
+                UNION ALL
+                SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE}
+                FROM molecule_dictionary
+            """  # noqa
+            df = pd.read_sql(query, conn)
+            # eliminate anything without a pref_name, as will be too big otherwise
+            df = df.dropna(subset=[DEFAULT_LABEL])
+
+            df.drop_duplicates(inplace=True)
+
+            return df
+
+That's it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere
 
