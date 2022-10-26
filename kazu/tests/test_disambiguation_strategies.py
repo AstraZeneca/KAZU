@@ -1,6 +1,6 @@
 import tempfile
 from itertools import chain
-from typing import Tuple, Set, List, Optional
+from typing import Tuple, Set, List
 
 import pytest
 
