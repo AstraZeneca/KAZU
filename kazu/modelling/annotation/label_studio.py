@@ -91,6 +91,7 @@ class KazuToLabelStudioConverter:
 
     @staticmethod
     def _create_mapping_region(ent: Entity, region_id: str, span: CharSpan, match: str):
+
         return {
             "id": region_id,
             "from_name": _TAX_NAME,
@@ -102,8 +103,10 @@ class KazuToLabelStudioConverter:
                 "end": span.end,
                 "text": match,
                 "taxonomy": sorted(
-                    (mapping.source, f"{mapping.default_label}|{mapping.idx}")
-                    for mapping in ent.mappings
+                    set(
+                        (mapping.source, f"{mapping.default_label}|{mapping.idx}")
+                        for mapping in ent.mappings
+                    )
                 ),
             },
         }
