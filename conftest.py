@@ -40,8 +40,18 @@ def kazu_test_config(override_kazu_test_config):
 def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
 
     dummy_data = {
-        IDX: ["1", "1", "2", "2", "2", "3", "3", "3"],
-        DEFAULT_LABEL: ["CDKN1B", "CDKN1B", "PAK2", "PAK2", "PAK2", "ZNRD2", "ZNRD2", "ZNRD2"],
+        IDX: ["1", "1", "2", "2", "2", "3", "3", "3", "1"],
+        DEFAULT_LABEL: [
+            "CDKN1B",
+            "CDKN1B",
+            "PAK2",
+            "PAK2",
+            "PAK2",
+            "ZNRD2",
+            "ZNRD2",
+            "ZNRD2",
+            "CDKN1B",
+        ],
         SYN: [
             "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
             "CDKN1B",
@@ -51,11 +61,12 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
             "Autoantigen p27",
             "ZNRD2",
             "p27",
+            "p27",
         ],
-        MAPPING_TYPE: ["", "", "", "", "", "", "", ""],
+        MAPPING_TYPE: ["", "", "", "", "", "", "", "", ""],
     }
     parser = make_dummy_parser(
-        in_path="", data=dummy_data, name="test_tfidf_parsr", source="test_tfidf_parsr"
+        in_path="", data=dummy_data, name="test_tfidf_parser", source="test_tfidf_parser"
     )
     parser.populate_databases()
     terms_with_metrics = set(
