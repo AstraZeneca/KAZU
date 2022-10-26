@@ -1,6 +1,6 @@
 import tempfile
 from itertools import chain
-from typing import Tuple, Set, List
+from typing import Tuple, Set, List, Optional
 
 import pytest
 
@@ -26,13 +26,17 @@ from kazu.utils.utils import get_cache_dir
 
 
 def check_ids_are_represented(
-    ids_to_check: Set[str], strategy: DisambiguationStrategy, doc: Document, parser: DummyParser
+    ids_to_check: Set[str],
+    strategy: DisambiguationStrategy,
+    doc: Document,
+    parser: DummyParser,
+    ents_to_tests: List[Entity],
 ):
     strategy.prepare(doc)
     all_id_sets: Set[EquivalentIdSet] = set(
         chain.from_iterable(
             term.associated_id_sets
-            for ent in doc.get_entities()
+            for ent in ents_to_tests
             for term in ent.syn_term_to_synonym_terms.values()
         )
     )
@@ -95,7 +99,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     strategy = DefinedElsewhereInDocumentDisambiguationStrategy()
 
     # first check no mappings are produced until we add the 'good' mapping info
-    check_ids_are_represented(ids_to_check=set(), strategy=strategy, doc=doc, parser=parser)
+    check_ids_are_represented(
+        ids_to_check=set(), strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+    )
 
     # now add a good mapping, that should be selected from the set of terms
     target_term = next(filter(lambda x: x.term_norm == "AUTOANTIGEN P 27", terms))
@@ -116,7 +122,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     autoantip27_ent.mappings.update(target_mappings)
 
     doc = create_doc_with_ents([autoantip27_ent, p27_ent])
-    check_ids_are_represented(ids_to_check={"3"}, strategy=strategy, doc=doc, parser=parser)
+    check_ids_are_represented(
+        ids_to_check={"3"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+    )
 
     #     finally, we'll add another entity with a relevant mapping. Since two relevant entities with mappings now occur in
     #     the same context, the strategy should produce a set with two ids in it
@@ -147,7 +155,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     cdkn1b_ent.mappings.update(target_mappings)
     doc = create_doc_with_ents([autoantip27_ent, p27_ent, cdkn1b_ent])
 
-    check_ids_are_represented(ids_to_check={"3", "1"}, strategy=strategy, doc=doc, parser=parser)
+    check_ids_are_represented(
+        ids_to_check={"3", "1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+    )
 
 
 def test_TfIdfContextStrategy(set_up_p27_test_case):
@@ -158,13 +168,22 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
         doc = Document.create_simple_document(text)
         cdkn1b_ent = Entity.load_contiguous_entity(
             start=len(text) - len("CDKN1B"),
-            end=len("CDKN1B"),
+            end=len(text),
             match="CDKN1B",
             entity_class="gene",
             namespace="test",
         )
-        cdkn1b_ent.update_terms(terms)
         doc.sections[0].entities.append(cdkn1b_ent)
+        p27_ent = Entity.load_contiguous_entity(
+            start=0,
+            end=len("p27"),
+            match="p27",
+            entity_class="gene",
+            namespace="test",
+        )
+
+        p27_ent.update_terms(terms)
+        doc.sections[0].entities.append(p27_ent)
 
         cache_dir = get_cache_dir(
             f,
@@ -178,7 +197,9 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
             relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
         )
 
-        check_ids_are_represented(ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser)
+        check_ids_are_represented(
+            ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+        )
 
 
 def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
@@ -205,7 +226,9 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
         else:
             meta_dict["annotation_score"] = 5
     strategy = AnnotationLevelDisambiguationStrategy()
-    check_ids_are_represented(ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser)
+    check_ids_are_represented(
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[cdkn1b_ent]
+    )
 
     # now repeat with equal scores
     for idx, meta_dict in all_metadata.items():
@@ -213,4 +236,10 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
             meta_dict["annotation_score"] = 10
         else:
             meta_dict["annotation_score"] = 5
-    check_ids_are_represented(ids_to_check={"1", "3"}, strategy=strategy, doc=doc, parser=parser)
+    check_ids_are_represented(
+        ids_to_check={"1", "3"},
+        strategy=strategy,
+        doc=doc,
+        parser=parser,
+        ents_to_tests=[cdkn1b_ent],
+    )
