@@ -22,7 +22,7 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 from kazu.tests.utils import DummyParser, make_dummy_parser
-from kazu.utils.utils import get_cache_dir
+from kazu.utils.utils import get_cache_dir, Singleton
 
 
 def check_ids_are_represented(
@@ -161,7 +161,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
 
 
 def test_TfIdfContextStrategy(set_up_p27_test_case):
-
+    # we need to clear out the scorer singleton. TODO: find a better way to handle this
+    if TfIdfScorer in Singleton._instances:
+        Singleton._instances.pop(TfIdfScorer)
     terms, parser = set_up_p27_test_case
     with tempfile.TemporaryDirectory("kazu") as f:
         text = "p27 is often confused, but in this context it's CDKN1B"
