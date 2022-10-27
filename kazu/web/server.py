@@ -5,6 +5,7 @@ from typing import Callable, Union, List
 import hydra
 import ray
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
@@ -17,12 +18,21 @@ logger = logging.getLogger("ray")
 app = FastAPI()
 
 
-class WebDocument(BaseModel):
+class SectionedWebDocument(BaseModel):
     sections: List[str]
+
+    def to_kazu_document(self) -> Document:
+        return Document.from_section_texts(texts=self.sections)
 
 
 class SimpleWebDocument(BaseModel):
     text: str
+
+    def to_kazu_document(self) -> Document:
+        return Document.create_simple_document(self.text)
+
+
+WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
 
 
 @serve.deployment(route_prefix="/api")
@@ -46,13 +56,16 @@ class KazuWebApp:
         return "Welcome to KAZU."
 
     @app.post(f"/{KAZU}")
-    def ner(self, doc: Union[SimpleWebDocument, WebDocument]):
+    def ner(self, doc: WebDocument):
         logger.info(f"received request: {doc}")
-        if isinstance(doc, SimpleWebDocument):
-            result = self.pipeline([Document.create_simple_document(doc.text)])
-        else:
-            result = self.pipeline([Document.from_section_texts(doc.sections)])
-        return result[0].json()
+        result = self.pipeline([doc.to_kazu_document()])
+        return JSONResponse(content=result[0].as_minified_dict())
+
+    @app.post(f"/{KAZU}/batch")
+    def batch_ner(self, docs: List[WebDocument]):
+        logger.info(f"received request: {[docs]}")
+        result = self.pipeline([doc.to_kazu_document() for doc in docs])
+        return JSONResponse(content=[res.as_minified_dict() for res in result])
 
 
 @hydra.main(config_path="../conf", config_name="config")
