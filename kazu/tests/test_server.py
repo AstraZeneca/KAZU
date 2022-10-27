@@ -33,8 +33,10 @@ def test_batch_api(override_kazu_test_config):
     start(cfg)
     data = requests.post(
         f"http://127.0.0.1:{cfg.ray.serve.port}/api/{KAZU}/batch",
-        json=[{"text": "Why do we always test EGFR in these applications?"},
-              {"sections": ["hello this is the first section", "the second section mentions BRCA1"]}],
+        json=[
+            {"text": "Why do we always test EGFR in these applications?"},
+            {"sections": ["hello this is the first section", "the second section mentions BRCA1"]},
+        ],
     ).json()
     doc0_section0 = data[0]["sections"][0]
     assert len(doc0_section0["entities"]) > 0
