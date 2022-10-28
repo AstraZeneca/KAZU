@@ -420,13 +420,13 @@ class JsonLinesOntologyParser(OntologyParser):
                     yield json.loads(line)
 
     def parse_to_dataframe(self):
-        return pd.concat(self.json_dict_to_parser_dataframe(self.read(self.in_path)))
+        return pd.DataFrame.from_records(self.json_dict_to_parser_records(self.read(self.in_path)))
 
-    def json_dict_to_parser_dataframe(
+    def json_dict_to_parser_records(
         self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[Dict[str, Any]]:
         """
-        for a given input json (represented as a python dict), yield a pd.DataFrame compatible with the expected
+        for a given input json (represented as a python dict), yield dictionary record(s) compatible with the expected
         structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
         IDX. All other keys are used as mapping metadata
 
@@ -451,9 +451,9 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
 
-    def json_dict_to_parser_dataframe(
+    def json_dict_to_parser_records(
         self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[Dict[str, Any]]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
             idx = self.look_for_mondo(json_dict["id"], json_dict.get("dbXRefs", []))
@@ -461,12 +461,16 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                 synonyms = json_dict.get("synonyms", {})
                 exact_syns = synonyms.get("hasExactSynonym", [])
                 exact_syns.append(json_dict["name"])
-                df = pd.DataFrame(exact_syns, columns=[SYN])
-                df[MAPPING_TYPE] = "hasExactSynonym"
-                df[DEFAULT_LABEL] = json_dict["name"]
-                df[IDX] = idx
-                df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
-                yield df
+                def_label = json_dict["name"]
+                dbXRefs = json_dict.get("dbXRefs", [])
+                for syn in exact_syns:
+                    yield {
+                        SYN: syn,
+                        MAPPING_TYPE: "hasExactSynonym",
+                        DEFAULT_LABEL: def_label,
+                        IDX: idx,
+                        "dbXRefs": dbXRefs,
+                    }
 
     def look_for_mondo(self, ot_id: str, db_xrefs: List[str]):
         if "MONDO" in ot_id:
@@ -526,16 +530,30 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     def find_kb(self, string: str) -> str:
         return "ENSEMBL"
 
-    def json_dict_to_parser_dataframe(
+    def json_dict_to_parser_records(
         self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[Dict[str, Any]]:
         for json_dict in jsons_gen:
             # due to a bug in OT data, TEC genes have "gene" as a synonym. Sunce they're uninteresting, we just filter
             # them
             biotype = json_dict.get("biotype")
             if biotype == "" or biotype == "tec" or json_dict["id"] == json_dict["approvedSymbol"]:
                 continue
-            records = []
+
+            annotation_score = sum(
+                1
+                for annotation_field in self.annotation_fields
+                if len(json_dict.get(annotation_field, [])) > 0
+            )
+
+            shared_values = {
+                IDX: json_dict["id"],
+                DEFAULT_LABEL: json_dict["approvedSymbol"],
+                "dbXRefs": json_dict.get("dbXRefs", []),
+                "approvedName": json_dict["approvedName"],
+                "annotation_score": annotation_score,
+            }
+
             for key in ["synonyms", "obsoleteSymbols", "obsoleteNames", "proteinIds"]:
                 synonyms_and_sources_lst = json_dict.get(key, [])
                 for record in synonyms_and_sources_lst:
@@ -546,24 +564,18 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
                     elif "id" in record:
                         record[SYN] = record.pop("id")
                     record[MAPPING_TYPE] = record.pop("source")
-                    records.append(record)
+                    record.update(shared_values)
+                    yield record
 
-            annotation_score = sum(
-                1
-                for annotation_field in self.annotation_fields
-                if len(json_dict.get(annotation_field, [])) > 0
-            )
+            for key in ("approvedSymbol", "approvedName", "id"):
+                if key == "id":
+                    mapping_type = "opentargets_id"
+                else:
+                    mapping_type = key
 
-            records.append({SYN: json_dict["approvedSymbol"], MAPPING_TYPE: "approvedSymbol"})
-            records.append({SYN: json_dict["approvedName"], MAPPING_TYPE: "approvedName"})
-            records.append({SYN: json_dict["id"], MAPPING_TYPE: "opentargets_id"})
-            df = pd.DataFrame.from_records(records, columns=[SYN, MAPPING_TYPE])
-            df[IDX] = json_dict["id"]
-            df[DEFAULT_LABEL] = json_dict["approvedSymbol"]
-            df["dbXRefs"] = [json_dict.get("dbXRefs", [])] * df.shape[0]
-            df["annotation_score"] = [annotation_score] * df.shape[0]
-            df["approvedName"] = json_dict["approvedName"]
-            yield df
+                res = {SYN: json_dict[key], MAPPING_TYPE: mapping_type}
+                res.update(shared_values)
+                yield res
 
 
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
@@ -572,28 +584,35 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
 
-    def json_dict_to_parser_dataframe(
+    def json_dict_to_parser_records(
         self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[Dict[str, Any]]:
         for json_dict in jsons_gen:
+            cross_references = json_dict.get("crossReferences", {})
+            default_label = json_dict["name"]
+            idx = json_dict["id"]
+
             synonyms = json_dict.get("synonyms", [])
             main_name = json_dict["name"]
             synonyms.append(main_name)
-            mapping_types = ["synonyms"] * len(synonyms)
-            trade_names = json_dict.get("tradeNames", [])
-            synonyms.extend(trade_names)
-            mapping_types.extend(["tradeNames"] * len(trade_names))
-            cross_references = [json_dict.get("crossReferences", {})] * len(synonyms)
-            df = pd.DataFrame(
-                {
-                    SYN: synonyms,
-                    MAPPING_TYPE: mapping_types,
+
+            for syn in synonyms:
+                yield {
+                    SYN: syn,
+                    MAPPING_TYPE: "synonyms",
                     "crossReferences": cross_references,
-                    DEFAULT_LABEL: json_dict["name"],
-                    IDX: json_dict["id"],
+                    DEFAULT_LABEL: default_label,
+                    IDX: idx,
                 }
-            )
-            yield df
+
+            for trade_name in json_dict.get("tradeNames", []):
+                yield {
+                    SYN: trade_name,
+                    MAPPING_TYPE: "tradeNames",
+                    "crossReferences": cross_references,
+                    DEFAULT_LABEL: default_label,
+                    IDX: idx,
+                }
 
 
 class RDFGraphParser(OntologyParser):
