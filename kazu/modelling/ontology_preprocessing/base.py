@@ -382,30 +382,6 @@ class OntologyParser(ABC):
         """
         raise NotImplementedError()
 
-    def format_training_table(self) -> pd.DataFrame:
-        """
-        generate a table of synonym pairs. Useful for aligning an embedding space (e.g. as for sapbert)
-        """
-        raise NotImplementedError()
-
-    def select_pos_pairs(self, df: pd.Series):
-        """
-        select synonym pair combinations for alignment. Capped at 50 to prevent overfitting
-
-        :param df:
-        :return:
-        """
-        raise NotImplementedError()
-
-    def write_training_pairs(self, out_path: str):
-        """
-        write training pairs to a directory.
-
-        :param out_path: directory to write to
-        :return:
-        """
-        raise NotImplementedError()
-
 
 class JsonLinesOntologyParser(OntologyParser):
     """
