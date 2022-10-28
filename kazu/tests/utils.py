@@ -273,9 +273,9 @@ class DummyParser(OntologyParser):
 
 
 def make_dummy_parser(
-    in_path: str, source: str, data: Dict[str, List[str]], name: str
+    in_path: str, source: str, data: Dict[str, List[str]], name: str, entity_class: str = "test"
 ) -> DummyParser:
-    parser = DummyParser(in_path)
+    parser = DummyParser(in_path, entity_class)
     parser.name = name
     parser.DUMMY_DATA = data
     parser.DUMMY_SOURCE = source
