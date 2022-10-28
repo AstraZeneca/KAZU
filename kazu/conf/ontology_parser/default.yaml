@@ -4,6 +4,7 @@ chembl_parser:
   data_origin: 'chembl_29_sqlite'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
+  entity_class: 'drug'
 
 mondo_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
@@ -15,6 +16,7 @@ mondo_parser:
     _target_: builtins.set
     _args_:
       - - http://purl.obolibrary.org/obo/HP_0000001
+  entity_class: 'disease'
 
 ot_disease_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
@@ -22,6 +24,7 @@ ot_disease_parser:
   data_origin: 'OPENTARGETS-DISEASE'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'disease'
 
 ot_molecule_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
@@ -29,6 +32,7 @@ ot_molecule_parser:
   data_origin: 'OPENTARGETS-MOLECULE'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
+  entity_class: 'drug'
 
 ot_target_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
@@ -44,6 +48,7 @@ meddra_parser:
   data_origin: 'MEDDRA-24.1'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'disease'
 
 uberon_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
@@ -51,18 +56,21 @@ uberon_parser:
   data_origin: 'UBERON'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'anatomy'
 
 cellosaurus_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
   data_origin: 'CELLOSAURUS'
   string_scorer: ${SapbertStringSimilarityScorer}
+  entity_class: 'cell_line'
 
 clo_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
   data_origin: 'CLO'
   string_scorer: ${SapbertStringSimilarityScorer}
+  entity_class: 'cell_type'
 
 go_bp_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
@@ -70,6 +78,7 @@ go_bp_parser:
   data_origin: 'GO-BP'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'go_bp'
 
 go_mf_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
@@ -77,6 +86,7 @@ go_mf_parser:
   data_origin: 'GO-MF'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'go_mf'
 
 go_cc_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
@@ -84,3 +94,4 @@ go_cc_parser:
   data_origin: 'GO-CC'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'go_cc'

@@ -4,14 +4,13 @@ from kazu.tests.utils import DummyParser
 
 
 def test_skips_prelinked_entities(tmp_path):
-    parser = DummyParser(str(tmp_path / "dummy_parser"))
+    parser = DummyParser(str(tmp_path / "dummy_parser"), entity_class="int")
     index = DictionaryIndex(parser)
     mock_skip_namespace = "mock_skip_namespace"
     mock_noskip_namespace = "mock_noskip_namespace"
     step = DictionaryEntityLinkingStep(
         depends_on=[],
         indices=[index],
-        entity_class_to_ontology_mappings={"int": [parser.name]},
         skip_ner_namespaces={mock_skip_namespace},
     )
 

@@ -1,6 +1,5 @@
 defaults:
   - ray: local
-  - entity_class_to_ontology_map: default
   - ontology_parser: default
   - PLSapbertModel: default
   - SpacyPipeline: default
