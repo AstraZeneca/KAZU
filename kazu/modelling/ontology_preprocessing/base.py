@@ -56,7 +56,6 @@ class OntologyParser(ABC):
     implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC).
     """
 
-    name = "unnamed"  # a label for this parser
     # the synonym table should have these (and only these columns)
     all_synonym_column_names = [IDX, SYN, MAPPING_TYPE]
     # the metadata table should have at least these columns (note, IDX will become the index)
@@ -71,6 +70,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        name: str = "unnamed",
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -96,6 +96,7 @@ class OntologyParser(ABC):
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.in_path = in_path
+        self.name = name
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.entity_class = entity_class
         self.excluded_ids = excluded_ids
@@ -415,7 +416,6 @@ class JsonLinesOntologyParser(OntologyParser):
 
 
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
-    name = "OPENTARGETS_DISEASE"
     # Just use IDs that are in MONDO, since that's all people in general care about.
     # if we want to expand this out, other sources are:
     # "OGMS", "FBbt", "Orphanet", "EFO", "OTAR"
@@ -425,6 +425,25 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     # currently, and easy to change later (and provide the current value as a default if
     # not present in config)
     allowed_sources = {"MONDO", "HP"}
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="OPENTARGETS_DISEASE",
+        )
 
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
@@ -460,7 +479,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 
 
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
-    name = "OPENTARGETS_TARGET"
 
     annotation_fields = {
         "subcellularLocations",
@@ -474,6 +492,25 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         "pathways",
         "targetClass",
     }
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="OPENTARGETS_TARGET",
+        )
 
     def score_and_group_ids(
         self,
@@ -557,7 +594,24 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
 
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
-    name = "OPENTARGETS_MOLECULE"
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="OPENTARGETS_MOLECULE",
+        )
 
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
@@ -597,8 +651,6 @@ class RDFGraphParser(OntologyParser):
     """
     Parser for Owl files.
     """
-
-    name = "RDFGraphParser"
 
     @property
     @classmethod
@@ -660,9 +712,28 @@ class RDFGraphParser(OntologyParser):
 
 
 class GeneOntologyParser(OntologyParser):
-    name = "UNDEFINED"
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
     query = """UNDEFINED"""
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+        )
 
     def load_go(self):
         g = rdflib.Graph()
@@ -702,7 +773,6 @@ class GeneOntologyParser(OntologyParser):
 
 
 class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
-    name = "BP_GENE_ONTOLOGY"
     query = """
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -718,9 +788,27 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
                   }
         """
 
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="BP_GENE_ONTOLOGY",
+        )
+
 
 class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
-    name = "MF_GENE_ONTOLOGY"
     query = """
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -736,9 +824,27 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
                   }
         """
 
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="MF_GENE_ONTOLOGY",
+        )
+
 
 class CellularComponentGeneOntologyParser(GeneOntologyParser):
-    name = "CC_GENE_ONTOLOGY"
     query = """
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -754,15 +860,52 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
                   }
         """
 
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="CC_GENE_ONTOLOGY",
+        )
+
 
 class UberonOntologyParser(RDFGraphParser):
-    name = "UBERON"
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$")
     """
     input should be an UBERON owl file
     e.g.
     https://www.ebi.ac.uk/ols/ontologies/uberon
     """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="UBERON",
+        )
 
     def _get_synonym_predicates(self) -> List[str]:
         return [
@@ -775,13 +918,31 @@ class UberonOntologyParser(RDFGraphParser):
 
 
 class MondoOntologyParser(OntologyParser):
-    name = "MONDO"
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(MONDO|HP)_[0-9]+$")
     """
     input should be a MONDO json file
     e.g.
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="MONDO",
+        )
 
     def find_kb(self, string: str):
         path = parse.urlparse(string).path
@@ -835,7 +996,6 @@ class MondoOntologyParser(OntologyParser):
 
 
 class EnsemblOntologyParser(OntologyParser):
-    name = "ENSEMBL"
     """
     input is a json from HGNC
     e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
@@ -843,15 +1003,32 @@ class EnsemblOntologyParser(OntologyParser):
     :return:
     """
 
-    def find_kb(self, string: str) -> str:
-        return "ENSEMBL"
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        additional_syns_path: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="ENSEMBL",
+        )
 
-    def __init__(self, in_path: str, entity_class: str, additional_syns_path: str):
-
-        super().__init__(in_path, entity_class)
         with open(additional_syns_path, "r") as f:
 
             self.additional_syns = json.load(f)
+
+    def find_kb(self, string: str) -> str:
+        return "ENSEMBL"
 
     def parse_to_dataframe(self) -> pd.DataFrame:
 
@@ -932,7 +1109,24 @@ class ChemblOntologyParser(OntologyParser):
     https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz
     """
 
-    name = "CHEMBL"
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="CHEMBL",
+        )
 
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
@@ -957,12 +1151,30 @@ class ChemblOntologyParser(OntologyParser):
 
 
 class CLOOntologyParser(RDFGraphParser):
-    name = "CLO"
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$")
     """
     input is a CLO Owl file
     https://www.ebi.ac.uk/ols/ontologies/clo
     """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="CLO",
+        )
 
     def find_kb(self, string: str) -> str:
         return "CLO"
@@ -981,8 +1193,26 @@ class CellosaurusOntologyParser(OntologyParser):
     https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo
     """
 
-    name = "CELLOSAURUS"
     cell_line_re = re.compile("cell line", re.IGNORECASE)
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="CELLOSAURUS",
+        )
 
     def find_kb(self, string: str) -> str:
         return "CELLOSAURUS"
@@ -1079,8 +1309,6 @@ class MeddraOntologyParser(OntologyParser):
     should contain the files 'mdhier.asc' and 'llt.asc'
     """
 
-    name = "MEDDRA_DISEASE"
-
     _mdhier_asc_col_names = (
         "pt_code",
         "hlt_code",
@@ -1113,6 +1341,25 @@ class MeddraOntologyParser(OntologyParser):
     )
 
     _exclude_soc = ["Surgical and medical procedures", "Social circumstances", "Investigations"]
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            name="MEDDRA_DISEASE",
+        )
 
     def find_kb(self, string: str) -> str:
         return "MEDDRA"
