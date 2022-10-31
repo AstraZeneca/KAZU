@@ -1,4 +1,3 @@
-import pytest
 import requests
 
 from kazu.tests.utils import requires_model_pack
