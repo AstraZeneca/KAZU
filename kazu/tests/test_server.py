@@ -7,7 +7,6 @@ from kazu.web.server import start
 
 
 @requires_model_pack
-@pytest.mark.skip
 def test_api(override_kazu_test_config):
 
     cfg = override_kazu_test_config(
@@ -24,7 +23,6 @@ def test_api(override_kazu_test_config):
 
 
 @requires_model_pack
-@pytest.mark.skip
 def test_batch_api(override_kazu_test_config):
 
     cfg = override_kazu_test_config(
