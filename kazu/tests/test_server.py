@@ -2,18 +2,13 @@ import requests
 
 from kazu.tests.utils import requires_model_pack
 from kazu.web.routes import KAZU
-from kazu.web.server import start
 
 
 @requires_model_pack
-def test_api(override_kazu_test_config):
+def test_api(ray_server, kazu_test_config):
 
-    cfg = override_kazu_test_config(
-        overrides=["ray=local", "ray.detached=True"],
-    )
-    start(cfg)
     data = requests.post(
-        f"http://127.0.0.1:{cfg.ray.serve.port}/api/{KAZU}/",
+        f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/",
         json={"text": "Why do we always test EGFR in these applications?"},
     ).json()
     section = data["sections"][0]
@@ -22,14 +17,9 @@ def test_api(override_kazu_test_config):
 
 
 @requires_model_pack
-def test_batch_api(override_kazu_test_config):
-
-    cfg = override_kazu_test_config(
-        overrides=["ray=local", "ray.detached=True"],
-    )
-    start(cfg)
+def test_batch_api(ray_server, kazu_test_config):
     data = requests.post(
-        f"http://127.0.0.1:{cfg.ray.serve.port}/api/{KAZU}/batch",
+        f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/batch",
         json=[
             {"text": "Why do we always test EGFR in these applications?"},
             {"sections": ["hello this is the first section", "the second section mentions BRCA1"]},

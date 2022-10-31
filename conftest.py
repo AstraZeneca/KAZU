@@ -12,6 +12,8 @@ from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.tests.utils import CONFIG_DIR, DummyParser, make_dummy_parser
 
+from kazu.web.server import start, stop
+
 
 @pytest.fixture(scope="session")
 def override_kazu_test_config():
@@ -87,3 +89,13 @@ def make_label_studio_manager():
 @pytest.fixture(scope="session")
 def label_studio_manager(make_label_studio_manager) -> LabelStudioManager:
     return make_label_studio_manager()
+
+
+@pytest.fixture(scope="function")
+def ray_server(override_kazu_test_config):
+    cfg = override_kazu_test_config(
+        overrides=["ray=local", "ray.detached=true"],
+    )
+    start(cfg)
+    yield
+    stop()

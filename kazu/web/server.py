@@ -82,11 +82,18 @@ def start(cfg: DictConfig) -> None:
     serve.start(
         detached=cfg.ray.detached, http_options={"host": "0.0.0.0", "location": "EveryNode"}
     )
+
     KazuWebApp.deploy(cfg)
     if not cfg.ray.detached:
         while True:
             logger.info(serve.list_deployments())
             time.sleep(10)
+
+
+def stop():
+    if ray.is_initialized():
+        serve.shutdown()
+        ray.shutdown()
 
 
 if __name__ == "__main__":
