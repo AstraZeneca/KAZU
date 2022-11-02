@@ -22,7 +22,12 @@ def test_batch_api(ray_server, kazu_test_config):
         f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/batch",
         json=[
             {"text": "EGFR is an important gene in breast cancer"},
-            {"sections": ["hello this is the first section", "the second section mentions BRCA1"]},
+            {
+                "sections": {
+                    "sec1": "hello this is the first section",
+                    "sec2": "the second section mentions BRCA1",
+                }
+            },
         ],
     ).json()
     doc0_section0 = data[0]["sections"][0]

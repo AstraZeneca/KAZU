@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Callable, Union, List
+from typing import Callable, Union, List, Dict
 
 import hydra
 import ray
@@ -22,9 +22,7 @@ class SectionedWebDocument(BaseModel):
     sections: Dict[str, str]
 
     def to_kazu_document(self) -> Document:
-         idx = uuid.uuid4().hex
-         sections = [Section(text=text, name=name) for text, name in sections.items()]
-         return Document(idx=idx, sections=sections)
+        return Document.from_named_section_texts(self.sections)
 
 
 class SimpleWebDocument(BaseModel):

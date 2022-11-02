@@ -514,9 +514,9 @@ class Document:
         return cls(idx=idx, sections=sections)
 
     @classmethod
-    def from_section_texts(cls, texts: List[str]) -> "Document":
+    def from_named_section_texts(cls, named_sections: Dict[str, str]) -> "Document":
         idx = uuid.uuid4().hex
-        sections = [Section(text=text, name="na") for text in texts]
+        sections = [Section(text=text, name=name) for name, text in named_sections.items()]
         return cls(idx=idx, sections=sections)
 
     def __len__(self):
