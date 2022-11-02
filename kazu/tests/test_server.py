@@ -9,7 +9,7 @@ def test_api(ray_server, kazu_test_config):
 
     data = requests.post(
         f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/",
-        json={"text": "Why do we always test EGFR in these applications?"},
+        json={"text": "EGFR is an important gene in breast cancer"},
     ).json()
     section = data["sections"][0]
     assert len(section["entities"]) > 0
@@ -21,7 +21,7 @@ def test_batch_api(ray_server, kazu_test_config):
     data = requests.post(
         f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/batch",
         json=[
-            {"text": "Why do we always test EGFR in these applications?"},
+            {"text": "EGFR is an important gene in breast cancer"},
             {"sections": ["hello this is the first section", "the second section mentions BRCA1"]},
         ],
     ).json()
