@@ -60,15 +60,12 @@ class KazuWebApp:
         logger.info(f"received request: {doc}")
         result = self.pipeline([doc.to_kazu_document()])
         resp_dict = result[0].as_minified_dict()
-        logger.info(resp_dict)
         return JSONResponse(content=resp_dict)
 
     @app.post(f"/{KAZU}/batch")
     def batch_ner(self, docs: List[WebDocument]):
         logger.info(f"received request: {[docs]}")
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
-        resp_dict = [res.as_minified_dict() for res in result]
-        logger.info(resp_dict)
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
 
