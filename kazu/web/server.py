@@ -19,10 +19,12 @@ app = FastAPI()
 
 
 class SectionedWebDocument(BaseModel):
-    sections: List[str]
+    sections: Dict[str, str]
 
     def to_kazu_document(self) -> Document:
-        return Document.from_section_texts(texts=self.sections)
+         idx = uuid.uuid4().hex
+         sections = [Section(text=text, name=name) for text, name in sections.items()]
+         return Document(idx=idx, sections=sections)
 
 
 class SimpleWebDocument(BaseModel):
