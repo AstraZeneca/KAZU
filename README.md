@@ -11,19 +11,17 @@ See docs at https://psychic-chainsaw-f197cc2b.pages.github.io/_build/html/index.
 # Quickstart
 
 Either: 
-`
-pip install -u kazu
-`
+
+`pip install kazu`
+
 or download the wheel from the release page and install locally.
 
 For most functionality, you will also need the Kazu model pack. This is tied to each release, and can be found on the release page. Once downloaded,
 extract the archive and:
 
-`
-export KAZU_MODEL_PACK=<path to the extracted archive>
-`
+`export KAZU_MODEL_PACK=<path to the extracted archive>`
 
-Kazu is highly configurable (using [Hydra](https://hydra.cc/docs/intro/)), although is comes preconfigured with defaults appropriate for most literature processing use cases. 
+Kazu is highly configurable (using [Hydra](https://hydra.cc/docs/intro/)), although it comes preconfigured with defaults appropriate for most literature processing use cases. 
 To make use of these, and process a simple document:
 
 ```python
@@ -69,17 +67,17 @@ Kazu includes elements under compatible licenses:
 ChEMBL data is from http://www.ebi.ac.uk/chembl - the version of ChEMBL is ChEMBL_29
 
 #### CLO
-CLO data is from http://www.ebi.ac.uk/clo - downloaded 18th October 2021
+CLO data is from http://www.ebi.ac.uk/ols/ontologies/clo - downloaded 18th October 2021
 
 #### UBERON
-UBERON data is from http://www.ebi.ac.uk/uberon - downloaded 18th October 2021
+UBERON data is from http://www.ebi.ac.uk/ols/ontologies/uberon - downloaded 18th October 2021
 
 
 
 ### Under [Creative Commons Attribution 4.0 Unported License](https://creativecommons.org/licenses/by/4.0/legalcode>)
 
 #### MONDO
-MONDO data is from http://www.ebi.ac.uk/mondo - downloaded 29th July 2022
+MONDO data is from http://www.ebi.ac.uk/ols/ontologies/mondo - downloaded 29th July 2022
 
 #### CELLOSAURUS
 CELLOSAURUS data is from https://www.cellosaurus.org/ - downloaded 8th November 2021
