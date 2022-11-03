@@ -23,7 +23,7 @@ extract the archive and:
 export KAZU_MODEL_PACK=<path to the extracted archive>
 `
 
-Kazu is highly configurable (using [hydra.cc](https://hydra.cc/docs/intro/)), although is comes preconfigured with defaults appropriate for most literature processing use cases. 
+Kazu is highly configurable (using [Hydra](https://hydra.cc/docs/intro/)), although is comes preconfigured with defaults appropriate for most literature processing use cases. 
 To make use of these, and process a simple document:
 
 ```python
