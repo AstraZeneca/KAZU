@@ -14,7 +14,7 @@ Either:
 `
 pip install -u kazu
 `
-or download the wheel from the release page and install locally
+or download the wheel from the release page and install locally.
 
 For most functionality, you will also need the Kazu model pack. This is tied to each release, and can be found on the release page. Once downloaded,
 extract the archive and:
