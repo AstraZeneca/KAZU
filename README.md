@@ -1,3 +1,5 @@
+![Maturity level-1](https://img.shields.io/badge/Maturity%20Level-ML--1-yellow)
+
 # Kazu - Biomedical NLP Framework
 
 Welcome to Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
