@@ -4,6 +4,7 @@ import os
 import re
 import sqlite3
 from abc import ABC, abstractmethod
+from functools import cache
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet
 from urllib import parse
@@ -22,6 +23,7 @@ from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDataba
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.string_normalizer import StringNormalizer
+from kazu.utils.utils import PathLike
 
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
@@ -735,17 +737,18 @@ class GeneOntologyParser(OntologyParser):
             synonym_generator=synonym_generator,
         )
 
-    def load_go(self):
+    @staticmethod
+    @cache
+    def load_go(in_path: PathLike) -> rdflib.Graph:
         g = rdflib.Graph()
-        g.parse(self.in_path)
+        g.parse(in_path)
         return g
 
     def find_kb(self, string: str) -> str:
         return self.name
 
     def parse_to_dataframe(self) -> pd.DataFrame:
-        g = rdflib.Graph()
-        g.parse(self.in_path)
+        g = self.load_go(self.in_path)
         result = g.query(self.query)
         default_labels = []
         iris = []
