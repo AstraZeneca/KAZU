@@ -6,9 +6,9 @@ designed to handle production workloads.
 This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
-See docs at https://psychic-chainsaw-f197cc2b.pages.github.io/_build/html/index.html
-
 # Quickstart
+
+## Install
 
 Either: 
 
@@ -16,7 +16,9 @@ Either:
 
 or download the wheel from the release page and install locally.
 
-For most functionality, you will also need the Kazu model pack. This is tied to each release, and can be found on the release page. Once downloaded,
+## Getting the model pack
+
+For most functionality, you will also need the Kazu model pack. This is tied to each release, and can be found on the [release page](https://github.com/astrazeneca/kazu/releases). Once downloaded,
 extract the archive and:
 
 `export KAZU_MODEL_PACK=<path to the extracted archive>`
@@ -33,6 +35,7 @@ from kazu.pipeline import Pipeline, load_steps
 from pathlib import Path
 import os
 
+# the hydra config is kept in the model pack
 cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')  
 with initialize_config_dir(config_dir=str(cdir)):
     cfg = compose(
@@ -47,9 +50,9 @@ with initialize_config_dir(config_dir=str(cdir)):
 
 ```
 
+# Documentation
 
-
-
+[Find our docs here](https://psychic-chainsaw-f197cc2b.pages.github.io/_build/html/index.html)
 
 ## License
 
@@ -71,7 +74,6 @@ CLO data is from http://www.ebi.ac.uk/ols/ontologies/clo - downloaded 18th Octob
 
 #### UBERON
 UBERON data is from http://www.ebi.ac.uk/ols/ontologies/uberon - downloaded 18th October 2021
-
 
 
 ### Under [Creative Commons Attribution 4.0 Unported License](https://creativecommons.org/licenses/by/4.0/legalcode>)
