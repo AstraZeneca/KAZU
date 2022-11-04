@@ -1,5 +1,5 @@
 Introduction
-==========
+============
 
 Why Kazu?
 ------------
@@ -19,8 +19,9 @@ For NER:
 
 For linking:
 1) There are numerous ontologies that overlap, either conceptually or in a composite fashion. Rather than depending on a composite system like UMLS,
-    we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date release of a given ontology, whilst avoiding issues
-    associated with the development of a composite ontology
+we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date release of a given ontology, whilst avoiding issues
+associated with the development of a composite ontology
+
 2) However, a great man once stated, "Ontologies are not designed for NLP". Entity Linking is a challenging problem that starts with dealing with the
     inconsistencies with the source knowledgebase. Therefore, we wanted a system that could fully (or at least partially) automated the preprocessing/cleaning of
     knowledgebases and ontologies, in preparation for them to become a linking target
