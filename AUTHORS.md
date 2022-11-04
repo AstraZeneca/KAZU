@@ -7,7 +7,7 @@ Primary Authors
 
 * __[Wonjin Yoon](https://github.com/wonjininfo)__
 
-* __[Rolando Fernandes](https://github.com/rsbf)__
+* __[Rolando Fernandez](https://github.com/rsbf)__
 
 
 Other Contributors
