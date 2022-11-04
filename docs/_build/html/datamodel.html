@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="TBA" href="training.html" /><link rel="prev" title="Quickstart" href="quickstart.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Visualising results in Label Studio" href="label_studio_integration.html" /><link rel="prev" title="At a glance: How to use Kazu" href="default_pipeline.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>Kazu data model - Kazu documentation</title>
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -143,12 +143,10 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo" src="_static/kazu_logo.png" alt="Logo"/>
-  </div>
   
+  <span class="sidebar-brand-text">Kazu  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -158,10 +156,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Guides and Tutorials</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">data model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="training.html">model training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="curating_for_explosion.html">curating an ontology for NER</a></li>
+<li class="toctree-l1"><a class="reference internal" href="default_pipeline.html">The Default Kazu Pipeline</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Kazu Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="label_studio_integration.html">Visualising results in Label Studio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ontology_parser.html">The OntologyParser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_kazu.html">Scaling with Ray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kazu_webservice.html">Kazu as a WebService</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
@@ -173,7 +175,6 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.modelling.html">kazu.modelling</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/kazu.modelling.annotation.html">kazu.modelling.annotation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.annotation.acceptance_test.html">kazu.modelling.annotation.acceptance_test</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.annotation.label_studio.html">kazu.modelling.annotation.label_studio</a></li>
 </ul>
 </li>
@@ -276,7 +277,6 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.caching.html">kazu.utils.caching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.link_index.html">kazu.utils.link_index</a></li>
@@ -288,7 +288,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -331,7 +330,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -341,7 +340,7 @@
 <h1>Kazu data model<a class="headerlink" href="#kazu-data-model" title="Permalink to this heading">#</a></h1>
 <p>The Kazu datamodel is based around the concepts of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Document</span></code></a>s and Steps (instances of <a class="reference internal" href="_autosummary/kazu.steps.base.step.html#kazu.steps.base.step.BaseStep" title="kazu.steps.base.step.BaseStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.base.step.BaseStep</span></code></a>). Steps are run over documents,
 generally returning the original document with additional information added.</p>
-<p>Documents are composed of a sequence of sections (for instance, title, body). A <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Section</span></code></a> is a container
+<p>Documents are composed of a sequence of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Section</span></code></a> (for instance, title, body). A <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Section</span></code></a> is a container
 for text and metadata, (such as entities detected by an NER step).</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">Entity</span>
 <span class="kn">from</span> <span class="nn">kazu.steps.document_post_processing.abbreviation_finder</span> <span class="kn">import</span> <span class="n">AbbreviationFinderStep</span>
@@ -372,6 +371,14 @@ for text and metadata, (such as entities detected by an NER step).</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">egfr_entity</span><span class="o">.</span><span class="n">match</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>For convenience, and to handle additional logging/failure events, Steps can be wrapped in a <a class="reference internal" href="_autosummary/kazu.pipeline.pipeline.html#kazu.pipeline.pipeline.Pipeline" title="kazu.pipeline.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.pipeline.pipeline.Pipeline</span></code></a>).</p>
+<section id="entity">
+<h2>Entity<a class="headerlink" href="#entity" title="Permalink to this heading">#</a></h2>
+<p>A <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Entity</span></code></a> is a container for information about a single entity detected within a <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Section</span></code></a></p>
+<p>Within an <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Entity</span></code></a>, the most important fields are <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Entity.match" title="kazu.data.data.Entity.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.Entity.match</span></code></a> (the actual string detected),
+<a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Entity.syn_term_to_synonym_terms" title="kazu.data.data.Entity.syn_term_to_synonym_terms"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.Entity.syn_term_to_synonym_terms</span></code></a>, a dict of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTermWithMetrics" title="kazu.data.data.SynonymTermWithMetrics"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTermWithMetrics</span></code></a> (candidates for knowledgebase hits)
+and <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Entity.mappings" title="kazu.data.data.Entity.mappings"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.Entity.mappings</span></code></a>, the final product of linked references to the underlying entity</p>
+</section>
 </section>
 
         </article>
@@ -379,23 +386,23 @@ for text and metadata, (such as entities detected by an NER step).</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="training.html">
+          <a class="next-page" href="label_studio_integration.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">TBA</div>
+                <div class="title">Visualising results in Label Studio</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="quickstart.html">
+          <a class="prev-page" href="default_pipeline.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Quickstart</div>
+                <div class="title">At a glance: How to use Kazu</div>
                 
               </div>
             </a>
@@ -419,8 +426,27 @@ for text and metadata, (such as entities detected by an NER step).</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Kazu data model</a><ul>
+<li><a class="reference internal" href="#entity">Entity</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

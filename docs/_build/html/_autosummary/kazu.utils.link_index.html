@@ -143,12 +143,10 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
-  </div>
   
+  <span class="sidebar-brand-text">Kazu  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -158,10 +156,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Guides and Tutorials</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../datamodel.html">data model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../training.html">model training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">curating an ontology for NER</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../default_pipeline.html">The Default Kazu Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -173,7 +175,6 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.modelling.html">kazu.modelling</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.annotation.html">kazu.modelling.annotation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.annotation.acceptance_test.html">kazu.modelling.annotation.acceptance_test</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.annotation.label_studio.html">kazu.modelling.annotation.label_studio</a></li>
 </ul>
 </li>
@@ -276,7 +277,6 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
-<li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">kazu.utils.link_index</a></li>
@@ -288,7 +288,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -514,7 +513,7 @@ configured with default params will be used otherwise)</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>embedding_model</strong> (<a class="reference internal" href="kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="kazu.modelling.linking.sapbert.train.PLSapbertModel"><em>PLSapbertModel</em></a>) – </p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.2)"><em>Trainer</em></a><em>]</em>) – </p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.0.post1)"><em>Trainer</em></a><em>]</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

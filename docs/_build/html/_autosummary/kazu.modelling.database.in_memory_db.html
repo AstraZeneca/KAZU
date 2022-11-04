@@ -143,12 +143,10 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
-  </div>
   
+  <span class="sidebar-brand-text">Kazu  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -158,10 +156,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Guides and Tutorials</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../datamodel.html">data model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../training.html">model training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">curating an ontology for NER</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../default_pipeline.html">The Default Kazu Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -173,7 +175,6 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="kazu.modelling.html">kazu.modelling</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.annotation.html">kazu.modelling.annotation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.annotation.acceptance_test.html">kazu.modelling.annotation.acceptance_test</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.annotation.label_studio.html">kazu.modelling.annotation.label_studio</a></li>
 </ul>
 </li>
@@ -276,7 +277,6 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
-<li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
@@ -288,7 +288,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -354,13 +353,18 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.database.in_memory_db.</span></span><span class="sig-name descname"><span class="pre">MetadataDatabase</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L18-L71"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.database.in_memory_db.</span></span><span class="sig-name descname"><span class="pre">MetadataDatabase</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L17-L93"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
 and this singleton allows us to load it once/reduce memory usage</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L46-L48"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.__init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.add_parser">
-<span class="sig-name descname"><span class="pre">add_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L28-L43"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.add_parser" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L83-L93"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.add_parser" title="Permalink to this definition">#</a></dt>
 <dd><p>add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
 override any existing entries with associated with the keys in the metadata dict</p>
 <dl class="field-list simple">
@@ -378,7 +382,7 @@ override any existing entries with associated with the keys in the metadata dict
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.get_all">
-<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L64-L71"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.get_all" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L65-L73"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.get_all" title="Permalink to this definition">#</a></dt>
 <dd><p>get all metadata associated with an ontology</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -395,7 +399,7 @@ override any existing entries with associated with the keys in the metadata dict
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.get_by_idx">
-<span class="sig-name descname"><span class="pre">get_by_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L45-L53"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.get_by_idx" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_by_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L50-L59"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.get_by_idx" title="Permalink to this definition">#</a></dt>
 <dd><p>get the metadata associated with an ontology and id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -415,7 +419,7 @@ override any existing entries with associated with the keys in the metadata dict
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.get_by_index">
-<span class="sig-name descname"><span class="pre">get_by_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L55-L62"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.get_by_index" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_by_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L61-L63"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.get_by_index" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -430,20 +434,31 @@ override any existing entries with associated with the keys in the metadata dict
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.loaded_parsers">
-<span class="sig-name descname"><span class="pre">loaded_parsers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.loaded_parsers" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.instance">
+<span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><span class="pre">__MetadataDatabase</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;kazu.modelling.database.in_memory_db.MetadataDatabase.__MetadataDatabase</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.instance" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.MetadataDatabase.loaded_parsers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loaded_parsers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.database.in_memory_db.MetadataDatabase.loaded_parsers" title="Permalink to this definition">#</a></dt>
+<dd><p>get the names of all loaded parsers</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.database.in_memory_db.</span></span><span class="sig-name descname"><span class="pre">SynonymDatabase</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L74-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.database.in_memory_db.</span></span><span class="sig-name descname"><span class="pre">SynonymDatabase</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L96-L240"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Singleton of a database of synonyms.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L179-L181"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.__init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonyms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L85-L104"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.add" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonyms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L226-L235"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.add" title="Permalink to this definition">#</a></dt>
 <dd><p>add synonyms to the database.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -460,7 +475,7 @@ override any existing entries with associated with the keys in the metadata dict
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L106-L114"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L183-L192"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get" title="Permalink to this definition">#</a></dt>
 <dd><p>get a set of EquivalentIdSets associated with an ontology and synonym string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -480,7 +495,7 @@ override any existing entries with associated with the keys in the metadata dict
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.get_all">
-<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L164-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_all" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L212-L220"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_all" title="Permalink to this definition">#</a></dt>
 <dd><p>get all synonyms associated with an ontology</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -496,8 +511,18 @@ override any existing entries with associated with the keys in the metadata dict
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.get_database">
+<span class="sig-name descname"><span class="pre">get_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L222-L224"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_database" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.get_syns_for_id">
-<span class="sig-name descname"><span class="pre">get_syns_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L116-L133"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_syns_for_id" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_syns_for_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L194-L201"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_syns_for_id" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -514,29 +539,29 @@ override any existing entries with associated with the keys in the metadata dict
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.get_syns_sharing_id">
-<span class="sig-name descname"><span class="pre">get_syns_sharing_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L135-L162"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_syns_sharing_id" title="Permalink to this definition">#</a></dt>
-<dd><p>get all other syns for a synonym in a kb</p>
-<dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">get_syns_sharing_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/database/in_memory_db.py#L203-L210"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.get_syns_sharing_id" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – parser name</p></li>
-<li><p><strong>synonym</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – synonym</p></li>
-<li><p><strong>strategy_filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdAggregationStrategy" title="kazu.data.data.EquivalentIdAggregationStrategy"><em>EquivalentIdAggregationStrategy</em></a><em>]</em><em>]</em>) – Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
-via these strategies will be returned. If None (the default), all syns will be returned</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>synonym</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>strategy_filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdAggregationStrategy" title="kazu.data.data.EquivalentIdAggregationStrategy"><em>EquivalentIdAggregationStrategy</em></a><em>]</em><em>]</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.instance">
+<span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><span class="pre">__SynonymDatabase</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.instance" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="kazu.modelling.database.in_memory_db.SynonymDatabase.loaded_parsers">
-<span class="sig-name descname"><span class="pre">loaded_parsers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.loaded_parsers" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loaded_parsers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.database.in_memory_db.SynonymDatabase.loaded_parsers" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
