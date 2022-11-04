@@ -60,21 +60,22 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
     result:
         sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`kazu.data.data.EquivalentIdSet`
 
-Naturally, this behaviour may not always be desired. You may want two instances of :class:`kazu.data.data.SynonymTerm` for the term "XLOA" (despite the MONDO ontology
-suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`kazu.data.data.SynonymTerm` is most appropriate.
-In this case, you can override this behaviour with :method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids`
+Naturally, this behaviour may not always be desired. You may want two instances of :class:`kazu.data.data.SynonymTerm`\\ for the term "XLOA" (despite the MONDO ontology
+suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`kazu.data.data.SynonymTerm`\\ is most appropriate.
+In this case, you can override this behaviour with :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids`\\
 
 
 Writing a Custom Parser
 -------------------------
 
 Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an OntologyParser. Fortunately, this is generally
-quite easy to do. Let's take the example of the :class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
+quite easy to do. Let's take the example of the :py:class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
 
-There are two methods you need to override :method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe` and
-:method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb`. Let's look at the first of these:
+There are two methods you need to override :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe` and
+:meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb`. Let's look at the first of these:
 
 .. code-block:: python
+
     DEFAULT_LABEL = "default_label"
     IDX = "idx"
     SYN = "syn"
@@ -106,7 +107,7 @@ There are two methods you need to override :method:`kazu.modelling.ontology_prep
 
         return df
 
-secondly, we need to write the :method:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb` method
+secondly, we need to write the :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb` method
 
 .. code-block:: python
 
@@ -123,6 +124,7 @@ secondly, we need to write the :method:`kazu.modelling.ontology_preprocessing.ba
 finally, we need to set the class field, so the full class looks like:
 
 .. code-block:: python
+
     class ChemblOntologyParser(OntologyParser):
 
         name = "CHEMBL"
