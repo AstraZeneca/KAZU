@@ -149,4 +149,3 @@ finally, we need to set the class field, so the full class looks like:
             return df
 
 That's it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere
-
