@@ -16,9 +16,9 @@ Welcome to Kazu's documentation!
    Quickstart <quickstart>
    The Default Kazu Pipeline <default_pipeline>
    Kazu Data Model <datamodel>
-   Deep Dive: Kazu Steps <steps>
    Visualising results in Label Studio <label_studio_integration>
    The OntologyParser <ontology_parser>
+   Curating a knowledgebase for NER and linking <curating_for_explosion>
    Scaling with Ray <scaling_kazu>
    Kazu as a WebService <kazu_webservice>
 
