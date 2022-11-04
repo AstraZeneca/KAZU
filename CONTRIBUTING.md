@@ -9,7 +9,7 @@ The Kazu team welcomes pull requests from the community
 
 ### Developing for Kazu
 
-`pip install kazu[dev]` will get you the additional development dependencies we use for Kazu. Please note the use of [pre-commit](https://pre-commit.com/)
+`pip install -e kazu[dev]` will get you the additional development dependencies we use for Kazu. Please note the use of [pre-commit](https://pre-commit.com/)
 to ensure consistent code structure
 
 ### Running Tests
