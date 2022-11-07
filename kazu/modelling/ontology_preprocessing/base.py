@@ -717,6 +717,9 @@ class GeneOntologyParser(OntologyParser):
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
     query = """UNDEFINED"""
 
+    instances: Set[str] = set()
+    instances_in_dbs: Set[str] = set()
+
     def __init__(
         self,
         in_path: str,
@@ -736,6 +739,19 @@ class GeneOntologyParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
         )
+        self.instances.add(name)
+
+    def populate_databases(self):
+        super().populate_databases()
+        self.instances_in_dbs.add(self.name)
+
+        if self.instances_in_dbs >= self.instances:
+            # all existing instances are in the database, so we can free up
+            # the memory used by the cached parsed gene ontology, which is significant.
+            self.load_go.cache_clear()
+
+    def __del__(self):
+        GeneOntologyParser.instances.discard(self.name)
 
     @staticmethod
     @cache
