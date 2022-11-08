@@ -1044,7 +1044,6 @@ class EnsemblOntologyParser(OntologyParser):
         )
 
         with open(additional_syns_path, "r") as f:
-
             self.additional_syns = json.load(f)
 
     def find_kb(self, string: str) -> str:
