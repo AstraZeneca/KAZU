@@ -21,7 +21,7 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
     AnnotationLevelDisambiguationStrategy,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
-from kazu.tests.utils import DummyParser, make_dummy_parser
+from kazu.tests.utils import DummyParser
 from kazu.utils.utils import get_cache_dir, Singleton
 
 
@@ -52,9 +52,7 @@ def check_ids_are_represented(
 def populate_databases() -> Tuple[DummyParser, DummyParser]:
 
     parser1 = DummyParser("")
-    parser2 = make_dummy_parser(
-        in_path="", data=DummyParser.DUMMY_DATA, name="test_parser2", source="test_parser2"
-    )
+    parser2 = DummyParser(in_path="", name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
         parser.populate_databases()
     return parser1, parser2

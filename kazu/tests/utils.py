@@ -19,6 +19,8 @@ from kazu.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
     OntologyParser,
 )
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -255,31 +257,45 @@ def get_TransformersModelForTokenClassificationNerStep_model_path():
 
 
 class DummyParser(OntologyParser):
-    DUMMY_SOURCE = "test_parser"
-    DUMMY_DATA = {
+    DEFAULT_DUMMY_DATA = {
         IDX: ["first", "first", "second", "second", "third", "alpha"],
         DEFAULT_LABEL: ["1", "1", "2", "2", "3", "4"],
         SYN: ["1", "one", "2", "two", "3", "4"],
         MAPPING_TYPE: ["int", "text", "int", "text", "int", "int"],
     }
-    name = DUMMY_SOURCE
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str = "test",
+        name: str = "test_parser",
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        source: str = "test_parser",
+        data: Optional[Dict[str, List[str]]] = None,
+    ):
+        super().__init__(
+            in_path,
+            entity_class,
+            name,
+            string_scorer,
+            synonym_merge_threshold,
+            data_origin,
+            synonym_generator,
+        )
+        self.source = source
+        if data is not None:
+            self.data = data
+        else:
+            self.data = self.DEFAULT_DUMMY_DATA
 
     def find_kb(self, string: str) -> str:
-        return self.DUMMY_SOURCE
+        return self.source
 
     def parse_to_dataframe(self) -> pd.DataFrame:
-
-        return pd.DataFrame.from_dict(self.DUMMY_DATA)
-
-
-def make_dummy_parser(
-    in_path: str, source: str, data: Dict[str, List[str]], name: str, entity_class: str = "test"
-) -> DummyParser:
-    parser = DummyParser(in_path, entity_class)
-    parser.name = name
-    parser.DUMMY_DATA = data
-    parser.DUMMY_SOURCE = source
-    return parser
+        return pd.DataFrame.from_dict(self.data)
 
 
 def make_dummy_synonym_term(

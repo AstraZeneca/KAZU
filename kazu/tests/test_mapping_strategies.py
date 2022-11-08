@@ -24,7 +24,7 @@ from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     StrongMatchWithEmbeddingConfirmationStringMatchingStrategy,
     MappingFactory,
 )
-from kazu.tests.utils import DummyParser, make_dummy_parser, requires_model_pack
+from kazu.tests.utils import DummyParser, requires_model_pack
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 
@@ -42,8 +42,11 @@ def set_up_disease_mapping_test_case() -> Tuple[Set[SynonymTermWithMetrics], Dum
         ],
         MAPPING_TYPE: ["", "", ""],
     }
-    parser = make_dummy_parser(
-        in_path="", data=dummy_data, name="test_tfidf_parsr", source="test_tfidf_parsr"
+    parser = DummyParser(
+        in_path="",
+        data=dummy_data,
+        name="test_tfidf_parsr",
+        source="test_tfidf_parsr",
     )
     parser.populate_databases()
     terms_with_metrics = set(
@@ -77,9 +80,7 @@ def check_correct_terms_selected(terms: Set[SynonymTermWithMetrics], mappings: L
 def populate_databases() -> Tuple[DummyParser, DummyParser]:
 
     parser1 = DummyParser("")
-    parser2 = make_dummy_parser(
-        in_path="", data=DummyParser.DUMMY_DATA, name="test_parser2", source="test_parser2"
-    )
+    parser2 = DummyParser(in_path="", name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
         parser.populate_databases()
     return parser1, parser2

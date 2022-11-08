@@ -5,7 +5,7 @@ from spacy.lang.en import English
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
-from kazu.tests.utils import make_dummy_parser
+from kazu.tests.utils import DummyParser
 
 
 def test_constructor():
@@ -32,7 +32,7 @@ def test_initialize():
     assert ontology_matcher.nr_lowercase_rules == 0
 
 
-parser_1 = make_dummy_parser(
+parser_1 = DummyParser(
     in_path="",
     name="first_mock_parser",
     source="test",
@@ -47,7 +47,7 @@ parser_1 = make_dummy_parser(
     },
 )
 
-parser_2 = make_dummy_parser(
+parser_2 = DummyParser(
     in_path="",
     name="second_mock_parser",
     source="test",
@@ -59,7 +59,7 @@ parser_2 = make_dummy_parser(
     },
 )
 
-parser_3 = make_dummy_parser(
+parser_3 = DummyParser(
     in_path="",
     name="third_mock_parser",
     source="test",

@@ -20,17 +20,13 @@ from kazu.steps.linking.post_processing.strategy_runner import (
     NamespaceStrategyExecution,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
-from kazu.tests.utils import DummyParser, make_dummy_parser
+from kazu.tests.utils import DummyParser
 
 
 @pytest.fixture(scope="session")
 def populate_databases() -> Tuple[DummyParser, DummyParser]:
-    parser1 = make_dummy_parser(
-        in_path="", data=DummyParser.DUMMY_DATA, name="test_parser1", source="test_parser1"
-    )
-    parser2 = make_dummy_parser(
-        in_path="", data=DummyParser.DUMMY_DATA, name="test_parser2", source="test_parser2"
-    )
+    parser1 = DummyParser(in_path="", name="test_parser1", source="test_parser1")
+    parser2 = DummyParser(in_path="", name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
         parser.populate_databases()
     return parser1, parser2
@@ -295,11 +291,11 @@ def build_and_execute_runner(
 
 
 def extract_expected_ids_from_parsers(parser1, parser2) -> Dict[str, Set[str]]:
-    expected_idx_1 = parser1.DUMMY_DATA[IDX][0]
+    expected_idx_1 = parser1.data[IDX][0]
     assert expected_idx_1 == "first"
-    expected_idx_2 = parser2.DUMMY_DATA[IDX][2]
+    expected_idx_2 = parser2.data[IDX][2]
     assert expected_idx_2 == "second"
-    expected_idx_3 = parser2.DUMMY_DATA[IDX][4]
+    expected_idx_3 = parser2.data[IDX][4]
     assert expected_idx_3 == "third"
 
     return {
@@ -324,16 +320,16 @@ def extract_terms_from_parsers(
     :return:
     """
     parser1_hit_1 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser1.name, synonym=parser1.DUMMY_DATA[SYN][0])
+        SynonymDatabase().get(parser1.name, synonym=parser1.data[SYN][0])
     )
     parser1_hit_2 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser1.name, synonym=parser1.DUMMY_DATA[SYN][4])
+        SynonymDatabase().get(parser1.name, synonym=parser1.data[SYN][4])
     )
     parser2_hit_1 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser2.name, synonym=parser2.DUMMY_DATA[SYN][2])
+        SynonymDatabase().get(parser2.name, synonym=parser2.data[SYN][2])
     )
     parser2_hit_2 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser2.name, synonym=parser2.DUMMY_DATA[SYN][4])
+        SynonymDatabase().get(parser2.name, synonym=parser2.data[SYN][4])
     )
     return parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2
 

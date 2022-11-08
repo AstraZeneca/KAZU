@@ -11,7 +11,7 @@ from kazu.modelling.annotation.label_studio import (
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
-from kazu.tests.utils import CONFIG_DIR, DummyParser, make_dummy_parser
+from kazu.tests.utils import CONFIG_DIR, DummyParser
 from kazu.web.server import start, stop
 
 
@@ -65,7 +65,7 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
         ],
         MAPPING_TYPE: ["", "", "", "", "", "", "", "", ""],
     }
-    parser = make_dummy_parser(
+    parser = DummyParser(
         in_path="", data=dummy_data, name="test_tfidf_parser", source="test_tfidf_parser"
     )
     parser.populate_databases()
