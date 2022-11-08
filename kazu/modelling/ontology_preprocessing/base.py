@@ -11,20 +11,20 @@ from urllib import parse
 
 import pandas as pd
 import rdflib
+
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     SynonymTerm,
     SimpleValue,
 )
-
-# dataframe column keys
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import PathLike
 
+# dataframe column keys
 DEFAULT_LABEL = "default_label"
 IDX = "idx"
 SYN = "syn"
