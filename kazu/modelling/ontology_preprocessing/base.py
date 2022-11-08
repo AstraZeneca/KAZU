@@ -91,16 +91,17 @@ class OntologyParser(ABC):
             based NER matching
         :param excluded_ids: optional set of ids to exclude from the parsing process
         """
+        self.in_path = in_path
+        self.entity_class = entity_class
+        self.name = name
         if string_scorer is None:
             logger.warning("no string scorer configured. Synonym resolution disabled.")
         self.string_scorer = string_scorer
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
-        self.in_path = in_path
-        self.name = name
+
         self.parsed_dataframe: Optional[pd.DataFrame] = None
-        self.entity_class = entity_class
         self.excluded_ids = excluded_ids
         self.metadata_db = MetadataDatabase()
 
