@@ -71,16 +71,6 @@ def check_correct_terms_selected(terms: Set[SynonymTermWithMetrics], mappings: L
     assert len(term_ids.symmetric_difference(mapping_ids)) == 0
 
 
-@pytest.fixture(scope="session")
-def populate_databases() -> Tuple[DummyParser, DummyParser]:
-
-    parser1 = DummyParser()
-    parser2 = DummyParser(name="test_parser2", source="test_parser2")
-    for parser in [parser1, parser2]:
-        parser.populate_databases()
-    return parser1, parser2
-
-
 def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
     terms, parser = set_up_p27_test_case
 

@@ -1,8 +1,7 @@
 import tempfile
 from itertools import chain
-from typing import Tuple, Set, List
+from typing import Set, List
 
-import pytest
 
 from kazu.data.data import (
     Document,
@@ -46,16 +45,6 @@ def check_ids_are_represented(
     assert len(disambiguated_id_sets) == len(ids_to_check)
     for idx in ids_to_check:
         assert any(idx in id_set.ids for id_set in disambiguated_id_sets)
-
-
-@pytest.fixture(scope="session")
-def populate_databases() -> Tuple[DummyParser, DummyParser]:
-
-    parser1 = DummyParser()
-    parser2 = DummyParser(name="test_parser2", source="test_parser2")
-    for parser in [parser1, parser2]:
-        parser.populate_databases()
-    return parser1, parser2
 
 
 def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
