@@ -51,8 +51,8 @@ def check_ids_are_represented(
 @pytest.fixture(scope="session")
 def populate_databases() -> Tuple[DummyParser, DummyParser]:
 
-    parser1 = DummyParser("")
-    parser2 = DummyParser(in_path="", name="test_parser2", source="test_parser2")
+    parser1 = DummyParser()
+    parser2 = DummyParser(name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
         parser.populate_databases()
     return parser1, parser2

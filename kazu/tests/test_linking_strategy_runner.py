@@ -25,8 +25,8 @@ from kazu.tests.utils import DummyParser
 
 @pytest.fixture(scope="session")
 def populate_databases() -> Tuple[DummyParser, DummyParser]:
-    parser1 = DummyParser(in_path="", name="test_parser1", source="test_parser1")
-    parser2 = DummyParser(in_path="", name="test_parser2", source="test_parser2")
+    parser1 = DummyParser(name="test_parser1", source="test_parser1")
+    parser2 = DummyParser(name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
         parser.populate_databases()
     return parser1, parser2

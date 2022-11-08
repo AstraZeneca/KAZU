@@ -266,7 +266,7 @@ class DummyParser(OntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: str = "",
         entity_class: str = "test",
         name: str = "test_parser",
         string_scorer: Optional[StringSimilarityScorer] = None,

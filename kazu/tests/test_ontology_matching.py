@@ -33,7 +33,6 @@ def test_initialize():
 
 
 parser_1 = DummyParser(
-    in_path="",
     name="first_mock_parser",
     source="test",
     data={
@@ -48,7 +47,6 @@ parser_1 = DummyParser(
 )
 
 parser_2 = DummyParser(
-    in_path="",
     name="second_mock_parser",
     source="test",
     data={
@@ -60,7 +58,6 @@ parser_2 = DummyParser(
 )
 
 parser_3 = DummyParser(
-    in_path="",
     name="third_mock_parser",
     source="test",
     data={

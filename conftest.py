@@ -65,9 +65,7 @@ def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
         ],
         MAPPING_TYPE: ["", "", "", "", "", "", "", "", ""],
     }
-    parser = DummyParser(
-        in_path="", data=dummy_data, name="test_tfidf_parser", source="test_tfidf_parser"
-    )
+    parser = DummyParser(data=dummy_data, name="test_tfidf_parser", source="test_tfidf_parser")
     parser.populate_databases()
     terms_with_metrics = set(
         SynonymTermWithMetrics.from_synonym_term(term)

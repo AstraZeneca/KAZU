@@ -42,12 +42,7 @@ def set_up_disease_mapping_test_case() -> Tuple[Set[SynonymTermWithMetrics], Dum
         ],
         MAPPING_TYPE: ["", "", ""],
     }
-    parser = DummyParser(
-        in_path="",
-        data=dummy_data,
-        name="test_tfidf_parsr",
-        source="test_tfidf_parsr",
-    )
+    parser = DummyParser(data=dummy_data, name="test_tfidf_parsr", source="test_tfidf_parsr")
     parser.populate_databases()
     terms_with_metrics = set(
         SynonymTermWithMetrics.from_synonym_term(term)
@@ -79,8 +74,8 @@ def check_correct_terms_selected(terms: Set[SynonymTermWithMetrics], mappings: L
 @pytest.fixture(scope="session")
 def populate_databases() -> Tuple[DummyParser, DummyParser]:
 
-    parser1 = DummyParser("")
-    parser2 = DummyParser(in_path="", name="test_parser2", source="test_parser2")
+    parser1 = DummyParser()
+    parser2 = DummyParser(name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
         parser.populate_databases()
     return parser1, parser2
