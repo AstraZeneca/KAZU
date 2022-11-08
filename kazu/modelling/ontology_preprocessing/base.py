@@ -67,18 +67,18 @@ class OntologyParser(ABC):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
-        name: str = "unnamed",
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
         :param entity_class: The entity class to associate with this parser throughout the pipeline.
             Also used in the parser when calling StringNormalizer to determine the class-appropriate behaviour.
-
+        :param name: A string to represent a parser in the overall pipeline.
         :param string_scorer: Optional protocol of StringSimilarityScorer.  Used for resolving ambiguous symbolic
             synonyms via similarity calculation of the default label associated with the conflicted labels. If no
             instance is provided, all synonym conflicts will be assumed to refer to different concepts. This is not
