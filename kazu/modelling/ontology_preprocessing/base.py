@@ -966,6 +966,7 @@ class UberonOntologyParser(RDFGraphParser):
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
+            name="UBERON",
             uri_regex=re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$"),
             synonym_predicates=(
                 rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
@@ -974,7 +975,6 @@ class UberonOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            name="UBERON",
         )
 
     def find_kb(self, string: str) -> str:
@@ -1231,6 +1231,7 @@ class CLOOntologyParser(RDFGraphParser):
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
+            name="CLO",
             uri_regex=re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$"),
             synonym_predicates=(
                 rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
@@ -1239,7 +1240,6 @@ class CLOOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            name="CLO",
         )
 
     def find_kb(self, string: str) -> str:
