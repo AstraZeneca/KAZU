@@ -359,15 +359,15 @@ allowed by a model. Resulting token labels are then post processed by
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – path to HF model, config and tokenizer. Passed to HF .from_pretrained()</p></li>
-<li><p><strong>depends_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
-<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – batch size for dataloader</p></li>
-<li><p><strong>stride</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
-<li><p><strong>max_sequence_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.7.7)"><em>Trainer</em></a>) – </p></li>
-<li><p><strong>detect_subspans</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – EXPERIMENTAL attempt to detect nested entities (threshold must be configured)</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>]</em>) – EXPERIMENTAL the confidence threshold used to detect nested entities</p></li>
-<li><p><strong>entity_splitter</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><em>NonContiguousEntitySplitter</em></a><em>]</em>) – instance of <a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter</span></code></a> to detect non-contiguous entities</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – path to HF model, config and tokenizer. Passed to HF .from_pretrained()</p></li>
+<li><p><strong>depends_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – batch size for dataloader</p></li>
+<li><p><strong>stride</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
+<li><p><strong>max_sequence_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.0.post1)"><em>Trainer</em></a>) – </p></li>
+<li><p><strong>detect_subspans</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – EXPERIMENTAL attempt to detect nested entities (threshold must be configured)</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>]</em>) – EXPERIMENTAL the confidence threshold used to detect nested entities</p></li>
+<li><p><strong>entity_splitter</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><em>NonContiguousEntitySplitter</em></a><em>]</em>) – instance of <a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter</span></code></a> to detect non-contiguous entities</p></li>
 </ul>
 </dd>
 </dl>
@@ -382,17 +382,17 @@ we need to return different subsets of the frame offsets and frame word_ids</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>batch_encoding</strong> (<em>BatchEncoding</em>) – </p></li>
-<li><p><strong>number_of_frames</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – number of frames created by the tokenizer for the string</p></li>
-<li><p><strong>frame_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – the index of the query frame, relative to the total number of frames</p></li>
-<li><p><strong>section_frame_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – the index of the section frame, relative to the whole BatchEncoding</p></li>
-<li><p><strong>predictions</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.12)"><em>Tensor</em></a>) – </p></li>
+<li><p><strong>number_of_frames</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – number of frames created by the tokenizer for the string</p></li>
+<li><p><strong>frame_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – the index of the query frame, relative to the total number of frames</p></li>
+<li><p><strong>section_frame_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – the index of the section frame, relative to the whole BatchEncoding</p></li>
+<li><p><strong>predictions</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tuple of 2 lists: frame offsets and frame word ids</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWord" title="kazu.steps.ner.tokenized_word_processor.TokenizedWord"><em>TokenizedWord</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWord" title="kazu.steps.ner.tokenized_word_processor.TokenizedWord"><em>TokenizedWord</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -404,7 +404,7 @@ we need to return different subsets of the frame offsets and frame word_ids</p>
 <a class="reference external" href="https://huggingface.co/docs/transformers/master/en/main_classes/data_collator#transformers.DataCollatorWithPadding" title="(in transformers vmaster)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.DataCollatorWithPadding</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>docs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>docs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The returned dict’s keys map to overflow_to_sample_mapping in the
@@ -412,7 +412,7 @@ underlying batch encoding, allowing the processing of docs longer than can fit w
 sequence length of a transformer</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><em>Tuple</em></a>[<em>DataLoader</em>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><em>Section</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Section" title="kazu.data.data.Section"><em>Section</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -425,14 +425,14 @@ sequence length of a transformer</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>batch_encoding</strong> (<em>BatchEncoding</em>) – </p></li>
-<li><p><strong>section_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
+<li><p><strong>section_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -443,13 +443,13 @@ sequence length of a transformer</p>
 <dd><p>get a namedtuple_values_indices consisting of confidence and labels for a given dataloader (i.e. run bert)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>loader</strong> (<em>DataLoader</em>) – </p>
+<dd class="field-odd"><p><strong>loader</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.12)"><em>Tensor</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -460,16 +460,16 @@ sequence length of a transformer</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>section_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
+<li><p><strong>section_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>batch_encoding</strong> (<em>BatchEncoding</em>) – </p></li>
-<li><p><strong>predictions</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.12)"><em>Tensor</em></a>) – </p></li>
+<li><p><strong>predictions</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWord" title="kazu.steps.ner.tokenized_word_processor.TokenizedWord"><em>TokenizedWord</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWord" title="kazu.steps.ner.tokenized_word_processor.TokenizedWord"><em>TokenizedWord</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>

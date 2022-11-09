@@ -341,6 +341,9 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.start" title="kazu.web.server.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>(cfg)</p></td>
 <td><p>deploy the web app to Ray Serve</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.web.server.stop" title="kazu.web.server.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -348,26 +351,60 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.WebDocument" title="kazu.web.server.WebDocument"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WebDocument</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.SectionedWebDocument" title="kazu.web.server.SectionedWebDocument"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SectionedWebDocument</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.web.server.SimpleWebDocument" title="kazu.web.server.SimpleWebDocument"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimpleWebDocument</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="kazu.web.server.WebDocument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">WebDocument</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L20-L21"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.WebDocument" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kazu.web.server.SectionedWebDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">SectionedWebDocument</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L21-L25"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SectionedWebDocument" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.web.server.SectionedWebDocument.to_kazu_document">
+<span class="sig-name descname"><span class="pre">to_kazu_document</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L24-L25"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SectionedWebDocument.to_kazu_document" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.web.server.WebDocument.text">
-<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#kazu.web.server.WebDocument.text" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kazu.web.server.SectionedWebDocument.sections">
+<span class="sig-name descname"><span class="pre">sections</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.web.server.SectionedWebDocument.sections" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kazu.web.server.SimpleWebDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">SimpleWebDocument</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L28-L32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SimpleWebDocument" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.web.server.SimpleWebDocument.to_kazu_document">
+<span class="sig-name descname"><span class="pre">to_kazu_document</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L31-L32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SimpleWebDocument.to_kazu_document" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.web.server.SimpleWebDocument.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kazu.web.server.SimpleWebDocument.text" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.web.server.start">
-<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L51-L69"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.start" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L72-L91"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.start" title="Permalink to this definition">#</a></dt>
 <dd><p>deploy the web app to Ray Serve</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -381,6 +418,11 @@
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.web.server.stop">
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L94-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.stop" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </section>
 

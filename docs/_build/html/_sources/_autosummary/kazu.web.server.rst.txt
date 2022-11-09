@@ -1,4 +1,4 @@
-kazu.web.server
+﻿kazu.web.server
 ===============
 
 .. automodule:: kazu.web.server
@@ -14,6 +14,7 @@ kazu.web.server
    .. autosummary::
    
       start
+      stop
    
    
 
@@ -23,7 +24,8 @@ kazu.web.server
 
    .. autosummary::
    
-      WebDocument
+      SectionedWebDocument
+      SimpleWebDocument
    
    
 

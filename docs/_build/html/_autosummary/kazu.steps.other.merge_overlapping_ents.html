@@ -374,11 +374,11 @@ the entity class name (reverse alphabetically ordered). Warning: This last sort 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>depends_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>ent_class_preferred_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – order of namespaces to prefer. Any partially overlapped entities are
+<li><p><strong>depends_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>ent_class_preferred_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – order of namespaces to prefer. Any partially overlapped entities are
 eliminated according to this ordering (first = higher priority). If an entity class is not specified, it’s
 assumed to have a priority of 0 (a.k.a lowest)</p></li>
-<li><p><strong>ignore_non_contiguous</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – should non-contiguous entities be excluded from the merge process?</p></li>
+<li><p><strong>ignore_non_contiguous</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – should non-contiguous entities be excluded from the merge process?</p></li>
 </ul>
 </dd>
 </dl>
@@ -390,13 +390,13 @@ assumed to have a priority of 0 (a.k.a lowest)</p></li>
 <dd><p>choose the best entities per location</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ents</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>ents</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -406,13 +406,13 @@ assumed to have a priority of 0 (a.k.a lowest)</p></li>
 <span class="sig-name descname"><span class="pre">group_entities_by_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/other/merge_overlapping_ents.py#L120-L154"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep.group_entities_by_location" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>entities</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>dict of locations to Set[Entity]</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -422,13 +422,13 @@ assumed to have a priority of 0 (a.k.a lowest)</p></li>
 <span class="sig-name descname"><span class="pre">select_preferred_entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ents</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/other/merge_overlapping_ents.py#L60-L75"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep.select_preferred_entity" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ents</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>ents</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple of Entity&lt;preferred&gt; ,List[Entity]&lt;other entities at this location&gt;</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><em>Tuple</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
