@@ -1,6 +1,7 @@
 import copy
 import dataclasses
 import itertools
+import json
 import logging
 import re
 from abc import ABC, abstractmethod
@@ -10,6 +11,7 @@ from typing import List, Dict, Optional, Iterable, Set
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
 from kazu.modelling.language.language_phenomena import GREEK_SUBS
 from kazu.utils.spacy_pipeline import SpacyPipeline
+from kazu.utils.utils import PathLike
 
 logger = logging.getLogger(__name__)
 
@@ -246,6 +248,71 @@ class StringReplacement(SynonymGenerator):
             return dataclasses.replace(
                 synonym,
                 terms=frozenset(results),
+                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+            )
+        else:
+            return None
+
+
+class SuffixReplacement(SynonymGenerator):
+    """Interchange all suffices within a provided set to produce new synonyms.
+
+    Note, this is expected to be noisy, and for most of the generated synonyms not to be valid
+    words. This class is present as a generation step for high recall, with curation of synonyms
+    expected later (see :ref:`curationg_for_explosion`).
+
+    In particular, note that this also doesn't check for the longest matching suffix - e.g. for a
+    synonym 'anaemia' and the suffices 'ia', 'a' and 'ic', the new synonyms 'anaemic' and
+    'amaemiic' will both be generated.
+    """
+
+    def __init__(self, suffices: Iterable[str]):
+        self.suffices = set(suffices)
+
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+        new_terms: Set[str] = set()
+        for term in synonym.terms:
+            for suffix in self.suffices:
+                # Note that this will trigger twice for 'ia' since 'a' is also present.
+                # We expect this to be noisy, and then curate from this.
+                if term.endswith(suffix):
+                    term_without_suffix = term.removesuffix(suffix)
+                    new_terms.update(
+                        term_without_suffix + new_suffix
+                        for new_suffix in self.suffices
+                        if new_suffix is not suffix
+                    )
+
+        if new_terms:
+            return dataclasses.replace(
+                synonym,
+                terms=frozenset(new_terms),
+                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+            )
+        else:
+            return None
+
+
+class SpellingVariationReplacement(SynonymGenerator):
+    """Generate additional synonyms using a mapping of (known) synonyms to a list of variations."""
+
+    def __init__(self, input_path: PathLike):
+        with open(input_path, mode="r", encoding="utf-8") as inf:
+            raw_variation_mapping: Dict[str, List[str]] = json.load(inf)
+
+        # lowercase for case-insensitive comparison
+        self.variation_mapping = {k.lower(): val for k, val in raw_variation_mapping.items()}
+
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+        new_terms = set()
+        for term in synonym.terms:
+            variations = self.variation_mapping.get(term.lower())
+            if variations is not None:
+                new_terms.update(variations)
+        if new_terms:
+            return dataclasses.replace(
+                synonym,
+                terms=frozenset(new_terms),
                 aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
             )
         else:
