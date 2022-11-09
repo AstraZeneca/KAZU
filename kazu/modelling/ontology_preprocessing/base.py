@@ -650,11 +650,11 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
                 }
 
 
-Predicate = Union[rdflib.paths.Path, rdflib.term.Node, str]
+RdfRef = Union[rdflib.paths.Path, rdflib.term.Node, str]
 # Note - lists are actually normally provided here through hydra config
 # but there's apparently no way of type hinting
 # 'any iterable of length two where the items have these types'
-PredicateAndValue = Tuple[Predicate, rdflib.term.Node]
+PredicateAndValue = Tuple[RdfRef, rdflib.term.Node]
 
 
 class RDFGraphParser(OntologyParser):
@@ -668,7 +668,7 @@ class RDFGraphParser(OntologyParser):
         entity_class: str,
         name: str,
         uri_regex: Union[str, re.Pattern],
-        synonym_predicates: Iterable[Predicate],
+        synonym_predicates: Iterable[RdfRef],
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
@@ -691,24 +691,28 @@ class RDFGraphParser(OntologyParser):
         else:
             self._uri_regex = re.compile(uri_regex)
 
-        self.synonym_predicates = tuple(self.convert_predicate(pred) for pred in synonym_predicates)
+        self.synonym_predicates = tuple(
+            self.convert_to_rdflib_ref(pred) for pred in synonym_predicates
+        )
 
         if include_entity_patterns is not None:
             self.include_entity_patterns = tuple(
-                (self.convert_predicate(pred), val) for pred, val in include_entity_patterns
+                (self.convert_to_rdflib_ref(pred), self.convert_to_rdflib_ref(val))
+                for pred, val in include_entity_patterns
             )
         else:
             self.include_entity_patterns = tuple()
 
         if exclude_entity_patterns is not None:
             self.exclude_entity_patterns = tuple(
-                (self.convert_predicate(pred), val) for pred, val in exclude_entity_patterns
+                (self.convert_to_rdflib_ref(pred), self.convert_to_rdflib_ref(val))
+                for pred, val in exclude_entity_patterns
             )
         else:
             self.exclude_entity_patterns = tuple()
 
     @staticmethod
-    def convert_predicate(pred: Predicate) -> Union[rdflib.paths.Path, rdflib.term.Node]:
+    def convert_to_rdflib_ref(pred: RdfRef) -> Union[rdflib.paths.Path, rdflib.term.Node]:
         if isinstance(pred, (rdflib.term.Node, rdflib.paths.Path)):
             return pred
         else:
