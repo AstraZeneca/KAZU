@@ -3,7 +3,7 @@ import logging
 import os
 import re
 import sqlite3
-from abc import ABC, abstractmethod
+from abc import ABC
 from functools import cache
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet, Union
@@ -662,22 +662,13 @@ class RDFGraphParser(OntologyParser):
     Parser for Owl files.
     """
 
-    @property
-    @classmethod
-    @abstractmethod
-    def _uri_regex(cls):
-        """
-        subclasses should provide this as a class attribute.
-
-        It should be a compiled regex object that matches on valid URIs for the ontology
-        being parsed."""
-        pass
-
     def __init__(
         self,
         in_path: str,
         entity_class: str,
         name: str,
+        uri_regex: Union[str, re.Pattern],
+        synonym_predicates: Iterable[Predicate],
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
@@ -695,6 +686,13 @@ class RDFGraphParser(OntologyParser):
             synonym_generator=synonym_generator,
         )
 
+        if isinstance(uri_regex, re.Pattern):
+            self._uri_regex = uri_regex
+        else:
+            self._uri_regex = re.compile(uri_regex)
+
+        self.synonym_predicates = tuple(self.convert_predicate(pred) for pred in synonym_predicates)
+
         if include_entity_patterns is not None:
             self.include_entity_patterns = tuple(
                 (self.convert_predicate(pred), val) for pred, val in include_entity_patterns
@@ -709,13 +707,6 @@ class RDFGraphParser(OntologyParser):
         else:
             self.exclude_entity_patterns = tuple()
 
-    def _get_synonym_predicates(self) -> List[str]:
-        """
-        subclasses should override this. Returns a List[str] of rdf predicates used to select synonyms from the owl
-        graph
-        """
-        raise NotImplementedError()
-
     @staticmethod
     def convert_predicate(pred: Predicate) -> Union[rdflib.paths.Path, rdflib.term.Node]:
         if isinstance(pred, (rdflib.term.Node, rdflib.paths.Path)):
@@ -728,7 +719,6 @@ class RDFGraphParser(OntologyParser):
         g.parse(self.in_path)
         label_pred_str = "http://www.w3.org/2000/01/rdf-schema#label"
         label_predicates = rdflib.URIRef(label_pred_str)
-        synonym_predicates = [rdflib.URIRef(x) for x in self._get_synonym_predicates()]
         default_labels = []
         iris = []
         syns = []
@@ -748,7 +738,7 @@ class RDFGraphParser(OntologyParser):
             iris.append(str(sub))
             syns.append(str(obj))
             mapping_type.append(label_pred_str)
-            for syn_predicate in synonym_predicates:
+            for syn_predicate in self.synonym_predicates:
                 for other_syn_obj in g.objects(subject=sub, predicate=syn_predicate):
                     default_labels.append(str(obj))
                     iris.append(str(sub))
@@ -957,7 +947,6 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
 
 
 class UberonOntologyParser(RDFGraphParser):
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$")
     """
     input should be an UBERON owl file
     e.g.
@@ -973,21 +962,20 @@ class UberonOntologyParser(RDFGraphParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
     ):
+
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
+            uri_regex=re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$"),
+            synonym_predicates=(
+                rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
+            ),
             string_scorer=string_scorer,
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             name="UBERON",
         )
-
-    def _get_synonym_predicates(self) -> List[str]:
-        return [
-            # "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
-            "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
-        ]
 
     def find_kb(self, string: str) -> str:
         return "UBERON"
@@ -1226,7 +1214,6 @@ class ChemblOntologyParser(OntologyParser):
 
 
 class CLOOntologyParser(RDFGraphParser):
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$")
     """
     input is a CLO Owl file
     https://www.ebi.ac.uk/ols/ontologies/clo
@@ -1244,6 +1231,10 @@ class CLOOntologyParser(RDFGraphParser):
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
+            uri_regex=re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$"),
+            synonym_predicates=(
+                rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
+            ),
             string_scorer=string_scorer,
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
@@ -1253,13 +1244,6 @@ class CLOOntologyParser(RDFGraphParser):
 
     def find_kb(self, string: str) -> str:
         return "CLO"
-
-    def _get_synonym_predicates(self) -> List[str]:
-        return [
-            # "http://purl.obolibrary.org/obo/hasNarrowSynonym",
-            "http://purl.obolibrary.org/obo/hasExactSynonym",
-            # "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
-        ]
 
 
 class CellosaurusOntologyParser(OntologyParser):
