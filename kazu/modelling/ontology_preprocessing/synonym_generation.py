@@ -259,7 +259,7 @@ class SuffixReplacement(SynonymGenerator):
 
     Note, this is expected to be noisy, and for most of the generated synonyms not to be valid
     words. This class is present as a generation step for high recall, with curation of synonyms
-    expected later (see :ref:`curationg_for_explosion`).
+    expected later (see :ref:`curating_for_explosion`).
 
     In particular, note that this also doesn't check for the longest matching suffix - e.g. for a
     synonym 'anaemia' and the suffices 'ia', 'a' and 'ic', the new synonyms 'anaemic' and

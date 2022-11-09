@@ -1,3 +1,4 @@
+.. _curating_for_explosion:
 Curating ontology terms for NER
 ================================
 
