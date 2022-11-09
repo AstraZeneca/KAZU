@@ -6,7 +6,7 @@ import sqlite3
 from abc import ABC, abstractmethod
 from functools import cache
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet
+from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet, Union
 from urllib import parse
 
 import pandas as pd
@@ -650,6 +650,13 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
                 }
 
 
+Predicate = Union[rdflib.paths.Path, rdflib.term.Node, str]
+# Note - lists are actually normally provided here through hydra config
+# but there's apparently no way of type hinting
+# 'any iterable of length two where the items have these types'
+PredicateAndValue = Tuple[Predicate, rdflib.term.Node]
+
+
 class RDFGraphParser(OntologyParser):
     """
     Parser for Owl files.
@@ -666,12 +673,55 @@ class RDFGraphParser(OntologyParser):
         being parsed."""
         pass
 
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+        )
+
+        if include_entity_patterns is not None:
+            self.include_entity_patterns = tuple(
+                (self.convert_predicate(pred), val) for pred, val in include_entity_patterns
+            )
+        else:
+            self.include_entity_patterns = tuple()
+
+        if exclude_entity_patterns is not None:
+            self.exclude_entity_patterns = tuple(
+                (self.convert_predicate(pred), val) for pred, val in exclude_entity_patterns
+            )
+        else:
+            self.exclude_entity_patterns = tuple()
+
     def _get_synonym_predicates(self) -> List[str]:
         """
         subclasses should override this. Returns a List[str] of rdf predicates used to select synonyms from the owl
         graph
         """
         raise NotImplementedError()
+
+    @staticmethod
+    def convert_predicate(pred: Predicate) -> Union[rdflib.paths.Path, rdflib.term.Node]:
+        if isinstance(pred, (rdflib.term.Node, rdflib.paths.Path)):
+            return pred
+        else:
+            return rdflib.URIRef(pred)
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         g = rdflib.Graph()
@@ -686,6 +736,12 @@ class RDFGraphParser(OntologyParser):
 
         for sub, obj in g.subject_objects(label_predicates):
             if not self.is_valid_iri(str(sub)):
+                continue
+
+            if any((sub, pred, value) not in g for pred, value in self.include_entity_patterns):
+                continue
+
+            if any((sub, pred, value) in g for pred, value in self.exclude_entity_patterns):
                 continue
 
             default_labels.append(str(obj))
