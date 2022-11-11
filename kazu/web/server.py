@@ -6,6 +6,7 @@ import hydra
 import ray
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
@@ -64,7 +65,6 @@ class KazuWebApp:
 
     @app.post(f"/{KAZU}/batch")
     def batch_ner(self, docs: List[WebDocument]):
-        logger.info(f"received request: {[docs]}")
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
@@ -79,9 +79,11 @@ def start(cfg: DictConfig) -> None:
     """
     # Connect to the running Ray cluster, or run as single node
     ray.init(address=cfg.ray.address, namespace="serve")
+    middlewares = instantiate(cfg.Middlewares)
     # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
     serve.start(
-        detached=cfg.ray.detached, http_options={"host": "0.0.0.0", "location": "EveryNode"}
+        detached=cfg.ray.detached,
+        http_options={"host": "0.0.0.0", "location": "EveryNode", **middlewares},
     )
 
     KazuWebApp.deploy(cfg)
