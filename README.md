@@ -8,6 +8,13 @@ designed to handle production workloads.
 This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
+If you want to use Kazu, please cite our EMNLP 2022 publication!
+
+citation link TBA
+
+[Please click here for the TinyBERN2 training and evaluation code](https://github.com/dmis-lab/KAZU-NER-module)
+
+
 # Quickstart
 
 ## Install
@@ -90,7 +97,37 @@ CELLOSAURUS data is from https://www.cellosaurus.org/ - downloaded 8th November 
 Gene Ontology data is from (version https://zenodo.org/record/7186998#.Y2OcR-zP3iM )
 
 
-### Other licenced datasets
+### Other licenced datasets and models
 
 #### OPEN TARGETS
 Open Targets datasets are kindly provided by www.opentargets.org, which are free for commercial use cases <https://platform-docs.opentargets.org/licence>
+
+Ochoa, D. et al. (2021). Open Targets Platform: supporting systematic drug–target identification and prioritisation. Nucleic Acids Research.
+
+#### STANZA
+
+Biomedical NLP models are derived from: 
+
+Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz. 
+Biomedical and Clinical English Model Packages in the Stanza Python NLP Library, 
+Journal of the American Medical Informatics Association. 2021.
+
+
+#### SCISPACY
+
+Biomedical scispacy models are derived from
+
+Mark Neumann, Daniel King, Iz Beltagy, Waleed Ammar
+ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing
+Proceedings of the 18th BioNLP Workshop and Shared Task
+ACL 2019
+https://www.aclweb.org/anthology/W19-5034
+
+#### SAPBERT
+
+Kazu uses a distilled form of SAPBERT, from
+
+Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, Nigel Collier
+Self-Alignment Pretraining for Biomedical Entity Representations
+ACL 2021
+https://aclanthology.org/2021.naacl-main.334.pdf
