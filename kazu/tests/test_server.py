@@ -1,3 +1,4 @@
+import pytest
 import requests
 
 from kazu.tests.utils import requires_model_pack
@@ -6,7 +7,6 @@ from kazu.web.routes import KAZU
 
 @requires_model_pack
 def test_api(ray_server, kazu_test_config):
-
     data = requests.post(
         f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/",
         json={"text": "EGFR is an important gene in breast cancer"},
@@ -17,9 +17,12 @@ def test_api(ray_server, kazu_test_config):
 
 
 @requires_model_pack
-def test_batch_api(ray_server, kazu_test_config):
+@pytest.mark.parametrize("server_type", ["ray_server", "ray_server_with_jwt_auth"])
+def test_batch_api(server_type, request, kazu_test_config):
+    headers = request.getfixturevalue(server_type)
     data = requests.post(
         f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/batch",
+        headers=headers,
         json=[
             {"text": "EGFR is an important gene in breast cancer"},
             {
