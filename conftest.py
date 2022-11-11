@@ -1,6 +1,7 @@
 import os
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Dict
 
+import jwt
 import pytest
 from hydra import compose, initialize_config_dir
 
@@ -108,5 +109,18 @@ def ray_server(override_kazu_test_config):
         overrides=["ray=local", "ray.detached=true"],
     )
     start(cfg)
-    yield
+    yield {}
+    stop()
+
+
+@pytest.fixture(scope="function")
+def ray_server_with_jwt_auth(override_kazu_test_config):
+    os.environ["KAZU_JWT_KEY"] = "this secret key is not secret"
+    cfg = override_kazu_test_config(
+        overrides=["ray=local", "ray.detached=true", "Middlewares=jwt"],
+    )
+    start(cfg)
+    yield {
+        "Authorization": f'JWT {jwt.encode(dict(username="user"), os.environ["KAZU_JWT_KEY"], algorithm="HS256")}'
+    }
     stop()
