@@ -25,3 +25,4 @@ defaults:
   - SapbertStringSimilarityScorer: default
   - CleanupStep: default
   - CleanupActions: default
+  - Middlewares: default

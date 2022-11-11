@@ -1,0 +1,9 @@
+_convert_: 'all'
+middlewares:
+  - _target_: starlette.middleware.Middleware
+    cls:
+      _target_: hydra.utils.get_class
+      path: starlette.middleware.authentication.AuthenticationMiddleware
+    backend:
+      _target_: kazu.web.jwtauth.JWTAuthenticationBackend
+      secret_key: ${oc.env:KAZU_JWT_KEY}
