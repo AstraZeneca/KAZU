@@ -27,28 +27,28 @@ For most use cases we've encountered, the default configuration should suffice. 
 
 4) Find candidates for linking the entities to knowledgebases according to the below yaml schema. This uses :py:class:`kazu.steps.linking.dictionary.DictionaryEntityLinkingStep`
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    drug:
-      - CHEMBL
-      - OPENTARGETS_MOLECULE
-    disease:
-      - MONDO
-      - OPENTARGETS_DISEASE
-    gene:
-      - OPENTARGETS_TARGET
-    anatomy:
-      - UBERON
-    cell_line:
-      - CELLOSAURUS
-    cell_type:
-      - CLO
-    go_bp:
-      - BP_GENE_ONTOLOGY
-    go_mf:
-      - MF_GENE_ONTOLOGY
-    go_cc:
-      - CC_GENE_ONTOLOGY
+        drug:
+          - CHEMBL
+          - OPENTARGETS_MOLECULE
+        disease:
+          - MONDO
+          - OPENTARGETS_DISEASE
+        gene:
+          - OPENTARGETS_TARGET
+        anatomy:
+          - UBERON
+        cell_line:
+          - CELLOSAURUS
+        cell_type:
+          - CLO
+        go_bp:
+          - BP_GENE_ONTOLOGY
+        go_mf:
+          - MF_GENE_ONTOLOGY
+        go_cc:
+          - CC_GENE_ONTOLOGY
 
 5) decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
 
