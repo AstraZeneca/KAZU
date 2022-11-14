@@ -137,4 +137,4 @@ Kazu uses a distilled form of SAPBERT, from
 Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, Nigel Collier
 Self-Alignment Pretraining for Biomedical Entity Representations
 ACL 2021
-https://aclanthology.org/2021.naacl-main.334.pdf
+https://aclanthology.org/2021.naacl-main.334/
