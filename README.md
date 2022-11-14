@@ -107,11 +107,17 @@ https://doi.org/10.1093/nar/gkaa1027
 
 #### STANZA
 
+The Stanza framework:
+
+Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020. Stanza: A Python Natural Language Processing Toolkit for Many Human Languages. In Association for Computational Linguistics (ACL) System Demonstrations. 2020.
+https://arxiv.org/abs/2003.07082
+
 Biomedical NLP models are derived from: 
 
 Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz. 
 Biomedical and Clinical English Model Packages in the Stanza Python NLP Library, 
 Journal of the American Medical Informatics Association. 2021.
+https://doi.org/10.1093/jamia/ocab090
 
 
 #### SCISPACY
