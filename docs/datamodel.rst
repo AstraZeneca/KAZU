@@ -12,4 +12,4 @@ for text and metadata, (such as entities detected by an NER step).
 
 For convenience, and to handle additional logging/failure events, Steps can be wrapped in a :class:`kazu.pipeline.pipeline.Pipeline`\ ).
 
-For further data model documentation, please see the API docs for :class:`kazu.data.data.Entity`, :class:`kazu.data.data.SynonymTerm` etc
+For further data model documentation, please see the API docs for :class:`kazu.data.data.Entity`, :class:`kazu.data.data.SynonymTerm` etc.
