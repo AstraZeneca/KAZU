@@ -103,6 +103,7 @@ Gene Ontology data is from (version https://zenodo.org/record/7186998#.Y2OcR-zP3
 Open Targets datasets are kindly provided by www.opentargets.org, which are free for commercial use cases <https://platform-docs.opentargets.org/licence>
 
 Ochoa, D. et al. (2021). Open Targets Platform: supporting systematic drug–target identification and prioritisation. Nucleic Acids Research.
+https://doi.org/10.1093/nar/gkaa1027
 
 #### STANZA
 
