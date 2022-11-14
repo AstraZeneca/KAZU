@@ -766,7 +766,6 @@ class RDFGraphParser(OntologyParser):
 
 class GeneOntologyParser(OntologyParser):
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
-    query = """UNDEFINED"""
 
     instances: Set[str] = set()
     instances_in_dbs: Set[str] = set()
@@ -776,6 +775,7 @@ class GeneOntologyParser(OntologyParser):
         in_path: str,
         entity_class: str,
         name: str,
+        query: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
@@ -791,6 +791,7 @@ class GeneOntologyParser(OntologyParser):
             synonym_generator=synonym_generator,
         )
         self.instances.add(name)
+        self.query = query
 
     def populate_databases(self):
         super().populate_databases()
@@ -843,21 +844,6 @@ class GeneOntologyParser(OntologyParser):
 
 
 class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
-    query = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                SELECT DISTINCT ?goid ?label ?synonym
-                        WHERE {
-
-                            ?goid oboinowl:hasExactSynonym ?synonym .
-                            ?goid rdfs:label ?label .
-                            ?goid oboinowl:hasOBONamespace "biological_process" .
-
-                  }
-        """
-
     def __init__(
         self,
         in_path: str,
@@ -875,25 +861,24 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             name="BP_GENE_ONTOLOGY",
+            query="""
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                    PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+
+                    SELECT DISTINCT ?goid ?label ?synonym
+                            WHERE {
+
+                                ?goid oboinowl:hasExactSynonym ?synonym .
+                                ?goid rdfs:label ?label .
+                                ?goid oboinowl:hasOBONamespace "biological_process" .
+
+                  }
+            """,
         )
 
 
 class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
-    query = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                SELECT DISTINCT ?goid ?label ?synonym
-                        WHERE {
-
-                            ?goid oboinowl:hasExactSynonym ?synonym .
-                            ?goid rdfs:label ?label .
-                            ?goid oboinowl:hasOBONamespace "molecular_function".
-
-                  }
-        """
-
     def __init__(
         self,
         in_path: str,
@@ -911,25 +896,24 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             name="MF_GENE_ONTOLOGY",
+            query="""
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                    PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+
+                    SELECT DISTINCT ?goid ?label ?synonym
+                            WHERE {
+
+                                ?goid oboinowl:hasExactSynonym ?synonym .
+                                ?goid rdfs:label ?label .
+                                ?goid oboinowl:hasOBONamespace "molecular_function".
+
+                    }
+            """,
         )
 
 
 class CellularComponentGeneOntologyParser(GeneOntologyParser):
-    query = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                SELECT DISTINCT ?goid ?label ?synonym
-                        WHERE {
-
-                            ?goid oboinowl:hasExactSynonym ?synonym .
-                            ?goid rdfs:label ?label .
-                            ?goid oboinowl:hasOBONamespace "cellular_component" .
-
-                  }
-        """
-
     def __init__(
         self,
         in_path: str,
@@ -947,6 +931,20 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             name="CC_GENE_ONTOLOGY",
+            query="""
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                    PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+
+                    SELECT DISTINCT ?goid ?label ?synonym
+                            WHERE {
+
+                                ?goid oboinowl:hasExactSynonym ?synonym .
+                                ?goid rdfs:label ?label .
+                                ?goid oboinowl:hasOBONamespace "cellular_component" .
+
+                    }
+            """,
         )
 
 
