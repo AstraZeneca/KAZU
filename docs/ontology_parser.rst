@@ -47,8 +47,9 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
 2) If the term is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
    group these IDs into one or more sets of IDs.
-    The idea here is that we can use embeddings to check if semantically, the confused symbol is referring to either a very similar concept, or something completely different
-    in the knowledgebase. Typically, we use a distilled form of the `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
+    The idea here is that we can use embeddings to check if semantically, each ID associated with a confused symbol is referring to either a very similar concept
+    to another ID associated with the symbol, or something completely different in the knowledgebase. Typically, we use a distilled form of the
+    `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
 
     example:
         "OFD" -> either "osteofibrous dysplasia (MONDO_0011806)" or "orofaciodigital syndrome (MONDO_0015375)".
@@ -60,28 +61,34 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
     result:
         sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`kazu.data.data.EquivalentIdSet`
 
-Naturally, this behaviour may not always be desired. You may want two instances of :class:`kazu.data.data.SynonymTerm`\\ for the term "XLOA" (despite the MONDO ontology
-suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`kazu.data.data.SynonymTerm`\\ is most appropriate.
-In this case, you can override this behaviour with :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids`\\
+Naturally, this behaviour may not always be desired. You may want two instances of :class:`.SynonymTerm` for the term "XLOA" (despite the MONDO ontology
+suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.SynonymTerm` is most appropriate.
+In this case, you can override this behaviour with :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids`\ .
 
 
 Writing a Custom Parser
 -------------------------
 
-Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an OntologyParser. Fortunately, this is generally
-quite easy to do. Let's take the example of the :py:class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
+Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an :class:`.OntologyParser`.
+Fortunately, this is generally quite easy to do. Let's take the example of the :class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
 
-There are two methods you need to override :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe` and
-:meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb`. Let's look at the first of these:
+There are two methods you need to override: :meth:`.parse_to_dataframe` and :meth:`.find_kb`. Let's look at the first of these:
 
 .. code-block:: python
 
-    DEFAULT_LABEL = "default_label"
-    IDX = "idx"
-    SYN = "syn"
-    MAPPING_TYPE = "mapping_type"
-    SOURCE = "source"
-    DATA_ORIGIN = "data_origin"
+import sqlite3
+
+import pandas as pd
+
+from kazu.modelling.ontology_preprocessing.base import (
+    OntologyParser,
+    DEFAULT_LABEL,
+    IDX,
+    SYN,
+    MAPPING_TYPE,
+)
+
+
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
         the objective of this method is to create a long, thin pandas dataframe of terms and associated metadata.
@@ -89,7 +96,7 @@ There are two methods you need to override :meth:`kazu.modelling.ontology_prepro
         synonyms and the type of mapping as well
         """
 
-        #fortunately, Chembl comes as and sqlite DB, which lends itself very well to this tabular structure
+        # fortunately, Chembl comes as and sqlite DB, which lends itself very well to this tabular structure
         conn = sqlite3.connect(self.in_path)
         query = f"""
             SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
@@ -107,7 +114,7 @@ There are two methods you need to override :meth:`kazu.modelling.ontology_prepro
 
         return df
 
-secondly, we need to write the :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb` method
+Secondly, we need to write the :meth:`.find_kb` method:
 
 .. code-block:: python
 
@@ -121,7 +128,7 @@ secondly, we need to write the :meth:`kazu.modelling.ontology_preprocessing.base
         return "CHEMBL"
 
 
-finally, we need to set the class field, so the full class looks like:
+Finally, we need to set the class field, so the full class looks like:
 
 .. code-block:: python
 
@@ -150,4 +157,4 @@ finally, we need to set the class field, so the full class looks like:
 
             return df
 
-That's it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere
+That's it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere.
