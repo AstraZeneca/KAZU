@@ -54,8 +54,8 @@ For most use cases we've encountered, the default configuration should suffice. 
 
 6) merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
 
-7) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
+7) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
 
-8) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
+8) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
 
 All of these steps are customisable via Hydra configuration
