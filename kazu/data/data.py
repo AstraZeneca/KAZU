@@ -194,8 +194,12 @@ class SynonymTermWithMetrics(SynonymTerm):
 @dataclass
 class Entity:
     """
-    Generic data class representing a unique entity in a string. Note, since an entity can consist of multiple CharSpan,
-    we have to define the semantics of overlapping spans.
+    A :class:`kazu.data.data.Entity` is a container for information about a single entity detected within a :class:`kazu.data.data.Section`
+
+    Within an :class:`kazu.data.data.Entity`, the most important fields are :attr:`.Entity.match` (the actual string detected),
+    :attr:`.Entity.syn_term_to_synonym_terms`, a dict of :class:`kazu.data.data.SynonymTermWithMetrics` (candidates for knowledgebase hits)
+    and :attr:`.Entity.mappings`, the final product of linked references to the underlying entity
+
     """
 
     match: str  # exact text representation
