@@ -1,5 +1,5 @@
 _target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep
-path: ${oc.env:KAZU_MODEL_PACK}/tinybern
+path: ${oc.env:KAZU_MODEL_PACK}/tinybern2
 depends_on: ~
 batch_size: 4
 stride: 16
@@ -19,19 +19,19 @@ entity_splitter:
     disease:
       - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
         spacy_pipeline: ${SpacyPipeline}
-detect_subspans: False
-threshold: ~
+detect_subspans: true
+threshold: 0.5
 labels:
-  - 'B-cell_line'
-  - 'B-cell_type'
-  - 'B-disease'
-  - 'B-drug'
-  - 'B-gene'
-  - 'B-species'
-  - 'I-cell_line'
-  - 'I-cell_type'
-  - 'I-disease'
-  - 'I-drug'
-  - 'I-gene'
-  - 'I-species'
-  - 'O'
+  - "O"
+  - "B-cell_line"
+  - "I-cell_line"
+  - "B-cell_type"
+  - "I-cell_type"
+  - "B-disease"
+  - "I-disease"
+  - "B-drug"
+  - "I-drug"
+  - "B-gene"
+  - "I-gene"
+  - "B-species"
+  - "I-species"
