@@ -1,15 +1,23 @@
-name: Release Test
+name: Create Release
 
 on:
   workflow_dispatch:
     inputs:
-      model-pack-path:
-        description: TBA
-        required: false
+      default-model-pack-path:
+        description: runner path to the default model pack
+        required: true
+        default: /home/github/runner/.kazu_data/kazu-model-pack-public
+      version:
+        description: The version to create (semantic versioning)
+        required: true
+        options:
+        - major
+        - minor
+        - patch
 
 jobs:
-  model-pack-tests:
-    runs-on: self-hosted
+  release_new_version:
+    runs-on: [self-hosted, has-model-pack]
     strategy:
       fail-fast: false
       matrix:
@@ -18,12 +26,131 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
 
+      - name: fetch tags
+        run: |
+          git fetch --prune --tags --prune-tags
+          echo exit code $?
+          git tag --list
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v2
+      - name: bump version without commit or tag and build wheel
+        id: build_wheel
+        run: |
+          rm -r dist || true
+          python setup.py clean --all
+          pip install bump2version==1.0.1
+          pip install wheel
+          bump2version --verbose --no-commit --no-tag $KAZU_NEW_VERSION
+          
+          python setup.py bdist_wheel
+          
+          PIP_CACHE_DIR=$(pip cache dir)
+          echo "pip cache dir is "${PIP_CACHE_DIR}
+          echo "PIP_CACHE_DIR=${PIP_CACHE_DIR}" >> $GITHUB_ENV
+        env:
+          KAZU_NEW_VERSION: ${{ inputs.version }}
+
+      - name: create venv and install wheel
+        run: |
+          PIP_CACHE_DIR=$(echo "${{ env.PIP_CACHE_DIR }}")
+          echo "pip cache dir is "${PIP_CACHE_DIR}
+          python -m venv kazu-env
+          . kazu-env/bin/activate
+          python -m pip install --upgrade pip
+          WHEEL_PATH=$(echo $GITHUB_WORKSPACE/dist/*whl)
+          pip install "${WHEEL_PATH}[dev]"  --cache-dir $PIP_CACHE_DIR
+
+      - name: Set up JDK 11 (required for SETH)
+        uses: actions/setup-java@v2
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ hashFiles('setup.py') }}
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Build model pack caches and test (with acceptance tests)
+        id: model_pack_cache_build_and_test
+        run: |
+          
+          export BASE_KAZU_CONF_PATH=$GITHUB_WORKSPACE"/kazu/conf"
+          # random suffix to prevent clashes with other runs          
+          export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
+          
+          mkdir $MODEL_PACK_BUILD_PATH   
+          
+          . kazu-env/bin/activate
+          
+          python -m kazu.utils.build_and_test_model_packs \
+          --build_base_model_pack_from_path $DEFAULT_MODEL_PACK_PATH \
+          --base_configuration_path $BASE_KAZU_CONF_PATH \
+          --zip_model_pack \
+          --run_acceptance_tests \
+          --model_pack_output_path $MODEL_PACK_BUILD_PATH
+                    
+          cd /tmp
+          pytest $GITHUB_WORKSPACE/kazu/tests
+          
+          NEW_MODEL_PACK_ZIP=$(echo $MODEL_PACK_BUILD_PATH/*.zip)
+          echo "NEW_MODEL_PACK_ZIP=${NEW_MODEL_PACK_ZIP}" >> $GITHUB_ENV
+
+        env:
+          DEFAULT_MODEL_PACK_PATH: ${{ inputs.default-model-pack-path }}
+          TOKENIZERS_PARALLELISM: false
+          PL_DISABLE_FORK: 1
+          LS_TOKEN: ${{ secrets.LS_TOKEN }}
+          LS_URL_PORT: ${{ secrets.LS_URL_PORT }}
+
+      - name: Bump version with commit and tag, commit, and push
+        run: |
+          cd $GITHUB_WORKSPACE
+          # reset to remove previous call to bump version, so we can call again with 
+          # tag and commit
+          git reset --hard
+          git config --global user.name 'Kazu Version Bump'
+          git config --global user.email 'kazu.versionbump@users.noreply.github.com'
+          bump2version --verbose --commit --tag $KAZU_NEW_VERSION
+          git push --follow-tags
+        env:
+          KAZU_NEW_VERSION: ${{ inputs.version }}
+
+      - name: create release on github
+        run: |
+          NEW_MODEL_PACK_ZIP=$(echo "${{ env.NEW_MODEL_PACK_ZIP }}")
+          rm -r dist || true
+          . kazu-env/bin/activate
+          python setup.py clean --all
+          python setup.py sdist bdist_wheel
+
+          KAZU_RELEASE_VERSION="v"$(python setup.py --version)
+          echo "KAZU_RELEASE_VERSION=${KAZU_RELEASE_VERSION}" >> $GITHUB_ENV
+          
+          gh release create $KAZU_RELEASE_VERSION --notes "TBA" --title $KAZU_RELEASE_VERSION          
+          gh release upload $KAZU_RELEASE_VERSION dist/* --clobber
+          gh release upload $KAZU_RELEASE_VERSION $NEW_MODEL_PACK_ZIP --clobber
+          rm -r $NEW_MODEL_PACK_ZIP
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push artifacts
+        run: |
+          . kazu-env/bin/activate
+          pip install twine
+          python -m twine upload  dist/* -u $ARTIFACT_USERNAME -p $ARTIFACT_TOKEN --repository-url $ARTIFACT_PYPI_URL
+          export KAZU_BASE_CONF_ZIP="base-conf-"$(echo "${{ env.KAZU_RELEASE_VERSION }}")".zip"
+          (cd kazu && zip -r ../${KAZU_BASE_CONF_ZIP} conf )
+          curl -u$ARTIFACT_USERNAME:$ARTIFACT_TOKEN  -T ${KAZU_BASE_CONF_ZIP} "${ARTIFACT_GENERIC_URL}${KAZU_BASE_CONF_ZIP}"
+
+        env:
+          ARTIFACT_USERNAME: ${{ secrets.ARTIFACT_USERNAME }}
+          ARTIFACT_TOKEN: ${{ secrets.ARTIFACT_TOKEN }}
+          ARTIFACT_PYPI_URL: ${{ secrets.ARTIFACT_PYPI_URL }}
+          ARTIFACT_GENERIC_URL: ${{ secrets.ARTIFACT_GENERIC_URL }}
+
+      - name: remove temp resources
+        run: |
+          # need to call twice, for NFS bug      
+          MODEL_PACK_BUILD_PATH=$(echo "${{ env.MODEL_PACK_BUILD_PATH }}")
+          rm -r $MODEL_PACK_BUILD_PATH || true
+          rm -r $MODEL_PACK_BUILD_PATH || true
