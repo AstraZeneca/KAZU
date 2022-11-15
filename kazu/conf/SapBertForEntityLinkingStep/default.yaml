@@ -20,5 +20,3 @@ indices:
     parser: ${ontology_parser.mondo_parser}
   - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
     parser: ${ontology_parser.ot_disease_parser}
-  - _target_: kazu.utils.link_index.MatMulTensorEmbeddingIndex
-    parser: ${ontology_parser.meddra_parser}

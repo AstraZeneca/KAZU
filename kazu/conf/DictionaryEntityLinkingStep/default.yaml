@@ -26,10 +26,6 @@ indices:
     boolean_scorers: ${StringScorers.gene}
 
   - _target_: kazu.utils.link_index.DictionaryIndex
-    parser: ${ontology_parser.meddra_parser}
-    boolean_scorers: ${StringScorers.disease}
-
-  - _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontology_parser.uberon_parser}
     boolean_scorers: ${StringScorers.anatomy}
 
