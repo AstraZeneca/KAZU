@@ -19,7 +19,6 @@ setup(
         "pytorch-lightning==1.7.5",
         "pandas==1.3.4",
         "pyarrow==8.0.0",
-        "gilda==0.10.3",
         "pytorch-metric-learning==0.9.99",
         "rapidfuzz==1.8.2",
         "seqeval==1.2.2",

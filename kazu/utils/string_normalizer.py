@@ -1,8 +1,7 @@
 import re
+import regex
 from functools import lru_cache
 from typing import Optional, Dict, Protocol, Type
-
-from gilda.process import depluralize, replace_dashes
 
 from kazu.modelling.language.language_phenomena import GREEK_SUBS
 
@@ -149,7 +148,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         :return:
         """
         if len(string) > 3:
-            string = depluralize(string)[0]
+            string = GildaUtils.depluralize(string)[0]
         return string
 
     @staticmethod
@@ -320,7 +319,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         :param original_string:
         :return:
         """
-        string = replace_dashes(original_string, " ")
+        string = GildaUtils.replace_dashes(original_string, " ")
         tokens = string.split(" ")
         if len(tokens) == 1 and not any(
             tokens[0].endswith(suffix) for suffix in GeneStringNormalizer.gene_name_suffixes
@@ -434,3 +433,123 @@ class StringNormalizer:
             return normaliser_for_entity_class.normalize_symbol(original_string)
         else:
             return normaliser_for_entity_class.normalize_noun_phrase(original_string)
+
+
+class GildaUtils:
+    """
+    Original Credit:
+    https://github.com/indralab/gilda
+    https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py
+
+    @article{gyori2022gilda,
+        author = {Gyori, Benjamin M and Hoyt, Charles Tapley and Steppi, Albert},
+        title = "{{Gilda: biomedical entity text normalization with machine-learned disambiguation as a service}}",
+        journal = {Bioinformatics Advances},
+        year = {2022},
+        month = {05},
+        issn = {2635-0041},
+        doi = {10.1093/bioadv/vbac034},
+        url = {https://doi.org/10.1093/bioadv/vbac034},
+        note = {vbac034}
+    }
+
+    -----------------------------------------------------------------
+    BSD 2-Clause License
+
+    Copyright (c) 2019, Benjamin M. Gyori, Harvard Medical School
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    -----------------------------------------------------------------
+    """
+
+    dashes = [chr(0x2212), chr(0x002D)] + [chr(c) for c in range(0x2010, 0x2016)]
+
+    @staticmethod
+    def depluralize(word):
+        """
+        Return the depluralized version of the word, along with a status  flag.
+        Parameters
+        ----------
+        word : str
+            The word which is to be depluralized.
+        Returns
+        -------
+        str
+            The original word, if it is detected to be non-plural, or the
+            depluralized version of the word.
+        str
+            A status flag represeting the detected pluralization status of the
+            word, with non_plural (e.g., BRAF), plural_oes (e.g., mosquitoes),
+            plural_ies (e.g., antibodies), plural_es (e.g., switches),
+            plural_cap_s (e.g., MAPKs), and plural_s (e.g., receptors).
+        """
+        # If the word doesn't end in s, we assume it's not plural
+        if not word.endswith("s"):
+            return word, "non_plural"
+        # Another case is words ending in -sis (e.g., apoptosis), these are almost
+        # exclusively non plural so we return here too
+        elif word.endswith("sis"):
+            return word, "non_plural"
+        # This is the case when the word ends with an o which is pluralized as oes
+        # e.g., mosquitoes
+        elif word.endswith("oes"):
+            return word[:-2], "plural_oes"
+        # This is the case when the word ends with a y which is pluralized as ies,
+        # e.g., antibodies
+        elif word.endswith("ies"):
+            return word[:-3] + "y", "plural_ies"
+        # These are the cases where words form plurals by adding -es so we
+        # return by stripping it off
+        elif word.endswith(("xes", "ses", "ches", "shes")):
+            return word[:-2], "plural_es"
+        # If the word is all caps and the last letter is an s, then it's a very
+        # strong signal that it is pluralized so we have a custom return value
+        # for that
+        elif regex.match(r"^\p{Lu}+$", word[:-1]):
+            return word[:-1], "plural_caps_s"
+        # Otherwise, we just go with the assumption that the last s is the
+        # plural marker
+        else:
+            return word[:-1], "plural_s"
+        # Note: there don't seem to be any compelling examples of -f or -fe -> ves
+        # so it is not implemented
+
+    @classmethod
+    def replace_dashes(cls, s: str, rep: Optional[str] = None) -> str:
+        """Replace all types of dashes in a given string with a given replacement.
+        Parameters
+        ----------
+        s : str
+            The string in which all types of dashes should be replaced.
+        rep : Optional[str]
+            The string with which dashes should be replaced. By default, the plain
+            ASCII dash (-) is used.
+        Returns
+        -------
+        str
+            The string in which dashes have been replaced.
+        """
+        rep = rep if rep is not None else "-"
+        for d in cls.dashes:
+            s = s.replace(d, rep)
+        return s
