@@ -1,49 +1,34 @@
 import dataclasses
 import itertools
+import json
+import os
 from collections import defaultdict, Counter
+from pathlib import Path
 from typing import List, Iterable, Dict, Set, Tuple, DefaultDict, Any
 
-import pytest
+import hydra
+from hydra.utils import instantiate
+
 from kazu.data.data import Entity, Document
 from kazu.pipeline import Pipeline, load_steps
-from kazu.tests.utils import requires_model_pack, requires_label_studio
 from kazu.utils.grouping import sort_then_group
 
-pytestmark = [requires_model_pack, requires_label_studio]
+
+class AcceptanceTestFailure(Exception):
+    pass
 
 
-NER_THRESHOLDS = {
-    "gene": {"precision": 0.80, "recall": 0.80},
-    "disease": {"precision": 0.70, "recall": 0.80},
-    "drug": {"precision": 0.80, "recall": 0.80},
-}
-
-LINKING_THRESHOLDS = {
-    "MONDO": {"precision": 0.70, "recall": 0.70},
-    "MEDDRA": {"precision": 0.70, "recall": 0.70},
-    "CHEMBL": {"precision": 0.80, "recall": 0.80},
-    "ENSEMBL": {"precision": 0.80, "recall": 0.80},
-}
+def acceptance_criteria() -> Dict[str, Dict[str, Dict[str, float]]]:
+    with open(Path(os.environ["KAZU_MODEL_PACK"]).joinpath("acceptance_criteria.json")) as f:
+        data = json.load(f)
+    return data
 
 
-def test_full_pipeline(capsys, override_kazu_test_config, label_studio_manager):
-
-    cfg = override_kazu_test_config(
-        # we don't want to test xref mappings, as we have no control over quality
-        overrides=["pipeline=acceptance_test", "MappingStep=no_xref"],
-    )
+@hydra.main(config_path="../../", config_name="conf")
+def execute_full_pipeline_acceptance_test(cfg):
+    manager = instantiate(cfg.LabelStudioManager)
     pipeline = Pipeline(load_steps(cfg=cfg))
-    analyse_full_pipeline(capsys, pipeline, label_studio_manager.export_from_ls())
-
-
-def test_gold_standard_consistency(capsys, label_studio_manager):
-    """
-    a test that always passes, but reports potential inconsistencies in the gold standard
-
-    :param label_studio_manager:
-    :return:
-    """
-    check_annotation_consistency(capsys, label_studio_manager.export_from_ls())
+    analyse_full_pipeline(pipeline, manager.export_from_ls(), acceptance_criteria())
 
 
 class SectionScorer:
@@ -243,7 +228,6 @@ def aggregate_linking_results(
 
 
 def check_results_meet_threshold(
-    capsys,
     results: Dict[str, AggregatedAccuracyResult],
     thresholds: Dict[str, Dict[str, float]],
 ):
@@ -257,33 +241,47 @@ def check_results_meet_threshold(
             f"{aggregated_result.tp} / {aggregated_result.fp + aggregated_result.tp} \n{message}"
         )
         if prec >= threshold["precision"]:
-            with capsys.disabled():
-                print(f"{key} passed precision threshold: {prec}. {prec_message}\n\n")
+            print(f"{key} passed precision threshold: {prec}. {prec_message}\n\n")
         else:
-            pytest.fail(f"{key} failed to meet precision threshold: {prec}. {prec_message}")
+            raise AcceptanceTestFailure(
+                f"{key} failed to meet precision threshold: {prec}. {prec_message}"
+            )
 
         message = "\n".join(f"{k} <missed {v} times>" for k, v in aggregated_result.fn_info)
         rec_message = (
             f"{aggregated_result.tp} / {aggregated_result.fn + aggregated_result.tp} \n{message}"
         )
         if rec >= threshold["recall"]:
-            with capsys.disabled():
-                print(f"{key} passed recall threshold: {rec}. {rec_message}\n\n")
+            print(f"{key} passed recall threshold: {rec}. {rec_message}\n\n")
         else:
-            pytest.fail(f"{key} failed to meet recall threshold: {rec}. {rec_message}")
+            raise AcceptanceTestFailure(
+                f"{key} failed to meet recall threshold: {rec}. {rec_message}"
+            )
 
 
-def analyse_full_pipeline(capsys, pipeline: Pipeline, docs: List[Document]):
+def analyse_full_pipeline(
+    pipeline: Pipeline,
+    docs: List[Document],
+    acceptance_criteria: Dict[str, Dict[str, Dict[str, float]]],
+):
     pipeline(docs)
     ner_dict = score_sections(docs)
     ner_results = aggregate_ner_results(ner_dict)
-    check_results_meet_threshold(capsys, results=ner_results, thresholds=NER_THRESHOLDS)
+    check_results_meet_threshold(
+        results=ner_results, thresholds=acceptance_criteria["NER_THRESHOLDS"]
+    )
 
     linking_results = aggregate_linking_results(ner_dict)
-    check_results_meet_threshold(capsys, results=linking_results, thresholds=LINKING_THRESHOLDS)
+    check_results_meet_threshold(
+        results=linking_results, thresholds=acceptance_criteria["LINKING_THRESHOLDS"]
+    )
 
 
-def check_annotation_consistency(capsys, docs: List[Document]):
+@hydra.main(config_path="../../", config_name="conf")
+def check_annotation_consistency(cfg):
+
+    manager = instantiate(cfg.LabelStudioManager)
+    docs = manager.export_from_ls()
     all_ents = []
     ent_to_task_lookup: Dict[Entity, int] = {}  # used for reporting task id that may have issues
     for doc in docs:
@@ -302,10 +300,9 @@ def check_annotation_consistency(capsys, docs: List[Document]):
         check_ent_class_consistency(ent_to_task_lookup, ents, match_str, messages)
         check_ent_mapping_consistency(ent_to_task_lookup, ents, match_str, messages)
 
-    with capsys.disabled():
-        print(f"{len(messages)} tasks with issues:\n")
-        for doc_id in sorted(messages):
-            print(f"\ntask id: {doc_id}\n" + "*" * 20 + "\n" + "\n".join(messages[doc_id]))
+    print(f"{len(messages)} tasks with issues:\n")
+    for doc_id in sorted(messages):
+        print(f"\ntask id: {doc_id}\n" + "*" * 20 + "\n" + "\n".join(messages[doc_id]))
 
 
 def check_ent_match_abnormalities(
@@ -409,3 +406,7 @@ def check_ent_mapping_consistency(
         )
         for doc_id in doc_id_to_groups:
             messages[doc_id].add(overall_message)
+
+
+if __name__ == "__main__":
+    execute_full_pipeline_acceptance_test()
