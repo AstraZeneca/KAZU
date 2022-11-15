@@ -711,6 +711,11 @@ class RDFGraphParser(OntologyParser):
         else:
             self.exclude_entity_patterns = tuple()
 
+    def find_kb(self, string: str) -> str:
+        # By default, just return the name of the parser.
+        # If more complex behaviour is necessary, write a custom subclass and override this method.
+        return self.name
+
     @staticmethod
     def convert_to_rdflib_ref(pred: RdfRef) -> Union[rdflib.paths.Path, rdflib.term.Node]:
         if isinstance(pred, (rdflib.term.Node, rdflib.paths.Path)):
