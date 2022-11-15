@@ -82,92 +82,85 @@ class MetadataDatabase(metaclass=Singleton):
         self._add_parser(name, metadata)
 
 
-class SynonymDatabase:
+class SynonymDatabase(metaclass=Singleton):
     """
     Singleton of a database of synonyms.
     """
 
-    instance: Optional["__SynonymDatabase"] = None
+    _syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
+    syns_by_aggregation_strategy: Dict[
+        ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
+    ] = {}
+    _loaded_parsers: Set[ParserName] = set()
 
-    class __SynonymDatabase:
-        syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
-        syns_by_aggregation_strategy: Dict[
-            ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
-        ] = {}
-        loaded_parsers: Set[ParserName] = set()
-
-        def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
-            self.loaded_parsers.add(name)
-            self.syns_database_by_syn[name] = {}
-            for synonym in synonyms:
-                self.syns_database_by_syn[name][synonym.term_norm] = synonym
-                for equiv_ids in synonym.associated_id_sets:
-                    for idx in equiv_ids.ids:
-                        dict_for_this_parser = self.syns_by_aggregation_strategy.setdefault(
-                            name, {}
-                        )
-                        dict_for_this_aggregation_strategy = dict_for_this_parser.setdefault(
-                            synonym.aggregated_by, {}
-                        )
-                        syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(
-                            idx, set()
-                        )
-                        syn_set_for_this_id.add(synonym.term_norm)
-
-        def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
-            return self.syns_database_by_syn[name][synonym]
-
-        def get_syns_for_id(
-            self,
-            name: ParserName,
-            idx: Idx,
-            strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-        ) -> Set[NormalisedSynonymStr]:
-            result = set()
-            if strategy_filters is None:
-                for syn_dict in self.syns_by_aggregation_strategy[name].values():
-                    result.update(syn_dict.get(idx, set()))
-            else:
-                for agg_strategy in strategy_filters:
-                    result.update(
-                        self.syns_by_aggregation_strategy[name]
-                        .get(agg_strategy, dict())
-                        .get(idx, set())
+    def _add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
+        self.loaded_parsers.add(name)
+        self._syns_database_by_syn[name] = {}
+        for synonym in synonyms:
+            self._syns_database_by_syn[name][synonym.term_norm] = synonym
+            for equiv_ids in synonym.associated_id_sets:
+                for idx in equiv_ids.ids:
+                    dict_for_this_parser = self.syns_by_aggregation_strategy.setdefault(
+                        name, {}
                     )
-            return result
-
-        def get_syns_sharing_id(
-            self,
-            name: ParserName,
-            synonym: NormalisedSynonymStr,
-            strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-        ) -> Set[NormalisedSynonymStr]:
-            """
-            get all other syns for a synonym in a kb
-
-            :param name: parser name
-            :param synonym: synonym
-            :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
-                via these strategies will be returned. If None (the default), all syns will be returned
-            :return:
-            """
-            result: Set[str] = set()
-            synonym_term = self.get(name, synonym)
-            if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
-                return result
-            for equiv_id_set in synonym_term.associated_id_sets:
-                for idx in equiv_id_set.ids:
-                    syns = self.get_syns_for_id(
-                        name,
-                        idx,
-                        strategy_filters,
+                    dict_for_this_aggregation_strategy = dict_for_this_parser.setdefault(
+                        synonym.aggregated_by, {}
                     )
-                    result.update(syns)
-            return result
+                    syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(
+                        idx, set()
+                    )
+                    syn_set_for_this_id.add(synonym.term_norm)
 
-    def __init__(self):
-        if not SynonymDatabase.instance:
-            SynonymDatabase.instance = SynonymDatabase.__SynonymDatabase()
+    def _get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
+        return self._syns_database_by_syn[name][synonym]
+
+    def _get_syns_for_id(
+        self,
+        name: ParserName,
+        idx: Idx,
+        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
+    ) -> Set[NormalisedSynonymStr]:
+        result = set()
+        if strategy_filters is None:
+            for syn_dict in self.syns_by_aggregation_strategy[name].values():
+                result.update(syn_dict.get(idx, set()))
+        else:
+            for agg_strategy in strategy_filters:
+                result.update(
+                    self.syns_by_aggregation_strategy[name]
+                    .get(agg_strategy, dict())
+                    .get(idx, set())
+                )
+        return result
+
+    def _get_syns_sharing_id(
+        self,
+        name: ParserName,
+        synonym: NormalisedSynonymStr,
+        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
+    ) -> Set[NormalisedSynonymStr]:
+        """
+        get all other syns for a synonym in a kb
+
+        :param name: parser name
+        :param synonym: synonym
+        :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
+            via these strategies will be returned. If None (the default), all syns will be returned
+        :return:
+        """
+        result: Set[str] = set()
+        synonym_term = self.get(name, synonym)
+        if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
+            return result
+        for equiv_id_set in synonym_term.associated_id_sets:
+            for idx in equiv_id_set.ids:
+                syns = self.get_syns_for_id(
+                    name,
+                    idx,
+                    strategy_filters,
+                )
+                result.update(syns)
+        return result
 
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
         """
@@ -177,8 +170,7 @@ class SynonymDatabase:
         :param synonym: idx to query
         :return:
         """
-        assert self.instance is not None
-        return self.instance.get(name, synonym)
+        return self._get(name, synonym)
 
     def get_syns_for_id(
         self,
@@ -186,8 +178,7 @@ class SynonymDatabase:
         idx: Idx,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> Set[NormalisedSynonymStr]:
-        assert self.instance is not None
-        return self.instance.get_syns_for_id(name, idx, strategy_filters)
+        return self._get_syns_for_id(name, idx, strategy_filters)
 
     def get_syns_sharing_id(
         self,
@@ -195,8 +186,7 @@ class SynonymDatabase:
         synonym: NormalisedSynonymStr,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> Set[NormalisedSynonymStr]:
-        assert self.instance is not None
-        return self.instance.get_syns_sharing_id(name, synonym, strategy_filters)
+        return self._get_syns_sharing_id(name, synonym, strategy_filters)
 
     def get_all(self, name: ParserName) -> Dict[NormalisedSynonymStr, SynonymTerm]:
         """
@@ -205,12 +195,10 @@ class SynonymDatabase:
         :param name: name of ontology
         :return:
         """
-        assert self.instance is not None
-        return self.instance.syns_database_by_syn[name]
+        return self._syns_database_by_syn[name]
 
     def get_database(self) -> Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]]:
-        assert self.instance is not None
-        return self.instance.syns_database_by_syn
+        return self._syns_database_by_syn
 
     def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
         """
@@ -220,10 +208,8 @@ class SynonymDatabase:
         :param synonyms: iterable of SynonymTerms to add
         :return:
         """
-        assert self.instance is not None
-        self.instance.add(name, synonyms)
+        self._add(name, synonyms)
 
     @property
     def loaded_parsers(self) -> Set[ParserName]:
-        assert self.instance is not None
-        return self.instance.loaded_parsers
+        return self._loaded_parsers
