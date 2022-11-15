@@ -1,0 +1,6 @@
+_target_: kazu.modelling.annotation.label_studio.LabelStudioManager
+project_name: kazu-annotations
+headers:
+  Content-Type: application/json
+  Authorization: Token ${oc.env:LS_TOKEN}
+url: ${oc.env:LS_URL_PORT}
