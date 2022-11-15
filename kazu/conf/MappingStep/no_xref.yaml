@@ -1,5 +1,0 @@
-defaults:
-  - default
-
-strategy_runner:
-  cross_ref_managers: ~

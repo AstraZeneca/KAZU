@@ -1,9 +1,0 @@
-# @package _global_
-pipeline:
-  steps:
-    - ExplosionStringMatchingStep
-    - StanzaStep
-    - SpacyNerStep
-    - TransformersModelForTokenClassificationNerStep
-    - NerDeDuplicationStep
-    - DictionaryEntityLinkingStep
