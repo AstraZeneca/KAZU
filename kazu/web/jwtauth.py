@@ -71,7 +71,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         self,
         secret_key: str,
         algorithm: str = "HS256",
-        prefix: str = "JWT",
+        prefix: str = "Bearer",
         username_field: str = "username",
         audience: Optional[str] = None,
         options: Optional[dict] = None,
