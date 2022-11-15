@@ -24,4 +24,5 @@ defaults:
   - SapbertStringSimilarityScorer: default
   - CleanupStep: default
   - CleanupActions: default
+  - LabelStudioManager: default
   - Middlewares: default
