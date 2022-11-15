@@ -1,20 +1,20 @@
 name: Integration tests
 
 on:
-  pull_request:
+  pull_request_review:
     branches: [ main ]
+    types: [submitted]
+
   workflow_dispatch:
     inputs:
-      model-pack-path:
-        description: Path in the github runner VM's filesystem to find the model pack for this test run. If not set, the test runner will search for the a suitable model pack
-        required: false
-      model-packs-dir:
-        description: Path to where model packs are stored on the VM's filesystem
+      default-model-pack-path:
+        description: runner path to the default model pack
         required: true
-        default: /home/github/runner/.kazu_data
+        default: /home/github/runner/.kazu_data/kazu-model-pack-public
 
 jobs:
   model-pack-tests:
+    if: github.event.review.state == 'approved'
     runs-on: [self-hosted, has-model-pack]
     strategy:
       fail-fast: false
@@ -28,25 +28,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-
-      # This step outputs a model pack path to be used in the pytest below.
-      # If defined, it will simply output the model_pack_path input argument.
-      # Otherwise, it will run  latest_model_pack_path.py to find a suitable model_pack_{git commit hash} on
-      # the runner by examining the git commit log.
-      - name: Set model_pack path
-        id: get_model_pack
-        run: |
-          if [ -z "$model_pack_path"]
-          then
-            output=$(python3 .github/workflows/latest_model_pack_path.py ${{ env.model_packs_dir }})
-            echo "::set-output name=model_pack_path::$output"
-          else
-            echo "::set-output name=model_pack_path::$model_pack_path"
-          fi
-        env:
-          model_pack_path: ${{ inputs.model-pack-path }}
-          model_packs_dir: ${{ inputs.model-packs-dir || '/home/github/runner/.kazu_data' }}
-
 
       - uses: actions/cache@v2
         with:
@@ -68,13 +49,28 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      # Runs the tests and sets a model pack so @require_model_pack tests will also be run
-      # Note that these tests won't build caches as part of their operation and will likely
-      # re-use existing cached data.
-      - name: Test with pytest
+      - name: Build model pack caches and test
+        id: model_pack_cache_build
         run: |
+          export BASE_KAZU_CONF_PATH=$GITHUB_WORKSPACE"/kazu/conf"
+          # random suffix to prevent clashes with other runs          
+          export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
+     
+          mkdir $MODEL_PACK_BUILD_PATH   
+          
+          python -m kazu.utils.build_and_test_model_packs \
+          --build_base_model_pack_from_path $DEFAULT_MODEL_PACK_PATH \
+          --base_configuration_path $BASE_KAZU_CONF_PATH \
+          --model_pack_output_path $MODEL_PACK_BUILD_PATH
+          
+          export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/*)
+          
           pytest
+          
+          # need to call twice, for NFS bug         
+          rm -r $MODEL_PACK_BUILD_PATH || true
+          rm -r $MODEL_PACK_BUILD_PATH || true
         env:
-          KAZU_MODEL_PACK: ${{ steps.get_model_pack.outputs.model_pack_path }}
+          DEFAULT_MODEL_PACK_PATH: ${{ inputs.default-model-pack-path }}
           TOKENIZERS_PARALLELISM: false
           PL_DISABLE_FORK: 1
