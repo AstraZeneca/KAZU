@@ -1,2 +1,2 @@
 _target_: kazu.utils.spacy_pipeline.SpacyPipeline
-path: ${oc.env:KAZU_MODEL_PACK}/scispacy/en_core_sci_lg-0.5.0/en_core_sci_lg/en_core_sci_lg-0.5.0
+path: ${oc.env:KAZU_MODEL_PACK}/scispacy/en_core_sci_md-0.5.0/en_core_sci_md/en_core_sci_md-0.5.0
