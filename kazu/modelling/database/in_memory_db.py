@@ -3,6 +3,7 @@ import logging
 from typing import Optional, Dict, List, Tuple, Set, Iterable
 
 from kazu.data.data import SynonymTerm, SimpleValue, EquivalentIdAggregationStrategy
+from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -14,38 +15,31 @@ NormalisedSynonymStr = str
 Metadata = Dict[str, SimpleValue]
 
 
-class MetadataDatabase:
+class MetadataDatabase(metaclass=Singleton):
     """
     Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
     and this singleton allows us to load it once/reduce memory usage
     """
 
-    instance: Optional["__MetadataDatabase"] = None
+    _database: Dict[ParserName, Dict[Idx, Metadata]] = {}
+    _keys_lst: Dict[ParserName, List[Idx]] = {}
+    _loaded_parsers: Set[str] = set()
 
-    class __MetadataDatabase:
-        database: Dict[ParserName, Dict[Idx, Metadata]] = {}
-        keys_lst: Dict[ParserName, List[Idx]] = {}
-        loaded_parsers: Set[str] = set()
+    def _add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
+        self.loaded_parsers.add(name)
+        if name in self._database:
+            logger.info(
+                f"parser {name} already present in metadata database - will override existing parser data."
+            )
+        self._database[name] = metadata
+        self._keys_lst[name] = list(self._database[name].keys())
 
-        def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
-            self.loaded_parsers.add(name)
-            if name in self.database:
-                logger.info(
-                    f"parser {name} already present in metadata database - will override existing parser data."
-                )
-            self.database[name] = metadata
-            self.keys_lst[name] = list(self.database[name].keys())
+    def _get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
+        return self._database[name][idx]
 
-        def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
-            return self.database[name][idx]
-
-        def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
-            idx = self.keys_lst[name][i]
-            return idx, self.database[name][idx]
-
-    def __init__(self):
-        if not MetadataDatabase.instance:
-            MetadataDatabase.instance = MetadataDatabase.__MetadataDatabase()
+    def _get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
+        idx = self._keys_lst[name][i]
+        return idx, self._database[name][idx]
 
     def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
         """
@@ -55,12 +49,10 @@ class MetadataDatabase:
         :param idx: idx to query
         :return:
         """
-        assert self.instance is not None
-        return copy.deepcopy(self.instance.get_by_idx(name, idx))
+        return copy.deepcopy(self._get_by_idx(name, idx))
 
     def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
-        assert self.instance is not None
-        return copy.deepcopy(self.instance.get_by_index(name, i))
+        return copy.deepcopy(self._get_by_index(name, i))
 
     def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
         """
@@ -69,16 +61,14 @@ class MetadataDatabase:
         :param name: name of ontology
         :return:
         """
-        assert self.instance is not None
-        return self.instance.database[name]
+        return self._database[name]
 
     @property
     def loaded_parsers(self) -> Set[ParserName]:
         """
         get the names of all loaded parsers
         """
-        assert self.instance is not None
-        return self.instance.loaded_parsers
+        return self._loaded_parsers
 
     def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
         """
@@ -89,8 +79,7 @@ class MetadataDatabase:
         :param metadata: dict in format {idx:metadata}
         :return:
         """
-        assert self.instance is not None
-        self.instance.add_parser(name, metadata)
+        self._add_parser(name, metadata)
 
 
 class SynonymDatabase:
