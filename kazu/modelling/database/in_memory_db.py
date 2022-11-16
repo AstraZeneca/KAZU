@@ -169,6 +169,3 @@ class SynonymDatabase(metaclass=Singleton):
         :return:
         """
         return self._syns_database_by_syn[name]
-
-    def get_database(self) -> Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]]:
-        return self._syns_database_by_syn
