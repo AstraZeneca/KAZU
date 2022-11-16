@@ -26,6 +26,7 @@ setup(
         "fastparquet== 0.8.0",
         "scikit-learn==1.0.1",
         "stanza==1.4.0",
+        "regex==2022.6.2",
     ],
     extras_require={
         "dev": [
