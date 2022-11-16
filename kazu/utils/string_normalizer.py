@@ -530,7 +530,7 @@ class GildaUtils:
         # so it is not implemented
 
     @classmethod
-    def replace_dashes(cls, s: str, rep: Optional[str] = None) -> str:
+    def replace_dashes(cls, s: str, rep: str = "-") -> str:
         """Replace all types of dashes in a given string with a given replacement.
 
         :param s: The string in which all types of dashes should be replaced.
