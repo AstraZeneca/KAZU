@@ -485,21 +485,16 @@ class GildaUtils:
     dashes = [chr(0x2212), chr(0x002D)] + [chr(c) for c in range(0x2010, 0x2016)]
 
     @staticmethod
-    def depluralize(word):
+    def depluralize(word: str) -> Tuple[str, str]:
         """
-        Return the depluralized version of the word, along with a status  flag.
-        Parameters
-        ----------
-        word : str
-            The word which is to be depluralized.
-        Returns
-        -------
-        str
-            The original word, if it is detected to be non-plural, or the
+        Return the depluralized version of the word, along with a status flag.
+
+        :param word: The word which is to be depluralized.
+        :return: The first element is the original word, if it is detected to be non-plural, or the
             depluralized version of the word.
-        str
-            A status flag represeting the detected pluralization status of the
-            word, with non_plural (e.g., BRAF), plural_oes (e.g., mosquitoes),
+
+            The second element is a status flag representing the detected pluralization status of
+            the word, with non_plural (e.g., BRAF), plural_oes (e.g., mosquitoes),
             plural_ies (e.g., antibodies), plural_es (e.g., switches),
             plural_cap_s (e.g., MAPKs), and plural_s (e.g., receptors).
         """
