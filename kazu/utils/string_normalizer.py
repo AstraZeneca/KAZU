@@ -538,7 +538,6 @@ class GildaUtils:
             ASCII dash (-) is used.
         :return: The string in which dashes have been replaced.
         """
-        rep = rep if rep is not None else "-"
         for d in cls.dashes:
             s = s.replace(d, rep)
         return s
