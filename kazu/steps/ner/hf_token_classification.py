@@ -91,12 +91,12 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         try:
             loader, id_section_map = self.get_dataloader(docs)
             # run the transformer and get results
-            softmax = self.get_activations(loader)
+            activations = self.get_activations(loader)
             for section_index, section in id_section_map.items():
                 words = TransformerUtils.section_frames_to_tokenised_words(
                     section_index=section_index,
                     batch_encoding=loader.dataset.encodings,
-                    predictions=softmax,
+                    predictions= activations,
                     tokenizer=self.tokeniser,
                     stride=self.stride,
                 )
