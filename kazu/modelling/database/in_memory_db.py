@@ -54,7 +54,12 @@ class MetadataDatabase(metaclass=Singleton):
 
     def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
         idx = self._keys_lst[name][i]
-        return copy.deepcopy((idx, self._database[name][idx],))
+        return copy.deepcopy(
+            (
+                idx,
+                self._database[name][idx],
+            )
+        )
 
     def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
         """
@@ -91,15 +96,11 @@ class SynonymDatabase(metaclass=Singleton):
             self._syns_database_by_syn[name][synonym.term_norm] = synonym
             for equiv_ids in synonym.associated_id_sets:
                 for idx in equiv_ids.ids:
-                    dict_for_this_parser = self._syns_by_aggregation_strategy.setdefault(
-                        name, {}
-                    )
+                    dict_for_this_parser = self._syns_by_aggregation_strategy.setdefault(name, {})
                     dict_for_this_aggregation_strategy = dict_for_this_parser.setdefault(
                         synonym.aggregated_by, {}
                     )
-                    syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(
-                        idx, set()
-                    )
+                    syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(idx, set())
                     syn_set_for_this_id.add(synonym.term_norm)
 
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
