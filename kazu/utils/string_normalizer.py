@@ -532,17 +532,11 @@ class GildaUtils:
     @classmethod
     def replace_dashes(cls, s: str, rep: Optional[str] = None) -> str:
         """Replace all types of dashes in a given string with a given replacement.
-        Parameters
-        ----------
-        s : str
-            The string in which all types of dashes should be replaced.
-        rep : Optional[str]
-            The string with which dashes should be replaced. By default, the plain
+
+        :param s: The string in which all types of dashes should be replaced.
+        :param rep: The string with which dashes should be replaced. By default, the plain
             ASCII dash (-) is used.
-        Returns
-        -------
-        str
-            The string in which dashes have been replaced.
+        :return: The string in which dashes have been replaced.
         """
         rep = rep if rep is not None else "-"
         for d in cls.dashes:
