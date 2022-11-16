@@ -133,8 +133,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
                 )
             ]
         )
-        activation = self.activation_fn(results)
-        return activation
+        return self.activation_fn(results)
 
     def get_dataloader(self, docs: List[Document]) -> Tuple[DataLoader, Dict[int, Section]]:
         """
