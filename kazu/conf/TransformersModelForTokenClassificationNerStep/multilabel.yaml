@@ -1,24 +1,6 @@
-_target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep
+defaults:
+  - default
 path: ${oc.env:KAZU_MODEL_PACK}/tinybern2
-depends_on: ~
-batch_size: 4
-stride: 16
-max_sequence_length: 128
-trainer:
-  _target_: pytorch_lightning.Trainer
-  enable_progress_bar: False
-  devices: 1
-  logger: False
-entity_splitter:
-  _target_: kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter
-  entity_conditions:
-    gene:
-      - _target_: kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix
-      - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
-        spacy_pipeline: ${SpacyPipeline}
-    disease:
-      - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
-        spacy_pipeline: ${SpacyPipeline}
 detect_subspans: true
 threshold: 0.5
 labels:
