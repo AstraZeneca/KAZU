@@ -23,52 +23,7 @@ class MetadataDatabase(metaclass=Singleton):
 
     _database: Dict[ParserName, Dict[Idx, Metadata]] = {}
     _keys_lst: Dict[ParserName, List[Idx]] = {}
-    _loaded_parsers: Set[str] = set()
-
-    def _add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
-        self.loaded_parsers.add(name)
-        if name in self._database:
-            logger.info(
-                f"parser {name} already present in metadata database - will override existing parser data."
-            )
-        self._database[name] = metadata
-        self._keys_lst[name] = list(self._database[name].keys())
-
-    def _get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
-        return self._database[name][idx]
-
-    def _get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
-        idx = self._keys_lst[name][i]
-        return idx, self._database[name][idx]
-
-    def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
-        """
-        get the metadata associated with an ontology and id
-
-        :param name: name of ontology to query
-        :param idx: idx to query
-        :return:
-        """
-        return copy.deepcopy(self._get_by_idx(name, idx))
-
-    def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
-        return copy.deepcopy(self._get_by_index(name, i))
-
-    def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
-        """
-        get all metadata associated with an ontology
-
-        :param name: name of ontology
-        :return:
-        """
-        return self._database[name]
-
-    @property
-    def loaded_parsers(self) -> Set[ParserName]:
-        """
-        get the names of all loaded parsers
-        """
-        return self._loaded_parsers
+    loaded_parsers: Set[str] = set()
 
     def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
         """
@@ -79,7 +34,36 @@ class MetadataDatabase(metaclass=Singleton):
         :param metadata: dict in format {idx:metadata}
         :return:
         """
-        self._add_parser(name, metadata)
+        self.loaded_parsers.add(name)
+        if name in self._database:
+            logger.info(
+                f"parser {name} already present in metadata database - will override existing parser data."
+            )
+        self._database[name] = metadata
+        self._keys_lst[name] = list(self._database[name].keys())
+
+    def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
+        """
+        get the metadata associated with an ontology and id
+
+        :param name: name of ontology to query
+        :param idx: idx to query
+        :return:
+        """
+        return copy.deepcopy(self._database[name][idx])
+
+    def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
+        idx = self._keys_lst[name][i]
+        return copy.deepcopy((idx, self._database[name][idx],))
+
+    def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
+        """
+        get all metadata associated with an ontology
+
+        :param name: name of ontology
+        :return:
+        """
+        return self._database[name]
 
 
 class SynonymDatabase(metaclass=Singleton):
@@ -88,19 +72,26 @@ class SynonymDatabase(metaclass=Singleton):
     """
 
     _syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
-    syns_by_aggregation_strategy: Dict[
+    _syns_by_aggregation_strategy: Dict[
         ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
     ] = {}
-    _loaded_parsers: Set[ParserName] = set()
+    loaded_parsers: Set[ParserName] = set()
 
-    def _add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
+    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
+        """
+        add synonyms to the database.
+
+        :param name: name of ontology to add to
+        :param synonyms: iterable of SynonymTerms to add
+        :return:
+        """
         self.loaded_parsers.add(name)
         self._syns_database_by_syn[name] = {}
         for synonym in synonyms:
             self._syns_database_by_syn[name][synonym.term_norm] = synonym
             for equiv_ids in synonym.associated_id_sets:
                 for idx in equiv_ids.ids:
-                    dict_for_this_parser = self.syns_by_aggregation_strategy.setdefault(
+                    dict_for_this_parser = self._syns_by_aggregation_strategy.setdefault(
                         name, {}
                     )
                     dict_for_this_aggregation_strategy = dict_for_this_parser.setdefault(
@@ -111,10 +102,17 @@ class SynonymDatabase(metaclass=Singleton):
                     )
                     syn_set_for_this_id.add(synonym.term_norm)
 
-    def _get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
+    def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
+        """
+        get a set of EquivalentIdSets associated with an ontology and synonym string
+
+        :param name: name of ontology to query
+        :param synonym: idx to query
+        :return:
+        """
         return self._syns_database_by_syn[name][synonym]
 
-    def _get_syns_for_id(
+    def get_syns_for_id(
         self,
         name: ParserName,
         idx: Idx,
@@ -122,18 +120,18 @@ class SynonymDatabase(metaclass=Singleton):
     ) -> Set[NormalisedSynonymStr]:
         result = set()
         if strategy_filters is None:
-            for syn_dict in self.syns_by_aggregation_strategy[name].values():
+            for syn_dict in self._syns_by_aggregation_strategy[name].values():
                 result.update(syn_dict.get(idx, set()))
         else:
             for agg_strategy in strategy_filters:
                 result.update(
-                    self.syns_by_aggregation_strategy[name]
+                    self._syns_by_aggregation_strategy[name]
                     .get(agg_strategy, dict())
                     .get(idx, set())
                 )
         return result
 
-    def _get_syns_sharing_id(
+    def get_syns_sharing_id(
         self,
         name: ParserName,
         synonym: NormalisedSynonymStr,
@@ -162,32 +160,6 @@ class SynonymDatabase(metaclass=Singleton):
                 result.update(syns)
         return result
 
-    def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
-        """
-        get a set of EquivalentIdSets associated with an ontology and synonym string
-
-        :param name: name of ontology to query
-        :param synonym: idx to query
-        :return:
-        """
-        return self._get(name, synonym)
-
-    def get_syns_for_id(
-        self,
-        name: ParserName,
-        idx: Idx,
-        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-    ) -> Set[NormalisedSynonymStr]:
-        return self._get_syns_for_id(name, idx, strategy_filters)
-
-    def get_syns_sharing_id(
-        self,
-        name: ParserName,
-        synonym: NormalisedSynonymStr,
-        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-    ) -> Set[NormalisedSynonymStr]:
-        return self._get_syns_sharing_id(name, synonym, strategy_filters)
-
     def get_all(self, name: ParserName) -> Dict[NormalisedSynonymStr, SynonymTerm]:
         """
         get all synonyms associated with an ontology
@@ -199,17 +171,3 @@ class SynonymDatabase(metaclass=Singleton):
 
     def get_database(self) -> Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]]:
         return self._syns_database_by_syn
-
-    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
-        """
-        add synonyms to the database.
-
-        :param name: name of ontology to add to
-        :param synonyms: iterable of SynonymTerms to add
-        :return:
-        """
-        self._add(name, synonyms)
-
-    @property
-    def loaded_parsers(self) -> Set[ParserName]:
-        return self._loaded_parsers
