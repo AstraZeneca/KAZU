@@ -37,8 +37,8 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 :class:`kazu.data.data.EquivalentIdSet`, or different ones. The algorithm for doing this works as follows:
 
 1) Use the :class:`kazu.utils.string_normalizer.StringNormalizer` to determine if the term is symbolic or not. If it's not symbolic (i.e. a noun phrase),
-    merge the IDs into a single :class:`kazu.data.data.EquivalentIdSet`. The idea here is that noun phrase entities 'ought' to be distinct enough such that
-    references to the same string across different identifiers refer to the same concept.
+   merge the IDs into a single :class:`kazu.data.data.EquivalentIdSet`. The idea here is that noun phrase entities 'ought' to be distinct enough such that
+   references to the same string across different identifiers refer to the same concept.
 
     example:
 
@@ -84,17 +84,17 @@ There are two methods you need to override: :meth:`.parse_to_dataframe` and :met
 
 .. code-block:: python
 
-import sqlite3
+    import sqlite3
 
-import pandas as pd
+    import pandas as pd
 
-from kazu.modelling.ontology_preprocessing.base import (
-    OntologyParser,
-    DEFAULT_LABEL,
-    IDX,
-    SYN,
-    MAPPING_TYPE,
-)
+    from kazu.modelling.ontology_preprocessing.base import (
+        OntologyParser,
+        DEFAULT_LABEL,
+        IDX,
+        SYN,
+        MAPPING_TYPE,
+    )
 
 
     def parse_to_dataframe(self) -> pd.DataFrame:
