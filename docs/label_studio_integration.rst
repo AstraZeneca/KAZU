@@ -9,65 +9,65 @@ Our recommended workflow is as follows:
 
 1) pre-annotate your documents with Kazu
 
-.. include:: pipeline_example.rst
+    .. include:: pipeline_example.rst
 
 2) load your annotations into Label Studio
 
-.. code-block:: python
+    .. code-block:: python
 
-    from kazu.modelling.annotation.label_studio import LabelStudioManager, KazuToLabelStudioConverter, \
-        LabelStudioAnnotationView
+        from kazu.modelling.annotation.label_studio import LabelStudioManager, KazuToLabelStudioConverter, \
+            LabelStudioAnnotationView
 
-    # convert to LS Tasks
-    tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
+        # convert to LS Tasks
+        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
 
-    # create the view
-    view = LabelStudioAnnotationView(
-        ner_labels={
-            "cell_line": "red",
-            "cell_type": "darkblue",
-            "disease": "orange",
-            "drug": "yellow",
-            "gene": "green",
-            "species": "purple",
-            "anatomy": "pink",
-            "go_mf": "grey",
-            "go_cc": "blue",
-            "go_bp": "brown",
+        # create the view
+        view = LabelStudioAnnotationView(
+            ner_labels={
+                "cell_line": "red",
+                "cell_type": "darkblue",
+                "disease": "orange",
+                "drug": "yellow",
+                "gene": "green",
+                "species": "purple",
+                "anatomy": "pink",
+                "go_mf": "grey",
+                "go_cc": "blue",
+                "go_bp": "brown",
+            }
+        )
+
+        #if running locally...
+        label_studio_url_and_port = 'http://localhost:8080'
+        headers = {
+            "Authorization": f"Token <your token here>",
+            "Content-Type": "application/json",
         }
-    )
-
-    #if running locally...
-    label_studio_url_and_port = 'http://localhost:8080'
-    headers = {
-        "Authorization": f"Token <your token here>",
-        "Content-Type": "application/json",
-    }
-    manager = LabelStudioManager(
-        project_name='test', headers=headers, url=label_studio_url_and_port
-    )
-    manager.create_linking_project(tasks,view)
+        manager = LabelStudioManager(
+            project_name='test', headers=headers, url=label_studio_url_and_port
+        )
+        manager.create_linking_project(tasks,view)
 
 3) view/correct annotations in label studio. Once you're finished, you can export back to Kazu Documents as follows:
 
-.. code-block:: python
+    .. code-block:: python
 
-    from kazu.modelling.annotation.label_studio import LabelStudioManager, KazuToLabelStudioConverter, \
-        LabelStudioAnnotationView
-    from kazu.data.data import Document
+        from kazu.modelling.annotation.label_studio import LabelStudioManager, KazuToLabelStudioConverter, \
+            LabelStudioAnnotationView
+        from kazu.data.data import Document
 
-    label_studio_url_and_port = 'http://localhost:8080'
-    headers = {
-        "Authorization": f"Token <your token here>",
-        "Content-Type": "application/json",
-    }
-    manager = LabelStudioManager(
-        project_name='test', headers=headers, url=label_studio_url_and_port
-    )
+        label_studio_url_and_port = 'http://localhost:8080'
+        headers = {
+            "Authorization": f"Token <your token here>",
+            "Content-Type": "application/json",
+        }
+        manager = LabelStudioManager(
+            project_name='test', headers=headers, url=label_studio_url_and_port
+        )
 
-    docs:List[Document] = manager.export_from_ls()
+        docs:List[Document] = manager.export_from_ls()
 
 4) Your 'gold standard' entities will now be accessible on the :attr:`kazu.data.data.Section.metadata` dictionary with the key: 'gold_entities'
 
 
-For an example of how we integrate label studio into the Kazu acceptance tests, take a look at kazu/kazu/tests/test_acceptance_test
+For an example of how we integrate label studio into the Kazu acceptance tests, take a look at :func:`kazu.modelling.annotation.acceptance_test.analyse_full_pipeline`
