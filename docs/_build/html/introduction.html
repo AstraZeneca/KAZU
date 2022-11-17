@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Quickstart" href="quickstart.html" /><link rel="prev" title="Welcome to Kazu’s documentation!" href="index.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>Introduction - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -347,23 +347,22 @@ NLP community over the last 20 years.</p>
 <p>But why make another NLP framework, when there’s already so many great NLP frameworks out there? Our focus with Kazu is specifically biomedical literature, and our
 experience tells us that none of the existing frameworks have the native support for the language phenomena that makes the BioNLP domain particularly challenging.</p>
 <p>Specifically, when we set out to make Kazu, we wanted to ensure we had a data model that supports the following concepts:</p>
-<p>For NER:
-1) Non-contiguous entities (see <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7362949/">Extending TextAE for annotation of non-contiguous entities</a>)
-2) Nested entities (see <a class="reference external" href="https://aclanthology.org/W06-3318.pdf">Recognizing Nested Named Entities in GENIA corpus</a>)</p>
-<p>For linking:
-1) There are numerous ontologies that overlap, either conceptually or in a composite fashion. Rather than depending on a composite system like UMLS,
+<p>For NER:</p>
+<ol class="arabic simple">
+<li><p>Non-contiguous entities (see <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7362949/">Extending TextAE for annotation of non-contiguous entities</a>).</p></li>
+<li><p>Nested entities (see <a class="reference external" href="https://aclanthology.org/W06-3318.pdf">Recognizing Nested Named Entities in GENIA corpus</a>).</p></li>
+</ol>
+<p>For linking:</p>
+<ol class="arabic simple">
+<li><p>There are numerous ontologies that overlap, either conceptually or in a composite fashion. Rather than depending on a composite system like UMLS,
 we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date release of a given ontology, whilst avoiding issues
-associated with the development of a composite ontology</p>
-<ol class="arabic simple" start="2">
-<li><dl class="simple">
-<dt>However, a great man once stated, “Ontologies are not designed for NLP”. Entity Linking is a challenging problem that starts with dealing with the</dt><dd><p>inconsistencies with the source knowledgebase. Therefore, we wanted a system that could fully (or at least partially) automated the preprocessing/cleaning of
-knowledgebases and ontologies, in preparation for them to become a linking target</p>
-</dd>
-</dl>
-</li>
+associated with the development of a composite ontology.</p></li>
+<li><p>However, entity Linking is a challenging problem that starts with dealing with the inconsistencies with the source knowledgebase.
+Therefore, we wanted a system that could fully (or at least partially) automate the preprocessing/cleaning of knowledgebases and
+ontologies, in preparation for them to become a linking target.</p></li>
 </ol>
 <p>Finally, speed is important. The intention with Kazu is that it will process and reprocess millions of documents. Therefore, the system should be able to
-process documents efficiently and scale easily (i.e. without requiring expensive GPU acceleration)</p>
+process documents efficiently and scale easily (i.e. without requiring expensive GPU acceleration).</p>
 <p>Regarding the actual models and algorithms in Kazu, the framework includes several well regarded and state of the art approaches by
 default. However, we recognise that NLP is a fast moving field. Therefore, our principal interest is extensibility, maintainable code and the isolation of
 concepts, such that new developments can be brought into Kazu with little work.</p>
@@ -372,19 +371,16 @@ concepts, such that new developments can be brought into Kazu with little work.<
 <h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">#</a></h2>
 <p>Kazu is:</p>
 <ol class="arabic simple">
-<li><p>An attempt to wrap a curated set of the best open source BioNLP components from the community in a consistent and scalable fashion</p></li>
-<li><p>Extensible, so that integrating new components should be relatively easy</p></li>
-<li><dl class="simple">
-<dt>Configurable - since a Kazu pipeline may have many steps, and each step might have a plethora of configuration options, we manage this complexity by using</dt><dd><p><a class="reference external" href="https://hydra.cc/docs/intro/">Hydra.cc</a></p>
-</dd>
-</dl>
-</li>
-<li><p>In production! We’re already using Kazu in live drug discovery/development projects, such as the <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.10.28.466262v1.full">BIKG knowledge graph</a></p></li>
-<li><p>Open source, with a licence friendly for commercial use cases</p></li>
+<li><p>An attempt to wrap a curated set of the best open source BioNLP components from the community in a consistent and scalable fashion.</p></li>
+<li><p>Extensible, so that integrating new components should be relatively easy.</p></li>
+<li><p>Configurable - since a Kazu pipeline may have many steps, and each step might have a plethora of configuration options, we manage this complexity by using
+<a class="reference external" href="https://hydra.cc/docs/intro/">Hydra.cc</a>.</p></li>
+<li><p>In production! We’re already using Kazu in live drug discovery/development projects, such as the <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.10.28.466262v1.full">BIKG knowledge graph</a>.</p></li>
+<li><p>Open source under a permissive Apache 2.0 license - including allowing commercial use.</p></li>
 </ol>
 <p>Kazu is not:</p>
 <ol class="arabic simple">
-<li><p>a system to train custom models (although we include some TinyBERN2 training code for historical purposes)</p></li>
+<li><p>a system to train custom models (although we include some TinyBERN2 training code for historical purposes).</p></li>
 </ol>
 </section>
 </section>
@@ -401,10 +397,10 @@ concepts, such that new developments can be brought into Kazu with little work.<
                 </div>
                 <div class="title">Quickstart</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="index.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
@@ -440,7 +436,7 @@ concepts, such that new developments can be brought into Kazu with little work.<
       <div class="toc-sticky toc-scroll">
         <div class="toc-title-container">
           <span class="toc-title">
-            Contents
+            On this page
           </span>
         </div>
         <div class="toc-tree-container">

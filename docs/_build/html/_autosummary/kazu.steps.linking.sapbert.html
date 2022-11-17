@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.ner" href="kazu.steps.ner.html" /><link rel="prev" title="kazu.steps.linking.post_processing.xref_manager" href="kazu.steps.linking.post_processing.xref_manager.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>kazu.steps.linking.sapbert - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -364,7 +364,7 @@ Original paper <a class="reference external" href="https://aclanthology.org/2021
 <li><p><strong>depends_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
 <li><p><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.utils.link_index.html#kazu.utils.link_index.EmbeddingIndex" title="kazu.utils.link_index.EmbeddingIndex"><em>EmbeddingIndex</em></a><em>]</em>) – list of EmbeddingIndex to use with this model</p></li>
 <li><p><strong>embedding_model</strong> (<a class="reference internal" href="kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="kazu.modelling.linking.sapbert.train.PLSapbertModel"><em>PLSapbertModel</em></a>) – The SapBERT model to use to generate embeddings for entity mentions in input documents</p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.0.post1)"><em>Trainer</em></a>) – PL trainer to call when generating embeddings</p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.1)"><em>Trainer</em></a>) – PL trainer to call when generating embeddings</p></li>
 <li><p><strong>entity_class_to_ontology_mappings</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em>) – defines which NER classes shold be linked to which ontologies</p></li>
 <li><p><strong>min_string_length_to_trigger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em><em>]</em>) – a per entity class mapping that signals sapbert will not run on matches
 shorter than this. (sapbert is less good at symbolic matching than string processing techniques)</p></li>
@@ -408,10 +408,10 @@ shorter than this. (sapbert is less good at symbolic matching than string proces
                 </div>
                 <div class="title">kazu.steps.ner</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="kazu.steps.linking.post_processing.xref_manager.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

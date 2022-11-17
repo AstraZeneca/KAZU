@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="The OntologyParser" href="ontology_parser.html" /><link rel="prev" title="Kazu data model" href="datamodel.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>Visualising results in Label Studio - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -343,26 +343,32 @@
 customised <a class="reference external" href="https://labelstud.io/tags/view.html">View</a> we provide (including non-contiguous and nested entities). This is also useful for annotating and benchmarking Kazu
 against your own data, as well as testing custom components.</p>
 <p>Our recommended workflow is as follows:</p>
-<ol class="arabic simple">
-<li><p>pre-annotate your documents with Kazu</p></li>
-</ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hydra</span>
-<span class="kn">from</span> <span class="nn">kazu.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">load_steps</span>
+<ol class="arabic">
+<li><p>pre-annotate your documents with Kazu</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hydra</span>
 <span class="kn">from</span> <span class="nn">omegaconf</span> <span class="kn">import</span> <span class="n">DictConfig</span>
+
+<span class="kn">from</span> <span class="nn">kazu.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">load_steps</span>
+<span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
+
+
 <span class="nd">@hydra</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="s2">&quot;conf&quot;</span><span class="p">,</span> <span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">run_docs</span><span class="p">(</span><span class="n">cfg</span> <span class="p">:</span> <span class="n">DictConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">run_docs</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">DictConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">load_steps</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
-    <span class="n">docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Document</span><span class="o">.</span><span class="n">create_simple_document</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;doc 1 text&#39;</span><span class="p">,</span><span class="s1">&#39;doc 2 text etc&#39;</span><span class="p">]]</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Document</span><span class="o">.</span><span class="n">create_simple_document</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;doc 1 text&quot;</span><span class="p">,</span> <span class="s2">&quot;doc 2 text etc&quot;</span><span class="p">]]</span>
     <span class="n">pipeline</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">run_docs</span><span class="p">()</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="2">
-<li><p>load your annotations into Label Studio</p></li>
-</ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="n">LabelStudioManager</span><span class="p">,</span> <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span> \
+</div></blockquote>
+</li>
+<li><p>load your annotations into Label Studio</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="n">LabelStudioManager</span><span class="p">,</span> <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span> \
     <span class="n">LabelStudioAnnotationView</span>
 
 <span class="c1"># convert to LS Tasks</span>
@@ -396,10 +402,11 @@ against your own data, as well as testing custom components.</p>
 <span class="n">manager</span><span class="o">.</span><span class="n">create_linking_project</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span><span class="n">view</span><span class="p">)</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="3">
-<li><p>view/correct annotations in label studio. Once you’re finished, you can export back to Kazu Documents as follows:</p></li>
-</ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="n">LabelStudioManager</span><span class="p">,</span> <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span> \
+</div></blockquote>
+</li>
+<li><p>view/correct annotations in label studio. Once you’re finished, you can export back to Kazu Documents as follows:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="n">LabelStudioManager</span><span class="p">,</span> <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span> \
     <span class="n">LabelStudioAnnotationView</span>
 <span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
 
@@ -415,10 +422,11 @@ against your own data, as well as testing custom components.</p>
 <span class="n">docs</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">export_from_ls</span><span class="p">()</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="4">
+</div></blockquote>
+</li>
 <li><p>Your ‘gold standard’ entities will now be accessible on the <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section.metadata" title="kazu.data.data.Section.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.Section.metadata</span></code></a> dictionary with the key: ‘gold_entities’</p></li>
 </ol>
-<p>For an example of how we integrate label studio into the Kazu acceptance tests, take a look at kazu/kazu/tests/test_acceptance_test</p>
+<p>For an example of how we integrate label studio into the Kazu acceptance tests, take a look at <code class="xref py py-func docutils literal notranslate"><span class="pre">kazu.modelling.annotation.acceptance_test.analyse_full_pipeline()</span></code></p>
 </section>
 
         </article>
@@ -433,10 +441,10 @@ against your own data, as well as testing custom components.</p>
                 </div>
                 <div class="title">The OntologyParser</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="datamodel.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

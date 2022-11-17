@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="TBA" href="scaling_kazu.html" /><link rel="prev" title="The OntologyParser" href="ontology_parser.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>Curating ontology terms for NER - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -341,13 +341,13 @@
 <h1>Curating ontology terms for NER<a class="headerlink" href="#curating-ontology-terms-for-ner" title="Permalink to this heading">#</a></h1>
 <p>Many entities in Biomedical NER do not require sophisticated NER or disambiguation techniques, as they are often
 unambiguous, and have few genuine synonyms. For instance, terms such as “Breast Cancer” and “mitosis” can be taken at face value, and
-simple string matching techniques can be employed (in our case, we use the <a class="reference external" href="https://spacy.io/api/phrasematcher">spacy PhraseMatcher</a>).</p>
+simple string matching techniques can be employed (in our case, we use the <a class="reference external" href="https://spacy.io/api/phrasematcher">Spacy PhraseMatcher</a>).</p>
 <p>However, the terms in ontologies tend to be noisy when taken ‘wholesale’, and need curation in order to ensure high precision matching.</p>
 <p>In Kazu, we take the following approach:</p>
-<ol class="arabic simple">
-<li><p>generate synonym candidates from the raw ontology to build a putative pipeline.</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.ontology_matching</span> <span class="kn">import</span> <span class="n">assemble_pipeline</span>
+<ol class="arabic">
+<li><p>generate synonym candidates from the raw ontology to build a putative pipeline.</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.ontology_matching</span> <span class="kn">import</span> <span class="n">assemble_pipeline</span>
 <span class="kn">from</span> <span class="nn">kazu.modelling.ontology_preprocessing.base</span> <span class="kn">import</span> <span class="n">MondoOntologyParser</span>
 <span class="kn">from</span> <span class="nn">kazu.modelling.ontology_preprocessing.synonym_generation</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">CombinatorialSynonymGenerator</span><span class="p">,</span>
@@ -369,11 +369,12 @@ simple string matching techniques can be employed (in our case, we use the <a cl
 <span class="p">)</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="2">
+</div></blockquote>
+</li>
 <li><p>we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
-is for illustration only - you’ll probably want a more sophisticated set up when doing this on a large document set!</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
+is for illustration only - you’ll probably want a more sophisticated set up when doing this on a large document set!</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
 <span class="kn">from</span> <span class="nn">kazu.steps.joint_ner_and_linking.explosion</span> <span class="kn">import</span> <span class="n">ExplosionStringMatchingStep</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
@@ -429,11 +430,12 @@ is for illustration only - you’ll probably want a more sophisticated set up wh
 <span class="n">save</span><span class="p">(</span><span class="s2">&quot;~/phrases_to_curate.jsonl&quot;</span><span class="p">,</span> <span class="n">curatable_phrases</span><span class="p">)</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="3">
+</div></blockquote>
+</li>
 <li><p>we curate the phrases_to_curate.jsonl file, according to whether they look like good matches or not for a given parser, and whether case matters.</p></li>
-<li><p>Now, the final pipeline can be generated as follows:</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span> <span class="o">=</span> <span class="n">assemble_pipeline</span><span class="o">.</span><span class="n">main</span><span class="p">(</span>
+<li><p>Now, the final pipeline can be generated as follows:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span> <span class="o">=</span> <span class="n">assemble_pipeline</span><span class="o">.</span><span class="n">main</span><span class="p">(</span>
     <span class="n">parser_name_to_entity_type</span><span class="o">=</span><span class="p">{</span><span class="n">parser</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="s2">&quot;disease&quot;</span><span class="p">},</span>
     <span class="n">curated_list</span><span class="o">=</span><span class="s2">&quot;~/phrases_to_curate.jsonl&quot;</span><span class="p">,</span>
     <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;disease&quot;</span><span class="p">},</span>
@@ -441,6 +443,9 @@ is for illustration only - you’ll probably want a more sophisticated set up wh
 <span class="p">)</span>
 </pre></div>
 </div>
+</div></blockquote>
+</li>
+</ol>
 </section>
 
         </article>
@@ -455,10 +460,10 @@ is for illustration only - you’ll probably want a more sophisticated set up wh
                 </div>
                 <div class="title">TBA</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="ontology_parser.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

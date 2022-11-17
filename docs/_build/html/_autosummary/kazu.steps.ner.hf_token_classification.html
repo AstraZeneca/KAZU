@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.ner.seth" href="kazu.steps.ner.seth.html" /><link rel="prev" title="kazu.steps.ner.entity_post_processing" href="kazu.steps.ner.entity_post_processing.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>kazu.steps.ner.hf_token_classification - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -369,7 +369,7 @@ allowed by a model. Resulting token labels are then post processed by
 <li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – batch size for dataloader</p></li>
 <li><p><strong>stride</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
 <li><p><strong>max_sequence_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.0.post1)"><em>Trainer</em></a>) – </p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.1)"><em>Trainer</em></a>) – </p></li>
 <li><p><strong>detect_subspans</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – EXPERIMENTAL attempt to detect nested entities (threshold must be configured)</p></li>
 <li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>]</em>) – EXPERIMENTAL the confidence threshold used to detect nested entities</p></li>
 <li><p><strong>entity_splitter</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><em>NonContiguousEntitySplitter</em></a><em>]</em>) – instance of <a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter</span></code></a> to detect non-contiguous entities</p></li>
@@ -495,10 +495,10 @@ sequence length of a transformer</p>
                 </div>
                 <div class="title">kazu.steps.ner.seth</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="kazu.steps.ner.entity_post_processing.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>

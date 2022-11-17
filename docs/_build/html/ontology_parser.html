@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Curating ontology terms for NER" href="curating_for_explosion.html" /><link rel="prev" title="Visualising results in Label Studio" href="label_studio_integration.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>The OntologyParser - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -340,76 +340,90 @@
           <section id="the-ontologyparser">
 <h1>The OntologyParser<a class="headerlink" href="#the-ontologyparser" title="Permalink to this heading">#</a></h1>
 <p><em>Ontologies are not designed for NLP</em> - Angus Roberts</p>
-<p>Ontologies, or more broadly Knowledge bases are a core component of entity linking. In addition, they may hold a lot of
+<p>Ontologies, or more broadly Knowledge Bases are a core component of entity linking. In addition, they may hold a lot of
 value as a vocabulary source for Dictionary based NER. However, they often need careful handling, as the (uncontextualised)
 labels and synonyms associated with a given identifier can be noisy and/overloaded.</p>
 <p>For instance, in the <a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/mondo">MONDO ontology</a>, the abbreviation “OFD” is referenced as
 has_exact_synonym for <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0011806">osteofibrous dysplasia</a> and
 <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0015375">orofaciodigital syndrome</a> - i.e. two completely different diseases. Let’s call
 this scenario 1.</p>
-<p>Similarly, the abbreviation “XLOA” is listed referenced as has_exact_symonym for <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0017304">ocular albinism</a>
+<p>Similarly, the abbreviation “XLOA” is referenced as has_exact_synonym for <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0017304">ocular albinism</a>
 and <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0021019">X-linked recessive ocular albinism</a> - i.e. two very similar references. Let’s call this scenario 2.</p>
 <p>It gets worse… many ontologies make use of identifiers from other ontologies, as well as assigning their own. For instance, “D-TGA” refers to
 “dextro-looped transposition of the great arteries” and actually has two identifiers associated:  <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0019443">MONDO_0019443</a>
-and <a class="reference external" href="https://hpo.jax.org/app/browse/term/HP:0031348">HP:0031348</a> - i.e. the exact same thing, but with different ids. When we say “we will link to MONDO”, what
-do we mean “only MONDO ids” or “everything in the MONDO ontology”!?</p>
-<p>Anyone familiar with a knowledgebase of any size will know such curation issues are not uncommon - When attempting to find candidates for
+and <a class="reference external" href="https://hpo.jax.org/app/browse/term/HP:0031348">HP:0031348</a> - i.e. the exact same thing, but with different ids. When we say “we will link to MONDO”, do we mean “only MONDO ids” or “everything in the MONDO ontology”!?</p>
+<p>Anyone familiar with a knowledgebase of any size will know such curation issues are not uncommon. When attempting to find candidates for
 linking either “OFD”, “XLOA” or “D-TGA” how should we reconcile these scenarios from an NLP perspective? For scenario 1, we can use some context of the underlying
-text to model which IRI is more likely. However, for scenario 2, this is very difficult, as the ontology is telling us the abbreviation is valid for both
-senses. We could arbitrarily choose one (or both). For scenario 3, it would seem like keeping both makes sense. Never the less, we need a system that can
+text to model which ID in MONDO is more likely. However, for scenario 2, this is very difficult, as the ontology is telling us the abbreviation is valid for both
+senses. We could arbitrarily choose one (or both). For scenario 3, it would seem like keeping both makes sense. Nevertheless, we need a system that can
 handle all three scenarios.</p>
 <p>Enter the Kazu <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a>. The job of the OntologyParser is to transform an Ontology or Knowledgebase
-into a set of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm</span></code></a>. A <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm</span></code></a> is a container for a synonym, which understands what set of IDs the
-synoynm may refer to, whether they refer to a single group of closely related concepts or multiple separate ones, and various other pieces of useful information
-such as whether the term is symbolic (a.k.a. an abbreviation or some other identifier). This is handled by the attribute
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet.associated_id_sets</span></code>.</p>
+into a set of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm</span></code></a>s. A <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a> is a container for a synonym, which understands what set of IDs the
+synonym may refer to and whether they refer to a single group of closely related concepts or multiple separate ones. This is handled by the attribute
+<a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm.associated_id_sets" title="kazu.data.data.SynonymTerm.associated_id_sets"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm.associated_id_sets</span></code></a>. A <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a> holds various other pieces of useful information
+such as whether the term is symbolic (i.e. an abbreviation or some other identifier).</p>
 <p>How does it work? When an ambiguous term is detected in the ontology, the parser must decide whether it should group the confused IDs into the same
 <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a>, or different ones. The algorithm for doing this works as follows:</p>
 <ol class="arabic">
-<li><dl>
-<dt>Use the <a class="reference internal" href="_autosummary/kazu.utils.string_normalizer.html#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.utils.string_normalizer.StringNormalizer</span></code></a> to determine if the term is symbolic or not. If it’s not symbolic (i.e. a noun phrase),</dt><dd><p>merge the IDs into a single <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a>. The idea here is that noun phrase entities ‘ought’ to be distinct enough such that
-references to the same string across different identifiers refer to the same concept.symbolic</p>
-<dl class="simple">
-<dt>example:</dt><dd><p>‘seborrheic eczema’ -&gt; IDs ‘<a class="reference external" href="http://purl.obolibrary.org/obo/HP_0001051">http://purl.obolibrary.org/obo/HP_0001051</a>’ and ‘<a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0006608">http://purl.obolibrary.org/obo/MONDO_0006608</a>’</p>
-</dd>
-<dt>result:</dt><dd><p>EquivalentIdSetAggregationStrategy.MERGED_AS_NON_SYMBOLIC</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<li><p>Use the <a class="reference internal" href="_autosummary/kazu.utils.string_normalizer.html#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.utils.string_normalizer.StringNormalizer</span></code></a> to determine if the term is symbolic or not. If it’s not symbolic (i.e. a noun phrase),
+merge the IDs into a single <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a>. The idea here is that noun phrase entities ‘ought’ to be distinct enough such that
+references to the same string across different identifiers refer to the same concept.</p>
+<blockquote>
+<div><p>example:</p>
+<blockquote>
+<div><p>‘seborrheic eczema’ -&gt; IDs ‘<a class="reference external" href="http://purl.obolibrary.org/obo/HP_0001051">http://purl.obolibrary.org/obo/HP_0001051</a>’ and ‘<a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0006608">http://purl.obolibrary.org/obo/MONDO_0006608</a>’</p>
+</div></blockquote>
+<p>result:</p>
+<blockquote>
+<div><p>EquivalentIdSetAggregationStrategy.MERGED_AS_NON_SYMBOLIC</p>
+</div></blockquote>
+</div></blockquote>
 </li>
-<li><dl>
-<dt>If the term is symbolic, use the configured string scorer to determine if the default label associated with each instance of the term is above some predefined threshold.</dt><dd><p>The idea here is that we can use embeddings to check if semantically, the confused symbol is referring to either a very similar concept, or something completely different
-in the knowledgebase. Typically, we use a distilled form of the <a class="reference external" href="https://github.com/cambridgeltl/sapbert">SapBert</a> model here, as it’s very good at this.</p>
-<dl class="simple">
-<dt>example:</dt><dd><p>“OFD” -&gt; either “osteofibrous dysplasia (MONDO_0011806)” or “orofaciodigital syndrome (MONDO_0015375)”.</p>
-</dd>
-<dt>result:</dt><dd><p>sapbert similarity: 0.4532. Threshold: 0.70. Decision -&gt; split into two instances of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a></p>
-</dd>
-<dt>example:</dt><dd><p>“XLOA” -&gt; either “X-linked recessive ocular albinism (MONDO_0021019)” or “ocular albinism (MONDO_0017304)”</p>
-</dd>
-<dt>result:</dt><dd><p>sapbert similarity: 0.7426. Threshold: 0.70. Decision -&gt; merge into one instance of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a></p>
-</dd>
-</dl>
-</dd>
-</dl>
+<li><p>If the term is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
+group these IDs into one or more sets of IDs. The idea here is that we can use embeddings to check if semantically, each ID associated with a confused symbol is referring
+to either a very similar concept to another ID associated with the symbol, or something completely different in the knowledgebase. Typically, we use a distilled form of the
+<a class="reference external" href="https://github.com/cambridgeltl/sapbert">SapBert</a> model here, as it’s very good at this.</p>
+<blockquote>
+<div><p>example:</p>
+<blockquote>
+<div><p>“OFD” -&gt; either <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0011806">osteofibrous dysplasia</a> or <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0015375">orofaciodigital syndrome</a>.</p>
+</div></blockquote>
+<p>result:</p>
+<blockquote>
+<div><p>sapbert similarity: 0.4532. Threshold: 0.70. Decision -&gt; split into two instances of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a></p>
+</div></blockquote>
+<p>example:</p>
+<blockquote>
+<div><p>“XLOA” -&gt; either <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0021019">X-linked recessive ocular albinism</a> or <a class="reference external" href="http://purl.obolibrary.org/obo/MONDO_0017304">ocular albinism</a></p>
+</div></blockquote>
+<p>result:</p>
+<blockquote>
+<div><p>sapbert similarity: 0.7426. Threshold: 0.70. Decision -&gt; merge into one instance of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.EquivalentIdSet</span></code></a></p>
+</div></blockquote>
+</div></blockquote>
 </li>
 </ol>
-<p>Naturally, this behaviour may not always be desired. You may want two instances of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm</span></code></a>\ for the term “XLOA” (despite the MONDO ontology
-suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm</span></code></a>\ is most appropriate.
-In this case, you can override this behaviour with <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids()</span></code></a>\</p>
+<p>Naturally, this behaviour may not always be desired. You may want two instances of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a> for the term “XLOA” (despite the MONDO ontology
+suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a> is most appropriate.
+In this case, you can override this behaviour with <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids()</span></code></a>.</p>
 <section id="writing-a-custom-parser">
 <h2>Writing a Custom Parser<a class="headerlink" href="#writing-a-custom-parser" title="Permalink to this heading">#</a></h2>
-<p>Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an OntologyParser. Fortunately, this is generally
-quite easy to do. Let’s take the example of the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser" title="kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser</span></code></a>.</p>
-<p>There are two methods you need to override <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe()</span></code></a> and
-<a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb()</span></code></a>. Let’s look at the first of these:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DEFAULT_LABEL</span> <span class="o">=</span> <span class="s2">&quot;default_label&quot;</span>
-<span class="n">IDX</span> <span class="o">=</span> <span class="s2">&quot;idx&quot;</span>
-<span class="n">SYN</span> <span class="o">=</span> <span class="s2">&quot;syn&quot;</span>
-<span class="n">MAPPING_TYPE</span> <span class="o">=</span> <span class="s2">&quot;mapping_type&quot;</span>
-<span class="n">SOURCE</span> <span class="o">=</span> <span class="s2">&quot;source&quot;</span>
-<span class="n">DATA_ORIGIN</span> <span class="o">=</span> <span class="s2">&quot;data_origin&quot;</span>
+<p>Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a>.
+Fortunately, this is generally quite easy to do. Let’s take the example of the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser" title="kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser</span></code></a>.</p>
+<p>There are two methods you need to override: <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe()</span></code></a> and <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb()</span></code></a>. Let’s look at the first of these:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sqlite3</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">kazu.modelling.ontology_preprocessing.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">OntologyParser</span><span class="p">,</span>
+    <span class="n">DEFAULT_LABEL</span><span class="p">,</span>
+    <span class="n">IDX</span><span class="p">,</span>
+    <span class="n">SYN</span><span class="p">,</span>
+    <span class="n">MAPPING_TYPE</span><span class="p">,</span>
+<span class="p">)</span>
+
+
 <span class="k">def</span> <span class="nf">parse_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    the objective of this method is to create a long, thin pandas dataframe of terms and associated metadata.</span>
@@ -417,7 +431,7 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
 <span class="sd">    synonyms and the type of mapping as well</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1">#fortunately, Chembl comes as and sqlite DB, which lends itself very well to this tabular structure</span>
+    <span class="c1"># fortunately, Chembl comes as and sqlite DB, which lends itself very well to this tabular structure</span>
     <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_path</span><span class="p">)</span>
     <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, synonyms AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, syn_type AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span><span class="s2"></span>
@@ -436,7 +450,7 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
     <span class="k">return</span> <span class="n">df</span>
 </pre></div>
 </div>
-<p>secondly, we need to write the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb()</span></code></a> method</p>
+<p>Secondly, we need to write the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb()</span></code></a> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_kb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    in our case, this is very simple, as everything in the Chembl DB has a chembl based identifier</span>
@@ -447,7 +461,7 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
     <span class="k">return</span> <span class="s2">&quot;CHEMBL&quot;</span>
 </pre></div>
 </div>
-<p>finally, we need to set the class field, so the full class looks like:</p>
+<p>Finally, we need to set the class <cite>name</cite> field, so the full class looks like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChemblOntologyParser</span><span class="p">(</span><span class="n">OntologyParser</span><span class="p">):</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;CHEMBL&quot;</span>
@@ -464,7 +478,7 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
 <span class="s2">            UNION ALL</span>
 <span class="s2">            SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, &quot;pref_name&quot; AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">            FROM molecule_dictionary</span>
-<span class="s2">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+<span class="s2">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
         <span class="c1"># eliminate anything without a pref_name, as will be too big otherwise</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">DEFAULT_LABEL</span><span class="p">])</span>
@@ -474,7 +488,7 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
         <span class="k">return</span> <span class="n">df</span>
 </pre></div>
 </div>
-<p>That’s it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere</p>
+<p>That’s it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere.</p>
 </section>
 </section>
 
@@ -490,10 +504,10 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
                 </div>
                 <div class="title">Curating ontology terms for NER</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="label_studio_integration.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
@@ -529,7 +543,7 @@ quite easy to do. Let’s take the example of the <a class="reference internal" 
       <div class="toc-sticky toc-scroll">
         <div class="toc-title-container">
           <span class="toc-title">
-            Contents
+            On this page
           </span>
         </div>
         <div class="toc-tree-container">
