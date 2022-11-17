@@ -530,5 +530,85 @@ class Document:
         return length
 
 
+class DocumentJsonUtils:
+
+    class ConversionException(Exception):
+        pass
+
+    atomic_types = {int, float, str, bool, type(None)}
+    listy_types = {list, tuple, set, frozenset}
+
+    JsonDictType = Union[dict, list, int, float, bool, str, type(None)]
+
+    @staticmethod
+    def doc_to_json_dict(doc: Document) -> Dict[str, Any]:
+        return DocumentJsonUtils.obj_to_dict_repr(doc.__dict__)
+
+    @classmethod
+    def obj_to_dict_repr(cls, obj: Dict[str, Any]) -> Dict[str, JsonDictType]:
+        return {k: cls._obj_to_dict_repr(v) for k, v in obj.items()}
+
+    @classmethod
+    def _obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
+        if cls.is_atomic(obj):
+            return obj
+        elif cls.is_numpy_atomic(obj):
+            return obj.item()
+        elif cls.is_listy(obj):
+            return [cls._obj_to_dict_repr(elem) for elem in obj]
+        elif cls.is_numpy_array(obj):
+            return obj.tolist()
+        elif cls.is_record(obj):
+            return cls._obj_to_dict_repr(obj.__dict__)
+        elif cls.is_dict(obj):
+            processed_dict_pairs = (cls._preprocess_dict_pair(pair) for pair in obj.items())
+            return {k: cls._obj_to_dict_repr(v) for k, v in processed_dict_pairs}
+        elif cls.is_enum(obj):
+            return obj.name
+        else:
+            raise cls.ConversionException(f"Unknown object type: {type(obj)}")
+
+    @classmethod
+    def _preprocess_dict_pair(cls, kv_pair: Tuple[Any, Any]) -> Tuple[str, JsonDictType]:
+        k, v = kv_pair
+        if k == "offset_map":
+            # v is a dict of CharSpan->CharSpan, needs conversion
+            return k, list(v.items())
+        elif k == "_sentence_spans":
+            return "sentence_spans", list(v.keys())
+        elif k == "syn_term_to_synonym_terms":
+            return "synonym_terms", list(v.values())
+        else:
+            return k, v
+
+    @classmethod
+    def is_atomic(cls, obj: Any) -> bool:
+        return type(obj) in cls.atomic_types
+
+    @classmethod
+    def is_listy(cls, obj: Any) -> bool:
+        return type(obj) in cls.listy_types
+
+    @classmethod
+    def is_record(cls, obj: Any) -> bool:
+        return dataclasses.is_dataclass(obj)
+
+    @classmethod
+    def is_dict(cls, obj: Any) -> bool:
+        return isinstance(obj, dict)
+
+    @classmethod
+    def is_numpy_atomic(cls, obj: Any) -> bool:
+        return isinstance(obj, (float16, float32,))
+
+    @classmethod
+    def is_numpy_array(cls, obj: Any) -> bool:
+        return isinstance(obj, ndarray)
+
+    @classmethod
+    def is_enum(cls, obj: Any) -> bool:
+        return isinstance(obj, Enum)
+
+
 UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
 SimpleValue = Union[NumericMetric, str]

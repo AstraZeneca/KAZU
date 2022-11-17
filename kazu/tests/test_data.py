@@ -1,24 +1,10 @@
 import json
-from typing import Dict, List
+from copy import deepcopy
 
 import pytest
 
-from kazu.data.data import (
-    CharSpan,
-    Entity,
-    Document,
-    Hit,
-    EquivalentIdSet,
-    EquivalentIdAggregationStrategy,
-)
-
-
-def make_hit(ids: List[str], parser_name: str, metrics: Dict[str, float]) -> Hit:
-    id_set = EquivalentIdSet(
-        aggregated_by=EquivalentIdAggregationStrategy.UNAMBIGUOUS, ids=frozenset(ids)
-    )
-    hit = Hit(id_set=id_set, parser_name=parser_name, per_normalized_syn_metrics={"test": metrics})
-    return hit
+from kazu.data.data import CharSpan, Entity, Document, SynonymTermWithMetrics, DocumentJsonUtils
+from kazu.tests.utils import make_dummy_synonym_term
 
 
 def test_serialisation():
@@ -72,7 +58,7 @@ def test_overlap_logic():
     assert not e1.is_partially_overlapped(e2)
 
 
-def test_hit_manipulation():
+def test_syn_term_manipulation():
     e1 = Entity(
         namespace="test",
         match="metastatic liver cancer",
@@ -80,90 +66,25 @@ def test_hit_manipulation():
         spans=frozenset([CharSpan(start=16, end=39)]),
     )
 
-    # first test hits are merged correctly (same id set, same parser name)
-    metrics_1 = {"test_metric_1": 99.5}
-    hit_1 = make_hit(["1", "2", "3"], parser_name="test", metrics=metrics_1)
-    e1.update_hits([hit_1])
-    metrics_2 = {"test_metric_2": 99.6}
-    hit_2 = make_hit(["1", "2", "3"], parser_name="test", metrics=metrics_2)
-    e1.update_hits([hit_2])
-    assert len(e1.hits) == 1
-    merged_hit: Hit = next(iter(e1.hits))
-    # make_hits makes "test" the norm_syn that metrics are grouped by
-    test_metric_items = merged_hit.per_normalized_syn_metrics["test"].items()
-    assert metrics_1.items() <= test_metric_items
-    assert metrics_2.items() <= test_metric_items
+    # first test syn_terms are merged correctly (same id set, same parser name)
+    syn_term_1 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", search_score=99.5)
+    e1.update_terms([syn_term_1])
+    syn_term_2 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", embed_score=99.6)
+    e1.update_terms([syn_term_2])
+    assert len(e1.syn_term_to_synonym_terms) == 1
+    merged_syn_term: SynonymTermWithMetrics = next(iter(e1.syn_term_to_synonym_terms.values()))
+    assert merged_syn_term.embed_score == 99.6
+    assert merged_syn_term.search_score == 99.5
 
-    # now test hits are differentiated if parser name is different
-    metrics_3 = {"test_metric_1": 99.5}
-    hit_3 = make_hit(["1", "2", "3"], parser_name="test_2", metrics=metrics_3)
-    e1.update_hits([hit_3])
-    assert len(e1.hits) == 2
+    # now test syn_terms are differentiated if parser name is different
+    syn_term_3 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test_2", search_score=99.5)
+    e1.update_terms([syn_term_3])
+    assert len(e1.syn_term_to_synonym_terms) == 2
 
-    # now test hits are differentiated if id set is different
-    metrics_4 = {"test_metric_1": 99.5}
-    hit_4 = make_hit(["1", "2"], parser_name="test", metrics=metrics_4)
-    e1.update_hits([hit_4])
-    assert len(e1.hits) == 3
-
-
-def test_entity_hit_groups():
-    # first group: multiple entities, same hits/matched string and class
-    e1_group1 = Entity(
-        namespace="test",
-        match="metastatic liver cancer",
-        entity_class="test",
-        spans=frozenset([CharSpan(start=0, end=6)]),
-    )
-    e1_group1.update_hits(
-        [make_hit(["1", "2", "3"], parser_name="test", metrics={"test_metric_1": 99.5})]
-    )
-    e1_group1.update_hits(
-        [make_hit(["1", "2", "3"], parser_name="test", metrics={"test_metric_2": 99.6})]
-    )
-
-    e2_group1 = Entity(
-        namespace="test",
-        match="metastatic liver cancer",
-        entity_class="test",
-        spans=frozenset([CharSpan(start=12, end=14)]),
-    )
-    e2_group1.update_hits(
-        [make_hit(["1", "2", "3"], parser_name="test", metrics={"test_metric_1": 99.5})]
-    )
-    e2_group1.update_hits(
-        [make_hit(["1", "2", "3"], parser_name="test", metrics={"test_metric_2": 99.6})]
-    )
-
-    # second group, different matched string and class
-    e1_group2 = Entity(
-        namespace="test",
-        match="skin disease",
-        entity_class="test_2",
-        spans=frozenset([CharSpan(start=0, end=6)]),
-    )
-    e1_group2.update_hits(
-        [make_hit(["4", "5", "6"], parser_name="test_2", metrics={"test_metric_1": 99.5})]
-    )
-    e1_group2.update_hits(
-        [make_hit(["7", "8", "9"], parser_name="test_2", metrics={"test_metric_2": 99.6})]
-    )
-    # third group, same as group 2, except different hit set
-    e1_group3 = Entity(
-        namespace="test",
-        match="skin disease",
-        entity_class="test_2",
-        spans=frozenset([CharSpan(start=0, end=6)]),
-    )
-    e1_group3.update_hits(
-        [make_hit(["4", "5", "6"], parser_name="test_2", metrics={"test_metric_1": 99.5})]
-    )
-
-    doc = Document.create_simple_document("Hello")
-    doc.sections[0].entities = [e1_group1, e2_group1, e1_group2, e1_group3]
-
-    groups = list(doc.sections[0].group_entities_on_hits)
-    assert len(groups) == 3
+    # now test syn_terms are differentiated if id set is different
+    syn_term_4 = make_dummy_synonym_term(["1", "2"], parser_name="test", search_score=99.5)
+    e1.update_terms([syn_term_4])
+    assert len(e1.syn_term_to_synonym_terms) == 3
 
 
 def test_section_sentence_spans_is_immutable():
@@ -173,3 +94,22 @@ def test_section_sentence_spans_is_immutable():
     # try re-assigning sentence_spans, which should raise an error
     with pytest.raises(AttributeError):
         x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
+
+
+def test_json_utils():
+    x = Document.create_simple_document("Hello")
+    x.sections[0].offset_map = {CharSpan(start=1, end=2): CharSpan(start=1, end=2)}
+    x.sections[0].entities = [
+        Entity(
+            namespace="test",
+            match="metastatic liver cancer",
+            entity_class="test",
+            spans=frozenset([CharSpan(start=16, end=39)]),
+        )
+    ]
+    x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
+    y = deepcopy(x)
+    json_dict = DocumentJsonUtils.doc_to_json_dict(y)
+    old_json_dict = json.loads(x.json())
+    assert json_dict == old_json_dict
+
