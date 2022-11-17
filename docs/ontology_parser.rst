@@ -52,12 +52,12 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
     `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
 
     example:
-        "OFD" -> either "osteofibrous dysplasia (http://purl.obolibrary.org/obo/MONDO_0011806)" or "orofaciodigital syndrome (http://purl.obolibrary.org/obo/MONDO_0015375)".
+        "OFD" -> either `osteofibrous dysplasia <http://purl.obolibrary.org/obo/MONDO_0011806>`_ or `orofaciodigital syndrome <http://purl.obolibrary.org/obo/MONDO_0015375>`_.
     result:
         sapbert similarity: 0.4532. Threshold: 0.70. Decision -> split into two instances of :class:`kazu.data.data.EquivalentIdSet`
 
     example:
-        "XLOA" -> either "X-linked recessive ocular albinism (http://purl.obolibrary.org/obo/MONDO_0021019)" or "ocular albinism (http://purl.obolibrary.org/obo/MONDO_0017304)"
+        "XLOA" -> either `X-linked recessive ocular albinism <http://purl.obolibrary.org/obo/MONDO_0021019>`_ or `ocular albinism <http://purl.obolibrary.org/obo/MONDO_0017304>`_
     result:
         sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`kazu.data.data.EquivalentIdSet`
 
