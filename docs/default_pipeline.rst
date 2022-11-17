@@ -1,5 +1,5 @@
-At a glance: How to use Kazu
-------------------------------
+At a glance: How to use the default Kazu pipeline
+-------------------------------------------------
 
 For most use cases we've encountered, the default configuration should suffice. This will
 

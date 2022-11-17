@@ -1,7 +1,7 @@
 .. _curating_for_explosion:
 
-Curating ontology terms for NER
-================================
+Curating a knowledge base for NER and Linking
+=============================================
 
 Many entities in Biomedical NER do not require sophisticated NER or disambiguation techniques, as they are often
 unambiguous, and have few genuine synonyms. For instance, terms such as "Breast Cancer" and "mitosis" can be taken at face value, and
