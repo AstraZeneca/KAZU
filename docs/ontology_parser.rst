@@ -80,7 +80,7 @@ Writing a Custom Parser
 Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an :class:`.OntologyParser`.
 Fortunately, this is generally quite easy to do. Let's take the example of the :class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
 
-There are two methods you need to override: :meth:`.parse_to_dataframe` and :meth:`.find_kb`. Let's look at the first of these:
+There are two methods you need to override: :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe` and :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb`. Let's look at the first of these:
 
 .. code-block:: python
 
@@ -122,7 +122,7 @@ There are two methods you need to override: :meth:`.parse_to_dataframe` and :met
 
         return df
 
-Secondly, we need to write the :meth:`.find_kb` method:
+Secondly, we need to write the :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb` method:
 
 .. code-block:: python
 
@@ -156,7 +156,7 @@ Finally, we need to set the class `name` field, so the full class looks like:
                 UNION ALL
                 SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE}
                 FROM molecule_dictionary
-            """  # noqa
+            """
             df = pd.read_sql(query, conn)
             # eliminate anything without a pref_name, as will be too big otherwise
             df = df.dropna(subset=[DEFAULT_LABEL])
