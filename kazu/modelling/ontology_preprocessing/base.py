@@ -79,7 +79,7 @@ class OntologyParser(ABC):
             symbolic (as determined by the StringNormalizer) that refer to more than one id are more likely to be
             ambiguous. Therefore, we assume they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303' OR
             'ENSG00000198804', and thus they will yield multiple instances of EquivalentIdSet.
-            Non symbolic synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we might
+            Non-symbolic synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we might
             want to merge the associated ID's non-symbolic ambiguous synonyms into a single EquivalentIdSet.
             The result of StringNormalizer.is_symbolic forms the is_symbolic parameter to .score_and_group_ids.
 
