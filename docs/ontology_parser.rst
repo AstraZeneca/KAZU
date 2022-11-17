@@ -136,7 +136,7 @@ Secondly, we need to write the :meth:`.find_kb` method:
         return "CHEMBL"
 
 
-Finally, we need to set the class field, so the full class looks like:
+Finally, we need to set the class `name` field, so the full class looks like:
 
 .. code-block:: python
 
