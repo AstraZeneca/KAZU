@@ -50,8 +50,8 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
 2) If the term is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
    group these IDs into one or more sets of IDs. The idea here is that we can use embeddings to check if semantically, each ID associated with a confused symbol is referring
-    to either a very similar concept to another ID associated with the symbol, or something completely different in the knowledgebase. Typically, we use a distilled form of the
-    `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
+   to either a very similar concept to another ID associated with the symbol, or something completely different in the knowledgebase. Typically, we use a distilled form of the
+   `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
 
     example:
 
