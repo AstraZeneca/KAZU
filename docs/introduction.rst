@@ -19,6 +19,7 @@ For NER:
 2) Nested entities (see `Recognizing Nested Named Entities in GENIA corpus <https://aclanthology.org/W06-3318.pdf>`_).
 
 For linking:
+
 1) There are numerous ontologies that overlap, either conceptually or in a composite fashion. Rather than depending on a composite system like UMLS,
    we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date release of a given ontology, whilst avoiding issues
    associated with the development of a composite ontology.
