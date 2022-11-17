@@ -4,7 +4,7 @@ At a glance: How to use Kazu
 For most use cases we've encountered, the default configuration should suffice. This will
 
 1) tag the following entity classes with the TinyBERN2 model (see the EMNLP Kazu paper for more details - Link TBA ). This uses
-    :py:class:`kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep`
+   :py:class:`kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep`
 
     a. gene
     b. disease
@@ -13,7 +13,7 @@ For most use cases we've encountered, the default configuration should suffice. 
     e. cell_type
 
 2) tag the following entity classes with a curated dictionary using the Spacy PhraseMatcher. This uses
-    :py:class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`
+   :py:class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`
 
     a. gene
     b. disease
