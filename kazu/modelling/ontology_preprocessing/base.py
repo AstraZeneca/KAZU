@@ -59,6 +59,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         entity_class: Optional[str] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -84,7 +85,7 @@ class OntologyParser(ABC):
 
             If the underlying knowledgebase contains more than one entity type, muliple parsers should be
             implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)
-
+        :param excluded_ids: optional list of ids to exclude from the parsing process
         """
         if string_scorer is None:
             logger.warning("no string scorer configured. Synonym resolution disabled.")
@@ -95,6 +96,7 @@ class OntologyParser(ABC):
         self.in_path = in_path
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.entity_class = entity_class
+        self.excluded_ids = excluded_ids
         self.metadata_db = MetadataDatabase()
 
     def find_kb(self, string: str) -> str:
@@ -283,9 +285,15 @@ class OntologyParser(ABC):
                     EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
                 )
 
+    def drop_excluded_ids(self):
+        self.parsed_dataframe = self.parsed_dataframe[
+            ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
+        ].copy()
+
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
             self.parsed_dataframe = self.parse_to_dataframe()
+            self.drop_excluded_ids()
             self.parsed_dataframe[DATA_ORIGIN] = self.data_origin
             self.parsed_dataframe[IDX] = self.parsed_dataframe[IDX].astype(str)
             self.parsed_dataframe.loc[
