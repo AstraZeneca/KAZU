@@ -1,7 +1,5 @@
-.. _curating_for_explosion:
-
-Curating ontology terms for NER
-================================
+Curating a knowledge base for NER and Linking
+=============================================
 
 Many entities in Biomedical NER do not require sophisticated NER or disambiguation techniques, as they are often
 unambiguous, and have few genuine synonyms. For instance, terms such as "Breast Cancer" and "mitosis" can be taken at face value, and
@@ -35,7 +33,6 @@ In Kazu, we take the following approach:
             labels={"disease"},
             output_dir="~/noisy_spacy_pipeline",
         )
-
 
 2. we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
    is for illustration only - you'll probably want a more sophisticated set up when doing this on a large document set!

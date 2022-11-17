@@ -1,4 +1,4 @@
-Kazu data model
+Kazu Data Model
 ================================
 
 The Kazu datamodel is based around the concepts of :class:`kazu.data.data.Document`\ s and Steps (instances of :class:`kazu.steps.base.step.BaseStep`\ ). Steps are run over documents,
