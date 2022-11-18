@@ -438,6 +438,7 @@ class Document:
 
     def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> Dict:
         as_dict = DocumentJsonUtils.doc_to_json_dict(self)
+        as_dict = DocumentJsonUtils.remove_empty_elements(as_dict)
         return DocumentJsonUtils.minify_json_dict(
             as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
         )
