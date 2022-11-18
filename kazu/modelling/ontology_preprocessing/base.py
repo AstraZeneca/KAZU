@@ -85,7 +85,7 @@ class OntologyParser(ABC):
 
             If the underlying knowledgebase contains more than one entity type, muliple parsers should be
             implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC)
-        :param excluded_ids: optional list of ids to exclude from the parsing process
+        :param excluded_ids: optional set of ids to exclude from the parsing process
         """
         if string_scorer is None:
             logger.warning("no string scorer configured. Synonym resolution disabled.")
