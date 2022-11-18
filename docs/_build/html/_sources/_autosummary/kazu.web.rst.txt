@@ -1,4 +1,4 @@
-kazu.web
+﻿kazu.web
 ========
 
 .. automodule:: kazu.web
@@ -27,6 +27,7 @@ kazu.web
    :toctree:
    :recursive:
 
+   kazu.web.jwtauth
    kazu.web.routes
    kazu.web.server
 
