@@ -437,6 +437,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -445,6 +446,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="OPENTARGETS_DISEASE",
         )
 
@@ -504,6 +506,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -512,6 +515,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="OPENTARGETS_TARGET",
         )
 
@@ -605,6 +609,7 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -614,6 +619,7 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             name="OPENTARGETS_MOLECULE",
+            excluded_ids=excluded_ids,
         )
 
     def find_kb(self, string: str) -> str:
@@ -673,6 +679,7 @@ class RDFGraphParser(OntologyParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
     ):
@@ -684,6 +691,7 @@ class RDFGraphParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -785,6 +793,7 @@ class GeneOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -794,6 +803,7 @@ class GeneOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
         )
         self.instances.add(name)
         self.query = query
@@ -857,6 +867,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -865,6 +876,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="BP_GENE_ONTOLOGY",
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -892,6 +904,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -900,6 +913,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="MF_GENE_ONTOLOGY",
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -927,6 +941,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -935,6 +950,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="CC_GENE_ONTOLOGY",
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -968,6 +984,7 @@ class UberonOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
 
         super().__init__(
@@ -982,6 +999,7 @@ class UberonOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1004,6 +1022,7 @@ class MondoOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1012,6 +1031,7 @@ class MondoOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="MONDO",
         )
 
@@ -1083,6 +1103,7 @@ class EnsemblOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1091,6 +1112,7 @@ class EnsemblOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="ENSEMBL",
         )
 
@@ -1187,6 +1209,7 @@ class ChemblOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1195,6 +1218,7 @@ class ChemblOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="CHEMBL",
         )
 
@@ -1234,6 +1258,7 @@ class CLOOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1247,6 +1272,7 @@ class CLOOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1269,6 +1295,7 @@ class CellosaurusOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1277,6 +1304,7 @@ class CellosaurusOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="CELLOSAURUS",
         )
 
@@ -1416,6 +1444,7 @@ class MeddraOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1424,6 +1453,7 @@ class MeddraOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
             name="MEDDRA_DISEASE",
         )
 
