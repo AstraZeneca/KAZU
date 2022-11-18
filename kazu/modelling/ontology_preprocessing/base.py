@@ -286,9 +286,10 @@ class OntologyParser(ABC):
                 )
 
     def drop_excluded_ids(self):
-        self.parsed_dataframe = self.parsed_dataframe[
-            ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
-        ].copy()
+        if self.excluded_ids is not None:
+            self.parsed_dataframe = self.parsed_dataframe[
+                ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
+            ].copy()
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
