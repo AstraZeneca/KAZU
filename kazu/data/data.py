@@ -20,8 +20,7 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 # key for Document Processing Failed
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
-NoneType = type(None)
-JsonDictType = Union[Dict[str, Any], list, int, float, bool, str, NoneType]
+JsonDictType = Union[Dict[str, Any], List, int, float, bool, str, None]
 
 
 class AutoNameEnum(Enum):
