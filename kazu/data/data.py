@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import uuid
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
@@ -34,22 +35,6 @@ class LinkRanks(AutoNameEnum):
     PROBABLE = auto()  # on the balance of probabilities, will be correct
     POSSIBLE = auto()  # high degree of uncertainty
     AMBIGUOUS = auto()  # likely ambiguous
-
-
-def remove_empty_elements(d):
-    """recursively remove empty lists, empty dicts, or None elements from a dictionary"""
-
-    def empty(x):
-        return x is None or x == {} or x == []
-
-    if not isinstance(d, (dict, list)):
-        return d
-    elif isinstance(d, list):
-        return [v for v in (remove_empty_elements(v) for v in d) if not empty(v)]
-    else:
-        return {
-            k: v for k, v in ((k, remove_empty_elements(v)) for k, v in d.items()) if not empty(v)
-        }
 
 
 @dataclass
@@ -409,46 +394,6 @@ class Section:
             return self.preprocessed_text
 
 
-class DocumentEncoder(json.JSONEncoder):
-    """
-    Since the Document model can't be directly serialised to JSON, we need a custom encoder/decoder
-    """
-
-    def default(self, obj):
-        if isinstance(obj, Section):
-            as_dict = obj.__dict__
-            # needed as CharSpan keys in offset map are not json serialisable
-            if as_dict.get("offset_map"):
-                as_dict["offset_map"] = list(as_dict["offset_map"].items())
-            # needed to serialise the sentence_spans @property, and drop the private _sentence_spans
-            as_dict["sentence_spans"] = list(obj.sentence_spans)
-            as_dict.pop("_sentence_spans", None)
-            return as_dict
-        elif isinstance(obj, (set, frozenset)):
-            return list(obj)
-        elif isinstance(obj, Entity):
-            synonym_term_set = set(obj.syn_term_to_synonym_terms.values())
-            as_dict = obj.__dict__
-            # convert syn_term_to_synonym_terms to set
-            as_dict.pop("syn_term_to_synonym_terms")
-            as_dict["synonym_terms"] = synonym_term_set
-            return as_dict
-        elif isinstance(obj, (datetime, date)):
-            return obj.isoformat()
-        elif isinstance(obj, ndarray):
-            return obj.tolist()
-        elif isinstance(obj, float32):
-            return obj.item()
-        elif isinstance(obj, float16):
-            return obj.item()
-        elif isinstance(obj, Enum):
-            return obj.name
-        elif dataclasses.is_dataclass(obj):
-            return obj.__dict__
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
 @dataclass(unsafe_hash=True)
 class Document:
     idx: str  # a document identifier
@@ -483,27 +428,12 @@ class Document:
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
-        if drop_unmapped_ents or drop_terms:
-            for section in self.sections:
-                if drop_unmapped_ents:
-                    ents_to_keep = list(filter(lambda x: x.mappings, section.entities))
-                else:
-                    ents_to_keep = section.entities
-                if drop_terms:
-                    for ent in ents_to_keep:
-                        ent.syn_term_to_synonym_terms.clear()
-                section.entities = ents_to_keep
-
-        return json.dumps(self, cls=DocumentEncoder, **kwargs)
-
-    def as_minified_json(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> str:
-        as_dict_minified = self.as_minified_dict(drop_unmapped_ents, drop_terms)
-        return json.dumps(as_dict_minified)
+        as_dict = self.as_minified_dict(drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms)
+        return json.dumps(as_dict, **kwargs)
 
     def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> Dict:
-        as_dict = json.loads(self.json(drop_unmapped_ents, drop_terms))
-        as_dict_minified = remove_empty_elements(as_dict)
-        return as_dict_minified
+        as_dict = DocumentJsonUtils.doc_to_json_dict(self)
+        return DocumentJsonUtils.minify_json_dict(as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms)
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
@@ -541,30 +471,43 @@ class DocumentJsonUtils:
     JsonDictType = Union[dict, list, int, float, bool, str, type(None)]
 
     @staticmethod
+    def minify_json_dict(doc_json_dict: Dict[str, Any], drop_unmapped_ents: bool = False, drop_terms: bool = False, in_place=True) -> Dict:
+        doc_json_dict = doc_json_dict if in_place else deepcopy(doc_json_dict)
+
+        if drop_unmapped_ents or drop_terms:
+            for section_dict in doc_json_dict["sections"]:
+                section_entities = section_dict["entities"]
+                ents_to_keep = list(filter(lambda _ent: _ent["mappings"], section_entities) if drop_unmapped_ents else section_entities)
+                if drop_terms:
+                    for ent in ents_to_keep:
+                        ent.syn_term_to_synonym_terms.clear()
+                section_dict["entities"] = ents_to_keep
+
+        return doc_json_dict
+
+    @staticmethod
     def doc_to_json_dict(doc: Document) -> Dict[str, Any]:
         return DocumentJsonUtils.obj_to_dict_repr(doc.__dict__)
 
     @classmethod
-    def obj_to_dict_repr(cls, obj: Dict[str, Any]) -> Dict[str, JsonDictType]:
-        return {k: cls._obj_to_dict_repr(v) for k, v in obj.items()}
-
-    @classmethod
-    def _obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
+    def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
         if cls.is_atomic(obj):
             return obj
         elif cls.is_numpy_atomic(obj):
             return obj.item()
         elif cls.is_listy(obj):
-            return [cls._obj_to_dict_repr(elem) for elem in obj]
+            return [cls.obj_to_dict_repr(elem) for elem in obj]
         elif cls.is_numpy_array(obj):
             return obj.tolist()
         elif cls.is_record(obj):
-            return cls._obj_to_dict_repr(obj.__dict__)
+            return cls.obj_to_dict_repr(obj.__dict__)
         elif cls.is_dict(obj):
             processed_dict_pairs = (cls._preprocess_dict_pair(pair) for pair in obj.items())
-            return {k: cls._obj_to_dict_repr(v) for k, v in processed_dict_pairs}
+            return {k: cls.obj_to_dict_repr(v) for k, v in processed_dict_pairs}
         elif cls.is_enum(obj):
             return obj.name
+        elif cls.is_date(obj):
+            return obj.isoformat()
         else:
             raise cls.ConversionException(f"Unknown object type: {type(obj)}")
 
@@ -608,6 +551,26 @@ class DocumentJsonUtils:
     @classmethod
     def is_enum(cls, obj: Any) -> bool:
         return isinstance(obj, Enum)
+
+    @classmethod
+    def is_date(cls, obj: Any) -> bool:
+        return isinstance(obj, (datetime, date))
+
+    @staticmethod
+    def remove_empty_elements(d: Any):
+        """recursively remove empty lists, empty dicts, or None elements from a dictionary"""
+
+        def empty(x):
+            return x is None or x == {} or x == []
+
+        if not isinstance(d, (dict, list)):
+            return d
+        elif isinstance(d, list):
+            return [v for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d) if not empty(v)]
+        else:
+            return {
+                k: v for k, v in ((k, DocumentJsonUtils.remove_empty_elements(v)) for k, v in d.items()) if not empty(v)
+            }
 
 
 UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}

@@ -95,21 +95,3 @@ def test_section_sentence_spans_is_immutable():
     with pytest.raises(AttributeError):
         x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
 
-
-def test_json_utils():
-    x = Document.create_simple_document("Hello")
-    x.sections[0].offset_map = {CharSpan(start=1, end=2): CharSpan(start=1, end=2)}
-    x.sections[0].entities = [
-        Entity(
-            namespace="test",
-            match="metastatic liver cancer",
-            entity_class="test",
-            spans=frozenset([CharSpan(start=16, end=39)]),
-        )
-    ]
-    x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
-    y = deepcopy(x)
-    json_dict = DocumentJsonUtils.doc_to_json_dict(y)
-    old_json_dict = json.loads(x.json())
-    assert json_dict == old_json_dict
-
