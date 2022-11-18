@@ -100,9 +100,9 @@ class OntologyParser(ABC):
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
+        self.excluded_ids = excluded_ids
 
         self.parsed_dataframe: Optional[pd.DataFrame] = None
-        self.excluded_ids = excluded_ids
         self.metadata_db = MetadataDatabase()
 
     def find_kb(self, string: str) -> str:
