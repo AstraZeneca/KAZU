@@ -546,7 +546,9 @@ class DocumentJsonUtils:
             return d
         elif isinstance(d, list):
             return [
-                v for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d) if not DocumentJsonUtils.empty(v)
+                v
+                for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d)
+                if not DocumentJsonUtils.empty(v)
             ]
         else:
             return {
