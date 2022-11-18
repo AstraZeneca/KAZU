@@ -20,6 +20,9 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 # key for Document Processing Failed
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
+NoneType = type(None)
+JsonDictType = Union[Dict[str, Any], list, int, float, bool, str, NoneType]
+
 
 class AutoNameEnum(Enum):
     """Subclass to create an Enum where values are the names when using enum.auto
@@ -468,11 +471,8 @@ class DocumentJsonUtils:
     class ConversionException(Exception):
         pass
 
-    atomic_types = {int, float, str, bool, type(None)}
+    atomic_types = {int, float, str, bool, NoneType}
     listy_types = {list, tuple, set, frozenset}
-
-    NoneType = type(None)
-    JsonDictType = Union[Dict[str, Any], list, int, float, bool, str, NoneType]
 
     @staticmethod
     def minify_json_dict(
