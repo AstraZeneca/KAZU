@@ -20,7 +20,9 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 # key for Document Processing Failed
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
-JsonDictType = Union[Dict[str, Any], List, int, float, bool, str, None]
+
+NoneType = type(None)
+JsonDictType = Union[Dict[str, Any], List, int, float, bool, str, NoneType]
 
 
 class AutoNameEnum(Enum):
@@ -471,8 +473,8 @@ class DocumentJsonUtils:
     class ConversionException(Exception):
         pass
 
-    atomic_types = {int, float, str, bool, NoneType}
-    listy_types = {list, tuple, set, frozenset}
+    atomic_types = (int, float, str, bool, type(None))
+    listlike_types = (list, tuple, set, frozenset)
 
     @staticmethod
     def minify_json_dict(
@@ -504,22 +506,22 @@ class DocumentJsonUtils:
 
     @classmethod
     def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
-        if cls.is_atomic(obj):
+        if isinstance(obj, cls.atomic_types):
             return obj
-        elif cls.is_numpy_atomic(obj):
+        elif isinstance(obj, (float16, float32)):
             return obj.item()
-        elif cls.is_listy(obj):
+        elif isinstance(obj, cls.listlike_types):
             return [cls.obj_to_dict_repr(elem) for elem in obj]
-        elif cls.is_numpy_array(obj):
+        elif isinstance(obj, ndarray):
             return obj.tolist()
-        elif cls.is_record(obj):
+        elif dataclasses.is_dataclass(obj):
             return cls.obj_to_dict_repr(obj.__dict__)
-        elif cls.is_dict(obj):
+        elif isinstance(obj, dict):
             processed_dict_pairs = (cls._preprocess_dict_pair(pair) for pair in obj.items())
             return {k: cls.obj_to_dict_repr(v) for k, v in processed_dict_pairs}
-        elif cls.is_enum(obj):
+        elif isinstance(obj, Enum):
             return obj.name
-        elif cls.is_date(obj):
+        elif isinstance(obj, (datetime, date)):
             return obj.isoformat()
         else:
             raise cls.ConversionException(f"Unknown object type: {type(obj)}")
@@ -537,63 +539,25 @@ class DocumentJsonUtils:
         else:
             return k, v
 
-    @classmethod
-    def is_atomic(cls, obj: Any) -> bool:
-        return type(obj) in cls.atomic_types
-
-    @classmethod
-    def is_listy(cls, obj: Any) -> bool:
-        return type(obj) in cls.listy_types
-
-    @classmethod
-    def is_record(cls, obj: Any) -> bool:
-        return dataclasses.is_dataclass(obj)
-
-    @classmethod
-    def is_dict(cls, obj: Any) -> bool:
-        return isinstance(obj, dict)
-
-    @classmethod
-    def is_numpy_atomic(cls, obj: Any) -> bool:
-        return isinstance(
-            obj,
-            (
-                float16,
-                float32,
-            ),
-        )
-
-    @classmethod
-    def is_numpy_array(cls, obj: Any) -> bool:
-        return isinstance(obj, ndarray)
-
-    @classmethod
-    def is_enum(cls, obj: Any) -> bool:
-        return isinstance(obj, Enum)
-
-    @classmethod
-    def is_date(cls, obj: Any) -> bool:
-        return isinstance(obj, (datetime, date))
-
     @staticmethod
     def remove_empty_elements(d: Any):
         """recursively remove empty lists, empty dicts, or None elements from a dictionary"""
-
-        def empty(x):
-            return x is None or x == {} or x == []
-
         if not isinstance(d, (dict, list)):
             return d
         elif isinstance(d, list):
             return [
-                v for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d) if not empty(v)
+                v for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d) if not DocumentJsonUtils.empty(v)
             ]
         else:
             return {
                 k: v
                 for k, v in ((k, DocumentJsonUtils.remove_empty_elements(v)) for k, v in d.items())
-                if not empty(v)
+                if not DocumentJsonUtils.empty(v)
             }
+
+    @staticmethod
+    def empty(x) -> bool:
+        return x is None or x == {} or x == []
 
 
 UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
