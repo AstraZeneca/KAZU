@@ -11,6 +11,10 @@ mondo_parser:
   data_origin: 'MONDO-2022-07-29'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
+  excluded_ids:
+    _target_: builtins.set
+    _args_:
+      - - http://purl.obolibrary.org/obo/HP_0000001
 
 ot_disease_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
