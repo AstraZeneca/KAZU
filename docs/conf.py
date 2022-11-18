@@ -88,7 +88,7 @@ html_theme_options = {
     "source_repository": remote_base_url,
     "source_branch": "main",
     "source_directory": "docs/",
-    "sidebar_hide_name": True
+    "sidebar_hide_name": True,
 }
 
 
