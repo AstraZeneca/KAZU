@@ -54,7 +54,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
 # a list of builtin themes.
 #
 html_theme = "furo"
-
+html_logo = "kazu_logo.png"
 
 # we use this to get module and class members documented as part of the autosummary-generated pages
 autodoc_default_options = {
@@ -88,6 +88,7 @@ html_theme_options = {
     "source_repository": remote_base_url,
     "source_branch": "main",
     "source_directory": "docs/",
+    "sidebar_hide_name": True
 }
 
 
