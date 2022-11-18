@@ -1,9 +1,7 @@
 import json
-from copy import deepcopy
-
 import pytest
 
-from kazu.data.data import CharSpan, Entity, Document, SynonymTermWithMetrics, DocumentJsonUtils
+from kazu.data.data import CharSpan, Entity, Document, SynonymTermWithMetrics
 from kazu.tests.utils import make_dummy_synonym_term
 
 
@@ -94,4 +92,3 @@ def test_section_sentence_spans_is_immutable():
     # try re-assigning sentence_spans, which should raise an error
     with pytest.raises(AttributeError):
         x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
-

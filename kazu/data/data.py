@@ -428,12 +428,16 @@ class Document:
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
-        as_dict = self.as_minified_dict(drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms)
+        as_dict = self.as_minified_dict(
+            drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
+        )
         return json.dumps(as_dict, **kwargs)
 
     def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> Dict:
         as_dict = DocumentJsonUtils.doc_to_json_dict(self)
-        return DocumentJsonUtils.minify_json_dict(as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms)
+        return DocumentJsonUtils.minify_json_dict(
+            as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
+        )
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
@@ -461,23 +465,32 @@ class Document:
 
 
 class DocumentJsonUtils:
-
     class ConversionException(Exception):
         pass
 
     atomic_types = {int, float, str, bool, type(None)}
     listy_types = {list, tuple, set, frozenset}
 
-    JsonDictType = Union[dict, list, int, float, bool, str, type(None)]
+    NoneType = type(None)
+    JsonDictType = Union[Dict[str, Any], list, int, float, bool, str, NoneType]
 
     @staticmethod
-    def minify_json_dict(doc_json_dict: Dict[str, Any], drop_unmapped_ents: bool = False, drop_terms: bool = False, in_place=True) -> Dict:
+    def minify_json_dict(
+        doc_json_dict: Dict[str, Any],
+        drop_unmapped_ents: bool = False,
+        drop_terms: bool = False,
+        in_place=True,
+    ) -> Dict:
         doc_json_dict = doc_json_dict if in_place else deepcopy(doc_json_dict)
 
         if drop_unmapped_ents or drop_terms:
             for section_dict in doc_json_dict["sections"]:
                 section_entities = section_dict["entities"]
-                ents_to_keep = list(filter(lambda _ent: _ent["mappings"], section_entities) if drop_unmapped_ents else section_entities)
+                ents_to_keep = list(
+                    filter(lambda _ent: _ent["mappings"], section_entities)
+                    if drop_unmapped_ents
+                    else section_entities
+                )
                 if drop_terms:
                     for ent in ents_to_keep:
                         ent.syn_term_to_synonym_terms.clear()
@@ -485,9 +498,9 @@ class DocumentJsonUtils:
 
         return doc_json_dict
 
-    @staticmethod
-    def doc_to_json_dict(doc: Document) -> Dict[str, Any]:
-        return DocumentJsonUtils.obj_to_dict_repr(doc.__dict__)
+    @classmethod
+    def doc_to_json_dict(cls, doc: Document) -> Dict[str, JsonDictType]:
+        return {k: DocumentJsonUtils.obj_to_dict_repr(v) for k, v in doc.__dict__.items()}
 
     @classmethod
     def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
@@ -542,7 +555,13 @@ class DocumentJsonUtils:
 
     @classmethod
     def is_numpy_atomic(cls, obj: Any) -> bool:
-        return isinstance(obj, (float16, float32,))
+        return isinstance(
+            obj,
+            (
+                float16,
+                float32,
+            ),
+        )
 
     @classmethod
     def is_numpy_array(cls, obj: Any) -> bool:
@@ -566,10 +585,14 @@ class DocumentJsonUtils:
         if not isinstance(d, (dict, list)):
             return d
         elif isinstance(d, list):
-            return [v for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d) if not empty(v)]
+            return [
+                v for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d) if not empty(v)
+            ]
         else:
             return {
-                k: v for k, v in ((k, DocumentJsonUtils.remove_empty_elements(v)) for k, v in d.items()) if not empty(v)
+                k: v
+                for k, v in ((k, DocumentJsonUtils.remove_empty_elements(v)) for k, v in d.items())
+                if not empty(v)
             }
 
 
