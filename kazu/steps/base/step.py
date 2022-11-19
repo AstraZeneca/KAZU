@@ -1,5 +1,4 @@
-from abc import ABC
-from typing import List, Tuple, TypedDict
+from typing import List, Protocol, Tuple, TypedDict
 
 from kazu.data.data import Document
 
@@ -8,7 +7,7 @@ class StepMetadata(TypedDict):
     has_run: bool
 
 
-class Step(ABC):
+class Step(Protocol):
     """
     abstract class for components. Describes signature of __call__ for all subclasses
     concrete implementations should implement the _run() method
