@@ -117,7 +117,7 @@ class StringPreprocessorStep(Step):
         """
         raise NotImplementedError()
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         for doc in docs:
             for section in doc.sections:
                 modifications = self.create_modifications(section)

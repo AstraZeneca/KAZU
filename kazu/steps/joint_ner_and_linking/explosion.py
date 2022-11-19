@@ -59,7 +59,7 @@ class ExplosionStringMatchingStep(Step):
                 for parser_name, term_norm in ontology_data:
                     yield span.start_char, span.end_char, span.text, entity_class, parser_name, term_norm
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
 
         try:

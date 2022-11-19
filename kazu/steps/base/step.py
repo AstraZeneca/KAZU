@@ -30,7 +30,7 @@ class Step(ABC):
         """
         self.depends_on = depends_on if depends_on is not None else []
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
         the main method to implement. Takes a list of docs, and returns a tuple where the first element
         is the succeeded docs, the second are the docs that failed to process. The logic of determining
@@ -40,6 +40,3 @@ class Step(ABC):
         :return:
         """
         raise NotImplementedError()
-
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        return self._run(docs)

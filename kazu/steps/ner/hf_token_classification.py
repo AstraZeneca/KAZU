@@ -86,7 +86,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
             id2label=self.id2labels_from_label_list(labels),
         )
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
         try:
             loader, id_section_map = self.get_dataloader(docs)

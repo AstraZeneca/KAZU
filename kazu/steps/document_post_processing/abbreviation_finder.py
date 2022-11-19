@@ -25,7 +25,7 @@ class AbbreviationFinderStep(Step):
             self.nlp, namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs
         )
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
 
         :param docs:

@@ -57,7 +57,7 @@ class SethStep(Step):
         self.seth = self.gateway.jvm.com.astrazeneca.kazu.SethRunner()
         self.entity_class = entity_class
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
         for doc in docs:
             if not self.condition or (self.condition and self.condition(doc)):

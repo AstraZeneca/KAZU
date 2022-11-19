@@ -57,7 +57,7 @@ class CleanupStep(Step):
         super().__init__(depends_on=depends_on)
         self.cleanup_actions = cleanup_actions
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
         for doc in docs:
             try:

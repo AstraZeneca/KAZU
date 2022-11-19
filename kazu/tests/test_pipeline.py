@@ -10,7 +10,7 @@ from kazu.tests.utils import requires_model_pack
 
 
 class BrokenStep(Step):
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
         for doc in docs:
             try:

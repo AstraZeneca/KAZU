@@ -70,7 +70,7 @@ class SapBertForEntityLinkingStep(Step):
             )
             indices_for_current_class.add(index)
 
-    def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
         logic of entity linker:
 
