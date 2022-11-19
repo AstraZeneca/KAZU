@@ -18,8 +18,7 @@ class AbbreviationFinderStep(Step):
     abbreviations learnt in one section will be applied throughout the others.
     """
 
-    def __init__(self, depends_on: List[str], exclude_abbrvs: Optional[List[str]] = None):
-        super().__init__(depends_on)
+    def __init__(self, exclude_abbrvs: Optional[List[str]] = None):
         self.nlp = English(max_length=10**8)
         self.detector = KazuAbbreviationDetector(
             self.nlp, namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs

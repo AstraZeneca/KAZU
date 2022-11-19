@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Iterator, List, Optional, Tuple, Iterable
+from typing import Iterator, List, Tuple, Iterable
 
 import spacy
 from kazu.data.data import (
@@ -27,18 +27,14 @@ class ExplosionStringMatchingStep(Step):
 
     def __init__(
         self,
-        depends_on: Optional[List[str]],
         path: PathLike,
         include_sentence_offsets: bool = True,
     ):
         """
-        :param depends_on:
         :param path: path to spacy pipeline including Ontology Matcher.
         :param include_sentence_offsets: whether to add sentence offsets to the metadata.
 
         """
-
-        super().__init__(depends_on=depends_on)
         self.include_sentence_offsets = include_sentence_offsets
         self.path = path
 

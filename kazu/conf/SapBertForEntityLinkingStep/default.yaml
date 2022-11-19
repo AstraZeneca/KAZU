@@ -1,6 +1,5 @@
 _target_: kazu.steps.linking.sapbert.SapBertForEntityLinkingStep
 top_n: 5
-depends_on: ~
 lookup_cache_size: 20000
 min_string_length_to_trigger:
   drug: 5

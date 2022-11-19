@@ -103,9 +103,7 @@ def test_cleanup_step(kazu_test_config):
                 else:
                     ent.match = ent.match.upper()
 
-    cleanup_step = CleanupStep(
-        depends_on=[], cleanup_actions=[MockCleanupAction1(), MockCleanupAction2()]
-    )
+    cleanup_step = CleanupStep(cleanup_actions=[MockCleanupAction1(), MockCleanupAction2()])
     doc1 = Document(
         idx="test1",
         sections=[

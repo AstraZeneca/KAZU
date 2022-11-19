@@ -9,7 +9,6 @@ def test_skips_prelinked_entities(tmp_path):
     mock_skip_namespace = "mock_skip_namespace"
     mock_noskip_namespace = "mock_noskip_namespace"
     step = DictionaryEntityLinkingStep(
-        depends_on=[],
         indices=[index],
         skip_ner_namespaces={mock_skip_namespace},
     )

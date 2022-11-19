@@ -13,15 +13,13 @@ class SpacyNerStep(Step):
     resulting spacy doc to have a populated doc.ents field.
     """
 
-    def __init__(self, depends_on: List[str], spacy_pipeline: SpacyPipeline):
+    def __init__(self, spacy_pipeline: SpacyPipeline):
         """
 
-        :param depends_on:
         :param model_name: name of spacy pipeline to load.
         :param path: If the spacy pipeline is not already installed into the python environment, attempt to
             install it from this path.
         """
-        super().__init__(depends_on=depends_on)
         self.nlp = spacy_pipeline.nlp
 
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:

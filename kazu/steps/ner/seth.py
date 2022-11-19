@@ -31,21 +31,17 @@ class SethStep(Step):
 
     def __init__(
         self,
-        depends_on: Optional[List[str]],
         entity_class: str,
         seth_fatjar_path: str,
         java_home: str,
         condition: Optional[Callable[[Document], bool]] = None,
     ):
         """
-
-        :param depends_on:
         :param entity_class: the entity_class to assign to any Entities that emerge
         :param seth_fatjar_path: path to a py4j fatjar, containing SETH dependencies
         :param condition: Since SETH can be slow, we can optionally specify a callable, so that
             any documents that don't contain pre-existing gene/protein entities are not processed
         """
-        super().__init__(depends_on)
         self.condition = condition
         if not os.path.exists(seth_fatjar_path):
             raise RuntimeError(f"required jar: {seth_fatjar_path} not found")

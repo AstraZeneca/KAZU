@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
 from kazu.data.data import Document, CharSpan, PROCESSING_EXCEPTION
 from kazu.steps.base.step import Step
@@ -54,13 +54,11 @@ class StanzaStep(Step):
     }
     """
 
-    def __init__(self, depends_on: Optional[List[str]], stanza_pipeline: StanzaPipeline):
+    def __init__(self, stanza_pipeline: StanzaPipeline):
         """
 
-        :param depends_on:
         :param stanza_pipeline: singleton wrapping a stanza pipeline
         """
-        super().__init__(depends_on)
         self.stanza_nlp = stanza_pipeline.instance
 
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:

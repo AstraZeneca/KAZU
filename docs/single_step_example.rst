@@ -20,7 +20,7 @@
     doc.sections[0].entities.append(entity)
 
     # create an instance of the AbbreviationFinderStep
-    step = AbbreviationFinderStep([])
+    step = AbbreviationFinderStep()
     # a step may fail to process a document, so it returns two lists, successes and failures
     succeeded, failed = step([doc])
     # check that a new entity has been created, attached to the EGFR span

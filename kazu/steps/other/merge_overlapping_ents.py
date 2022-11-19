@@ -1,7 +1,7 @@
 import logging
 import traceback
 from collections import defaultdict
-from typing import List, Tuple, Optional, DefaultDict, Set, Dict
+from typing import List, Tuple, DefaultDict, Set, Dict
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
 from kazu.steps import Step
@@ -17,7 +17,6 @@ class MergeOverlappingEntsStep(Step):
 
     def __init__(
         self,
-        depends_on: Optional[List[str]],
         ent_class_preferred_order: List[str],
         ignore_non_contiguous: bool = True,
     ):
@@ -43,14 +42,11 @@ class MergeOverlappingEntsStep(Step):
               the entity class name (reverse alphabetically ordered). Warning: This last sort criteria is arbitrary
 
 
-        :param depends_on:
         :param ent_class_preferred_order: order of namespaces to prefer. Any partially overlapped entities are
             eliminated according to this ordering (first = higher priority). If an entity class is not specified, it's
             assumed to have a priority of 0 (a.k.a lowest)
         :param ignore_non_contiguous: should non-contiguous entities be excluded from the merge process?
         """
-
-        super().__init__(depends_on)
         # store as dict for lookup speed
         self.ignore_non_contiguous = ignore_non_contiguous
         self.ent_class_preferred_order = {

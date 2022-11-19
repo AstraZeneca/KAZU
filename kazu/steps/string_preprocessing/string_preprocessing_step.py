@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Dict
 
 from kazu.data.data import Document, CharSpan, Section
 from kazu.steps import Step
@@ -18,9 +18,6 @@ class StringPreprocessorStep(Step):
 
     simple implementations need only override create_modifications.
     """
-
-    def __init__(self, depends_on: Optional[List[str]]):
-        super().__init__(depends_on)
 
     def recalculate_offset_maps(
         self, offset_map: Dict[CharSpan, CharSpan], shifts: Dict[CharSpan, int]

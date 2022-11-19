@@ -24,7 +24,6 @@ class SapBertForEntityLinkingStep(Step):
 
     def __init__(
         self,
-        depends_on: List[str],
         indices: List[EmbeddingIndex],
         embedding_model: PLSapbertModel,
         trainer: Trainer,
@@ -36,7 +35,6 @@ class SapBertForEntityLinkingStep(Step):
     ):
         """
 
-        :param depends_on:
         :param indices: list of EmbeddingIndex to use with this model
         :param embedding_model: The SapBERT model to use to generate embeddings for entity mentions in input documents
         :param trainer: PL trainer to call when generating embeddings
@@ -47,8 +45,6 @@ class SapBertForEntityLinkingStep(Step):
         :param top_n: keep up to the top_n results for the query
         :param batch_size: inference batch size
         """
-
-        super().__init__(depends_on=depends_on)
         self.batch_size = batch_size
         self.trainer = trainer
         self.embedding_model = embedding_model

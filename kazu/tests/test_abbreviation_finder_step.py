@@ -22,7 +22,7 @@ def test_AbbreviationFinderStep_copy_ents():
     sec2.entities = [ent3]
     doc = Document(idx="test copy of entity data", sections=[sec1, sec2])
 
-    step = AbbreviationFinderStep([])
+    step = AbbreviationFinderStep()
 
     success, failure = step([doc])
     assert len(failure) == 0
@@ -56,7 +56,7 @@ def test_AbbreviationFinderStep_copy_ents():
 @pytest.mark.parametrize(argnames=("exclude_abbr"), argvalues=(([]), (["AML"])))
 def test_AbbreviationFinderStep_remove_ents(exclude_abbr):
 
-    step = AbbreviationFinderStep([], exclude_abbrvs=exclude_abbr)
+    step = AbbreviationFinderStep(exclude_abbrvs=exclude_abbr)
 
     sec3 = Section(text="Auto Mega Liquid (AML) is not form of cancer", name="part1")
     ent4 = Entity.load_contiguous_entity(

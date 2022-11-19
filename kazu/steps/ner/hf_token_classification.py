@@ -40,7 +40,6 @@ class TransformersModelForTokenClassificationNerStep(Step):
     def __init__(
         self,
         path: str,
-        depends_on: List[str],
         batch_size: int,
         stride: int,
         max_sequence_length: int,
@@ -53,7 +52,6 @@ class TransformersModelForTokenClassificationNerStep(Step):
         """
 
         :param path: path to HF model, config and tokenizer. Passed to HF .from_pretrained()
-        :param depends_on:
         :param batch_size: batch size for dataloader
         :param stride: passed to HF tokenizers (for splitting long docs)
         :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
@@ -62,8 +60,6 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param threshold: the confidence threshold used to detect nested entities
         :param entity_splitter: instance of :class:`kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter` to detect non-contiguous entities
         """
-
-        super().__init__(depends_on=depends_on)
         self.entity_splitter = entity_splitter
         if max_sequence_length % 2 != 0:
             raise RuntimeError(

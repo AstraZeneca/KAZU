@@ -1,3 +1,2 @@
 _target_: kazu.steps.ner.spacy_ner.SpacyNerStep
-depends_on: ~
 spacy_pipeline: ${SpacyPipeline}

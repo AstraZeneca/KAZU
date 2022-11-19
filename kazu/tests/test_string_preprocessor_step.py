@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
 import pytest
 
@@ -9,12 +9,10 @@ from kazu.steps.string_preprocessing.string_preprocessing_step import StringPrep
 class AddSomeCharsStep(StringPreprocessorStep):
     def __init__(
         self,
-        depends_on: Optional[List[str]],
         insert_string: str,
         insert_start: int,
         insert_end: int,
     ):
-        super().__init__(depends_on)
         self.insert_start = insert_start
         self.insert_end = insert_end
         self.insert_string = insert_string
@@ -30,7 +28,7 @@ def test_multiple_string_preprocessing_steps():
 
     # case 1: overwrite original string with extra characters
     expansion_string_1 = "Hello look how I've grown! "
-    step = AddSomeCharsStep([], expansion_string_1, 0, 5)
+    step = AddSomeCharsStep(expansion_string_1, 0, 5)
     success, _ = step([doc])
     section = success[0].sections[0]
     expected_string = "Hello look how I've grown! "
@@ -40,7 +38,7 @@ def test_multiple_string_preprocessing_steps():
 
     # case 2: remove characters
     expansion_string_2 = "Hello again"
-    step = AddSomeCharsStep([], expansion_string_2, 0, len(expansion_string_1))
+    step = AddSomeCharsStep(expansion_string_2, 0, len(expansion_string_1))
     success, _ = step([doc])
     section = success[0].sections[0]
     expected_string = "Hello again"
@@ -50,7 +48,7 @@ def test_multiple_string_preprocessing_steps():
 
     # case 3: substitute characters
     expansion_string_3 = "it's gone again!"
-    step = AddSomeCharsStep([], expansion_string_3, 6, 11)
+    step = AddSomeCharsStep(expansion_string_3, 6, 11)
     success, _ = step([doc])
     section = success[0].sections[0]
     expected_string = "Hello it's gone again!"
@@ -58,7 +56,7 @@ def test_multiple_string_preprocessing_steps():
 
     # test case 1 again
     expansion_string_1 = "Hello look how I've grown! "
-    step = AddSomeCharsStep([], expansion_string_1, 0, 5)
+    step = AddSomeCharsStep(expansion_string_1, 0, 5)
     success, _ = step([doc])
     section = success[0].sections[0]
     expected_string = "Hello look how I've grown!  it's gone again!"

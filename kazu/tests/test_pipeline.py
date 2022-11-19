@@ -23,7 +23,7 @@ class BrokenStep(Step):
 
 
 def test_pipeline_error_handling(tmp_path: Path):
-    step = BrokenStep([])
+    step = BrokenStep()
     pipeline = Pipeline([step], [FailedDocsFileHandler(tmp_path)])
 
     docs = [Document.create_simple_document("hello") for _ in range(5)]

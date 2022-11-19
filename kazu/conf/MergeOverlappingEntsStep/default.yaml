@@ -1,5 +1,4 @@
 _target_: kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep
-depends_on: ~
 ent_class_preferred_order:
   - disease
   - drug

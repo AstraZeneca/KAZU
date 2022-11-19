@@ -1,5 +1,5 @@
 import traceback
-from typing import List, Tuple, Optional, Protocol, Callable, Iterable
+from typing import List, Tuple, Protocol, Callable, Iterable
 from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Mapping, LinkRanks
 from kazu.steps import Step
 
@@ -53,8 +53,7 @@ class DropUnmappedEntityFilter:
 
 
 class CleanupStep(Step):
-    def __init__(self, depends_on: Optional[List[str]], cleanup_actions: List[CleanupAction]):
-        super().__init__(depends_on=depends_on)
+    def __init__(self, cleanup_actions: List[CleanupAction]):
         self.cleanup_actions = cleanup_actions
 
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:

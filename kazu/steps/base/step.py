@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Tuple, Optional, TypedDict
+from typing import List, Tuple, TypedDict
 
 from kazu.data.data import Document
 
@@ -21,14 +21,6 @@ class Step(ABC):
         defaults to  cls.__name__
         """
         return cls.__name__
-
-    def __init__(self, depends_on: Optional[List[str]]):
-        """
-        :param depends_on: a list of step namespaces that this step expects. Note, this is not used by the step itself,
-            but should be used via some step orchestration logic (e.g. Pipeline) to determine whether the step should
-            run or not.
-        """
-        self.depends_on = depends_on if depends_on is not None else []
 
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """
