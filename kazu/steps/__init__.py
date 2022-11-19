@@ -1,4 +1,4 @@
-from .base.step import BaseStep
+from .base.step import Step
 from .linking.dictionary import DictionaryEntityLinkingStep
 from .linking.sapbert import SapBertForEntityLinkingStep
 from .ner.hf_token_classification import TransformersModelForTokenClassificationNerStep

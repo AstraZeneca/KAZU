@@ -4,12 +4,12 @@ from collections import defaultdict
 from typing import List, Tuple, Optional, DefaultDict, Set, Dict
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
-from kazu.steps import BaseStep
+from kazu.steps import Step
 
 logger = logging.getLogger(__name__)
 
 
-class MergeOverlappingEntsStep(BaseStep):
+class MergeOverlappingEntsStep(Step):
     """
     This step merges overlapping and nested entities. The final result should not allow any overlapped entities
     see algorithm description below

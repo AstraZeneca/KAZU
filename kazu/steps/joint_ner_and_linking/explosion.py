@@ -13,14 +13,14 @@ from kazu.data.data import (
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.utils.utils import PathLike
 from spacy.tokens import Span
 
 logger = logging.getLogger(__name__)
 
 
-class ExplosionStringMatchingStep(BaseStep):
+class ExplosionStringMatchingStep(Step):
     """
     A wrapper for the explosion ontology-based entity matcher and linker.
     """

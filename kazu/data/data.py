@@ -194,7 +194,7 @@ class Entity:
     match: str  # exact text representation
     entity_class: str  # entity class
     spans: FrozenSet[CharSpan]  # charspans
-    namespace: str  # namespace of BaseStep that produced this instance
+    namespace: str  # namespace of Step that produced this instance
     mappings: Set[Mapping] = field(default_factory=set)
     metadata: Dict[Any, Any] = field(default_factory=dict)  # generic metadata
     start: int = field(init=False)

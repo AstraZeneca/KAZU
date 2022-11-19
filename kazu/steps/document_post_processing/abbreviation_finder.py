@@ -4,11 +4,11 @@ from typing import Tuple, List, Optional
 from spacy.lang.en import English
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.utils.abbreviation_detector import KazuAbbreviationDetector
 
 
-class AbbreviationFinderStep(BaseStep):
+class AbbreviationFinderStep(Step):
     """
     Detects abbreviations using the algorithm in "A simple algorithm for identifying
     abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).

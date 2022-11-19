@@ -20,7 +20,7 @@ from transformers.file_utils import PaddingStrategy
 from kazu.data.data import Document, Section, PROCESSING_EXCEPTION
 from kazu.data.pytorch import HFDataset
 from kazu.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
@@ -28,7 +28,7 @@ from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 logger = logging.getLogger(__name__)
 
 
-class TransformersModelForTokenClassificationNerStep(BaseStep):
+class TransformersModelForTokenClassificationNerStep(Step):
     """
     A wrapper for
     :class:`transformers.AutoModelForTokenClassification`\\ . This implementation uses a sliding

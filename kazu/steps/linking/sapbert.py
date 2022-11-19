@@ -8,7 +8,7 @@ import pydash
 import torch
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, SynonymTermWithMetrics
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.link_index import EmbeddingIndex
 from pytorch_lightning import Trainer
@@ -16,7 +16,7 @@ from pytorch_lightning import Trainer
 logger = logging.getLogger(__name__)
 
 
-class SapBertForEntityLinkingStep(BaseStep):
+class SapBertForEntityLinkingStep(Step):
     """
     This step wraps Sapbert: Self Alignment pretraining for biomedical entity representation.
     Original paper https://aclanthology.org/2021.naacl-main.334.pdf

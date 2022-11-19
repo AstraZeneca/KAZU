@@ -3,11 +3,11 @@ from collections import defaultdict
 from typing import List, Tuple
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 
-class SpacyNerStep(BaseStep):
+class SpacyNerStep(Step):
     """
     A simple spacy NER implementation. Runs a spacy pipeline over document sections, expecting the
     resulting spacy doc to have a populated doc.ents field.

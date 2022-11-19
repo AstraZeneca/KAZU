@@ -1,14 +1,14 @@
 from typing import List, Tuple, Optional
 
 from kazu.data.data import Document, CharSpan, PROCESSING_EXCEPTION
-from kazu.steps.base.step import BaseStep
+from kazu.steps.base.step import Step
 from kazu.utils.stanza_pipeline import StanzaPipeline
 from stanza.models.common.doc import Sentence
 
 import traceback
 
 
-class StanzaStep(BaseStep):
+class StanzaStep(Step):
     """
     Stanza step
     Currently used for just sentence-segmentation using a tokenizer trained on the genia treebank

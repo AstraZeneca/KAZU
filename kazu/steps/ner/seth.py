@@ -5,13 +5,13 @@ from typing import Optional, List, Tuple, Callable
 from py4j.java_gateway import JavaGateway
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Mapping, LinkRanks
-from kazu.steps import BaseStep
+from kazu.steps import Step
 
 
 SETH_METADATA_KEY = "seth"
 
 
-class SethStep(BaseStep):
+class SethStep(Step):
     """
     A Step that calls SETH (SNP Extraction Tool for Human Variations) over py4j
 

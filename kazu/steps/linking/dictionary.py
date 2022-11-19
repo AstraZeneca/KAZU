@@ -3,7 +3,7 @@ import traceback
 from typing import List, Tuple, Dict, Set, Optional
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION, SynonymTermWithMetrics
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.link_index import DictionaryIndex
@@ -12,7 +12,7 @@ from kazu.utils.utils import find_document_from_entity
 logger = logging.getLogger(__name__)
 
 
-class DictionaryEntityLinkingStep(BaseStep):
+class DictionaryEntityLinkingStep(Step):
     """
     Uses :class:`kazu.utils.link_index.DictionaryIndex` to match entities to ontologies.
     """

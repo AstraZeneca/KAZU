@@ -11,7 +11,7 @@ from omegaconf import DictConfig
 from torch.utils.tensorboard import SummaryWriter
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.steps.base.step import StepMetadata
 
 from datetime import datetime
@@ -19,7 +19,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-def load_steps(cfg: DictConfig) -> List[BaseStep]:
+def load_steps(cfg: DictConfig) -> List[Step]:
     """
     loads steps based on the cfg.pipeline
     """
@@ -124,7 +124,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
 class Pipeline:
     def __init__(
         self,
-        steps: List[BaseStep],
+        steps: List[Step],
         failure_handler: Optional[List[FailedDocsHandler]] = None,
         profile_steps_dir: Optional[str] = None,
         skip_doc_len: Optional[int] = 200000,
@@ -221,7 +221,7 @@ class Pipeline:
                 )
             self.call_count += 1
 
-    def update_failed_docs(self, step: BaseStep, failed_docs: List[Document]):
+    def update_failed_docs(self, step: Step, failed_docs: List[Document]):
         if self.failure_handlers is not None:
             self.failed_docs[step.namespace()] = failed_docs
 

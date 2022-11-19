@@ -1,7 +1,7 @@
 import traceback
 from typing import List, Tuple, Optional, Protocol, Callable, Iterable
 from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Mapping, LinkRanks
-from kazu.steps import BaseStep
+from kazu.steps import Step
 
 EntityFilterFn = Callable[[Entity], bool]
 MappingFilterFn = Callable[[Mapping], bool]
@@ -52,7 +52,7 @@ class DropUnmappedEntityFilter:
         return ent.namespace in self.from_ent_namespaces and len(ent.mappings) == 0
 
 
-class CleanupStep(BaseStep):
+class CleanupStep(Step):
     def __init__(self, depends_on: Optional[List[str]], cleanup_actions: List[CleanupAction]):
         super().__init__(depends_on=depends_on)
         self.cleanup_actions = cleanup_actions

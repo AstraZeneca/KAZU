@@ -3,13 +3,13 @@ import traceback
 from typing import List, Optional, Tuple
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.steps.linking.post_processing.strategy_runner import StrategyRunner
 
 logger = logging.getLogger(__name__)
 
 
-class MappingStep(BaseStep):
+class MappingStep(Step):
     """
     A wrapper for :class:`.StrategyRunner`, so it can be used in a pipeline.
     """

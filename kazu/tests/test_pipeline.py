@@ -5,11 +5,11 @@ from typing import List, Tuple
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.pipeline import FailedDocsFileHandler, Pipeline, load_steps
-from kazu.steps import BaseStep
+from kazu.steps import Step
 from kazu.tests.utils import requires_model_pack
 
 
-class BrokenStep(BaseStep):
+class BrokenStep(Step):
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
         for doc in docs:

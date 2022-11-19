@@ -8,7 +8,7 @@ class StepMetadata(TypedDict):
     has_run: bool
 
 
-class BaseStep(ABC):
+class Step(ABC):
     """
     abstract class for components. Describes signature of __call__ for all subclasses
     concrete implementations should implement the _run() method
