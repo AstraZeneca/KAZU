@@ -1,14 +1,12 @@
 import logging
 import sys
-import traceback
 from collections import defaultdict
-from typing import List, Tuple, Iterable, Optional, Dict, Set
+from typing import List, Iterable, Optional, Dict, Set
 
-import pydash
 import torch
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, SynonymTermWithMetrics
+from kazu.data.data import Document, Entity, SynonymTermWithMetrics
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
-from kazu.steps import Step
+from kazu.steps import Step, batch_step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.link_index import EmbeddingIndex
 from pytorch_lightning import Trainer
@@ -66,7 +64,8 @@ class SapBertForEntityLinkingStep(Step):
             )
             indices_for_current_class.add(index)
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    @batch_step
+    def __call__(self, docs: List[Document]) -> None:
         """
         logic of entity linker:
 
@@ -79,11 +78,9 @@ class SapBertForEntityLinkingStep(Step):
         :param docs:
         :return:
         """
-        failed_docs = []
-        try:
-            entities_to_process = []
-            ent: Entity
-            for ent in pydash.flatten([x.get_entities() for x in docs]):
+        entities_to_process = []
+        for doc in docs:
+            for ent in doc.get_entities():
                 if ent.entity_class not in self.entity_class_to_indices.keys():
                     continue
                 if self.ignore_high_conf:
@@ -103,17 +100,7 @@ class SapBertForEntityLinkingStep(Step):
                     ):
                         entities_to_process.append(ent)
 
-            self.process_entities(entities_to_process)
-        except Exception:
-            affected_doc_ids = [doc.idx for doc in docs]
-            for doc in docs:
-                message = (
-                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
-                )
-                doc.metadata[PROCESSING_EXCEPTION] = message
-                failed_docs.append(doc)
-
-        return docs, failed_docs
+        self.process_entities(entities_to_process)
 
     def process_entities(self, entities: Iterable[Entity]):
         entities = self.lookup_cache.check_lookup_cache(entities)

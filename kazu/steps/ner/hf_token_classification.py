@@ -1,5 +1,4 @@
 import logging
-import traceback
 from functools import partial
 from typing import List, Tuple, Dict, Optional, Iterable
 
@@ -17,10 +16,10 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from kazu.data.data import Document, Section, PROCESSING_EXCEPTION
+from kazu.data.data import Document, Section
 from kazu.data.pytorch import HFDataset
 from kazu.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
-from kazu.steps import Step
+from kazu.steps import Step, batch_step
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
@@ -82,35 +81,24 @@ class TransformersModelForTokenClassificationNerStep(Step):
             id2label=self.id2labels_from_label_list(labels),
         )
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
-        try:
-            loader, id_section_map = self.get_dataloader(docs)
-            # run the transformer and get results
-            activations = self.get_activations(loader)
-            for section_index, section in id_section_map.items():
-                words = self.section_frames_to_tokenised_words(
-                    section_index=section_index,
-                    batch_encoding=loader.dataset.encodings,
-                    predictions=activations,
-                )
-                entities = self.tokenized_word_processor(
-                    words, text=section.get_text(), namespace=self.namespace()
-                )
-                section.entities.extend(entities)
-                if self.entity_splitter:
-                    for ent in entities:
-                        section.entities.extend(self.entity_splitter(ent, section.get_text()))
-        except Exception:
-            affected_doc_ids = [doc.idx for doc in docs]
-            for doc in docs:
-                message = (
-                    f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
-                )
-                doc.metadata[PROCESSING_EXCEPTION] = message
-                failed_docs.append(doc)
-
-        return docs, failed_docs
+    @batch_step
+    def __call__(self, docs: List[Document]) -> None:
+        loader, id_section_map = self.get_dataloader(docs)
+        # run the transformer and get results
+        activations = self.get_activations(loader)
+        for section_index, section in id_section_map.items():
+            words = self.section_frames_to_tokenised_words(
+                section_index=section_index,
+                batch_encoding=loader.dataset.encodings,
+                predictions=activations,
+            )
+            entities = self.tokenized_word_processor(
+                words, text=section.get_text(), namespace=self.namespace()
+            )
+            section.entities.extend(entities)
+            if self.entity_splitter:
+                for ent in entities:
+                    section.entities.extend(self.entity_splitter(ent, section.get_text()))
 
     def get_activations(self, loader: DataLoader) -> Tensor:
         """

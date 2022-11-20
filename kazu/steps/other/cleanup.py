@@ -1,7 +1,6 @@
-import traceback
-from typing import List, Tuple, Protocol, Callable, Iterable
-from kazu.data.data import Document, Entity, PROCESSING_EXCEPTION, Mapping, LinkRanks
-from kazu.steps import Step
+from typing import List, Protocol, Callable, Iterable
+from kazu.data.data import Document, Entity, Mapping, LinkRanks
+from kazu.steps import Step, iterating_step
 
 EntityFilterFn = Callable[[Entity], bool]
 MappingFilterFn = Callable[[Mapping], bool]
@@ -56,14 +55,7 @@ class CleanupStep(Step):
     def __init__(self, cleanup_actions: List[CleanupAction]):
         self.cleanup_actions = cleanup_actions
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
-        for doc in docs:
-            try:
-                for cleanup_action in self.cleanup_actions:
-                    cleanup_action.cleanup(doc)
-            except Exception:
-                doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                failed_docs.append(doc)
-
-        return docs, failed_docs
+    @iterating_step
+    def __call__(self, doc: Document) -> None:
+        for cleanup_action in self.cleanup_actions:
+            cleanup_action.cleanup(doc)

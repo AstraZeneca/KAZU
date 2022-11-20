@@ -1,11 +1,9 @@
-from typing import List, Tuple
+from typing import List
 
-from kazu.data.data import Document, CharSpan, PROCESSING_EXCEPTION
-from kazu.steps.base.step import Step
+from kazu.data.data import Document, CharSpan
+from kazu.steps.base.step import Step, iterating_step
 from kazu.utils.stanza_pipeline import StanzaPipeline
 from stanza.models.common.doc import Sentence
-
-import traceback
 
 
 class StanzaStep(Step):
@@ -61,21 +59,12 @@ class StanzaStep(Step):
         """
         self.stanza_nlp = stanza_pipeline.instance
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
-
-        for doc in docs:
-            try:
-                for section in doc.sections:
-                    stanza_doc = self.stanza_nlp(section.get_text())
-                    sentences: List[Sentence] = stanza_doc.sentences
-                    char_spans = (
-                        CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char)
-                        for sent in sentences
-                    )
-                    section.sentence_spans = char_spans
-            except Exception:
-                doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                failed_docs.append(doc)
-
-        return docs, failed_docs
+    @iterating_step
+    def __call__(self, doc: Document):
+        for section in doc.sections:
+            stanza_doc = self.stanza_nlp(section.get_text())
+            sentences: List[Sentence] = stanza_doc.sentences
+            char_spans = (
+                CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char) for sent in sentences
+            )
+            section.sentence_spans = char_spans

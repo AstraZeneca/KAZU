@@ -1,10 +1,9 @@
 import logging
-import traceback
 from collections import defaultdict
 from typing import List, Tuple, DefaultDict, Set, Dict
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity
-from kazu.steps import Step
+from kazu.data.data import Document, Entity
+from kazu.steps import Step, iterating_step
 
 logger = logging.getLogger(__name__)
 
@@ -87,31 +86,23 @@ class MergeOverlappingEntsStep(Step):
                 to_keep.extend(ents_set)
         return to_keep
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
-        for doc in docs:
-            try:
-                for section in doc.sections:
-                    if len(section.entities) > 0:
-                        ents_to_merge, non_contig_ents = [], []
-                        if self.ignore_non_contiguous:
-                            for ent in section.entities:
-                                if len(ent.spans) == 1:
-                                    ents_to_merge.append(ent)
-                                else:
-                                    non_contig_ents.append(ent)
+    @iterating_step
+    def __call__(self, doc: Document) -> None:
+        for section in doc.sections:
+            if len(section.entities) > 0:
+                ents_to_merge, non_contig_ents = [], []
+                if self.ignore_non_contiguous:
+                    for ent in section.entities:
+                        if len(ent.spans) == 1:
+                            ents_to_merge.append(ent)
                         else:
-                            ents_to_merge = section.entities
+                            non_contig_ents.append(ent)
+                else:
+                    ents_to_merge = section.entities
 
-                        locations_overlapped = self.group_entities_by_location(ents_to_merge)
-                        section.entities = self.filter_ents_across_class(locations_overlapped)
-                        section.entities.extend(non_contig_ents)
-
-            except Exception:
-                message = f"doc failed: affected ids: {doc.idx}\n" + traceback.format_exc()
-                doc.metadata[PROCESSING_EXCEPTION] = message
-                failed_docs.append(doc)
-        return docs, failed_docs
+                locations_overlapped = self.group_entities_by_location(ents_to_merge)
+                section.entities = self.filter_ents_across_class(locations_overlapped)
+                section.entities.extend(non_contig_ents)
 
     def group_entities_by_location(
         self, entities: List[Entity]

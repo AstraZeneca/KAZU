@@ -1,5 +1,4 @@
 import logging
-import traceback
 from typing import Iterator, List, Tuple, Iterable
 
 import spacy
@@ -9,11 +8,10 @@ from kazu.data.data import (
     Section,
     Entity,
     SynonymTermWithMetrics,
-    PROCESSING_EXCEPTION,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.steps import Step
+from kazu.steps import Step, batch_step
 from kazu.utils.utils import PathLike
 from spacy.tokens import Span
 
@@ -55,67 +53,53 @@ class ExplosionStringMatchingStep(Step):
                 for parser_name, term_norm in ontology_data:
                     yield span.start_char, span.end_char, span.text, entity_class, parser_name, term_norm
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
+    @batch_step
+    def __call__(self, docs: List[Document]) -> None:
+        texts_and_sections = (
+            (section.get_text(), (section, doc)) for doc in docs for section in doc.sections
+        )
 
-        try:
-            texts_and_sections = (
-                (section.get_text(), (section, doc)) for doc in docs for section in doc.sections
-            )
+        # TODO: multiprocessing within the pipe command?
+        spacy_result: Iterator[
+            Tuple[spacy.tokens.Doc, Tuple[Section, Document]]
+        ] = self.spacy_pipeline.pipe(texts_and_sections, as_tuples=True)
 
-            # TODO: multiprocessing within the pipe command?
-            spacy_result: Iterator[
-                Tuple[spacy.tokens.Doc, Tuple[Section, Document]]
-            ] = self.spacy_pipeline.pipe(texts_and_sections, as_tuples=True)
+        for processed_text, (section, doc) in spacy_result:
+            entities = []
 
-            for processed_text, (section, doc) in spacy_result:
-                entities = []
+            spans = processed_text.spans[self.span_key]
+            for (
+                start_char,
+                end_char,
+                text,
+                entity_class,
+                parser_name,
+                term_norm,
+            ) in self.extract_entity_data_from_spans(spans):
+                e = Entity.load_contiguous_entity(
+                    start=start_char,
+                    end=end_char,
+                    match=text,
+                    entity_class=entity_class,
+                    namespace=self.namespace(),
+                )
+                entities.append(e)
+                terms = []
+                term = self.synonym_db.get(parser_name, term_norm)
+                terms.append(term)
+                terms_with_metrics = (
+                    SynonymTermWithMetrics.from_synonym_term(term, exact_match=True)
+                    for term in terms
+                )
+                e.update_terms(terms_with_metrics)
 
-                spans = processed_text.spans[self.span_key]
-                for (
-                    start_char,
-                    end_char,
-                    text,
-                    entity_class,
-                    parser_name,
-                    term_norm,
-                ) in self.extract_entity_data_from_spans(spans):
-                    e = Entity.load_contiguous_entity(
-                        start=start_char,
-                        end=end_char,
-                        match=text,
-                        entity_class=entity_class,
-                        namespace=self.namespace(),
-                    )
-                    entities.append(e)
-                    terms = []
-                    term = self.synonym_db.get(parser_name, term_norm)
-                    terms.append(term)
-                    terms_with_metrics = (
-                        SynonymTermWithMetrics.from_synonym_term(term, exact_match=True)
-                        for term in terms
-                    )
-                    e.update_terms(terms_with_metrics)
+            # add sentence offsets
+            if self.include_sentence_offsets:
+                sent_metadata = []
+                for sent in processed_text.sents:
+                    sent_metadata.append(CharSpan(sent.start_char, sent.end_char))
+                section.sentence_spans = sent_metadata
 
-                # add sentence offsets
-                if self.include_sentence_offsets:
-                    sent_metadata = []
-                    for sent in processed_text.sents:
-                        sent_metadata.append(CharSpan(sent.start_char, sent.end_char))
-                    section.sentence_spans = sent_metadata
-
-                # if one section of a doc fails after others have succeeded, this will leave failed docs
-                # in a partially processed state. It's actually unclear to me whether this is desireable or not.
-                section.entities.extend(entities)
-
-        # this will give up on all docs as soon as one fails - we could have an additional
-        # try-except inside the loop. We'd probably need to handle the case when the iterator raises an
-        # error when we try iterating further though, or we might get stuck in a loop.
-        except Exception:
-            failed_docs = docs
-            affected_doc_ids = [doc.idx for doc in docs]
-            message = f"batch failed: affected ids: {affected_doc_ids}\n" + traceback.format_exc()
-            for doc in docs:
-                doc.metadata[PROCESSING_EXCEPTION] = message
-
-        return docs, failed_docs
+            # if one section of a doc fails after others have succeeded, this will leave failed docs
+            # in a partially processed state. It's actually unclear to me whether this is desireable or not.
+            section.entities.extend(entities)
