@@ -1,11 +1,10 @@
 import os
-import traceback
-from typing import Optional, List, Tuple, Callable
+from typing import Optional, Callable
 
 from py4j.java_gateway import JavaGateway
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, Entity, Mapping, LinkRanks
-from kazu.steps import Step
+from kazu.data.data import Document, Entity, Mapping, LinkRanks
+from kazu.steps import Step, iterating_step
 
 
 SETH_METADATA_KEY = "seth"
@@ -53,43 +52,37 @@ class SethStep(Step):
         self.seth = self.gateway.jvm.com.astrazeneca.kazu.SethRunner()
         self.entity_class = entity_class
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        failed_docs = []
-        for doc in docs:
-            if not self.condition or (self.condition and self.condition(doc)):
-                for section in doc.sections:
-                    try:
-                        mutation_lst = self.seth.findMutations(section.get_text())
-                        entities = []
-                        for java_mutation_dict in mutation_lst:
-                            python_dict = dict(java_mutation_dict)
-                            entities.append(
-                                Entity.from_spans(
-                                    spans=[
-                                        (
-                                            python_dict.pop("start"),
-                                            python_dict.pop("end"),
-                                        )
-                                    ],
-                                    text=section.get_text(),
-                                    entity_class=self.entity_class,
-                                    namespace=self.namespace(),
-                                    metadata={SETH_METADATA_KEY: python_dict},
-                                    mappings=[
-                                        Mapping(
-                                            default_label=self.entity_class,
-                                            source=self.entity_class,
-                                            parser_name="n/a",
-                                            idx=self.entity_class,
-                                            mapping_strategy=self.namespace(),
-                                            disambiguation_strategy=None,
-                                            confidence=LinkRanks.PROBABLE,
-                                        )
-                                    ],
-                                ),
-                            )
-                        section.entities.extend(entities)
-                    except Exception:
-                        doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                        failed_docs.append(doc)
-        return docs, failed_docs
+    @iterating_step
+    def __call__(self, doc: Document) -> None:
+        if not self.condition or (self.condition and self.condition(doc)):
+            for section in doc.sections:
+                mutation_lst = self.seth.findMutations(section.get_text())
+                entities = []
+                for java_mutation_dict in mutation_lst:
+                    python_dict = dict(java_mutation_dict)
+                    entities.append(
+                        Entity.from_spans(
+                            spans=[
+                                (
+                                    python_dict.pop("start"),
+                                    python_dict.pop("end"),
+                                )
+                            ],
+                            text=section.get_text(),
+                            entity_class=self.entity_class,
+                            namespace=self.namespace(),
+                            metadata={SETH_METADATA_KEY: python_dict},
+                            mappings=[
+                                Mapping(
+                                    default_label=self.entity_class,
+                                    source=self.entity_class,
+                                    parser_name="n/a",
+                                    idx=self.entity_class,
+                                    mapping_strategy=self.namespace(),
+                                    disambiguation_strategy=None,
+                                    confidence=LinkRanks.PROBABLE,
+                                )
+                            ],
+                        ),
+                    )
+                section.entities.extend(entities)
