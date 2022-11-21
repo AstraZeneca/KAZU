@@ -136,13 +136,11 @@ Secondly, we need to write the :meth:`.OntologyParser.find_kb` method:
         return "CHEMBL"
 
 
-Finally, we need to set the class `name` field, so the full class looks like:
+The full class looks like:
 
 .. code-block:: python
 
     class ChemblOntologyParser(OntologyParser):
-
-        name = "CHEMBL"
 
         def find_kb(self, string: str) -> str:
             return "CHEMBL"
@@ -165,4 +163,19 @@ Finally, we need to set the class `name` field, so the full class looks like:
 
             return df
 
-That's it! The datasource is now ready for integration into Kazu, and can be referenced as a mapping target or elsewhere.
+Finally, when we want to use our new parser, we need to give it information about what entity class it is associated with
+.. code-block:: python
+
+    # we need a string scorer to resolve similar terms. Here, we use a trivial example for brevity
+    string_scorer = lambda string_1,string_2: 0.75
+    parser = ChemblOntologyParser(
+        in_path='path to chembl DB goes here',
+        entity_class='drug' #if used in entity linking, entities with class 'drug' will be associated with this parser.
+        name='CHEMBL' # a globally unique name for the parser
+        string_scorer = string_scorer
+        ):
+
+That's it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.
+
+To explore the other capabilities of the :class:`.OntologyParser`, such as synonym generation and ID filtering, please
+refer to the API documentation.
