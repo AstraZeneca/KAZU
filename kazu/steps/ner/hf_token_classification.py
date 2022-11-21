@@ -79,7 +79,7 @@ class TransformersModelForTokenClassificationNerStep(BaseStep):
         self.model = AutoModelForTokenClassification.from_pretrained(path, config=self.config)
         self.model = PLAutoModelForTokenClassification(self.model).eval()
         self.trainer = trainer
-        self.activation_fn = sigmoid if detect_subspans else partial(softmax, dim=1)
+        self.activation_fn = sigmoid if detect_subspans else partial(softmax, dim=-1)
         self.tokenized_word_processor = TokenizedWordProcessor(
             detect_subspans=detect_subspans,
             confidence_threshold=threshold,
