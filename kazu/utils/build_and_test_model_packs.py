@@ -9,7 +9,10 @@ from typing import Tuple, List, Optional
 
 from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
-from kazu.modelling.annotation.acceptance_test import execute_full_pipeline_acceptance_test
+from kazu.modelling.annotation.acceptance_test import (
+    execute_full_pipeline_acceptance_test,
+    check_annotation_consistency,
+)
 from kazu.modelling.ontology_matching import assemble_pipeline
 from kazu.pipeline import load_steps
 from kazu.utils.utils import Singleton
@@ -60,6 +63,7 @@ class ModelPackBuilder:
         custom_model_pack_params: Optional[List[Tuple[Path, bool, bool]]],
         zip_pack: bool,
         run_acceptance_tests: bool,
+        run_consistency_checks: bool,
         output_dir: Path,
     ):
         """
@@ -70,6 +74,7 @@ class ModelPackBuilder:
             <use base config>, <use base model pack>,)
         :param zip_pack: should the pack be zipped at the end?
         :param run_acceptance_tests: should acceptance tests be run?
+        :param run_consistency_checks: run against the annotated corpus, to highlight potential annotation errors
         :param output_dir: directory to build model packs in
         :return:
         """
@@ -78,7 +83,6 @@ class ModelPackBuilder:
         if len(os.listdir(output_dir)) > 0:
             raise ModelPackBuildError(f"{str(output_dir)} is not empty")
 
-        # add additional model packs here to build. Second value of tuple is whether to include default resources or not
         kazu_version = (
             subprocess.check_output("pip show kazu | grep Version", shell=True)
             .decode("utf-8")
@@ -93,6 +97,7 @@ class ModelPackBuilder:
                 maybe_base_configuration_path=maybe_base_configuration_path,
                 maybe_base_model_pack_path=None,
                 kazu_version=kazu_version,
+                run_consistency_checks=run_consistency_checks,
                 run_acceptance_tests=run_acceptance_tests,
                 zip_pack=zip_pack,
                 uncached_model_pack_path=maybe_base_model_pack_path,
@@ -113,6 +118,7 @@ class ModelPackBuilder:
                     maybe_base_configuration_path=maybe_base_configuration_path,
                     maybe_base_model_pack_path=base_model_pack_path_with_cached_files,
                     kazu_version=kazu_version,
+                    run_consistency_checks=run_consistency_checks,
                     run_acceptance_tests=run_acceptance_tests,
                     zip_pack=zip_pack,
                     uncached_model_pack_path=custom_model_pack_path,
@@ -135,6 +141,7 @@ class ModelPackBuilder:
         maybe_base_model_pack_path: Optional[Path],
         kazu_version: str,
         run_acceptance_tests: bool,
+        run_consistency_checks: bool,
         zip_pack: bool,
         uncached_model_pack_path: Path,
         build_dir: Path,
@@ -146,6 +153,7 @@ class ModelPackBuilder:
         :param maybe_base_model_pack_path: if this pack requires the base model pack, specify path
         :param kazu_version: version of kazu used to generate model pack
         :param run_acceptance_tests: should acceptance tests be run?
+        :param run_acceptance_tests: should consistency_checks be run on the annotated corpus?
         :param zip_pack: should model pack be zipped?
         :param uncached_model_pack_path: path to model pack to process
         :param build_dir: directory pack should be built in
@@ -181,6 +189,8 @@ class ModelPackBuilder:
                 overrides=[],
             )
             ModelPackBuilder.build_caches(cfg)
+            if run_consistency_checks:
+                check_annotation_consistency(cfg)
             if run_acceptance_tests:
                 execute_full_pipeline_acceptance_test(cfg)
             if zip_pack:
@@ -320,6 +330,11 @@ to be able to retrieve the annotations"""
         help="should the acceptance tests be run?",
     )
     parser.add_argument(
+        "--run_consistency_checks",
+        action="store_true",
+        help="should consistency checks be run against the annotated corpus, to highlight potential annotation errors?",
+    )
+    parser.add_argument(
         "--zip_model_pack",
         action="store_true",
         help="should the model pack be zipped? (requires command line tool 'zip')",
@@ -342,6 +357,7 @@ to be able to retrieve the annotations"""
         maybe_base_configuration_path=args.base_configuration_path,
         custom_model_pack_params=custom_model_pack_params,
         zip_pack=args.zip_model_pack,
+        run_consistency_checks=args.run_consistency_checks,
         run_acceptance_tests=args.run_acceptance_tests,
         output_dir=args.model_pack_output_path,
     )
