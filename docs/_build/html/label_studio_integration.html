@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="The OntologyParser" href="ontology_parser.html" /><link rel="prev" title="Kazu data model" href="datamodel.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="The OntologyParser" href="ontology_parser.html" /><link rel="prev" title="Kazu Data Model" href="datamodel.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>Visualising results in Label Studio - Kazu documentation</title>
@@ -143,10 +143,12 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="index.html">
   
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/kazu_logo.png" alt="Logo"/>
+  </div>
   
-  <span class="sidebar-brand-text">Kazu  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -162,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="curating_for_explosion.html">Curating a knowledgebase for NER and linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kazu_webservice.html">Kazu as a WebService</a></li>
 </ul>
@@ -176,6 +178,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.modelling.html">kazu.modelling</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/kazu.modelling.annotation.html">kazu.modelling.annotation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.annotation.acceptance_test.html">kazu.modelling.annotation.acceptance_test</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.annotation.label_studio.html">kazu.modelling.annotation.label_studio</a></li>
 </ul>
 </li>
@@ -278,6 +281,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.caching.html">kazu.utils.caching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.utils.link_index.html">kazu.utils.link_index</a></li>
@@ -289,6 +293,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -426,7 +431,7 @@ against your own data, as well as testing custom components.</p>
 </li>
 <li><p>Your ‘gold standard’ entities will now be accessible on the <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section.metadata" title="kazu.data.data.Section.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.Section.metadata</span></code></a> dictionary with the key: ‘gold_entities’</p></li>
 </ol>
-<p>For an example of how we integrate label studio into the Kazu acceptance tests, take a look at <code class="xref py py-func docutils literal notranslate"><span class="pre">kazu.modelling.annotation.acceptance_test.analyse_full_pipeline()</span></code></p>
+<p>For an example of how we integrate label studio into the Kazu acceptance tests, take a look at <a class="reference internal" href="_autosummary/kazu.modelling.annotation.acceptance_test.html#kazu.modelling.annotation.acceptance_test.analyse_full_pipeline" title="kazu.modelling.annotation.acceptance_test.analyse_full_pipeline"><code class="xref py py-func docutils literal notranslate"><span class="pre">kazu.modelling.annotation.acceptance_test.analyse_full_pipeline()</span></code></a></p>
 </section>
 
         </article>
@@ -450,7 +455,7 @@ against your own data, as well as testing custom components.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Kazu data model</div>
+                <div class="title">Kazu Data Model</div>
                 
               </div>
             </a>
