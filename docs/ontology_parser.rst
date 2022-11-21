@@ -104,7 +104,7 @@ There are two methods you need to override: :meth:`.OntologyParser.parse_to_data
         synonyms and the type of mapping as well
         """
 
-        # fortunately, Chembl comes as and sqlite DB, which lends itself very well to this tabular structure
+        # fortunately, Chembl comes as an sqlite DB, which lends itself very well to this tabular structure
         conn = sqlite3.connect(self.in_path)
         query = f"""
             SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
