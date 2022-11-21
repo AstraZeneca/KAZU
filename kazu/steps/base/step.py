@@ -10,16 +10,11 @@ class StepMetadata(TypedDict):
 
 
 class Step(Protocol):
-    """
-    abstract class for components. Describes signature of __call__ for all subclasses
-    concrete implementations should implement the _run() method
-    """
-
     @classmethod
     def namespace(cls) -> str:
-        """
-        the namespace is a piece of metadata to describe the step, and is used in various places.
-        defaults to  cls.__name__
+        """Metadata to name/describe the step, used in various places.
+
+        Defaults to  ``cls.__name__``.
         """
         # Note: it would be nice for this to be a property, but you can't use @classmethod
         # and @property together in most versions of python (you could in 3.9 and 3.10), and
@@ -27,13 +22,11 @@ class Step(Protocol):
         return cls.__name__
 
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
-        """
-        the main method to implement. Takes a list of docs, and returns a tuple where the first element
-        is the succeeded docs, the second are the docs that failed to process. The logic of determining
-        these two lists is the responsibility of the implementation.
+        """Process documents and respond with processed and failed documents.
 
         :param docs:
-        :return:
+        :return: The first element is all the provided docs (now modified by the processing), the
+            second is the docs that failed to (fully) process correctly.
         """
         raise NotImplementedError()
 
