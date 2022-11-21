@@ -27,17 +27,17 @@ text to model which ID in MONDO is more likely. However, for scenario 2, this is
 senses. We could arbitrarily choose one (or both). For scenario 3, it would seem like keeping both makes sense. Nevertheless, we need a system that can
 handle all three scenarios.
 
-Enter the Kazu :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`. The job of the OntologyParser is to transform an Ontology or Knowledgebase
-into a set of :class:`kazu.data.data.SynonymTerm`\ s. A :class:`.SynonymTerm` is a container for a synonym, which understands what set of IDs the
+Enter the Kazu :class:`.OntologyParser`. The job of the OntologyParser is to transform an Ontology or Knowledgebase
+into a set of :class:`.SynonymTerm`\ s. A :class:`.SynonymTerm` is a container for a synonym, which understands what set of IDs the
 synonym may refer to and whether they refer to a single group of closely related concepts or multiple separate ones. This is handled by the attribute
-:attr:`kazu.data.data.SynonymTerm.associated_id_sets`. A :class:`.SynonymTerm` holds various other pieces of useful information
+:attr:`.SynonymTerm.associated_id_sets`. A :class:`.SynonymTerm` holds various other pieces of useful information
 such as whether the term is symbolic (i.e. an abbreviation or some other identifier).
 
 How does it work? When an ambiguous term is detected in the ontology, the parser must decide whether it should group the confused IDs into the same
-:class:`kazu.data.data.EquivalentIdSet`, or different ones. The algorithm for doing this works as follows:
+:class:`.EquivalentIdSet`, or different ones. The algorithm for doing this works as follows:
 
-1) Use the :class:`kazu.utils.string_normalizer.StringNormalizer` to determine if the term is symbolic or not. If it's not symbolic (i.e. a noun phrase),
-   merge the IDs into a single :class:`kazu.data.data.EquivalentIdSet`. The idea here is that noun phrase entities 'ought' to be distinct enough such that
+1) Use the :class:`.StringNormalizer` to determine if the term is symbolic or not. If it's not symbolic (i.e. a noun phrase),
+   merge the IDs into a single :class:`.EquivalentIdSet`. The idea here is that noun phrase entities 'ought' to be distinct enough such that
    references to the same string across different identifiers refer to the same concept.
 
     example:
@@ -59,7 +59,7 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
     result:
 
-        sapbert similarity: 0.4532. Threshold: 0.70. Decision -> split into two instances of :class:`kazu.data.data.EquivalentIdSet`
+        sapbert similarity: 0.4532. Threshold: 0.70. Decision -> split into two instances of :class:`.EquivalentIdSet`
 
     example:
 
@@ -67,20 +67,20 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
     result:
 
-        sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`kazu.data.data.EquivalentIdSet`
+        sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`.EquivalentIdSet`
 
 Naturally, this behaviour may not always be desired. You may want two instances of :class:`.SynonymTerm` for the term "XLOA" (despite the MONDO ontology
 suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.SynonymTerm` is most appropriate.
-In this case, you can override this behaviour with :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids`\ .
+In this case, you can override this behaviour with :meth:`.OntologyParser.score_and_group_ids`\ .
 
 
 Writing a Custom Parser
 -------------------------
 
 Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an :class:`.OntologyParser`.
-Fortunately, this is generally quite easy to do. Let's take the example of the :class:`kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser`.
+Fortunately, this is generally quite easy to do. Let's take the example of the :class:`.ChemblOntologyParser`.
 
-There are two methods you need to override: :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe` and :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb`. Let's look at the first of these:
+There are two methods you need to override: :meth:`.OntologyParser.parse_to_dataframe` and :meth:`.OntologyParser.find_kb`. Let's look at the first of these:
 
 .. code-block:: python
 
@@ -122,7 +122,7 @@ There are two methods you need to override: :meth:`kazu.modelling.ontology_prepr
 
         return df
 
-Secondly, we need to write the :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb` method:
+Secondly, we need to write the :meth:`.OntologyParser.find_kb` method:
 
 .. code-block:: python
 
