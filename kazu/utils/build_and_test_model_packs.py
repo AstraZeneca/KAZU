@@ -286,8 +286,8 @@ requires each model pack directory to contain the following:
   acceptance tests to run. This file should specify the thresholds per NER class/Ontology for NER/linking
   respectively (see the provided model pack for an example)
 
-In addition, if run_acceptance_tests or run_consistency_checks are specified, an instance of Label Studio 
-should be accessible on the network, in order for the acceptance test to be able to retrieve the annotations. 
+In addition, if run_acceptance_tests or run_consistency_checks are specified, an instance of Label Studio
+should be accessible on the network, in order for the acceptance test to be able to retrieve the annotations.
 Access parameters for Label Studio are taken from the LabelStudioManager config in the model pack path.
 """
 
