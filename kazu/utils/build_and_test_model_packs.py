@@ -28,6 +28,7 @@ class ModelPackBuilder:
     def clear_cached_resources_from_model_pack_dir(model_path_path: Path):
         """
         delete any cached data from the input path
+
         :param model_path_path:
         :return:
         """
@@ -68,6 +69,7 @@ class ModelPackBuilder:
     ):
         """
         build multiple model packs
+
         :param maybe_base_model_pack_path: Path to the base model pack, if required
         :param maybe_base_configuration_path: Path to the base configuration, if required
         :param custom_model_pack_params: optional tuples of (<path to custom pack resources>,
@@ -130,6 +132,7 @@ class ModelPackBuilder:
         """
         this is required between different instantiations of the pipeline config, as singleton states
         may conflict
+
         :return:
         """
         print("clearing singletons")
