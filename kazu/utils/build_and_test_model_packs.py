@@ -279,11 +279,14 @@ requires each model pack directory to contain the following:
  b) a LabelStudioManager configuration to run acceptance tests
 2) an explosion_whitelist.jsonl in the path <model_pack_root>/ontologies/curations/explosion_whitelist.jsonl
   in order for an ExplosionStringMatchingStep to be created
-3) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order to the
-  acceptance tests to run
+3) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order for the
+  acceptance tests to run. This file should specify the thresholds per NER class/Ontology for NER/linking
+  respectively (see the provided model pack for an example)
 
-In addition, an instance of Label Studio should be accessible on the network, in order for the acceptance test
-to be able to retrieve the annotations"""
+In addition, if run_acceptance_tests or run_consistency_checks are specified, an instance of Label Studio 
+should be accessible on the network, in order for the acceptance test to be able to retrieve the annotations. 
+Access parameters for Label Studio are taken from the LabelStudioManager config in the model pack path.
+"""
 
     parser = argparse.ArgumentParser(description=description)
 
