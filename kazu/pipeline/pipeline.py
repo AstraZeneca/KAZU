@@ -183,7 +183,7 @@ class Pipeline:
         batch_start = time.time()
         for step in self.steps:
             start = time.time()
-            succeeded_docs, failed_docs = step(docs_to_process)
+            _processed_docs, failed_docs = step(docs_to_process)
             step_times[step.namespace()] = round(time.time() - start, 4)
             self.update_failed_docs(step, failed_docs)
         batch_time = round(time.time() - batch_start, 4)
