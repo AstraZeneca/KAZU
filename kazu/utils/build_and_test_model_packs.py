@@ -227,19 +227,17 @@ class ModelPackBuilder:
         load_steps(cfg)
 
 
-def build_custom_pack_params(arguments):
-    if arguments.custom_model_pack_paths is not None:
-        custom_model_pack_params = [
-            (
-                path,
-                args.custom_packs_to_use_base_configuration[i],
-                args.custom_packs_to_use_base_resources[i],
-            )
-            for i, path in enumerate(args.custom_model_pack_paths)
-        ]
-    else:
-        custom_model_pack_params = None
-    return custom_model_pack_params
+def build_custom_pack_params(arguments) -> Optional[List[Tuple[Path, bool, bool]]]:
+    if arguments.custom_model_pack_paths is None:
+        return None
+    return [
+        (
+            path,
+            args.custom_packs_to_use_base_configuration[i],
+            args.custom_packs_to_use_base_resources[i],
+        )
+        for i, path in enumerate(args.custom_model_pack_paths)
+    ]
 
 
 def _validate_arguments(arguments):
