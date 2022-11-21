@@ -21,6 +21,9 @@ class Step(Protocol):
         the namespace is a piece of metadata to describe the step, and is used in various places.
         defaults to  cls.__name__
         """
+        # Note: it would be nice for this to be a property, but you can't use @classmethod
+        # and @property together in most versions of python (you could in 3.9 and 3.10), and
+        # it being a classmethod is quite useful.
         return cls.__name__
 
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
