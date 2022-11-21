@@ -1,4 +1,5 @@
 .. _curating_for_explosion:
+
 Curating ontology terms for NER
 ================================
 
@@ -34,6 +35,7 @@ In Kazu, we take the following approach:
         labels={"disease"},
         output_dir="~/noisy_spacy_pipeline",
     )
+
 
 2. we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
    is for illustration only - you'll probably want a more sophisticated set up when doing this on a large document set!

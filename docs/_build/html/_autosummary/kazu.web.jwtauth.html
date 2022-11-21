@@ -345,20 +345,18 @@
 All rights reserved.</p>
 <p>Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:</p>
-<ul class="simple">
-<li><p>Redistributions of source code must retain the above copyright notice, this</p></li>
+<blockquote>
+<div><ul class="simple">
+<li><p>Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.</p></li>
+<li><p>Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.</p></li>
+<li><p>Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.</p></li>
 </ul>
-<p>list of conditions and the following disclaimer.</p>
-<ul class="simple">
-<li><p>Redistributions in binary form must reproduce the above copyright notice,</p></li>
-</ul>
-<p>this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.</p>
-<ul class="simple">
-<li><p>Neither the name of the copyright holder nor the names of its</p></li>
-</ul>
-<p>contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.</p>
+</div></blockquote>
 <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS”
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -384,11 +382,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.web.jwtauth.JWTAuthenticationBackend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.jwtauth.</span></span><span class="sig-name descname"><span class="pre">JWTAuthenticationBackend</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L69-L117"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.jwtauth.</span></span><span class="sig-name descname"><span class="pre">JWTAuthenticationBackend</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L70-L118"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AuthenticationBackend</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.web.jwtauth.JWTAuthenticationBackend.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secret_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HS256'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bearer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'username'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L70-L84"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secret_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'HS256'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bearer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'username'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L71-L85"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -408,7 +406,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.web.jwtauth.JWTAuthenticationBackend.authenticate">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L97-L117"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend.authenticate" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L98-L118"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend.authenticate" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[None, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<em>AuthCredentials</em>, <em>BaseUser</em>]]</p>
@@ -418,7 +416,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.web.jwtauth.JWTAuthenticationBackend.get_token_from_header">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_token_from_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">authorization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L86-L95"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend.get_token_from_header" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_token_from_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">authorization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L87-L96"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTAuthenticationBackend.get_token_from_header" title="Permalink to this definition">#</a></dt>
 <dd><p>Parses the Authorization header and returns only the token</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -437,11 +435,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.web.jwtauth.JWTUser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.jwtauth.</span></span><span class="sig-name descname"><span class="pre">JWTUser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L54-L66"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTUser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.jwtauth.</span></span><span class="sig-name descname"><span class="pre">JWTUser</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L55-L67"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTUser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseUser</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.web.jwtauth.JWTUser.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L55-L58"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTUser.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/jwtauth.py#L56-L59"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.jwtauth.JWTUser.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

@@ -511,7 +511,7 @@ This is needed in a multi GPU environment</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">PLSapbertModel</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/linking/sapbert/train.py#L238-L482"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html#pytorch_lightning.core.LightningModule" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html#pytorch_lightning.core.LightningModule" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a></p>
 <p>pytorch lightning production implementation of SapBert</p>
 <p>Original source
 <a class="reference external" href="https://github.com/cambridgeltl/sapbert">https://github.com/cambridgeltl/sapbert</a></p>
@@ -625,7 +625,7 @@ should be conditioned on.</p>
 </pre></div>
 </div>
 <p>Metrics can be made available to monitor by simply logging it using
-<code class="docutils literal notranslate"><span class="pre">self.log('metric_to_track',</span> <span class="pre">metric_val)</span></code> in your <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html#pytorch_lightning.core.LightningModule" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a>.</p>
+<code class="docutils literal notranslate"><span class="pre">self.log('metric_to_track',</span> <span class="pre">metric_val)</span></code> in your <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html#pytorch_lightning.core.LightningModule" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a>.</p>
 <dl>
 <dt>Note:</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">frequency</span></code> value specified in a dict along with the <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> key is an int corresponding
 to the number of sequential batches optimized with the specific optimizer.
@@ -793,7 +793,7 @@ override the <code class="xref py py-meth docutils literal notranslate"><span cl
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>texts</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.1)"><em>Trainer</em></a><em>]</em>) – an optional PL Trainer to use. If not specified, uses the default one</p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.2)"><em>Trainer</em></a><em>]</em>) – an optional PL Trainer to use. If not specified, uses the default one</p></li>
 <li><p><strong>size</strong> (<em>batch</em>) – optional batch size to use. If not specified, use 16</p></li>
 <li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – </p></li>
 </ul>
@@ -815,7 +815,7 @@ override the <code class="xref py py-meth docutils literal notranslate"><span cl
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loader</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>) – </p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.1)"><em>Trainer</em></a>) – the PL Trainer to use</p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.8.2)"><em>Trainer</em></a>) – the PL Trainer to use</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -835,13 +835,13 @@ override the <code class="xref py py-meth docutils literal notranslate"><span cl
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.predict_step">
 <span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/linking/sapbert/train.py#L375-L376"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.predict_step" title="Permalink to this definition">#</a></dt>
-<dd><p>Step function called during <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.predict" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code></a>. By default, it
+<dd><p>Step function called during <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.predict" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code></a>. By default, it
 calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code>. Override to add any processing logic.</p>
 <p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict_step()</span></code> is used
 to scale inference on multi-devices.</p>
-<p>To prevent an OOM error, it is possible to use <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.callbacks.BasePredictionWriter.html#pytorch_lightning.callbacks.BasePredictionWriter" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code></a>
+<p>To prevent an OOM error, it is possible to use <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.callbacks.BasePredictionWriter.html#pytorch_lightning.callbacks.BasePredictionWriter" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code></a>
 callback to write the predictions to disk or database after each batch or on epoch end.</p>
-<p>The <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.callbacks.BasePredictionWriter.html#pytorch_lightning.callbacks.BasePredictionWriter" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code></a> should be used while using a spawn
+<p>The <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.callbacks.BasePredictionWriter.html#pytorch_lightning.callbacks.BasePredictionWriter" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code></a> should be used while using a spawn
 based accelerator. This happens for <code class="docutils literal notranslate"><span class="pre">Trainer(strategy=&quot;ddp_spawn&quot;)</span></code>
 or training on 8 TPU cores with <code class="docutils literal notranslate"><span class="pre">Trainer(accelerator=&quot;tpu&quot;,</span> <span class="pre">devices=8)</span></code> as predictions won’t be returned.</p>
 <p>Example</p>
@@ -884,7 +884,7 @@ dataloader_idx: Index of the current dataloader.</p>
 <dd><p>Implement one or more PyTorch DataLoaders for training.</p>
 <dl class="simple">
 <dt>Return:</dt><dd><p>A collection of <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code></a> specifying training samples.
-In the case of multiple dataloaders, please see this <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/guides/data.html#multiple-dataloaders" title="(in PyTorch Lightning v1.8.1)"><span class="xref std std-ref">section</span></a>.</p>
+In the case of multiple dataloaders, please see this <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/guides/data.html#multiple-dataloaders" title="(in PyTorch Lightning v1.8.2)"><span class="xref std std-ref">section</span></a>.</p>
 </dd>
 </dl>
 <p>The dataloader you return will not be reloaded unless you set
@@ -903,7 +903,7 @@ a positive integer.</p>
 <p>do not assign state in prepare_data</p>
 </div>
 <ul class="simple">
-<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.fit" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a></p></li>
+<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.fit" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></p></li>
 </ul>
@@ -1042,8 +1042,8 @@ so it differs from the actual loss returned in train/validation step.</p>
 a positive integer.</p>
 <p>It’s recommended that all data downloads and preparation happen in <code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code>.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.fit" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a></p></li>
-<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.validate" title="(in PyTorch Lightning v1.8.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate()</span></code></a></p></li>
+<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.fit" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a></p></li>
+<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.validate" title="(in PyTorch Lightning v1.8.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate()</span></code></a></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></p></li>
 </ul>
