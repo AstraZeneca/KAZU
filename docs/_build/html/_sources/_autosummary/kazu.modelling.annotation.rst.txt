@@ -1,4 +1,4 @@
-kazu.modelling.annotation
+﻿kazu.modelling.annotation
 =========================
 
 .. automodule:: kazu.modelling.annotation
@@ -27,5 +27,6 @@ kazu.modelling.annotation
    :toctree:
    :recursive:
 
+   kazu.modelling.annotation.acceptance_test
    kazu.modelling.annotation.label_studio
 

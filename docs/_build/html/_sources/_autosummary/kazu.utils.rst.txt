@@ -1,4 +1,4 @@
-kazu.utils
+﻿kazu.utils
 ==========
 
 .. automodule:: kazu.utils
@@ -28,6 +28,7 @@ kazu.utils
    :recursive:
 
    kazu.utils.abbreviation_detector
+   kazu.utils.build_and_test_model_packs
    kazu.utils.caching
    kazu.utils.grouping
    kazu.utils.link_index

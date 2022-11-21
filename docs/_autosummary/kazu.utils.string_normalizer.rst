@@ -1,4 +1,4 @@
-﻿kazu.utils.string\_normalizer
+kazu.utils.string\_normalizer
 =============================
 
 .. automodule:: kazu.utils.string_normalizer
