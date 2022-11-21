@@ -299,7 +299,7 @@ to be able to retrieve the annotations"""
         type=Path,
         required=False,
         help="""Path to the base configuration to use if a model pack requires it (generally
-        this should be <kazu repo root>/kazu/conf""",
+        this should be <kazu repo root>/kazu/conf)""",
     )
     parser.add_argument(
         "--custom_model_pack_paths",
