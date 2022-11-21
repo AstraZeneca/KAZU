@@ -453,7 +453,7 @@ class GildaUtils:
         note = {vbac034}
     }
 
-    -----------------------------------------------------------------
+
     BSD 2-Clause License
 
     Copyright (c) 2019, Benjamin M. Gyori, Harvard Medical School
@@ -479,7 +479,7 @@ class GildaUtils:
     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
     OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-    -----------------------------------------------------------------
+
     """
 
     dashes = [chr(0x2212), chr(0x002D)] + [chr(c) for c in range(0x2010, 0x2016)]
