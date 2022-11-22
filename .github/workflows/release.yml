@@ -106,13 +106,19 @@ jobs:
       - name: Bump version with commit and tag, commit, and push
         run: |
           cd $GITHUB_WORKSPACE
+          GITHUB_BOT="kazu.versionbump@users.noreply.github.com"
           # reset to remove previous call to bump version, so we can call again with 
           # tag and commit
           git reset --hard
           git config --global user.name 'Kazu Version Bump'
-          git config --global user.email 'kazu.versionbump@users.noreply.github.com'
+          git config --global user.email $GITHUB_BOT
+          git checkout -b releases/$KAZU_NEW_VERSION
           bump2version --verbose --commit --tag $KAZU_NEW_VERSION
           git push --follow-tags
+          
+          PR_ID=$(gh pr create -b main --title "version bump to v${KAZU_NEW_VERSION}")
+          # todo: when github support gets back to us, uncomment this to auto merge PR
+          # gh pr merge $PR_ID --admin --author-email $GITHUB_BOT --rebase
         env:
           KAZU_NEW_VERSION: ${{ inputs.version }}
 
