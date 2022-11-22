@@ -443,7 +443,6 @@ class Document:
             as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
         )
         return DocumentJsonUtils.remove_empty_elements(as_dict)
-        
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
