@@ -124,8 +124,8 @@ jobs:
           git push -u origin --follow-tags releases/$KAZU_RELEASE_VERSION
           
           PR_ID=$(gh pr create -b main --title "version bump to v${KAZU_NEW_VERSION}")
-          # todo: when github support gets back to us, uncomment this to auto merge PR
-          gh pr merge $PR_ID --admin --rebase
+          # todo: auto merge when we have a solution for this
+          # gh pr merge $PR_ID --admin --rebase
           NEW_MODEL_PACK_ZIP=$(echo "${{ env.NEW_MODEL_PACK_ZIP }}")          
           gh release create $KAZU_RELEASE_VERSION --notes "TBA" --title $KAZU_RELEASE_VERSION          
           gh release upload $KAZU_RELEASE_VERSION dist/* --clobber
