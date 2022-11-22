@@ -118,7 +118,7 @@ jobs:
           
           PR_ID=$(gh pr create -b main --title "version bump to v${KAZU_NEW_VERSION}")
           # todo: when github support gets back to us, uncomment this to auto merge PR
-          # gh pr merge $PR_ID --admin --author-email $GITHUB_BOT --rebase
+          gh pr merge $PR_ID --admin --rebase
         env:
           KAZU_NEW_VERSION: ${{ inputs.version }}
 
