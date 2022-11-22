@@ -114,7 +114,7 @@ jobs:
           git config --global user.email $GITHUB_BOT
           git checkout -b releases/$KAZU_NEW_VERSION
           bump2version --verbose --commit --tag $KAZU_NEW_VERSION
-          git push --follow-tags
+          git push -u --follow-tags
           
           PR_ID=$(gh pr create -b main --title "version bump to v${KAZU_NEW_VERSION}")
           # todo: when github support gets back to us, uncomment this to auto merge PR
