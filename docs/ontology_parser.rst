@@ -163,17 +163,18 @@ The full class looks like:
 
             return df
 
-Finally, when we want to use our new parser, we need to give it information about what entity class it is associated with
+Finally, when we want to use our new parser, we need to give it information about what entity class it is associated with:
+
 .. code-block:: python
 
     # we need a string scorer to resolve similar terms. Here, we use a trivial example for brevity
-    string_scorer = lambda string_1,string_2: 0.75
+    string_scorer = lambda string_1, string_2: 0.75
     parser = ChemblOntologyParser(
         in_path='path to chembl DB goes here',
-        entity_class='drug' #if used in entity linking, entities with class 'drug' will be associated with this parser.
+        entity_class='drug' # if used in entity linking, entities with class 'drug' will be associated with this parser.
         name='CHEMBL' # a globally unique name for the parser
         string_scorer = string_scorer
-        ):
+    )
 
 That's it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.
 
