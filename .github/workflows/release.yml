@@ -121,7 +121,7 @@ jobs:
           . kazu-env/bin/activate
           python setup.py clean --all
           python setup.py sdist bdist_wheel
-          git push -u --follow-tags
+          git push -u origin --follow-tags releases/$KAZU_RELEASE_VERSION
           
           PR_ID=$(gh pr create -b main --title "version bump to v${KAZU_NEW_VERSION}")
           # todo: when github support gets back to us, uncomment this to auto merge PR
