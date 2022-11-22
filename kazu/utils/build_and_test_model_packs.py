@@ -182,8 +182,9 @@ class ModelPackBuilder:
         else:
             # the base conf may have been copied over if the base model pack was used,
             # so we get rid of it here if required
-            print(f"removing base configuration for {uncached_model_pack_path.name}")
-            shutil.rmtree(conf_path)
+            if conf_path.exists():
+                print(f"removing base configuration for {uncached_model_pack_path.name}")
+                shutil.rmtree(conf_path)
 
         print(f"preparing to build model pack {model_pack_build_path.name}")
         copy_tree(str(uncached_model_pack_path), str(model_pack_build_path))
