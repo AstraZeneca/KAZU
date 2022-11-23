@@ -37,9 +37,9 @@ def main(
     this will be logged as a warning.
 
     :param output_dir: the output directory to write the pipeline into.
-    :param parsers: build the pipeline using these parsers as a data source
+    :param parsers: build the pipeline using these parsers as a data source.
     :param curated_list: optional path to a jsonl file. Each line should be json with fields:
-        'term', 'case_sensitive', entity_class
+        'term', 'case_sensitive', entity_class.
     :param span_key: the key to use within the generated Spacy Docs'
         `span attribute <https://spacy.io/api/doc#spans>`_ to store and access recognised NER
         spans.
