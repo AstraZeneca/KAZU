@@ -1,15 +1,17 @@
 import json
 import logging
 import pickle
+import uuid
 from collections import defaultdict
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Iterable, Tuple, Optional
+from typing import List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Set
 
 import spacy
 import srsly
 
+from kazu.data.data import SynonymTerm
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
@@ -28,6 +30,8 @@ ENTITY = "entity"
 SPAN_KEY = "RAW_HITS"
 MATCH_ID_SEP = ":::"
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class OntologyMatcherConfig:
@@ -35,6 +39,23 @@ class OntologyMatcherConfig:
     match_id_sep: str
     labels: List[str]
     parser_name_to_entity_type: Dict[str, str]
+
+
+@dataclass
+class CuratedTerm:
+    term: str
+    action: str
+    case_sensitive: bool
+    entity_class: str
+    term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
+
+
+def _ontology_dict_setter(span: Span, value: Dict):
+    span.doc.user_data[span] = value
+
+
+def _ontology_dict_getter(span: Span):
+    return span.doc.user_data.get(span, {})
 
 
 @Language.factory(
@@ -63,7 +84,10 @@ class OntologyMatcher:
 
         :param span_key: the key for doc.spans to store the matches in
         """
-        Span.set_extension("ontology_dict_", default=dict(), force=True)
+
+        Span.set_extension(
+            "ontology_dict_", force=True, getter=_ontology_dict_getter, setter=_ontology_dict_setter
+        )
         self.nlp = nlp
         self.name = name
         self.cfg = OntologyMatcherConfig(
@@ -116,35 +140,124 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
+    def _load_curations(self, curated_list: PathLike) -> List[CuratedTerm]:
+        with open(curated_list, mode="r") as jsonlf:
+            curated_synonyms = [CuratedTerm(**json.loads(line)) for line in jsonlf]
+        return curated_synonyms
+
+    def _match_curations_to_ontology_terms(
+        self, parsers: List[OntologyParser], curations: List[CuratedTerm]
+    ) -> List[CuratedTerm]:
+
+        case_sensitive: DefaultDict[str, DefaultDict[str, Set[SynonymTerm]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
+        case_insensitive: DefaultDict[str, DefaultDict[str, Set[SynonymTerm]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
+        matched_curations = []
+        for parser in parsers:
+            terms = parser.generate_synonyms()
+            for term in terms:
+                for original_string in term.terms:
+                    case_sensitive[parser.entity_class][original_string].add(term)
+                    case_insensitive[parser.entity_class][original_string.lower()].add(term)
+
+        for curation in curations:
+            if curation.action != "keep":
+                logging.debug(f"dropping unwanted curation: {curation}")
+                continue
+            if curation.case_sensitive:
+                query_dict = case_sensitive
+                query_string = curation.term
+            else:
+                query_dict = case_insensitive
+                query_string = curation.term.lower()
+
+            matched_terms_this_curation = defaultdict(set)
+            matched_syn_terms = query_dict[curation.entity_class].get(query_string, set())
+            if len(matched_syn_terms) == 0:
+                logger.warning(f"failed to find ontology match for {curation}")
+            else:
+
+                non_redundant_syn_terms_by_parser = sort_then_group(
+                    matched_syn_terms,
+                    key_func=lambda x: (
+                        x.parser_name,
+                        x.associated_id_sets,
+                    ),
+                )
+                for (
+                    parser_name,
+                    associated_id_sets,
+                ), syn_terms_this_parser in non_redundant_syn_terms_by_parser:
+
+                    # sort when choosing a term to use (amongst redundant terms) so that
+                    # the chosen term is consistent between executions
+                    syn_term_for_this_id_set = sorted(
+                        list(syn_terms_this_parser), key=lambda x: x.term_norm
+                    )[0]
+                    matched_terms_this_curation[parser_name].add(syn_term_for_this_id_set.term_norm)
+                    if len(matched_terms_this_curation[parser_name]) > 1:
+                        logger.warning(
+                            f"multiple SynonymTerm's detected for string {query_string}, "
+                            f"This is probably means {query_string} is ambiguous in the "
+                            f"parser {parser_name}"
+                        )
+            curation.term_norm_mapping = dict(matched_terms_this_curation)
+            matched_curations.append(curation)
+
+        return matched_curations
+
     def create_phrasematchers_from_curated_list(
-        self, curated_list: PathLike
+        self, curated_list: PathLike, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
+        """
+        in order to (non-redundantly) map a curated term to a :class:`.SynonymTerm`,
+        we need to perform the following steps:
+
+        1) look for the curated term string in the :attr:`.SynonymTerm.terms` field,
+            checking for case sensitivity as we go
+
+        2) for all matched :class:`.SynonymTerm`\'s, check for redundancy by looking
+            at the hash of :attr:`.SynonymTerm.associated_id_sets`
+
+        3) for all non-redundant :class:`.SynonymTerm`\'s, map the curated term string
+            to the :attr:`.SynonymTerm.term_norm`
+
+        :param curated_list:
+        :param parsers:
+        :return:
+        """
+
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
+        self.set_labels(parser.entity_class for parser in parsers)
+        curations = self._load_curations(curated_list)
+        matched_curations = self._match_curations_to_ontology_terms(
+            parsers=parsers, curations=curations
+        )
 
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
 
-        with open(curated_list, mode="r") as jsonlf:
-            curated_synonyms = [json.loads(line) for line in jsonlf]
-
-        synonyms_to_add = [item for item in curated_synonyms if item["action"] == "keep"]
-
         patterns = self.nlp.tokenizer.pipe(
-            # we need it lowercased for the case insensitive matcher
-            item["term"] if item["case_sensitive"] else item["term"].lower()
-            for item in synonyms_to_add
+            # we need it lowercased for the case-insensitive matcher
+            curation.term if curation.case_sensitive else curation.term.lower()
+            for curation in matched_curations
         )
 
-        for item, pattern in zip(synonyms_to_add, patterns):
-            # a generated synonym can have different term_norms for different parsers,
-            # since the string normalizer's output depends on the entity class
-            for parser_name, term_norm in item["term_norm_mapping"].items():
-                match_id = parser_name + self.match_id_sep + term_norm
-                if item["case_sensitive"]:
-                    strict_matcher.add(match_id, [pattern])
-                else:
-                    lowercase_matcher.add(match_id, [pattern])
+        for curation, pattern in zip(matched_curations, patterns):
+            # a curation can have different term_norms for different parsers,
+            # since the string normalizer's output depends on the entity class.
+            # Also, a curation may exist in multiple SynonymTerm.terms
+            for parser_name, term_norms in curation.term_norm_mapping.items():
+                for term_norm in term_norms:
+                    match_id = parser_name + self.match_id_sep + term_norm
+                    if curation.case_sensitive:
+                        strict_matcher.add(match_id, [pattern])
+                    else:
+                        lowercase_matcher.add(match_id, [pattern])
 
         # only set the phrasematcher if we have any rules for them
         # this lets us skip running a phrasematcher if it has no rules when we come
@@ -162,9 +275,10 @@ class OntologyMatcher:
         Returns the lowercase phrasematcher and None - so it matches the return shape of
         :meth:`create_phrasematchers_from_curated_list`\\ .
         """
+
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
-
+        self.set_labels(parser.entity_class for parser in parsers)
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         for parser in parsers:
             synonym_terms = parser.generate_synonyms()
@@ -203,10 +317,7 @@ class OntologyMatcher:
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
-            raise ValueError(
-                "The matcher rules have not been set up properly. "
-                "Did you initialize the labels and the phrase matchers?"
-            )
+            raise ValueError("there are no matcher rules configured!")
 
         # at least one phrasematcher will now be set.
         # normally, this will only be one: either a strict matcher if constructed by curated list,
@@ -244,10 +355,10 @@ class OntologyMatcher:
                         term_norm,
                     )
                 )
-
             for ent_class in data:
-                new_span = Span(doc, start, end, label=ent_class)
-                new_span._.set("ontology_dict_", data)
+                # we use a uuid here so that every span hash is unique
+                new_span = Span(doc, start, end, label=uuid.uuid4().hex)
+                new_span._.set("ontology_dict_", {ent_class: data[ent_class]})
                 spans.append(new_span)
         final_spans = self.filter_by_contexts(doc, spans)
         span_group = SpanGroup(doc, name=self.span_key, spans=final_spans)
@@ -265,38 +376,42 @@ class OntologyMatcher:
         for label in self.labels:
             # Set all token attributes for other labels (to use in the matcher rules)
             for s in spans:
-                if s.label_ != label and s.label_ in self.labels:
-                    self._set_token_attr(s, True)
+                for ent_class in s._.ontology_dict_:
+                    if ent_class != label and ent_class in self.labels:
+                        self._set_token_attr(ent_class=ent_class, span=s, value=True)
             # Set the token attribute for each span of this label one-by-one, then match
             for span in spans:
-                if span.label_ == label:
-                    self._set_token_attr(span, True)
-                    context = doc
-                    if doc_has_sents:
-                        context = span.sent
-                    if (
-                        self.span_in_TP_coocc(context, span)
-                        and not self.span_in_FP_coocc(context, span)
-                        and self.span_in_TP_context(context, span)
-                        and not self.span_in_FP_context(context, span)
-                    ):
-                        filtered_spans.append(span)
-                    # reset for the next span within the same label
-                    self._set_token_attr(span, False)
+                for ent_class in span._.ontology_dict_:
+                    if ent_class == label:
+                        self._set_token_attr(ent_class=ent_class, span=span, value=True)
+                        context = doc
+                        if doc_has_sents:
+                            context = span.sent
+                        if (
+                            self.span_in_TP_coocc(context, span=span, ent_class=ent_class)
+                            and not self.span_in_FP_coocc(context, span=span, ent_class=ent_class)
+                            and self.span_in_TP_context(context, ent_class)
+                            and not self.span_in_FP_context(context, ent_class)
+                        ):
+                            filtered_spans.append(span)
+                        # reset for the next span within the same label
+                        self._set_token_attr(ent_class, span, False)
             # reset for the next label
             for s in spans:
-                if s.label_ in self.labels:
-                    self._set_token_attr(s, False)
+                for ent_class in s._.ontology_dict_:
+                    if ent_class in self.labels:
+                        self._set_token_attr(ent_class, s, False)
         return filtered_spans
 
-    def _set_token_attr(self, span, value: bool):
+    def _set_token_attr(self, ent_class: str, span: Span, value: bool):
         for token in span:
-            token._.set(span.label_, value)
+            token._.set(ent_class, value)
 
-    def span_in_TP_context(self, doc, span):
+    def span_in_TP_context(self, doc, ent_class: str):
         """When an entity type has a TP matcher defined, it should match for this
         span to be regarded as a true hit."""
-        tp_matcher = self.tp_matchers.get(span.label_, None)
+        assert self.tp_matchers is not None
+        tp_matcher = self.tp_matchers.get(ent_class, None)
         if tp_matcher:
             rule_spans = tp_matcher(doc, as_spans=True)
             if len(rule_spans) > 0:
@@ -304,10 +419,11 @@ class OntologyMatcher:
             return False
         return True
 
-    def span_in_FP_context(self, doc, span):
+    def span_in_FP_context(self, doc, ent_class: str):
         """When an entity type has a FP matcher defined, spans that match
         are regarded as FPs."""
-        fp_matcher = self.fp_matchers.get(span.label_, None)
+        assert self.fp_matchers is not None
+        fp_matcher = self.fp_matchers.get(ent_class, None)
         if fp_matcher:
             rule_spans = fp_matcher(doc, as_spans=True)
             if len(rule_spans) > 0:
@@ -315,10 +431,11 @@ class OntologyMatcher:
             return False
         return False
 
-    def span_in_TP_coocc(self, doc, span):
+    def span_in_TP_coocc(self, doc, span: Span, ent_class: str):
         """When an entity type has a TP co-occ dict defined, a hit defined in the dict
         is only regarded as a true hit when it matches at least one of its co-occ terms."""
-        tp_dict = self.tp_coocc_dict.get(span.label_, None)
+        assert self.tp_coocc_dict is not None
+        tp_dict = self.tp_coocc_dict.get(ent_class, None)
         if tp_dict and tp_dict.get(span.text):
             for w in tp_dict[span.text]:
                 if w in doc.text:
@@ -326,10 +443,11 @@ class OntologyMatcher:
             return False
         return True
 
-    def span_in_FP_coocc(self, doc, span):
+    def span_in_FP_coocc(self, doc, span: Span, ent_class: str):
         """When an entity type has a FP co-occ dic defined, a hit defined in the dict
         is regarded as a false positive when it matches at least one of its co-occ terms."""
-        fp_dict = self.fp_coocc_dict.get(span.label_, None)
+        assert self.fp_coocc_dict is not None
+        fp_dict = self.fp_coocc_dict.get(ent_class, None)
         if fp_dict and fp_dict.get(span.text):
             for w in fp_dict[span.text]:
                 if w in doc.text:
