@@ -1,9 +1,8 @@
 import logging
 import traceback
-from typing import Iterator, List, Optional, Tuple
+from typing import Iterator, List, Optional, Tuple, Iterable
 
 import spacy
-
 from kazu.data.data import (
     CharSpan,
     Document,
@@ -15,8 +14,8 @@ from kazu.data.data import (
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.steps import BaseStep
-from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
+from spacy.tokens import Span
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +51,14 @@ class ExplosionStringMatchingStep(BaseStep):
 
         self.synonym_db = SynonymDatabase()
 
+    def extract_entity_data_from_spans(
+        self, spans: Iterable[Span]
+    ) -> Iterator[Tuple[int, int, str, str, str, str]]:
+        for span in spans:
+            for entity_class, ontology_data in span._.ontology_dict_.items():
+                for parser_name, term_norm in ontology_data:
+                    yield span.start_char, span.end_char, span.text, entity_class, parser_name, term_norm
+
     def _run(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         failed_docs = []
 
@@ -69,22 +76,25 @@ class ExplosionStringMatchingStep(BaseStep):
                 entities = []
 
                 spans = processed_text.spans[self.span_key]
-                grouped_spans = sort_then_group(spans, self._mapping_invariant_span)
-                for mapping_invariant_span, span_group in grouped_spans:
-                    span_start, span_end, span_text, entity_type = mapping_invariant_span
+                for (
+                    start_char,
+                    end_char,
+                    text,
+                    entity_class,
+                    parser_name,
+                    term_norm,
+                ) in self.extract_entity_data_from_spans(spans):
                     e = Entity.load_contiguous_entity(
-                        start=span_start,
-                        end=span_end,
-                        match=span_text,
-                        entity_class=entity_type,
+                        start=start_char,
+                        end=end_char,
+                        match=text,
+                        entity_class=entity_class,
                         namespace=self.namespace(),
                     )
                     entities.append(e)
                     terms = []
-                    for span in span_group:
-                        for parser_name, term_norm in span._.ontology_dict_[span.label_]:
-                            term = self.synonym_db.get(parser_name, term_norm)
-                            terms.append(term)
+                    term = self.synonym_db.get(parser_name, term_norm)
+                    terms.append(term)
                     terms_with_metrics = (
                         SynonymTermWithMetrics.from_synonym_term(term, exact_match=True)
                         for term in terms
@@ -113,13 +123,3 @@ class ExplosionStringMatchingStep(BaseStep):
                 doc.metadata[PROCESSING_EXCEPTION] = message
 
         return docs, failed_docs
-
-    @staticmethod
-    def _mapping_invariant_span(span: spacy.tokens.Span) -> Tuple[int, int, str, str]:
-        """Return key information about a span excluding mapping information.
-
-        This includes the entity_class (stored in span.label_) since this is
-        stored on Kazu's :class:`kazu.data.data.Entity` concept rather than
-        :class:`kazu.data.data.Mapping`
-        """
-        return (span.start_char, span.end_char, span.text, span.label_)
