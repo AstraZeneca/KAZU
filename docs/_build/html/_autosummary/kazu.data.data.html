@@ -225,7 +225,6 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.pipeline.pipeline.html">kazu.pipeline.pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="kazu.runner.html">kazu.runner</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.steps.html">kazu.steps</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.base.html">kazu.steps.base</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.base.step.html">kazu.steps.base.step</a></li>
@@ -344,16 +343,6 @@
         <article role="main">
           <section id="module-kazu.data.data">
 <span id="kazu-data-data"></span><h1>kazu.data.data<a class="headerlink" href="#module-kazu.data.data" title="Permalink to this heading">#</a></h1>
-<p class="rubric">Functions</p>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.data.data.remove_empty_elements" title="kazu.data.data.remove_empty_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_empty_elements</span></code></a>(d)</p></td>
-<td><p>recursively remove empty lists, empty dicts, or None elements from a dictionary</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -367,8 +356,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Document</span></code></a></p></td>
 <td><p>Document(idx: str, sections: List[kazu.data.data.Section] = &lt;factory&gt;, metadata: Dict[Any, Any] = &lt;factory&gt;)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.data.data.DocumentEncoder" title="kazu.data.data.DocumentEncoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DocumentEncoder</span></code></a></p></td>
-<td><p>Since the Document model can't be directly serialised to JSON, we need a custom encoder/decoder</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.data.data.DocumentJsonUtils" title="kazu.data.data.DocumentJsonUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DocumentJsonUtils</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Entity</span></code></a></p></td>
 <td><p>A <a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Entity</span></code></a> is a container for information about a single entity detected within a <a class="reference internal" href="#kazu.data.data.Section" title="kazu.data.data.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Section</span></code></a></p></td>
@@ -399,7 +388,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.AutoNameEnum">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">AutoNameEnum</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L23-L29"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.AutoNameEnum" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">AutoNameEnum</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L28-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.AutoNameEnum" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Subclass to create an Enum where values are the names when using enum.auto</p>
 <p>Taken from the Python Enum Docs (licensed under Zero-Clause BSD).</p>
@@ -407,7 +396,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.CharSpan">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">CharSpan</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L55-L87"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CharSpan" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">CharSpan</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L44-L76"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CharSpan" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A concept similar to a Spacy Span, except is character index based rather than token based</p>
 <dl class="py method">
@@ -428,7 +417,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CharSpan.is_completely_overlapped">
-<span class="sig-name descname"><span class="pre">is_completely_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L62-L69"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CharSpan.is_completely_overlapped" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_completely_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L51-L58"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CharSpan.is_completely_overlapped" title="Permalink to this definition">#</a></dt>
 <dd><p>True if other completely overlaps this span</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -442,7 +431,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CharSpan.is_partially_overlapped">
-<span class="sig-name descname"><span class="pre">is_partially_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L71-L78"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CharSpan.is_partially_overlapped" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_partially_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L60-L67"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CharSpan.is_partially_overlapped" title="Permalink to this definition">#</a></dt>
 <dd><p>True if other partially overlaps this span</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -468,7 +457,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.Document">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L452-L530"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L401-L469"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Document(idx: str, sections: List[kazu.data.data.Section] = &lt;factory&gt;, metadata: Dict[Any, Any] = &lt;factory&gt;)</p>
 <dl class="py method">
@@ -490,7 +479,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Document.as_minified_dict">
-<span class="sig-name descname"><span class="pre">as_minified_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_unmapped_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L503-L506"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.as_minified_dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">as_minified_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_unmapped_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L440-L445"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.as_minified_dict" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -505,24 +494,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.data.data.Document.as_minified_json">
-<span class="sig-name descname"><span class="pre">as_minified_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_unmapped_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L499-L501"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.as_minified_json" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>drop_unmapped_ents</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>drop_terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Document.create_simple_document">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_simple_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L508-L518"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.create_simple_document" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_simple_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L447-L457"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.create_simple_document" title="Permalink to this definition">#</a></dt>
 <dd><p>create an instance of document from a text string. The idx field will be generated from uuid.uuid4().hex</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -539,7 +512,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Document.from_named_section_texts">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_named_section_texts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">named_sections</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L520-L524"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.from_named_section_texts" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_named_section_texts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">named_sections</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L459-L463"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.from_named_section_texts" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>named_sections</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p>
@@ -552,7 +525,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Document.get_entities">
-<span class="sig-name descname"><span class="pre">get_entities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L463-L470"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.get_entities" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_entities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L412-L419"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.get_entities" title="Permalink to this definition">#</a></dt>
 <dd><p>get all entities in this document</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -563,7 +536,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Document.json">
-<span class="sig-name descname"><span class="pre">json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_unmapped_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L472-L497"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.json" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_unmapped_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L421-L438"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Document.json" title="Permalink to this definition">#</a></dt>
 <dd><p>custom encoder needed to handle serialisation issues with our data model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Param<span class="colon">:</span></dt>
@@ -603,36 +576,94 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="kazu.data.data.DocumentEncoder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">DocumentEncoder</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L412-L449"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentEncoder" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">JSONEncoder</span></code></p>
-<p>Since the Document model can’t be directly serialised to JSON, we need a custom encoder/decoder</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.data.data.DocumentEncoder.default">
-<span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L417-L449"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentEncoder.default" title="Permalink to this definition">#</a></dt>
-<dd><p>Implement this method in a subclass such that it returns
-a serializable object for <code class="docutils literal notranslate"><span class="pre">o</span></code>, or calls the base implementation
-(to raise a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>).</p>
-<p>For example, to support arbitrary iterators, you could
-implement default like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">iterable</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
-    <span class="c1"># Let the base class default method raise the TypeError</span>
-    <span class="k">return</span> <span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
-</pre></div>
-</div>
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">DocumentJsonUtils</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L472-L562"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.ConversionException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConversionException</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L473-L474"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.ConversionException" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.doc_to_json_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doc_to_json_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L503-L505"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.doc_to_json_dict" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>doc</strong> (<a class="reference internal" href="#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.empty">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L560-L562"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.empty" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.minify_json_dict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">minify_json_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc_json_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_unmapped_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L479-L501"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.minify_json_dict" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>doc_json_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em>) – </p></li>
+<li><p><strong>drop_unmapped_ents</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+<li><p><strong>drop_terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.obj_to_dict_repr">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">obj_to_dict_repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L507-L527"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.obj_to_dict_repr" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.remove_empty_elements">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_empty_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L542-L558"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.remove_empty_elements" title="Permalink to this definition">#</a></dt>
+<dd><p>recursively remove empty lists, empty dicts, or None elements from a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.atomic_types">
+<span class="sig-name descname"><span class="pre">atomic_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'bool'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'NoneType'&gt;)</span></em><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.atomic_types" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.data.data.DocumentJsonUtils.listlike_types">
+<span class="sig-name descname"><span class="pre">listlike_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;class</span> <span class="pre">'list'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'set'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'frozenset'&gt;)</span></em><a class="headerlink" href="#kazu.data.data.DocumentJsonUtils.listlike_types" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.Entity">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Entity</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L194-L355"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Entity</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L183-L344"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A <a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Entity</span></code></a> is a container for information about a single entity detected within a <a class="reference internal" href="#kazu.data.data.Section" title="kazu.data.data.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Section</span></code></a></p>
 <p>Within an <a class="reference internal" href="#kazu.data.data.Entity" title="kazu.data.data.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Entity</span></code></a>, the most important fields are <a class="reference internal" href="#kazu.data.data.Entity.match" title="kazu.data.data.Entity.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Entity.match</span></code></a> (the actual string detected),
@@ -661,7 +692,7 @@ and <a class="reference internal" href="#kazu.data.data.Entity.mappings" title="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.add_mapping">
-<span class="sig-name descname"><span class="pre">add_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L324-L331"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.add_mapping" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L313-L320"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.add_mapping" title="Permalink to this definition">#</a></dt>
 <dd><p>deprecated</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -675,7 +706,7 @@ and <a class="reference internal" href="#kazu.data.data.Entity.mappings" title="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.as_brat">
-<span class="sig-name descname"><span class="pre">as_brat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L317-L322"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.as_brat" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">as_brat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L306-L311"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.as_brat" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>self as the third party biomedical nlp Brat format, (see docs on Brat)</p>
@@ -685,7 +716,7 @@ and <a class="reference internal" href="#kazu.data.data.Entity.mappings" title="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.calc_starts_and_ends">
-<span class="sig-name descname"><span class="pre">calc_starts_and_ends</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L235-L245"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.calc_starts_and_ends" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">calc_starts_and_ends</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L224-L234"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.calc_starts_and_ends" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>]</p>
@@ -695,7 +726,7 @@ and <a class="reference internal" href="#kazu.data.data.Entity.mappings" title="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.from_spans">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L333-L350"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.from_spans" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_spans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L322-L339"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.from_spans" title="Permalink to this definition">#</a></dt>
 <dd><p>create an instance of Entity from a list of character indices. A text string of underlying doc is
 also required to produce a representative match</p>
 <dl class="field-list simple">
@@ -715,7 +746,7 @@ also required to produce a representative match</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.is_completely_overlapped">
-<span class="sig-name descname"><span class="pre">is_completely_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L251-L264"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.is_completely_overlapped" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_completely_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L240-L253"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.is_completely_overlapped" title="Permalink to this definition">#</a></dt>
 <dd><p>True if all CharSpan instances are completely encompassed by all other CharSpan instances</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -729,7 +760,7 @@ also required to produce a representative match</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.is_partially_overlapped">
-<span class="sig-name descname"><span class="pre">is_partially_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L266-L299"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.is_partially_overlapped" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_partially_overlapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L255-L288"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.is_partially_overlapped" title="Permalink to this definition">#</a></dt>
 <dd><p>True if only one CharSpan instance is defined in both self and other, and they are partially overlapped</p>
 <p>If multiple CharSpan are defined in both self and other, this becomes pathological, as while they may overlap
 in the technical sense, they may have distinct semantic meaning. For instance, consider the case where
@@ -757,7 +788,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.load_contiguous_entity">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_contiguous_entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L352-L355"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.load_contiguous_entity" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_contiguous_entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L341-L344"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.load_contiguous_entity" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -773,7 +804,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Entity.update_terms">
-<span class="sig-name descname"><span class="pre">update_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L218-L227"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.update_terms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L207-L216"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Entity.update_terms" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#kazu.data.data.SynonymTermWithMetrics" title="kazu.data.data.SynonymTermWithMetrics"><em>SynonymTermWithMetrics</em></a><em>]</em>) – </p>
@@ -835,7 +866,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.EquivalentIdAggregationStrategy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">EquivalentIdAggregationStrategy</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L90-L96"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.EquivalentIdAggregationStrategy" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">EquivalentIdAggregationStrategy</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L79-L85"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.EquivalentIdAggregationStrategy" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.data.data.AutoNameEnum" title="kazu.data.data.AutoNameEnum"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNameEnum</span></code></a></p>
 <p>An enumeration.</p>
 <dl class="py attribute">
@@ -872,7 +903,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.EquivalentIdSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">EquivalentIdSet</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L99-L108"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.EquivalentIdSet" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">EquivalentIdSet</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L88-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.EquivalentIdSet" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A representation of a set of kb ID’s that map to the same synonym and mean the same thing.</p>
 <dl class="py method">
@@ -905,7 +936,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.LinkRanks">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">LinkRanks</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L32-L36"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.LinkRanks" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">LinkRanks</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L37-L41"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.LinkRanks" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.data.data.AutoNameEnum" title="kazu.data.data.AutoNameEnum"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNameEnum</span></code></a></p>
 <p>An enumeration.</p>
 <dl class="py attribute">
@@ -932,7 +963,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.Mapping">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Mapping</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L111-L125"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Mapping" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Mapping</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L100-L114"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Mapping" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>a mapping is a fully mapped and disambiguated kb concept</p>
 <dl class="py method">
@@ -1007,7 +1038,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.Section">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Section</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L358-L409"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Section" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">Section</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L347-L398"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Section" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Section(text: str, name: str, preprocessed_text: Optional[str] = None, metadata: Dict[Any, Any] = &lt;factory&gt;, entities: List[kazu.data.data.Entity] = &lt;factory&gt;)</p>
 <dl class="py method">
@@ -1031,7 +1062,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.Section.get_text">
-<span class="sig-name descname"><span class="pre">get_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L401-L409"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Section.get_text" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L390-L398"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.Section.get_text" title="Permalink to this definition">#</a></dt>
 <dd><p>rather than accessing text or preprocessed_text directly, this method provides a convenient wrapper to get
 preprocessed_text if available, or text if not.</p>
 <dl class="field-list simple">
@@ -1080,7 +1111,7 @@ preprocessed_text if available, or text if not.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTerm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">SynonymTerm</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L131-L152"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTerm" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">SynonymTerm</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L120-L141"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTerm" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>a SynonymTerm is a container for a single normalised synonym, and is produced by an OntologyParser implementation.
 It may be composed of multiple terms that normalise
@@ -1151,7 +1182,7 @@ synonym maps to is determined by the  score_and_group_ids method of the associat
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermWithMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">SynonymTermWithMetrics</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L155-L191"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">SynonymTermWithMetrics</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L144-L180"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a></p>
 <p>Similar to SynonymTerm, but also allows metrics to be scored. As these metrics are not used in the hash function,
 care should be taken when hashing of this object is required</p>
@@ -1182,7 +1213,7 @@ care should be taken when hashing of this object is required</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermWithMetrics.from_synonym_term">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_synonym_term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact_match</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L167-L182"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics.from_synonym_term" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_synonym_term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact_match</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L156-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics.from_synonym_term" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1198,7 +1229,7 @@ care should be taken when hashing of this object is required</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermWithMetrics.merge_metrics">
-<span class="sig-name descname"><span class="pre">merge_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L184-L191"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics.merge_metrics" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">merge_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L173-L180"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics.merge_metrics" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>term</strong> (<a class="reference internal" href="#kazu.data.data.SynonymTermWithMetrics" title="kazu.data.data.SynonymTermWithMetrics"><em>SynonymTermWithMetrics</em></a>) – </p>
@@ -1229,12 +1260,6 @@ care should be taken when hashing of this object is required</p>
 <span class="sig-name descname"><span class="pre">search_score</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.data.data.SynonymTermWithMetrics.search_score" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kazu.data.data.remove_empty_elements">
-<span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">remove_empty_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/data/data.py#L39-L52"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.remove_empty_elements" title="Permalink to this definition">#</a></dt>
-<dd><p>recursively remove empty lists, empty dicts, or None elements from a dictionary</p>
 </dd></dl>
 
 </section>

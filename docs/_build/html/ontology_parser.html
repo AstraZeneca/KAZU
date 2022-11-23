@@ -225,7 +225,6 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/kazu.pipeline.pipeline.html">kazu.pipeline.pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/kazu.runner.html">kazu.runner</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/kazu.steps.html">kazu.steps</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/kazu.steps.base.html">kazu.steps.base</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.steps.base.step.html">kazu.steps.base.step</a></li>
@@ -491,20 +490,17 @@ Fortunately, this is generally quite easy to do. Let’s take the example of the
         <span class="k">return</span> <span class="n">df</span>
 </pre></div>
 </div>
-<p>Finally, when we want to use our new parser, we need to give it information about what entity class it is associated with
-.. code-block:: python</p>
-<blockquote>
-<div><p># we need a string scorer to resolve similar terms. Here, we use a trivial example for brevity
-string_scorer = lambda string_1,string_2: 0.75
-parser = ChemblOntologyParser(</p>
-<blockquote>
-<div><p>in_path=’path to chembl DB goes here’,
-entity_class=’drug’ #if used in entity linking, entities with class ‘drug’ will be associated with this parser.
-name=’CHEMBL’ # a globally unique name for the parser
-string_scorer = string_scorer
-):</p>
-</div></blockquote>
-</div></blockquote>
+<p>Finally, when we want to use our new parser, we need to give it information about what entity class it is associated with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># we need a string scorer to resolve similar terms. Here, we use a trivial example for brevity</span>
+<span class="n">string_scorer</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">string_1</span><span class="p">,</span> <span class="n">string_2</span><span class="p">:</span> <span class="mf">0.75</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">ChemblOntologyParser</span><span class="p">(</span>
+    <span class="n">in_path</span><span class="o">=</span><span class="s1">&#39;path to chembl DB goes here&#39;</span><span class="p">,</span>
+    <span class="n">entity_class</span><span class="o">=</span><span class="s1">&#39;drug&#39;</span> <span class="c1"># if used in entity linking, entities with class &#39;drug&#39; will be associated with this parser.</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CHEMBL&#39;</span> <span class="c1"># a globally unique name for the parser</span>
+    <span class="n">string_scorer</span> <span class="o">=</span> <span class="n">string_scorer</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <p>That’s it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.</p>
 <p>To explore the other capabilities of the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a>, such as synonym generation and ID filtering, please
 refer to the API documentation.</p>

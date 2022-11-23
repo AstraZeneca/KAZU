@@ -1,4 +1,4 @@
-kazu.data.data
+﻿kazu.data.data
 ==============
 
 .. automodule:: kazu.data.data
@@ -8,12 +8,6 @@ kazu.data.data
    
 
    
-   
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      remove_empty_elements
    
    
 
@@ -26,7 +20,7 @@ kazu.data.data
       AutoNameEnum
       CharSpan
       Document
-      DocumentEncoder
+      DocumentJsonUtils
       Entity
       EquivalentIdAggregationStrategy
       EquivalentIdSet

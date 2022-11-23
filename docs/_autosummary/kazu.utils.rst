@@ -1,4 +1,4 @@
-﻿kazu.utils
+kazu.utils
 ==========
 
 .. automodule:: kazu.utils

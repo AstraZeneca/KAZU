@@ -1,4 +1,4 @@
-﻿kazu.web
+kazu.web
 ========
 
 .. automodule:: kazu.web

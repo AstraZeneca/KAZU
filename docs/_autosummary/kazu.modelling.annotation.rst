@@ -1,4 +1,4 @@
-﻿kazu.modelling.annotation
+kazu.modelling.annotation
 =========================
 
 .. automodule:: kazu.modelling.annotation

@@ -1,4 +1,4 @@
-kazu.modelling.ontology\_matching.ontology\_matcher
+﻿kazu.modelling.ontology\_matching.ontology\_matcher
 ===================================================
 
 .. automodule:: kazu.modelling.ontology_matching.ontology_matcher
@@ -17,6 +17,7 @@ kazu.modelling.ontology\_matching.ontology\_matcher
 
    .. autosummary::
    
+      CuratedTerm
       OntologyMatcher
       OntologyMatcherConfig
    
