@@ -210,10 +210,6 @@ class ModelPackBuilder:
         :return:
         """
         parser_dict = instantiate(cfg.ontology_parser)
-        parser_name_to_entity_type = {}
-        for parser in parser_dict.values():
-            parser_name_to_entity_type[parser.name] = parser.entity_class
-
         curations_path = (
             Path(os.environ["KAZU_MODEL_PACK"])
             .joinpath("ontologies")
@@ -222,9 +218,8 @@ class ModelPackBuilder:
         )
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
         assemble_pipeline.main(
-            parser_name_to_entity_type=parser_name_to_entity_type,
+            parsers=parser_dict.values(),
             curated_list=curations_path,
-            labels=set(parser_name_to_entity_type.values()),
             output_dir=explosion_path,
         )
         load_steps(cfg)
