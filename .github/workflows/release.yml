@@ -6,7 +6,7 @@ on:
       default-model-pack-path:
         description: runner path to the default model pack
         required: true
-        default: /home/github/runner/.kazu_data/kazu-model-pack-public
+        default: /home/github/runner/.kazu_data/kazu_model_pack_public
       version:
         description: The version to create (semantic versioning)
         required: true
