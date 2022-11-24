@@ -159,9 +159,9 @@ class OntologyMatcher:
         for parser in parsers:
             terms = parser.generate_synonyms()
             for term in terms:
-                for original_string in term.terms:
-                    case_sensitive[parser.entity_class][original_string].add(term)
-                    case_insensitive[parser.entity_class][original_string.lower()].add(term)
+                for term_string in term.terms:
+                    case_sensitive[parser.entity_class][term_string].add(term)
+                    case_insensitive[parser.entity_class][term_string.lower()].add(term)
 
         for curation in curations:
             if curation.action != "keep":
