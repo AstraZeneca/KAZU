@@ -165,7 +165,7 @@ class OntologyMatcher:
 
         for curation in curations:
             if curation.action != "keep":
-                logging.debug(f"dropping unwanted curation: {curation}")
+                logger.debug(f"dropping unwanted curation: {curation}")
                 continue
             if curation.case_sensitive:
                 query_dict = case_sensitive
@@ -174,7 +174,6 @@ class OntologyMatcher:
                 query_dict = case_insensitive
                 query_string = curation.term.lower()
 
-            matched_terms_this_curation = defaultdict(set)
             matched_syn_terms = query_dict[curation.entity_class].get(query_string, set())
             if len(matched_syn_terms) == 0:
                 logger.warning(f"failed to find ontology match for {curation}")
@@ -195,16 +194,17 @@ class OntologyMatcher:
                     # sort when choosing a term to use (amongst redundant terms) so that
                     # the chosen term is consistent between executions
                     syn_term_for_this_id_set = sorted(
-                        list(syn_terms_this_parser), key=lambda x: x.term_norm
+                        syn_terms_this_parser, key=lambda x: x.term_norm
                     )[0]
-                    matched_terms_this_curation[parser_name].add(syn_term_for_this_id_set.term_norm)
+                    curation.term_norm_mapping.setdefault(parser_name, set()).add(
+                        syn_term_for_this_id_set.term_norm
+                    )
                     if len(matched_terms_this_curation[parser_name]) > 1:
                         logger.warning(
                             f"multiple SynonymTerm's detected for string {query_string}, "
                             f"This is probably means {query_string} is ambiguous in the "
                             f"parser {parser_name}"
                         )
-            curation.term_norm_mapping = dict(matched_terms_this_curation)
             matched_curations.append(curation)
 
         return matched_curations
