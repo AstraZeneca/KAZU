@@ -33,7 +33,7 @@ def main(
     data tends to need some curation before it can be applied.
 
     If a curated_list is also provided, the build process will attempt to match these to the
-    :class:`~kazu.data.data.SynonymTerm`\ s coming from each parser. If a curated item can't be matched
+    :class:`~kazu.data.data.SynonymTerm`\\ s coming from each parser. If a curated item can't be matched
     this will be logged as a warning.
 
     :param output_dir: the output directory to write the pipeline into.
