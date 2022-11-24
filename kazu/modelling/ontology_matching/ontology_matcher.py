@@ -199,7 +199,7 @@ class OntologyMatcher:
                     curation.term_norm_mapping.setdefault(parser_name, set()).add(
                         syn_term_for_this_id_set.term_norm
                     )
-                    if len(matched_terms_this_curation[parser_name]) > 1:
+                    if len(curation.term_norm_mapping[parser_name]) > 1:
                         logger.warning(
                             f"multiple SynonymTerm's detected for string {query_string}, "
                             f"This is probably means {query_string} is ambiguous in the "
