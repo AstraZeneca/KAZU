@@ -379,7 +379,7 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         "Q8_syn",
         "SynonymTerm",
         "complex 7 disease alpha",
-        "complexVII disease\u03B1",
+        "ComplexVII Disease\u03B1",
         "amongst",
     }
     match_ontology_dicts = [
