@@ -8,14 +8,14 @@ on:
       default-model-pack-path:
         description: runner path to the default model pack
         required: true
-        default: /home/github/runner/.kazu_data/kazu-model-pack-public
+        default: /home/github/runner/.kazu_data/kazu_model_pack_public
         
   workflow_dispatch:
     inputs:
       default-model-pack-path:
         description: runner path to the default model pack
         required: true
-        default: /home/github/runner/.kazu_data/kazu-model-pack-public
+        default: /home/github/runner/.kazu_data/kazu_model_pack_public
 
 jobs:
   model-pack-tests:
