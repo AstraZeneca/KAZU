@@ -56,15 +56,15 @@ class ExplosionStringMatchingStep(Step):
     @batch_step
     def __call__(self, docs: List[Document]) -> None:
         texts_and_sections = (
-            (section.get_text(), (section, doc)) for doc in docs for section in doc.sections
+            (section.get_text(), section) for doc in docs for section in doc.sections
         )
 
         # TODO: multiprocessing within the pipe command?
-        spacy_result: Iterator[
-            Tuple[spacy.tokens.Doc, Tuple[Section, Document]]
-        ] = self.spacy_pipeline.pipe(texts_and_sections, as_tuples=True)
+        spacy_result: Iterator[Tuple[spacy.tokens.Doc, Section]] = self.spacy_pipeline.pipe(
+            texts_and_sections, as_tuples=True
+        )
 
-        for processed_text, (section, doc) in spacy_result:
+        for processed_text, section in spacy_result:
             entities = []
 
             spans = processed_text.spans[self.span_key]
