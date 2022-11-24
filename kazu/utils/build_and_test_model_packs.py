@@ -116,9 +116,13 @@ class ModelPackBuilder:
             ) in custom_model_pack_params:
                 ModelPackBuilder.reset_singletons()
                 print(f"building custom model pack at {custom_model_pack_path}")
+                base_conf_path = maybe_base_configuration_path if include_default_config else None
+                base_model_path = (
+                    base_model_pack_path_with_cached_files if include_default_resources else None
+                )
                 ModelPackBuilder.process_model_pack_path(
-                    maybe_base_configuration_path=maybe_base_configuration_path,
-                    maybe_base_model_pack_path=base_model_pack_path_with_cached_files,
+                    maybe_base_configuration_path=base_conf_path,
+                    maybe_base_model_pack_path=base_model_path,
                     kazu_version=kazu_version,
                     run_consistency_checks=run_consistency_checks,
                     run_acceptance_tests=run_acceptance_tests,
