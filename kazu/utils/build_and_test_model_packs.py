@@ -209,7 +209,7 @@ class ModelPackBuilder:
         :param cfg:
         :return:
         """
-        parser_dict = instantiate(cfg.ontology_parser)
+        parsers = instantiate(cfg.ontology_parser).values()
         curations_path = (
             Path(os.environ["KAZU_MODEL_PACK"])
             .joinpath("ontologies")
@@ -218,7 +218,7 @@ class ModelPackBuilder:
         )
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
         assemble_pipeline.main(
-            parsers=parser_dict.values(),
+            parsers=parsers,
             curated_list=curations_path,
             output_dir=explosion_path,
         )
