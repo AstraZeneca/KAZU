@@ -217,13 +217,13 @@ class OntologyMatcher:
         we need to perform the following steps:
 
         1) look for the curated term string in the :attr:`.SynonymTerm.terms` field,
-            checking for case sensitivity as we go
+           checking for case sensitivity as we go
 
-        2) for all matched :class:`.SynonymTerm`\'s, check for redundancy by looking
-            at the hash of :attr:`.SynonymTerm.associated_id_sets`
+        2) for all matched :class:`.SynonymTerm`\\ s, check for redundancy by looking
+           at the hash of :attr:`.SynonymTerm.associated_id_sets`
 
-        3) for all non-redundant :class:`.SynonymTerm`\'s, map the curated term string
-            to the :attr:`.SynonymTerm.term_norm`
+        3) for all non-redundant :class:`.SynonymTerm`\\ s, map the curated term string
+           to the :attr:`.SynonymTerm.term_norm`
 
         :param curated_list:
         :param parsers:
