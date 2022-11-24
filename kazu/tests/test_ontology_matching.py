@@ -44,7 +44,7 @@ def test_initialize():
 
 example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
     This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
-    like for complex 7 disease alpha a.k.a complexVII disease\u03B1 amongst others."""
+    like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
 def write_curations(path: Path, terms: List[CuratedTerm]):
@@ -81,51 +81,76 @@ class DummySynGenerator(SynonymGenerator):
         pytest.param(
             [
                 CuratedTerm(
-                    term="SynonymTerm",
-                    action="keep",
-                    case_sensitive=True,
-                    entity_class="ent_type_1",
-                ),
-                CuratedTerm(
-                    term="SynonymTerm",
-                    action="keep",
-                    case_sensitive=True,
-                    entity_class="ent_type_2",
-                ),
-            ],
-            2,
-            {"SynonymTerm"},
-            [
-                {"ent_type_1": {("first_mock_parser", "SYNONYMTERM")}},
-                {"ent_type_2": {("second_mock_parser", "SYNONYMTERM")}},
-            ],
-            None,
-            marks=pytest.mark.basic,
-            id="Two curated terms from two parsers. Both should hit",
-        ),
-        pytest.param(
-            [
-                CuratedTerm(
-                    term="complexVII Disease\u03B1",
+                    term="complexVII disease\u03B1",
                     action="keep",
                     case_sensitive=False,
                     entity_class="ent_type_1",
                 ),
                 CuratedTerm(
-                    term="ComplexVII disease\u03B1",
+                    term="complexVII disease\u03B1",
+                    action="keep",
+                    case_sensitive=False,
+                    entity_class="ent_type_2",
+                ),
+            ],
+            2,
+            {"ComplexVII Disease\u03B1"},
+            [
+                {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+                {"ent_type_2": {("second_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+            ],
+            None,
+            marks=pytest.mark.basic,
+            id="Two curated case insensitive terms from two parsers. Both should hit",
+        ),
+        pytest.param(
+            [
+                CuratedTerm(
+                    term="complexVII disease\u03B1",
+                    action="keep",
+                    case_sensitive=False,
+                    entity_class="ent_type_1",
+                ),
+                CuratedTerm(
+                    term="complexVII disease\u03B1",
                     action="keep",
                     case_sensitive=True,
                     entity_class="ent_type_2",
                 ),
             ],
             1,
-            {"complexVII disease\u03B1"},
+            {"ComplexVII Disease\u03B1"},
             [
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
             marks=pytest.mark.basic,
             id="Two curated terms from two parsers. One should hit, to test case sensitivity",
+        ),
+        pytest.param(
+            [
+                CuratedTerm(
+                    term="complexVII disease\u03B1",
+                    action="keep",
+                    case_sensitive=False,
+                    entity_class="ent_type_1",
+                ),
+                CuratedTerm(
+                    term="others",
+                    action="keep",
+                    case_sensitive=False,
+                    entity_class="ent_type_2",
+                ),
+            ],
+            1,
+            {"ComplexVII Disease\u03B1"},
+            [
+                {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+            ],
+            None,
+            marks=pytest.mark.basic,
+            id="Two curated terms from two parsers. One should hit, one should miss "
+            "as it doesn't match a term string in the ontology",
         ),
         pytest.param(
             [
@@ -143,7 +168,7 @@ class DummySynGenerator(SynonymGenerator):
                 ),
             ],
             1,
-            {"complexVII disease\u03B1"},
+            {"ComplexVII Disease\u03B1"},
             [
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
