@@ -59,12 +59,16 @@ class DummySynGenerator(SynonymGenerator):
     map to an exising value of .terms in another SynonymTerm is handled correctly
     """
 
-    @classmethod
-    def call(cls, synonym: SynonymTerm) -> Optional[SynonymTerm]:
-        if "amongst us" in synonym.terms:
+    def __init__(self, term_to_find: str, term_to_add: str):
+
+        self.term_to_add = term_to_add
+        self.term_to_find = term_to_find
+
+    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
+        if self.term_to_find in synonym.terms:
             return dataclasses.replace(
                 synonym,
-                terms=frozenset(["amongst", "amongst us"]),
+                terms=frozenset([self.term_to_add]),
                 aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
             )
         else:
@@ -74,7 +78,7 @@ class DummySynGenerator(SynonymGenerator):
 @pytest.mark.parametrize(
     ("curated_terms", "match_len", "match_texts", "match_ontology_dicts", "syn_generator"),
     [
-        (
+        pytest.param(
             [
                 CuratedTerm(
                     term="SynonymTerm",
@@ -96,8 +100,10 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_2": {("second_mock_parser", "SYNONYMTERM")}},
             ],
             None,
+            marks=pytest.mark.basic,
+            id="Two curated terms from two parsers. Both should hit",
         ),
-        (
+        pytest.param(
             [
                 CuratedTerm(
                     term="complexVII Disease\u03B1",
@@ -118,8 +124,10 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
+            marks=pytest.mark.basic,
+            id="Two curated terms from two parsers. One should hit, to test case sensitivity",
         ),
-        (
+        pytest.param(
             [
                 CuratedTerm(
                     term="complexVII Disease\u03B1",
@@ -130,7 +138,7 @@ class DummySynGenerator(SynonymGenerator):
                 CuratedTerm(
                     term="ComplexVII disease\u03B1",
                     action="drop",
-                    case_sensitive=True,
+                    case_sensitive=False,
                     entity_class="ent_type_2",
                 ),
             ],
@@ -140,8 +148,10 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
+            marks=pytest.mark.basic,
+            id="Two curated terms from two parsers. One should hit, to test drop logic",
         ),
-        (
+        pytest.param(
             [
                 CuratedTerm(
                     term="amongst",
@@ -156,9 +166,41 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_1": {("first_mock_parser", "AMONGST")}},
             ],
             CombinatorialSynonymGenerator(
-                [DummySynGenerator()]
+                [DummySynGenerator(term_to_find="amongst us", term_to_add="amongst")]
             ),  # this generates a term that matches an existing ontology term, so we can test
             # that we're only matching to one term_norm (should be handled by syn generator)
+            marks=pytest.mark.basic,
+            id="One curated term from one parser, with a synonym generator producing a term that"
+            "hits a separate term from the parser. Only one should hit",
+        ),
+        pytest.param(
+            [
+                CuratedTerm(
+                    term="amongst",
+                    action="keep",
+                    case_sensitive=False,
+                    entity_class="ent_type_1",
+                ),
+                CuratedTerm(
+                    term="others",
+                    action="keep",
+                    case_sensitive=False,
+                    entity_class="ent_type_1",
+                ),
+            ],
+            2,
+            {"amongst", "others"},
+            [
+                {"ent_type_1": {("first_mock_parser", "AMONGST")}},
+                {"ent_type_1": {("first_mock_parser", "AMONGST")}},
+            ],
+            CombinatorialSynonymGenerator(
+                [DummySynGenerator(term_to_find="amongst", term_to_add="others")]
+            ),  # this generates a term that matches an existing ontology term, so we can test
+            # that we're only matching to one term_norm (should be handled by syn generator)
+            marks=pytest.mark.basic,
+            id="Two curated terms from one parser, with a synonym generator producing a term that"
+            "generates an alternative. There should be two hits on the same term norm",
         ),
     ],
 )
