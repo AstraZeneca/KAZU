@@ -73,6 +73,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[str] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -91,6 +92,7 @@ class OntologyParser(ABC):
             based NER matching
         :param excluded_ids: optional set of ids to exclude from the parsing process
         """
+
         self.in_path = in_path
         self.entity_class = entity_class
         self.name = name
@@ -101,6 +103,7 @@ class OntologyParser(ABC):
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.excluded_ids = excluded_ids
+        self.additional_synonyms = additional_synonyms
 
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
@@ -297,9 +300,33 @@ class OntologyParser(ABC):
                 ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
             ].copy()
 
+    def _add_additional_synonyms(self):
+        if self.additional_synonyms:
+            dataframes_to_add = []
+            with open(self.additional_synonyms, "r") as f:
+                for line in f:
+                    additional_syn = json.loads(line)
+                    idx = additional_syn[IDX]
+                    additional_terms: List[str] = additional_syn[SYN]
+                    query_row = (
+                        self.parsed_dataframe[self.parsed_dataframe[IDX] == idx]
+                        .head(1)
+                        .copy()
+                        .reset_index()
+                    )
+                    additional_syn_df = query_row.loc[[0] * len(additional_terms)]
+                    additional_syn_df[SYN] = additional_terms
+                    additional_syn_df[MAPPING_TYPE] = "kazu_curated"
+                    dataframes_to_add.append(additional_syn_df)
+            merge_df = pd.concat(dataframes_to_add)
+            new_df = pd.concat([self.parsed_dataframe, merge_df])
+            new_df.drop_duplicates(inplace=True)
+            self.parsed_dataframe = new_df.reset_index()
+
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
             self.parsed_dataframe = self.parse_to_dataframe()
+            self._add_additional_synonyms()
             self.drop_excluded_ids()
             self.parsed_dataframe[DATA_ORIGIN] = self.data_origin
             self.parsed_dataframe[IDX] = self.parsed_dataframe[IDX].astype(str)
