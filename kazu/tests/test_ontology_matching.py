@@ -119,7 +119,7 @@ class DummySynGenerator(SynonymGenerator):
                 ),
             ],
             1,
-            {"complexVII diseaseα"},
+            {"complexVII disease\u03B1"},
             [
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
@@ -143,7 +143,7 @@ class DummySynGenerator(SynonymGenerator):
                 ),
             ],
             1,
-            {"complexVII diseaseα"},
+            {"complexVII disease\u03B1"},
             [
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
