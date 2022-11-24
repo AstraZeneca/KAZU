@@ -5,6 +5,8 @@ from typing import List, Optional
 
 import pytest
 import spacy
+from spacy.lang.en import English
+
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, CuratedTerm
@@ -14,7 +16,6 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
 )
 from kazu.tests.utils import DummyParser
-from spacy.lang.en import English
 
 
 def test_constructor():
