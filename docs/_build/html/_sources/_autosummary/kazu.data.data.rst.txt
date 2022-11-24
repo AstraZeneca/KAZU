@@ -1,4 +1,4 @@
-﻿kazu.data.data
+kazu.data.data
 ==============
 
 .. automodule:: kazu.data.data
