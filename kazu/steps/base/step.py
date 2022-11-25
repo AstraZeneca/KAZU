@@ -24,6 +24,11 @@ class Step(Protocol):
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """Process documents and respond with processed and failed documents.
 
+        Note that many steps will be decorated by :func:`iterating_step` or :func:`batch_step`
+        which will modify the 'original' ``__call__`` function signature to match the expected
+        signature for a step, as the decorators handle the exception/failed documents logic for
+        you.
+
         :param docs:
         :return: The first element is all the provided docs (now modified by the processing), the
             second is the docs that failed to (fully) process correctly.
