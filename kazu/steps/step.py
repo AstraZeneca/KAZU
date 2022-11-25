@@ -40,11 +40,21 @@ def document_iterating_step(
 ) -> Callable[[Self, List[Document]], Tuple[List[Document], List[Document]]]:
     """Handle a list of :class:`~kazu.data.data.Document`\\ s and add error handling.
 
-    Decorate a method that processes single :class:`~kazu.data.data.Document`\\ s with
-    this, and then resulting function will then iterate over a list of
-    :class:`~kazu.data.data.Document`\\ s, calling the original function, and error handling
-    and providing a return value to match the return type of the ``__call__`` method of a
-    :class:`Step`\\ .
+    Use this to decorate a method that processes a single :class:`~kazu.data.data.Document`\\ .
+    The resulting method will then iterate over a list of
+    :class:`~kazu.data.data.Document`\\ s, calling the decorated function for each
+    :class:`~kazu.data.data.Document`\\ . Errors are handled automatically and added to the
+    ``PROCESSING_EXCEPTION`` metadata of documents, with failed docs returned as the second element
+    of the return value, as expected of the ``__call__`` method of a :class:`Step`\\ .
+
+    Generally speaking, it will save effort and repetition to decorate a :class:`Step` with either
+    :func:`document_iterating_step` or :func:`document_batch_step`\\, rather than implementing the
+    error handling in the :class:`Step` itself.
+
+    Normally, :func:`document_iterating_step` would be used in preference to
+    :func:`document_batch_step`\\, unless the method involves computation which is more efficient
+    when run in a batch, such as inference with a transformer-based Machine Learning model, or
+    using spacy's `pipe <https://spacy.io/api/language/#pipe>`_ method.
 
     Note that this will only work for a method of a class, rather than a standalone function,
     as it expects to have to pass through 'self' as a parameter.
@@ -73,11 +83,20 @@ def document_batch_step(
 ) -> Callable[[Self, List[Document]], Tuple[List[Document], List[Document]]]:
     """Add error handling to a method that processes batches of :class:`~kazu.data.data.Document`\\ s.
 
-    Decorate a function that processes single :class:`~kazu.data.data.Document`\\ s with
-    this, and then resulting function will then iterate over a list of
-    :class:`~kazu.data.data.Document`\\ s, calling the original function, and error handling
-    and providing a return value to match the return type of the ``__call__`` method of a
-    :class:`Step`\\ .
+    Use this to decorate a method that processes a batch of :class:`~kazu.data.data.Document`\\ s
+    at a time. The resulting method will wrap a call to the decorated function with error handling
+    which will added exceptions to the ``PROCESSING_EXCEPTION`` metadata of documents. Failed documents
+    will be returned as the second element of the return value, as expected of the ``__call__``
+    method of a :class:`Step`\\ .
+
+    Generally speaking, it will save effort and repetition to decorate a :class:`Step` with either
+    :func:`document_iterating_step` or :func:`document_batch_step`\\, rather than implementing the
+    error handling in the :class:`Step` itself.
+
+    Normally, :func:`document_iterating_step` would be used in preference to
+    :func:`document_batch_step`\\, unless the method involves computation which is more efficient
+    when run in a batch, such as inference with a transformer-based Machine Learning model, or
+    using spacy's `pipe <https://spacy.io/api/language/#pipe>`_ method.
 
     Note that this will only work for a method of a class, rather than a standalone function,
     as it expects to have to pass through 'self' as a parameter.
