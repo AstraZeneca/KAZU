@@ -222,11 +222,8 @@ class Pipeline:
         if self.failure_handlers is not None:
             self.failed_docs[step.namespace()] = failed_docs
 
-    def flush_failed_docs(self):
+    def reset(self):
         if self.failure_handlers is not None:
             for handler in self.failure_handlers:
                 handler(self.failed_docs)
         self.failed_docs = {}
-
-    def reset(self):
-        self.flush_failed_docs()
