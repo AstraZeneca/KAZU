@@ -3,7 +3,7 @@ from typing import List, Optional
 from spacy.lang.en import English
 
 from kazu.data.data import Document
-from kazu.steps import Step, iterating_step
+from kazu.steps import Step, document_iterating_step
 from kazu.utils.abbreviation_detector import KazuAbbreviationDetector
 
 
@@ -23,7 +23,7 @@ class AbbreviationFinderStep(Step):
             self.nlp, namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs
         )
 
-    @iterating_step
+    @document_iterating_step
     def __call__(self, doc: Document) -> None:
         """
 

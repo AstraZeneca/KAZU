@@ -1,6 +1,6 @@
 from typing import List, Protocol, Callable, Iterable
 from kazu.data.data import Document, Entity, Mapping, LinkRanks
-from kazu.steps import Step, iterating_step
+from kazu.steps import Step, document_iterating_step
 
 EntityFilterFn = Callable[[Entity], bool]
 MappingFilterFn = Callable[[Mapping], bool]
@@ -55,7 +55,7 @@ class CleanupStep(Step):
     def __init__(self, cleanup_actions: List[CleanupAction]):
         self.cleanup_actions = cleanup_actions
 
-    @iterating_step
+    @document_iterating_step
     def __call__(self, doc: Document) -> None:
         for cleanup_action in self.cleanup_actions:
             cleanup_action.cleanup(doc)

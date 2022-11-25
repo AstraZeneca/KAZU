@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import List, Tuple, DefaultDict, Set, Dict
 
 from kazu.data.data import Document, Entity
-from kazu.steps import Step, iterating_step
+from kazu.steps import Step, document_iterating_step
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class MergeOverlappingEntsStep(Step):
                 to_keep.extend(ents_set)
         return to_keep
 
-    @iterating_step
+    @document_iterating_step
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
             if len(section.entities) > 0:

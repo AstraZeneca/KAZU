@@ -6,7 +6,7 @@ from typing import List, Iterable, Optional, Dict, Set
 import torch
 from kazu.data.data import Document, Entity, SynonymTermWithMetrics
 from kazu.modelling.linking.sapbert.train import PLSapbertModel
-from kazu.steps import Step, batch_step
+from kazu.steps import Step, document_batch_step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.link_index import EmbeddingIndex
 from pytorch_lightning import Trainer
@@ -64,7 +64,7 @@ class SapBertForEntityLinkingStep(Step):
             )
             indices_for_current_class.add(index)
 
-    @batch_step
+    @document_batch_step
     def __call__(self, docs: List[Document]) -> None:
         """
         logic of entity linker:

@@ -1,7 +1,7 @@
 from typing import List
 
 from kazu.data.data import Document, CharSpan
-from kazu.steps import Step, iterating_step
+from kazu.steps import Step, document_iterating_step
 from kazu.utils.stanza_pipeline import StanzaPipeline
 from stanza.models.common.doc import Sentence
 
@@ -59,7 +59,7 @@ class StanzaStep(Step):
         """
         self.stanza_nlp = stanza_pipeline.instance
 
-    @iterating_step
+    @document_iterating_step
     def __call__(self, doc: Document):
         for section in doc.sections:
             stanza_doc = self.stanza_nlp(section.get_text())

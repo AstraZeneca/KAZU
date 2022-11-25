@@ -4,7 +4,7 @@ from typing import Optional, Callable
 from py4j.java_gateway import JavaGateway
 
 from kazu.data.data import Document, Entity, Mapping, LinkRanks
-from kazu.steps import Step, iterating_step
+from kazu.steps import Step, document_iterating_step
 
 
 SETH_METADATA_KEY = "seth"
@@ -52,7 +52,7 @@ class SethStep(Step):
         self.seth = self.gateway.jvm.com.astrazeneca.kazu.SethRunner()
         self.entity_class = entity_class
 
-    @iterating_step
+    @document_iterating_step
     def __call__(self, doc: Document) -> None:
         if self.condition and not self.condition(doc):
             # skip this document

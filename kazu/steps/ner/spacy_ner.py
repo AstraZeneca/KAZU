@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from kazu.data.data import Document, Entity
-from kazu.steps import Step, iterating_step
+from kazu.steps import Step, document_iterating_step
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
 
@@ -20,7 +20,7 @@ class SpacyNerStep(Step):
         """
         self.nlp = spacy_pipeline.nlp
 
-    @iterating_step
+    @document_iterating_step
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
             spacy_doc = self.nlp(section.get_text())

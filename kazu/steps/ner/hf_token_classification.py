@@ -19,7 +19,7 @@ from transformers.file_utils import PaddingStrategy
 from kazu.data.data import Document, Section
 from kazu.data.pytorch import HFDataset
 from kazu.modelling.hf_lightning_wrappers import PLAutoModelForTokenClassification
-from kazu.steps import Step, batch_step
+from kazu.steps import Step, document_batch_step
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
@@ -81,7 +81,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
             id2label=self.id2labels_from_label_list(labels),
         )
 
-    @batch_step
+    @document_batch_step
     def __call__(self, docs: List[Document]) -> None:
         loader, id_section_map = self.get_dataloader(docs)
         # run the transformer and get results

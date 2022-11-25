@@ -11,7 +11,7 @@ from kazu.data.data import (
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.steps import Step, batch_step
+from kazu.steps import Step, document_batch_step
 from kazu.utils.utils import PathLike
 from spacy.tokens import Span
 
@@ -53,7 +53,7 @@ class ExplosionStringMatchingStep(Step):
                 for parser_name, term_norm in ontology_data:
                     yield span.start_char, span.end_char, span.text, entity_class, parser_name, term_norm
 
-    @batch_step
+    @document_batch_step
     def __call__(self, docs: List[Document]) -> None:
         texts_and_sections = (
             (section.get_text(), section) for doc in docs for section in doc.sections

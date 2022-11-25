@@ -20,10 +20,10 @@ class Step(Protocol):
     def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
         """Process documents and respond with processed and failed documents.
 
-        Note that many steps will be decorated by :func:`iterating_step` or :func:`batch_step`
-        which will modify the 'original' ``__call__`` function signature to match the expected
-        signature for a step, as the decorators handle the exception/failed documents logic for
-        you.
+        Note that many steps will be decorated by :func:`document_iterating_step` or
+        :func:`document_batch_step` which will modify the 'original' ``__call__`` function
+        signature to match the expected signature for a step, as the decorators handle the
+        exception/failed documents logic for you.
 
         :param docs:
         :return: The first element is all the provided docs (now modified by the processing), the
@@ -35,7 +35,7 @@ class Step(Protocol):
 Self = TypeVar("Self")
 
 
-def iterating_step(
+def document_iterating_step(
     per_doc_callable: Callable[[Self, Document], Any]
 ) -> Callable[[Self, List[Document]], Tuple[List[Document], List[Document]]]:
     """Handle a list of :class:`~kazu.data.data.Document`\\ s and add error handling.
@@ -68,7 +68,7 @@ def iterating_step(
     return step_call
 
 
-def batch_step(
+def document_batch_step(
     batch_doc_callable: Callable[[Self, List[Document]], Any]
 ) -> Callable[[Self, List[Document]], Tuple[List[Document], List[Document]]]:
     """Add error handling to a method that processes batches of :class:`~kazu.data.data.Document`\\ s.

@@ -1,4 +1,4 @@
-from kazu.steps.step import Step, iterating_step, batch_step
+from kazu.steps.step import Step, document_iterating_step, document_batch_step
 from kazu.steps.document_post_processing.abbreviation_finder import AbbreviationFinderStep
 from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
 from kazu.steps.linking.dictionary import DictionaryEntityLinkingStep
