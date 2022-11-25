@@ -1,12 +1,8 @@
 from functools import wraps
 import traceback
-from typing import Any, Callable, List, Protocol, Tuple, TypedDict, TypeVar
+from typing import Any, Callable, List, Protocol, Tuple, TypeVar
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-
-
-class StepMetadata(TypedDict):
-    has_run: bool
 
 
 class Step(Protocol):

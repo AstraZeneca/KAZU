@@ -12,7 +12,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import Step
-from kazu.steps.step import StepMetadata
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -137,7 +136,6 @@ class Pipeline:
         """
         self.skip_doc_len = skip_doc_len
         self.failure_handlers = failure_handler
-        self.pipeline_metadata: Dict[str, StepMetadata] = {}  # metadata about each step
         self.steps = steps
         # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
         self.failed_docs: Dict[str, List[Document]] = {}
@@ -232,4 +230,3 @@ class Pipeline:
 
     def reset(self):
         self.flush_failed_docs()
-        self.pipeline_metadata: Dict[str, StepMetadata] = {}
