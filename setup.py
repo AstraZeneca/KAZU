@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="kazu",
-    version="0.0.10",
+    version="0.0.11",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",
     description="NER",
