@@ -1,6 +1,9 @@
 ![Maturity level-1](https://img.shields.io/badge/Maturity%20Level-ML--1-yellow)
 
-![Alt text](docs/kazu_logo.png?raw=true "Kazu - Biomedical NLP Framework")
+<p align="center">
+  <img src="docs/kazu_logo.png?raw=true" alt="Kazu - Biomedical NLP Framework" align=middle style="width: 66%;height: auto;"/>
+  <br><br>
+</p>
 
 # Kazu - Biomedical NLP Framework
 
