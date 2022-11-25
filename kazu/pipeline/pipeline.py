@@ -12,8 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import Step
-from kazu.steps.base.step import StepMetadata
-
+from kazu.steps.step import StepMetadata
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

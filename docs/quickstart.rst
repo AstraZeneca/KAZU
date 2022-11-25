@@ -20,7 +20,7 @@ the pretrained models required by the pipeline. This is available from <TBA>
 
 Running Steps
 -------------
-Components are wrapped as instances of :class:`kazu.steps.base.step.Step`.
+Components are wrapped as instances of :class:`kazu.steps.step.Step`.
 
 .. include:: single_step_example.rst
 

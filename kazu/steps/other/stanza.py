@@ -1,7 +1,7 @@
 from typing import List
 
 from kazu.data.data import Document, CharSpan
-from kazu.steps.base.step import Step, iterating_step
+from kazu.steps import Step, iterating_step
 from kazu.utils.stanza_pipeline import StanzaPipeline
 from stanza.models.common.doc import Sentence
 
