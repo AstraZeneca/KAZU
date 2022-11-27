@@ -1,6 +1,6 @@
-import copy
 import logging
 from collections import defaultdict
+from copy import deepcopy
 from typing import Dict, Tuple, Set, List, Iterable
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
@@ -223,7 +223,7 @@ class LSToKazuConversion:
             spans = frozenset([to_span, from_span])
             # since independent regions might have different mapping values, we merge them all
             # ideally this wouldn't happen if human annotation is consistent
-            mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
+            mappings = deepcopy(self.id_to_mappings.get(region_id, set()))
             mappings.update(self.id_to_mappings.get(to_id, set()))
             for label in labels:
                 yield Entity(
@@ -236,7 +236,7 @@ class LSToKazuConversion:
 
     def _create_contiguous_entity(self, label, region_id, span):
         single_span = frozenset([span])
-        mappings = copy.deepcopy(self.id_to_mappings.get(region_id, set()))
+        mappings = deepcopy(self.id_to_mappings.get(region_id, set()))
         return Entity(
             match=self.text[span.start : span.end],
             entity_class=label,

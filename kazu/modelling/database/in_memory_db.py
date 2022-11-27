@@ -1,5 +1,5 @@
-import copy
 import logging
+from copy import deepcopy
 from typing import Optional, Dict, List, Tuple, Set, Iterable
 
 from kazu.data.data import SynonymTerm, SimpleValue, EquivalentIdAggregationStrategy
@@ -50,11 +50,11 @@ class MetadataDatabase(metaclass=Singleton):
         :param idx: idx to query
         :return:
         """
-        return copy.deepcopy(self._database[name][idx])
+        return deepcopy(self._database[name][idx])
 
     def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
         idx = self._keys_lst[name][i]
-        return copy.deepcopy(
+        return deepcopy(
             (
                 idx,
                 self._database[name][idx],

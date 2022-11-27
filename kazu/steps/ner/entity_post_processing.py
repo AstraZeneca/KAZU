@@ -1,4 +1,4 @@
-import copy
+from copy import deepcopy
 from typing import List, Callable, Tuple, Dict, Optional, Set
 from kazu.data.data import Entity, CharSpan
 from kazu.utils.spacy_pipeline import SpacyPipeline
@@ -11,7 +11,7 @@ def _copy_ent_with_new_spans(
     join_str: str,
     rule_name: Optional[str] = None,
 ):
-    attrb_dict = copy.deepcopy(entity).__dict__
+    attrb_dict = deepcopy(entity).__dict__
     attrb_dict.pop("spans")
     attrb_dict.pop("match_norm")
     attrb_dict.pop("match")

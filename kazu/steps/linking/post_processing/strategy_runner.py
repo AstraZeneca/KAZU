@@ -1,5 +1,5 @@
-import copy
 import logging
+from copy import deepcopy
 from itertools import groupby
 from typing import List, Tuple, Iterable, Dict, FrozenSet, Set, Optional
 
@@ -325,8 +325,8 @@ class StrategyRunner:
                             xref_mappings.update(xref_manager.create_xref_mappings(mapping=mapping))
 
                     for entity in entity_group:
-                        entity.mappings.add(copy.deepcopy(mapping))
-                        entity.mappings.update(copy.deepcopy(xref_mappings))
+                        entity.mappings.add(deepcopy(mapping))
+                        entity.mappings.update(deepcopy(xref_mappings))
                     logger.debug(
                         "mapping created: original string: %s, mapping: %s, cross-references: %s",
                         reference_entity.match,

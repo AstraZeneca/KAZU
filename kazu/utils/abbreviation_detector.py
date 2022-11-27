@@ -1,6 +1,6 @@
-import copy
 import logging
 from collections import defaultdict
+from copy import deepcopy
 from typing import Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
 
 from spacy.language import Language
@@ -307,7 +307,7 @@ class KazuAbbreviationDetector:
     def _create_ent_from_span_and_source_ent(
         self, abbrv_span: Span, section: Section, source_ent: Entity
     ) -> Entity:
-        new_ent_data = copy.deepcopy(source_ent.__dict__)
+        new_ent_data = deepcopy(source_ent.__dict__)
         new_ent_data.pop("start")
         new_ent_data.pop("end")
         new_ent_data.pop("spans")

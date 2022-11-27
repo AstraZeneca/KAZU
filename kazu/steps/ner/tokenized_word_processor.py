@@ -1,5 +1,5 @@
-import copy
 import logging
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Optional, Set
 
@@ -102,7 +102,7 @@ class SpanFinder:
                 if bio == ENTITY_START_SYMBOL and c == span.clazz:
                     # a new word of the same class is beginning, so add a copy of the currently open TokWordSpan to the
                     # closed spans
-                    self.closed_spans.append(copy.deepcopy(span))
+                    self.closed_spans.append(deepcopy(span))
                 if c == span.clazz:
                     # the word is the same class as the active TokWordSpan, so extend it
                     span.tok_words.append(word)

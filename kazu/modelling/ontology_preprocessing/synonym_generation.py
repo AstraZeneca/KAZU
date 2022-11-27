@@ -1,4 +1,3 @@
-import copy
 import dataclasses
 import itertools
 import json
@@ -6,6 +5,7 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from copy import deepcopy
 from typing import List, Dict, Optional, Iterable, Set
 
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
@@ -72,7 +72,7 @@ class CombinatorialSynonymGenerator:
         results = set()
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original synonyms
-            all_syns = copy.deepcopy(synonyms)
+            all_syns = deepcopy(synonyms)
             logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
             for generator in permutation_list:
                 # run the generator

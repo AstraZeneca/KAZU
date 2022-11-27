@@ -1,4 +1,4 @@
-import copy
+from copy import deepcopy
 from typing import Iterable, List
 
 from cachetools import LFUCache
@@ -35,5 +35,5 @@ class EntityLinkingLookupCache:
             if not terms_from_cache:
                 cache_misses.append(ent)
             else:
-                ent.update_terms(copy.deepcopy(terms_from_cache))
+                ent.update_terms(deepcopy(terms_from_cache))
         return cache_misses
