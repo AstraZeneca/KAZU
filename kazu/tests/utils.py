@@ -32,21 +32,21 @@ BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
 
 CONFIG_DIR = Path(__file__).parent.parent.joinpath("conf")
 
-SKIP_MESSAGE_NO_MODEL_PACK = """
-skipping acceptance test as KAZU_MODEL_PACK is not provided as an environment variable. This should be the path 
-to the kazu model pack root
-"""  # noqa
+SKIP_MESSAGE_NO_MODEL_PACK = """Skipping acceptance test as KAZU_MODEL_PACK is not provided as an \
+environment variable.
+This should be the path to the kazu model pack root.
+"""
 
 requires_model_pack = pytest.mark.skipif(
     getenv("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE_NO_MODEL_PACK
 )
 
 
-SKIP_MESSAGE_NO_LABEL_STUDIO = """
-skipping acceptance test as either LS_PROJECT_NAME, LS_URL_PORT or LS_TOKEN are not provided as an environment variable
-This should indicate the project name and connection/auth information required to retrieve annotations from a 
+SKIP_MESSAGE_NO_LABEL_STUDIO = """Skipping acceptance test as either LS_PROJECT_NAME, LS_URL_PORT \
+or LS_TOKEN are not provided as an environment variable.
+This should indicate the project name and connection/auth information required to retrieve annotations from a \
 Label Studio server where the gold standard annotations are stored.
-"""  # noqa
+"""
 
 requires_label_studio = pytest.mark.skipif(
     any(getenv(varname) is None for varname in ("LS_PROJECT_NAME", "LS_URL_PORT", "LS_TOKEN")),
