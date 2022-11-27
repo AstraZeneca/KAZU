@@ -10,7 +10,7 @@ import hydra
 from hydra.utils import instantiate
 
 from kazu.data.data import Entity, Document
-from kazu.pipeline import Pipeline, load_steps
+from kazu.pipeline import Pipeline
 from kazu.utils.grouping import sort_then_group
 
 
@@ -27,7 +27,7 @@ def acceptance_criteria() -> Dict[str, Dict[str, Dict[str, float]]]:
 @hydra.main(config_path="../../", config_name="conf")
 def execute_full_pipeline_acceptance_test(cfg):
     manager = instantiate(cfg.LabelStudioManager)
-    pipeline = Pipeline(load_steps(cfg=cfg))
+    pipeline: Pipeline = instantiate(cfg.Pipeline)
     analyse_full_pipeline(pipeline, manager.export_from_ls(), acceptance_criteria())
 
 

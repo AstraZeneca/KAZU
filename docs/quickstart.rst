@@ -44,15 +44,16 @@ or manually update the model paths that use the variable - search for
 
     import os
     from hydra import compose, initialize_config_dir
+    from hydra.utils import instantiate
     from kazu.data.data import Document
-    from kazu.pipeline import Pipeline, load_steps
+    from kazu.pipeline import Pipeline
     # some text we want to process
     text = """EGFR is a gene"""
 
     with initialize_config_dir(config_dir=os.environ.get("KAZU_CONFIG_DIR")):
         cfg = compose(config_name="config")
         # instantiate a pipeline based on Hydra defaults
-        pipeline = Pipeline(steps=load_steps(cfg))
+        pipeline: Pipeline = instantiate(cfg.Pipeline)
         # create an instance of Document from our text string
         doc = Document.create_simple_document(text)
         # Pipeline takes a List[Document] as an argument to __call__

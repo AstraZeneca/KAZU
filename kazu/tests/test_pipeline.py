@@ -3,8 +3,10 @@ import traceback
 from pathlib import Path
 from typing import List, Tuple
 
+from hydra.utils import instantiate
+
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-from kazu.pipeline import FailedDocsFileHandler, Pipeline, load_steps
+from kazu.pipeline import FailedDocsFileHandler, Pipeline
 from kazu.steps import Step
 from kazu.tests.utils import requires_model_pack
 
@@ -46,7 +48,7 @@ def test_pipeline_error_handling(tmp_path: Path):
 @requires_model_pack
 def test_full_pipeline_and_serialisation(kazu_test_config):
     # test the default pipeline can load/configs are all correct
-    pipeline = Pipeline(steps=load_steps(kazu_test_config))
+    pipeline: Pipeline = instantiate(kazu_test_config.Pipeline)
     doc = Document.create_simple_document("EGFR is an important gene in breast cancer")
     doc: Document = pipeline([doc])[0]
     with tempfile.TemporaryFile(mode="w") as f:

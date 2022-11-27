@@ -43,9 +43,10 @@ To make use of these, and process a simple document:
 ```python
 
 from hydra import initialize_config_dir, compose
+from hydra.utils import instantiate
 
 from kazu.data.data import Document
-from kazu.pipeline import Pipeline, load_steps
+from kazu.pipeline import Pipeline
 from pathlib import Path
 import os
 
@@ -56,7 +57,7 @@ with initialize_config_dir(config_dir=str(cdir)):
         config_name="config",
         overrides=[],
     )
-    pipeline = Pipeline(load_steps(cfg))
+    pipeline: Pipeline = instantiate(cfg.Pipeline)
     text = "EGFR mutations are often implicated in lung cancer"
     doc = Document.create_simple_document(text)
     pipeline([doc])

@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from ray import serve
 
 from kazu.data.data import Document
-from kazu.pipeline import Pipeline, load_steps
+from kazu.pipeline import Pipeline
 from kazu.web.routes import KAZU
 
 logger = logging.getLogger("ray")
@@ -49,7 +49,7 @@ class KazuWebApp:
         """
         :param cfg: DictConfig from Hydra
         """
-        self.pipeline = Pipeline(load_steps(cfg))
+        self.pipeline: Pipeline = instantiate(cfg.Pipeline)
 
     @app.get("/")
     def get(self):

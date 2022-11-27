@@ -17,14 +17,21 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-def load_steps(cfg: DictConfig) -> List[Step]:
+def load_steps_and_log_memory_usage(cfg: DictConfig) -> List[Step]:
     """
-    loads steps based on the cfg.pipeline
+    Loads steps based on the pipeline config, and log the memory increase after loading each step.
+
+    Note that you can instantiate the pipeline directly from the config in a way that gives the
+    same results, but this is useful for monitoring/debugging high memory usage.
+
+    :param cfg: An OmegaConf config object for the kazu :class:`.Pipeline`\\ .
+        Normally created from hydra config files.
+    :return: The instantiated steps from the pipeline config
     """
     steps = []
-    for step in cfg.pipeline.steps:
+    for step in cfg.Pipeline.steps:
         prev_memory = psutil.Process(os.getpid()).memory_info().rss / 1024**2
-        new_step = instantiate(cfg[step])
+        new_step = instantiate(step)
         steps.append(new_step)
         new_memory = psutil.Process(os.getpid()).memory_info().rss / 1024**2
         mem_increase = ((new_memory - prev_memory) / prev_memory) * 100

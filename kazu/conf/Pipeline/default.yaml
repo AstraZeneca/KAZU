@@ -1,0 +1,11 @@
+_target_: kazu.pipeline.pipeline.Pipeline
+steps:
+  - ${ExplosionStringMatchingStep}
+  - ${StanzaStep}
+  - ${TransformersModelForTokenClassificationNerStep}
+  - ${DictionaryEntityLinkingStep}
+  - ${MappingStep}
+  - ${SethStep}
+  - ${MergeOverlappingEntsStep}
+  - ${AbbreviationFinderStep}
+  - ${CleanupStep}

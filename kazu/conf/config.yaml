@@ -11,7 +11,7 @@ defaults:
   - SapBertForEntityLinkingStep: default
   - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
-  - pipeline: default
+  - Pipeline: default
   - DistillationTraining: default
   - SethStep: default
   - SynonymGeneration: default

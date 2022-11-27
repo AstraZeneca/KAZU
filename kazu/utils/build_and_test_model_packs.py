@@ -14,7 +14,7 @@ from kazu.modelling.annotation.acceptance_test import (
     check_annotation_consistency,
 )
 from kazu.modelling.ontology_matching import assemble_pipeline
-from kazu.pipeline import load_steps
+from kazu.pipeline import load_steps_and_log_memory_usage
 from kazu.utils.utils import Singleton
 from omegaconf import DictConfig
 
@@ -227,7 +227,7 @@ class ModelPackBuilder:
             curated_list=curations_path,
             output_dir=explosion_path,
         )
-        load_steps(cfg)
+        load_steps_and_log_memory_usage(cfg)
 
 
 def build_custom_pack_params(arguments) -> Optional[List[Tuple[Path, bool, bool]]]:
