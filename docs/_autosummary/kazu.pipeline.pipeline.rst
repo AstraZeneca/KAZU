@@ -15,7 +15,7 @@ kazu.pipeline.pipeline
    
       batch_metrics
       calc_doc_size
-      load_steps
+      load_steps_and_log_memory_usage
    
    
 
