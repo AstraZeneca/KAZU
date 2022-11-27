@@ -1,5 +1,6 @@
 from copy import deepcopy
 from typing import List, Callable, Tuple, Dict, Optional, Set
+
 from kazu.data.data import Entity, CharSpan
 from kazu.utils.spacy_pipeline import SpacyPipeline
 
