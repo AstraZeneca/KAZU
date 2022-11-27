@@ -33,9 +33,10 @@ class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
 
     number_finder = re.compile("[0-9]+")
 
-    def __call__(self, reference_term: str, query_term: str) -> bool:
-        reference_term_number_count = Counter(self.number_finder.findall(reference_term))
-        query_term_number_count = Counter(self.number_finder.findall(query_term))
+    @classmethod
+    def __call__(cls, reference_term: str, query_term: str) -> bool:
+        reference_term_number_count = Counter(cls.number_finder.findall(reference_term))
+        query_term_number_count = Counter(cls.number_finder.findall(query_term))
         return reference_term_number_count == query_term_number_count
 
 
@@ -49,11 +50,12 @@ class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
     # but not I as this would be problematic
     numeric_class_phrases = re.compile("|".join(["TYPE (?:I|[0-9]+)"]))
 
-    def __call__(self, reference_term: str, query_term: str) -> bool:
+    @classmethod
+    def __call__(cls, reference_term: str, query_term: str) -> bool:
         reference_term_numeric_phrase_count = Counter(
-            self.numeric_class_phrases.findall(reference_term)
+            cls.numeric_class_phrases.findall(reference_term)
         )
-        query_term_numeric_phrase_count = Counter(self.numeric_class_phrases.findall(query_term))
+        query_term_numeric_phrase_count = Counter(cls.numeric_class_phrases.findall(query_term))
 
         # we don't want to just do reference_term_numeric_phrase_count == query_term_numeric_phrase_count
         # because e.g. if reference term is 'diabetes' that is an NER match we've picked up in some text,
@@ -88,7 +90,8 @@ class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
     more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used
     """
 
-    def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
+    @staticmethod
+    def __call__(reference_term: str, query_term: str) -> NumericMetric:
         if len(reference_term) > 10 and len(reference_term.split(" ")) > 4:
             return fuzz.token_sort_ratio(reference_term, query_term)
         else:
