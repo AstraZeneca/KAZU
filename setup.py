@@ -1,5 +1,11 @@
 from setuptools import setup, find_packages
 
+
+webserver_dependencies = [
+    "ray[serve]==1.13.0",
+    "PyJWT==2.6.0",
+]
+
 setup(
     name="kazu",
     version="0.0.13",
@@ -12,7 +18,6 @@ setup(
         "torchvision==0.13.0",
         "torchaudio==0.12.0",
         "transformers==4.12.5",
-        "ray[serve]==1.13.0",
         "rdflib==6.0.2",
         "requests==2.28.1",
         "hydra-core==1.1.1",
@@ -26,10 +31,10 @@ setup(
         "fastparquet== 0.8.0",
         "scikit-learn==1.0.1",
         "stanza==1.4.0",
-        "PyJWT==2.6.0",
         "regex==2022.6.2",
     ],
     extras_require={
+        "webserver": webserver_dependencies,
         "dev": [
             "black~=22.0",
             "flake8",
@@ -42,7 +47,8 @@ setup(
             "sphinx",
             "myst_parser",
             "furo",
-        ],
+        ]
+        + webserver_dependencies,
     },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
