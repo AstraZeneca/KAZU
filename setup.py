@@ -15,8 +15,6 @@ setup(
     install_requires=[
         "spacy==3.2.1",
         "torch==1.12.0",
-        "torchvision==0.13.0",
-        "torchaudio==0.12.0",
         "transformers==4.12.5",
         "rdflib==6.0.2",
         "requests==2.28.1",
