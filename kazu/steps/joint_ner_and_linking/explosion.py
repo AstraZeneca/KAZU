@@ -1,5 +1,5 @@
 import logging
-from typing import Iterator, List, Tuple, Iterable
+from typing import Iterator, List, Tuple, Iterable, Dict, Set
 
 import spacy
 from kazu.data.data import (
@@ -47,11 +47,9 @@ class ExplosionStringMatchingStep(Step):
 
     def extract_entity_data_from_spans(
         self, spans: Iterable[Span]
-    ) -> Iterator[Tuple[int, int, str, str, str, str]]:
+    ) -> Iterator[Tuple[int, int, str, Dict[str, Set[Tuple[str, str]]]]]:
         for span in spans:
-            for entity_class, ontology_data in span._.ontology_dict_.items():
-                for parser_name, term_norm in ontology_data:
-                    yield span.start_char, span.end_char, span.text, entity_class, parser_name, term_norm
+            yield span.start_char, span.end_char, span.text, span._.ontology_dict_
 
     @document_batch_step
     def __call__(self, docs: List[Document]) -> None:
@@ -72,26 +70,25 @@ class ExplosionStringMatchingStep(Step):
                 start_char,
                 end_char,
                 text,
-                entity_class,
-                parser_name,
-                term_norm,
+                ontology_data,
             ) in self.extract_entity_data_from_spans(spans):
-                e = Entity.load_contiguous_entity(
-                    start=start_char,
-                    end=end_char,
-                    match=text,
-                    entity_class=entity_class,
-                    namespace=self.namespace(),
-                )
-                entities.append(e)
-                terms = []
-                term = self.synonym_db.get(parser_name, term_norm)
-                terms.append(term)
-                terms_with_metrics = (
-                    SynonymTermWithMetrics.from_synonym_term(term, exact_match=True)
-                    for term in terms
-                )
-                e.update_terms(terms_with_metrics)
+                for entity_class, per_parser_term_norm_set in ontology_data.items():
+
+                    e = Entity.load_contiguous_entity(
+                        start=start_char,
+                        end=end_char,
+                        match=text,
+                        entity_class=entity_class,
+                        namespace=self.namespace(),
+                    )
+                    entities.append(e)
+                    terms = []
+                    for parser_name, term_norm in per_parser_term_norm_set:
+                        term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
+                            self.synonym_db.get(parser_name, term_norm), exact_match=True
+                        )
+                        terms.append(term_with_metrics)
+                    e.update_terms(terms)
 
             # add sentence offsets
             if self.include_sentence_offsets:
