@@ -3,7 +3,7 @@ import logging
 import pickle
 import uuid
 from collections import defaultdict
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
 from typing import List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Set
@@ -11,7 +11,7 @@ from typing import List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Se
 import spacy
 import srsly
 
-from kazu.data.data import SynonymTerm
+from kazu.data.data import SynonymTerm, CuratedTerm
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
@@ -39,15 +39,6 @@ class OntologyMatcherConfig:
     match_id_sep: str
     labels: List[str]
     parser_name_to_entity_type: Dict[str, str]
-
-
-@dataclass
-class CuratedTerm:
-    term: str
-    action: str
-    case_sensitive: bool
-    entity_class: str
-    term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
 
 
 def _ontology_dict_setter(span: Span, value: Dict):

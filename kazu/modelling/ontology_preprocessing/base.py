@@ -4,6 +4,7 @@ import os
 import re
 import sqlite3
 from abc import ABC
+from collections import defaultdict
 from functools import cache
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet, Union
@@ -17,12 +18,13 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTerm,
     SimpleValue,
+    CuratedTerm,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.string_normalizer import StringNormalizer
-from kazu.utils.utils import PathLike
+from kazu.utils.utils import PathLike, Singleton
 
 # dataframe column keys
 DEFAULT_LABEL = "default_label"
@@ -34,6 +36,18 @@ DATA_ORIGIN = "data_origin"
 
 
 logger = logging.getLogger(__name__)
+
+
+class CuratedTermDataset(metaclass=Singleton):
+    def __init__(self, path: str):
+        self.terms = []
+        self.terms_by_parser = defaultdict(set)
+        with open(path, "r") as f:
+            for line in f:
+                term = CuratedTerm(**json.loads(line))
+                self.terms.append(term)
+                for parser_name in term.curated_id_mappings:
+                    self.terms_by_parser[parser_name].add(term)
 
 
 class OntologyParser(ABC):
@@ -73,7 +87,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[str] = None,
+        additional_synonyms_dataset: Optional[CuratedTermDataset] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -103,7 +117,7 @@ class OntologyParser(ABC):
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.excluded_ids = excluded_ids
-        self.additional_synonyms = additional_synonyms
+        self.additional_synonyms_dataset = additional_synonyms_dataset
 
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
@@ -301,27 +315,28 @@ class OntologyParser(ABC):
             ].copy()
 
     def _add_additional_synonyms(self):
-        if self.additional_synonyms:
+        if self.additional_synonyms_dataset is not None:
             dataframes_to_add = []
-            with open(self.additional_synonyms, "r") as f:
-                for line in f:
-                    additional_syn = json.loads(line)
-                    idx = additional_syn[IDX]
-                    additional_terms: List[str] = additional_syn[SYN]
-                    query_row = (
-                        self.parsed_dataframe[self.parsed_dataframe[IDX] == idx]
-                        .head(1)
-                        .copy()
-                        .reset_index()
-                    )
-                    additional_syn_df = query_row.loc[[0] * len(additional_terms)]
-                    additional_syn_df[SYN] = additional_terms
-                    additional_syn_df[MAPPING_TYPE] = "kazu_curated"
-                    dataframes_to_add.append(additional_syn_df)
-            merge_df = pd.concat(dataframes_to_add)
-            new_df = pd.concat([self.parsed_dataframe, merge_df])
-            new_df.drop_duplicates(inplace=True)
-            self.parsed_dataframe = new_df.reset_index()
+            for curated_term in self.additional_synonyms_dataset.terms_by_parser.get(
+                self.name, set()
+            ):
+                idx = curated_term.curated_id_mappings[self.name]
+                query_row = (
+                    self.parsed_dataframe[self.parsed_dataframe[IDX] == idx]
+                    .head(1)
+                    .copy()
+                    .reset_index()
+                )
+                query_row[SYN] = curated_term.term
+                query_row[MAPPING_TYPE] = "kazu_curated"
+                dataframes_to_add.append(query_row)
+
+            if len(dataframes_to_add) > 1:
+                dataframes_to_add.append(self.parsed_dataframe)
+
+                self.parsed_dataframe = pd.concat(dataframes_to_add)
+                self.parsed_dataframe.drop_duplicates(inplace=True)
+                self.parsed_dataframe.reset_index(inplace=True)
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:

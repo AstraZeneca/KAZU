@@ -18,6 +18,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     OntologyParser,
+    CuratedTermDataset,
 )
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
@@ -161,7 +162,7 @@ class DummyParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         source: str = "test_parser",
         data: Optional[Dict[str, List[str]]] = None,
-        additional_synonyms: Optional[str] = None,
+        additional_synonyms_dataset: Optional[CuratedTermDataset] = None,
     ):
         super().__init__(
             in_path,
@@ -171,7 +172,7 @@ class DummyParser(OntologyParser):
             synonym_merge_threshold,
             data_origin,
             synonym_generator,
-            additional_synonyms=additional_synonyms,
+            additional_synonyms_dataset=additional_synonyms_dataset,
         )
         self.source = source
         if data is not None:
