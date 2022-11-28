@@ -29,6 +29,7 @@ setup(
         "scikit-learn==1.0.1",
         "stanza==1.4.0",
         "regex==2022.6.2",
+        "psutil>=5.3.0",
     ],
     extras_require={
         "webserver": webserver_dependencies,
