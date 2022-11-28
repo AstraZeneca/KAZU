@@ -28,7 +28,6 @@ setup(
         "rapidfuzz==1.8.2",
         "seqeval==1.2.2",
         "py4j==0.10.9.3",
-        "fastparquet== 0.8.0",
         "scikit-learn==1.0.1",
         "stanza==1.4.0",
         "regex==2022.6.2",
