@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 
 webserver_dependencies = [
-    "ray[serve]==1.13.0",
-    "PyJWT==2.6.0",
+    "ray[serve]>=1.10.0",
+    "PyJWT>=2.0.0",
 ]
 
 setup(
@@ -13,22 +13,22 @@ setup(
     author="AstraZeneca AI and Korea University",
     description="NER",
     install_requires=[
-        "spacy==3.2.1",
-        "torch==1.12.0",
-        "transformers==4.12.5",
-        "rdflib==6.0.2",
-        "requests==2.28.1",
-        "hydra-core==1.1.1",
+        "spacy>=3.2.0",
+        "torch>=1.12.0",
+        "transformers>=4.0.0",
+        "rdflib>=6.0.0",
+        "requests>=2.20.0",
+        "hydra-core>=1.1.0",
         "pytorch-lightning==1.7.5",
-        "pandas==1.3.4",
-        "pyarrow==8.0.0",
-        "pytorch-metric-learning==0.9.99",
-        "rapidfuzz==1.8.2",
-        "seqeval==1.2.2",
-        "py4j==0.10.9.3",
-        "scikit-learn==1.0.1",
-        "stanza==1.4.0",
-        "regex==2022.6.2",
+        "pandas>=1.0.0",
+        "pyarrow>=8.0.0",
+        "pytorch-metric-learning>=0.9.99",
+        "rapidfuzz>=1.0.0",
+        "seqeval>=1.0.0",
+        "py4j>=0.10.9",
+        "scikit-learn>=0.24.0",
+        "stanza>=1.0.0",
+        "regex>=2020.1.7",
         "psutil>=5.3.0",
     ],
     extras_require={
