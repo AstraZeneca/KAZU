@@ -331,7 +331,7 @@ class OntologyParser(ABC):
                 query_row[MAPPING_TYPE] = "kazu_curated"
                 dataframes_to_add.append(query_row)
 
-            if len(dataframes_to_add) > 1:
+           if len(dataframes_to_add) > 0:
                 dataframes_to_add.append(self.parsed_dataframe)
 
                 self.parsed_dataframe = pd.concat(dataframes_to_add)
