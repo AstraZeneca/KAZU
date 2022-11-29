@@ -48,6 +48,8 @@ from starlette.authentication import (
     BaseUser,
     AuthCredentials,
 )
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +99,9 @@ class JWTAuthenticationBackend(AuthenticationBackend):
 
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
         if "Authorization" not in request.headers:
-            return None
+            raise AuthenticationError(
+                "No authorisation header specified: please use a valid Bearer token"
+            )
 
         auth = request.headers["Authorization"]
         token = self.get_token_from_header(authorization=auth, prefix=self.prefix)
@@ -116,3 +120,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         return AuthCredentials(["authenticated"]), JWTUser(
             username=username, token=token, payload=payload
         )
+
+
+def on_auth_error(request: Request, exc: Exception):
+    return JSONResponse({"error": str(exc)}, status_code=401)
