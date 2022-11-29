@@ -58,7 +58,6 @@ class KazuWebApp:
 
     @app.post(f"/{KAZU}")
     def ner(self, doc: WebDocument):
-        logger.info(f"received request: {doc}")
         result = self.pipeline([doc.to_kazu_document()])
         resp_dict = result[0].as_minified_dict()
         return JSONResponse(content=resp_dict)
