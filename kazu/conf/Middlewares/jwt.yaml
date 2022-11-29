@@ -7,3 +7,6 @@ middlewares:
     backend:
       _target_: kazu.web.jwtauth.JWTAuthenticationBackend
       secret_key: ${oc.env:KAZU_JWT_KEY}
+    on_error:
+      _target_: hydra.utils.get_method
+      path: kazu.web.jwtauth.on_auth_error
