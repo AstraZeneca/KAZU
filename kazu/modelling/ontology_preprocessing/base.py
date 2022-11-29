@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class CuratedTermDataset(metaclass=Singleton):
-    def __init__(self, path: str):
+    def __init__(self, path: PathLike):
         self.terms = []
         self.terms_by_parser = defaultdict(set)
         with open(path, "r") as f:
