@@ -78,4 +78,3 @@ def test_injected_synonyms(tmp_path):
             else:
                 with pytest.raises(KeyError):
                     db.get_syns_for_id(name=parser_name, idx=idx)
-
