@@ -100,7 +100,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
         if "Authorization" not in request.headers:
             raise AuthenticationError(
-                "No authorisation header specified: please use a valid Bearer token"
+                "No 'Authorization' header specified: please use a valid Bearer token"
             )
 
         auth = request.headers["Authorization"]
