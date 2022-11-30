@@ -1,0 +1,193 @@
+from typing import List, TypedDict, Dict, NamedTuple, Iterable, Set
+from collections import defaultdict
+
+import numpy as np
+
+
+from kazu.data.data import Document, Entity, Section
+from kazu.utils.grouping import sort_then_group
+from kazu.steps import Step, document_iterating_step
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+class ScoredContext(NamedTuple):
+    entity_class: str
+    score: float
+    thresh: float
+
+
+class TfIdfDisambiguationEntry(NamedTuple):
+    entity_class: str
+    tfidf_document: np.ndarray
+    tfidf_vectorizer: TfidfVectorizer
+    thresh: float
+
+
+class DisambiguationEntry(TypedDict):
+    entity_class: str
+    relevant_text: List[str]
+    thresh: float
+
+
+class EntityClassTfIdfScorer:
+    def __init__(self, spans_to_tfidf_disambiguator: Dict[str, List[TfIdfDisambiguationEntry]]):
+        self.spans_to_tfidf_disambiguator = spans_to_tfidf_disambiguator
+
+    @staticmethod
+    def from_spans_to_sentence_disambiguator(
+        spans_text_disambiguator: Dict[str, List[DisambiguationEntry]]
+    ) -> "EntityClassTfIdfScorer":
+        return EntityClassTfIdfScorer(
+            EntityClassTfIdfScorer.build_tfidf_documents(spans_text_disambiguator)
+        )
+
+    @staticmethod
+    def build_tfidf_documents(
+        spans_text_disambiguator: Dict[str, List[DisambiguationEntry]]
+    ) -> Dict[str, List[TfIdfDisambiguationEntry]]:
+        span_to_tfidf_disambiguator = dict()
+        for span, disambiguation_entries in spans_text_disambiguator.items():
+            tfidf_disambiguation_entries = []
+            for disambiguation_entry in disambiguation_entries:
+                tfidf_vectorizer = TfidfVectorizer()
+                document_mat = tfidf_vectorizer.fit_transform(disambiguation_entry["relevant_text"])
+                tfidf_disambiguation_entry = TfIdfDisambiguationEntry(
+                    entity_class=disambiguation_entry["entity_class"],
+                    tfidf_document=document_mat.data,
+                    tfidf_vectorizer=tfidf_vectorizer,
+                    thresh=disambiguation_entry["thresh"],
+                )
+                tfidf_disambiguation_entries.append(tfidf_disambiguation_entry)
+            span_to_tfidf_disambiguator[span] = tfidf_disambiguation_entries
+        return span_to_tfidf_disambiguator
+
+    @staticmethod
+    def tfidf_score(
+        ent_context: str, tfidf_disambig_entry: TfIdfDisambiguationEntry
+    ) -> ScoredContext:
+        vectorizer = tfidf_disambig_entry.tfidf_vectorizer
+        doc_mat = tfidf_disambig_entry.tfidf_document
+        vector_context = vectorizer.transform([ent_context])
+        score = np.squeeze(np.asarray(vector_context.dot(doc_mat.T))).item()
+        return ScoredContext(
+            entity_class=tfidf_disambig_entry.entity_class,
+            score=score,
+            thresh=tfidf_disambig_entry.thresh,
+        )
+
+    def score_entity_context(self, ent_span: str, ent_context: str) -> Iterable[ScoredContext]:
+        """
+        Score the entity context against the TfIdf documents specified for the entity's span
+
+        :param ent_span:
+        :param ent_context:
+        :return:
+        """
+        if ent_span not in self.spans_to_tfidf_disambiguator:
+            yield from ()
+        else:
+            tfidf_disambiguation_entries = self.spans_to_tfidf_disambiguator[ent_span]
+            for tfidf_disambiguation_entry in tfidf_disambiguation_entries:
+                scored_context = self.tfidf_score(ent_context, tfidf_disambiguation_entry)
+                yield scored_context
+
+
+class EntityClassDisambiguation(Step):
+    def __init__(self, context: Dict[str, List[DisambiguationEntry]]):
+        self.spans_to_disambiguate = set(context.keys())
+        self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(
+            context
+        )
+
+    @staticmethod
+    def sentence_context_for_entity(entity: Entity, section: Section, window: int = 3) -> str:
+        sent_spans = list(section.sentence_spans)
+        if len(sent_spans) == 0:
+            return section.get_text()
+        else:
+            idx, _ = next(
+                (
+                    (
+                        idx,
+                        sent_span,
+                    )
+                    for idx, sent_span in enumerate(sent_spans)
+                    if entity.is_completely_overlapped(sent_span)
+                )
+            )
+            context_start_idx = min(0, idx - int(window / 2))
+            context_end_idx = max(len(sent_spans), idx + int(window / 2))
+            sentence_context_spans = sent_spans[context_start_idx:context_end_idx]
+            return section.get_text()[
+                sentence_context_spans[0].start : sentence_context_spans[-1].end
+            ]
+
+    @document_iterating_step
+    def __call__(self, doc: Document):
+
+        ent_section_pairs = list(
+            (
+                (
+                    ent,
+                    section,
+                )
+                for section in doc.sections
+                for ent in section.entities
+            )
+        )
+        ent_section_pairs_to_disambiguate = list(
+            (
+                (
+                    ent,
+                    section,
+                )
+                for ent, section in ent_section_pairs
+                if ent.match in self.spans_to_disambiguate
+            )
+        )
+        grouped_ent_section_pairs = [
+            (key, list(group))
+            for key, group in sort_then_group(
+                ent_section_pairs_to_disambiguate,
+                lambda ent_section_pair: next(iter(ent_section_pair[0].spans)),
+            )
+        ]
+        drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
+        for ent_span, _grouped_ent_section_pairs in grouped_ent_section_pairs:
+            if len(_grouped_ent_section_pairs) > 1:
+                # make entity-class->ent mapping
+                ents = [ent for ent, section in _grouped_ent_section_pairs]
+                class_to_ents = {
+                    entity_class: set(ents)
+                    for entity_class, ents in sort_then_group(ents, lambda ent: ent.entity_class)
+                }
+
+                representative_ent = _grouped_ent_section_pairs[0][0]
+                representative_section = _grouped_ent_section_pairs[0][1]
+                ent_match = representative_ent.match
+                ent_sentence_context_str = self.sentence_context_for_entity(
+                    representative_ent, representative_section
+                )
+                scored_contexts = list(
+                    self.entity_class_scorer.score_entity_context(
+                        ent_span=ent_match, ent_context=ent_sentence_context_str
+                    )
+                )
+                acceptable_scores = (
+                    scored_context
+                    for scored_context in scored_contexts
+                    if scored_context.score >= scored_context.thresh
+                )
+                best_score = max(
+                    acceptable_scores, default=None, key=lambda scored_context: scored_context.score
+                )
+                if best_score is not None:
+                    best_match_ents = class_to_ents[best_score.entity_class]
+                    drop_set[representative_section].update(
+                        (ent for ent in ents if ent not in best_match_ents)
+                    )
+                else:
+                    drop_set[representative_section].update(ents)
+
+        for section, drop_entities in drop_set.items():
+            section.entities = [ent for ent in section.entities if ent not in drop_entities]
