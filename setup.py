@@ -45,6 +45,9 @@ setup(
             "sphinx",
             "myst_parser",
             "furo",
+            # to allow profiling
+            # of the steps.
+            "tensorboard",
         ]
         + webserver_dependencies,
     },

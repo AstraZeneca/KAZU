@@ -8,7 +8,6 @@ from typing import List, Dict, Optional
 import psutil
 from hydra.utils import instantiate
 from omegaconf import DictConfig
-from torch.utils.tensorboard import SummaryWriter
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import Step
@@ -151,6 +150,16 @@ class Pipeline:
         logger.info(f"pipeline initialised: {self.init_time}")
         self.profile_steps_dir = profile_steps_dir
         if profile_steps_dir:
+            try:
+                from torch.utils.tensorboard import SummaryWriter
+            except ImportError as e:
+                raise ImportError(
+                    "Profiling the pipeline requires tensorboard to be installed.\n"
+                    "Tensorboard is included in Kazu's dev dependencies, so this will work"
+                    " with 'pip install kazu[dev]', but you could also just do 'pip install"
+                    " tensorboard' if you don't want the other dev dependencies."
+                ) from e
+
             idx_this_process = uuid.uuid1().hex
             dir_and_time = f"{profile_steps_dir}_{self.init_time}_{idx_this_process}"
             logger.info(f"profiling configured. log dir is {dir_and_time}")
