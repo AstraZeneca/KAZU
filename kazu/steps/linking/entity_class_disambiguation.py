@@ -1,10 +1,10 @@
-from typing import List, TypedDict, Dict, NamedTuple, Iterable, Set
+from typing import List, TypedDict, Dict, NamedTuple, Iterable, Set, Tuple
 from collections import defaultdict
 
 import numpy as np
 
 
-from kazu.data.data import Document, Entity, Section
+from kazu.data.data import Document, Entity, Section, CharSpan
 from kazu.utils.grouping import sort_then_group
 from kazu.steps import Step, document_iterating_step
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -27,6 +27,9 @@ class DisambiguationEntry(TypedDict):
     entity_class: str
     relevant_text: List[str]
     thresh: float
+
+
+EntSectionPair = Tuple[Entity, Section]
 
 
 class EntityClassTfIdfScorer:
@@ -94,6 +97,27 @@ class EntityClassTfIdfScorer:
 
 class EntityClassDisambiguation(Step):
     def __init__(self, context: Dict[str, List[DisambiguationEntry]]):
+        """
+        Optionally disambiguates the entity class (anatomy, drug, etc.) of entities that exactly share a span in a
+        document. The provided context dictionary specifies terms along with an expected textual context around those
+        terms.
+
+        For example, "UCB" could refer to "umbilical cord blood" an anatomical entity, or the pharmaceutical company
+        UCB, a corporate entity. An expected context might be "umbilical pregnancy blood baby placenta..." in the former
+        case, or "company business..." in the latter. Multiple expected contexts (disambiguation entries) should be
+        provided to allow this step to choose the best matching entity class for an entity span. A tf-idf model is built
+        to correlate an entity's actual textual context with the provided expected context, and provided thresholds are
+        used to allow the tf-idf model to choose the most suitable entity class.
+
+        :param context:
+        """
+        self.spans_to_disambiguate = set(context.keys())
+        self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(
+            context
+        )
+
+    def pretend_init(self, context: Dict[str, List[DisambiguationEntry]]):
+
         self.spans_to_disambiguate = set(context.keys())
         self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(
             context
@@ -122,9 +146,9 @@ class EntityClassDisambiguation(Step):
                 sentence_context_spans[0].start : sentence_context_spans[-1].end
             ]
 
-    @document_iterating_step
-    def __call__(self, doc: Document):
-
+    def spangrouped_ent_section_pairs(
+        self, doc: Document
+    ) -> List[Tuple[CharSpan, List[EntSectionPair]]]:
         ent_section_pairs = list(
             (
                 (
@@ -152,18 +176,21 @@ class EntityClassDisambiguation(Step):
                 lambda ent_section_pair: next(iter(ent_section_pair[0].spans)),
             )
         ]
+        return grouped_ent_section_pairs
+
+    @document_iterating_step
+    def __call__(self, doc: Document):
         drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
-        for ent_span, _grouped_ent_section_pairs in grouped_ent_section_pairs:
-            if len(_grouped_ent_section_pairs) > 1:
-                # make entity-class->ent mapping
-                ents = [ent for ent, section in _grouped_ent_section_pairs]
+        for ent_span, spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
+            if len(spansharing_ent_section_pairs) > 1:
+                ents = [ent for ent, section in spansharing_ent_section_pairs]
                 class_to_ents = {
                     entity_class: set(ents)
                     for entity_class, ents in sort_then_group(ents, lambda ent: ent.entity_class)
                 }
 
-                representative_ent = _grouped_ent_section_pairs[0][0]
-                representative_section = _grouped_ent_section_pairs[0][1]
+                representative_ent = spansharing_ent_section_pairs[0][0]
+                representative_section = spansharing_ent_section_pairs[0][1]
                 ent_match = representative_ent.match
                 ent_sentence_context_str = self.sentence_context_for_entity(
                     representative_ent, representative_section

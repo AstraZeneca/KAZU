@@ -10,15 +10,15 @@ def test_EntityClassDisambiguationStep():
     context: Dict[str, List[DisambiguationEntry]] = {
         "UCB": [
             DisambiguationEntry(
-                entity_class="anatomy", relevant_text=["blood umbilical pregnancy"], thresh=0.4
+                entity_class="anatomy", relevant_text=["umbilical pregnancy"], thresh=0.8
             ),
             DisambiguationEntry(
                 entity_class="company", relevant_text=["pharma company brussels"], thresh=0.5
             ),
         ]
     }
-    text1 = "UCB probably refers to the pharma company"
-    doc = Document.create_simple_document(text1)
+    text = "UCB probably refers to the pharma company not umbilical cord blood"
+    doc = Document.create_simple_document(text)
     ucb_company_ent = Entity.load_contiguous_entity(
         start=0,
         end=3,
