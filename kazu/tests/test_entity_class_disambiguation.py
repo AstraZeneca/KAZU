@@ -1,7 +1,7 @@
 from typing import List, Dict
 from kazu.data.data import Document, Entity
 from kazu.steps.linking.entity_class_disambiguation import (
-    EntityClassDisambiguation,
+    EntityClassDisambiguationStep,
     DisambiguationEntry,
 )
 
@@ -36,7 +36,7 @@ def test_EntityClassDisambiguationStep():
 
     doc.sections[0].entities.extend([ucb_anatomy_ent, ucb_company_ent])
 
-    step = EntityClassDisambiguation(context=context)
+    step = EntityClassDisambiguationStep(context=context)
     step([doc])
     assert ucb_company_ent in doc.get_entities()
     assert ucb_anatomy_ent not in doc.get_entities()

@@ -95,7 +95,7 @@ class EntityClassTfIdfScorer:
                 yield scored_context
 
 
-class EntityClassDisambiguation(Step):
+class EntityClassDisambiguationStep(Step):
     def __init__(self, context: Dict[str, List[DisambiguationEntry]]):
         """
         Optionally disambiguates the entity class (anatomy, drug, etc.) of entities that exactly share a span in a
@@ -111,13 +111,6 @@ class EntityClassDisambiguation(Step):
 
         :param context:
         """
-        self.spans_to_disambiguate = set(context.keys())
-        self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(
-            context
-        )
-
-    def pretend_init(self, context: Dict[str, List[DisambiguationEntry]]):
-
         self.spans_to_disambiguate = set(context.keys())
         self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(
             context
@@ -148,34 +141,32 @@ class EntityClassDisambiguation(Step):
 
     def spangrouped_ent_section_pairs(
         self, doc: Document
-    ) -> List[Tuple[CharSpan, List[EntSectionPair]]]:
-        ent_section_pairs = list(
+    ) -> Iterable[Tuple[CharSpan, List[EntSectionPair]]]:
+        ent_section_pairs = (
             (
-                (
-                    ent,
-                    section,
-                )
-                for section in doc.sections
-                for ent in section.entities
+                ent,
+                section,
             )
+            for section in doc.sections
+            for ent in section.entities
         )
-        ent_section_pairs_to_disambiguate = list(
+
+        ent_section_pairs_to_disambiguate = (
             (
-                (
-                    ent,
-                    section,
-                )
-                for ent, section in ent_section_pairs
-                if ent.match in self.spans_to_disambiguate
+                ent,
+                section,
             )
+            for ent, section in ent_section_pairs
+            if ent.match in self.spans_to_disambiguate
         )
-        grouped_ent_section_pairs = [
+
+        grouped_ent_section_pairs = (
             (key, list(group))
             for key, group in sort_then_group(
                 ent_section_pairs_to_disambiguate,
                 lambda ent_section_pair: next(iter(ent_section_pair[0].spans)),
             )
-        ]
+        )
         return grouped_ent_section_pairs
 
     @document_iterating_step
@@ -185,8 +176,8 @@ class EntityClassDisambiguation(Step):
             if len(spansharing_ent_section_pairs) > 1:
                 ents = [ent for ent, section in spansharing_ent_section_pairs]
                 class_to_ents = {
-                    entity_class: set(ents)
-                    for entity_class, ents in sort_then_group(ents, lambda ent: ent.entity_class)
+                    entity_class: set(_ents)
+                    for entity_class, _ents in sort_then_group(ents, lambda ent: ent.entity_class)
                 }
 
                 representative_ent = spansharing_ent_section_pairs[0][0]
@@ -195,11 +186,10 @@ class EntityClassDisambiguation(Step):
                 ent_sentence_context_str = self.sentence_context_for_entity(
                     representative_ent, representative_section
                 )
-                scored_contexts = list(
-                    self.entity_class_scorer.score_entity_context(
-                        ent_span=ent_match, ent_context=ent_sentence_context_str
-                    )
+                scored_contexts = self.entity_class_scorer.score_entity_context(
+                    ent_span=ent_match, ent_context=ent_sentence_context_str
                 )
+
                 acceptable_scores = (
                     scored_context
                     for scored_context in scored_contexts

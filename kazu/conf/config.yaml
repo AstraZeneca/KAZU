@@ -26,3 +26,4 @@ defaults:
   - CleanupActions: default
   - LabelStudioManager: default
   - Middlewares: default
+  - EntityClassDisambiguationStep: default
