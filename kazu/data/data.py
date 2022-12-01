@@ -574,6 +574,3 @@ class CuratedTerm:
     entity_class: str
     term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
     curated_id_mappings: Dict[str, str] = field(default_factory=dict)
-
-    def __hash__(self):
-        return hash(id(self))
