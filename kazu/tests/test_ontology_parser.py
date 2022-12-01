@@ -5,7 +5,7 @@ import pytest
 
 from kazu.data.data import CuratedTerm
 from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.ontology_preprocessing.base import CuratedTermDataset
+from kazu.modelling.ontology_preprocessing.base import get_curated_terms_for_parser
 from kazu.tests.utils import DummyParser
 
 
@@ -13,7 +13,7 @@ def test_injected_synonyms(tmp_path):
     path = tmp_path.joinpath("injections.jsonl")
     missing_parser_name = "missing_parser_1"
 
-    injected_synonym_curated_terms = (
+    injected_synonym_curated_terms = [
         CuratedTerm(
             term="hello I'm injected",
             action="keep",
@@ -43,7 +43,7 @@ def test_injected_synonyms(tmp_path):
             entity_class="injection_test",
             curated_id_mappings={missing_parser_name: "blah"},
         ),
-    )
+    ]
 
     with open(path, "w") as f:
         f.writelines(
@@ -55,13 +55,17 @@ def test_injected_synonyms(tmp_path):
         name="injection_test_parser_1",
         in_path="",
         entity_class="injection_test",
-        additional_synonyms_dataset=CuratedTermDataset(path),
+        additional_synonyms_dataset=get_curated_terms_for_parser(
+            path=path, parser_name="injection_test_parser_1"
+        ),
     )
     parser2 = DummyParser(
         name="injection_test_parser_2",
         in_path="",
         entity_class="injection_test",
-        additional_synonyms_dataset=CuratedTermDataset(path),
+        additional_synonyms_dataset=get_curated_terms_for_parser(
+            path=path, parser_name="injection_test_parser_2"
+        ),
     )
     parser.populate_databases()
     parser2.populate_databases()
