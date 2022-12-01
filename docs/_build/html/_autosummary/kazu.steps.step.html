@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.ner.hf_token_classification" href="kazu.steps.ner.hf_token_classification.html" /><link rel="prev" title="kazu.steps.ner" href="kazu.steps.ner.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.utils" href="kazu.utils.html" /><link rel="prev" title="kazu.steps.other.stanza" href="kazu.steps.other.stanza.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
-        <title>kazu.steps.ner.entity_post_processing - Kazu documentation</title>
+        <title>kazu.steps.step - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -254,8 +254,8 @@
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">kazu.steps.ner.entity_post_processing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html">kazu.steps.ner.entity_post_processing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.hf_token_classification.html">kazu.steps.ner.hf_token_classification</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.seth.html">kazu.steps.ner.seth</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.ner.spacy_ner.html">kazu.steps.ner.spacy_ner</a></li>
@@ -268,7 +268,7 @@
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.other.stanza.html">kazu.steps.other.stanza</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="kazu.steps.step.html">kazu.steps.step</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">kazu.steps.step</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.utils.html">kazu.utils</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -312,7 +312,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.steps.ner.entity_post_processing.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.steps.step.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -334,90 +334,113 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-kazu.steps.ner.entity_post_processing">
-<span id="kazu-steps-ner-entity-post-processing"></span><h1>kazu.steps.ner.entity_post_processing<a class="headerlink" href="#module-kazu.steps.ner.entity_post_processing" title="Permalink to this heading">#</a></h1>
+          <section id="module-kazu.steps.step">
+<span id="kazu-steps-step"></span><h1>kazu.steps.step<a class="headerlink" href="#module-kazu.steps.step" title="Permalink to this heading">#</a></h1>
+<p class="rubric">Functions</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.steps.step.document_batch_step" title="kazu.steps.step.document_batch_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">document_batch_step</span></code></a>(batch_doc_callable)</p></td>
+<td><p>Add error handling to a method that processes batches of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>s.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.steps.step.document_iterating_step" title="kazu.steps.step.document_iterating_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">document_iterating_step</span></code></a>(per_doc_callable)</p></td>
+<td><p>Handle a list of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>s and add error handling.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NonContiguousEntitySplitter</span></code></a></p></td>
-<td><p>Some simple rules to split non-contiguous entities into component entities</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern" title="kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SplitOnConjunctionPattern</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Step</span></code></a></p></td>
 <td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix" title="kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SplitOnNumericalListPatternWithPrefix</span></code></a></p></td>
-<td><p>split a string of numerically incrementing parts:</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.ner.entity_post_processing.</span></span><span class="sig-name descname"><span class="pre">NonContiguousEntitySplitter</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L169-L190"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Some simple rules to split non-contiguous entities into component entities</p>
+<dt class="sig sig-object py" id="kazu.steps.step.Step">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.step.</span></span><span class="sig-name descname"><span class="pre">Step</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/step.py#L8-L32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.step.Step" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_conditions</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L174-L176"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter.__init__" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>entity_conditions</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Entity" title="kazu.data.data.Entity"><em>Entity</em></a><em>]</em><em>]</em><em>]</em><em>]</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.ner.entity_post_processing.</span></span><span class="sig-name descname"><span class="pre">SplitOnConjunctionPattern</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L27-L90"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spacy_pipeline</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L28-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern.__init__" title="Permalink to this definition">#</a></dt>
-<dd><p>analyse</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pattern</strong> – </p></li>
-<li><p><strong>spacy_pipeline</strong> (<a class="reference internal" href="kazu.utils.spacy_pipeline.html#kazu.utils.spacy_pipeline.SpacyPipeline" title="kazu.utils.spacy_pipeline.SpacyPipeline"><em>SpacyPipeline</em></a>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern.run_conjunction_rules">
-<span class="sig-name descname"><span class="pre">run_conjunction_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L43-L90"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern.run_conjunction_rules" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="kazu.steps.step.Step.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/../../../.pyenv/versions/3.9.13/lib/python3.9/typing.py#L1087-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.step.Step.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.ner.entity_post_processing.</span></span><span class="sig-name descname"><span class="pre">SplitOnNumericalListPatternWithPrefix</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L93-L166"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>split a string of numerically incrementing parts:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">splitter</span> <span class="o">=</span> <span class="n">SplitOnNumericalListPatternWithPrefix</span><span class="p">()</span>
-<span class="n">ent</span> <span class="o">=</span> <span class="n">Entity</span><span class="o">.</span><span class="n">load_contiguous_entity</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">entity_class</span><span class="o">=</span><span class="s2">&quot;gene&quot;</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s2">&quot;BRCA1/2/3&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">splitter</span><span class="p">(</span><span class="n">ent</span><span class="p">,</span> <span class="s2">&quot;BRCA1/2/3 are oncogenes&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[BRCA1:gene:test:0:5, BRCA2:gene:test:0:7, BRCA3:gene:test:0:9]
-</pre></div>
-</div>
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/ner/entity_post_processing.py#L115-L121"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix.__init__" title="Permalink to this definition">#</a></dt>
-<dd><p>pattern to split the string on (typically “/”)</p>
+<dt class="sig sig-object py" id="kazu.steps.step.Step.namespace">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">namespace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/step.py#L9-L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.step.Step.namespace" title="Permalink to this definition">#</a></dt>
+<dd><p>Metadata to name/describe the step, used in various places.</p>
+<p>Defaults to  <code class="docutils literal notranslate"><span class="pre">cls.__name__</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.steps.step.document_batch_step">
+<span class="sig-prename descclassname"><span class="pre">kazu.steps.step.</span></span><span class="sig-name descname"><span class="pre">document_batch_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_doc_callable</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/step.py#L81-L124"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.step.document_batch_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Add error handling to a method that processes batches of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>s.</p>
+<p>Use this to decorate a method that processes a batch of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>s
+at a time. The resulting method will wrap a call to the decorated function with error handling
+which will added exceptions to the <code class="docutils literal notranslate"><span class="pre">PROCESSING_EXCEPTION</span></code> metadata of documents. Failed documents
+will be returned as the second element of the return value, as expected of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code>
+method of a <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a>.</p>
+<p>Generally speaking, it will save effort and repetition to decorate a <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a> with either
+<a class="reference internal" href="#kazu.steps.step.document_iterating_step" title="kazu.steps.step.document_iterating_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_iterating_step()</span></code></a> or <a class="reference internal" href="#kazu.steps.step.document_batch_step" title="kazu.steps.step.document_batch_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_batch_step()</span></code></a>, rather than implementing the
+error handling in the <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a> itself.</p>
+<p>Normally, <a class="reference internal" href="#kazu.steps.step.document_iterating_step" title="kazu.steps.step.document_iterating_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_iterating_step()</span></code></a> would be used in preference to
+<a class="reference internal" href="#kazu.steps.step.document_batch_step" title="kazu.steps.step.document_batch_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_batch_step()</span></code></a>, unless the method involves computation which is more efficient
+when run in a batch, such as inference with a transformer-based Machine Learning model, or
+using spacy’s <a class="reference external" href="https://spacy.io/api/language/#pipe">pipe</a> method.</p>
+<p>Note that this will only work for a method of a class, rather than a standalone function,
+as it expects to have to pass through ‘self’ as a parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>batch_doc_callable</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a><em>[</em><em>[</em><em>Self</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em>) – A function that processes a batch of documents, that you want to use
+as the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method of a <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a>. This must do its work by mutating the
+input documents: the return value is ignored.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a>[[<em>Self</em>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.steps.step.document_iterating_step">
+<span class="sig-prename descclassname"><span class="pre">kazu.steps.step.</span></span><span class="sig-name descname"><span class="pre">document_iterating_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">per_doc_callable</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/step.py#L38-L78"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.step.document_iterating_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Handle a list of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>s and add error handling.</p>
+<p>Use this to decorate a method that processes a single <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>.
+The resulting method will then iterate over a list of
+<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>s, calling the decorated function for each
+<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>. Errors are handled automatically and added to the
+<code class="docutils literal notranslate"><span class="pre">PROCESSING_EXCEPTION</span></code> metadata of documents, with failed docs returned as the second element
+of the return value, as expected of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method of a <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a>.</p>
+<p>Generally speaking, it will save effort and repetition to decorate a <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a> with either
+<a class="reference internal" href="#kazu.steps.step.document_iterating_step" title="kazu.steps.step.document_iterating_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_iterating_step()</span></code></a> or <a class="reference internal" href="#kazu.steps.step.document_batch_step" title="kazu.steps.step.document_batch_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_batch_step()</span></code></a>, rather than implementing the
+error handling in the <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a> itself.</p>
+<p>Normally, <a class="reference internal" href="#kazu.steps.step.document_iterating_step" title="kazu.steps.step.document_iterating_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_iterating_step()</span></code></a> would be used in preference to
+<a class="reference internal" href="#kazu.steps.step.document_batch_step" title="kazu.steps.step.document_batch_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_batch_step()</span></code></a>, unless the method involves computation which is more efficient
+when run in a batch, such as inference with a transformer-based Machine Learning model, or
+using spacy’s <a class="reference external" href="https://spacy.io/api/language/#pipe">pipe</a> method.</p>
+<p>Note that this will only work for a method of a class, rather than a standalone function,
+as it expects to have to pass through ‘self’ as a parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>per_doc_callable</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a><em>[</em><em>[</em><em>Self</em><em>, </em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em>) – A function that processes a single document, that you want to use as
+the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method of a <a class="reference internal" href="#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a>. This must do its work by mutating the
+input document: the return value is ignored.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a>[[<em>Self</em>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]]]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -427,23 +450,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="kazu.steps.ner.hf_token_classification.html">
+          <a class="next-page" href="kazu.utils.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">kazu.steps.ner.hf_token_classification</div>
+                <div class="title">kazu.utils</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="kazu.steps.ner.html">
+          <a class="prev-page" href="kazu.steps.other.stanza.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">kazu.steps.ner</div>
+                <div class="title">kazu.steps.other.stanza</div>
                 
               </div>
             </a>

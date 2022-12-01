@@ -430,14 +430,14 @@ Fortunately, this is generally quite easy to do. Let’s take the example of the
 
     <span class="c1"># fortunately, Chembl comes as an sqlite DB, which lends itself very well to this tabular structure</span>
     <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_path</span><span class="p">)</span>
-    <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
 <span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, synonyms AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, syn_type AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">        FROM molecule_dictionary AS md</span>
 <span class="s2">                 JOIN molecule_synonyms ms ON md.molregno = ms.molregno</span>
 <span class="s2">        UNION ALL</span>
 <span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, &quot;pref_name&quot; AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">        FROM molecule_dictionary</span>
-<span class="s2">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+<span class="s2">    &quot;&quot;&quot;</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
     <span class="c1"># eliminate anything without a pref_name, as will be too big otherwise</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">DEFAULT_LABEL</span><span class="p">])</span>
