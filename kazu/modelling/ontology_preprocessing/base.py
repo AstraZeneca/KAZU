@@ -43,7 +43,7 @@ def load_curated_terms(path: PathLike) -> List[CuratedTerm]:
     """
     load curated terms from a Path
 
-    :param path:
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
     """
     with open(path, mode="r") as jsonlf:
@@ -55,7 +55,7 @@ def get_curated_terms_by_parser(path: PathLike) -> DefaultDict[str, List[Curated
     """
     return a list of curated terms indexed by parser name
 
-    :param path:
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
     """
     terms = load_curated_terms(path)
@@ -70,8 +70,9 @@ def get_curated_terms_for_parser(path: PathLike, parser_name: str) -> List[Curat
     """
     for a given parser name, get all the curated terms associated with it
 
-    :param path:
-    :param parser_name:
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :param parser_name: name of parser that curated terms should be extracted
+        for, from the input path
     :return:
     """
     terms_by_parser = get_curated_terms_by_parser(path)
@@ -133,6 +134,9 @@ class OntologyParser(ABC):
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
         :param excluded_ids: optional set of ids to exclude from the parsing process
+        :param additional_synonyms: optional list of :class:`kazu.data.data.CuratedTerm`, to be injected into the parser.
+            each term should have :attr:`kazu.data.data.CuratedTerm.curated_id_mappings` populated with
+            key=self.parser_name, value: identifier
         """
 
         self.in_path = in_path
