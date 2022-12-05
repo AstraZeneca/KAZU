@@ -173,11 +173,10 @@ class EntityClassDisambiguationStep(Step):
         drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
         for ent_span, spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
             if len(spansharing_ent_section_pairs) > 1:
-                ents = [ent for ent, section in spansharing_ent_section_pairs]
-                class_to_ents = {
-                    entity_class: set(_ents)
-                    for entity_class, _ents in sort_then_group(ents, lambda ent: ent.entity_class)
-                }
+                ents: List[Entity] = [ent for ent, section in spansharing_ent_section_pairs]
+                class_to_ents = defaultdict(set)
+                for ent in ents:
+                    class_to_ents[ent.entity_class].add(ent)
 
                 representative_ent = spansharing_ent_section_pairs[0][0]
                 representative_section = spansharing_ent_section_pairs[0][1]
