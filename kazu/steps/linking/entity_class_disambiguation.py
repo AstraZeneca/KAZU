@@ -169,7 +169,7 @@ class EntityClassDisambiguationStep(Step):
         return grouped_ent_section_pairs
 
     @document_iterating_step
-    def __call__(self, doc: Document):
+    def __call__(self, doc: Document) -> None:
         drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
         for ent_span, spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
             if len(spansharing_ent_section_pairs) > 1:
