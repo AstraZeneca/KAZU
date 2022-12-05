@@ -3,7 +3,6 @@ from collections import defaultdict
 
 import numpy as np
 
-
 from kazu.data.data import Document, Entity, Section, CharSpan
 from kazu.utils.grouping import sort_then_group
 from kazu.steps import Step, document_iterating_step
