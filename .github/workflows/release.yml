@@ -28,7 +28,7 @@ jobs:
 
       - name: fetch tags
         run: |
-          git fetch --prune --tags --prune-tags
+          git fetch --prune --tags --prune-tags --force
           echo exit code $?
           git tag --list
 
