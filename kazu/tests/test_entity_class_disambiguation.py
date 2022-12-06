@@ -17,18 +17,20 @@ def test_EntityClassDisambiguationStep():
             ),
         ]
     }
-    text = "UCB probably refers to the pharma company not umbilical cord blood"
-    doc = Document.create_simple_document(text)
+    sents = ["Sentence context.",
+             "UCB probably refers to the pharma company not umbilical cord blood.",
+             "More sentence context."]
+    doc = Document.simple_document_from_sents(sents)
     ucb_company_ent = Entity.load_contiguous_entity(
-        start=0,
-        end=3,
+        start=len(sents[0]),
+        end=len(sents[0]) + len("UCB"),
         match="UCB",
         entity_class="company",
         namespace="test",
     )
     ucb_anatomy_ent = Entity.load_contiguous_entity(
-        start=0,
-        end=3,
+        start=len(sents[0]),
+        end=len(sents[0]) + len("UCB"),
         match="UCB",
         entity_class="anatomy",
         namespace="test",

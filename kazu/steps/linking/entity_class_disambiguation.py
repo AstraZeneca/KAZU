@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Dict, NamedTuple, Iterable, Set, Tuple
+from typing import List, TypedDict, Dict, NamedTuple, Iterable, Set, Tuple, DefaultDict, FrozenSet
 from collections import defaultdict
 
 import numpy as np
@@ -128,58 +128,39 @@ class EntityClassDisambiguationStep(Step):
                         sent_span,
                     )
                     for idx, sent_span in enumerate(sent_spans)
-                    if entity.is_completely_overlapped(sent_span)
+                    if any(entity_span.is_completely_overlapped(sent_span) for entity_span in entity.spans)
                 )
             )
-            context_start_idx = min(0, idx - int(window / 2))
-            context_end_idx = max(len(sent_spans), idx + int(window / 2))
+            context_start_idx = max(0, idx - int(window / 2))
+            context_end_idx = min(len(sent_spans), idx + int(window / 2)) + 1
             sentence_context_spans = sent_spans[context_start_idx:context_end_idx]
             return section.get_text()[
-                sentence_context_spans[0].start : sentence_context_spans[-1].end
+                sentence_context_spans[0].start:sentence_context_spans[-1].end
             ]
 
     def spangrouped_ent_section_pairs(
         self, doc: Document
-    ) -> Iterable[Tuple[CharSpan, List[EntSectionPair]]]:
-        ent_section_pairs = (
-            (
-                ent,
-                section,
-            )
-            for section in doc.sections
-            for ent in section.entities
-        )
-
-        ent_section_pairs_to_disambiguate = (
-            (
-                ent,
-                section,
-            )
-            for ent, section in ent_section_pairs
-            if ent.match in self.spans_to_disambiguate
-        )
-
-        grouped_ent_section_pairs = (
-            (key, list(group))
-            for key, group in sort_then_group(
-                ent_section_pairs_to_disambiguate,
-                lambda ent_section_pair: next(iter(ent_section_pair[0].spans)),
-            )
-        )
-        return grouped_ent_section_pairs
+    ) -> Iterable[List[EntSectionPair]]:
+        spans_to_ents_and_sections: DefaultDict[
+            FrozenSet[CharSpan], List[EntSectionPair]
+        ] = defaultdict(list)
+        for section in doc.sections:
+            for ent in section.entities:
+                if ent.match in self.spans_to_disambiguate:
+                    spans_to_ents_and_sections[ent.spans].append((ent, section))
+        return spans_to_ents_and_sections.values()
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
         drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
-        for ent_span, spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
+        for spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
             if len(spansharing_ent_section_pairs) > 1:
+                representative_ent, representative_section = spansharing_ent_section_pairs[0]
                 ents: List[Entity] = [ent for ent, section in spansharing_ent_section_pairs]
                 class_to_ents = defaultdict(set)
                 for ent in ents:
                     class_to_ents[ent.entity_class].add(ent)
 
-                representative_ent = spansharing_ent_section_pairs[0][0]
-                representative_section = spansharing_ent_section_pairs[0][1]
                 ent_match = representative_ent.match
                 ent_sentence_context_str = self.sentence_context_for_entity(
                     representative_ent, representative_section
