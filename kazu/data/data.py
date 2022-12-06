@@ -463,7 +463,7 @@ class Document:
         sent_spans = []
         curr_start = 0
         for sent in sents:
-            sent_spans.append(CharSpan(start=curr_start, end=curr_start+len(sent)))
+            sent_spans.append(CharSpan(start=curr_start, end=curr_start + len(sent)))
             curr_start = len(sent)
         section.sentence_spans = sent_spans
         return cls(idx=idx, sections=[section])

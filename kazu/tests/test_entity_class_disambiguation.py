@@ -17,9 +17,11 @@ def test_EntityClassDisambiguationStep():
             ),
         ]
     }
-    sents = ["Sentence context.",
-             "UCB probably refers to the pharma company not umbilical cord blood.",
-             "More sentence context."]
+    sents = [
+        "Sentence context.",
+        "UCB probably refers to the pharma company not umbilical cord blood.",
+        "More sentence context.",
+    ]
     doc = Document.simple_document_from_sents(sents)
     ucb_company_ent = Entity.load_contiguous_entity(
         start=len(sents[0]),

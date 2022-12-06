@@ -4,7 +4,6 @@ from collections import defaultdict
 import numpy as np
 
 from kazu.data.data import Document, Entity, Section, CharSpan
-from kazu.utils.grouping import sort_then_group
 from kazu.steps import Step, document_iterating_step
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -128,19 +127,20 @@ class EntityClassDisambiguationStep(Step):
                         sent_span,
                     )
                     for idx, sent_span in enumerate(sent_spans)
-                    if any(entity_span.is_completely_overlapped(sent_span) for entity_span in entity.spans)
+                    if any(
+                        entity_span.is_completely_overlapped(sent_span)
+                        for entity_span in entity.spans
+                    )
                 )
             )
             context_start_idx = max(0, idx - int(window / 2))
             context_end_idx = min(len(sent_spans), idx + int(window / 2)) + 1
             sentence_context_spans = sent_spans[context_start_idx:context_end_idx]
             return section.get_text()[
-                sentence_context_spans[0].start:sentence_context_spans[-1].end
+                sentence_context_spans[0].start : sentence_context_spans[-1].end
             ]
 
-    def spangrouped_ent_section_pairs(
-        self, doc: Document
-    ) -> Iterable[List[EntSectionPair]]:
+    def spangrouped_ent_section_pairs(self, doc: Document) -> Iterable[List[EntSectionPair]]:
         spans_to_ents_and_sections: DefaultDict[
             FrozenSet[CharSpan], List[EntSectionPair]
         ] = defaultdict(list)
