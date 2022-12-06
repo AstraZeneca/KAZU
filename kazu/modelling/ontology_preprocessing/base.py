@@ -1518,6 +1518,7 @@ class MeddraOntologyParser(OntologyParser):
         )
         return df
 
+
 class CLOntologyParser(RDFGraphParser):
     """
     input should be an CL owl file
@@ -1526,14 +1527,14 @@ class CLOntologyParser(RDFGraphParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            excluded_ids: Optional[Set[str]] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
     ):
 
         super().__init__(
