@@ -8,7 +8,7 @@ webserver_dependencies = [
 
 setup(
     name="kazu",
-    version="0.0.13",
+    version="0.0.14",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",
     description="NER",
