@@ -1517,3 +1517,39 @@ class MeddraOntologyParser(OntologyParser):
             {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
         return df
+
+class CLOntologyParser(RDFGraphParser):
+    """
+    input should be an CL owl file
+    e.g.
+    https://www.ebi.ac.uk/ols/ontologies/cl
+    """
+
+    def __init__(
+            self,
+            in_path: str,
+            entity_class: str,
+            string_scorer: Optional[StringSimilarityScorer] = None,
+            synonym_merge_threshold: float = 0.70,
+            data_origin: str = "unknown",
+            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+            excluded_ids: Optional[Set[str]] = None,
+    ):
+
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name="CL",
+            uri_regex=re.compile("^http://purl.obolibrary.org/obo/CL_[0-9]+$"),
+            synonym_predicates=(
+                rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
+            ),
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
+        )
+
+    def find_kb(self, string: str) -> str:
+        return "CL"
