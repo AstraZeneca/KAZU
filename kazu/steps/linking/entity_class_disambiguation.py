@@ -97,8 +97,7 @@ class EntityClassDisambiguationStep(Step):
     def __init__(self, context: Dict[str, List[DisambiguationEntry]]):
         """
         Optionally disambiguates the entity class (anatomy, drug, etc.) of entities that exactly share a span in a
-        document. The provided context dictionary specifies terms along with an expected textual context around those
-        terms.
+        document.
 
         For example, "UCB" could refer to "umbilical cord blood" an anatomical entity, or the pharmaceutical company
         UCB, a corporate entity. An expected context might be "umbilical pregnancy blood baby placenta..." in the former
@@ -107,7 +106,7 @@ class EntityClassDisambiguationStep(Step):
         to correlate an entity's actual textual context with the provided expected context, and provided thresholds are
         used to allow the tf-idf model to choose the most suitable entity class.
 
-        :param context:
+        :param context: Specifies terms to disambiguate along with an expected textual context around those terms.
         """
         self.spans_to_disambiguate = set(context.keys())
         self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(
