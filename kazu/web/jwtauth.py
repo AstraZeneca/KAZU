@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import logging
 from typing import Optional, Tuple, Union
+import random 
 
 import jwt
 from starlette.authentication import (AuthCredentials, AuthenticationBackend,
@@ -94,9 +95,10 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         return token
 
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
+        request_id = random.getrandbits(128)
         if "Authorization" not in request.headers:
             raise AuthenticationError(
-                f"No 'Authorization' header specified: please use a valid Bearer token"
+                "No 'Authorization' header specified: please use a valid Bearer token"
             )
 
         auth = request.headers["Authorization"]
