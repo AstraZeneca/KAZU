@@ -42,8 +42,12 @@ import logging
 from typing import Optional, Tuple, Union
 
 import jwt
-from starlette.authentication import (AuthCredentials, AuthenticationBackend,
-                                      AuthenticationError, BaseUser)
+from starlette.authentication import (
+    AuthCredentials,
+    AuthenticationBackend,
+    AuthenticationError,
+    BaseUser,
+)
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
