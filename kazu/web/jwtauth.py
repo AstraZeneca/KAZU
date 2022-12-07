@@ -42,16 +42,12 @@ import logging
 from typing import Optional, Tuple, Union
 
 import jwt
-from starlette.authentication import (
-    AuthenticationBackend,
-    AuthenticationError,
-    BaseUser,
-    AuthCredentials,
-)
+from starlette.authentication import (AuthCredentials, AuthenticationBackend,
+                                      AuthenticationError, BaseUser)
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ray")
 
 
 class JWTUser(BaseUser):
@@ -100,7 +96,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
         if "Authorization" not in request.headers:
             raise AuthenticationError(
-                "No 'Authorization' header specified: please use a valid Bearer token"
+                f"No 'Authorization' header specified: please use a valid Bearer token"
             )
 
         auth = request.headers["Authorization"]
@@ -114,9 +110,10 @@ class JWTAuthenticationBackend(AuthenticationBackend):
                 options=self.options,
             )
         except jwt.InvalidTokenError as e:
+            logger.warn(e)
             raise AuthenticationError(str(e))
         username = payload[self.username_field]
-        logger.info(f"received request from {username}")
+        logger.info(f"Received request from {username}")
         return AuthCredentials(["authenticated"]), JWTUser(
             username=username, token=token, payload=payload
         )
