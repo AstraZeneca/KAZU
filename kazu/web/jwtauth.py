@@ -53,6 +53,7 @@ from starlette.responses import JSONResponse
 
 logger = logging.getLogger("ray")
 
+EXLUDED_ENDPOINTS = ['/api', '/api/docs', '/api/openapi.json']
 
 class JWTUser(BaseUser):
     def __init__(self, username: str, token: str, payload: dict) -> None:
@@ -98,6 +99,11 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         return token
 
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
+        request.scope['raw_path'].decode()
+        if request.scope['raw_path'].decode() in EXLUDED_ENDPOINTS:
+            logger.info("Request to %s, no authentication required" % request.scope['raw_path'] )
+            return None
+
         if "Authorization" not in request.headers:
             raise AuthenticationError(
                 "No 'Authorization' header specified: please use a valid Bearer token"
