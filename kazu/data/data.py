@@ -495,7 +495,7 @@ class DocumentJsonUtils:
                 )
                 if drop_terms:
                     for ent in ents_to_keep:
-                        ent.syn_term_to_synonym_terms.clear()
+                        ent["synonym_terms"].clear()
                 section_dict["entities"] = ents_to_keep
 
         return doc_json_dict
