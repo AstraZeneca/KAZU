@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import logging
+import uuid
 from typing import Optional, Tuple, Union
 
 import jwt
@@ -51,10 +52,9 @@ from starlette.authentication import (
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from kazu.web.routes import EXLUDED_ENDPOINTS
+
 logger = logging.getLogger("ray")
-
-EXLUDED_ENDPOINTS = ["/api", "/api/", "/api/docs", "/api/openapi.json"]
-
 
 class JWTUser(BaseUser):
     def __init__(self, username: str, token: str, payload: dict) -> None:
@@ -100,13 +100,21 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         return token
 
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
+        req_id = str(uuid.uuid4())
+        request.headers.__dict__["_list"].append(
+                (
+                    "X-request-id".encode(),
+                    req_id.encode(),
+                )
+            )
         if request.scope["raw_path"].decode() in EXLUDED_ENDPOINTS:
-            logger.info("Request to %s, no authentication required" % request.scope["raw_path"])
+
+            logger.info("ID: %s Request to %s, no authentication required" % req_id, request.scope["raw_path"])
             return None
 
         if "Authorization" not in request.headers:
             raise AuthenticationError(
-                "No 'Authorization' header specified: please use a valid Bearer token"
+                f"ID: {req_id} No 'Authorization' header specified: please use a valid Bearer token"
             )
 
         auth = request.headers["Authorization"]
@@ -120,10 +128,10 @@ class JWTAuthenticationBackend(AuthenticationBackend):
                 options=self.options,
             )
         except jwt.InvalidTokenError as e:
-            logger.warn(e)
-            raise AuthenticationError(str(e))
+            logger.warn(f"ID: {req_id} {e}")
+            raise AuthenticationError(f"ID: {req_id} {e}")
         username = payload[self.username_field]
-        logger.info(f"Received request from {username}")
+        logger.info(f"ID: {req_id} Received request from {username}")
         return AuthCredentials(["authenticated"]), JWTUser(
             username=username, token=token, payload=payload
         )
