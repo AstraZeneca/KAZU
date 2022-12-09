@@ -405,6 +405,31 @@ class GeneStringNormalizer(EntityClassNormalizer):
         return DefaultStringNormalizer.normalize_noun_phrase(original_string)
 
 
+class CompanyStringNormalizer(EntityClassNormalizer):
+    @staticmethod
+    def is_symbol_like(original_string: str) -> bool:
+        alpha_chars = filter(lambda x: x.isalpha(), original_string)
+        return all(x.isupper() for x in alpha_chars)
+
+    @staticmethod
+    def normalize_symbol(original_string: str) -> str:
+        """
+        just upper case
+        :param original_string:
+        :return:
+        """
+        return original_string.upper()
+
+    @staticmethod
+    def normalize_noun_phrase(original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_noun_phrase
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_noun_phrase(original_string)
+
+
 class StringNormalizer:
     """
     call custom entity class normalizers, or a default normalizer if none is available
@@ -414,6 +439,7 @@ class StringNormalizer:
         "gene": GeneStringNormalizer,
         "anatomy": AnatomyStringNormalizer,
         "disease": DiseaseStringNormalizer,
+        "company": CompanyStringNormalizer,
     }
 
     @staticmethod
