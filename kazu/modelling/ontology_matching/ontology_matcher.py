@@ -47,6 +47,7 @@ class CuratedTerm:
     action: str
     case_sensitive: bool
     entity_class: str
+    doc_freq: float = 0.0
     term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
 
 
