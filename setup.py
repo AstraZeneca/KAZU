@@ -30,6 +30,7 @@ setup(
         "stanza>=1.0.0",
         "regex>=2020.1.7",
         "psutil>=5.3.0",
+        "cachetools>=5.2.0",
     ],
     extras_require={
         "webserver": webserver_dependencies,
