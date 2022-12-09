@@ -4,9 +4,6 @@ Quickstart
 Installation
 ------------
 
-Note, currently not functional - install from repo only at present.
-Ensure you are on version 21.0 or newer of pip.
-
 .. code-block:: console
 
    pip install kazu
@@ -31,7 +28,7 @@ Processing your first document
 ------------------------------
 
 .. testcode::
-    :skipif: kazu_config_missing or kazu_model_pack_missing
+    :skipif: kazu_model_pack_missing
 
     from hydra import initialize_config_dir, compose
     from hydra.utils import instantiate
@@ -57,7 +54,7 @@ Processing your first document
 
 .. testoutput::
     :hide:
-    :skipif: kazu_config_missing or kazu_model_pack_missing
+    :skipif: kazu_model_pack_missing
 
     EGFR mutations are often implicated in lung cancer
 
