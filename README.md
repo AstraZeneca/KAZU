@@ -67,7 +67,7 @@ with initialize_config_dir(config_dir=str(cdir)):
 
 # Documentation
 
-[Find our docs here](https://psychic-chainsaw-f197cc2b.pages.github.io/_build/html/index.html)
+[Find our docs here](https://astrazeneca.github.io/KAZU/_build/html/index.html)
 
 ## License
 
