@@ -76,7 +76,6 @@ class KazuWebApp:
         logger.info(f"ID: {req_id} Document: {doc}")
         result = self.pipeline([doc.to_kazu_document()])
         resp_dict = result[0].as_minified_dict()
-        logger.info(f"ID: {req_id} Output: {resp_dict}")
         return JSONResponse(content=resp_dict)
 
     @app.post(f"/{KAZU}/batch")
@@ -102,6 +101,7 @@ class KazuWebApp:
             "X-request-id",
             req_id,
         )
+        logger.info(f"ID: {req_id} Response Code: {response.status_code}")
         return response
 
 
