@@ -19,16 +19,18 @@ from kazu.web.routes import KAZU
 logger = logging.getLogger("ray")
 app = FastAPI()
 
-def get_request_id(request: HTTPConnection) -> str:
+
+def get_request_id(request: HTTPConnection) -> Union[str, None]:
     """Utility function for extracting custom header from HTTPConnection Object.
 
     :param request: Starlette HTTPConnection object
     :returns: ID string
     """
     key, req_id = request.headers.__dict__["_list"][-1]
-    if key.decode('latin-1').lower() != "x-request-id":
+    if key.decode("latin-1").lower() != "x-request-id":
         return None
-    return req_id.decode('latin-1')
+    return req_id.decode("latin-1")
+
 
 class SectionedWebDocument(BaseModel):
     sections: Dict[str, str]
@@ -81,13 +83,13 @@ class KazuWebApp:
     def batch_ner(self, docs: List[WebDocument]):
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
-    
+
     @app.middleware("http")
     async def add_id_header(
         request: Request,
         call_next,
     ):
-        """Add request ID to response header. 
+        """Add request ID to response header.
 
         :param request: Request object
         :param call_next: Function for passing middleware to FASTAPI
@@ -97,12 +99,11 @@ class KazuWebApp:
         req_id = get_request_id(request)
         response = await call_next(request)
         response.headers.append(
-                
-                    "X-request-id",
-                    req_id,
-                
-            )
+            "X-request-id",
+            req_id,
+        )
         return response
+
 
 @hydra.main(config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
@@ -132,6 +133,7 @@ def stop():
     if ray.is_initialized():
         serve.shutdown()
         ray.shutdown()
+
 
 if __name__ == "__main__":
     start()

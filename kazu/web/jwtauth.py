@@ -56,6 +56,7 @@ from kazu.web.routes import EXLUDED_ENDPOINTS
 
 logger = logging.getLogger("ray")
 
+
 class JWTUser(BaseUser):
     def __init__(self, username: str, token: str, payload: dict) -> None:
         self.username = username
@@ -102,14 +103,17 @@ class JWTAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
         req_id = str(uuid.uuid4())
         request.headers.__dict__["_list"].append(
-                (
-                    "X-request-id".encode(),
-                    req_id.encode(),
-                )
+            (
+                "X-request-id".encode(),
+                req_id.encode(),
             )
+        )
         if request.scope["raw_path"].decode() in EXLUDED_ENDPOINTS:
 
-            logger.info("ID: %s Request to %s, no authentication required" % req_id, request.scope["raw_path"])
+            logger.info(
+                "ID: %s Request to %s, no authentication required" % req_id,
+                request.scope["raw_path"],
+            )
             return None
 
         if "Authorization" not in request.headers:
