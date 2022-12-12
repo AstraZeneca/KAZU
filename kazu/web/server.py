@@ -4,7 +4,7 @@ from typing import Callable, Union, List, Dict
 
 import hydra
 import ray
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from hydra.utils import instantiate
 from omegaconf import DictConfig
