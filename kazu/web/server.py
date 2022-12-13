@@ -20,7 +20,7 @@ from kazu.web.routes import KAZU
 
 description = """
 Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
-designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
+designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
 The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the library is available
@@ -28,11 +28,11 @@ The Web API is designed for light usage, if you need to run kazu for a heavy wor
 """
 logger = logging.getLogger("ray")
 kazu_version = (
-            subprocess.check_output("pip show kazu | grep Version", shell=True)
-            .decode("utf-8")
-            .split(" ")[1]
-            .strip()
-        )
+    subprocess.check_output("pip show kazu | grep Version", shell=True)
+    .decode("utf-8")
+    .split(" ")[1]
+    .strip()
+)
 app = FastAPI(
     title="Kazu - Biomedical NLP Framework",
     description=description,
