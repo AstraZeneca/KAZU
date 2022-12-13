@@ -1,18 +1,19 @@
 import logging
+import subprocess
 import time
-from typing import Callable, Union, List, Dict
+from typing import Callable, Dict, List, Union
 
 import hydra
 import ray
-from fastapi import FastAPI, Depends
+from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
-from fastapi.security import HTTPBearer
+from starlette.requests import HTTPConnection, Request
 
-from starlette.requests import Request, HTTPConnection
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
 from kazu.web.routes import KAZU
@@ -22,7 +23,7 @@ Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedic
 designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
-The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the llirary is available
+The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the library is available
 *[here](https://astrazeneca.github.io/KAZU/_build/html/index.html)*.
 """
 logger = logging.getLogger("ray")
