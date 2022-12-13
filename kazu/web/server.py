@@ -26,9 +26,16 @@ The Web API is designed for light usage, if you need to run kazu for a heavy wor
 *[here](https://astrazeneca.github.io/KAZU/_build/html/index.html)*.
 """
 logger = logging.getLogger("ray")
+kazu_version = (
+            subprocess.check_output("pip show kazu | grep Version", shell=True)
+            .decode("utf-8")
+            .split(" ")[1]
+            .strip()
+        )
 app = FastAPI(
     title="Kazu - Biomedical NLP Framework",
     description=description,
+    version=kazu_version,
     license_info={
         "name": "Apache 2.0",
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
