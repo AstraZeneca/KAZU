@@ -1,23 +1,49 @@
 import logging
+import subprocess
 import time
-from typing import Callable, Union, List, Dict
+from typing import Callable, Dict, List, Union
 
 import hydra
 import ray
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
+from starlette.requests import HTTPConnection, Request
 
-from starlette.requests import Request, HTTPConnection
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
 from kazu.web.routes import KAZU
 
+description = """
+Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
+designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the
+research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
+
+The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the library is available
+*[here](https://astrazeneca.github.io/KAZU/_build/html/index.html)*.
+"""
 logger = logging.getLogger("ray")
-app = FastAPI()
+kazu_version = (
+    subprocess.check_output("pip show kazu | grep Version", shell=True)
+    .decode("utf-8")
+    .split(" ")[1]
+    .strip()
+)
+app = FastAPI(
+    title="Kazu - Biomedical NLP Framework",
+    description=description,
+    version=kazu_version,
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
+oauth2_scheme = HTTPBearer()
 
 
 def get_request_id(request: HTTPConnection) -> Union[str, None]:
@@ -70,7 +96,7 @@ class KazuWebApp:
         return "Welcome to KAZU."
 
     @app.post(f"/{KAZU}")
-    def ner(self, doc: WebDocument, request: Request):
+    def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         req_id = get_request_id(request)
         logger.info("ID: %s Request to kazu endpoint" % req_id)
         logger.info(f"ID: {req_id} Document: {doc}")
@@ -79,7 +105,7 @@ class KazuWebApp:
         return JSONResponse(content=resp_dict)
 
     @app.post(f"/{KAZU}/batch")
-    def batch_ner(self, docs: List[WebDocument]):
+    def batch_ner(self, docs: List[WebDocument], token=Depends(oauth2_scheme)):
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 

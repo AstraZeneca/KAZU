@@ -111,8 +111,8 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         if request.scope["raw_path"].decode() in EXLUDED_ENDPOINTS:
 
             logger.info(
-                "ID: %s Request to %s, no authentication required" % req_id,
-                request.scope["raw_path"],
+                "ID: %s Request to %s, no authentication required"
+                % (req_id, request.scope["raw_path"]),
             )
             return None
 
