@@ -4,12 +4,13 @@ from typing import Callable, Union, List, Dict
 
 import hydra
 import ray
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
+from fastapi.security import HTTPBearer
 
 from starlette.requests import Request, HTTPConnection
 from kazu.data.data import Document
@@ -18,6 +19,8 @@ from kazu.web.routes import KAZU
 
 logger = logging.getLogger("ray")
 app = FastAPI()
+
+oauth2_scheme = HTTPBearer()
 
 
 def get_request_id(request: HTTPConnection) -> Union[str, None]:
@@ -70,7 +73,7 @@ class KazuWebApp:
         return "Welcome to KAZU."
 
     @app.post(f"/{KAZU}")
-    def ner(self, doc: WebDocument, request: Request):
+    def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         req_id = get_request_id(request)
         logger.info("ID: %s Request to kazu endpoint" % req_id)
         logger.info(f"ID: {req_id} Document: {doc}")
@@ -79,7 +82,7 @@ class KazuWebApp:
         return JSONResponse(content=resp_dict)
 
     @app.post(f"/{KAZU}/batch")
-    def batch_ner(self, docs: List[WebDocument]):
+    def batch_ner(self, docs: List[WebDocument], token=Depends(oauth2_scheme)):
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
