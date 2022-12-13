@@ -8,7 +8,7 @@ webserver_dependencies = [
 
 setup(
     name="kazu",
-    version="0.0.14",
+    version="0.0.17",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",
     description="NER",
@@ -30,6 +30,7 @@ setup(
         "stanza>=1.0.0",
         "regex>=2020.1.7",
         "psutil>=5.3.0",
+        "cachetools>=5.2.0",
     ],
     extras_require={
         "webserver": webserver_dependencies,

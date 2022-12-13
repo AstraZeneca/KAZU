@@ -97,7 +97,6 @@ html_theme_options = {
 doctest_global_setup = """
 import os
 
-kazu_config_missing = os.environ.get("KAZU_CONFIG_DIR") is None
 kazu_model_pack_missing = os.environ.get("KAZU_MODEL_PACK") is None
 """
 

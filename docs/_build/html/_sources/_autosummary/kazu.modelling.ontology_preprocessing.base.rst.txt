@@ -1,4 +1,4 @@
-kazu.modelling.ontology\_preprocessing.base
+﻿kazu.modelling.ontology\_preprocessing.base
 ===========================================
 
 .. automodule:: kazu.modelling.ontology_preprocessing.base
@@ -19,6 +19,7 @@ kazu.modelling.ontology\_preprocessing.base
    
       BiologicalProcessGeneOntologyParser
       CLOOntologyParser
+      CLOntologyParser
       CellosaurusOntologyParser
       CellularComponentGeneOntologyParser
       ChemblOntologyParser
