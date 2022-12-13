@@ -17,8 +17,23 @@ from kazu.data.data import Document
 from kazu.pipeline import Pipeline
 from kazu.web.routes import KAZU
 
+description = """
+Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
+designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
+research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
+
+The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the llirary is available
+*[here](https://github.com/dmis-lab/KAZU-NER-module)*.
+"""
 logger = logging.getLogger("ray")
-app = FastAPI()
+app = FastAPI(
+    title="Kazu - Biomedical NLP Framework",
+    description=description,
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
 
 oauth2_scheme = HTTPBearer()
 
