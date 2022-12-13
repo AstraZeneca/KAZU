@@ -23,7 +23,7 @@ designed to handle production workloads. This library aims to simplify the proce
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
 The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the llirary is available
-*[here](https://github.com/dmis-lab/KAZU-NER-module)*.
+*[here](https://astrazeneca.github.io/KAZU/_build/html/index.html)*.
 """
 logger = logging.getLogger("ray")
 app = FastAPI(
