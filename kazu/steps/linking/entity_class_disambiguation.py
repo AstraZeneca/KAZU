@@ -48,19 +48,24 @@ class EntityClassTfIdfScorer:
     ) -> Dict[str, List[TfIdfDisambiguationEntry]]:
         span_to_tfidf_disambiguator = {}
         for span, disambiguation_entries in spans_text_disambiguator.items():
-            tfidf_disambiguation_entries = []
-            for disambiguation_entry in disambiguation_entries:
-                tfidf_vectorizer = TfidfVectorizer()
-                document_mat = tfidf_vectorizer.fit_transform(disambiguation_entry["relevant_text"])
-                tfidf_disambiguation_entry = TfIdfDisambiguationEntry(
-                    entity_class=disambiguation_entry["entity_class"],
-                    tfidf_document=document_mat.data,
-                    tfidf_vectorizer=tfidf_vectorizer,
-                    thresh=disambiguation_entry["thresh"],
-                )
-                tfidf_disambiguation_entries.append(tfidf_disambiguation_entry)
-            span_to_tfidf_disambiguator[span] = tfidf_disambiguation_entries
+            span_to_tfidf_disambiguator[span] = [
+                EntityClassTfIdfScorer.disambiguation_entry_to_tfidf_entry(dis_ent)
+                for dis_ent in disambiguation_entries
+            ]
         return span_to_tfidf_disambiguator
+
+    @staticmethod
+    def disambiguation_entry_to_tfidf_entry(
+        disamb_entry: DisambiguationEntry,
+    ) -> TfIdfDisambiguationEntry:
+        tfidf_vectorizer = TfidfVectorizer()
+        document_mat = tfidf_vectorizer.fit_transform(disamb_entry["relevant_text"])
+        return TfIdfDisambiguationEntry(
+            entity_class=disamb_entry["entity_class"],
+            tfidf_document=document_mat.data,
+            tfidf_vectorizer=tfidf_vectorizer,
+            thresh=disamb_entry["thresh"],
+        )
 
     @staticmethod
     def tfidf_score(
