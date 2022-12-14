@@ -47,7 +47,7 @@ class CuratedTerm:
     action: str
     case_sensitive: bool
     entity_class: str
-    doc_freq: float = 0.0
+    doc_freq: float = 0.0  # for information only: some measure of how frequently a curation is observed (suggest freq per 10k docs)
     term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
 
 
