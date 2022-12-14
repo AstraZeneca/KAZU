@@ -414,7 +414,8 @@ class CompanyStringNormalizer(EntityClassNormalizer):
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
         """
-        just upper case
+        just upper case.
+
         :param original_string:
         :return:
         """
