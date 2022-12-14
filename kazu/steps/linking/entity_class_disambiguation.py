@@ -124,17 +124,11 @@ class EntityClassDisambiguationStep(Step):
         if len(sent_spans) == 0:
             return section.get_text()
         else:
-            idx, _ = next(
-                (
-                    (
-                        idx,
-                        sent_span,
-                    )
-                    for idx, sent_span in enumerate(sent_spans)
-                    if any(
-                        entity_span.is_completely_overlapped(sent_span)
-                        for entity_span in entity.spans
-                    )
+            idx = next(
+                idx
+                for idx, sent_span in enumerate(sent_spans)
+                if any(
+                    entity_span.is_completely_overlapped(sent_span) for entity_span in entity.spans
                 )
             )
             context_start_idx = max(0, idx - int(window / 2))
