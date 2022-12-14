@@ -46,7 +46,7 @@ class EntityClassTfIdfScorer:
     def build_tfidf_documents(
         spans_text_disambiguator: Dict[str, List[DisambiguationEntry]]
     ) -> Dict[str, List[TfIdfDisambiguationEntry]]:
-        span_to_tfidf_disambiguator = dict()
+        span_to_tfidf_disambiguator = {}
         for span, disambiguation_entries in spans_text_disambiguator.items():
             tfidf_disambiguation_entries = []
             for disambiguation_entry in disambiguation_entries:
