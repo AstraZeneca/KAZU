@@ -375,7 +375,8 @@ how it is called, one or more of the following may be required:
 
 1) a conf dir (Hydra configuration for the model pack), containing
  a) configurations for a pipeline to be created
- b) a LabelStudioManager configuration to run acceptance tests
+ b) a LabelStudioManager configuration to run acceptance tests or consistency checks, pointing to a running
+  and network-accessible instance of LabelStudio
 2) an explosion_whitelist.jsonl in the path <model_pack_root>/ontologies/curations/explosion_whitelist.jsonl
   in order for an ExplosionStringMatchingStep to be created
 3) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order for the
@@ -383,10 +384,6 @@ how it is called, one or more of the following may be required:
   respectively (see the provided model pack for an example)
 4) a merge config in the path <model_pack_root>/base_model_merge_config.json, which determines which elements
   of the base configuration and model pack should be used
-
-In addition, if run_acceptance_tests or run_consistency_checks are specified, an instance of Label Studio
-should be accessible on the network, in order for the acceptance test to be able to retrieve the annotations.
-Access parameters for Label Studio are taken from the LabelStudioManager config in the model pack path.
 """
 
     parser = argparse.ArgumentParser(description=description)
