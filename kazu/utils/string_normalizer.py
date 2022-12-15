@@ -126,7 +126,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        return " ".join(original_string.upper().strip().split())
+        return " ".join(original_string.upper().split())
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
@@ -136,9 +136,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         string = DefaultStringNormalizer.remove_non_alphanum(string)
         string = DefaultStringNormalizer.depluralize(string)
         string = DefaultStringNormalizer.sub_greek_char_abbreviations(string)
-        string = string.strip().upper()
-        string = " ".join(string.split())
-        return string.upper()
+        return " ".join(string.upper().split())
 
     @staticmethod
     def depluralize(string):
@@ -392,10 +390,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         string = DefaultStringNormalizer.replace_greek(string)
         string = DefaultStringNormalizer.remove_non_alphanum(string)
         string = DefaultStringNormalizer.sub_greek_char_abbreviations(string)
-        string = string.strip()
-        string = string.upper()
-        string = " ".join(string.split())
-        return string
+        return " ".join(string.upper().split())
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
