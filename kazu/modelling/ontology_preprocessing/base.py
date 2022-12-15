@@ -134,8 +134,8 @@ class OntologyParser(ABC):
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
         :param excluded_ids: optional set of ids to exclude from the parsing process
-        :param additional_synonyms: optional list of :class:`kazu.data.data.CuratedTerm`, to be injected into the parser.
-            each term should have :attr:`kazu.data.data.CuratedTerm.curated_id_mappings` populated with
+        :param additional_synonyms: terms to inject into the parser if given. Each term should have
+            :attr:`kazu.data.data.CuratedTerm.curated_id_mappings` populated with
             key=self.parser_name, value: identifier
         """
 
