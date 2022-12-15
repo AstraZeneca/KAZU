@@ -229,7 +229,7 @@ class ModelPackBuilder:
     def build_all_model_packs(
         maybe_base_model_pack_path: Optional[Path],
         maybe_base_configuration_path: Optional[Path],
-        model_pack_paths: Optional[List[Path]],
+        model_pack_paths: List[Path],
         zip_pack: bool,
         output_dir: Path,
     ):
@@ -255,18 +255,17 @@ class ModelPackBuilder:
             .strip()
         )
 
-        if model_pack_paths is not None:
-            for model_pack_path in model_pack_paths:
-                ModelPackBuilder.reset_singletons()
-                print(f"building model pack at {model_pack_path}")
-                ModelPackBuilder.process_model_pack_path(
-                    maybe_base_model_pack_path=maybe_base_model_pack_path,
-                    maybe_base_configuration_path=maybe_base_configuration_path,
-                    kazu_version=kazu_version,
-                    zip_pack=zip_pack,
-                    uncached_model_pack_path=model_pack_path,
-                    build_dir=output_dir,
-                )
+        for model_pack_path in model_pack_paths:
+            ModelPackBuilder.reset_singletons()
+            print(f"building model pack at {model_pack_path}")
+            ModelPackBuilder.process_model_pack_path(
+                maybe_base_model_pack_path=maybe_base_model_pack_path,
+                maybe_base_configuration_path=maybe_base_configuration_path,
+                kazu_version=kazu_version,
+                zip_pack=zip_pack,
+                uncached_model_pack_path=model_pack_path,
+                build_dir=output_dir,
+            )
 
     @staticmethod
     def reset_singletons():
