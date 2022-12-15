@@ -504,30 +504,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     # not present in config)
     allowed_sources = {"MONDO", "HP"}
 
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name=name,
-            additional_synonyms=additional_synonyms,
-        )
-
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
 
@@ -575,30 +551,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         "pathways",
         "targetClass",
     }
-
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name=name,
-            additional_synonyms=additional_synonyms,
-        )
 
     def score_and_group_ids(
         self,
@@ -682,30 +634,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
 
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            name=name,
-            excluded_ids=excluded_ids,
-            additional_synonyms=additional_synonyms,
-        )
-
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
 
@@ -1114,30 +1042,6 @@ class MondoOntologyParser(OntologyParser):
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
 
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name=name,
-            additional_synonyms=additional_synonyms,
-        )
-
     def find_kb(self, string: str):
         path = parse.urlparse(string).path
         # just the final bit, e.g. MONDO_0000123
@@ -1307,30 +1211,6 @@ class ChemblOntologyParser(OntologyParser):
     https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz
     """
 
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name=name,
-            additional_synonyms=additional_synonyms,
-        )
-
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
 
@@ -1398,30 +1278,6 @@ class CellosaurusOntologyParser(OntologyParser):
     """
 
     cell_line_re = re.compile("cell line", re.IGNORECASE)
-
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name=name,
-            additional_synonyms=additional_synonyms,
-        )
 
     def find_kb(self, string: str) -> str:
         return "CELLOSAURUS"
@@ -1550,30 +1406,6 @@ class MeddraOntologyParser(OntologyParser):
     )
 
     _exclude_soc = ["Surgical and medical procedures", "Social circumstances", "Investigations"]
-
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        name: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name=name,
-            additional_synonyms=additional_synonyms,
-        )
 
     def find_kb(self, string: str) -> str:
         return "MEDDRA"
