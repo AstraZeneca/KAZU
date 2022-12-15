@@ -230,7 +230,7 @@ class ModelPackBuilder:
     def build_all_model_packs(
         maybe_base_model_pack_path: Optional[Path],
         maybe_base_configuration_path: Optional[Path],
-        custom_model_pack_params: Optional[List[Path]],
+        model_pack_paths: Optional[List[Path]],
         zip_pack: bool,
         output_dir: Path,
     ):
@@ -239,7 +239,7 @@ class ModelPackBuilder:
 
         :param maybe_base_model_pack_path: Path to the base model pack, if required
         :param maybe_base_configuration_path: Path to the base configuration, if required
-        :param custom_model_pack_params: optional list of paths to custom pack resources
+        :param model_pack_paths: list of paths to model pack resources
         :param zip_pack: should the pack be zipped at the end?
         :param output_dir: directory to build model packs in
         :return:
@@ -256,16 +256,16 @@ class ModelPackBuilder:
             .strip()
         )
 
-        if custom_model_pack_params is not None:
-            for custom_model_pack_path in custom_model_pack_params:
+        if model_pack_paths is not None:
+            for model_pack_path in model_pack_paths:
                 ModelPackBuilder.reset_singletons()
-                print(f"building custom model pack at {custom_model_pack_path}")
+                print(f"building model pack at {model_pack_path}")
                 ModelPackBuilder.process_model_pack_path(
                     maybe_base_model_pack_path=maybe_base_model_pack_path,
                     maybe_base_configuration_path=maybe_base_configuration_path,
                     kazu_version=kazu_version,
                     zip_pack=zip_pack,
-                    uncached_model_pack_path=custom_model_pack_path,
+                    uncached_model_pack_path=model_pack_path,
                     build_dir=output_dir,
                 )
 
@@ -361,19 +361,6 @@ class ModelPackBuilder:
         load_steps_and_log_memory_usage(cfg)
 
 
-def build_custom_pack_params(arguments) -> Optional[List[Tuple[Path, bool, bool]]]:
-    if arguments.custom_model_pack_paths is None:
-        return None
-    return [
-        (
-            path,
-            args.custom_packs_to_use_base_configuration[i],
-            args.custom_packs_to_use_base_resources[i],
-        )
-        for i, path in enumerate(args.custom_model_pack_paths)
-    ]
-
-
 if __name__ == "__main__":
     description = """Build and test model packs. This script takes a list of model
 pack directories, and creates model packs with a number of options. Depending on
@@ -434,7 +421,7 @@ Access parameters for Label Studio are taken from the LabelStudioManager config 
     ModelPackBuilder.build_all_model_packs(
         maybe_base_model_pack_path=args.base_model_pack_path,
         maybe_base_configuration_path=args.base_configuration_path,
-        custom_model_pack_params=args.model_packs_to_build,
+        model_pack_paths=args.model_packs_to_build,
         zip_pack=args.zip_model_pack,
         output_dir=args.model_pack_output_path,
     )
