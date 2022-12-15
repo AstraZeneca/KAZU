@@ -23,9 +23,8 @@ from omegaconf import DictConfig
 @dataclass
 class BuildConfiguration:
     """Dataclass that controls how a base model pack and config should be merged with a
-    target model pack
+    target model pack.
 
-    Constructor arguments:
     :param use_base_config: should this model pack use the base config as a starting point?
     :param models: what model directories should this model pack include from the base model pack?
     :param curations: what entity classes should this model pack use from the curated list in the base model pack?
