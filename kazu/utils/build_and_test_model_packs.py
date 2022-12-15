@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from distutils.dir_util import copy_tree
 from pathlib import Path
 from typing import Tuple, List, Optional, Set, Dict, Iterable
@@ -29,7 +29,7 @@ class BuildConfiguration:
     """Dataclass that controls how a base model pack and config should be merged with a
     target model pack.
 
-    :param use_base_config: should this model pack use the base config as a starting point?
+    :param requires_base_config: should this model pack use the base config as a starting point?
     :param models: what model directories should this model pack include from the base model pack?
     :param curations: what entity classes should this model pack use from the curated list in the base model pack?
     :param ontologies: what ontologies should this model pack use from the base ontology pack?
@@ -40,16 +40,21 @@ class BuildConfiguration:
     :param run_consistency_checks: should consistency checks be run on the gold standard?
     """
 
-    use_base_config: bool
+    requires_base_config: bool
     models: List[str]
     curations: Set[str]
     ontologies: List[Iterable[str]]
     has_own_config: bool
     run_acceptance_tests: bool = False
     run_consistency_checks: bool = False
+    requires_base_model_pack: bool = field(init=False)
 
     def __post_init__(self):
         self.curations = set(self.curations)
+        if len(self.models) > 0 or len(self.ontologies) > 0 or len(self.curations) > 0:
+            self.requires_base_model_pack = True
+        else:
+            self.requires_base_model_pack = False
 
 
 class ModelPackBuildError(Exception):
@@ -119,7 +124,7 @@ class ModelPackBuilder:
         # copy the target pack to the target build dir
         copy_tree(str(uncached_model_pack_path), str(model_pack_build_path))
         # copy base config if required
-        if build_config.use_base_config:
+        if build_config.requires_base_config:
             if maybe_base_configuration_path is None:
                 raise ModelPackBuildError(
                     f"merge config asked for base configuration path but none was provided: {build_config}"
@@ -135,15 +140,35 @@ class ModelPackBuilder:
                 str(model_pack_build_path.joinpath("conf")),
             )
 
-        if maybe_base_model_pack_path is None and (
-            len(build_config.models) > 0
-            or len(build_config.ontologies) > 0
-            or len(build_config.curations) > 0
-        ):
+        if maybe_base_model_pack_path is None and build_config.requires_base_model_pack:
             raise ModelPackBuildError(
                 f"merge config asked for base model pack path but none was provided: {build_config}"
             )
-        assert isinstance(maybe_base_model_pack_path, Path)
+        elif maybe_base_model_pack_path is not None and build_config.requires_base_model_pack:
+            ModelPackBuilder.copy_base_model_pack_resources_to_target(
+                build_config, maybe_base_model_pack_path, model_pack_build_path
+            )
+            curations = ModelPackBuilder.resolve_curations(
+                maybe_base_model_pack_path, uncached_model_pack_path, build_config
+            )
+        else:
+            curations = list(
+                ModelPackBuilder.load_curations(uncached_model_pack_path, None).values()
+            )
+
+        if len(curations) > 0:
+            curations_dir = model_pack_build_path.joinpath("ontologies").joinpath("curations")
+            curations_dir.mkdir(parents=True, exist_ok=True)
+            with open(curations_dir.joinpath("explosion_whitelist.jsonl"), "w") as f:
+                for curation in curations:
+                    f.write(json.dumps(curation) + "\n")
+
+    @staticmethod
+    def copy_base_model_pack_resources_to_target(
+        build_config: BuildConfiguration,
+        maybe_base_model_pack_path: Path,
+        model_pack_build_path: Path,
+    ):
         for model in build_config.models:
             model_source_path = maybe_base_model_pack_path.joinpath(model)
             target_dir = model_pack_build_path.joinpath(model_source_path.name)
@@ -155,15 +180,6 @@ class ModelPackBuilder:
                 shutil.copytree(str(ontology_path), str(target_path))
             else:
                 shutil.copy(ontology_path, target_path)
-
-        curations = ModelPackBuilder.resolve_curations(
-            maybe_base_model_pack_path, uncached_model_pack_path, build_config
-        )
-        curations_dir = model_pack_build_path.joinpath("ontologies").joinpath("curations")
-        curations_dir.mkdir(parents=True, exist_ok=True)
-        with open(curations_dir.joinpath("explosion_whitelist.jsonl"), "w") as f:
-            for curation in curations:
-                f.write(json.dumps(curation) + "\n")
 
     @staticmethod
     def load_curations(
