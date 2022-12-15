@@ -1482,10 +1482,12 @@ class CLOntologyParser(RDFGraphParser):
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
+        synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
 
@@ -1502,6 +1504,8 @@ class CLOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            include_entity_patterns=include_entity_patterns,
+            exclude_entity_patterns=exclude_entity_patterns,
             additional_synonyms=additional_synonyms,
         )
 
