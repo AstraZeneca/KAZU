@@ -1,24 +1,23 @@
-import json
 import logging
 import pickle
 import uuid
 from collections import defaultdict
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
 from typing import List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Set
 
 import spacy
 import srsly
-
-from kazu.data.data import SynonymTerm
-from kazu.modelling.ontology_preprocessing.base import OntologyParser
-from kazu.utils.grouping import sort_then_group
-from kazu.utils.utils import PathLike
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
+
+from kazu.data.data import SynonymTerm, CuratedTerm
+from kazu.modelling.ontology_preprocessing.base import OntologyParser, load_curated_terms
+from kazu.utils.grouping import sort_then_group
+from kazu.utils.utils import PathLike
 
 GENE = "gene"
 DRUG = "drug"
@@ -39,16 +38,6 @@ class OntologyMatcherConfig:
     match_id_sep: str
     labels: List[str]
     parser_name_to_entity_type: Dict[str, str]
-
-
-@dataclass
-class CuratedTerm:
-    term: str
-    action: str
-    case_sensitive: bool
-    entity_class: str
-    doc_freq: float = 0.0  # for information only: some measure of how frequently a curation is observed (suggest freq per 10k docs)
-    term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
 
 
 def _ontology_dict_setter(span: Span, value: Dict):
@@ -141,11 +130,6 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
-    def _load_curations(self, curated_list: PathLike) -> List[CuratedTerm]:
-        with open(curated_list, mode="r") as jsonlf:
-            curated_synonyms = [CuratedTerm(**json.loads(line)) for line in jsonlf]
-        return curated_synonyms
-
     def _match_curations_to_ontology_terms(
         self, parsers: List[OntologyParser], curations: List[CuratedTerm]
     ) -> List[CuratedTerm]:
@@ -234,7 +218,7 @@ class OntologyMatcher:
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
         self.set_labels(parser.entity_class for parser in parsers)
-        curations = self._load_curations(curated_list)
+        curations = load_curated_terms(curated_list)
         matched_curations = self._match_curations_to_ontology_terms(
             parsers=parsers, curations=curations
         )

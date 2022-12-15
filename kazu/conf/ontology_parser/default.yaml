@@ -2,12 +2,18 @@ chembl_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_31_sqlite/chembl_31.db
   data_origin: 'chembl_31_sqlite'
+  name: "CHEMBL"
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
   entity_class: 'drug'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 mondo_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
+  name: "MONDO"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
   data_origin: 'MONDO-2022-07-29'
   string_scorer: ${SapbertStringSimilarityScorer}
@@ -17,79 +23,129 @@ mondo_parser:
     _args_:
       - - http://purl.obolibrary.org/obo/HP_0000001
   entity_class: 'disease'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 ot_disease_parser:
+  name: "OPENTARGETS_DISEASE"
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/disease
   data_origin: 'OPENTARGETS-DISEASE'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'disease'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 ot_molecule_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
+  name: "OPENTARGETS_MOLECULE"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
   data_origin: 'OPENTARGETS-MOLECULE'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
   entity_class: 'drug'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 ot_target_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
+  name: "OPENTARGETS_TARGET"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
   data_origin: 'OPENTARGETS-TARGET'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.gene}
   entity_class: 'gene'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 uberon_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
+  name: "UBERON"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
   data_origin: 'UBERON'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'anatomy'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 cellosaurus_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+  name: "CELLOSAURUS"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
   data_origin: 'CELLOSAURUS'
   string_scorer: ${SapbertStringSimilarityScorer}
   entity_class: 'cell_line'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 clo_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
+  name: "CLO"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
   data_origin: 'CLO'
   string_scorer: ${SapbertStringSimilarityScorer}
   entity_class: 'cell_type'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 go_bp_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
+  name: "BP_GENE_ONTOLOGY"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
   data_origin: 'GO-BP'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_bp'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 go_mf_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
+  name: "MF_GENE_ONTOLOGY"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
   data_origin: 'GO-MF'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_mf'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 go_cc_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
+  name: "CC_GENE_ONTOLOGY"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
   data_origin: 'GO-CC'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_cc'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
 
 cl_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CLOntologyParser
+  name: "CL"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cl.owl
   data_origin: 'CL'
   string_scorer: ${SapbertStringSimilarityScorer}
@@ -99,3 +155,7 @@ cl_parser:
     _target_: builtins.set
     _args_:
       - - http://purl.obolibrary.org/obo/CL_0000000
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
