@@ -19,6 +19,10 @@ from kazu.pipeline import load_steps_and_log_memory_usage
 from kazu.utils.utils import Singleton
 from omegaconf import DictConfig
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class BuildConfiguration:
@@ -96,9 +100,9 @@ class ModelPackBuilder:
             if k in build_curations:
                 new_v = build_curations.pop(k)
                 if v["action"] != new_v["action"] and new_v["action"] == "keep":
-                    print(f"warning: previously dropped term is now being kept: {new_v}")
+                    logger.warning(f"previously dropped term is now being kept: {new_v}")
                 if v["case_sensitive"] != new_v["case_sensitive"] and not new_v["case_sensitive"]:
-                    print(f"warning: case sensitivity is now less strict for {new_v}")
+                    logger.warning(f"case sensitivity is now less strict for {new_v}")
                 final_curations[k] = new_v
         final_curations.update(build_curations)
         return list(final_curations.values())
@@ -179,7 +183,7 @@ class ModelPackBuilder:
             .joinpath("explosion_whitelist.jsonl")
         )
         if not target_path.exists():
-            print(f"no curations found at {str(target_path)}")
+            logger.info(f"no curations found at {str(target_path)}")
             return curations
 
         with open(target_path) as f:
@@ -208,7 +212,7 @@ class ModelPackBuilder:
                     or d_name.startswith("spacy_pipeline")
                 ):
                     deletion_path = os.path.join(root, d_name)
-                    print(f"deleting cached resource: {deletion_path}")
+                    logger.info(f"deleting cached resource: {deletion_path}")
                     shutil.rmtree(deletion_path)
 
     @staticmethod
@@ -221,7 +225,7 @@ class ModelPackBuilder:
         :param build_dir:
         :return:
         """
-        print(f"zipping model pack {model_pack_name}")
+        logger.info(f"zipping model pack {model_pack_name}")
         subprocess.run(["zip", "-r", model_pack_name, "."], cwd=build_dir)
         shutil.move(build_dir.joinpath(model_pack_name), build_dir.parent.joinpath(model_pack_name))
 
@@ -257,7 +261,7 @@ class ModelPackBuilder:
 
         for model_pack_path in model_pack_paths:
             ModelPackBuilder.reset_singletons()
-            print(f"building model pack at {model_pack_path}")
+            logger.info(f"building model pack at {model_pack_path}")
             ModelPackBuilder.process_model_pack_path(
                 maybe_base_model_pack_path=maybe_base_model_pack_path,
                 maybe_base_configuration_path=maybe_base_configuration_path,
@@ -275,7 +279,7 @@ class ModelPackBuilder:
 
         :return:
         """
-        print("clearing singletons")
+        logger.info("clearing singletons")
         Singleton._instances = {}
 
     @staticmethod
