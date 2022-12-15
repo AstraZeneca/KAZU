@@ -54,7 +54,7 @@ class ModelPackBuildError(Exception):
 
 class ModelPackBuilder:
     @staticmethod
-    def load_build_configuration(model_pack_path: Path) -> Optional[BuildConfiguration]:
+    def load_build_configuration(model_pack_path: Path) -> BuildConfiguration:
         """
         try to load a merge configuration from the model pack root. The merge configuration should be
         a json file called base_model_merge_config.json. None is returned if no model pack is found
@@ -64,12 +64,11 @@ class ModelPackBuilder:
         """
         config_path = model_pack_path.joinpath("build_config.json")
         if not config_path.exists():
-            print(f"no merge config found at {str(config_path)}")
-            return None
-        else:
-            with open(config_path, "r") as f:
-                data = json.load(f)
-            return BuildConfiguration(**data)
+            raise ModelPackBuildError(f"no merge config found at {str(config_path)}")
+
+        with open(config_path, "r") as f:
+            data = json.load(f)
+        return BuildConfiguration(**data)
 
     @staticmethod
     def resolve_curations(
@@ -106,7 +105,7 @@ class ModelPackBuilder:
 
     @staticmethod
     def apply_merge_configurations(
-        merge_config: BuildConfiguration,
+        build_config: BuildConfiguration,
         maybe_base_model_pack_path: Optional[Path],
         maybe_base_configuration_path: Optional[Path],
         model_pack_build_path: Path,
@@ -116,16 +115,16 @@ class ModelPackBuilder:
         # copy the target pack to the target build dir
         copy_tree(str(uncached_model_pack_path), str(model_pack_build_path))
         # copy base config if required
-        if merge_config.use_base_config:
+        if build_config.use_base_config:
             if maybe_base_configuration_path is None:
                 raise ModelPackBuildError(
-                    f"merge config asked for base configuration path but none was provided: {merge_config}"
+                    f"merge config asked for base configuration path but none was provided: {build_config}"
                 )
             model_pack_build_path.joinpath("conf").mkdir(exist_ok=True)
             copy_tree(
                 str(maybe_base_configuration_path), str(model_pack_build_path.joinpath("conf"))
             )
-        if merge_config.has_own_config:
+        if build_config.has_own_config:
             # and copy target config to override required elements (if required)
             copy_tree(
                 str(uncached_model_pack_path.joinpath("conf")),
@@ -133,19 +132,19 @@ class ModelPackBuilder:
             )
 
         if maybe_base_model_pack_path is None and (
-            len(merge_config.models) > 0
-            or len(merge_config.ontologies) > 0
-            or len(merge_config.curations) > 0
+            len(build_config.models) > 0
+            or len(build_config.ontologies) > 0
+            or len(build_config.curations) > 0
         ):
             raise ModelPackBuildError(
-                f"merge config asked for base model pack path but none was provided: {merge_config}"
+                f"merge config asked for base model pack path but none was provided: {build_config}"
             )
         assert isinstance(maybe_base_model_pack_path, Path)
-        for model in merge_config.models:
+        for model in build_config.models:
             model_source_path = maybe_base_model_pack_path.joinpath(model)
             target_dir = model_pack_build_path.joinpath(model_source_path.name)
             shutil.copytree(str(model_source_path), str(target_dir))
-        for ontology_path_elements in merge_config.ontologies:
+        for ontology_path_elements in build_config.ontologies:
             ontology_path = Path(os.path.join(maybe_base_model_pack_path, *ontology_path_elements))
             target_path = Path(os.path.join(model_pack_build_path, *ontology_path_elements))
             if ontology_path.is_dir():
@@ -154,7 +153,7 @@ class ModelPackBuilder:
                 shutil.copy(ontology_path, target_path)
 
         curations = ModelPackBuilder.resolve_curations(
-            maybe_base_model_pack_path, uncached_model_pack_path, merge_config
+            maybe_base_model_pack_path, uncached_model_pack_path, build_config
         )
         curations_dir = model_pack_build_path.joinpath("ontologies").joinpath("curations")
         curations_dir.mkdir(parents=True, exist_ok=True)
@@ -304,37 +303,32 @@ class ModelPackBuilder:
         model_pack_build_path = build_dir.joinpath(uncached_model_pack_path.name)
         model_pack_build_path.mkdir()
 
-        maybe_build_config = ModelPackBuilder.load_build_configuration(uncached_model_pack_path)
-        if maybe_build_config is None:
-            print(
-                f"no build configuration found for {uncached_model_pack_path}. Will not build this model pack"
-            )
-        else:
+        build_config = ModelPackBuilder.load_build_configuration(uncached_model_pack_path)
 
-            ModelPackBuilder.apply_merge_configurations(
-                merge_config=maybe_build_config,
-                maybe_base_model_pack_path=maybe_base_model_pack_path,
-                maybe_base_configuration_path=maybe_base_configuration_path,
-                model_pack_build_path=model_pack_build_path,
-                uncached_model_pack_path=uncached_model_pack_path,
-            )
+        ModelPackBuilder.apply_merge_configurations(
+            build_config=build_config,
+            maybe_base_model_pack_path=maybe_base_model_pack_path,
+            maybe_base_configuration_path=maybe_base_configuration_path,
+            model_pack_build_path=model_pack_build_path,
+            uncached_model_pack_path=uncached_model_pack_path,
+        )
 
-            ModelPackBuilder.clear_cached_resources_from_model_pack_dir(model_pack_build_path)
-            # set the env param so that hydra conf is correctly configured
-            os.environ["KAZU_MODEL_PACK"] = str(model_pack_build_path)
-            with initialize_config_dir(config_dir=str(model_pack_build_path.joinpath("conf"))):
-                cfg = compose(
-                    config_name="config",
-                    overrides=[],
-                )
-                ModelPackBuilder.build_caches(cfg)
-                if maybe_build_config.run_consistency_checks:
-                    check_annotation_consistency(cfg)
-                if maybe_build_config.run_acceptance_tests:
-                    execute_full_pipeline_acceptance_test(cfg)
-                if zip_pack:
-                    model_pack_name = f"{uncached_model_pack_path.name}-v{kazu_version}.zip"
-                    ModelPackBuilder.zip_model_pack(model_pack_name, model_pack_build_path)
+        ModelPackBuilder.clear_cached_resources_from_model_pack_dir(model_pack_build_path)
+        # set the env param so that hydra conf is correctly configured
+        os.environ["KAZU_MODEL_PACK"] = str(model_pack_build_path)
+        with initialize_config_dir(config_dir=str(model_pack_build_path.joinpath("conf"))):
+            cfg = compose(
+                config_name="config",
+                overrides=[],
+            )
+            ModelPackBuilder.build_caches(cfg)
+            if build_config.run_consistency_checks:
+                check_annotation_consistency(cfg)
+            if build_config.run_acceptance_tests:
+                execute_full_pipeline_acceptance_test(cfg)
+            if zip_pack:
+                model_pack_name = f"{uncached_model_pack_path.name}-v{kazu_version}.zip"
+                ModelPackBuilder.zip_model_pack(model_pack_name, model_pack_build_path)
         return model_pack_build_path
 
     @staticmethod
