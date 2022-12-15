@@ -17,7 +17,7 @@ def test_serialisation():
         )
     ]
     x.sections[0].sentence_spans = [CharSpan(start=0, end=28), CharSpan(start=29, end=50)]
-    json_str = x.json()
+    json_str = x.json(drop_terms=True)
     # ensure this is valid json
     json_doc = json.loads(json_str)
     assert type(json_doc["sections"][0]["sentence_spans"]) == list

@@ -7,11 +7,12 @@
     doc = Document.create_simple_document("Epidermal Growth Factor Receptor (EGFR) is a gene.")
     # create an Entity for the span "Epidermal Growth Factor Receptor"
     entity = Entity.load_contiguous_entity(
+        # start and end are the character indices for the entity
         start=0,
-        end=32,
+        end=len("Epidermal Growth Factor Receptor"),
         namespace='example',
         entity_class='gene',
-        match=doc.sections[0].get_text()[0:32]
+        match="Epidermal Growth Factor Receptor",
     )
 
 

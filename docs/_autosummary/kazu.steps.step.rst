@@ -1,7 +1,7 @@
-kazu.web.jwtauth
-================
+kazu.steps.step
+===============
 
-.. automodule:: kazu.web.jwtauth
+.. automodule:: kazu.steps.step
 
    
    
@@ -13,7 +13,8 @@ kazu.web.jwtauth
 
    .. autosummary::
    
-      on_auth_error
+      document_batch_step
+      document_iterating_step
    
    
 
@@ -23,8 +24,7 @@ kazu.web.jwtauth
 
    .. autosummary::
    
-      JWTAuthenticationBackend
-      JWTUser
+      Step
    
    
 

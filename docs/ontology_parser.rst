@@ -147,7 +147,7 @@ The full class looks like:
 
         def parse_to_dataframe(self) -> pd.DataFrame:
             conn = sqlite3.connect(self.in_path)
-            query = f"""
+            query = f"""\
                 SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
                 FROM molecule_dictionary AS md
                          JOIN molecule_synonyms ms ON md.molregno = ms.molregno

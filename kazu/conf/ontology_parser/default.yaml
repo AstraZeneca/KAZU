@@ -1,8 +1,8 @@
 chembl_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_31_sqlite/chembl_31.db
+  data_origin: 'chembl_31_sqlite'
   name: "CHEMBL"
-  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_29_sqlite/chembl_29.db
-  data_origin: 'chembl_29_sqlite'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
   entity_class: 'drug'
@@ -31,7 +31,7 @@ mondo_parser:
 ot_disease_parser:
   name: "OPENTARGETS_DISEASE"
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
-  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/disease
   data_origin: 'OPENTARGETS-DISEASE'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
@@ -138,6 +138,23 @@ go_cc_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_cc'
+  additional_synonyms:
+    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
+    parser_name: ${..name}
+
+cl_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.CLOntologyParser
+  name: "CL"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cl.owl
+  data_origin: 'CL'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'cell_type'
+  excluded_ids:
+    _target_: builtins.set
+    _args_:
+      - - http://purl.obolibrary.org/obo/CL_0000000
   additional_synonyms:
     _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
     path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl

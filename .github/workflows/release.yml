@@ -28,7 +28,7 @@ jobs:
 
       - name: fetch tags
         run: |
-          git fetch --prune --tags --prune-tags
+          git fetch --prune --tags --prune-tags --force
           echo exit code $?
           git tag --list
 
@@ -62,7 +62,7 @@ jobs:
           . kazu-env/bin/activate
           python -m pip install --upgrade pip
           WHEEL_PATH=$(echo $GITHUB_WORKSPACE/dist/*whl)
-          pip install "${WHEEL_PATH}[dev]"  --cache-dir $PIP_CACHE_DIR
+          pip install "${WHEEL_PATH}[dev,webserver]"  --cache-dir $PIP_CACHE_DIR
 
       - name: Set up JDK 11 (required for SETH)
         uses: actions/setup-java@v2
