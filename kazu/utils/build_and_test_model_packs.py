@@ -32,8 +32,8 @@ class BuildConfiguration:
     :param requires_base_config: should this model pack use the base config as a starting point?
     :param models: what model directories should this model pack include from the base model pack?
     :param curations: what entity classes should this model pack use from the curated list in the base model pack?
-    :param ontologies: what ontologies should this model pack use from the base ontology pack?
-        (elements iterables of path parts, e.g.  ('ontologies','cl.owl'))
+    :param ontologies: what ontologies should this model pack use from the base ontology pack? Arg
+        should be a list of strings to the ontology root, from the root of the base pack
     :param has_own_config: does this model pack have its own config dir? (if used with use_base_config
         these will override any config files from the base config)
     :param run_acceptance_tests: should acceptance tests be run?
@@ -43,7 +43,7 @@ class BuildConfiguration:
     requires_base_config: bool
     models: List[str]
     curations: Set[str]
-    ontologies: List[Iterable[str]]
+    ontologies: List[str]
     has_own_config: bool
     run_acceptance_tests: bool = False
     run_consistency_checks: bool = False
@@ -173,9 +173,9 @@ class ModelPackBuilder:
             model_source_path = maybe_base_model_pack_path.joinpath(model)
             target_dir = model_pack_build_path.joinpath(model_source_path.name)
             shutil.copytree(str(model_source_path), str(target_dir))
-        for ontology_path_elements in build_config.ontologies:
-            ontology_path = Path(os.path.join(maybe_base_model_pack_path, *ontology_path_elements))
-            target_path = Path(os.path.join(model_pack_build_path, *ontology_path_elements))
+        for ontology_path in build_config.ontologies:
+            ontology_path = Path(os.path.join(maybe_base_model_pack_path, ontology_path))
+            target_path = Path(os.path.join(model_pack_build_path, ontology_path))
             if ontology_path.is_dir():
                 shutil.copytree(str(ontology_path), str(target_path))
             else:
