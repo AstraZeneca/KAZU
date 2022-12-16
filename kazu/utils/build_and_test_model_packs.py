@@ -203,9 +203,7 @@ class ModelPackBuilder:
         with open(target_path) as f:
             for line in f:
                 item: Dict = json.loads(line)
-                if (
-                    ent_class_filter is not None and item["entity_class"] in ent_class_filter
-                ) or ent_class_filter is None:
+                if ent_class_filter is None or item["entity_class"] in ent_class_filter:
                     curations[(item["term"], item["entity_class"])] = item
 
         return curations
