@@ -23,6 +23,8 @@ from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
+EXPLOSION_WHITELIST_PATH = Path("ontologies/curations/explosion_whitelist.jsonl")
+
 
 @dataclass
 class BuildConfiguration:
@@ -157,9 +159,9 @@ class ModelPackBuilder:
             )
 
         if len(curations) > 0:
-            curations_dir = model_pack_build_path.joinpath("ontologies", "curations")
+            curations_dir = model_pack_build_path.joinpath(EXPLOSION_WHITELIST_PATH.parent)
             curations_dir.mkdir(parents=True, exist_ok=True)
-            with open(curations_dir.joinpath("explosion_whitelist.jsonl"), "w") as f:
+            with open(curations_dir.joinpath(EXPLOSION_WHITELIST_PATH.name), "w") as f:
                 for curation in curations:
                     f.write(json.dumps(curation) + "\n")
 
@@ -193,9 +195,7 @@ class ModelPackBuilder:
         :return:
         """
         curations: Dict[Tuple[str, str], Dict] = {}
-        target_path = model_pack_path.joinpath(
-            "ontologies", "curations", "explosion_whitelist.jsonl"
-        )
+        target_path = model_pack_path.joinpath(EXPLOSION_WHITELIST_PATH)
         if not target_path.exists():
             logger.info(f"no curations found at {str(target_path)}")
             return curations
@@ -357,9 +357,7 @@ class ModelPackBuilder:
         :return:
         """
         parsers = instantiate(cfg.ontology_parser).values()
-        curations_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath(
-            "ontologies", "curations", "explosion_whitelist.jsonl"
-        )
+        curations_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath()
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
         assemble_pipeline.main(
             parsers=parsers,
