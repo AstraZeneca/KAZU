@@ -1,15 +1,18 @@
 import argparse
 import json
+import logging
 import os
 import shutil
 import subprocess
 from dataclasses import dataclass, field
 from distutils.dir_util import copy_tree
 from pathlib import Path
-from typing import Tuple, List, Optional, Set, Dict, Iterable
+from typing import Tuple, List, Optional, Set, Dict
 
 from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
+from omegaconf import DictConfig
+
 from kazu.modelling.annotation.acceptance_test import (
     execute_full_pipeline_acceptance_test,
     check_annotation_consistency,
@@ -17,9 +20,6 @@ from kazu.modelling.annotation.acceptance_test import (
 from kazu.modelling.ontology_matching import assemble_pipeline
 from kazu.pipeline import load_steps_and_log_memory_usage
 from kazu.utils.utils import Singleton
-from omegaconf import DictConfig
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -173,8 +173,8 @@ class ModelPackBuilder:
             model_source_path = maybe_base_model_pack_path.joinpath(model)
             target_dir = model_pack_build_path.joinpath(model_source_path.name)
             shutil.copytree(str(model_source_path), str(target_dir))
-        for ontology_path in build_config.ontologies:
-            ontology_path = Path(os.path.join(maybe_base_model_pack_path, ontology_path))
+        for ontology_path_str in build_config.ontologies:
+            ontology_path = Path(os.path.join(maybe_base_model_pack_path, ontology_path_str))
             target_path = Path(os.path.join(model_pack_build_path, ontology_path))
             if ontology_path.is_dir():
                 shutil.copytree(str(ontology_path), str(target_path))
