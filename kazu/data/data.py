@@ -575,3 +575,4 @@ class CuratedTerm:
     entity_class: str
     term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
     curated_id_mappings: Dict[str, str] = field(default_factory=dict)
+    doc_freq: float = 0.0  # for information only: some measure of how frequently a curation is observed (suggest freq per 10k docs)
