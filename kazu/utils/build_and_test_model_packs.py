@@ -106,7 +106,7 @@ class ModelPackBuilder:
                 new_v = build_curations.pop(k)
                 if v["action"] != new_v["action"] and new_v["action"] == "keep":
                     logger.warning(f"previously dropped term is now being kept: {new_v}")
-                if v["case_sensitive"] and not new_v["case_sensitive"]
+                if v["case_sensitive"] and not new_v["case_sensitive"]:
                     logger.warning(f"case sensitivity is now less strict for {new_v}")
                 final_curations[k] = new_v
         final_curations.update(build_curations)
