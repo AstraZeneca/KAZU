@@ -102,17 +102,20 @@ class ModelPackBuilder:
             base_model_pack_path, merge_config.curations
         )
         build_curations = ModelPackBuilder.load_curations(target_model_pack_path, None)
-        final_curations = {}
         for k, v in base_curations.items():
             if k in build_curations:
-                new_v = build_curations.pop(k)
-                if v["action"] != new_v["action"] and new_v["action"] == "keep":
-                    logger.warning(f"previously dropped term is now being kept: {new_v}")
-                if v["case_sensitive"] and not new_v["case_sensitive"]:
-                    logger.warning(f"case sensitivity is now less strict for {new_v}")
-                final_curations[k] = new_v
-        final_curations.update(build_curations)
-        return list(final_curations.values())
+                if (
+                    v["action"] != build_curations[k]["action"]
+                    and build_curations[k]["action"] == "keep"
+                ):
+                    logger.warning(
+                        f"previously dropped term is now being kept: {build_curations[k]}"
+                    )
+                if v["case_sensitive"] and not build_curations[k]["case_sensitive"]:
+                    logger.warning(f"case sensitivity is now less strict for {build_curations[k]}")
+            else:
+                build_curations[k] = v
+        return list(build_curations.values())
 
     @staticmethod
     def apply_merge_configurations(
