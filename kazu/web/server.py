@@ -43,7 +43,7 @@ app = FastAPI(
     },
 )
 
-oauth2_scheme = HTTPBearer()
+oauth2_scheme = HTTPBearer(auto_error=False)
 
 
 def get_request_id(request: HTTPConnection) -> Union[str, None]:
@@ -123,10 +123,11 @@ class KazuWebApp:
         """
         req_id = get_request_id(request)
         response = await call_next(request)
-        response.headers.append(
-            "X-request-id",
-            req_id,
-        )
+        if req_id is not None:
+            response.headers.append(
+                "X-request-id",
+                req_id,
+            )
         logger.info(f"ID: {req_id} Response Code: {response.status_code}")
         return response
 
