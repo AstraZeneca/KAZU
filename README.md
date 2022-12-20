@@ -17,6 +17,8 @@ If you want to use Kazu, please cite our EMNLP 2022 publication!
 
 citation link TBA
 
+[Please click here for the web live demo (Swagger UI) from http://kazu.korea.ac.kr/](http://kazu.korea.ac.kr/)
+
 [Please click here for the TinyBERN2 training and evaluation code](https://github.com/dmis-lab/KAZU-NER-module)
 
 
