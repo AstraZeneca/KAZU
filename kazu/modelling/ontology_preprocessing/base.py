@@ -1486,6 +1486,7 @@ class CLOntologyParser(RDFGraphParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
 
         super().__init__(
@@ -1501,6 +1502,7 @@ class CLOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            additional_synonyms=additional_synonyms,
         )
 
     def find_kb(self, string: str) -> str:
