@@ -1480,6 +1480,7 @@ class CLOntologyParser(RDFGraphParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
@@ -1490,7 +1491,7 @@ class CLOntologyParser(RDFGraphParser):
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
-            name="CL",
+            name=name,
             uri_regex=re.compile("^http://purl.obolibrary.org/obo/CL_[0-9]+$"),
             synonym_predicates=(
                 rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
