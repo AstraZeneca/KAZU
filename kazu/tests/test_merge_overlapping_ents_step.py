@@ -40,8 +40,8 @@ def test_merge_overlapping_step_case_1(merge_step):
 
     doc = Document.create_simple_document("Baclofen drug")
     doc.sections[0].entities = [explosion_ent, transformer_ent]
-    successes, failures = merge_step([doc])
-    assert len(successes) == 1
+    processed, failures = merge_step([doc])
+    assert len(processed) == 1
     assert len(doc.sections[0].entities) == 1
     assert doc.sections[0].entities[0] == explosion_ent
 
@@ -86,8 +86,8 @@ def test_merge_overlapping_step_case_2(merge_step):
 
     doc = Document.create_simple_document("Baclofen drug")
     doc.sections[0].entities = [explosion_ent, transformer_ent]
-    successes, failures = merge_step([doc])
-    assert len(successes) == 1
+    processed, failures = merge_step([doc])
+    assert len(processed) == 1
     assert len(doc.sections[0].entities) == 1
     assert doc.sections[0].entities[0] == transformer_ent
 
@@ -132,8 +132,8 @@ def test_merge_overlapping_step_case_3(merge_step):
 
     doc = Document.create_simple_document("Baclofen drug")
     doc.sections[0].entities = [explosion_ent, transformer_ent]
-    successes, failures = merge_step([doc])
-    assert len(successes) == 1
+    processed, failures = merge_step([doc])
+    assert len(processed) == 1
     assert len(doc.sections[0].entities) == 1
     assert doc.sections[0].entities[0] == transformer_ent
 
@@ -195,8 +195,8 @@ def test_merge_overlapping_step_case_4(merge_step):
 
     doc = Document.create_simple_document("Baclofen drug treatment")
     doc.sections[0].entities = [explosion_ent, transformer_ent, transformer_ent_2]
-    successes, failures = merge_step([doc])
-    assert len(successes) == 1
+    processed, failures = merge_step([doc])
+    assert len(processed) == 1
     assert len(doc.sections[0].entities) == 1
     assert doc.sections[0].entities[0] == transformer_ent_2
 
@@ -300,8 +300,8 @@ def test_merge_overlapping_step_case_5(merge_step):
         transformer_ent_3,
         transformer_ent_4,
     ]
-    successes, failures = merge_step([doc])
-    assert len(successes) == 1
+    processed, failures = merge_step([doc])
+    assert len(processed) == 1
     assert len(doc.sections[0].entities) == 3
     assert doc.sections[0].entities[0] == transformer_ent_2
     assert doc.sections[0].entities[1] == transformer_ent_3
