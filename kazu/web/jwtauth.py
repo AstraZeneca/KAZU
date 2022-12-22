@@ -49,7 +49,7 @@ from starlette.authentication import (
     AuthenticationError,
     BaseUser,
 )
-from starlette.requests import Request
+from starlette.requests import Request, HTTPConnection
 from starlette.responses import JSONResponse
 
 from kazu.web.routes import EXCLUDED_ENDPOINTS
@@ -100,7 +100,9 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             raise AuthenticationError(f"Authorization scheme {scheme} is not supported")
         return token
 
-    async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
+    async def authenticate(
+        self, request: HTTPConnection
+    ) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
         req_id = str(uuid.uuid4())
         request.headers.__dict__["_list"].append(
             (
@@ -109,7 +111,6 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             )
         )
         if request.scope["raw_path"].decode() in EXCLUDED_ENDPOINTS:
-
             logger.info(
                 "ID: %s Request to %s, no authentication required"
                 % (req_id, request.scope["raw_path"]),
