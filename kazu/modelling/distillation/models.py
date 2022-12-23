@@ -442,7 +442,9 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
         # Logging
         self.log("training_loss", loss, prog_bar=True, on_step=True)
-        lr_list = self.lr_schedulers().get_last_lr()
+        scheduler = self.lr_schedulers()
+        assert isinstance(scheduler, _LRScheduler)
+        lr_list = scheduler.get_last_lr()
         self.log("lr", lr_list[0], prog_bar=True, on_step=True)
         if lr_list[0] != lr_list[1]:
             self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
@@ -630,7 +632,9 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.log("training_loss", loss, on_step=True)
         self.log("att_loss", att_loss, on_step=True)
         self.log("rep_loss", rep_loss, on_step=True)
-        lr_list = self.lr_schedulers().get_last_lr()
+        scheduler = self.lr_schedulers()
+        assert isinstance(scheduler, _LRScheduler)
+        lr_list = scheduler.get_last_lr()
         self.log("lr", lr_list[0], prog_bar=True, on_step=True)
         if lr_list[0] != lr_list[1]:
             self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
