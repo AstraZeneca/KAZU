@@ -8,7 +8,19 @@ from abc import ABC
 from collections import defaultdict
 from functools import cache
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet, Union, DefaultDict
+from typing import (
+    cast,
+    List,
+    Tuple,
+    Dict,
+    Any,
+    Iterable,
+    Set,
+    Optional,
+    FrozenSet,
+    Union,
+    DefaultDict,
+)
 from urllib import parse
 
 import pandas as pd
@@ -341,12 +353,14 @@ class OntologyParser(ABC):
                 )
 
     def drop_excluded_ids(self):
+        assert self.parsed_dataframe is not None
         if self.excluded_ids is not None:
             self.parsed_dataframe = self.parsed_dataframe[
                 ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
             ].copy()
 
     def _add_additional_synonyms(self):
+        assert self.parsed_dataframe is not None
         if self.additional_synonyms is not None:
             logger.info(
                 f"{len(self.additional_synonyms)} curated synonyms for {self.name} detected."
@@ -392,7 +406,7 @@ class OntologyParser(ABC):
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
-        return metadata
+        return cast(Dict[str, Dict[str, SimpleValue]], metadata)
 
     def export_synonym_terms(self) -> Set[SynonymTerm]:
         self._parse_df_if_not_already_parsed()
@@ -1415,20 +1429,25 @@ class MeddraOntologyParser(OntologyParser):
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
         llt_path = os.path.join(self.in_path, "llt.asc")
+        # note: this isn't true! But the pandas stubs currently think that the names argument
+        # here has to be a list of str, but it doesn't, it just has to be a sequence of strings
+        list_mdhier_names = cast(List[str], self._mdhier_asc_col_names)
         hier_df = pd.read_csv(
             mdheir_path,
             sep="$",
             header=None,
-            names=self._mdhier_asc_col_names,
+            names=list_mdhier_names,
             dtype="string",
         )
         hier_df = hier_df[~hier_df["soc_name"].isin(self._exclude_soc)]
 
+        # as above
+        list_llt_names = cast(List[str], self._llt_asc_column_names)
         llt_df = pd.read_csv(
             llt_path,
             sep="$",
             header=None,
-            names=self._llt_asc_column_names,
+            names=list_llt_names,
             usecols=("llt_name", "pt_code"),
             dtype="string",
         )
