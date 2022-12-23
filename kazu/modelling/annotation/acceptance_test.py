@@ -53,7 +53,7 @@ class SectionScorer:
         self.calculate_ner_matches()
 
         self.gold_to_test_mappings: Dict[
-            Tuple[Entity, str], Dict[str, Tuple[str, str]]
+            Tuple[Entity, str], Dict[str, Set[Tuple[str, str]]]
         ] = defaultdict(dict)
         self.calculate_linking_matches()
 
