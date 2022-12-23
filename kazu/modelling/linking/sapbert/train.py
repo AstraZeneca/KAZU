@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Any, Optional, Union, Callable, NamedTuple
+from typing import cast, List, Tuple, Dict, Any, Optional, Union, NamedTuple
 
 import hydra
 import numpy as np
@@ -28,6 +28,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
+from tokenizers import Encoding
 
 from kazu.utils.constants import HYDRA_VERSION_BASE
 
@@ -47,7 +48,7 @@ class SapbertDataCollatorWithPadding:
 
     def __call__(self, features: List) -> Tuple[BatchEncoding, BatchEncoding]:
         query_toks1 = [x["query_toks1"] for x in features]
-        query_toks1 = self.tokenizer.pad(
+        query_toks1_enc = self.tokenizer.pad(
             query_toks1,
             padding=self.padding,
             max_length=self.max_length,
@@ -55,7 +56,7 @@ class SapbertDataCollatorWithPadding:
             return_tensors="pt",
         )
         query_toks2 = [x["query_toks2"] for x in features]
-        query_toks2 = self.tokenizer.pad(
+        query_toks2_enc = self.tokenizer.pad(
             query_toks2,
             padding=self.padding,
             max_length=self.max_length,
@@ -63,10 +64,10 @@ class SapbertDataCollatorWithPadding:
             return_tensors="pt",
         )
 
-        return query_toks1, query_toks2
+        return query_toks1_enc, query_toks2_enc
 
 
-def init_hf_collate_fn(tokenizer: Callable) -> Callable:
+def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
     """
     get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST
 
@@ -102,7 +103,8 @@ class HFSapbertInferenceDataset(Dataset):
         self.encodings = encodings
 
     def __len__(self):
-        return len(self.encodings.encodings)
+        encodings = cast(List[Encoding], self.encodings.encodings)
+        return len(encodings)
 
 
 class HFSapbertPairwiseDataset(Dataset):
@@ -138,7 +140,8 @@ class HFSapbertPairwiseDataset(Dataset):
         self.encodings_2 = encodings_2
 
     def __len__(self):
-        return len(self.encodings_1.encodings)
+        encodings = cast(List[Encoding], self.encodings_1.encodings)
+        return len(encodings)
 
 
 class SapbertTrainingParams(BaseModel):
@@ -153,7 +156,11 @@ class SapbertTrainingParams(BaseModel):
 
 
 def get_embedding_dataloader_from_strings(
-    texts: List[str], tokenizer: Callable, batch_size: int, num_workers: int, max_length: int = 50
+    texts: List[str],
+    tokenizer: PreTrainedTokenizerBase,
+    batch_size: int,
+    num_workers: int,
+    max_length: int = 50,
 ):
     """
     get a dataloader with dataset HFSapbertInferenceDataset and DataCollatorWithPadding. This should be used to
@@ -289,6 +296,7 @@ class PLSapbertModel(LightningModule):
             self.ontology_embeddings = None
 
     def configure_optimizers(self):
+        assert self.sapbert_training_params is not None
         optimizer = optim.AdamW(
             [
                 {"params": self.model.parameters()},
@@ -482,6 +490,7 @@ class PLSapbertModel(LightningModule):
         """
         self.eval()
         predictions = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
+        predictions = cast(List[Dict[int, torch.Tensor]], predictions)
         results = self.get_embeddings(predictions)
         return results
 
