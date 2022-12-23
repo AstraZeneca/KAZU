@@ -14,6 +14,7 @@ import inspect
 import os
 import subprocess
 import sys
+from typing import Any
 
 import kazu
 
@@ -137,7 +138,7 @@ def linkcode_resolve(domain, info):
     if submod is None:
         return None
 
-    obj = submod
+    obj: Any = submod
     for part in fullname.split("."):
         try:
             # pandas has a warnings.catch_warnings context manager here
