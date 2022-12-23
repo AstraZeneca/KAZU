@@ -774,7 +774,7 @@ class RDFGraphParser(OntologyParser):
                     default_labels.append(str(obj))
                     iris.append(str(sub))
                     syns.append(str(other_syn_obj))
-                    mapping_type.append(syn_predicate)
+                    mapping_type.append(str(syn_predicate))
 
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
