@@ -16,8 +16,6 @@ from transformers import (
     InputExample,
     DataCollatorForTokenClassification,
     PreTrainedTokenizerBase,
-)
-from transformers import (
     get_constant_schedule,
     get_linear_schedule_with_warmup,
     get_cosine_schedule_with_warmup,
