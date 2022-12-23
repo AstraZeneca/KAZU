@@ -10,10 +10,7 @@ from kazu.data.data import (
     EquivalentIdSet,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.ontology_preprocessing.base import (
-    IDX,
-    SYN,
-)
+from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 from kazu.steps.linking.post_processing.strategy_runner import (
     StrategyRunner,

@@ -10,12 +10,8 @@ from kazu.data.data import (
     LinkRanks,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, Metadata
-from kazu.modelling.language.string_similarity_scorers import (
-    StringSimilarityScorer,
-)
-from kazu.modelling.ontology_preprocessing.base import (
-    DEFAULT_LABEL,
-)
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 
 
