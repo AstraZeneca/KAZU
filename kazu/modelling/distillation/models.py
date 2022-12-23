@@ -10,7 +10,13 @@ from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADER
 from torch.nn import CrossEntropyLoss, MSELoss
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataset import T_co
-from transformers import AdamW, AutoTokenizer, InputExample, DataCollatorForTokenClassification
+from transformers import (
+    AdamW,
+    AutoTokenizer,
+    InputExample,
+    DataCollatorForTokenClassification,
+    PreTrainedTokenizerBase,
+)
 from transformers import (
     get_constant_schedule,
     get_linear_schedule_with_warmup,
@@ -46,14 +52,14 @@ class NerDataset(Dataset):
 
     def __init__(
         self,
-        tokenizer: AutoTokenizer,
+        tokenizer: PreTrainedTokenizerBase,
         examples: List[InputExample],
         label_map: Dict[str, int],
         max_length: int,
     ):
         """
 
-        :param tokenizer: and instance of AutoTokenizer
+        :param tokenizer: typically created from AutoTokenizer.from_pretrained
         :param examples: a list of InputExample, typically created from a
             :class:`kazu.modelling.distillation.dataprocessor.NerProcessor`
         :param label_map: str to int mapping of labels
@@ -284,7 +290,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         self.processor = NerProcessor()
         self.data_dir = data_dir
         self.max_length = max_length
-        self.tokenizer = AutoTokenizer.from_pretrained(student_model_path)
+        self.tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(student_model_path)
         super().__init__(
             schedule=schedule,
             accumulate_grad_batches=accumulate_grad_batches,

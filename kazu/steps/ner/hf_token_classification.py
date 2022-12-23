@@ -13,6 +13,7 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
     BatchEncoding,
+    PreTrainedTokenizerBase,
 )
 from transformers.file_utils import PaddingStrategy
 
@@ -72,7 +73,9 @@ class TransformersModelForTokenClassificationNerStep(Step):
         self.stride = stride
         self.batch_size = batch_size
         self.config = AutoConfig.from_pretrained(path)
-        self.tokeniser = AutoTokenizer.from_pretrained(path, config=self.config)
+        self.tokeniser: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
+            path, config=self.config
+        )
         self.model = AutoModelForTokenClassification.from_pretrained(path, config=self.config)
         self.model = PLAutoModelForTokenClassification(self.model).eval()
         self.trainer = trainer
