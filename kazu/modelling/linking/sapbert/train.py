@@ -371,6 +371,8 @@ class PLSapbertModel(LightningModule):
             dataloaders.append(query_dataloader)
             dataloaders.append(ontology_dataloader)
 
+        return dataloaders
+
     def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
         return self(batch)
 
