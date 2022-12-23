@@ -79,8 +79,8 @@ class NerProcessor(SeqTagProcessor):
         """Reads a BIO data."""
         inpFilept = open(input_file)
         lines = []
-        words = []
-        labels = []
+        words: List[str] = []
+        labels: List[str] = []
         continualLineErrorCnt = 0
         for lineIdx, line in enumerate(inpFilept):
             contents = line.splitlines()[0]
