@@ -331,7 +331,7 @@ class PLSapbertModel(LightningModule):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         assert self.sapbert_training_params is not None
         training_df = pd.read_parquet(self.sapbert_training_params.train_file)
-        labels = training_df["id"].astype("category").cat.codes.values
+        labels = training_df["id"].astype("category").cat.codes.to_numpy()
         encodings_1 = self.tokeniser(training_df["syn1"].tolist())
         encodings_2 = self.tokeniser(training_df["syn2"].tolist())
         encodings_1["labels"] = labels
