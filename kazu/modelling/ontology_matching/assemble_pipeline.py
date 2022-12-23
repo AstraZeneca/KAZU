@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import spacy
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
@@ -16,7 +16,7 @@ def custom_tokenizer(nlp):
 def main(
     output_dir: PathLike,
     parsers: List[OntologyParser],
-    curated_list: PathLike = None,
+    curated_list: Optional[PathLike] = None,
     span_key: str = SPAN_KEY,
 ) -> spacy.language.Language:
     """Generates, serializes and returns a Spacy pipeline with an
