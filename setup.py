@@ -43,6 +43,12 @@ setup(
         "dev": [
             "black~=22.0",
             "flake8",
+            "mypy",
+            "types-requests",
+            "types-cachetools",
+            "types-regex",
+            "types-psutil",
+            "pandas-stubs",
             "bump2version",
             "pre-commit",
             "pytest",
