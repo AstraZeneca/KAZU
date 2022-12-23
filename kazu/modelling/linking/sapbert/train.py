@@ -395,7 +395,7 @@ class PLSapbertModel(LightningModule):
             embedding = torch.cat(list(full_dict.values()))
         return embedding
 
-    def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         """
         lightning override
         generate new embeddings for each :attr:`SapbertEvaluationDataset.ontology_source` and query them with
