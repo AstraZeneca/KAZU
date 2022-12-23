@@ -597,8 +597,8 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         assert teacher_layer_num % student_layer_num == 0
         layers_per_block = int(teacher_layer_num / student_layer_num)
 
-        att_loss = 0.0
-        rep_loss = 0.0
+        att_loss = torch.Tensor([0.0])
+        rep_loss = torch.Tensor([0.0])
 
         new_teacher_atts = [
             teacher_atts[i * layers_per_block + layers_per_block - 1]
