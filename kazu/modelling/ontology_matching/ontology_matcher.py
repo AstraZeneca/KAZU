@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Set
+from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Set, cast
 
 import spacy
 import srsly
@@ -41,11 +41,14 @@ class OntologyMatcherConfig:
 
 
 def _ontology_dict_setter(span: Span, value: Dict):
-    span.doc.user_data[span] = value
+    # spacy's typing on the property says this has to be a Dict[str, Any]
+    # but the __init__ typing says it can be a Dict[Any, Any]
+    span.doc.user_data[span] = value  # type: ignore[index]
 
 
 def _ontology_dict_getter(span: Span):
-    return span.doc.user_data.get(span, {})
+    # as above with types
+    return span.doc.user_data.get(span, {})  # type: ignore[call-overload]
 
 
 @Language.factory(
@@ -87,7 +90,8 @@ class OntologyMatcher:
             parser_name_to_entity_type=parser_name_to_entity_type,
         )
         # These will be defined when calling initialize
-        self.strict_matcher, self.lowercase_matcher = None, None
+        self.strict_matcher: Optional[PhraseMatcher] = None
+        self.lowercase_matcher: Optional[PhraseMatcher] = None
         self.tp_matchers, self.fp_matchers = None, None
         self.tp_coocc_dict, self.fp_coocc_dict = None, None
 
@@ -226,7 +230,8 @@ class OntologyMatcher:
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
 
-        patterns = self.nlp.tokenizer.pipe(
+        # spacy's typing isn't smart enough to know this will have a 'pipe' attr
+        patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
             # we need it lowercased for the case-insensitive matcher
             curation.term if curation.case_sensitive else curation.term.lower()
             for curation in matched_curations
@@ -276,7 +281,8 @@ class OntologyMatcher:
                 for synonym_term in synonym_terms
                 for term in synonym_term.terms
             ]
-            patterns = self.nlp.tokenizer.pipe(term for (term, _synonym_term) in synonyms_and_terms)
+            # spacy's typing isn't smart enough to know this will have a 'pipe' attr
+            patterns = self.nlp.tokenizer.pipe(term for (term, _synonym_term) in synonyms_and_terms)  # type: ignore[union-attr]
 
             for (term, synonym_term), pattern in zip(synonyms_and_terms, patterns):
                 match_id = parser_name + self.match_id_sep + synonym_term.term_norm
@@ -310,16 +316,17 @@ class OntologyMatcher:
         # initial step in building a curation-based phrasematcher
 
         if self.strict_matcher is not None and self.lowercase_matcher is not None:
-            matches = set(self.strict_matcher(doc)).union(set(self.lowercase_matcher(doc)))
+            matcher_res = set(self.strict_matcher(doc)).union(set(self.lowercase_matcher(doc)))
         elif self.strict_matcher is not None:
-            matches = set(self.strict_matcher(doc))
+            matcher_res = set(self.strict_matcher(doc))
         elif self.lowercase_matcher is not None:
-            matches = set(self.lowercase_matcher(doc))
+            matcher_res = set(self.lowercase_matcher(doc))
         else:
             # this isn't possible since if both of them were None,
             # the if clause at the start of this function would raise an error
             raise AssertionError()
 
+        matches = cast(Set[Tuple[int, int, int]], matcher_res)
         spans = []
         for (start, end), matches_grp in sort_then_group(
             matches,
@@ -453,26 +460,37 @@ class OntologyMatcher:
     def _create_cellline_tp_tokenmatcher(self):
         """Define patterns where a Cell line appears and it's likely a true positive"""
         matcher = Matcher(self.nlp.vocab)
-        pattern_1 = [{"_": {CELL_LINE: True}}, {"LOWER": {"IN": ["cell", "cells"]}}]
-        pattern_2 = [{"LOWER": "cell"}, {"LOWER": "line"}, {"_": {CELL_LINE: True}}]
-        pattern_3 = [{"LOWER": "cell"}, {"LOWER": "type"}, {"_": {CELL_LINE: True}}]
+        pattern_1: List[Dict[str, Any]] = [
+            {"_": {CELL_LINE: True}},
+            {"LOWER": {"IN": ["cell", "cells"]}},
+        ]
+        pattern_2: List[Dict[str, Any]] = [
+            {"LOWER": "cell"},
+            {"LOWER": "line"},
+            {"_": {CELL_LINE: True}},
+        ]
+        pattern_3: List[Dict[str, Any]] = [
+            {"LOWER": "cell"},
+            {"LOWER": "type"},
+            {"_": {CELL_LINE: True}},
+        ]
         matcher.add("Cell_line_context", [pattern_1, pattern_2, pattern_3])
         return matcher
 
     def _create_anatomy_fp_tokenmatcher(self):
         """Define patterns where an atanomy entity appears and it's likely a false positive"""
         matcher = Matcher(self.nlp.vocab)
-        patterns = []
+        patterns: List[List[Dict[str, Any]]] = []
         if DRUG in self.labels:
-            p = [{"_": {DRUG: True}}, {"_": {ANATOMY: True}, "LOWER": "arm"}]
+            p: List[Dict[str, Any]] = [{"_": {DRUG: True}}, {"_": {ANATOMY: True}, "LOWER": "arm"}]
             patterns.append(p)
-        p2 = [
+        p2: List[Dict[str, Any]] = [
             {"LOWER": "single"},
             {"LOWER": "-"},
             {"_": {ANATOMY: True}, "LOWER": "arm"},
         ]
         patterns.append(p2)
-        p3 = [
+        p3: List[Dict[str, Any]] = [
             {"LOWER": "quality"},
             {"LOWER": "-", "OP": "?"},
             {"LOWER": "of"},
@@ -544,13 +562,15 @@ class OntologyMatcher:
 
         deserialize = {}
 
-        def deserialize_cfg(path: str) -> None:
+        def deserialize_cfg(path: PathLike) -> None:
             loaded_conf = srsly.read_json(path)
             self.cfg = OntologyMatcherConfig(**loaded_conf)
 
         deserialize["cfg"] = deserialize_cfg
         deserialize["strict_matcher"] = partial(unpickle_matcher, strict=True)
         deserialize["lowercase_matcher"] = partial(unpickle_matcher, strict=False)
-        spacy.util.from_disk(path, deserialize, exclude)
+        # spacy's typing says the functions have to only take strings, but they would normally take
+        # a path as well without that being a problem.
+        spacy.util.from_disk(path, deserialize, exclude)  # type: ignore[arg-type]
         self.set_context_matchers()
         return self
