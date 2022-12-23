@@ -387,7 +387,7 @@ class PLSapbertModel(LightningModule):
         :return:
         """
         full_dict = {}
-        for batch_id, batch in enumerate(output):
+        for batch in output:
             full_dict.update(batch)
         if len(full_dict) > 1:
             embedding = torch.squeeze(torch.cat(list(full_dict.values())))
