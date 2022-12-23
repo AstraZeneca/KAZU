@@ -128,7 +128,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     target_id_set_for_good_mapping = next(
         filter(lambda x: "1" in x.ids, target_term.associated_id_sets)
     )
-    target_mappings: Set[Mapping] = set()
+    target_mappings = set()
     target_mappings.update(
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
