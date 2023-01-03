@@ -3,8 +3,8 @@ strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
   cross_ref_managers: ~
   ner_namespace_processing_order:
-    - TransformersModelForTokenClassificationNerStep
-    - ExplosionStringMatchingStep
+    - _target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep.namespace
+    - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
   symbolic_strategies:
 
     TransformersModelForTokenClassificationNerStep:
