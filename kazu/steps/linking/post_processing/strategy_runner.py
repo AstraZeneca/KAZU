@@ -156,6 +156,9 @@ class NamespaceStrategyExecution:
         self.entity_mapped.clear()
 
 
+NAMESPACE_ERROR_ENDING = "If entities with these namespace(s) appear, attempting to process them would cause an exception. It is likely that this class is mis-configured."
+
+
 class StrategyRunner:
     """
     This is a complex class, designed to co-ordinate the running of various strategies over a document, with the end
@@ -213,6 +216,28 @@ class StrategyRunner:
         self.metadata_db = MetadataDatabase()
 
         if self.ner_namespace_processing_order is not None:
+            # Check that sets of namespaces are consistent
+            namespaces_with_a_namespace_strategy_execution = set(self.symbolic_strategies).union(
+                self.non_symbolic_strategies
+            )
+            processing_order_namespaces = set(self.ner_namespace_processing_order)
+            assert processing_order_namespaces.issubset(
+                namespaces_with_a_namespace_strategy_execution
+            ), (
+                "There are namespace(s) in the ner_namespace_processing_order that aren't associated"
+                " with any mapping strategies. " + NAMESPACE_ERROR_ENDING
+            )
+            assert namespaces_with_a_namespace_strategy_execution.issubset(
+                processing_order_namespaces
+            ), (
+                "There are namespace(s) associated with a strategy that aren't in the"
+                " ner_namespace_processing_order. " + NAMESPACE_ERROR_ENDING
+            )
+            # Note that the stricter:
+            # assert set(self.ner_namespace_processing_order) == set(self.symbolic_strategies) === set(self.non_symbolic_strategies)
+            # would rule out the case where we know that entities from a certain namespace will always be symbolic or non-symbolic, so
+            # the namespace only needs to be in either self.symbolic_strategies or self.non_symbolic_strategies, but not both.
+
             self.ner_namespace_to_index = {
                 ns: ind for ind, ns in enumerate(self.ner_namespace_processing_order)
             }
