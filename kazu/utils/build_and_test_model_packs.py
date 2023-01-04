@@ -30,24 +30,23 @@ EXPLOSION_WHITELIST_PATH = Path("ontologies/curations/explosion_whitelist.jsonl"
 class BuildConfiguration:
     """Dataclass that controls how a base model pack and config should be merged with a
     target model pack.
-
-    :param requires_base_config: should this model pack use the base config as a starting point?
-    :param models: what model directories should this model pack include from the base model pack?
-    :param curations: what entity classes should this model pack use from the curated list in the base model pack?
-    :param ontologies: what ontologies should this model pack use from the base ontology pack? Arg
-        should be a list of strings to the ontology root, from the root of the base pack
-    :param has_own_config: does this model pack have its own config dir? (if used with use_base_config
-        these will override any config files from the base config)
-    :param run_acceptance_tests: should acceptance tests be run?
-    :param run_consistency_checks: should consistency checks be run on the gold standard?
     """
 
+    #: should this model pack use the base config as a starting point?
     requires_base_config: bool
+    #: what model directories should this model pack include from the base model pack?
     models: List[str]
+    #: what entity classes should this model pack use from the curated list in the base model pack?
     curations: Set[str]
+    #: what ontologies should this model pack use from the base ontology pack?
+    #: Arg should be a list of strings to the ontology root, from the root of the base pack
     ontologies: List[str]
+    #: does this model pack have its own config dir? (if used with use_base_config
+    #: these will override any config files from the base config)
     has_own_config: bool
+    #: should acceptance tests be run?
     run_acceptance_tests: bool = False
+    #: should consistency checks be run on the gold standard?
     run_consistency_checks: bool = False
     requires_base_model_pack: bool = field(init=False)
 
