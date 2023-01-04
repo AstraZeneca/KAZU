@@ -15,7 +15,7 @@ setup(
     version="0.0.20",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",
-    description="NER",
+    description="Biomedical Named Entity Recognition and Entity Linking for Enterprise use cases",
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
