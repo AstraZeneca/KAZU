@@ -215,7 +215,10 @@ class StrategyRunner:
         self.ner_namespace_processing_order = ner_namespace_processing_order
         self.metadata_db = MetadataDatabase()
 
-        if self.ner_namespace_processing_order is not None:
+        if len(self.ner_namespace_processing_order) == 0:
+            # no sort order given: sort alphabetically just to get some consistent (but arbitrary) sort key
+            self.get_namespace_sort_key = lambda ns: ns
+        else:
             # Check that sets of namespaces are consistent
             namespaces_with_a_namespace_strategy_execution = set(self.symbolic_strategies).union(
                 self.non_symbolic_strategies
@@ -242,8 +245,6 @@ class StrategyRunner:
                 ns: ind for ind, ns in enumerate(self.ner_namespace_processing_order)
             }
             self.get_namespace_sort_key = lambda ns: self.ner_namespace_to_index[ns]
-        else:
-            self.get_namespace_sort_key = lambda ns: ns
 
     @staticmethod
     def group_entities_by_symbolism(
