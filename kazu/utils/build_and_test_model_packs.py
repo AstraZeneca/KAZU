@@ -48,6 +48,9 @@ class BuildConfiguration:
     run_acceptance_tests: bool = False
     #: should consistency checks be run on the gold standard?
     run_consistency_checks: bool = False
+    #: Whether a base model pack is required to build this model pack
+    #: This will be set automatically based on the values of the other fields,
+    #: it's not available to set when instantiating the class.
     requires_base_model_pack: bool = field(init=False)
 
     def __post_init__(self):
