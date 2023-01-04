@@ -2,7 +2,7 @@ import {LSComponent} from "./ls-component";
 import {TextSubmit} from "./text-submit";
 import React from "react";
 import {KazuResponse} from "../types/types";
-import {IKazuClient} from "../lib/kazu-client";
+import {IKazuClient} from "../utils/kazu-client";
 import { JsonViewer } from '@textea/json-viewer'
 
 type AppProps = {

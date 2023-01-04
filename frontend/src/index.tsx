@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import {App} from './components/app';
 import reportWebVitals from './reportWebVitals';
-import {KazuClient} from "./lib/kazu-client";
+import {KazuClient} from "./utils/kazu-client";
 import {Config} from "./config";
 
 const conf = new Config();

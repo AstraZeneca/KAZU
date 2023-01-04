@@ -1,6 +1,6 @@
 import React from "react";
 import {KazuResponse} from "../types/types";
-import {IKazuClient} from "../lib/kazu-client";
+import {IKazuClient} from "../utils/kazu-client";
 
 type TextSubmitProps = {
     ner_response_callback: (arg: KazuResponse) => void;
