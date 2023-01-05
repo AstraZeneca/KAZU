@@ -181,16 +181,16 @@ class ModelPackBuilder:
     @staticmethod
     def copy_base_model_pack_resources_to_target(
         build_config: BuildConfiguration,
-        maybe_base_model_pack_path: Path,
+        base_model_pack_path: Path,
         model_pack_build_path: Path,
     ):
         for model in build_config.models:
-            model_source_path = maybe_base_model_pack_path.joinpath(model)
+            model_source_path = base_model_pack_path.joinpath(model)
             target_dir = model_pack_build_path.joinpath(model_source_path.name)
             shutil.copytree(str(model_source_path), str(target_dir))
         for ontology_path_str in build_config.ontologies:
-            ontology_path = Path(os.path.join(maybe_base_model_pack_path, ontology_path_str))
-            target_path = Path(os.path.join(model_pack_build_path, ontology_path))
+            ontology_path = base_model_pack_path.joinpath(ontology_path_str)
+            target_path = model_pack_build_path.joinpath(ontology_path)
             if ontology_path.is_dir():
                 shutil.copytree(str(ontology_path), str(target_path))
             else:
