@@ -104,18 +104,22 @@ class ModelPackBuilder:
         )
         build_curations = ModelPackBuilder.load_curations(target_model_pack_path, None)
         for k, v in base_curations.items():
-            if k in build_curations:
+            equivalent_build_curation = build_curations.get(k)
+            if equivalent_build_curation is not None:
                 if (
-                    v["action"] != build_curations[k]["action"]
-                    and build_curations[k]["action"] == "keep"
+                    v["action"] != equivalent_build_curation["action"]
+                    and equivalent_build_curation["action"] == "keep"
                 ):
                     logger.warning(
-                        f"previously dropped term is now being kept: {build_curations[k]}"
+                        f"previously dropped term is now being kept: {equivalent_build_curation}"
                     )
-                if v["case_sensitive"] and not build_curations[k]["case_sensitive"]:
-                    logger.warning(f"case sensitivity is now less strict for {build_curations[k]}")
+                if v["case_sensitive"] and not equivalent_build_curation["case_sensitive"]:
+                    logger.warning(
+                        f"case sensitivity is now less strict for {equivalent_build_curation}"
+                    )
             else:
                 build_curations[k] = v
+
         return list(build_curations.values())
 
     @staticmethod
