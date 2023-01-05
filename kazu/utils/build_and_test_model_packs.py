@@ -368,7 +368,7 @@ class ModelPackBuilder:
         :return:
         """
         parsers = instantiate(cfg.ontology_parser).values()
-        curations_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath()
+        curations_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath(EXPLOSION_WHITELIST_PATH)
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
         assemble_pipeline.main(
             parsers=parsers,
