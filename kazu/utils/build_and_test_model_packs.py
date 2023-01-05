@@ -222,14 +222,14 @@ class ModelPackBuilder:
         return curations
 
     @staticmethod
-    def clear_cached_resources_from_model_pack_dir(model_path_path: Path):
+    def clear_cached_resources_from_model_pack_dir(model_pack_path: Path):
         """
         delete any cached data from the input path
 
-        :param model_path_path:
+        :param model_pack_path:
         :return:
         """
-        for root, d_names, f_names in os.walk(model_path_path):
+        for root, d_names, f_names in os.walk(model_pack_path):
             for d_name in d_names:
                 if (
                     d_name.startswith("cached")
