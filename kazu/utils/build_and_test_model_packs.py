@@ -5,7 +5,6 @@ import os
 import shutil
 import subprocess
 from dataclasses import dataclass, field
-from distutils.dir_util import copy_tree
 from pathlib import Path
 from typing import Tuple, List, Optional, Set, Dict
 
@@ -129,7 +128,9 @@ class ModelPackBuilder:
     ):
 
         # copy the target pack to the target build dir
-        copy_tree(str(uncached_model_pack_path), str(model_pack_build_path))
+        shutil.copytree(
+            str(uncached_model_pack_path), str(model_pack_build_path), dirs_exist_ok=True
+        )
         # copy base config if required
         if build_config.requires_base_config:
             if maybe_base_configuration_path is None:
@@ -137,14 +138,17 @@ class ModelPackBuilder:
                     f"merge config asked for base configuration path but none was provided: {build_config}"
                 )
             model_pack_build_path.joinpath("conf").mkdir(exist_ok=True)
-            copy_tree(
-                str(maybe_base_configuration_path), str(model_pack_build_path.joinpath("conf"))
+            shutil.copytree(
+                str(maybe_base_configuration_path),
+                str(model_pack_build_path.joinpath("conf")),
+                dirs_exist_ok=True,
             )
         if build_config.has_own_config:
             # and copy target config to override required elements (if required)
-            copy_tree(
+            shutil.copytree(
                 str(uncached_model_pack_path.joinpath("conf")),
                 str(model_pack_build_path.joinpath("conf")),
+                dirs_exist_ok=True,
             )
 
         if maybe_base_model_pack_path is None and build_config.requires_base_model_pack:
