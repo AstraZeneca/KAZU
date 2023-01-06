@@ -29,13 +29,21 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ hashFiles('setup.py') }}
 
-      - name: Install dependencies
+      - name: create venv and install dependencies
         run: |
+          rm -r kazu-env || true
+          
+          PIP_CACHE_DIR=$(pip cache dir)
+          echo "pip cache dir is "${PIP_CACHE_DIR}
+          python -m venv kazu-env
+          . kazu-env/bin/activate
           python -m pip install --upgrade pip
-          pip install -e ".[dev,webserver]"
+          pip install -e ."[dev,webserver]"  --cache-dir $PIP_CACHE_DIR
+
 
       - name: Check precommit
         run: |
+          . kazu-env/bin/activate
           pre-commit run --all-files
 
       - name: Set up JDK 11
@@ -52,6 +60,8 @@ jobs:
           export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
      
           mkdir $MODEL_PACK_BUILD_PATH   
+          
+          . kazu-env/bin/activate
           
           python -m kazu.utils.build_and_test_model_packs \
           --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
