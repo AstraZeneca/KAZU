@@ -90,7 +90,7 @@ class ModelPackBuilder:
     ) -> List[Dict]:
         """
         load curations from the base model pack based upon the required entity classes specified
-        in the :class:`.MergeConfiguration`\\, then load any additional ones from the target
+        in the :class:`.BuildConfiguration`\\, then load any additional ones from the target
         model pack path. Finally, merge the two lists, warning on any inconsistencies that occur
 
         :param base_model_pack_path:
