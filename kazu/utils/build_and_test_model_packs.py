@@ -187,12 +187,12 @@ class ModelPackBuilder:
         for model in build_config.models:
             model_source_path = base_model_pack_path.joinpath(model)
             target_dir = model_pack_build_path.joinpath(model_source_path.name)
-            shutil.copytree(str(model_source_path), str(target_dir))
+            shutil.copytree(str(model_source_path), str(target_dir), dirs_exist_ok=True)
         for ontology_path_str in build_config.ontologies:
             ontology_path = base_model_pack_path.joinpath(ontology_path_str)
-            target_path = model_pack_build_path.joinpath(ontology_path)
+            target_path = model_pack_build_path.joinpath(ontology_path_str)
             if ontology_path.is_dir():
-                shutil.copytree(str(ontology_path), str(target_path))
+                shutil.copytree(str(ontology_path), str(target_path), dirs_exist_ok=True)
             else:
                 shutil.copy(ontology_path, target_path)
 
