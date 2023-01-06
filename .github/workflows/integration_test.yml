@@ -54,11 +54,14 @@ jobs:
           mkdir $MODEL_PACK_BUILD_PATH   
           
           python -m kazu.utils.build_and_test_model_packs \
-          --build_base_model_pack_from_path $DEFAULT_MODEL_PACK_PATH \
+          --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
-          --model_pack_output_path $MODEL_PACK_BUILD_PATH
+          --model_packs_to_build \
+          $DEFAULT_MODEL_PACK_PATH \
+          --model_pack_output_path $MODEL_PACK_BUILD_PATH \
+          --skip_tests
           
-          export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/*)
+          export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
           
           pytest
           
