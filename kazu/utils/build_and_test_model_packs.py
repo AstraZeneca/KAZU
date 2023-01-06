@@ -261,6 +261,7 @@ class ModelPackBuilder:
         model_pack_paths: List[Path],
         zip_pack: bool,
         output_dir: Path,
+        skip_tests: bool,
     ):
         """
         build multiple model packs
@@ -270,6 +271,7 @@ class ModelPackBuilder:
         :param model_pack_paths: list of paths to model pack resources
         :param zip_pack: should the pack be zipped at the end?
         :param output_dir: directory to build model packs in
+        :param skip_tests: don't run any tests
         :return:
         """
         if not output_dir.is_dir():
@@ -294,6 +296,7 @@ class ModelPackBuilder:
                 zip_pack=zip_pack,
                 uncached_model_pack_path=model_pack_path,
                 build_dir=output_dir,
+                skip_tests=skip_tests,
             )
 
     @staticmethod
@@ -315,6 +318,7 @@ class ModelPackBuilder:
         zip_pack: bool,
         uncached_model_pack_path: Path,
         build_dir: Path,
+        skip_tests: bool,
     ) -> Path:
         """
         run all configured options on a given model pack path
@@ -325,6 +329,7 @@ class ModelPackBuilder:
         :param zip_pack: should model pack be zipped?
         :param uncached_model_pack_path: path to model pack to process
         :param build_dir: directory pack should be built in
+        :param skip_tests: don't run any tests
         :return:
         """
 
@@ -350,10 +355,11 @@ class ModelPackBuilder:
                 overrides=[],
             )
             ModelPackBuilder.build_caches(cfg)
-            if build_config.run_consistency_checks:
-                check_annotation_consistency(cfg)
-            if build_config.run_acceptance_tests:
-                execute_full_pipeline_acceptance_test(cfg)
+            if not skip_tests:
+                if build_config.run_consistency_checks:
+                    check_annotation_consistency(cfg)
+                if build_config.run_acceptance_tests:
+                    execute_full_pipeline_acceptance_test(cfg)
             if zip_pack:
                 model_pack_name = f"{uncached_model_pack_path.name}-v{kazu_version}.zip"
                 ModelPackBuilder.zip_model_pack(model_pack_name, model_pack_build_path)
@@ -429,6 +435,11 @@ how it is called, one or more of the following may be required:
         required=True,
         help="create model packs at this location",
     )
+    parser.add_argument(
+        "--skip_tests",
+        action="store_true",
+        help="don't run any tests",
+    )
 
     args = parser.parse_args()
 
@@ -438,4 +449,5 @@ how it is called, one or more of the following may be required:
         model_pack_paths=args.model_packs_to_build,
         zip_pack=args.zip_model_pack,
         output_dir=args.model_pack_output_path,
+        skip_tests=args.skip_tests,
     )
