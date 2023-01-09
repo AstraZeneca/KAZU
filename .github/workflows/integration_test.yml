@@ -35,15 +35,15 @@ jobs:
           
           PIP_CACHE_DIR=$(pip cache dir)
           echo "pip cache dir is "${PIP_CACHE_DIR}
-          python -m venv kazu-env
-          . kazu-env/bin/activate
+          python -m venv /tmp/kazu-env
+          . /tmp/kazu-env/bin/activate
           python -m pip install --upgrade pip
           pip install -e ."[dev,webserver]"  --cache-dir $PIP_CACHE_DIR
 
 
       - name: Check precommit
         run: |
-          . kazu-env/bin/activate
+          . /tmp/kazu-env/bin/activate
           pre-commit run --all-files
 
       - name: Set up JDK 11
@@ -61,7 +61,7 @@ jobs:
      
           mkdir $MODEL_PACK_BUILD_PATH   
           
-          . kazu-env/bin/activate
+          . /tmp/kazu-env/bin/activate
           
           python -m kazu.utils.build_and_test_model_packs \
           --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
@@ -75,7 +75,10 @@ jobs:
           
           pytest
           
-          # need to call twice, for NFS bug         
+          # need to call twice, for NFS bug
+          rm -r /tmp/kazu-env || true
+          rm -r /tmp/kazu-env || true
+          
           rm -r $MODEL_PACK_BUILD_PATH || true
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:
