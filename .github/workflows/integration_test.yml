@@ -52,6 +52,16 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: Setup and execute Gradle 'test' task
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
+          build-root-directory: kazu-jvm/
+
+      - name: Run Sphinx doctest
+        run: |
+          make -C docs doctest          
+
       - name: Build model pack caches and test
         id: model_pack_cache_build
         run: |
