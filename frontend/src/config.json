@@ -1,4 +1,4 @@
 {
-  "kazuApiUrl": "http://localhost:8000",
+  "kazuApiUrl": "$KAZU_API_URL",
   "authEnabled": true
 }

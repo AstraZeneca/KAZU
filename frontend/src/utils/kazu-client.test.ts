@@ -20,4 +20,3 @@ describe("Kazu client tests", () => {
             })
     })
 });
-
