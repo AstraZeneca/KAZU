@@ -18,7 +18,7 @@ setup(
         "transformers>=4.0.0",
         "rdflib>=6.0.0",
         "requests>=2.20.0",
-        "hydra-core>=1.1.0",
+        "hydra-core>=1.3.0",
         "pytorch-lightning>=1.7.4",
         "pandas>=1.0.0",
         "pyarrow>=8.0.0",
