@@ -132,7 +132,7 @@ class KazuWebApp:
         return response
 
 
-@hydra.main(config_path="../conf", config_name="config")
+@hydra.main(version_base="1.3", config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
     """
     deploy the web app to Ray Serve

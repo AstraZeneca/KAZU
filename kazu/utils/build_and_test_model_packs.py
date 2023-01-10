@@ -349,7 +349,9 @@ class ModelPackBuilder:
         ModelPackBuilder.clear_cached_resources_from_model_pack_dir(model_pack_build_path)
         # set the env param so that hydra conf is correctly configured
         os.environ["KAZU_MODEL_PACK"] = str(model_pack_build_path)
-        with initialize_config_dir(config_dir=str(model_pack_build_path.joinpath("conf"))):
+        with initialize_config_dir(
+            version_base="1.3", config_dir=str(model_pack_build_path.joinpath("conf"))
+        ):
             cfg = compose(
                 config_name="config",
                 overrides=[],
