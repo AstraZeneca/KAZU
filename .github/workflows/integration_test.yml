@@ -61,6 +61,8 @@ jobs:
 
       - name: Run Sphinx doctest
         run: |
+          . /tmp/kazu-env/bin/activate
+          
           make -C docs doctest          
 
       - name: Build model pack caches and test
