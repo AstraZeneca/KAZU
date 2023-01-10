@@ -1,6 +1,7 @@
 defaults:
   - ray: local
   - ontology_parser: default
+  - indices: default
   - PLSapbertModel: default
   - SpacyPipeline: default
   - StanzaPipeline: default
