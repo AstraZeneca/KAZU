@@ -34,11 +34,17 @@ class AutoNameEnum(Enum):
         return name
 
 
-class LinkRanks(AutoNameEnum):
+class StringMatchConfidence(AutoNameEnum):
     HIGHLY_LIKELY = auto()  # almost certain to be correct
     PROBABLE = auto()  # on the balance of probabilities, will be correct
     POSSIBLE = auto()  # high degree of uncertainty
-    AMBIGUOUS = auto()  # likely ambiguous
+
+
+class DisambiguationConfidence(AutoNameEnum):
+    HIGHLY_LIKELY = auto()  # almost certain to be correct
+    PROBABLE = auto()  # on the balance of probabilities, will be correct
+    POSSIBLE = auto()  # high degree of uncertainty
+    AMBIGUOUS = auto()  # could not disambiguate
 
 
 @dataclass
@@ -107,8 +113,11 @@ class Mapping:
     source: str  # the knowledgebase/database/ontology name
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
-    mapping_strategy: str  # the strategy used to create the mapping
-    confidence: LinkRanks
+    string_match_strategy: str  # the strategy used to identify the string match
+    string_match_confidence: StringMatchConfidence  # the confidence of the string match
+    disambiguation_confidence: Optional[
+        DisambiguationConfidence
+    ] = None  # the confidence of the disambiguation
     disambiguation_strategy: Optional[str] = None  # the strategy used to disambiguate
     xref_source_parser_name: Optional[str] = None  # source parser name if mapping is an XREF
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
