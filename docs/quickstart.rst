@@ -41,7 +41,7 @@ Processing your first document
     # the hydra config is kept in the model pack. Ensure this env
     # variable is set to your model pack location
     cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')
-    with initialize_config_dir(version_base=HYDRA_VERSION_BASE,config_dir=str(cdir)):
+    with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)):
         cfg = compose(
             config_name="config",
             overrides=[],
