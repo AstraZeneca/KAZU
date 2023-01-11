@@ -10,6 +10,7 @@ from kazu.data.data import (
     Document,
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
+    DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import (
     MetadataDatabase,
@@ -30,6 +31,9 @@ class DisambiguationStrategy(ABC):
     preprocessing work that may be required (see :class:`.StrategyRunner` for the complexities of
     how MappingStrategy and DisambiguationStrategy are coordinated).
     """
+
+    def __init__(self, confidence: DisambiguationConfidence):
+        self.confidence = confidence
 
     @abstractmethod
     def prepare(self, document: Document):
@@ -57,9 +61,9 @@ class DisambiguationStrategy(ABC):
 
     def __call__(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+    ) -> Tuple[Set[EquivalentIdSet], DisambiguationConfidence]:
         self.prepare(document)
-        return self.disambiguate(id_sets, document, parser_name)
+        return self.disambiguate(id_sets, document, parser_name), self.confidence
 
 
 class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
@@ -69,9 +73,8 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
        hit
     """
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, confidence: DisambiguationConfidence):
+        super().__init__(confidence)
         self.mapped_ids: Set[Tuple[str, str, str]] = set()
 
     def prepare(self, document: Document):
@@ -125,6 +128,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     def __init__(
         self,
         scorer: TfIdfScorer,
+        confidence: DisambiguationConfidence,
         context_threshold: float = 0.7,
         relevant_aggregation_strategies: Optional[Iterable[EquivalentIdAggregationStrategy]] = None,
     ):
@@ -135,6 +139,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :param relevant_aggregation_strategies: Only consider these strategies when selecting synonyms from the
             synonym database, when building a representation. If none, all strategies will be considered
         """
+        super().__init__(confidence)
         self.context_threshold = context_threshold
         if relevant_aggregation_strategies is None:
             self.relevant_aggregation_strategies = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
