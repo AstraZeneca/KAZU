@@ -47,6 +47,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         detect_subspans: bool = False,
         threshold: Optional[float] = None,
         entity_splitter: Optional[NonContiguousEntitySplitter] = None,
+        strip_re: Optional[Dict[str, str]] = None,
     ):
         """
 
@@ -58,6 +59,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param detect_subspans: attempt to detect nested entities (threshold must be configured)
         :param threshold: the confidence threshold used to detect nested entities
         :param entity_splitter: instance of :class:`kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter` to detect non-contiguous entities
+        :param strip_re: passed to :class:`~kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor`
         """
         self.entity_splitter = entity_splitter
         if max_sequence_length % 2 != 0:
@@ -79,6 +81,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
             detect_subspans=detect_subspans,
             confidence_threshold=threshold,
             id2label=self.id2labels_from_label_list(labels),
+            strip_re=strip_re,
         )
 
     @document_batch_step
