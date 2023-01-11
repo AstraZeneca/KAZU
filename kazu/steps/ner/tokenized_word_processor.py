@@ -1,4 +1,5 @@
 import logging
+import re
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Optional, Set
@@ -320,17 +321,23 @@ class TokenizedWordProcessor:
         confidence_threshold: Optional[float],
         id2label: Dict[int, str],
         detect_subspans: bool = False,
+        strip_re: Optional[Dict[str, str]] = None,
     ):
         """
 
         :param confidence_threshold: optional threshold if using :class:`SmartSpanFinder`\\ . Ignored if detect_subspans is false
         :param id2label: mapping of label int id to str label
         :param detect_subspans: use :class:`SmartSpanFinder` if True. A confidence_threshold must be provided
+        :param strip_re: an optional dict of {<entity_class>:<python regex to remove>} to process NER results that the
+            model frequently misclassifies.
         """
 
         self.id2label = id2label
         self.detect_subspans = detect_subspans
         self.confidence_threshold = confidence_threshold
+        self.strip_re = (
+            {k: re.compile(v) for k, v in strip_re.items()} if strip_re is not None else None
+        )
 
     def _make_smart_span_finder(self, text: str):
         logger.debug(
@@ -397,6 +404,9 @@ class TokenizedWordProcessor:
                 metadata = {IS_SUBSPAN: span.subspan}
             else:
                 metadata = {}
+
+            match_str, end = self.attempt_strip_suffixes(start, end, match_str, span.clazz)
+
             entity = Entity.load_contiguous_entity(
                 start=start,
                 end=end,
@@ -415,3 +425,24 @@ class TokenizedWordProcessor:
             starts.append(word.word_char_start)
             ends.append(word.word_char_end)
         return min(starts), max(ends) + 1
+
+    def attempt_strip_suffixes(
+        self, start: int, end: int, match_str: str, clazz: str
+    ) -> Tuple[str, int]:
+        """
+        transformers sometimes get confused about precise offsets, depending on the training data
+        (e.g. "COX2" is often classified as "COX2 gene"). This method offers light post-processing
+        to correct these, for better entity linking results
+
+        :param start: original start
+        :param end: original end
+        :param match_str: original string
+        :param clazz: entity class
+        :return: new string, new end
+        """
+        if self.strip_re is not None:
+            suffixes_re = self.strip_re.get(clazz)
+            if suffixes_re is not None:
+                match_str = suffixes_re.sub("", match_str)
+                end = len(match_str) + start
+        return match_str, end
