@@ -146,6 +146,8 @@ class MappingStrategy:
     Selected instances of :class:`.EquivalentIdSet` are converted to :class:`.Mapping`\\ .
     """
 
+    DISAMBIGUATION_NOT_REQUIRED = "disambiguation_not_required"
+
     def __init__(
         self,
         confidence: StringMatchConfidence,
@@ -154,9 +156,7 @@ class MappingStrategy:
         """
 
         :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
-            for human users, and has no bearing on the actual algorithm. Note, if after term filtering and (optional)
-            disambiguation, if multiple :class:`.EquivalentIdSet` still remain, they will all receive
-            the confidence label of :attr:`.LinkRanks.AMBIGUOUS`\\ .
+            for human users, and has no bearing on the actual algorithm.
         :param disambiguation_strategies: after :meth:`filter_terms` is called, these strategies are triggered if either
             multiple instances of :class:`.SynonymTermWithMetrics` remain, and/or any of them are ambiguous.
         """
@@ -207,7 +207,8 @@ class MappingStrategy:
     ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
         """
         applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
-        of the filtered_terms are ambiguous.
+        of the filtered_terms are ambiguous. If ids are still ambiguous after all strategies have run,
+        the disambiguation confidence will be :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
 
         :param filtered_terms: terms to disambiguate
         :param document: originating Document
@@ -218,21 +219,21 @@ class MappingStrategy:
         all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
 
         if self.disambiguation_strategies is None:
-            return all_id_sets, None
+            return all_id_sets, None, None
         elif len(filtered_terms) == 1:
             only_term = next(iter(filtered_terms))
             if not only_term.is_ambiguous:
                 # there's a single term that isn't ambiguous, no need to disambiguate
-                return all_id_sets, None
+                return all_id_sets, self.DISAMBIGUATION_NOT_REQUIRED, None
 
         for strategy in self.disambiguation_strategies:
-            filtered_id_sets = strategy(
+            filtered_id_sets, disambiguation_confidence = strategy(
                 id_sets=all_id_sets, document=document, parser_name=parser_name
             )
             if len(filtered_id_sets) == 1:
-                return filtered_id_sets, strategy.__class__.__name__
+                return filtered_id_sets, strategy.__class__.__name__, disambiguation_confidence
 
-        return all_id_sets, None
+        return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
 
     def __call__(
         self,
@@ -259,15 +260,18 @@ class MappingStrategy:
             parser_name=parser_name,
         )
 
-        id_sets, successful_disambiguation_strategy = self.disambiguate_if_required(
-            filtered_terms, document, parser_name
-        )
+        (
+            id_sets,
+            successful_disambiguation_strategy,
+            disambiguation_confidence,
+        ) = self.disambiguate_if_required(filtered_terms, document, parser_name)
         yield from MappingFactory.create_mapping_from_id_sets(
             id_sets=id_sets,
             parser_name=parser_name,
-            confidence=self.confidence if len(id_sets) == 1 else LinkRanks.AMBIGUOUS,
+            string_match_confidence=self.confidence,
+            disambiguation_confidence=disambiguation_confidence,
             additional_metadata=None,
-            mapping_strategy=self.__class__.__name__,
+            string_match_strategy=self.__class__.__name__,
             disambiguation_strategy=successful_disambiguation_strategy,
         )
 
