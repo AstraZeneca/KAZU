@@ -148,7 +148,7 @@ class MappingStrategy:
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
     ):
         """
@@ -204,7 +204,7 @@ class MappingStrategy:
 
     def disambiguate_if_required(
         self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
-    ) -> Tuple[Set[EquivalentIdSet], Optional[str]]:
+    ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
         """
         applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
         of the filtered_terms are ambiguous.
@@ -339,7 +339,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         min_term_norm_len_to_consider: int = 3,
     ):
@@ -392,7 +392,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold=80.0,
         symbolic_only: bool = False,
@@ -453,7 +453,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         complex_string_scorer: BooleanStringSimilarityScorer,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold: float = 80.0,
