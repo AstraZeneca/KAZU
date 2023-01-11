@@ -1,4 +1,4 @@
-from kazu.data.data import Document, Entity, Mapping, LinkRanks
+from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.modelling.annotation.label_studio import (
     LabelStudioManager,
     KazuToLabelStudioConverter,
@@ -26,9 +26,9 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
             source="test1",
             parser_name="test1",
             idx="1",
-            mapping_strategy="test",
+            string_match_strategy="test",
             disambiguation_strategy=None,
-            confidence=LinkRanks.HIGHLY_LIKELY,
+            string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
             metadata={},
         )
     )
@@ -38,9 +38,9 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
             source="test2",
             parser_name="test2",
             idx="2",
-            mapping_strategy="test",
+            string_match_strategy="test",
             disambiguation_strategy=None,
-            confidence=LinkRanks.HIGHLY_LIKELY,
+            string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
             metadata={},
         )
     )
@@ -51,9 +51,9 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
             source="test3",
             parser_name="test3",
             idx="3",
-            mapping_strategy="test",
+            string_match_strategy="test",
             disambiguation_strategy=None,
-            confidence=LinkRanks.HIGHLY_LIKELY,
+            string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
             metadata={},
         )
     )
