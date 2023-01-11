@@ -7,7 +7,8 @@ from kazu.data.data import (
     Mapping,
     EquivalentIdSet,
     SynonymTermWithMetrics,
-    LinkRanks,
+    StringMatchConfidence,
+    DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, Metadata
 from kazu.modelling.language.string_similarity_scorers import (
@@ -30,9 +31,10 @@ class MappingFactory:
     def create_mapping_from_id_sets(
         id_sets: Set[EquivalentIdSet],
         parser_name: str,
-        mapping_strategy: str,
+        string_match_strategy: str,
+        string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str],
-        confidence: LinkRanks,
+        disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
     ) -> Iterable[Mapping]:
@@ -41,9 +43,10 @@ class MappingFactory:
             yield from MappingFactory.create_mapping_from_id_set(
                 id_set=id_set,
                 parser_name=parser_name,
-                mapping_strategy=mapping_strategy,
+                string_match_strategy=string_match_strategy,
+                string_match_confidence=string_match_confidence,
                 disambiguation_strategy=disambiguation_strategy,
-                confidence=confidence,
+                disambiguation_confidence=disambiguation_confidence,
                 additional_metadata=additional_metadata,
                 strip_url=strip_url,
             )
@@ -52,9 +55,10 @@ class MappingFactory:
     def create_mapping_from_id_set(
         id_set: EquivalentIdSet,
         parser_name: str,
-        mapping_strategy: str,
+        string_match_strategy: str,
+        string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str],
-        confidence: LinkRanks,
+        disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
     ) -> Iterable[Mapping]:
@@ -64,9 +68,10 @@ class MappingFactory:
                 parser_name=parser_name,
                 source=source,
                 idx=idx,
-                mapping_strategy=mapping_strategy,
+                string_match_strategy=string_match_strategy,
+                string_match_confidence=string_match_confidence,
                 disambiguation_strategy=disambiguation_strategy,
-                confidence=confidence,
+                disambiguation_confidence=disambiguation_confidence,
                 additional_metadata=additional_metadata if additional_metadata is not None else {},
                 strip_url=strip_url,
             )
@@ -85,9 +90,10 @@ class MappingFactory:
         parser_name: str,
         source: str,
         idx: str,
-        mapping_strategy: str,
-        confidence: LinkRanks,
+        string_match_strategy: str,
+        string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str] = None,
+        disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
         xref_source_parser_name: Optional[str] = None,
@@ -105,9 +111,10 @@ class MappingFactory:
             default_label=default_label,
             idx=new_idx,
             source=source,
-            mapping_strategy=mapping_strategy,
+            string_match_strategy=string_match_strategy,
+            string_match_confidence=string_match_confidence,
             disambiguation_strategy=disambiguation_strategy,
-            confidence=confidence,
+            disambiguation_confidence=disambiguation_confidence,
             parser_name=parser_name,
             metadata=metadata,
             xref_source_parser_name=xref_source_parser_name,
