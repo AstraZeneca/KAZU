@@ -49,12 +49,13 @@ from hydra.utils import instantiate
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
+from kazu.utils.constants import HYDRA_VERSION_BASE
 from pathlib import Path
 import os
 
 # the hydra config is kept in the model pack
 cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')  
-with initialize_config_dir(config_dir=str(cdir)):
+with initialize_config_dir(version_base=HYDRA_VERSION_BASE,config_dir=str(cdir)):
     cfg = compose(
         config_name="config",
         overrides=[],

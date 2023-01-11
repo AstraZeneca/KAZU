@@ -1,0 +1,1 @@
+HYDRA_VERSION_BASE = "1.3"

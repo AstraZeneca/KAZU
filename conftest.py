@@ -12,6 +12,7 @@ from kazu.modelling.annotation.label_studio import (
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.tests.utils import CONFIG_DIR, DummyParser
+from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.server import start, stop
 
 
@@ -24,7 +25,7 @@ def override_kazu_test_config():
         """
 
         # needs a str, can't take a Path
-        with initialize_config_dir(config_dir=str(CONFIG_DIR)):
+        with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(CONFIG_DIR)):
             cfg = compose(config_name="config", overrides=overrides)
         return cfg
 

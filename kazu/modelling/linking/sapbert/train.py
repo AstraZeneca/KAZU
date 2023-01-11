@@ -29,6 +29,8 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
+from kazu.utils.constants import HYDRA_VERSION_BASE
+
 logger = logging.getLogger(__name__)
 
 
@@ -482,7 +484,7 @@ class PLSapbertModel(LightningModule):
         return results
 
 
-@hydra.main(version_base="1.3", config_path="../../../conf", config_name="config")
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
     trainer: Trainer = instantiate(cfg.SapBertTraining.trainer)
     model: PLSapbertModel = instantiate(cfg.SapBertTraining.model)

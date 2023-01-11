@@ -11,9 +11,10 @@ from kazu.modelling.distillation.models import (
     SequenceTaggingDistillationForFinalLayer,
     SequenceTaggingDistillationForIntermediateLayer,
 )
+from kazu.utils.constants import HYDRA_VERSION_BASE
 
 
-@hydra.main(config_path="../../conf", config_name="config")
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
 
     if torch.backends.cudnn.is_available():  # for reproducibility

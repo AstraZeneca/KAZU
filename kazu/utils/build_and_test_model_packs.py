@@ -18,6 +18,7 @@ from kazu.modelling.annotation.acceptance_test import (
 )
 from kazu.modelling.ontology_matching import assemble_pipeline
 from kazu.pipeline import load_steps_and_log_memory_usage
+from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
@@ -350,7 +351,7 @@ class ModelPackBuilder:
         # set the env param so that hydra conf is correctly configured
         os.environ["KAZU_MODEL_PACK"] = str(model_pack_build_path)
         with initialize_config_dir(
-            version_base="1.3", config_dir=str(model_pack_build_path.joinpath("conf"))
+            version_base=HYDRA_VERSION_BASE, config_dir=str(model_pack_build_path.joinpath("conf"))
         ):
             cfg = compose(
                 config_name="config",
