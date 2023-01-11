@@ -3,4 +3,4 @@ lookup_cache_size: 50000
 top_n: 20
 skip_ner_namespaces:
   - ExplosionStringMatchingStep
-indices: ${oc.dict.values:..indices}
+indices: ${oc.dict.values:indices}
