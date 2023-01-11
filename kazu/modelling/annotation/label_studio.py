@@ -7,7 +7,15 @@ from xml.dom.minidom import Element, getDOMImplementation
 
 import requests
 
-from kazu.data.data import Document, Section, Entity, Mapping, LinkRanks, CharSpan
+from kazu.data.data import (
+    Document,
+    Section,
+    Entity,
+    Mapping,
+    StringMatchConfidence,
+    CharSpan,
+    DisambiguationConfidence,
+)
 from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
@@ -195,9 +203,10 @@ class LSToKazuConversion:
                     source=source,
                     parser_name="gold",
                     idx=idx,
-                    mapping_strategy="gold",
-                    disambiguation_strategy=None,
-                    confidence=LinkRanks.HIGHLY_LIKELY,
+                    string_match_strategy="gold",
+                    disambiguation_strategy="gold",
+                    string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                    disambiguation_confidence=DisambiguationConfidence.HIGHLY_LIKELY,
                 )
             )
         return mappings
