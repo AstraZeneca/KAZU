@@ -1,8 +1,14 @@
 default:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-    confidence: HIGHLY_LIKELY
+    confidence:
+      _target_: kazu.data.data.DisambiguationConfidence
+      _args_:
+        - HIGHLY_LIKELY
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    confidence: PROBABLE
+    confidence:
+      _target_: kazu.data.data.DisambiguationConfidence
+      _args_:
+        - PROBABLE
     relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
@@ -22,9 +28,15 @@ default:
 
 gene:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-    confidence: HIGHLY_LIKELY
+    confidence:
+      _target_: kazu.data.data.DisambiguationConfidence
+      _args_:
+        - HIGHLY_LIKELY
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    confidence: PROBABLE
+    confidence:
+      _target_: kazu.data.data.DisambiguationConfidence
+      _args_:
+        - PROBABLE
     relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
@@ -36,11 +48,17 @@ gene:
         _args_:
           - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy
-    confidence: POSSIBLE
+    confidence:
+      _target_: kazu.data.data.DisambiguationConfidence
+      _args_:
+        - POSSIBLE
 
 cell_line:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-    confidence: HIGHLY_LIKELY
+    confidence:
+      _target_: kazu.data.data.DisambiguationConfidence
+      _args_:
+        - HIGHLY_LIKELY
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
     confidence: PROBABLE
     relevant_aggregation_strategies:
