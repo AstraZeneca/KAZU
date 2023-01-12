@@ -1,14 +1,19 @@
 from typing import Tuple, Dict, List, Any
 
 from kazu.data.data import Document
-from kazu.modelling.annotation.label_studio import LabelStudioAnnotationView, KazuToLabelStudioConverter
+from kazu.modelling.annotation.label_studio import (
+    LabelStudioAnnotationView,
+    KazuToLabelStudioConverter,
+)
 
 LSView = str
 LSTask = Dict[str, Any]
 
 
 class LSWebUtils:
-    def __init__(self, ls_view_generator: LabelStudioAnnotationView, ls_converter: KazuToLabelStudioConverter):
+    def __init__(
+        self, ls_view_generator: LabelStudioAnnotationView, ls_converter: KazuToLabelStudioConverter
+    ):
         self.ls_view_generator = ls_view_generator
         self.ls_converter = ls_converter
 
@@ -18,5 +23,7 @@ class LSWebUtils:
         return ls_view, ls_tasks
 
     @staticmethod
-    def default() -> 'LSWebUtils':
-        return LSWebUtils(LabelStudioAnnotationView.with_default_colours(), KazuToLabelStudioConverter())
+    def default() -> "LSWebUtils":
+        return LSWebUtils(
+            LabelStudioAnnotationView.with_default_colours(), KazuToLabelStudioConverter()
+        )

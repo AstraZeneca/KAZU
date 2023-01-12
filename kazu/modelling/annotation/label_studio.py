@@ -364,19 +364,21 @@ class LabelStudioAnnotationView:
         return dom.toxml()
 
     @staticmethod
-    def with_default_colours() -> 'LabelStudioAnnotationView':
-        return LabelStudioAnnotationView(ner_labels={
-            "cell_line": "red",
-            "cell_type": "darkblue",
-            "disease": "orange",
-            "drug": "yellow",
-            "gene": "green",
-            "species": "purple",
-            "anatomy": "pink",
-            "go_mf": "grey",
-            "go_cc": "blue",
-            "go_bp": "brown",
-        })
+    def with_default_colours() -> "LabelStudioAnnotationView":
+        return LabelStudioAnnotationView(
+            ner_labels={
+                "cell_line": "red",
+                "cell_type": "darkblue",
+                "disease": "orange",
+                "drug": "yellow",
+                "gene": "green",
+                "species": "purple",
+                "anatomy": "pink",
+                "go_mf": "grey",
+                "go_cc": "blue",
+                "go_bp": "brown",
+            }
+        )
 
 
 class LabelStudioManager:

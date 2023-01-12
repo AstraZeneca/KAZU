@@ -1,7 +1,7 @@
 import logging
 import subprocess
 import time
-from typing import Callable, Dict, List, Union, Any, Tuple
+from typing import Callable, Dict, List, Union
 
 import hydra
 import ray
@@ -16,7 +16,6 @@ from starlette.requests import HTTPConnection, Request
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
-from kazu.modelling.annotation.label_studio import KazuToLabelStudioConverter, LabelStudioAnnotationView
 from kazu.web.ls_web_utils import LSWebUtils
 from kazu.web.routes import KAZU
 
@@ -115,11 +114,9 @@ class KazuWebApp:
         self.log_request(doc, request)
         result = self.pipeline([doc.to_kazu_document()])[0]
         ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
-        return JSONResponse(content={
-            "ls_view": ls_view,
-            "ls_tasks": ls_tasks,
-            "doc": result.as_minified_dict()
-        })
+        return JSONResponse(
+            content={"ls_view": ls_view, "ls_tasks": ls_tasks, "doc": result.as_minified_dict()}
+        )
 
     @app.middleware("http")
     async def add_id_header(
@@ -148,7 +145,6 @@ class KazuWebApp:
         req_id = get_request_id(request)
         logger.info("ID: %s Request to kazu endpoint" % req_id)
         logger.info(f"ID: {req_id} Document: {doc}")
-
 
 
 @hydra.main(config_path="../conf", config_name="config")
