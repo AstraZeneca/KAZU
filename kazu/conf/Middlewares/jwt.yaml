@@ -14,7 +14,7 @@ middlewares:
     cls:
       _target_: hydra.utils.get_class
       path: starlette.middleware.cors.CORSMiddleware
-    allow_origin_regex: ${oc.env:CORS_ORIGIN_REGEX,"http://.*"}
+    allow_origin_regex: ${oc.env:CORS_ORIGIN_REGEX,"http://localhost.*"}
     allow_methods:
       - "*"
     allow_headers:
