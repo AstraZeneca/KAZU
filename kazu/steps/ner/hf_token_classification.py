@@ -4,8 +4,8 @@ from typing import List, Tuple, Dict, Optional, Iterable, Callable, cast
 
 import torch
 from pytorch_lightning import Trainer
-from torch import Tensor
-from torch.nn.functional import sigmoid, softmax
+from torch import Tensor, sigmoid
+from torch.nn.functional import softmax
 from torch.utils.data import DataLoader
 from transformers import (
     AutoModelForTokenClassification,
