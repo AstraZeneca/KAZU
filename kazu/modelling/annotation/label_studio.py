@@ -14,7 +14,6 @@ from kazu.data.data import (
     Mapping,
     StringMatchConfidence,
     CharSpan,
-    DisambiguationConfidence,
 )
 from kazu.utils.grouping import sort_then_group
 
@@ -204,9 +203,7 @@ class LSToKazuConversion:
                     parser_name="gold",
                     idx=idx,
                     string_match_strategy="gold",
-                    disambiguation_strategy="gold",
                     string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
-                    disambiguation_confidence=DisambiguationConfidence.HIGHLY_LIKELY,
                 )
             )
         return mappings
