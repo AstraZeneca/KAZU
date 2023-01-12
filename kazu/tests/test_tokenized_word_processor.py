@@ -265,9 +265,9 @@ def test_tokenized_word_processor_no_threshold():
 
 def test_tokenized_word_processor_strip_re():
     processor = TokenizedWordProcessor(
-        confidence_threshold=None, id2label={}, strip_re={"gene": " gene$| protein$"}
+        confidence_threshold=None, id2label={}, strip_re={"gene": "( (gene|protein)s?)+$"}
     )
-    queries = ["COX2 protein", "COX2 gene"]
+    queries = ["COX2 protein", "COX2 gene", "COX2 gene protein protein gene"]
     expected_str = "COX2"
     expected_end = 4
     for query in queries:
