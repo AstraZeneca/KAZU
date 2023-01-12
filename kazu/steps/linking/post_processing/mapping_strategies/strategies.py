@@ -218,22 +218,20 @@ class MappingStrategy:
 
         all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
 
-        if self.disambiguation_strategies is None:
-            return all_id_sets, None, None
-        elif len(filtered_terms) == 1:
-            only_term = next(iter(filtered_terms))
-            if not only_term.is_ambiguous:
-                # there's a single term that isn't ambiguous, no need to disambiguate
-                return all_id_sets, self.DISAMBIGUATION_NOT_REQUIRED, None
+        if len(all_id_sets) == 1:
+            # there's a single id set that isn't ambiguous, no need to disambiguate
+            return all_id_sets, self.DISAMBIGUATION_NOT_REQUIRED, None
+        elif self.disambiguation_strategies is None:
+            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
+        else:
+            for strategy in self.disambiguation_strategies:
+                filtered_id_sets, disambiguation_confidence = strategy(
+                    id_sets=all_id_sets, document=document, parser_name=parser_name
+                )
+                if len(filtered_id_sets) == 1:
+                    return filtered_id_sets, strategy.__class__.__name__, disambiguation_confidence
 
-        for strategy in self.disambiguation_strategies:
-            filtered_id_sets, disambiguation_confidence = strategy(
-                id_sets=all_id_sets, document=document, parser_name=parser_name
-            )
-            if len(filtered_id_sets) == 1:
-                return filtered_id_sets, strategy.__class__.__name__, disambiguation_confidence
-
-        return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
+            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
 
     def __call__(
         self,
