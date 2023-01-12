@@ -261,3 +261,21 @@ def test_tokenized_word_processor_no_threshold():
             detect_subspans=True,
         )
         processor(words=[word1], text=text, namespace="test")
+
+
+def test_tokenized_word_processor_strip_re():
+    processor = TokenizedWordProcessor(
+        confidence_threshold=None, id2label={}, strip_re={"gene": " gene$| protein$"}
+    )
+    queries = ["COX2 protein", "COX2 gene"]
+    expected_str = "COX2"
+    expected_end = 4
+    for query in queries:
+        result_str, result_end = processor.attempt_strip_suffixes(
+            start=0, end=len(query), match_str=query, clazz="gene"
+        )
+        assert result_str == expected_str and result_end == expected_end
+        result_str, result_end = processor.attempt_strip_suffixes(
+            start=0, end=len(query), match_str=query, clazz="none"
+        )
+        assert result_str == query and result_end == len(query)
