@@ -1,4 +1,4 @@
-import {Entity, KazuResponse, KazuWebDocument, Section} from "../types/types";
+import {Entity, KazuLSResponse, KazuNERResponse, KazuWebDocument, Section} from "../types/types";
 import axios from "axios";
 import * as R from "rambda";
 
@@ -8,7 +8,8 @@ class JsonParseError extends Error {
     }
 }
 interface IKazuClient {
-    ner(text: string, auth?: string): Promise<KazuResponse>
+    ner(text: string, auth?: string): Promise<KazuNERResponse>
+    ner_with_ls(text: string, auth?: string): Promise<KazuLSResponse>
 }
 class KazuClient implements IKazuClient {
     private kazuApiUrl: string;
@@ -47,7 +48,7 @@ class KazuClient implements IKazuClient {
             throw new JsonParseError("Failed to parse Kazu web response", e);
         }
     }
-    ner(text: string, auth?: string): Promise<KazuResponse> {
+    ner(text: string, auth?: string): Promise<KazuNERResponse> {
         let req;
         if(auth === undefined) {
             req = {
@@ -70,6 +71,42 @@ class KazuClient implements IKazuClient {
                 return {
                     parsedDocument: KazuClient.parseKazuResponse(kazuWebResponseJson),
                     rawDocument: kazuWebResponseJson.data
+                }
+            }).catch((e: JsonParseError) => {
+                return Promise.reject(e.message);
+            })
+    }
+
+    ner_with_ls(text: string, auth?: string | undefined): Promise<KazuLSResponse> {
+        let req;
+        if(auth === undefined) {
+            req = {
+                url: `${this.kazuApiUrl}/api/kazu/ls-annotations`,
+                data: {text: text},
+                method: "POST"
+            }
+        } else {
+            req = {
+                url: `${this.kazuApiUrl}/api/kazu/ls-annotations`,
+                data: {text: text},
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${auth}`
+                }
+            }
+        }
+
+        return axios(req)
+            .then((resp: any) => {
+                const respData = resp.data
+                const lsView = respData["ls_view"] as string
+                const lsTasks = respData["ls_tasks"]
+                const rawDocument = respData["doc"]
+
+                return {
+                    ls_view: lsView,
+                    ls_tasks: lsTasks,
+                    rawDocument: rawDocument
                 }
             }).catch((e: JsonParseError) => {
                 return Promise.reject(e.message);

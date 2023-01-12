@@ -1,7 +1,7 @@
 import {LSComponent} from "./ls-component";
 import {TextSubmit} from "./text-submit";
 import React from "react";
-import {KazuResponse} from "../types/types";
+import {KazuLSResponse, KazuNERResponse} from "../types/types";
 import {IKazuClient} from "../utils/kazu-client";
 import { JsonViewer } from '@textea/json-viewer'
 
@@ -12,7 +12,7 @@ type AppProps = {
 
 type AppState = {
     text?: string;
-    text_ner_result?: KazuResponse;
+    text_ner_result?: KazuLSResponse;
 }
 
 class App extends React.Component<AppProps, AppState> {
@@ -24,7 +24,7 @@ class App extends React.Component<AppProps, AppState> {
         }
     }
 
-    setKazuResponse(kazuResponse: KazuResponse) {
+    setKazuResponse(kazuResponse: KazuLSResponse) {
         this.setState((state) => ({
             text_ner_result: kazuResponse,
         }))
@@ -35,7 +35,7 @@ class App extends React.Component<AppProps, AppState> {
         let lsComponent;
         let jsonViewComponent;
         if (kazuResp !== undefined) {
-            lsComponent = <LSComponent kazuWebDocument={kazuResp.parsedDocument}/>
+            lsComponent = <LSComponent kazuLSAnnotations={kazuResp}/>
             jsonViewComponent = <JsonViewer value={kazuResp.rawDocument}/>
         } else {
             lsComponent = undefined

@@ -2,7 +2,7 @@
 
 import LabelStudio from "@heartexlabs/label-studio";
 import React, {useEffect, useRef} from 'react';
-import {Entity, KazuWebDocument, Section} from "../types/types";
+import {Entity, KazuWebDocument, KazuLSResponse, Section} from "../types/types";
 import * as R from "rambda";
 
 
@@ -76,18 +76,18 @@ type LSTask = {
 }
 
 type LSComponentProps = {
-    kazuWebDocument?: KazuWebDocument;
+    kazuLSAnnotations?: KazuLSResponse;
 }
 
 type LSComponentState = {
-    lsTask?: LSTask
+
 }
 
 class LSComponent extends React.Component<LSComponentProps, LSComponentState> {
     constructor(props: LSComponentProps) {
         super(props);
         this.state = {
-            lsTask: this.props.kazuWebDocument ? LSComponent.lsTaskFromKazuDocument(this.props.kazuWebDocument) : undefined
+
         }
     }
 
@@ -139,10 +139,11 @@ class LSComponent extends React.Component<LSComponentProps, LSComponentState> {
     }
 
     render() {
-        if (this.props.kazuWebDocument !== undefined) {
-            const lsTask = LSComponent.lsTaskFromKazuDocument(this.props.kazuWebDocument);
-            const conf = LSComponent.labelConfig(this.props.kazuWebDocument.sections[0].text)
-            return <LabelStudioReact config={conf} task={lsTask} interfaces={[
+        if (this.props.kazuLSAnnotations !== undefined) {
+            const kazuLSAnnotations = this.props.kazuLSAnnotations
+            const lsTasks = kazuLSAnnotations.ls_tasks
+            const lsView = kazuLSAnnotations.ls_view
+            return <LabelStudioReact config={lsView} task={lsTasks[0]} interfaces={[
                 "panel",
                 "update",
                 "controls",

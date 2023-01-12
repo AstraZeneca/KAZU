@@ -62,20 +62,7 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
     manager: LabelStudioManager = make_label_studio_manager(project_name="kazu_integration_test")
     manager.delete_project_if_exists()
     tasks = KazuToLabelStudioConverter.convert_docs_to_tasks([doc_1])
-    view = LabelStudioAnnotationView(
-        ner_labels={
-            "cell_line": "red",
-            "cell_type": "darkblue",
-            "disease": "orange",
-            "drug": "yellow",
-            "gene": "green",
-            "species": "purple",
-            "anatomy": "pink",
-            "go_mf": "grey",
-            "go_cc": "blue",
-            "go_bp": "brown",
-        }
-    )
+    view = LabelStudioAnnotationView.with_default_colours()
     manager.create_linking_project(tasks, view)
 
     docs = manager.export_from_ls()

@@ -16,9 +16,15 @@ type KazuWebDocument = {
 
 type RawKazuDocument = any;
 
-type KazuResponse = {
+type KazuNERResponse = {
     parsedDocument: KazuWebDocument;
     rawDocument: RawKazuDocument;
 }
 
-export type {Entity, Section, KazuWebDocument, KazuResponse}
+type KazuLSResponse = {
+    ls_view: string,
+    ls_tasks: object[],
+    rawDocument: RawKazuDocument
+}
+
+export type {Entity, Section, KazuWebDocument, KazuNERResponse, KazuLSResponse}

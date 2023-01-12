@@ -1,7 +1,7 @@
 import logging
 import subprocess
 import time
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Union, Any, Tuple
 
 import hydra
 import ray
@@ -16,6 +16,8 @@ from starlette.requests import HTTPConnection, Request
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
+from kazu.modelling.annotation.label_studio import KazuToLabelStudioConverter, LabelStudioAnnotationView
+from kazu.web.ls_web_utils import LSWebUtils
 from kazu.web.routes import KAZU
 
 description = """
@@ -89,6 +91,7 @@ class KazuWebApp:
         :param cfg: DictConfig from Hydra
         """
         self.pipeline: Pipeline = instantiate(cfg.Pipeline)
+        self.ls_web_utils: LSWebUtils = instantiate(cfg.LSWebUtils)
 
     @app.get("/")
     def get(self):
@@ -97,9 +100,7 @@ class KazuWebApp:
 
     @app.post(f"/{KAZU}")
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
-        req_id = get_request_id(request)
-        logger.info("ID: %s Request to kazu endpoint" % req_id)
-        logger.info(f"ID: {req_id} Document: {doc}")
+        self.log_request(doc, request)
         result = self.pipeline([doc.to_kazu_document()])
         resp_dict = result[0].as_minified_dict()
         return JSONResponse(content=resp_dict)
@@ -108,6 +109,17 @@ class KazuWebApp:
     def batch_ner(self, docs: List[WebDocument], token=Depends(oauth2_scheme)):
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
+
+    @app.post(f"/{KAZU}/ls-annotations/")
+    def ls_annotations(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
+        self.log_request(doc, request)
+        result = self.pipeline([doc.to_kazu_document()])[0]
+        ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
+        return JSONResponse(content={
+            "ls_view": ls_view,
+            "ls_tasks": ls_tasks,
+            "doc": result.as_minified_dict()
+        })
 
     @app.middleware("http")
     async def add_id_header(
@@ -130,6 +142,13 @@ class KazuWebApp:
             )
         logger.info(f"ID: {req_id} Response Code: {response.status_code}")
         return response
+
+    @staticmethod
+    def log_request(doc: WebDocument, request: Request):
+        req_id = get_request_id(request)
+        logger.info("ID: %s Request to kazu endpoint" % req_id)
+        logger.info(f"ID: {req_id} Document: {doc}")
+
 
 
 @hydra.main(config_path="../conf", config_name="config")
