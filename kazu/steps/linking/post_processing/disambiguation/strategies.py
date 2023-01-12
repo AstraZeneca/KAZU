@@ -33,6 +33,11 @@ class DisambiguationStrategy(ABC):
     """
 
     def __init__(self, confidence: DisambiguationConfidence):
+        """
+
+        :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
+            for human users, and has no bearing on the actual algorithm.
+        """
         self.confidence = confidence
 
     @abstractmethod
