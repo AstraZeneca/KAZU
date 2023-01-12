@@ -10,3 +10,12 @@ middlewares:
     on_error:
       _target_: hydra.utils.get_method
       path: kazu.web.jwtauth.on_auth_error
+  - _target_: starlette.middleware.Middleware
+    cls:
+      _target_: hydra.utils.get_class
+      path: starlette.middleware.cors.CORSMiddleware
+    allow_origin_regex: ${oc.env:CORS_ORIGIN_REGEX,"http://localhost.*"}
+    allow_methods:
+      - "*"
+    allow_headers:
+      - "*"
