@@ -35,4 +35,4 @@ labels:
   - 'I-species'
   - 'O'
 strip_re:
-  gene: " gene$| protein$| proteins$| genes$"
+  gene: " (gene|protein)s?$"
