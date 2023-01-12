@@ -132,8 +132,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     def __init__(
         self,
-        scorer: TfIdfScorer,
         confidence: DisambiguationConfidence,
+        scorer: TfIdfScorer,
         context_threshold: float = 0.7,
         relevant_aggregation_strategies: Optional[Iterable[EquivalentIdAggregationStrategy]] = None,
     ):
