@@ -1,5 +1,7 @@
+import abc
 import itertools
 import urllib
+from abc import ABC
 from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
 
 from kazu.data.data import (
@@ -131,7 +133,7 @@ class MappingFactory:
         return new_idx
 
 
-class MappingStrategy:
+class MappingStrategy(ABC):
     """
     A MappingStrategy is responsible for actualising instances of :class:`.Mapping`\\ .
 
@@ -176,6 +178,7 @@ class MappingStrategy:
         """
         pass
 
+    @abc.abstractmethod
     def filter_terms(
         self,
         ent_match: str,
@@ -198,9 +201,9 @@ class MappingStrategy:
         :param document: originating Document.
         :param terms: terms to filter.
         :param parser_name: parser name associated with these terms.
-        :return: defaults to ``set(terms)`` (i.e. no filtering).
+        :return: a set of filtered terms
         """
-        return set(terms)
+        raise NotImplementedError()
 
     def disambiguate_if_required(
         self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
@@ -515,32 +518,10 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         return selected_terms
 
 
-class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
+class NoopMappingStrategy(MappingStrategy):
     """
-    1. look for entities on the document that have mappings
-    2. see if any of these mappings correspond to any ids in the :class:`.EquivalentIdSet` on each
-       :class:`.SynonymTermWithMetrics`
-    3. filter the synonym terms according to detected mappings
+    a No-op strategy in case you want to pass all terms straight through for disambiguation
     """
-
-    found_equivalent_ids: Set[Tuple[str, str, str]]
-
-    def prepare(self, document: Document):
-        """
-        can't be cached: document state may change between executions.
-
-        :param document:
-        :return:
-        """
-        self.found_equivalent_ids = set(
-            (
-                mapping.parser_name,
-                mapping.source,
-                mapping.idx,
-            )
-            for ent in document.get_entities()
-            for mapping in ent.mappings
-        )
 
     def filter_terms(
         self,
@@ -550,15 +531,4 @@ class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
-        found_terms = set()
-        for term in terms:
-            for id_set in term.associated_id_sets:
-                for idx in id_set.ids:
-                    if (
-                        term.parser_name,
-                        id_set.ids_to_source[idx],
-                        idx,
-                    ) in self.found_equivalent_ids:
-                        found_terms.add(term)
-                        break
-        return found_terms
+        return set(terms)
