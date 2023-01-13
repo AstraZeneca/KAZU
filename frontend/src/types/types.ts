@@ -27,4 +27,4 @@ type KazuLSResponse = {
     rawDocument: RawKazuDocument
 }
 
-export type {Entity, Section, KazuWebDocument, KazuNERResponse, KazuLSResponse}
+export type {Entity, Section, KazuWebDocument, KazuNERResponse, KazuLSResponse, RawKazuDocument}
