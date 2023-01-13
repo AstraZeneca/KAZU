@@ -184,7 +184,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
         )
 
         strategy = TfIdfDisambiguationStrategy(
-            TfIdfScorer(path=cache_dir),
+            scorer=TfIdfScorer(path=cache_dir),
             context_threshold=0.0,
             relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
             confidence=DisambiguationConfidence.POSSIBLE,
