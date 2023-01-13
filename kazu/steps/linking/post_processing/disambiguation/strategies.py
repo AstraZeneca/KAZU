@@ -61,9 +61,9 @@ class DisambiguationStrategy(ABC):
 
     def __call__(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Tuple[Set[EquivalentIdSet], DisambiguationConfidence]:
+    ) -> Set[EquivalentIdSet]:
         self.prepare(document)
-        return self.disambiguate(id_sets, document, parser_name), self.confidence
+        return self.disambiguate(id_sets, document, parser_name)
 
 
 class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
