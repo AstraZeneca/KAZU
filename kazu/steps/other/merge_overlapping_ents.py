@@ -17,6 +17,7 @@ class MergeOverlappingEntsStep(Step):
     def __init__(
         self,
         ent_class_preferred_order: List[str],
+        ent_namespace_preferred_order: List[str],
         ignore_non_contiguous: bool = True,
     ):
         """
@@ -51,6 +52,9 @@ class MergeOverlappingEntsStep(Step):
         self.ent_class_preferred_order = {
             namespace: i for i, namespace in enumerate(reversed(ent_class_preferred_order))
         }
+        self.ent_namespace_preferred_order = {
+            namespace: i for i, namespace in enumerate(reversed(ent_namespace_preferred_order))
+        }
 
     def select_preferred_entity(self, ents: Set[Entity]) -> Tuple[Entity, List[Entity]]:
         """
@@ -63,6 +67,7 @@ class MergeOverlappingEntsStep(Step):
                 len(x.mappings) > 0,
                 (x.end - x.start),
                 self.ent_class_preferred_order.get(x.entity_class, 0),
+                self.ent_namespace_preferred_order.get(x.namespace, 0),
                 x.entity_class,
             ),
             reverse=True,
