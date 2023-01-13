@@ -225,11 +225,11 @@ class MappingStrategy:
             return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
         else:
             for strategy in self.disambiguation_strategies:
-                filtered_id_sets, disambiguation_confidence = strategy(
+                filtered_id_sets = strategy(
                     id_sets=all_id_sets, document=document, parser_name=parser_name
                 )
                 if len(filtered_id_sets) == 1:
-                    return filtered_id_sets, strategy.__class__.__name__, disambiguation_confidence
+                    return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
 
             return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
 
