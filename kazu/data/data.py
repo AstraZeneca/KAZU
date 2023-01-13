@@ -113,12 +113,10 @@ class Mapping:
     source: str  # the knowledgebase/database/ontology name
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
-    string_match_strategy: str  # the strategy used to identify the string match
-    string_match_confidence: StringMatchConfidence  # the confidence of the string match
-    disambiguation_confidence: Optional[
-        DisambiguationConfidence
-    ] = None  # the confidence of the disambiguation
-    disambiguation_strategy: Optional[str] = None  # the strategy used to disambiguate
+    string_match_strategy: str
+    string_match_confidence: StringMatchConfidence
+    disambiguation_confidence: Optional[DisambiguationConfidence] = None
+    disambiguation_strategy: Optional[str] = None
     xref_source_parser_name: Optional[str] = None  # source parser name if mapping is an XREF
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
