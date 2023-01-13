@@ -7,10 +7,10 @@ from kazu.data.data import (
     Document,
     Mapping,
     StringMatchConfidence,
+    DisambiguationConfidence,
     Entity,
     EquivalentIdAggregationStrategy,
     EquivalentIdSet,
-    DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
