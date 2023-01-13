@@ -1,14 +1,8 @@
 default:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-    confidence:
-      _target_: kazu.data.data.DisambiguationConfidence
-      _args_:
-        - HIGHLY_LIKELY
+    confidence: ${confidence.disambiguation_highly_likely}
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    confidence:
-      _target_: kazu.data.data.DisambiguationConfidence
-      _args_:
-        - PROBABLE
+    confidence: ${confidence.disambiguation_probable}
     relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
@@ -28,15 +22,9 @@ default:
 
 gene:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-    confidence:
-      _target_: kazu.data.data.DisambiguationConfidence
-      _args_:
-        - HIGHLY_LIKELY
+    confidence: ${confidence.disambiguation_highly_likely}
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    confidence:
-      _target_: kazu.data.data.DisambiguationConfidence
-      _args_:
-        - PROBABLE
+    confidence: ${confidence.disambiguation_probable}
     relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
@@ -48,19 +36,13 @@ gene:
         _args_:
           - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy
-    confidence:
-      _target_: kazu.data.data.DisambiguationConfidence
-      _args_:
-        - POSSIBLE
+    confidence: ${confidence.disambiguation_possible}
 
 cell_line:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-    confidence:
-      _target_: kazu.data.data.DisambiguationConfidence
-      _args_:
-        - HIGHLY_LIKELY
+    confidence: ${confidence.disambiguation_highly_likely}
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
-    confidence: PROBABLE
+    confidence: ${confidence.disambiguation_probable}
     relevant_aggregation_strategies:
       - _target_: kazu.data.data.EquivalentIdAggregationStrategy
         _args_:
