@@ -20,7 +20,10 @@ from kazu.steps.linking.post_processing.strategy_runner import (
     StrategyRunner,
     NamespaceStrategyExecution,
 )
-from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
+    MappingStrategy,
+    NoopMappingStrategy,
+)
 from kazu.tests.utils import DummyParser
 
 
@@ -146,7 +149,7 @@ def build_runner(
             ),
         ],
     )
-    fifth_test_strategy = MappingStrategy(StringMatchConfidence.HIGHLY_LIKELY)
+    fifth_test_strategy = NoopMappingStrategy(StringMatchConfidence.HIGHLY_LIKELY)
 
     default_strategy = TestStrategy(
         StringMatchConfidence.HIGHLY_LIKELY,

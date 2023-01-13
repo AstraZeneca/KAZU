@@ -19,10 +19,9 @@ from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     ExactMatchMappingStrategy,
     SymbolMatchMappingStrategy,
     TermNormIsSubStringMappingStrategy,
-    DefinedElsewhereInDocumentMappingStrategy,
+    NoopMappingStrategy,
     StrongMatchMappingStrategy,
     StrongMatchWithEmbeddingConfirmationStringMatchingStrategy,
-    MappingFactory,
 )
 from kazu.tests.utils import DummyParser, requires_model_pack
 from kazu.utils.grouping import sort_then_group
@@ -175,14 +174,11 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     check_correct_terms_selected({target_term}, mappings)
 
 
-def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
+def test_NoopMappingStrategy(set_up_p27_test_case):
     terms, parser = set_up_p27_test_case
     text1 = "p27 gene is also known as CDKN1B"
     ent_match = "p27"
     ent_match_norm = StringNormalizer.normalize(ent_match)
-
-    target_term = next(filter(lambda x: x.term_norm == ent_match_norm, terms))
-
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
@@ -199,20 +195,9 @@ def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
         entity_class="test",
         namespace="test",
     )
-
-    mappings = MappingFactory.create_mapping_from_id_set(
-        next(iter(target_term.associated_id_sets)),
-        parser_name=parser.name,
-        string_match_strategy="test",
-        disambiguation_strategy=None,
-        string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
-    )
-    cdkn1b_ent.mappings.update(mappings)
     doc.sections[0].entities.append(cdkn1b_ent)
 
-    strategy = DefinedElsewhereInDocumentMappingStrategy(
-        confidence=StringMatchConfidence.HIGHLY_LIKELY
-    )
+    strategy = NoopMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
     strategy.prepare(doc)
     mappings = list(
         strategy(
@@ -223,7 +208,7 @@ def test_DefinedElsewhereInDocumentStringMatchingStrategy(set_up_p27_test_case):
         )
     )
 
-    check_correct_terms_selected({target_term}, mappings)
+    check_correct_terms_selected(terms, mappings)
 
 
 @pytest.mark.parametrize("search_threshold,differential", [(100.0, 0.0), (85.0, 15.0)])
