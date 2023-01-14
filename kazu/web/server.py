@@ -110,8 +110,11 @@ class KazuWebApp:
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
+    # this method doesn't take self as a first param, but doesn't work
+    # when wrapped in # @staticmethod, so the type: ignore is necessary for
+    # mypy to be happy.
     @app.middleware("http")
-    async def add_id_header(
+    async def add_id_header(  # type: ignore[misc]
         request: Request,
         call_next,
     ):
