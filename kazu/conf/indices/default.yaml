@@ -25,6 +25,11 @@ ot_target_index:
   parser: ${ontology_parser.ot_target_parser}
   boolean_scorers: ${StringScorers.gene}
 
+hgnc_gene_family_index:
+  _target_: kazu.utils.link_index.DictionaryIndex
+  parser: ${ontology_parser.hgnc_gene_family_parser}
+  boolean_scorers: ${StringScorers.gene}
+
 uberon_index:
   _target_: kazu.utils.link_index.DictionaryIndex
   parser: ${ontology_parser.uberon_parser}

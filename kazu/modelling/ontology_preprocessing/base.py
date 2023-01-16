@@ -23,6 +23,7 @@ from typing import (
 )
 from urllib import parse
 
+import numpy as np
 import pandas as pd
 import rdflib
 
@@ -1532,3 +1533,40 @@ class CLOntologyParser(RDFGraphParser):
 
     def find_kb(self, string: str) -> str:
         return "CL"
+
+
+class HGNCGeneFamilyParser(OntologyParser):
+
+    syn_column_keys = {"Family alias", "Common root gene symbol"}
+
+    def find_kb(self, string: str) -> str:
+        return "HGNC_GENE_FAMILY"
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        df = pd.read_csv(self.in_path, sep="\t")
+        data = []
+        for family_id, row in df.groupby(by="Family ID").agg(set).iterrows():
+            # in theory, there should only be one family name per ID
+            assert len(row["Family name"]) == 1
+            default_label = next(iter(row["Family name"]))
+            data.append(
+                {
+                    SYN: default_label,
+                    MAPPING_TYPE: "Family name",
+                    DEFAULT_LABEL: default_label,
+                    IDX: family_id,
+                }
+            )
+            for key in self.syn_column_keys:
+                syns: Set[str] = row[key]
+                for syn in syns:
+                    if syn != np.NAN:
+                        data.append(
+                            {
+                                SYN: syn,
+                                MAPPING_TYPE: key,
+                                DEFAULT_LABEL: default_label,
+                                IDX: family_id,
+                            }
+                        )
+        return pd.DataFrame.from_records(data)
