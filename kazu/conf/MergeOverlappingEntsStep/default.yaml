@@ -9,6 +9,4 @@ ent_class_preferred_order:
   - go_bp
   - go_mf
   - go_cc
-ent_namespace_preferred_order:
-  - _target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep.namespace
-  - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
+ent_namespace_preferred_order: ${MappingStep.strategy_runner.ner_namespace_processing_order}
