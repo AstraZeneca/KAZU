@@ -1,7 +1,7 @@
 import pytest
 from hydra.utils import instantiate
 
-from kazu.data.data import Entity, CharSpan, Document, Mapping, LinkRanks
+from kazu.data.data import Entity, CharSpan, Document, Mapping, StringMatchConfidence
 from kazu.steps import (
     MergeOverlappingEntsStep,
     ExplosionStringMatchingStep,
@@ -31,8 +31,8 @@ def test_merge_overlapping_step_case_1(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -67,8 +67,8 @@ def test_merge_overlapping_step_case_2(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -85,8 +85,8 @@ def test_merge_overlapping_step_case_2(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -113,8 +113,8 @@ def test_merge_overlapping_step_case_3(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -131,9 +131,9 @@ def test_merge_overlapping_step_case_3(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                mapping_strategy="test",
+                string_match_strategy="test",
                 disambiguation_strategy=None,
-                confidence=LinkRanks.HIGHLY_LIKELY,
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
             )
         },
     )
@@ -159,8 +159,8 @@ def test_merge_overlapping_step_case_4(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -177,8 +177,8 @@ def test_merge_overlapping_step_case_4(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -194,8 +194,8 @@ def test_merge_overlapping_step_case_4(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -222,8 +222,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -240,8 +240,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -257,8 +257,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -275,8 +275,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },
@@ -293,8 +293,8 @@ def test_merge_overlapping_step_case_5(merge_step):
                 source="test",
                 parser_name="test",
                 idx="test",
-                confidence=LinkRanks.HIGHLY_LIKELY,
-                mapping_strategy="test",
+                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                string_match_strategy="test",
                 disambiguation_strategy=None,
             )
         },

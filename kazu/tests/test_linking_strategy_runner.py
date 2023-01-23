@@ -4,10 +4,11 @@ import pytest
 
 from kazu.data.data import (
     Document,
-    LinkRanks,
+    StringMatchConfidence,
     Entity,
     SynonymTermWithMetrics,
     EquivalentIdSet,
+    DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
@@ -16,7 +17,10 @@ from kazu.steps.linking.post_processing.strategy_runner import (
     StrategyRunner,
     NamespaceStrategyExecution,
 )
-from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
+    MappingStrategy,
+    NoopMappingStrategy,
+)
 from kazu.tests.utils import DummyParser
 
 
@@ -36,7 +40,7 @@ class TestStrategy(MappingStrategy):
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         ent_match: str,
         expected_ids: Set[str],
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
@@ -90,22 +94,10 @@ class TestDoNothingDisambiguationStrategy(DisambiguationStrategy):
 
 
 class TestDisambiguationStrategy(DisambiguationStrategy):
-    class TestDoNothingDisambiguationStrategy(DisambiguationStrategy):
-        """
-        Implementation of DisambiguationStrategy for testing.
-        """
-
-        def prepare(self, document: Document):
-            pass
-
-        def disambiguate(
-            self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-        ) -> Set[EquivalentIdSet]:
-            return set()
-
-    def __init__(self, expected_id: str):
+    def __init__(self, expected_id: str, confidence: DisambiguationConfidence):
         # as above, we check .prepare is being called properly in DisambiguationStrategy by assigning the intended
         # value in .prepare
+        super().__init__(confidence)
         self.expected_id: str = ""
         self.temp_id = expected_id
 
@@ -128,27 +120,36 @@ def build_runner(
     :return:
     """
     first_test_strategy = TestStrategy(
-        LinkRanks.HIGHLY_LIKELY, ent_match="test_1", expected_ids=expected_id_groups["test_1"]
+        StringMatchConfidence.HIGHLY_LIKELY,
+        ent_match="test_1",
+        expected_ids=expected_id_groups["test_1"],
     )
     second_test_strategy = TestStrategy(
-        LinkRanks.HIGHLY_LIKELY, ent_match="test_2", expected_ids=expected_id_groups["test_2"]
+        StringMatchConfidence.HIGHLY_LIKELY,
+        ent_match="test_2",
+        expected_ids=expected_id_groups["test_2"],
     )
     third_test_strategy = TestStrategy(
-        LinkRanks.HIGHLY_LIKELY, ent_match="test_3", expected_ids=expected_id_groups["test_3"]
+        StringMatchConfidence.HIGHLY_LIKELY,
+        ent_match="test_3",
+        expected_ids=expected_id_groups["test_3"],
     )
     fourth_test_strategy = TestStrategy(
-        LinkRanks.HIGHLY_LIKELY,
+        StringMatchConfidence.HIGHLY_LIKELY,
         ent_match="test_4",
         expected_ids=expected_id_groups["test_4"],
         disambiguation_strategies=[
-            TestDoNothingDisambiguationStrategy(),
-            TestDisambiguationStrategy(expected_id=next(iter(expected_id_groups["test_4"]))),
+            TestDoNothingDisambiguationStrategy(DisambiguationConfidence.AMBIGUOUS),
+            TestDisambiguationStrategy(
+                expected_id=next(iter(expected_id_groups["test_4"])),
+                confidence=DisambiguationConfidence.POSSIBLE,
+            ),
         ],
     )
-    fifth_test_strategy = MappingStrategy(LinkRanks.HIGHLY_LIKELY)
+    fifth_test_strategy = NoopMappingStrategy(StringMatchConfidence.HIGHLY_LIKELY)
 
     default_strategy = TestStrategy(
-        LinkRanks.HIGHLY_LIKELY,
+        StringMatchConfidence.HIGHLY_LIKELY,
         ent_match="unknown",
         expected_ids=expected_id_groups["test_default"],
     )
