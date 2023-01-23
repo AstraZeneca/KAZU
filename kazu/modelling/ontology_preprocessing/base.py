@@ -868,15 +868,17 @@ class GeneOntologyParser(OntologyParser):
         syns = []
         mapping_type = []
 
-        for row in result:
-            idx = row.goid
-            if "obsolete" in row.label:
-                logger.info(f"skipping obsolete id: {row.goid}, {row.label}")
+        # there seems to be a bug in rdflib that means the iterator sometimes exits early unless we covert to list first
+        for row in list(result):
+            idx = str(row.goid)
+            label = str(row.label)
+            if "obsolete" in label:
+                logger.info(f"skipping obsolete id: {idx}, {label}")
                 continue
             if self._uri_regex.match(idx):
-                default_labels.append(row.label)
-                iris.append(row.goid)
-                syns.append(row.synonym)
+                default_labels.append(label)
+                iris.append(idx)
+                syns.append(str(row.synonym))
                 mapping_type.append("hasExactSynonym")
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
