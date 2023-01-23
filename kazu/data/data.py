@@ -516,7 +516,7 @@ class DocumentJsonUtils:
     def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
         if isinstance(obj, cls.atomic_types):
             return obj
-        elif isinstance(obj, (float16, float32)):
+        elif isinstance(obj, (float16, float32)):  # type: ignore[misc]
             return obj.item()
         elif isinstance(obj, cls.listlike_types):
             return [cls.obj_to_dict_repr(elem) for elem in obj]

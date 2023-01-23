@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Any, Optional, Union, Callable, NamedTuple
+from typing import cast, List, Tuple, Dict, Any, Optional, Union, NamedTuple
 
 import hydra
 import numpy as np
@@ -28,6 +28,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
+from tokenizers import Encoding
 
 from kazu.utils.constants import HYDRA_VERSION_BASE
 
@@ -47,7 +48,7 @@ class SapbertDataCollatorWithPadding:
 
     def __call__(self, features: List) -> Tuple[BatchEncoding, BatchEncoding]:
         query_toks1 = [x["query_toks1"] for x in features]
-        query_toks1 = self.tokenizer.pad(
+        query_toks1_enc = self.tokenizer.pad(
             query_toks1,
             padding=self.padding,
             max_length=self.max_length,
@@ -55,7 +56,7 @@ class SapbertDataCollatorWithPadding:
             return_tensors="pt",
         )
         query_toks2 = [x["query_toks2"] for x in features]
-        query_toks2 = self.tokenizer.pad(
+        query_toks2_enc = self.tokenizer.pad(
             query_toks2,
             padding=self.padding,
             max_length=self.max_length,
@@ -63,10 +64,10 @@ class SapbertDataCollatorWithPadding:
             return_tensors="pt",
         )
 
-        return query_toks1, query_toks2
+        return query_toks1_enc, query_toks2_enc
 
 
-def init_hf_collate_fn(tokenizer: Callable) -> Callable:
+def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
     """
     get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST
 
@@ -102,7 +103,8 @@ class HFSapbertInferenceDataset(Dataset):
         self.encodings = encodings
 
     def __len__(self):
-        return len(self.encodings.encodings)
+        encodings = cast(List[Encoding], self.encodings.encodings)
+        return len(encodings)
 
 
 class HFSapbertPairwiseDataset(Dataset):
@@ -138,7 +140,8 @@ class HFSapbertPairwiseDataset(Dataset):
         self.encodings_2 = encodings_2
 
     def __len__(self):
-        return len(self.encodings_1.encodings)
+        encodings = cast(List[Encoding], self.encodings_1.encodings)
+        return len(encodings)
 
 
 class SapbertTrainingParams(BaseModel):
@@ -153,7 +156,11 @@ class SapbertTrainingParams(BaseModel):
 
 
 def get_embedding_dataloader_from_strings(
-    texts: List[str], tokenizer: Callable, batch_size: int, num_workers: int, max_length: int = 50
+    texts: List[str],
+    tokenizer: PreTrainedTokenizerBase,
+    batch_size: int,
+    num_workers: int,
+    max_length: int = 50,
 ):
     """
     get a dataloader with dataset HFSapbertInferenceDataset and DataCollatorWithPadding. This should be used to
@@ -289,6 +296,7 @@ class PLSapbertModel(LightningModule):
             self.ontology_embeddings = None
 
     def configure_optimizers(self):
+        assert self.sapbert_training_params is not None
         optimizer = optim.AdamW(
             [
                 {"params": self.model.parameters()},
@@ -331,7 +339,7 @@ class PLSapbertModel(LightningModule):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         assert self.sapbert_training_params is not None
         training_df = pd.read_parquet(self.sapbert_training_params.train_file)
-        labels = training_df["id"].astype("category").cat.codes.values
+        labels = training_df["id"].astype("category").cat.codes.to_numpy()
         encodings_1 = self.tokeniser(training_df["syn1"].tolist())
         encodings_2 = self.tokeniser(training_df["syn2"].tolist())
         encodings_1["labels"] = labels
@@ -371,6 +379,8 @@ class PLSapbertModel(LightningModule):
             dataloaders.append(query_dataloader)
             dataloaders.append(ontology_dataloader)
 
+        return dataloaders
+
     def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
         return self(batch)
 
@@ -385,7 +395,7 @@ class PLSapbertModel(LightningModule):
         :return:
         """
         full_dict = {}
-        for batch_id, batch in enumerate(output):
+        for batch in output:
             full_dict.update(batch)
         if len(full_dict) > 1:
             embedding = torch.squeeze(torch.cat(list(full_dict.values())))
@@ -393,7 +403,7 @@ class PLSapbertModel(LightningModule):
             embedding = torch.cat(list(full_dict.values()))
         return embedding
 
-    def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
         """
         lightning override
         generate new embeddings for each :attr:`SapbertEvaluationDataset.ontology_source` and query them with
@@ -479,8 +489,9 @@ class PLSapbertModel(LightningModule):
         :return: 2d tensor of cls  output
         """
         self.eval()
-        results = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
-        results = self.get_embeddings(results)
+        predictions = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
+        predictions = cast(List[Dict[int, torch.Tensor]], predictions)
+        results = self.get_embeddings(predictions)
         return results
 
 

@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
+from typing import cast, Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
 
 from spacy.language import Language
 from spacy.matcher import Matcher
@@ -237,6 +237,9 @@ class KazuAbbreviationDetector:
     ):
         for section, spacy_doc in section_to_spacy_doc.items():
             global_matches = global_matcher(spacy_doc)
+            # necessary because the spacy typing says this could be a List[Span],
+            # but this is only the case if as_spans=True is passed
+            global_matches = cast(List[Tuple[int, int, int]], global_matches)
             for spacy_match_int, start, end in global_matches:
                 # span of the detected abbreviation
                 abbrv_span: Span = spacy_doc[start:end]
@@ -277,7 +280,8 @@ class KazuAbbreviationDetector:
         :return:
         """
 
-        long_form_string_key = global_matcher.vocab.strings[spacy_match_int]
+        # ignore necessary as the spacy typing doesn't declare that Matcher's have a vocab property, but they do
+        long_form_string_key = global_matcher.vocab.strings[spacy_match_int]  # type: ignore[attr-defined]
         section.entities.extend(
             self._create_ent_from_span_and_source_ent(abbrv_span, section, long_form_ent)
             for long_form_ent in long_form_string_to_source_ents.get(long_form_string_key, set())
@@ -377,6 +381,9 @@ class KazuAbbreviationDetector:
         for section in document.sections:
             spacy_doc = self.nlp(section.get_text())
             matches = self.matcher(spacy_doc)
+            # necessary because the spacy typing says this could be a List[Span],
+            # but this is only the case if as_spans=True is passed
+            matches = cast(List[Tuple[int, int, int]], matches)
             matches_no_brackets = [(x[0], x[1] + 1, x[2] - 1) for x in matches]
 
             long_to_short_candidates.extend(filter_matches(section, matches_no_brackets, spacy_doc))

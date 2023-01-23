@@ -128,7 +128,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             payload = jwt.decode(
                 token,
                 key=self.secret_key,
-                algorithms=self.algorithm,
+                algorithms=[self.algorithm],
                 audience=self.audience,
                 options=self.options,
             )

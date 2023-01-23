@@ -135,4 +135,6 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
             query_embedding = embeddings[0]
             self.embedding_cache[query_term] = query_embedding
 
+        assert ref_embedding is not None
+        assert query_embedding is not None
         return cosine_similarity(ref_embedding, query_embedding, dim=0).item()

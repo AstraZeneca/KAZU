@@ -13,12 +13,8 @@ from kazu.data.data import (
     DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, Metadata
-from kazu.modelling.language.string_similarity_scorers import (
-    BooleanStringSimilarityScorer,
-)
-from kazu.modelling.ontology_preprocessing.base import (
-    DEFAULT_LABEL,
-)
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 
 
@@ -459,7 +455,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
     def __init__(
         self,
         confidence: StringMatchConfidence,
-        complex_string_scorer: BooleanStringSimilarityScorer,
+        complex_string_scorer: StringSimilarityScorer,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold: float = 80.0,
         embedding_threshold: float = 0.60,

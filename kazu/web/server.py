@@ -110,28 +110,6 @@ class KazuWebApp:
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
-    @app.middleware("http")
-    async def add_id_header(
-        request: Request,
-        call_next,
-    ):
-        """Add request ID to response header.
-
-        :param request: Request object
-        :param call_next: Function for passing middleware to FASTAPI
-
-        :returns: Response object
-        """
-        req_id = get_request_id(request)
-        response = await call_next(request)
-        if req_id is not None:
-            response.headers.append(
-                "X-request-id",
-                req_id,
-            )
-        logger.info(f"ID: {req_id} Response Code: {response.status_code}")
-        return response
-
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:

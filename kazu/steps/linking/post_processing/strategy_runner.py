@@ -253,18 +253,14 @@ class StrategyRunner:
         """
         groups entities into symbolic and non-symbolic forms, so they can be processed separately.
 
-        Expects an already sorted list of entities, since we only call this after a sort is required
-        elsewhere. However, it will still work with an unsorted list, it will just call
-        :meth:`.StringNormalizer.classify_symbolic` more times than necessary.
-
         :param entities:
         :return:
         """
         symbolic: List[Entity] = []
         non_symbolic: List[Entity] = []
-        grouped_by_match = groupby(
+        grouped_by_match = sort_then_group(
             entities,
-            key=lambda x: (
+            key_func=lambda x: (
                 x.match,
                 x.entity_class,
             ),
@@ -307,7 +303,9 @@ class StrategyRunner:
 
         for (_namespace_sort_key, namespace), entities in entities_grouped_by_namespace_order:
             logger.debug("mapping entities for namespace %s", namespace)
-            symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(entities)
+            symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(
+                entities=entities
+            )
             self.execute_hit_post_processing_strategies(
                 non_symbolic_entities, doc, self.non_symbolic_strategies[namespace]
             )
