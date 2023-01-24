@@ -74,6 +74,7 @@ hgnc_gene_family_parser:
   data_origin: 'HGNC Mart 13.01.23'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.gene}
+  # needs to be gene to pick up mis-recognised gene families by the transformers model
   entity_class: 'gene'
 
 uberon_parser:
