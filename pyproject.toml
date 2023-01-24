@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache 2.0" }  # could also give the actual file with file = "LICENSE"
 authors = [
-  # it looks like setup.py was unhappy with this already - it should have names and emails
   {name = "AstraZeneca AI and Korea University"}
 ]
 dependencies = [
