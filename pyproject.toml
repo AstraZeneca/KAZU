@@ -98,7 +98,7 @@ exclude = '''
 '''
 
 [tool.pytest.ini_options]
-testpaths = "kazu/"  # TODO: change to "kazu/tests" ?
+testpaths = "kazu/tests"
 filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::SyntaxWarning",
