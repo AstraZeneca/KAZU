@@ -64,15 +64,15 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["kazu"]
-exclude = ["kazu.tests*"]
+[tool.hatch.build]
+include = ["/kazu"]
+exclude = ["/kazu/tests"]
 
-[tool.setuptools.dynamic]
-version = {attr = "kazu.__version__"}
+[tool.hatch.version]
+path = "kazu/__init__.py"
 
 [tool.black]
 line-length = 100
