@@ -1,5 +1,6 @@
 import functools
 import logging
+import os
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Tuple, Optional, Set, Dict, Iterable, FrozenSet
@@ -173,7 +174,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         )
 
     @staticmethod
-    @functools.lru_cache(maxsize=20)
+    @functools.lru_cache(maxsize=int(os.environ.get("KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE", 20)))
     def cacheable_build_document_representation(
         scorer: TfIdfScorer, doc: Document, parsers: FrozenSet[str]
     ) -> Dict[str, np.ndarray]:
