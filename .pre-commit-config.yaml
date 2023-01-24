@@ -20,7 +20,7 @@ repos:
     name: mypy
     stages: [commit]
     language: python
-    entry:  mypy --ignore-missing-imports --check-untyped-defs
+    entry:  mypy
     types: [python] 
     types_or: [python, pyi]
     require_serial: true

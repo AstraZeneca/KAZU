@@ -103,3 +103,7 @@ filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::SyntaxWarning",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+check_untyped_defs = true
