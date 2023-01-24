@@ -27,3 +27,12 @@ defaults:
   - LabelStudioManager: default
   - Middlewares: default
   - confidence: default
+
+# we set certain env vars here for things that are statically initialised
+hydra:
+  job:
+    env_set:
+      KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE: 20 # prevents unnecessary recalculation of document representation across multiple instances of TfIdfDisambiguationStrategy
+      KAZU_STRING_NORMALIZER_CACHE_SIZE: 5000 # cache size for StringNormalizer
+      TOKENIZERS_PARALLELISM: false # prevent rust tokenisers from forking
+      PL_DISABLE_FORK: 1 # prevent pytorch lighting from spawning processes, which causes Ray to freeze
