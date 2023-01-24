@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ hashFiles('setup.py') }}
+          key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
 
       - name: create venv and install dependencies
         run: |
