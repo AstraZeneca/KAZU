@@ -23,7 +23,6 @@ from typing import (
 )
 from urllib import parse
 
-import numpy as np
 import pandas as pd
 import rdflib
 
@@ -1545,7 +1544,9 @@ class HGNCGeneFamilyParser(OntologyParser):
     def parse_to_dataframe(self) -> pd.DataFrame:
         df = pd.read_csv(self.in_path, sep="\t")
         data = []
-        for family_id, row in df.groupby(by="Family ID").agg(set).iterrows():
+        for family_id, row in (
+            df.groupby(by="Family ID").agg(lambda col_series: set(col_series.dropna())).iterrows()
+        ):
             # in theory, there should only be one family name per ID
             assert len(row["Family name"]) == 1
             default_label = next(iter(row["Family name"]))
@@ -1557,16 +1558,14 @@ class HGNCGeneFamilyParser(OntologyParser):
                     IDX: family_id,
                 }
             )
-            for key in self.syn_column_keys:
-                syns: Set[str] = row[key]
-                for syn in syns:
-                    if syn != np.NAN:
-                        data.append(
-                            {
-                                SYN: syn,
-                                MAPPING_TYPE: key,
-                                DEFAULT_LABEL: default_label,
-                                IDX: family_id,
-                            }
-                        )
+            data.extend(
+                {
+                    SYN: syn,
+                    MAPPING_TYPE: key,
+                    DEFAULT_LABEL: default_label,
+                    IDX: family_id,
+                }
+                for key in self.syn_column_keys
+                for syn in row[key]
+            )
         return pd.DataFrame.from_records(data)
