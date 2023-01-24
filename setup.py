@@ -12,7 +12,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="kazu",
-    version="0.0.20",
+    version="0.0.21",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",
     description="Biomedical Named Entity Recognition and Entity Linking for Enterprise use cases",
