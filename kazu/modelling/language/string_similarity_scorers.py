@@ -103,10 +103,16 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
     note this is an implementation of the StringSimilarityScorer Protocol, but as a Singleton we can't inherit it
     """
 
-    def __init__(self, sapbert: PLSapbertModel, trainer: Trainer):
+    def __init__(self, sapbert: PLSapbertModel, trainer: Trainer, cache_size: int = 1000):
+        """
+
+        :param sapbert: model to use
+        :param trainer: trainer to use
+        :param cache_size: cache size, to prevent repeated calls to sapbert for the same string
+        """
         self.trainer = trainer
         self.sapbert = sapbert
-        self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=1000)
+        self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=cache_size)
 
     def __call__(self, reference_term: str, query_term: str) -> float:
         if reference_term == query_term:
