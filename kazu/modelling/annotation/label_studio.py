@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
+from functools import cached_property
 from typing import Dict, Tuple, Set, List, Iterable
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
@@ -376,7 +377,7 @@ class LabelStudioManager:
         self.headers = headers
         self.url = url
 
-    @property
+    @cached_property
     def project_id(self) -> int:
         project_ids = [
             result
