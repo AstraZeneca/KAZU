@@ -105,5 +105,17 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-ignore_missing_imports = true
 check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "seqeval.*",
+    "transformers.*",
+    "tokenizers.*",
+    "stanza.*",
+    "sklearn.*",
+    "pytorch_metric_learning.*",
+    "srsly.*",
+    "py4j.*",
+]
+ignore_missing_imports = true
