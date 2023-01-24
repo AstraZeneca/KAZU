@@ -5,4 +5,4 @@ trainer:
   enable_progress_bar: False
   accelerator: "cpu"
   logger: False
-cache_size: 1000
+cache_size: ${cache_sizes.SapbertStringSimilarityScorer_cache_size}
