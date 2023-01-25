@@ -18,4 +18,5 @@ hydra:
     env_set:
       # prevents unnecessary recalculation of document representation across multiple instances of TfIdfDisambiguationStrategy
       KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE: 20
+      KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE: 1 # should only be 1 or 0. Only change this if you know what you're doing!
       KAZU_STRING_NORMALIZER_CACHE_SIZE: 5000 # cache size for StringNormalizer

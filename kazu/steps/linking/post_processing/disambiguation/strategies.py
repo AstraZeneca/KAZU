@@ -155,7 +155,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         self.scorer = scorer
         self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
 
-    @functools.lru_cache(maxsize=1)
+    @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document):
         """
         build document representations by parser names here, and store in a dict. This method is cached so
