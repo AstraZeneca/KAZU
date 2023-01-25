@@ -33,8 +33,10 @@ defaults:
 hydra:
   job:
     env_set:
-      # prevents unnecessary recalculation of document representation across multiple instances of TfIdfDisambiguationStrategy
-      KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE: ${cache_sizes.tfidf_disambiguation_cache_size}
-      KAZU_STRING_NORMALIZER_CACHE_SIZE: ${cache_sizes.string_normalizer_cache_size} # cache size for StringNormalizer
+      # Note that the cache_sizes config also modifies this env_set in order to
+      # set environment variables related to cache sizes.
+      # That config is in cache_sizes/default.yaml so that all cache size related config
+      #  can be in a single place for ease of discoverability and modification,
+      # whether it affects an environment variable or not.
       TOKENIZERS_PARALLELISM: false # prevent rust tokenisers from forking
       PL_DISABLE_FORK: 1 # prevent pytorch lighting from spawning processes, which causes Ray to freeze
