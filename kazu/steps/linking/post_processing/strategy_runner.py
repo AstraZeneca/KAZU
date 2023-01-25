@@ -327,33 +327,38 @@ class StrategyRunner:
         :param namespace_strategy_execution:
         :return:
         """
-        namespace_strategy_execution.reset()
-        strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
+        try:
+            strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
 
-        groups = [
-            list(ents)
-            for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
-        ]
+            groups = [
+                list(ents)
+                for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
+            ]
 
-        for i in range(0, strategy_max_index):
-            for entity_group in groups:
-                reference_entity = next(iter(entity_group))
-                for mapping in namespace_strategy_execution(
-                    entity=reference_entity,
-                    strategy_index=i,
-                    document=document,
-                ):
-                    xref_mappings: Set[Mapping] = set()
-                    if self.cross_ref_managers is not None:
-                        for xref_manager in self.cross_ref_managers:
-                            xref_mappings.update(xref_manager.create_xref_mappings(mapping=mapping))
+            for i in range(0, strategy_max_index):
+                for entity_group in groups:
+                    reference_entity = next(iter(entity_group))
+                    for mapping in namespace_strategy_execution(
+                        entity=reference_entity,
+                        strategy_index=i,
+                        document=document,
+                    ):
+                        xref_mappings: Set[Mapping] = set()
+                        if self.cross_ref_managers is not None:
+                            for xref_manager in self.cross_ref_managers:
+                                xref_mappings.update(
+                                    xref_manager.create_xref_mappings(mapping=mapping)
+                                )
 
-                    for entity in entity_group:
-                        entity.mappings.add(deepcopy(mapping))
-                        entity.mappings.update(deepcopy(xref_mappings))
-                    logger.debug(
-                        "mapping created: original string: %s, mapping: %s, cross-references: %s",
-                        reference_entity.match,
-                        mapping,
-                        xref_mappings,
-                    )
+                        for entity in entity_group:
+                            entity.mappings.add(deepcopy(mapping))
+                            entity.mappings.update(deepcopy(xref_mappings))
+                        logger.debug(
+                            "mapping created: original string: %s, mapping: %s, cross-references: %s",
+                            reference_entity.match,
+                            mapping,
+                            xref_mappings,
+                        )
+        finally:
+            # in case exception is thrown - always reset state
+            namespace_strategy_execution.reset()
