@@ -30,27 +30,27 @@ Processing your first document
 .. testcode::
     :skipif: kazu_model_pack_missing
 
-    from hydra import initialize_config_dir, compose
+    import hydra
     from hydra.utils import instantiate
+
     from kazu.data.data import Document
     from kazu.pipeline import Pipeline
     from kazu.utils.constants import HYDRA_VERSION_BASE
     from pathlib import Path
     import os
 
-    # the hydra config is kept in the model pack. Ensure this env
-    # variable is set to your model pack location
+    # the hydra config is kept in the model pack
     cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')
-    with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)):
-        cfg = compose(
-            config_name="config",
-            overrides=[],
-        )
+    @hydra.main(version_base=HYDRA_VERSION_BASE,config_path=str(cdir),config_name='config')
+    def kazu_test(cfg):
         pipeline: Pipeline = instantiate(cfg.Pipeline)
         text = "EGFR mutations are often implicated in lung cancer"
         doc = Document.create_simple_document(text)
         pipeline([doc])
         print(f"{doc.sections[0].text}")
+
+    if __name__ == '__main__':
+        kazu_test()
 
 
 .. testoutput::
