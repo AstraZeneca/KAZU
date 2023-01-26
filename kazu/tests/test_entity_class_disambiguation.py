@@ -66,10 +66,11 @@ def test_same_entity_with_same_span_in_multiple_sections():
     section_b_sents = [
         "Sentence context.",
         "UCB in this section refers to umbilical cord blood.",
-        "More sentence context mentioning the word pregnancy."
+        "More sentence context mentioning the word pregnancy.",
     ]
-    doc = Document.from_named_section_texts({"section_a": " ".join(section_a_sents),
-                                             "section_b": " ".join(section_b_sents)})
+    doc = Document.from_named_section_texts(
+        {"section_a": " ".join(section_a_sents), "section_b": " ".join(section_b_sents)}
+    )
 
     ucb_company_ent_section_a = Entity.load_contiguous_entity(
         start=len(section_a_sents[0]) + 1,
@@ -102,7 +103,3 @@ def test_same_entity_with_same_span_in_multiple_sections():
     # section_b should only have the UCB anatomy entity
     assert ucb_anatomy_ent_section_b in doc.get_entities()
     assert ucb_company_ent_section_b not in doc.get_entities()
-
-
-
-

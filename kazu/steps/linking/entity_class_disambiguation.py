@@ -135,7 +135,7 @@ class EntityClassDisambiguationStep(Step):
             context_end_idx = min(len(sent_spans), idx + int(window / 2)) + 1
             sentence_context_spans = sent_spans[context_start_idx:context_end_idx]
             return section.get_text()[
-                sentence_context_spans[0].start: sentence_context_spans[-1].end
+                sentence_context_spans[0].start : sentence_context_spans[-1].end
             ]
 
     def spangrouped_ent_section_pairs(self, doc: Document) -> Iterable[List[EntSectionPair]]:
