@@ -1,11 +1,12 @@
 import logging
 import subprocess
 import time
-from typing import Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Union
 
 import hydra
 import ray
 from fastapi import Depends, FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from hydra.utils import instantiate
@@ -13,6 +14,7 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
 from starlette.requests import HTTPConnection, Request
+from starlette.middleware.authentication import AuthenticationMiddleware
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
@@ -43,6 +45,38 @@ app = FastAPI(
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
 )
+
+
+def openapi_no_auth() -> Dict[str, Any]:
+    """Remove the bits of the openapi schema that put auth buttons on the Swagger UI.
+
+    When we don't configure any Authentication middleware, we otherwise still get the
+    buttons, even though they aren't necessary to fill in and don't do anything, which
+    may be confusing to users."""
+    if not app.openapi_schema:
+        base_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            openapi_version=app.openapi_version,
+            description=app.description,
+            terms_of_service=app.terms_of_service,
+            contact=app.contact,
+            license_info=app.license_info,
+            routes=app.routes,
+            tags=app.openapi_tags,
+            servers=app.servers,
+        )
+        del base_schema["components"]["securitySchemes"]
+        for _path, path_data in base_schema["paths"].items():
+            for _method, endpoint_data in path_data.items():
+                # security in the openapi json is only present
+                # to start with on those endpoints with
+                # token=Depends(oauth2_scheme)
+                if "security" in endpoint_data:
+                    del endpoint_data["security"]
+        app.openapi_schema = base_schema
+    return app.openapi_schema
+
 
 oauth2_scheme = HTTPBearer(auto_error=False)
 
@@ -85,11 +119,19 @@ class KazuWebApp:
 
     deploy: Callable
 
-    def __init__(self, cfg: DictConfig):
+    def __init__(self, cfg: DictConfig, auth_required: bool):
         """
         :param cfg: DictConfig from Hydra
         """
         self.pipeline: Pipeline = instantiate(cfg.Pipeline)
+        if not auth_required:
+            app.openapi = openapi_no_auth  # type: ignore[assignment]
+            # we need the 'type: ignore' as otherwise mypy gives an error:
+            # mypy doesn't like assigning to a method - it isn't able
+            # to infer whether typing is consistent if you do this.
+            # However, note that '@decorator' syntax is just syntactic
+            # sugar for doing this, so this is a *fairly* reasonable
+            # thing to do.
 
     @app.get("/")
     def get(self):
@@ -128,7 +170,12 @@ def start(cfg: DictConfig) -> None:
         http_options={"host": "0.0.0.0", "location": "EveryNode", **middlewares},
     )
 
-    KazuWebApp.deploy(cfg)
+    if any(m.cls is AuthenticationMiddleware for m in middlewares["middlewares"]):
+        auth_required = True
+    else:
+        auth_required = False
+
+    KazuWebApp.deploy(cfg, auth_required=auth_required)
     if not cfg.ray.detached:
         while True:
             logger.info(serve.list_deployments())
