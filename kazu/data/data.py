@@ -459,7 +459,7 @@ class Document:
     @classmethod
     def simple_document_from_sents(cls, sents: List[str]) -> "Document":
         idx = uuid.uuid4().hex
-        section = Section(text="".join(sents), name="na")
+        section = Section(text=" ".join(sents), name="na")
         sent_spans = []
         curr_start = 0
         for sent in sents:
