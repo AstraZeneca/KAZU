@@ -152,36 +152,39 @@ class EntityClassDisambiguationStep(Step):
     def __call__(self, doc: Document) -> None:
         drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
         for spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
-            if len(spansharing_ent_section_pairs) > 1:
-                representative_ent, representative_section = spansharing_ent_section_pairs[0]
-                ents: List[Entity] = [ent for ent, section in spansharing_ent_section_pairs]
-                class_to_ents = defaultdict(set)
-                for ent in ents:
-                    class_to_ents[ent.entity_class].add(ent)
+            if len(spansharing_ent_section_pairs) == 1:
+                # only a single entity; span(s) are unambiguous for entity class
+                continue
 
-                ent_match = representative_ent.match
-                ent_sentence_context_str = self.sentence_context_for_entity(
-                    representative_ent, representative_section
-                )
-                scored_contexts = self.entity_class_scorer.score_entity_context(
-                    ent_span=ent_match, ent_context=ent_sentence_context_str
-                )
+            representative_ent, representative_section = spansharing_ent_section_pairs[0]
+            ents: List[Entity] = [ent for ent, section in spansharing_ent_section_pairs]
+            class_to_ents = defaultdict(set)
+            for ent in ents:
+                class_to_ents[ent.entity_class].add(ent)
 
-                acceptable_scores = (
-                    scored_context
-                    for scored_context in scored_contexts
-                    if scored_context.score >= scored_context.thresh
+            ent_match = representative_ent.match
+            ent_sentence_context_str = self.sentence_context_for_entity(
+                representative_ent, representative_section
+            )
+            scored_contexts = self.entity_class_scorer.score_entity_context(
+                ent_span=ent_match, ent_context=ent_sentence_context_str
+            )
+
+            acceptable_scores = (
+                scored_context
+                for scored_context in scored_contexts
+                if scored_context.score >= scored_context.thresh
+            )
+            best_score = max(
+                acceptable_scores, default=None, key=lambda scored_context: scored_context.score
+            )
+            if best_score is not None:
+                best_match_ents = class_to_ents[best_score.entity_class]
+                drop_set[representative_section].update(
+                    (ent for ent in ents if ent not in best_match_ents)
                 )
-                best_score = max(
-                    acceptable_scores, default=None, key=lambda scored_context: scored_context.score
-                )
-                if best_score is not None:
-                    best_match_ents = class_to_ents[best_score.entity_class]
-                    drop_set[representative_section].update(
-                        (ent for ent in ents if ent not in best_match_ents)
-                    )
-                else:
-                    drop_set[representative_section].update(ents)
+            else:
+                drop_set[representative_section].update(ents)
 
         for section, drop_entities in drop_set.items():
             section.entities = [ent for ent in section.entities if ent not in drop_entities]
