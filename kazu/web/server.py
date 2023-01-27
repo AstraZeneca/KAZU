@@ -93,6 +93,14 @@ def get_request_id(request: HTTPConnection) -> Union[str, None]:
     return req_id.decode("latin-1")
 
 
+def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
+    req_id = get_request_id(request)
+    if req_id is not None:
+        return "ID: " + req_id + " "
+    else:
+        return ""
+
+
 class SectionedWebDocument(BaseModel):
     sections: Dict[str, str]
 
@@ -140,18 +148,18 @@ class KazuWebApp:
 
     @app.post(f"/{KAZU}")
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
-        req_id = get_request_id(request)
-        logger.info("ID: %s Request to kazu endpoint" % req_id)
-        logger.info(f"ID: {req_id} Document: {doc}")
+        id_log_prefix = get_id_log_prefix_if_available(request)
+        logger.info(id_log_prefix + "Request to kazu endpoint")
+        logger.info(id_log_prefix + "Document: %s" % doc)
         result = self.pipeline([doc.to_kazu_document()])
         resp_dict = result[0].as_minified_dict()
         return JSONResponse(content=resp_dict)
 
     @app.post(f"/{KAZU}/batch")
     def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
-        req_id = get_request_id(request)
-        logger.info("ID: %s Request to kazu/batch endpoint" % req_id)
-        logger.info(f"ID: {req_id} Documents sent: {len(docs)}")
+        id_log_prefix = get_id_log_prefix_if_available(request)
+        logger.info(id_log_prefix + "Request to kazu/batch endpoint")
+        logger.info(id_log_prefix + "Documents sent: %s" % len(docs))
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
