@@ -57,6 +57,11 @@ class AutoNameEnum(Enum):
         return name
 
 
+class MentionConfidence(AutoNameEnum):
+    HIGHLY_LIKELY = auto()  # almost certain to be correct
+    POSSIBLE = auto()  # high degree of uncertainty
+
+
 class StringMatchConfidence(AutoNameEnum):
     HIGHLY_LIKELY = auto()  # almost certain to be correct
     PROBABLE = auto()  # on the balance of probabilities, will be correct
@@ -609,6 +614,7 @@ SimpleValue = Union[NumericMetric, str]
 @dataclass
 class CuratedTerm:
     term: str
+    mention_confidence: MentionConfidence
     action: str
     case_sensitive: bool
     entity_class: str
