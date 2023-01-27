@@ -617,6 +617,12 @@ class Behaviour(AutoNameEnum):
     ADD_NEW = auto()
 
 
+class CurationScope(AutoNameEnum):
+    NER = auto()
+    LINKING = auto()
+    NER_AND_LINKING = auto()
+
+
 @dataclass
 class Target:
     entity_class: Optional[List[str]] = None
@@ -627,6 +633,7 @@ class Target:
 class Action:
     behaviour: Behaviour
     target: Target
+    scope: CurationScope
     children: Optional[List["Action"]] = None
 
 
