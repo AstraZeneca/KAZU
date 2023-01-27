@@ -116,10 +116,11 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             return None
 
         if "Authorization" not in request.headers:
-            raise AuthenticationError(
+            message = (
                 f"ID: {req_id} No 'Authorization' header specified: please use a valid Bearer token"
             )
-
+            logger.warn(message)
+            raise AuthenticationError(message)
         auth = request.headers["Authorization"]
         token = self.get_token_from_header(authorization=auth, prefix=self.prefix)
         try:
