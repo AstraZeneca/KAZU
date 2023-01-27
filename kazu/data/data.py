@@ -623,13 +623,13 @@ class CurationScope(AutoNameEnum):
     NER_AND_LINKING = auto()
 
 
-@dataclass
+@dataclass(frozen=True)
 class Target:
     entity_class: Optional[Tuple[str]] = None
     parser_name: Optional[Tuple[str]] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class Action:
     behaviour: Behaviour
     target: Target
