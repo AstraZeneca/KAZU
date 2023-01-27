@@ -148,7 +148,10 @@ class KazuWebApp:
         return JSONResponse(content=resp_dict)
 
     @app.post(f"/{KAZU}/batch")
-    def batch_ner(self, docs: List[WebDocument], token=Depends(oauth2_scheme)):
+    def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
+        req_id = get_request_id(request)
+        logger.info("ID: %s Request to kazu/batch endpoint" % req_id)
+        logger.info(f"ID: {req_id} Documents sent: {len(docs)}")
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
