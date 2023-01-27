@@ -625,8 +625,8 @@ class CurationScope(AutoNameEnum):
 
 @dataclass
 class Target:
-    entity_class: Optional[List[str]] = None
-    parser_name: Optional[List[str]] = None
+    entity_class: Optional[Tuple[str]] = None
+    parser_name: Optional[Tuple[str]] = None
 
 
 @dataclass
@@ -634,7 +634,7 @@ class Action:
     behaviour: Behaviour
     target: Target
     scope: CurationScope
-    children: Optional[List["Action"]] = None
+    children: Optional[Tuple["Action"]] = None
 
 
 @dataclass(frozen=True)
