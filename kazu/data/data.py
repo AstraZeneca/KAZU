@@ -611,13 +611,47 @@ UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGU
 SimpleValue = Union[NumericMetric, str]
 
 
+class Behaviour(AutoNameEnum):
+    DROP = auto()
+    KEEP = auto()
+    ADD_NEW = auto()
+
+
 @dataclass
-class CuratedTerm:
-    term: str
+class Target:
+    entity_class: Optional[List[str]] = None
+    parser_name: Optional[List[str]] = None
+
+
+@dataclass
+class Action:
+    behaviour: Behaviour
+    target: Target
+    children: Optional[List["Action"]] = None
+
+
+@dataclass(frozen=True)
+class Curation:
+    # TODO: make sphinx pleased with attributes for dataclass and write docstrings
     mention_confidence: MentionConfidence
-    action: str
+    action: Action
     case_sensitive: bool
-    entity_class: str
-    term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
-    curated_id_mappings: Dict[str, str] = field(default_factory=dict)
+    curated_synonym: Optional[str] = None
+    curated_id_mappings: Dict[str, Set[str]] = field(default_factory=dict)
     doc_freq: float = 0.0  # for information only: some measure of how frequently a curation is observed (suggest freq per 10k docs)
+
+
+@dataclass(frozen=True)
+class CurationWithTermNorms(Curation):
+    term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
+
+    @staticmethod
+    def from_curated_term(
+        term: Curation,
+        term_norm_mapping: Dict[str, Set[str]],
+    ):
+
+        return CurationWithTermNorms(
+            term_norm_mapping=term_norm_mapping,
+            **term.__dict__,
+        )
