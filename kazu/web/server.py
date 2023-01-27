@@ -94,6 +94,11 @@ def get_request_id(request: HTTPConnection) -> Union[str, None]:
 
 
 def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
+    """Utility function for generating the appropriate prefix for logs.
+
+    :param request: Starlette HTTPConnection object
+    :returns: Prefix to pre-pend to log messages containing the request id.
+    """
     req_id = get_request_id(request)
     if req_id is not None:
         return "ID: " + req_id + " "
@@ -130,6 +135,8 @@ class KazuWebApp:
     def __init__(self, cfg: DictConfig, auth_required: bool):
         """
         :param cfg: DictConfig from Hydra
+        :param auth_required: Does this require authentication to use?
+            If not, we'll make sure the openapi docs don't generate auth buttons.
         """
         self.pipeline: Pipeline = instantiate(cfg.Pipeline)
         if not auth_required:
