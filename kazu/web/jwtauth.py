@@ -112,9 +112,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         )
         path: str = request.scope["raw_path"].decode()
         if path in EXCLUDED_ENDPOINTS:
-            logger.info(
-                "ID: %s Request to %s, no authentication required" % (req_id, path),
-            )
+            logger.info("ID: %s Request to %s, no authentication required", req_id, path)
             return None
 
         if "Authorization" not in request.headers:
@@ -133,10 +131,10 @@ class JWTAuthenticationBackend(AuthenticationBackend):
                 options=self.options,
             )
         except jwt.InvalidTokenError as e:
-            logger.warn(f"ID: {req_id} {e}")
+            logger.warn("ID: %s %s", req_id, e)
             raise AuthenticationError(f"ID: {req_id} {e}")
         username = payload[self.username_field]
-        logger.info(f"ID: {req_id} Received request from {username}")
+        logger.info("ID: %s Received request from %s", req_id, username)
         return AuthCredentials(["authenticated"]), JWTUser(
             username=username, token=token, payload=payload
         )

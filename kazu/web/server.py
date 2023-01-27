@@ -150,7 +150,7 @@ class KazuWebApp:
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu endpoint")
-        logger.info(id_log_prefix + "Document: %s" % doc)
+        logger.info(id_log_prefix + "Document: %s", doc)
         result = self.pipeline([doc.to_kazu_document()])
         resp_dict = result[0].as_minified_dict()
         return JSONResponse(content=resp_dict)
@@ -159,7 +159,7 @@ class KazuWebApp:
     def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch endpoint")
-        logger.info(id_log_prefix + "Documents sent: %s" % len(docs))
+        logger.info(id_log_prefix + "Documents sent: %s", len(docs))
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 

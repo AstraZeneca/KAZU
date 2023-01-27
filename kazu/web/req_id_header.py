@@ -58,5 +58,5 @@ class AddRequestIdMiddleware(BaseHTTPMiddleware):
         if req_id is not None:
             response.headers["X-request-id"] = req_id
 
-        logger.info(f"ID: {req_id} Response Code: {response.status_code}")
+        logger.info("ID: %s Response Code: %s", req_id, response.status_code)
         return response
