@@ -126,9 +126,9 @@ class CrossReferenceManager(ABC):
                     xref_source_parser_name=mapping.parser_name,
                     source=target_source,
                     idx=target_idx,
-                    mapping_strategy=self.__class__.__name__,
+                    string_match_strategy=self.__class__.__name__,
                     disambiguation_strategy=mapping.disambiguation_strategy,
-                    confidence=mapping.confidence,
+                    string_match_confidence=mapping.string_match_confidence,
                     additional_metadata=mapping.metadata,
                 )
                 yield xref_mapping

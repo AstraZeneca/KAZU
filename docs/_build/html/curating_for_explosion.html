@@ -339,110 +339,24 @@
 <p>Many entities in Biomedical NER do not require sophisticated NER or disambiguation techniques, as they are often
 unambiguous, and have few genuine synonyms. For instance, terms such as “Breast Cancer” and “mitosis” can be taken at face value, and
 simple string matching techniques can be employed (in our case, we use the <a class="reference external" href="https://spacy.io/api/phrasematcher">Spacy PhraseMatcher</a>).</p>
-<p>However, the terms in ontologies tend to be noisy when taken ‘wholesale’, and need curation in order to ensure high precision matching.</p>
+<p>However, the string labels in ontologies tend to be noisy when taken ‘wholesale’, and need curation in order to ensure high precision matching.
+For instance, the <a class="reference external" href="http://amigo.geneontology.org/amigo/term/GO:0031975">Gene Ontology reference for envelope</a> is highly ambiguous -
+we wouldn’t want this to be tagged every time we see the string ‘envelope’ appear in text. On the other hand
+<a class="reference external" href="http://amigo.geneontology.org/amigo/term/GO:1903575">cornified envelope assembly</a> is highly specific, and whenever we see this string,
+we can safely assume it refers to this GO id.</p>
+<p>Given an ontology can contain 100 000s of labels, how do we curate these? It’s too labour intensive to look at every one. Therefore, we
+apply some pragmaticism in order to produce a set of precise labels we want to use for dictionary based NER and linking.</p>
 <p>In Kazu, we take the following approach:</p>
-<ol class="arabic">
-<li><p>generate synonym candidates from the raw ontology to build a putative pipeline.</p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.ontology_matching</span> <span class="kn">import</span> <span class="n">assemble_pipeline</span>
-<span class="kn">from</span> <span class="nn">kazu.modelling.ontology_preprocessing.base</span> <span class="kn">import</span> <span class="n">MondoOntologyParser</span>
-<span class="kn">from</span> <span class="nn">kazu.modelling.ontology_preprocessing.synonym_generation</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CombinatorialSynonymGenerator</span><span class="p">,</span>
-    <span class="n">StringReplacement</span><span class="p">,</span>
-    <span class="n">StopWordRemover</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">syn_generator</span> <span class="o">=</span> <span class="n">CombinatorialSynonymGenerator</span><span class="p">(</span>
-    <span class="p">[</span><span class="n">StopWordRemover</span><span class="p">(),</span> <span class="n">StringReplacement</span><span class="p">(</span><span class="n">include_greek</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
-<span class="p">)</span>
-<span class="n">parser</span> <span class="o">=</span> <span class="n">MondoOntologyParser</span><span class="p">(</span>
-    <span class="n">in_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data_origin</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">synonym_generator</span><span class="o">=</span><span class="n">syn_generator</span>
-<span class="p">)</span>
-<span class="n">nlp</span> <span class="o">=</span> <span class="n">assemble_pipeline</span><span class="o">.</span><span class="n">main</span><span class="p">(</span>
-    <span class="n">parser_name_to_entity_type</span><span class="o">=</span><span class="p">{</span><span class="n">parser</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="s2">&quot;disease&quot;</span><span class="p">},</span>
-    <span class="n">parsers</span><span class="o">=</span><span class="p">[</span><span class="n">parser</span><span class="p">],</span>
-    <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;disease&quot;</span><span class="p">},</span>
-    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;~/noisy_spacy_pipeline&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-</li>
-<li><p>we then run this pipeline over a large corpora of text, and look at the frequency of each hit. Note, the below
-is for illustration only - you’ll probably want a more sophisticated set up when doing this on a large document set!</p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
-<span class="kn">from</span> <span class="nn">kazu.steps.joint_ner_and_linking.explosion</span> <span class="kn">import</span> <span class="n">ExplosionStringMatchingStep</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">AnnotatedPhrase</span><span class="p">:</span>
-    <span class="n">term</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">symbolic</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">case_sensitive</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">term_norm_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="n">examples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">AnnotatedPhraseEncoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">AnnotatedPhrase</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span>
-        <span class="c1"># Base class default() raises TypeError:</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">AnnotatedPhraseEncoder</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
-
-
-<span class="c1"># get_docs represents some function to get documents relevant to you</span>
-<span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_docs</span><span class="p">()</span>
-<span class="n">noisy_step</span> <span class="o">=</span> <span class="n">ExplosionStringMatchingStep</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;~/noisy_spacy_pipeline&quot;</span><span class="p">)</span>
-
-<span class="n">noisy_step</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-<span class="n">curatable_phrases</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sections</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">entities</span><span class="p">:</span>
-            <span class="n">term_norm_mapping</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">term</span><span class="o">.</span><span class="n">parser_name</span><span class="p">:</span> <span class="n">term</span><span class="o">.</span><span class="n">term_norm</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">ent</span><span class="o">.</span><span class="n">syn_term_to_synonym_terms</span>
-            <span class="p">}</span>
-            <span class="n">symbolic</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_symbolic</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ent</span><span class="o">.</span><span class="n">syn_term_to_synonym_terms</span><span class="p">)</span>
-            <span class="n">to_curate</span> <span class="o">=</span> <span class="n">AnnotatedPhrase</span><span class="p">(</span>
-                <span class="n">term</span><span class="o">=</span><span class="n">ent</span><span class="o">.</span><span class="n">match</span><span class="p">,</span>
-                <span class="n">action</span><span class="o">=</span><span class="s2">&quot;to_curate&quot;</span><span class="p">,</span>
-                <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span><span class="p">,</span>
-                <span class="n">term_norm_mapping</span><span class="o">=</span><span class="n">term_norm_mapping</span><span class="p">,</span>
-                <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="n">section</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">ent</span><span class="o">.</span><span class="n">start</span> <span class="p">:</span> <span class="n">ent</span><span class="o">.</span><span class="n">end</span><span class="p">]],</span>
-            <span class="p">)</span>
-            <span class="n">curatable_phrases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">to_curate</span><span class="p">)</span>
-
-<span class="n">save</span><span class="p">(</span><span class="s2">&quot;~/phrases_to_curate.jsonl&quot;</span><span class="p">,</span> <span class="n">curatable_phrases</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-</li>
-<li><p>we curate the phrases_to_curate.jsonl file, according to whether they look like good matches or not for a given parser, and whether case matters.</p></li>
-<li><p>Now, the final pipeline can be generated as follows:</p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nlp</span> <span class="o">=</span> <span class="n">assemble_pipeline</span><span class="o">.</span><span class="n">main</span><span class="p">(</span>
-    <span class="n">parser_name_to_entity_type</span><span class="o">=</span><span class="p">{</span><span class="n">parser</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="s2">&quot;disease&quot;</span><span class="p">},</span>
-    <span class="n">curated_list</span><span class="o">=</span><span class="s2">&quot;~/phrases_to_curate.jsonl&quot;</span><span class="p">,</span>
-    <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;disease&quot;</span><span class="p">},</span>
-    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;~/&lt;kazu model pack&gt;/spacy_pipeline&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-</li>
+<ol class="arabic simple">
+<li><p>Generate synonym candidates from the raw ontology to build a putative list of terms we might want to use. If the term is symbolic,
+we assume it’s case sensitive. Otherwise assume case insensitive.</p></li>
+<li><p>Build a pipeline from this list, execute this pipeline over a large corpora of target data, and explore the results to get a sense of
+which terms are ‘noisy’</p></li>
+<li><p>Curate the top x hits by frequency, to determine whether a given term is precise enough in it’s own right to be valid for dictionary based NER.
+We assume here that if a term doesn’t hit frequently enough to be considered in step 2, it’s probably safe to include. Depending on your target
+data, this may be invalid -  so in practice, the curation approach is iterative.</p></li>
 </ol>
+<p>TODO: add a worked example</p>
 </section>
 
         </article>

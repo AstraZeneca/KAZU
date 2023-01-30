@@ -9,3 +9,4 @@ ent_class_preferred_order:
   - go_bp
   - go_mf
   - go_cc
+ent_namespace_preferred_order: ${MappingStep.strategy_runner.ner_namespace_processing_order}

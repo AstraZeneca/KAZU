@@ -11,6 +11,7 @@ from hydra.utils import instantiate
 
 from kazu.data.data import Entity, Document
 from kazu.pipeline import Pipeline
+from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.utils.grouping import sort_then_group
 
 
@@ -24,7 +25,7 @@ def acceptance_criteria() -> Dict[str, Dict[str, Dict[str, float]]]:
     return data
 
 
-@hydra.main(config_path="../../", config_name="conf")
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../", config_name="conf")
 def execute_full_pipeline_acceptance_test(cfg):
     manager = instantiate(cfg.LabelStudioManager)
     pipeline: Pipeline = instantiate(cfg.Pipeline)
@@ -52,7 +53,7 @@ class SectionScorer:
         self.calculate_ner_matches()
 
         self.gold_to_test_mappings: Dict[
-            Tuple[Entity, str], Dict[str, Tuple[str, str]]
+            Tuple[Entity, str], Dict[str, Set[Tuple[str, str]]]
         ] = defaultdict(dict)
         self.calculate_linking_matches()
 
@@ -277,7 +278,7 @@ def analyse_full_pipeline(
     )
 
 
-@hydra.main(config_path="../../", config_name="conf")
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../", config_name="conf")
 def check_annotation_consistency(cfg):
 
     manager = instantiate(cfg.LabelStudioManager)

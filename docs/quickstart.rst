@@ -4,9 +4,6 @@ Quickstart
 Installation
 ------------
 
-Note, currently not functional - install from repo only at present.
-Ensure you are on version 21.0 or newer of pip.
-
 .. code-block:: console
 
    pip install kazu
@@ -15,56 +12,57 @@ Ensure you are on version 21.0 or newer of pip.
 
 Model Pack
 ----------
-In order to use the majority of Kazu, you will need the model pack, which contains
-the pretrained models required by the pipeline. This is available from <TBA>
+In order to use the majority of Kazu, you will need a model pack, which contains
+the pretrained models and knowledge bases/ontologies required by the pipeline.
+These are available from the `release page <https://github.com/astrazeneca/kazu/releases>`_
+
+Default configuration
+---------------------
+Kazu has a LOT of moving parts, each of which can be configured according to your requirements.
+Since this can get complicated, we use `Hydra <https://hydra.cc/docs/intro/>`_ to manage different
+configurations, and provide a 'default' configuration that is generally useful in most circumstances
+(and is also a good starting point for your own tweaks). This default configuration is located in
+the 'conf/' directory of the model pack.
+
+Processing your first document
+------------------------------
+
+.. testcode::
+    :skipif: kazu_model_pack_missing
+
+    import hydra
+    from hydra.utils import instantiate
+
+    from kazu.data.data import Document
+    from kazu.pipeline import Pipeline
+    from kazu.utils.constants import HYDRA_VERSION_BASE
+    from pathlib import Path
+    import os
+
+    # the hydra config is kept in the model pack
+    cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')
+    @hydra.main(version_base=HYDRA_VERSION_BASE,config_path=str(cdir),config_name='config')
+    def kazu_test(cfg):
+        pipeline: Pipeline = instantiate(cfg.Pipeline)
+        text = "EGFR mutations are often implicated in lung cancer"
+        doc = Document.create_simple_document(text)
+        pipeline([doc])
+        print(f"{doc.sections[0].text}")
+
+    if __name__ == '__main__':
+        kazu_test()
+
+
+.. testoutput::
+    :hide:
+    :skipif: kazu_model_pack_missing
+
+    EGFR mutations are often implicated in lung cancer
+
+You can now inspect the doc object, and explore what entities were detected on each section
 
 Running Steps
 -------------
 Components are wrapped as instances of :class:`kazu.steps.step.Step`.
 
 .. include:: single_step_example.rst
-
-Advanced Pipeline configuration with Hydra
--------------------------------------------
-
-To create an NLP pipeline, you need to instantiate steps. Given the large amount
-of configuration required, the easiest way to do this is with Hydra https://hydra.cc/docs/intro/
-
-Here, you will need a hydra config directory (see kazu/conf for an example).
-
-First, export the path of your config directory to KAZU_CONFIG_DIR.
-
-To use the example kazu/conf config you will need to
-set the environment variable KAZU_MODEL_PACK to a path for a kazu model pack,
-or manually update the model paths that use the variable - search for
-`${oc.env:KAZU_MODEL_PACK}` in kazu/conf).
-
-.. testcode::
-    :skipif: kazu_config_missing or kazu_model_pack_missing
-
-    import os
-    from hydra import compose, initialize_config_dir
-    from hydra.utils import instantiate
-    from kazu.data.data import Document
-    from kazu.pipeline import Pipeline
-    # some text we want to process
-    text = """EGFR is a gene"""
-
-    with initialize_config_dir(config_dir=os.environ.get("KAZU_CONFIG_DIR")):
-        cfg = compose(config_name="config")
-        # instantiate a pipeline based on Hydra defaults
-        pipeline: Pipeline = instantiate(cfg.Pipeline)
-        # create an instance of Document from our text string
-        doc = Document.create_simple_document(text)
-        # Pipeline takes a List[Document] as an argument to __call__
-        # and returns a processed List[Document]
-        result: Document = pipeline([doc])[0]
-        # a Document is composed of Sections
-        # (a Document created with create_simple_document has only one)
-        print(result.sections[0].get_text())
-
-.. testoutput::
-    :hide:
-    :skipif: kazu_config_missing or kazu_model_pack_missing
-
-    EGFR is a gene

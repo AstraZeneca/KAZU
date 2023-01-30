@@ -3,7 +3,7 @@ from typing import Optional, Callable
 
 from py4j.java_gateway import JavaGateway
 
-from kazu.data.data import Document, Entity, Mapping, LinkRanks
+from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step
 
 
@@ -81,9 +81,9 @@ class SethStep(Step):
                                 source=self.entity_class,
                                 parser_name="n/a",
                                 idx=self.entity_class,
-                                mapping_strategy=self.namespace(),
+                                string_match_strategy=self.namespace(),
                                 disambiguation_strategy=None,
-                                confidence=LinkRanks.PROBABLE,
+                                string_match_confidence=StringMatchConfidence.PROBABLE,
                             )
                         ],
                     ),

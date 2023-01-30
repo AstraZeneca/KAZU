@@ -1,15 +1,16 @@
 from typing import Any, Optional
 
 from pytorch_lightning import LightningModule
-from transformers import AutoModelForTokenClassification, AutoModel
+from transformers import PreTrainedModel
 
 
 class PLAutoModelForTokenClassification(LightningModule):
-    def __init__(self, model: AutoModelForTokenClassification, *args: Any, **kwargs: Any):
+    def __init__(self, model: PreTrainedModel, *args: Any, **kwargs: Any):
         """
         very simple Lightning wrapper for AutoModelForTokenClassification
 
-        :param model: instance of AutoModelForTokenClassification
+        :param model: A pretrained model for token classification - usually created with
+            AutoModelForTokenClassification.from_pretrained
         :param args:
         :param kwargs:
         """
@@ -21,11 +22,11 @@ class PLAutoModelForTokenClassification(LightningModule):
 
 
 class PLAutoModel(LightningModule):
-    def __init__(self, model: AutoModel, *args: Any, **kwargs: Any):
+    def __init__(self, model: PreTrainedModel, *args: Any, **kwargs: Any):
         """
         very simple Lightning wrapper for AutoModel
 
-        :param model: instance of AutoModel
+        :param model: A pretrained model - usually created with AutoModel.from_pretrained
         :param args:
         :param kwargs:
         """

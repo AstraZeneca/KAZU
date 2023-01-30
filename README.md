@@ -17,6 +17,8 @@ If you want to use Kazu, please cite our EMNLP 2022 publication!
 
 citation link TBA
 
+[Please click here for the web live demo (Swagger UI) from http://kazu.korea.ac.kr/](http://kazu.korea.ac.kr/)
+
 [Please click here for the TinyBERN2 training and evaluation code](https://github.com/dmis-lab/KAZU-NER-module)
 
 
@@ -42,32 +44,33 @@ To make use of these, and process a simple document:
 
 ```python
 
-from hydra import initialize_config_dir, compose
+import hydra
 from hydra.utils import instantiate
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
+from kazu.utils.constants import HYDRA_VERSION_BASE
 from pathlib import Path
 import os
 
 # the hydra config is kept in the model pack
-cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')  
-with initialize_config_dir(config_dir=str(cdir)):
-    cfg = compose(
-        config_name="config",
-        overrides=[],
-    )
+cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')
+@hydra.main(version_base=HYDRA_VERSION_BASE,config_path=str(cdir),config_name='config')
+def kazu_test(cfg):
     pipeline: Pipeline = instantiate(cfg.Pipeline)
     text = "EGFR mutations are often implicated in lung cancer"
     doc = Document.create_simple_document(text)
     pipeline([doc])
     print(f"{doc.get_entities()}")
 
+if __name__ == '__main__':
+    kazu_test()
+
 ```
 
 # Documentation
 
-[Find our docs here](https://psychic-chainsaw-f197cc2b.pages.github.io/_build/html/index.html)
+[Find our docs here](https://astrazeneca.github.io/KAZU/_build/html/index.html)
 
 ## License
 

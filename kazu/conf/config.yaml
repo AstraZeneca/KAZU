@@ -1,13 +1,13 @@
 defaults:
   - ray: local
   - ontology_parser: default
+  - indices: default
   - PLSapbertModel: default
   - SpacyPipeline: default
   - StanzaPipeline: default
   - AbbreviationFinderStep: default
   - SpacyNerStep: default
   - TransformersModelForTokenClassificationNerStep: default
-  - NerDeDuplicationStep: default
   - SapBertForEntityLinkingStep: default
   - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
@@ -27,3 +27,17 @@ defaults:
   - LabelStudioManager: default
   - Middlewares: default
   - EntityClassDisambiguationStep: default
+  - confidence: default
+  - cache_sizes: default
+
+# we set certain env vars here for things that are statically initialised
+hydra:
+  job:
+    env_set:
+      # Note that the cache_sizes config also modifies this env_set in order to
+      # set environment variables related to cache sizes.
+      # That config is in cache_sizes/default.yaml so that all cache size related config
+      #  can be in a single place for ease of discoverability and modification,
+      # whether it affects an environment variable or not.
+      TOKENIZERS_PARALLELISM: false # prevent rust tokenisers from forking
+      PL_DISABLE_FORK: 1 # prevent pytorch lighting from spawning processes, which causes Ray to freeze

@@ -1,12 +1,26 @@
+import functools
 import json
 import logging
 import os
 import re
 import sqlite3
 from abc import ABC
+from collections import defaultdict
 from functools import cache
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet, Union
+from typing import (
+    cast,
+    List,
+    Tuple,
+    Dict,
+    Any,
+    Iterable,
+    Set,
+    Optional,
+    FrozenSet,
+    Union,
+    DefaultDict,
+)
 from urllib import parse
 
 import pandas as pd
@@ -17,6 +31,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTerm,
     SimpleValue,
+    CuratedTerm,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
@@ -34,6 +49,46 @@ DATA_ORIGIN = "data_origin"
 
 
 logger = logging.getLogger(__name__)
+
+
+def load_curated_terms(path: PathLike) -> List[CuratedTerm]:
+    """
+    load curated terms from a Path
+
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :return:
+    """
+    with open(path, mode="r") as jsonlf:
+        return [CuratedTerm(**json.loads(line)) for line in jsonlf]
+
+
+@functools.cache
+def get_curated_terms_by_parser(path: PathLike) -> DefaultDict[str, List[CuratedTerm]]:
+    """
+    return a list of curated terms indexed by parser name
+
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :return:
+    """
+    terms = load_curated_terms(path)
+    terms_by_parser = defaultdict(list)
+    for term in terms:
+        for parser_name in term.curated_id_mappings:
+            terms_by_parser[parser_name].append(term)
+    return terms_by_parser
+
+
+def get_curated_terms_for_parser(path: PathLike, parser_name: str) -> List[CuratedTerm]:
+    """
+    for a given parser name, get all the curated terms associated with it
+
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :param parser_name: name of parser that curated terms should be extracted
+        for, from the input path
+    :return:
+    """
+    terms_by_parser = get_curated_terms_by_parser(path)
+    return terms_by_parser[parser_name]
 
 
 class OntologyParser(ABC):
@@ -73,6 +128,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -90,7 +146,11 @@ class OntologyParser(ABC):
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
         :param excluded_ids: optional set of ids to exclude from the parsing process
+        :param additional_synonyms: terms to inject into the parser if given. Each term should have
+            :attr:`kazu.data.data.CuratedTerm.curated_id_mappings` populated with
+            key=self.parser_name, value: identifier
         """
+
         self.in_path = in_path
         self.entity_class = entity_class
         self.name = name
@@ -101,6 +161,7 @@ class OntologyParser(ABC):
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.excluded_ids = excluded_ids
+        self.additional_synonyms = additional_synonyms
 
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
@@ -292,14 +353,42 @@ class OntologyParser(ABC):
                 )
 
     def drop_excluded_ids(self):
+        assert self.parsed_dataframe is not None
         if self.excluded_ids is not None:
             self.parsed_dataframe = self.parsed_dataframe[
                 ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
             ].copy()
 
+    def _add_additional_synonyms(self):
+        assert self.parsed_dataframe is not None
+        if self.additional_synonyms is not None:
+            logger.info(
+                f"{len(self.additional_synonyms)} curated synonyms for {self.name} detected."
+            )
+            dataframes_to_add = []
+            for curated_term in self.additional_synonyms:
+                idx = curated_term.curated_id_mappings[self.name]
+                query_row = (
+                    self.parsed_dataframe[self.parsed_dataframe[IDX] == idx]
+                    .head(1)
+                    .copy()
+                    .reset_index()
+                )
+                query_row[SYN] = curated_term.term
+                query_row[MAPPING_TYPE] = "kazu_curated"
+                dataframes_to_add.append(query_row)
+
+            if len(dataframes_to_add) > 0:
+                dataframes_to_add.append(self.parsed_dataframe)
+
+                self.parsed_dataframe = pd.concat(dataframes_to_add)
+                self.parsed_dataframe.drop_duplicates(inplace=True)
+                self.parsed_dataframe.reset_index(inplace=True)
+
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
             self.parsed_dataframe = self.parse_to_dataframe()
+            self._add_additional_synonyms()
             self.drop_excluded_ids()
             self.parsed_dataframe[DATA_ORIGIN] = self.data_origin
             self.parsed_dataframe[IDX] = self.parsed_dataframe[IDX].astype(str)
@@ -317,7 +406,7 @@ class OntologyParser(ABC):
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
-        return metadata
+        return cast(Dict[str, Dict[str, SimpleValue]], metadata)
 
     def export_synonym_terms(self) -> Set[SynonymTerm]:
         self._parse_df_if_not_already_parsed()
@@ -429,27 +518,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     # not present in config)
     allowed_sources = {"MONDO", "HP"}
 
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name="OPENTARGETS_DISEASE",
-        )
-
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
 
@@ -497,27 +565,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         "pathways",
         "targetClass",
     }
-
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name="OPENTARGETS_TARGET",
-        )
 
     def score_and_group_ids(
         self,
@@ -601,27 +648,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
 
 class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            name="OPENTARGETS_MOLECULE",
-            excluded_ids=excluded_ids,
-        )
-
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
 
@@ -682,6 +708,7 @@ class RDFGraphParser(OntologyParser):
         excluded_ids: Optional[Set[str]] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -692,6 +719,7 @@ class RDFGraphParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            additional_synonyms=additional_synonyms,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -760,7 +788,7 @@ class RDFGraphParser(OntologyParser):
                     default_labels.append(str(obj))
                     iris.append(str(sub))
                     syns.append(str(other_syn_obj))
-                    mapping_type.append(syn_predicate)
+                    mapping_type.append(str(syn_predicate))
 
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
@@ -794,6 +822,7 @@ class GeneOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -804,6 +833,7 @@ class GeneOntologyParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            additional_synonyms=additional_synonyms,
         )
         self.instances.add(name)
         self.query = query
@@ -838,15 +868,17 @@ class GeneOntologyParser(OntologyParser):
         syns = []
         mapping_type = []
 
-        for row in result:
-            idx = row.goid
-            if "obsolete" in row.label:
-                logger.info(f"skipping obsolete id: {row.goid}, {row.label}")
+        # there seems to be a bug in rdflib that means the iterator sometimes exits early unless we covert to list first
+        for row in list(result):
+            idx = str(row.goid)
+            label = str(row.label)
+            if "obsolete" in label:
+                logger.info(f"skipping obsolete id: {idx}, {label}")
                 continue
             if self._uri_regex.match(idx):
-                default_labels.append(row.label)
-                iris.append(row.goid)
-                syns.append(row.synonym)
+                default_labels.append(label)
+                iris.append(idx)
+                syns.append(str(row.synonym))
                 mapping_type.append("hasExactSynonym")
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
@@ -863,11 +895,13 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -877,7 +911,8 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
-            name="BP_GENE_ONTOLOGY",
+            name=name,
+            additional_synonyms=additional_synonyms,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -900,11 +935,13 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -914,7 +951,8 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
-            name="MF_GENE_ONTOLOGY",
+            name=name,
+            additional_synonyms=additional_synonyms,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -937,11 +975,13 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -951,7 +991,8 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
-            name="CC_GENE_ONTOLOGY",
+            name=name,
+            additional_synonyms=additional_synonyms,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -980,17 +1021,19 @@ class UberonOntologyParser(RDFGraphParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
 
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
-            name="UBERON",
+            name=name,
             uri_regex=re.compile("^http://purl.obolibrary.org/obo/UBERON_[0-9]+$"),
             synonym_predicates=(
                 rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
@@ -1000,6 +1043,7 @@ class UberonOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            additional_synonyms=additional_synonyms,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1013,27 +1057,6 @@ class MondoOntologyParser(OntologyParser):
     e.g.
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
-
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name="MONDO",
-        )
 
     def find_kb(self, string: str):
         path = parse.urlparse(string).path
@@ -1098,12 +1121,14 @@ class EnsemblOntologyParser(OntologyParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         additional_syns_path: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1113,7 +1138,8 @@ class EnsemblOntologyParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
-            name="ENSEMBL",
+            name=name,
+            additional_synonyms=additional_synonyms,
         )
 
         with open(additional_syns_path, "r") as f:
@@ -1201,27 +1227,6 @@ class ChemblOntologyParser(OntologyParser):
     https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz
     """
 
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name="CHEMBL",
-        )
-
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
 
@@ -1254,16 +1259,18 @@ class CLOOntologyParser(RDFGraphParser):
         self,
         in_path: str,
         entity_class: str,
+        name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
-            name="CLO",
+            name=name,
             uri_regex=re.compile("^http://purl.obolibrary.org/obo/CLO_[0-9]+$"),
             synonym_predicates=(
                 rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
@@ -1273,6 +1280,7 @@ class CLOOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            additional_synonyms=additional_synonyms,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1286,27 +1294,6 @@ class CellosaurusOntologyParser(OntologyParser):
     """
 
     cell_line_re = re.compile("cell line", re.IGNORECASE)
-
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name="CELLOSAURUS",
-        )
 
     def find_kb(self, string: str) -> str:
         return "CELLOSAURUS"
@@ -1436,27 +1423,6 @@ class MeddraOntologyParser(OntologyParser):
 
     _exclude_soc = ["Surgical and medical procedures", "Social circumstances", "Investigations"]
 
-    def __init__(
-        self,
-        in_path: str,
-        entity_class: str,
-        string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
-        data_origin: str = "unknown",
-        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-    ):
-        super().__init__(
-            in_path=in_path,
-            entity_class=entity_class,
-            string_scorer=string_scorer,
-            synonym_merge_threshold=synonym_merge_threshold,
-            data_origin=data_origin,
-            synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            name="MEDDRA_DISEASE",
-        )
-
     def find_kb(self, string: str) -> str:
         return "MEDDRA"
 
@@ -1465,20 +1431,25 @@ class MeddraOntologyParser(OntologyParser):
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
         llt_path = os.path.join(self.in_path, "llt.asc")
+        # note: this isn't true! But the pandas stubs currently think that the names argument
+        # here has to be a list of str, but it doesn't, it just has to be a sequence of strings
+        list_mdhier_names = cast(List[str], self._mdhier_asc_col_names)
         hier_df = pd.read_csv(
             mdheir_path,
             sep="$",
             header=None,
-            names=self._mdhier_asc_col_names,
+            names=list_mdhier_names,
             dtype="string",
         )
         hier_df = hier_df[~hier_df["soc_name"].isin(self._exclude_soc)]
 
+        # as above
+        list_llt_names = cast(List[str], self._llt_asc_column_names)
         llt_df = pd.read_csv(
             llt_path,
             sep="$",
             header=None,
-            names=self._llt_asc_column_names,
+            names=list_llt_names,
             usecols=("llt_name", "pt_code"),
             dtype="string",
         )
@@ -1517,3 +1488,84 @@ class MeddraOntologyParser(OntologyParser):
             {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
         )
         return df
+
+
+class CLOntologyParser(RDFGraphParser):
+    """
+    input should be an CL owl file
+    e.g.
+    https://www.ebi.ac.uk/ols/ontologies/cl
+    """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
+    ):
+
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            uri_regex=re.compile("^http://purl.obolibrary.org/obo/CL_[0-9]+$"),
+            synonym_predicates=(
+                rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
+            ),
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
+            include_entity_patterns=include_entity_patterns,
+            exclude_entity_patterns=exclude_entity_patterns,
+            additional_synonyms=additional_synonyms,
+        )
+
+    def find_kb(self, string: str) -> str:
+        return "CL"
+
+
+class HGNCGeneFamilyParser(OntologyParser):
+
+    syn_column_keys = {"Family alias", "Common root gene symbol"}
+
+    def find_kb(self, string: str) -> str:
+        return "HGNC_GENE_FAMILY"
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        df = pd.read_csv(self.in_path, sep="\t")
+        data = []
+        for family_id, row in (
+            df.groupby(by="Family ID").agg(lambda col_series: set(col_series.dropna())).iterrows()
+        ):
+            # in theory, there should only be one family name per ID
+            assert len(row["Family name"]) == 1
+            default_label = next(iter(row["Family name"]))
+            data.append(
+                {
+                    SYN: default_label,
+                    MAPPING_TYPE: "Family name",
+                    DEFAULT_LABEL: default_label,
+                    IDX: family_id,
+                }
+            )
+            data.extend(
+                {
+                    SYN: syn,
+                    MAPPING_TYPE: key,
+                    DEFAULT_LABEL: default_label,
+                    IDX: family_id,
+                }
+                for key in self.syn_column_keys
+                for syn in row[key]
+            )
+        return pd.DataFrame.from_records(data)

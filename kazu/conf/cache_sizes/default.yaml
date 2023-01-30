@@ -1,0 +1,22 @@
+# @package _global_
+
+# note: this is a 'global' package - which makes it 'top-level' in the config.
+# This is necessary for us to both:
+# 1. Modify the hydra job config, in order to set environment variables that
+#    relate to cache sizes.
+# 2. Set other cache size related config values in a 'cache_sizes' package.
+
+# Doing it this way means we can have a single file with all the cache size config,
+# so discovering and modifying all of the cache size options is simpler.
+cache_sizes:
+  # For clarity: this value will be available elsewhere as:
+  # ${cache_sizes.SapbertStringSimilarityScorer_cache_size}
+  SapbertStringSimilarityScorer_cache_size: 1000
+
+hydra:
+  job:
+    env_set:
+      # prevents unnecessary recalculation of document representation across multiple instances of TfIdfDisambiguationStrategy
+      KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE: 20
+      KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE: 1 # should only be 1 or 0. Only change this if you know what you're doing!
+      KAZU_STRING_NORMALIZER_CACHE_SIZE: 5000 # cache size for StringNormalizer

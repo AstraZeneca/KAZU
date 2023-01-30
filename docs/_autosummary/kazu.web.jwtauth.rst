@@ -9,6 +9,12 @@ kazu.web.jwtauth
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      on_auth_error
+   
    
 
    

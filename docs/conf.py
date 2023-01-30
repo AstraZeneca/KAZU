@@ -14,6 +14,7 @@ import inspect
 import os
 import subprocess
 import sys
+from typing import Any
 
 import kazu
 
@@ -97,7 +98,6 @@ html_theme_options = {
 doctest_global_setup = """
 import os
 
-kazu_config_missing = os.environ.get("KAZU_CONFIG_DIR") is None
 kazu_model_pack_missing = os.environ.get("KAZU_MODEL_PACK") is None
 """
 
@@ -138,7 +138,7 @@ def linkcode_resolve(domain, info):
     if submod is None:
         return None
 
-    obj = submod
+    obj: Any = submod
     for part in fullname.split("."):
         try:
             # pandas has a warnings.catch_warnings context manager here

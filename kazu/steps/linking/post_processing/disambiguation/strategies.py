@@ -2,6 +2,7 @@ import functools
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from os import getenv
 from typing import Tuple, Optional, Set, Dict, Iterable, FrozenSet
 
 import numpy as np
@@ -10,6 +11,7 @@ from kazu.data.data import (
     Document,
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
+    DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import (
     MetadataDatabase,
@@ -30,6 +32,14 @@ class DisambiguationStrategy(ABC):
     preprocessing work that may be required (see :class:`.StrategyRunner` for the complexities of
     how MappingStrategy and DisambiguationStrategy are coordinated).
     """
+
+    def __init__(self, confidence: DisambiguationConfidence):
+        """
+
+        :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
+            for human users, and has no bearing on the actual algorithm.
+        """
+        self.confidence = confidence
 
     @abstractmethod
     def prepare(self, document: Document):
@@ -69,9 +79,8 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
        hit
     """
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, confidence: DisambiguationConfidence):
+        super().__init__(confidence)
         self.mapped_ids: Set[Tuple[str, str, str]] = set()
 
     def prepare(self, document: Document):
@@ -124,6 +133,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     def __init__(
         self,
+        confidence: DisambiguationConfidence,
         scorer: TfIdfScorer,
         context_threshold: float = 0.7,
         relevant_aggregation_strategies: Optional[Iterable[EquivalentIdAggregationStrategy]] = None,
@@ -135,6 +145,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :param relevant_aggregation_strategies: Only consider these strategies when selecting synonyms from the
             synonym database, when building a representation. If none, all strategies will be considered
         """
+        super().__init__(confidence)
         self.context_threshold = context_threshold
         if relevant_aggregation_strategies is None:
             self.relevant_aggregation_strategies = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
@@ -144,7 +155,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         self.scorer = scorer
         self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
 
-    @functools.lru_cache(maxsize=1)
+    @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document):
         """
         build document representations by parser names here, and store in a dict. This method is cached so
@@ -163,7 +174,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         )
 
     @staticmethod
-    @functools.lru_cache(maxsize=20)
+    @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE", 20)))
     def cacheable_build_document_representation(
         scorer: TfIdfScorer, doc: Document, parsers: FrozenSet[str]
     ) -> Dict[str, np.ndarray]:

@@ -1,15 +1,15 @@
 import dataclasses
 import json
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import pytest
 import spacy
 from spacy.lang.en import English
 
-from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
+from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy, CuratedTerm
 from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, CuratedTerm
+from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
     SynonymGenerator,
@@ -20,11 +20,7 @@ from kazu.tests.utils import DummyParser
 
 def test_constructor():
     nlp = English()
-    default_config = {
-        "span_key": "my_results",
-        "parser_name_to_entity_type": {},
-    }
-    ontology_matcher = OntologyMatcher(nlp, **default_config)
+    ontology_matcher = OntologyMatcher(nlp, span_key="my_results", parser_name_to_entity_type={})
     assert ontology_matcher.span_key == "my_results"
     assert ontology_matcher.nr_strict_rules == 0
     assert ontology_matcher.nr_lowercase_rules == 0
@@ -33,7 +29,7 @@ def test_constructor():
 
 def test_initialize():
     nlp = English()
-    config = {"parser_name_to_entity_type": {}}
+    config: Dict[str, Any] = {"parser_name_to_entity_type": {}}
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
     # no matcher rules are defined

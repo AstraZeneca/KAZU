@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Union, Tuple
+from typing import List, Dict, Union, Tuple, Optional, Callable
 
 import numpy as np
 import pytorch_lightning as pl
@@ -8,10 +8,15 @@ from cachetools import LRUCache
 from omegaconf import ListConfig, OmegaConf
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 from torch.nn import CrossEntropyLoss, MSELoss
+from torch.optim.lr_scheduler import _LRScheduler
 from torch.utils.data import Dataset, DataLoader
-from torch.utils.data.dataset import T_co
-from transformers import AdamW, AutoTokenizer, InputExample, DataCollatorForTokenClassification
 from transformers import (
+    AdamW,
+    AutoTokenizer,
+    InputExample,
+    DataCollatorForTokenClassification,
+    PreTrainedTokenizer,
+    PreTrainedTokenizerFast,
     get_constant_schedule,
     get_linear_schedule_with_warmup,
     get_cosine_schedule_with_warmup,
@@ -28,7 +33,7 @@ check_min_version("4.0.0")  # at least 4.0.0... for optimerzers
 
 logger = logging.getLogger(__name__)
 
-SCHEDULES = {
+SCHEDULES: Dict[Optional[str], Callable] = {
     None: get_constant_schedule,
     "none": get_constant_schedule,
     "warmup_cosine": get_cosine_schedule_with_warmup,
@@ -46,14 +51,14 @@ class NerDataset(Dataset):
 
     def __init__(
         self,
-        tokenizer: AutoTokenizer,
+        tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
         examples: List[InputExample],
         label_map: Dict[str, int],
         max_length: int,
     ):
         """
 
-        :param tokenizer: and instance of AutoTokenizer
+        :param tokenizer: typically created from AutoTokenizer.from_pretrained
         :param examples: a list of InputExample, typically created from a
             :class:`kazu.modelling.distillation.dataprocessor.NerProcessor`
         :param label_map: str to int mapping of labels
@@ -67,7 +72,7 @@ class NerDataset(Dataset):
         self.call_count = 0
         self.cache: LRUCache = LRUCache(5000)
 
-    def __getitem__(self, index) -> T_co:
+    def __getitem__(self, index) -> Dict[str, List]:
         if index not in self.cache:
             self.cache[index] = self.convert_single_example(
                 ex_index=index, example=self.examples[index]
@@ -78,16 +83,16 @@ class NerDataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def convert_single_example(self, ex_index, example) -> Dict[str, torch.Tensor]:
+    def convert_single_example(self, ex_index, example) -> Dict[str, List]:
         textlist = example.text_a.split()
         labellist = example.label.split()
         tokens = []
         labels = []
         for i, word in enumerate(textlist):
-            token = self.tokenizer.tokenize(word)
-            tokens.extend(token)
+            tokenized = self.tokenizer.tokenize(word)
+            tokens.extend(tokenized)
             label_1 = labellist[i]
-            for m, tok in enumerate(token):
+            for m, tok in enumerate(tokenized):
                 if m == 0:
                     labels.append(label_1)
                 else:
@@ -119,6 +124,9 @@ class NerDataset(Dataset):
         label_id.append(IGNORE_IDX)
 
         input_ids = self.tokenizer.convert_tokens_to_ids(ntokens)
+        # convert_tokens_to_ids can return a single int if a single token is passed,
+        # but we know here we're dealing with lists.
+        assert isinstance(input_ids, list)
         # The mask has 1 for real tokens and 0 for padding tokens.
         input_mask = [1] * len(input_ids)
         if self.call_count < 4 and ex_index < 4:  # Examples. Executed only once per model run
@@ -260,7 +268,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         student_model_path: str,
         teacher_model_path: str,
         num_workers: int,
-        schedule: str = None,
+        schedule: Optional[str] = None,
         metric: str = "Default",
     ):
         """
@@ -284,7 +292,9 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         self.processor = NerProcessor()
         self.data_dir = data_dir
         self.max_length = max_length
-        self.tokenizer = AutoTokenizer.from_pretrained(student_model_path)
+        self.tokenizer: Union[
+            PreTrainedTokenizer, PreTrainedTokenizerFast
+        ] = AutoTokenizer.from_pretrained(student_model_path)
         super().__init__(
             schedule=schedule,
             accumulate_grad_batches=accumulate_grad_batches,
@@ -369,7 +379,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         student_model_path: str,
         teacher_model_path: str,
         num_workers: int,
-        schedule: str = None,
+        schedule: Optional[str] = None,
         metric: str = "Default",
     ):
         """
@@ -438,7 +448,9 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
         # Logging
         self.log("training_loss", loss, prog_bar=True, on_step=True)
-        lr_list = self.lr_schedulers().get_last_lr()
+        scheduler = self.lr_schedulers()
+        assert isinstance(scheduler, _LRScheduler)
+        lr_list = scheduler.get_last_lr()
         self.log("lr", lr_list[0], prog_bar=True, on_step=True)
         if lr_list[0] != lr_list[1]:
             self.log("lr1", lr_list[1], prog_bar=True, on_step=True)
@@ -518,7 +530,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         student_model_path: str,
         teacher_model_path: str,
         num_workers: int,
-        schedule: str = None,
+        schedule: Optional[str] = None,
         metric: str = "Default",
     ):
         """
@@ -591,8 +603,8 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         assert teacher_layer_num % student_layer_num == 0
         layers_per_block = int(teacher_layer_num / student_layer_num)
 
-        att_loss = 0.0
-        rep_loss = 0.0
+        att_loss = torch.Tensor([0.0])
+        rep_loss = torch.Tensor([0.0])
 
         new_teacher_atts = [
             teacher_atts[i * layers_per_block + layers_per_block - 1]
@@ -626,7 +638,9 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.log("training_loss", loss, on_step=True)
         self.log("att_loss", att_loss, on_step=True)
         self.log("rep_loss", rep_loss, on_step=True)
-        lr_list = self.lr_schedulers().get_last_lr()
+        scheduler = self.lr_schedulers()
+        assert isinstance(scheduler, _LRScheduler)
+        lr_list = scheduler.get_last_lr()
         self.log("lr", lr_list[0], prog_bar=True, on_step=True)
         if lr_list[0] != lr_list[1]:
             self.log("lr1", lr_list[1], prog_bar=True, on_step=True)

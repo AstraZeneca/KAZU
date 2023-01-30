@@ -13,5 +13,5 @@ def test_ExplosionStringMatchingStep(kazu_test_config):
     instantiate(kazu_test_config.DictionaryEntityLinkingStep)
     step = instantiate(kazu_test_config.ExplosionStringMatchingStep)
     docs = [Document.create_simple_document(x[0]) for x in ner_simple_test_cases()]
-    successes, failures = step(docs)
-    assert len(successes) == len(docs) and len(failures) == 0
+    processed, failures = step(docs)
+    assert len(processed) == len(docs) and len(failures) == 0

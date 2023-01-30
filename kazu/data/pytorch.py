@@ -1,13 +1,12 @@
-from typing import Iterator
+from typing import Iterator, Dict, Any
 
 from torch.utils.data import IterableDataset
-from torch.utils.data.dataset import T_co
 from transformers import BatchEncoding
 
 
 class HFDataset(IterableDataset):
-    def __getitem__(self, index) -> T_co:
-        pass
+    def __getitem__(self, index):
+        pass  # type: ignore[empty-body]
 
     def __init__(self, encodings: BatchEncoding):
         """
@@ -18,7 +17,7 @@ class HFDataset(IterableDataset):
         self.encodings = encodings
         self.dataset_size = len(encodings.data["input_ids"])
 
-    def __iter__(self) -> Iterator[T_co]:
+    def __iter__(self) -> Iterator[Dict[str, Any]]:
 
         for i in range(self.dataset_size):
             yield {

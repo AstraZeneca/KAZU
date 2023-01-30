@@ -11,6 +11,7 @@ from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     SynonymTermWithMetrics,
+    CuratedTerm,
 )
 from kazu.modelling.ontology_preprocessing.base import (
     IDX,
@@ -161,6 +162,7 @@ class DummyParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         source: str = "test_parser",
         data: Optional[Dict[str, List[str]]] = None,
+        additional_synonyms_dataset: Optional[List[CuratedTerm]] = None,
     ):
         super().__init__(
             in_path,
@@ -170,6 +172,7 @@ class DummyParser(OntologyParser):
             synonym_merge_threshold,
             data_origin,
             synonym_generator,
+            additional_synonyms=additional_synonyms_dataset,
         )
         self.source = source
         if data is not None:

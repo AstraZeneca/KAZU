@@ -1,5 +1,7 @@
+import abc
 import itertools
 import urllib
+from abc import ABC
 from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
 
 from kazu.data.data import (
@@ -7,15 +9,12 @@ from kazu.data.data import (
     Mapping,
     EquivalentIdSet,
     SynonymTermWithMetrics,
-    LinkRanks,
+    StringMatchConfidence,
+    DisambiguationConfidence,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, Metadata
-from kazu.modelling.language.string_similarity_scorers import (
-    BooleanStringSimilarityScorer,
-)
-from kazu.modelling.ontology_preprocessing.base import (
-    DEFAULT_LABEL,
-)
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 
 
@@ -30,9 +29,10 @@ class MappingFactory:
     def create_mapping_from_id_sets(
         id_sets: Set[EquivalentIdSet],
         parser_name: str,
-        mapping_strategy: str,
+        string_match_strategy: str,
+        string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str],
-        confidence: LinkRanks,
+        disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
     ) -> Iterable[Mapping]:
@@ -41,9 +41,10 @@ class MappingFactory:
             yield from MappingFactory.create_mapping_from_id_set(
                 id_set=id_set,
                 parser_name=parser_name,
-                mapping_strategy=mapping_strategy,
+                string_match_strategy=string_match_strategy,
+                string_match_confidence=string_match_confidence,
                 disambiguation_strategy=disambiguation_strategy,
-                confidence=confidence,
+                disambiguation_confidence=disambiguation_confidence,
                 additional_metadata=additional_metadata,
                 strip_url=strip_url,
             )
@@ -52,9 +53,10 @@ class MappingFactory:
     def create_mapping_from_id_set(
         id_set: EquivalentIdSet,
         parser_name: str,
-        mapping_strategy: str,
+        string_match_strategy: str,
+        string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str],
-        confidence: LinkRanks,
+        disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
     ) -> Iterable[Mapping]:
@@ -64,9 +66,10 @@ class MappingFactory:
                 parser_name=parser_name,
                 source=source,
                 idx=idx,
-                mapping_strategy=mapping_strategy,
+                string_match_strategy=string_match_strategy,
+                string_match_confidence=string_match_confidence,
                 disambiguation_strategy=disambiguation_strategy,
-                confidence=confidence,
+                disambiguation_confidence=disambiguation_confidence,
                 additional_metadata=additional_metadata if additional_metadata is not None else {},
                 strip_url=strip_url,
             )
@@ -85,9 +88,10 @@ class MappingFactory:
         parser_name: str,
         source: str,
         idx: str,
-        mapping_strategy: str,
-        confidence: LinkRanks,
+        string_match_strategy: str,
+        string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str] = None,
+        disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
         xref_source_parser_name: Optional[str] = None,
@@ -105,9 +109,10 @@ class MappingFactory:
             default_label=default_label,
             idx=new_idx,
             source=source,
-            mapping_strategy=mapping_strategy,
+            string_match_strategy=string_match_strategy,
+            string_match_confidence=string_match_confidence,
             disambiguation_strategy=disambiguation_strategy,
-            confidence=confidence,
+            disambiguation_confidence=disambiguation_confidence,
             parser_name=parser_name,
             metadata=metadata,
             xref_source_parser_name=xref_source_parser_name,
@@ -124,7 +129,7 @@ class MappingFactory:
         return new_idx
 
 
-class MappingStrategy:
+class MappingStrategy(ABC):
     """
     A MappingStrategy is responsible for actualising instances of :class:`.Mapping`\\ .
 
@@ -139,17 +144,17 @@ class MappingStrategy:
     Selected instances of :class:`.EquivalentIdSet` are converted to :class:`.Mapping`\\ .
     """
 
+    DISAMBIGUATION_NOT_REQUIRED = "disambiguation_not_required"
+
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
     ):
         """
 
         :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
-            for human users, and has no bearing on the actual algorithm. Note, if after term filtering and (optional)
-            disambiguation, if multiple :class:`.EquivalentIdSet` still remain, they will all receive
-            the confidence label of :attr:`.LinkRanks.AMBIGUOUS`\\ .
+            for human users, and has no bearing on the actual algorithm.
         :param disambiguation_strategies: after :meth:`filter_terms` is called, these strategies are triggered if either
             multiple instances of :class:`.SynonymTermWithMetrics` remain, and/or any of them are ambiguous.
         """
@@ -169,6 +174,7 @@ class MappingStrategy:
         """
         pass
 
+    @abc.abstractmethod
     def filter_terms(
         self,
         ent_match: str,
@@ -191,16 +197,17 @@ class MappingStrategy:
         :param document: originating Document.
         :param terms: terms to filter.
         :param parser_name: parser name associated with these terms.
-        :return: defaults to ``set(terms)`` (i.e. no filtering).
+        :return: a set of filtered terms
         """
-        return set(terms)
+        raise NotImplementedError()
 
     def disambiguate_if_required(
         self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
-    ) -> Tuple[Set[EquivalentIdSet], Optional[str]]:
+    ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
         """
         applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
-        of the filtered_terms are ambiguous.
+        of the filtered_terms are ambiguous. If ids are still ambiguous after all strategies have run,
+        the disambiguation confidence will be :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
 
         :param filtered_terms: terms to disambiguate
         :param document: originating Document
@@ -210,22 +217,20 @@ class MappingStrategy:
 
         all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
 
-        if self.disambiguation_strategies is None:
-            return all_id_sets, None
-        elif len(filtered_terms) == 1:
-            only_term = next(iter(filtered_terms))
-            if not only_term.is_ambiguous:
-                # there's a single term that isn't ambiguous, no need to disambiguate
-                return all_id_sets, None
+        if len(all_id_sets) == 1:
+            # there's a single id set that isn't ambiguous, no need to disambiguate
+            return all_id_sets, self.DISAMBIGUATION_NOT_REQUIRED, None
+        elif self.disambiguation_strategies is None:
+            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
+        else:
+            for strategy in self.disambiguation_strategies:
+                filtered_id_sets = strategy(
+                    id_sets=all_id_sets, document=document, parser_name=parser_name
+                )
+                if len(filtered_id_sets) == 1:
+                    return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
 
-        for strategy in self.disambiguation_strategies:
-            filtered_id_sets = strategy(
-                id_sets=all_id_sets, document=document, parser_name=parser_name
-            )
-            if len(filtered_id_sets) == 1:
-                return filtered_id_sets, strategy.__class__.__name__
-
-        return all_id_sets, None
+            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
 
     def __call__(
         self,
@@ -252,15 +257,18 @@ class MappingStrategy:
             parser_name=parser_name,
         )
 
-        id_sets, successful_disambiguation_strategy = self.disambiguate_if_required(
-            filtered_terms, document, parser_name
-        )
+        (
+            id_sets,
+            successful_disambiguation_strategy,
+            disambiguation_confidence,
+        ) = self.disambiguate_if_required(filtered_terms, document, parser_name)
         yield from MappingFactory.create_mapping_from_id_sets(
             id_sets=id_sets,
             parser_name=parser_name,
-            confidence=self.confidence if len(id_sets) == 1 else LinkRanks.AMBIGUOUS,
+            string_match_confidence=self.confidence,
+            disambiguation_confidence=disambiguation_confidence,
             additional_metadata=None,
-            mapping_strategy=self.__class__.__name__,
+            string_match_strategy=self.__class__.__name__,
             disambiguation_strategy=successful_disambiguation_strategy,
         )
 
@@ -332,7 +340,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         min_term_norm_len_to_consider: int = 3,
     ):
@@ -385,7 +393,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
 
     def __init__(
         self,
-        confidence: LinkRanks,
+        confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold=80.0,
         symbolic_only: bool = False,
@@ -446,8 +454,8 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
 
     def __init__(
         self,
-        confidence: LinkRanks,
-        complex_string_scorer: BooleanStringSimilarityScorer,
+        confidence: StringMatchConfidence,
+        complex_string_scorer: StringSimilarityScorer,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         search_threshold: float = 80.0,
         embedding_threshold: float = 0.60,
@@ -506,32 +514,10 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         return selected_terms
 
 
-class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
+class NoopMappingStrategy(MappingStrategy):
     """
-    1. look for entities on the document that have mappings
-    2. see if any of these mappings correspond to any ids in the :class:`.EquivalentIdSet` on each
-       :class:`.SynonymTermWithMetrics`
-    3. filter the synonym terms according to detected mappings
+    a No-op strategy in case you want to pass all terms straight through for disambiguation
     """
-
-    found_equivalent_ids: Set[Tuple[str, str, str]]
-
-    def prepare(self, document: Document):
-        """
-        can't be cached: document state may change between executions.
-
-        :param document:
-        :return:
-        """
-        self.found_equivalent_ids = set(
-            (
-                mapping.parser_name,
-                mapping.source,
-                mapping.idx,
-            )
-            for ent in document.get_entities()
-            for mapping in ent.mappings
-        )
 
     def filter_terms(
         self,
@@ -541,15 +527,4 @@ class DefinedElsewhereInDocumentMappingStrategy(MappingStrategy):
         terms: FrozenSet[SynonymTermWithMetrics],
         parser_name: str,
     ) -> Set[SynonymTermWithMetrics]:
-        found_terms = set()
-        for term in terms:
-            for id_set in term.associated_id_sets:
-                for idx in id_set.ids:
-                    if (
-                        term.parser_name,
-                        id_set.ids_to_source[idx],
-                        idx,
-                    ) in self.found_equivalent_ids:
-                        found_terms.add(term)
-                        break
-        return found_terms
+        return set(terms)

@@ -255,31 +255,31 @@ class StringReplacement(SynonymGenerator):
 
 
 class SuffixReplacement(SynonymGenerator):
-    """Interchange all suffices within a provided set to produce new synonyms.
+    """Interchange all suffixes within a provided set to produce new synonyms.
 
     Note, this is expected to be noisy, and for most of the generated synonyms not to be valid
     words. This class is present as a generation step for high recall, with curation of synonyms
     expected later (see :ref:`curating_for_explosion`).
 
     In particular, note that this also doesn't check for the longest matching suffix - e.g. for a
-    synonym 'anaemia' and the suffices 'ia', 'a' and 'ic', the new synonyms 'anaemic' and
+    synonym 'anaemia' and the suffixes 'ia', 'a' and 'ic', the new synonyms 'anaemic' and
     'amaemiic' will both be generated.
     """
 
-    def __init__(self, suffices: Iterable[str]):
-        self.suffices = set(suffices)
+    def __init__(self, suffixes: Iterable[str]):
+        self.suffixes = set(suffixes)
 
     def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
         new_terms: Set[str] = set()
         for term in synonym.terms:
-            for suffix in self.suffices:
+            for suffix in self.suffixes:
                 # Note that this will trigger twice for 'ia' since 'a' is also present.
                 # We expect this to be noisy, and then curate from this.
                 if term.endswith(suffix):
                     term_without_suffix = term.removesuffix(suffix)
                     new_terms.update(
                         term_without_suffix + new_suffix
-                        for new_suffix in self.suffices
+                        for new_suffix in self.suffixes
                         if new_suffix is not suffix
                     )
 

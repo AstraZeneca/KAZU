@@ -1,5 +1,5 @@
 import logging
-from typing import Iterator, List, Tuple, Iterable, Dict, Set
+from typing import Iterator, List, Tuple, Iterable, Dict, Set, cast
 
 import spacy
 from kazu.data.data import (
@@ -40,7 +40,7 @@ class ExplosionStringMatchingStep(Step):
         # think about how this affects the OntologyMatcher's lookup of parser names in case they
         # are not there in the new config.
         self.spacy_pipeline = spacy.load(path)
-        matcher: OntologyMatcher = self.spacy_pipeline.get_pipe("ontology_matcher")
+        matcher = cast(OntologyMatcher, self.spacy_pipeline.get_pipe("ontology_matcher"))
         self.span_key = matcher.span_key
 
         self.synonym_db = SynonymDatabase()

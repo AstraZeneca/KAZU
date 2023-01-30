@@ -34,11 +34,17 @@ class AutoNameEnum(Enum):
         return name
 
 
-class LinkRanks(AutoNameEnum):
+class StringMatchConfidence(AutoNameEnum):
     HIGHLY_LIKELY = auto()  # almost certain to be correct
     PROBABLE = auto()  # on the balance of probabilities, will be correct
     POSSIBLE = auto()  # high degree of uncertainty
-    AMBIGUOUS = auto()  # likely ambiguous
+
+
+class DisambiguationConfidence(AutoNameEnum):
+    HIGHLY_LIKELY = auto()  # almost certain to be correct
+    PROBABLE = auto()  # on the balance of probabilities, will be correct
+    POSSIBLE = auto()  # high degree of uncertainty
+    AMBIGUOUS = auto()  # could not disambiguate
 
 
 @dataclass
@@ -107,9 +113,10 @@ class Mapping:
     source: str  # the knowledgebase/database/ontology name
     parser_name: str  # the origin of this mapping
     idx: str  # the identifier within the KB
-    mapping_strategy: str  # the strategy used to create the mapping
-    confidence: LinkRanks
-    disambiguation_strategy: Optional[str] = None  # the strategy used to disambiguate
+    string_match_strategy: str
+    string_match_confidence: StringMatchConfidence
+    disambiguation_confidence: Optional[DisambiguationConfidence] = None
+    disambiguation_strategy: Optional[str] = None
     xref_source_parser_name: Optional[str] = None  # source parser name if mapping is an XREF
     metadata: Dict[Any, Any] = field(default_factory=dict, hash=False)  # generic metadata
 
@@ -507,7 +514,8 @@ class DocumentJsonUtils:
                 )
                 if drop_terms:
                     for ent in ents_to_keep:
-                        ent.syn_term_to_synonym_terms.clear()
+                        ent["synonym_terms"].clear()
+
                 section_dict["entities"] = ents_to_keep
 
         return doc_json_dict
@@ -520,7 +528,7 @@ class DocumentJsonUtils:
     def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
         if isinstance(obj, cls.atomic_types):
             return obj
-        elif isinstance(obj, (float16, float32)):
+        elif isinstance(obj, (float16, float32)):  # type: ignore[misc]
             return obj.item()
         elif isinstance(obj, cls.listlike_types):
             return [cls.obj_to_dict_repr(elem) for elem in obj]
@@ -576,3 +584,14 @@ class DocumentJsonUtils:
 
 UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
 SimpleValue = Union[NumericMetric, str]
+
+
+@dataclass
+class CuratedTerm:
+    term: str
+    action: str
+    case_sensitive: bool
+    entity_class: str
+    term_norm_mapping: Dict[str, Set[str]] = field(default_factory=dict)
+    curated_id_mappings: Dict[str, str] = field(default_factory=dict)
+    doc_freq: float = 0.0  # for information only: some measure of how frequently a curation is observed (suggest freq per 10k docs)

@@ -27,9 +27,9 @@ def test_seth_step_no_condition(override_kazu_test_config):
 
     step = instantiate(cfg.SethStep)
     doc = Document.create_simple_document(test_text)
-    success_docs, failed_docs = step([doc])
+    processed_docs, failed_docs = step([doc])
     assert len(failed_docs) == 0
-    check_step_has_found_entitites(success_docs[0], step.entity_class)
+    check_step_has_found_entitites(processed_docs[0], step.entity_class)
 
 
 @requires_model_pack
@@ -37,7 +37,7 @@ def test_seth_step_with_condition(kazu_test_config):
     step = instantiate(kazu_test_config.SethStep)
     assert step.condition
     doc = Document.create_simple_document(test_text)
-    success_docs, failed_docs = step([doc])
+    processed_docs, failed_docs = step([doc])
     assert len(failed_docs) == 0
     assert all((x.entity_class != step.entity_class for x in doc.get_entities()))
     doc = Document.create_simple_document(test_text)
@@ -49,5 +49,5 @@ def test_seth_step_with_condition(kazu_test_config):
             entity_class=next(iter(step.condition.required_entities)),
         )
     )
-    success_docs, failed_docs = step([doc])
-    check_step_has_found_entitites(success_docs[0], step.entity_class)
+    processed_docs, failed_docs = step([doc])
+    check_step_has_found_entitites(processed_docs[0], step.entity_class)

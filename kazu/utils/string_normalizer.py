@@ -1,4 +1,6 @@
 import re
+from os import getenv
+
 import regex
 from functools import lru_cache
 from typing import Optional, Dict, Protocol, Type, Tuple
@@ -126,7 +128,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        return original_string.upper().strip()
+        return " ".join(original_string.upper().split())
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
@@ -136,8 +138,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         string = DefaultStringNormalizer.remove_non_alphanum(string)
         string = DefaultStringNormalizer.depluralize(string)
         string = DefaultStringNormalizer.sub_greek_char_abbreviations(string)
-        string = string.strip()
-        return string.upper()
+        return " ".join(string.upper().split())
 
     @staticmethod
     def depluralize(string):
@@ -391,14 +392,39 @@ class GeneStringNormalizer(EntityClassNormalizer):
         string = DefaultStringNormalizer.replace_greek(string)
         string = DefaultStringNormalizer.remove_non_alphanum(string)
         string = DefaultStringNormalizer.sub_greek_char_abbreviations(string)
-        string = string.strip()
-        return string.upper()
+        return " ".join(string.upper().split())
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
         """
         revert to DefaultStringNormalizer.normalize_noun_phrase for non symbolic genes
 
+        :param original_string:
+        :return:
+        """
+        return DefaultStringNormalizer.normalize_noun_phrase(original_string)
+
+
+class CompanyStringNormalizer(EntityClassNormalizer):
+    @staticmethod
+    def is_symbol_like(original_string: str) -> bool:
+        alpha_chars = filter(lambda x: x.isalpha(), original_string)
+        return all(x.isupper() for x in alpha_chars)
+
+    @staticmethod
+    def normalize_symbol(original_string: str) -> str:
+        """
+        just upper case.
+
+        :param original_string:
+        :return:
+        """
+        return original_string.upper()
+
+    @staticmethod
+    def normalize_noun_phrase(original_string: str) -> str:
+        """
+        revert to DefaultStringNormalizer.normalize_noun_phrase
         :param original_string:
         :return:
         """
@@ -414,17 +440,18 @@ class StringNormalizer:
         "gene": GeneStringNormalizer,
         "anatomy": AnatomyStringNormalizer,
         "disease": DiseaseStringNormalizer,
+        "company": CompanyStringNormalizer,
     }
 
     @staticmethod
-    @lru_cache(maxsize=5000)
+    @lru_cache(maxsize=int(getenv("KAZU_STRING_NORMALIZER_CACHE_SIZE", 5000)))
     def classify_symbolic(original_string: str, entity_class: Optional[str] = None) -> bool:
         return StringNormalizer.normalizers.get(
             entity_class, DefaultStringNormalizer
         ).is_symbol_like(original_string)
 
     @staticmethod
-    @lru_cache(maxsize=5000)
+    @lru_cache(maxsize=int(getenv("KAZU_STRING_NORMALIZER_CACHE_SIZE", 5000)))
     def normalize(original_string: str, entity_class: Optional[str] = None) -> str:
         normaliser_for_entity_class = StringNormalizer.normalizers.get(
             entity_class, DefaultStringNormalizer

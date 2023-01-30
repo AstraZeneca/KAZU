@@ -156,6 +156,9 @@ class NamespaceStrategyExecution:
         self.entity_mapped.clear()
 
 
+NAMESPACE_ERROR_ENDING = "If entities with these namespace(s) appear, attempting to process them would cause an exception. It is likely that this class is mis-configured."
+
+
 class StrategyRunner:
     """
     This is a complex class, designed to co-ordinate the running of various strategies over a document, with the end
@@ -212,13 +215,36 @@ class StrategyRunner:
         self.ner_namespace_processing_order = ner_namespace_processing_order
         self.metadata_db = MetadataDatabase()
 
-        if self.ner_namespace_processing_order is not None:
+        if len(self.ner_namespace_processing_order) == 0:
+            # no sort order given: sort alphabetically just to get some consistent (but arbitrary) sort key
+            self.get_namespace_sort_key = lambda ns: ns
+        else:
+            # Check that sets of namespaces are consistent
+            namespaces_with_a_namespace_strategy_execution = set(self.symbolic_strategies).union(
+                self.non_symbolic_strategies
+            )
+            processing_order_namespaces = set(self.ner_namespace_processing_order)
+            assert processing_order_namespaces.issubset(
+                namespaces_with_a_namespace_strategy_execution
+            ), (
+                "There are namespace(s) in the ner_namespace_processing_order that aren't associated"
+                " with any mapping strategies. " + NAMESPACE_ERROR_ENDING
+            )
+            assert namespaces_with_a_namespace_strategy_execution.issubset(
+                processing_order_namespaces
+            ), (
+                "There are namespace(s) associated with a strategy that aren't in the"
+                " ner_namespace_processing_order. " + NAMESPACE_ERROR_ENDING
+            )
+            # Note that the stricter:
+            # assert set(self.ner_namespace_processing_order) == set(self.symbolic_strategies) === set(self.non_symbolic_strategies)
+            # would rule out the case where we know that entities from a certain namespace will always be symbolic or non-symbolic, so
+            # the namespace only needs to be in either self.symbolic_strategies or self.non_symbolic_strategies, but not both.
+
             self.ner_namespace_to_index = {
                 ns: ind for ind, ns in enumerate(self.ner_namespace_processing_order)
             }
             self.get_namespace_sort_key = lambda ns: self.ner_namespace_to_index[ns]
-        else:
-            self.get_namespace_sort_key = lambda ns: ns
 
     @staticmethod
     def group_entities_by_symbolism(
@@ -227,18 +253,14 @@ class StrategyRunner:
         """
         groups entities into symbolic and non-symbolic forms, so they can be processed separately.
 
-        Expects an already sorted list of entities, since we only call this after a sort is required
-        elsewhere. However, it will still work with an unsorted list, it will just call
-        :meth:`.StringNormalizer.classify_symbolic` more times than necessary.
-
         :param entities:
         :return:
         """
         symbolic: List[Entity] = []
         non_symbolic: List[Entity] = []
-        grouped_by_match = groupby(
+        grouped_by_match = sort_then_group(
             entities,
-            key=lambda x: (
+            key_func=lambda x: (
                 x.match,
                 x.entity_class,
             ),
@@ -281,7 +303,9 @@ class StrategyRunner:
 
         for (_namespace_sort_key, namespace), entities in entities_grouped_by_namespace_order:
             logger.debug("mapping entities for namespace %s", namespace)
-            symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(entities)
+            symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(
+                entities=entities
+            )
             self.execute_hit_post_processing_strategies(
                 non_symbolic_entities, doc, self.non_symbolic_strategies[namespace]
             )
@@ -303,33 +327,38 @@ class StrategyRunner:
         :param namespace_strategy_execution:
         :return:
         """
-        namespace_strategy_execution.reset()
-        strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
+        try:
+            strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
 
-        groups = [
-            list(ents)
-            for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
-        ]
+            groups = [
+                list(ents)
+                for _entity_key, ents in groupby(ents_needing_mappings, key=entity_to_entity_key)
+            ]
 
-        for i in range(0, strategy_max_index):
-            for entity_group in groups:
-                reference_entity = next(iter(entity_group))
-                for mapping in namespace_strategy_execution(
-                    entity=reference_entity,
-                    strategy_index=i,
-                    document=document,
-                ):
-                    xref_mappings: Set[Mapping] = set()
-                    if self.cross_ref_managers is not None:
-                        for xref_manager in self.cross_ref_managers:
-                            xref_mappings.update(xref_manager.create_xref_mappings(mapping=mapping))
+            for i in range(0, strategy_max_index):
+                for entity_group in groups:
+                    reference_entity = next(iter(entity_group))
+                    for mapping in namespace_strategy_execution(
+                        entity=reference_entity,
+                        strategy_index=i,
+                        document=document,
+                    ):
+                        xref_mappings: Set[Mapping] = set()
+                        if self.cross_ref_managers is not None:
+                            for xref_manager in self.cross_ref_managers:
+                                xref_mappings.update(
+                                    xref_manager.create_xref_mappings(mapping=mapping)
+                                )
 
-                    for entity in entity_group:
-                        entity.mappings.add(deepcopy(mapping))
-                        entity.mappings.update(deepcopy(xref_mappings))
-                    logger.debug(
-                        "mapping created: original string: %s, mapping: %s, cross-references: %s",
-                        reference_entity.match,
-                        mapping,
-                        xref_mappings,
-                    )
+                        for entity in entity_group:
+                            entity.mappings.add(deepcopy(mapping))
+                            entity.mappings.update(deepcopy(xref_mappings))
+                        logger.debug(
+                            "mapping created: original string: %s, mapping: %s, cross-references: %s",
+                            reference_entity.match,
+                            mapping,
+                            xref_mappings,
+                        )
+        finally:
+            # in case exception is thrown - always reset state
+            namespace_strategy_execution.reset()

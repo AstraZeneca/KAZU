@@ -1,11 +1,10 @@
 import logging
 from functools import partial
-from typing import List, Tuple, Dict, Optional, Iterable
+from typing import List, Tuple, Dict, Optional, Iterable, Callable, cast
 
 import torch
 from pytorch_lightning import Trainer
-from torch import Tensor
-from torch.nn.functional import sigmoid, softmax
+from torch import Tensor, sigmoid, softmax
 from torch.utils.data import DataLoader
 from transformers import (
     AutoModelForTokenClassification,
@@ -13,6 +12,7 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
     BatchEncoding,
+    PreTrainedTokenizerBase,
 )
 from transformers.file_utils import PaddingStrategy
 
@@ -47,6 +47,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         detect_subspans: bool = False,
         threshold: Optional[float] = None,
         entity_splitter: Optional[NonContiguousEntitySplitter] = None,
+        strip_re: Optional[Dict[str, str]] = None,
     ):
         """
 
@@ -58,6 +59,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param detect_subspans: attempt to detect nested entities (threshold must be configured)
         :param threshold: the confidence threshold used to detect nested entities
         :param entity_splitter: instance of :class:`kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter` to detect non-contiguous entities
+        :param strip_re: passed to :class:`~kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor`
         """
         self.entity_splitter = entity_splitter
         if max_sequence_length % 2 != 0:
@@ -70,26 +72,33 @@ class TransformersModelForTokenClassificationNerStep(Step):
         self.stride = stride
         self.batch_size = batch_size
         self.config = AutoConfig.from_pretrained(path)
-        self.tokeniser = AutoTokenizer.from_pretrained(path, config=self.config)
+        self.tokeniser: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
+            path, config=self.config
+        )
         self.model = AutoModelForTokenClassification.from_pretrained(path, config=self.config)
         self.model = PLAutoModelForTokenClassification(self.model).eval()
         self.trainer = trainer
-        self.activation_fn = sigmoid if detect_subspans else partial(softmax, dim=-1)
+        self.activation_fn = cast(
+            Callable[[Tensor], Tensor], sigmoid if detect_subspans else partial(softmax, dim=-1)
+        )
         self.tokenized_word_processor = TokenizedWordProcessor(
             detect_subspans=detect_subspans,
             confidence_threshold=threshold,
             id2label=self.id2labels_from_label_list(labels),
+            strip_re=strip_re,
         )
 
     @document_batch_step
     def __call__(self, docs: List[Document]) -> None:
         loader, id_section_map = self.get_dataloader(docs)
+        # need this so mypy knows to expect the dataset to have encodings
+        dataset = cast(HFDataset, loader.dataset)
         # run the transformer and get results
         activations = self.get_activations(loader)
         for section_index, section in id_section_map.items():
             words = self.section_frames_to_tokenised_words(
                 section_index=section_index,
-                batch_encoding=loader.dataset.encodings,
+                batch_encoding=dataset.encodings,
                 predictions=activations,
             )
             entities = self.tokenized_word_processor(
@@ -109,8 +118,8 @@ class TransformersModelForTokenClassificationNerStep(Step):
         """
         results = torch.cat(
             [
-                x.logits
-                for x in self.trainer.predict(
+                x.logits  # type: ignore[union-attr]
+                for x in self.trainer.predict(  # type: ignore[union-attr]
                     model=self.model, dataloaders=loader, return_predictions=True
                 )
             ]
@@ -171,6 +180,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
             start_index = half_stride + 1
             end_index = -(half_stride + 1)
 
+        assert batch_encoding.encodings is not None
         frame_offsets = batch_encoding.encodings[section_frame_index].offsets[start_index:end_index]
         frame_word_ids = batch_encoding.encodings[section_frame_index].word_ids[
             start_index:end_index
