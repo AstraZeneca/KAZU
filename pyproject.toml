@@ -4,9 +4,16 @@ dynamic = ["version"]
 description = "Biomedical Named Entity Recognition and Entity Linking for Enterprise use cases"
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "Apache 2.0" }  # could also give the actual file with file = "LICENSE"
 authors = [
   {name = "AstraZeneca AI and Korea University"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Healthcare Industry",
+    "Natural Language :: English",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
 dependencies = [
   "spacy>=3.2.0",
