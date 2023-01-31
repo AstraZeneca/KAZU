@@ -9,21 +9,24 @@ type TextSubmitProps = {
 }
 
 type TextSubmitState = {
-    textAreaValue: string
+    textAreaValue: string;
+    authAreaValue?: string
 }
 
 class TextSubmit extends React.Component<TextSubmitProps, TextSubmitState> {
     constructor(props: any) {
         super(props);
         this.state = {
-            textAreaValue: "EGFR"
+            textAreaValue: "EGFR",
+            authAreaValue: undefined
         }
     }
 
     handleButtonClick() {
         const kazuClient = this.props.kazu_client;
         const text = this.state.textAreaValue;
-        kazuClient.ner_with_ls(text).then(this.props.ner_response_callback);
+        const auth = this.state.authAreaValue;
+        kazuClient.ner_with_ls(text, auth).then(this.props.ner_response_callback);
     }
 
     handleTextAreaChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -32,12 +35,18 @@ class TextSubmit extends React.Component<TextSubmitProps, TextSubmitState> {
         })
     }
 
+    handleAuthAreaChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+        this.setState((_) => {
+            return {authAreaValue: event.target.value};
+        })
+    }
+
     render() {
         let authInputComponent;
         if(this.props.auth_enabled) {
             authInputComponent = (
                 <div>
-                    <textarea id={"authInput"} placeholder={"JWT token"}/>
+                    <textarea id={"authInput"} placeholder={"JWT token"} onChange={this.handleAuthAreaChange.bind(this)}/>
                 </div>
             )
         } else {
