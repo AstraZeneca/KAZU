@@ -366,16 +366,16 @@ class Section:
     entities: List[Entity] = field(
         default_factory=list, hash=False
     )  # entities detected in this section
-    _sentence_spans: Optional[Dict[CharSpan, Any]] = field(
+    _sentence_spans: Optional[Tuple[CharSpan, ...]] = field(
         default=None, hash=False, init=False
-    )  # hidden implem. for an ordered, immutable set of sentence spans
+    )  # hidden implem. to prevent overwriting existing sentence spans
 
     @property
     def sentence_spans(self) -> Iterable[CharSpan]:
-        if self._sentence_spans:
-            yield from self._sentence_spans.keys()
+        if self._sentence_spans is not None:
+            return self._sentence_spans
         else:
-            yield from ()
+            return ()
 
     @sentence_spans.setter
     def sentence_spans(self, sent_spans: Iterable[CharSpan]):
@@ -386,8 +386,12 @@ class Section:
         :param sent_spans:
         :return:
         """
-        if not self._sentence_spans:
-            self._sentence_spans = {sent_span: True for sent_span in sent_spans}
+        if self._sentence_spans is None:
+            sent_spans_tuple = tuple(sent_spans)
+            assert len(sent_spans_tuple) == len(
+                set(sent_spans_tuple)
+            ), "There are duplicate sentence spans"
+            self._sentence_spans = sent_spans_tuple
         else:
             raise AttributeError("Immutable sentence_spans is already set")
 
@@ -553,7 +557,7 @@ class DocumentJsonUtils:
             # v is a dict of CharSpan->CharSpan, needs conversion
             return k, list(v.items())
         elif k == "_sentence_spans":
-            return "sentence_spans", list(v.keys())
+            return "sentence_spans", list(v)
         elif k == "syn_term_to_synonym_terms":
             return "synonym_terms", list(v.values())
         else:
