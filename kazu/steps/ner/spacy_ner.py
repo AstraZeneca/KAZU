@@ -2,7 +2,8 @@ from collections import defaultdict
 
 from kazu.data.data import Document, Entity
 from kazu.steps import Step, document_iterating_step
-from kazu.utils.spacy_pipeline import SpacyPipeline
+
+import spacy
 
 
 class SpacyNerStep(Step):
@@ -11,14 +12,14 @@ class SpacyNerStep(Step):
     resulting spacy doc to have a populated doc.ents field.
     """
 
-    def __init__(self, spacy_pipeline: SpacyPipeline):
+    def __init__(self, spacy_pipeline: spacy.Language):
         """
 
         :param model_name: name of spacy pipeline to load.
         :param path: If the spacy pipeline is not already installed into the python environment, attempt to
             install it from this path.
         """
-        self.nlp = spacy_pipeline.nlp
+        self.nlp = spacy_pipeline
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:

@@ -10,8 +10,9 @@ from typing import List, Dict, Optional, Iterable, Set
 
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
 from kazu.modelling.language.language_phenomena import GREEK_SUBS
-from kazu.utils.spacy_pipeline import SpacyPipeline
 from kazu.utils.utils import PathLike
+
+import spacy
 
 logger = logging.getLogger(__name__)
 
@@ -87,8 +88,8 @@ class CombinatorialSynonymGenerator:
 # TODO: this isn't used currently - do we want to try and refine it
 # or just kill it off altogether?
 class SeparatorExpansion(SynonymGenerator):
-    def __init__(self, spacy_pipeline: SpacyPipeline):
-        self.all_stopwords = spacy_pipeline.nlp.Defaults.stop_words
+    def __init__(self, spacy_pipeline: spacy.Language):
+        self.all_stopwords = spacy_pipeline.Defaults.stop_words
         self.end_expression_brackets = r"(.*)\((.*)\)$"
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]

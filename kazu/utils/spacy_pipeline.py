@@ -1,21 +1,8 @@
+from functools import cache
+
 import spacy
 
 
-class SpacyPipeline:
-    """
-    Singleton of a spacy pipeline, so we can reuse it across steps without needing to load the model
-    multiple times
-    """
-
-    instance = None
-
-    class __SpacyPipeline:
-        def __init__(self, path: str):
-            self.nlp = spacy.load(path)
-
-    def __init__(self, path: str):
-        if not SpacyPipeline.instance:
-            SpacyPipeline.instance = SpacyPipeline.__SpacyPipeline(path)
-
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
+@cache
+def cached_spacy_pipeline_load(path: str) -> spacy.Language:
+    return spacy.load(path)
