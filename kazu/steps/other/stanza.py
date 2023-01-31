@@ -1,9 +1,10 @@
 from typing import List
 
+import stanza
+from stanza.models.common.doc import Sentence
+
 from kazu.data.data import Document, CharSpan
 from kazu.steps import Step, document_iterating_step
-from kazu.utils.stanza_pipeline import StanzaPipeline
-from stanza.models.common.doc import Sentence
 
 
 class StanzaStep(Step):
@@ -52,12 +53,12 @@ class StanzaStep(Step):
     }
     """
 
-    def __init__(self, stanza_pipeline: StanzaPipeline):
+    def __init__(self, stanza_pipeline: stanza.Pipeline):
         """
 
-        :param stanza_pipeline: singleton wrapping a stanza pipeline
+        :param stanza_pipeline: The stanza pipeline the step uses for sentence-segmentation
         """
-        self.stanza_nlp = stanza_pipeline.instance
+        self.stanza_nlp = stanza_pipeline
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
