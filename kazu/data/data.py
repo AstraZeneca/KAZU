@@ -47,7 +47,7 @@ class DisambiguationConfidence(AutoNameEnum):
     AMBIGUOUS = auto()  # could not disambiguate
 
 
-@dataclass
+@dataclass(frozen=True)
 class CharSpan:
     """A concept similar to a Spacy Span, except is character index based rather than token based"""
 
@@ -77,9 +77,6 @@ class CharSpan:
 
     def __gt__(self, other):
         return self.end > other.end
-
-    def __hash__(self):
-        return hash((self.start, self.end))
 
 
 class EquivalentIdAggregationStrategy(AutoNameEnum):
