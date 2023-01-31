@@ -4,6 +4,7 @@ steps:
   - ${StanzaStep}
   - ${TransformersModelForTokenClassificationNerStep}
   - ${DictionaryEntityLinkingStep}
+  - ${EntityClassDisambiguationStep}
   - ${MappingStep}
   - ${SethStep}
   - ${MergeOverlappingEntsStep}

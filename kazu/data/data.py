@@ -464,6 +464,18 @@ class Document:
         return cls(idx=idx, sections=sections)
 
     @classmethod
+    def simple_document_from_sents(cls, sents: List[str]) -> "Document":
+        idx = uuid.uuid4().hex
+        section = Section(text=" ".join(sents), name="na")
+        sent_spans = []
+        curr_start = 0
+        for sent in sents:
+            sent_spans.append(CharSpan(start=curr_start, end=curr_start + len(sent)))
+            curr_start += len(sent) + 1  # + 1 is for the joining space
+        section.sentence_spans = sent_spans
+        return cls(idx=idx, sections=[section])
+
+    @classmethod
     def from_named_section_texts(cls, named_sections: Dict[str, str]) -> "Document":
         idx = uuid.uuid4().hex
         sections = [Section(text=text, name=name) for name, text in named_sections.items()]

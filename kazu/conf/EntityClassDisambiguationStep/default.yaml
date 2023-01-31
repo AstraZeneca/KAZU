@@ -1,0 +1,6 @@
+_target_: kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep
+context:
+  UCB:
+    - entity_class: "company"
+      relevant_text: ["pharma company brussels"]
+      thresh: 0.5
