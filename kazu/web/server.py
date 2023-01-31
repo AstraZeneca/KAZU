@@ -20,6 +20,8 @@ from kazu.data.data import Document
 from kazu.pipeline import Pipeline
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.routes import KAZU
+from kazu.web.ls_web_utils import LSWebUtils
+
 
 description = """
 Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
@@ -139,6 +141,7 @@ class KazuWebApp:
             If not, we'll make sure the openapi docs don't generate auth buttons.
         """
         self.pipeline: Pipeline = instantiate(cfg.Pipeline)
+        self.ls_web_utils: LSWebUtils = instantiate(cfg.LSWebUtils)
         if not auth_required:
             app.openapi = openapi_no_auth  # type: ignore[assignment]
             # we need the 'type: ignore' as otherwise mypy gives an error:
@@ -169,6 +172,17 @@ class KazuWebApp:
         logger.info(id_log_prefix + "Documents sent: %s", len(docs))
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
+
+    @app.post(f"/{KAZU}/ls-annotations")
+    def ls_annotations(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
+        id_log_prefix = get_id_log_prefix_if_available(request)
+        logger.info(id_log_prefix + "Request to kazu endpoint")
+        logger.info(id_log_prefix + "Document: %s", doc)
+        result = self.pipeline([doc.to_kazu_document()])[0]
+        ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
+        return JSONResponse(
+            content={"ls_view": ls_view, "ls_tasks": ls_tasks, "doc": result.as_minified_dict()}
+        )
 
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")

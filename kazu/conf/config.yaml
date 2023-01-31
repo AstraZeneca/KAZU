@@ -25,6 +25,7 @@ defaults:
   - CleanupStep: default
   - CleanupActions: default
   - LabelStudioManager: default
+  - LSWebUtils: default
   - Middlewares: default
   - confidence: default
   - cache_sizes: default
