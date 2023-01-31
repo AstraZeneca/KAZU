@@ -58,12 +58,12 @@ class StanzaStep(Step):
 
         :param stanza_pipeline: The stanza pipeline the step uses for sentence-segmentation
         """
-        self.stanza_nlp = stanza_pipeline
+        self.stanza_pipeline = stanza_pipeline
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
-            stanza_doc = self.stanza_nlp(section.get_text())
+            stanza_doc = self.stanza_pipeline(section.get_text())
             sentences: List[Sentence] = stanza_doc.sentences
             char_spans = (
                 CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char) for sent in sentences
