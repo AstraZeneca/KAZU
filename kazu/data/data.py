@@ -471,7 +471,7 @@ class Document:
         curr_start = 0
         for sent in sents:
             sent_spans.append(CharSpan(start=curr_start, end=curr_start + len(sent)))
-            curr_start = len(sent)
+            curr_start += len(sent) + 1  # + 1 is for the joining space
         section.sentence_spans = sent_spans
         return cls(idx=idx, sections=[section])
 
