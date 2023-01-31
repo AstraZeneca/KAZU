@@ -176,7 +176,7 @@ class KazuWebApp:
     @app.post(f"/{KAZU}/ls-annotations")
     def ls_annotations(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
-        logger.info(id_log_prefix + "Request to kazu endpoint")
+        logger.info(id_log_prefix + "Request to kazu/ls-annotations endpoint")
         logger.info(id_log_prefix + "Document: %s", doc)
         result = self.pipeline([doc.to_kazu_document()])[0]
         ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
