@@ -25,6 +25,7 @@ defaults:
   - CleanupStep: default
   - CleanupActions: default
   - LabelStudioManager: default
+  - LSWebUtils: default
   - Middlewares: default
   - EntityClassDisambiguationStep: default
   - confidence: default
