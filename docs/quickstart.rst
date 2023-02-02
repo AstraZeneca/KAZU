@@ -8,6 +8,7 @@ Installation
 
    pip install kazu
 
+Python version 3.9 or higher is required (tested with Python 3.9).
 
 
 Model Pack
