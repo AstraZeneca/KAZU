@@ -26,6 +26,8 @@ citation link TBA
 
 ## Install
 
+Python version 3.9 or higher is required (tested with Python 3.9).
+
 Either: 
 
 `pip install kazu`
