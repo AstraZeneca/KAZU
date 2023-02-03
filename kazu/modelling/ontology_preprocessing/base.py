@@ -1,11 +1,9 @@
-import functools
 import json
 import logging
 import os
 import re
 import sqlite3
 from abc import ABC
-from collections import defaultdict
 from functools import cache
 from pathlib import Path
 from typing import (
@@ -19,7 +17,6 @@ from typing import (
     Optional,
     FrozenSet,
     Union,
-    DefaultDict,
 )
 from urllib import parse
 
@@ -31,7 +28,9 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTerm,
     SimpleValue,
-    CuratedTerm,
+    Curation,
+    ParserBehaviour,
+    ComplexParserAction,
 )
 from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
