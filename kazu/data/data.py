@@ -617,7 +617,6 @@ class DocumentJsonUtils:
         return x is None or x == {} or x == []
 
 
-UNAMBIGUOUS_SYNONYM_MERGE_STRATEGIES = {EquivalentIdAggregationStrategy.UNAMBIGUOUS}
 SimpleValue = Union[NumericMetric, str]
 
 
