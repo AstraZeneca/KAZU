@@ -122,10 +122,17 @@ class EquivalentIdSet:
     A representation of a set of kb ID's that map to the same synonym and mean the same thing.
     """
 
-    ids: FrozenSet[str] = field(
+    ids_and_source: FrozenSet[Tuple[str, str]] = field(
         default_factory=frozenset, hash=True
     )  # other ID's mapping to this syn, from different KBs
-    ids_to_source: Dict[str, str] = field(default_factory=dict, hash=False, compare=False)
+
+    @property
+    def sources(self) -> Set[str]:
+        return set(x[1] for x in self.ids_and_source)
+
+    @property
+    def ids(self) -> Set[str]:
+        return set(x[0] for x in self.ids_and_source)
 
 
 @dataclass(frozen=True)
