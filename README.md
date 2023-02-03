@@ -74,11 +74,11 @@ if __name__ == '__main__':
 
 ## License
 
-Licensed under [Apache 2.0](LICENSE).
+Licensed under [Apache 2.0](https://github.com/AstraZeneca/KAZU/blob/main/LICENSE).
 
 Kazu includes elements under compatible licenses:
-- some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](kazu/modelling/ontology_matching/README.md).
-- the doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](docs/NUMPY_LICENSE.txt)
+- some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/README.md).
+- the doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/NUMPY_LICENSE.txt)
 
 ## Dataset licences
 
