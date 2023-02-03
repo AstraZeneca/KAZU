@@ -21,9 +21,10 @@ class MetadataDatabase(metaclass=Singleton):
     and this singleton allows us to load it once/reduce memory usage
     """
 
-    _database: Dict[ParserName, Dict[Idx, Metadata]] = {}
-    _keys_lst: Dict[ParserName, List[Idx]] = {}
-    loaded_parsers: Set[str] = set()
+    def __init__(self):
+        self._database: Dict[ParserName, Dict[Idx, Metadata]] = {}
+        self._keys_lst: Dict[ParserName, List[Idx]] = {}
+        self.loaded_parsers: Set[str] = set()
 
     def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
         """
@@ -76,11 +77,12 @@ class SynonymDatabase(metaclass=Singleton):
     Singleton of a database of synonyms.
     """
 
-    _syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
-    _syns_by_aggregation_strategy: Dict[
-        ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
-    ] = {}
-    loaded_parsers: Set[ParserName] = set()
+    def __init__(self):
+        self._syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
+        self._syns_by_aggregation_strategy: Dict[
+            ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
+        ] = {}
+        self.loaded_parsers: Set[ParserName] = set()
 
     def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
         """
