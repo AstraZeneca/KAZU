@@ -1,3 +1,4 @@
+import functools
 import json
 import logging
 import os
@@ -49,8 +50,8 @@ DATA_ORIGIN = "data_origin"
 
 logger = logging.getLogger(__name__)
 
-
-def load_curated_terms(path: PathLike) -> List[CuratedTerm]:
+@functools.cache
+def load_curated_terms(path: PathLike) -> List[Curation]:
     """
     load curated terms from a Path
 
@@ -58,37 +59,7 @@ def load_curated_terms(path: PathLike) -> List[CuratedTerm]:
     :return:
     """
     with open(path, mode="r") as jsonlf:
-        return [CuratedTerm(**json.loads(line)) for line in jsonlf]
-
-
-@functools.cache
-def get_curated_terms_by_parser(path: PathLike) -> DefaultDict[str, List[CuratedTerm]]:
-    """
-    return a list of curated terms indexed by parser name
-
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
-    :return:
-    """
-    terms = load_curated_terms(path)
-    terms_by_parser = defaultdict(list)
-    for term in terms:
-        for parser_name in term.curated_id_mappings:
-            terms_by_parser[parser_name].append(term)
-    return terms_by_parser
-
-
-def get_curated_terms_for_parser(path: PathLike, parser_name: str) -> List[CuratedTerm]:
-    """
-    for a given parser name, get all the curated terms associated with it
-
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
-    :param parser_name: name of parser that curated terms should be extracted
-        for, from the input path
-    :return:
-    """
-    terms_by_parser = get_curated_terms_by_parser(path)
-    return terms_by_parser[parser_name]
-
+        return [Curation.from_json(json.loads(line)) for line in jsonlf]
 
 class OntologyParser(ABC):
     """
