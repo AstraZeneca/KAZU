@@ -31,9 +31,12 @@ from kazu.data.data import (
     SimpleValue,
     Curation,
     ParserBehaviour,
-    ComplexParserAction,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
+from kazu.modelling.database.in_memory_db import (
+    MetadataDatabase,
+    SynonymDatabase,
+    DBModificationResult,
+)
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.string_normalizer import StringNormalizer
@@ -50,6 +53,7 @@ DATA_ORIGIN = "data_origin"
 
 logger = logging.getLogger(__name__)
 
+
 @functools.cache
 def load_curated_terms(path: PathLike) -> List[Curation]:
     """
@@ -60,6 +64,7 @@ def load_curated_terms(path: PathLike) -> List[Curation]:
     """
     with open(path, mode="r") as jsonlf:
         return [Curation.from_json(json.loads(line)) for line in jsonlf]
+
 
 class OntologyParser(ABC):
     """
@@ -296,44 +301,128 @@ class OntologyParser(ABC):
                     EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
                 )
 
-    def drop_excluded_ids(self):
-        assert self.parsed_dataframe is not None
-        if self.excluded_ids is not None:
-            self.parsed_dataframe = self.parsed_dataframe[
-                ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
-            ].copy()
-
-    def _add_additional_synonyms(self):
-        assert self.parsed_dataframe is not None
-        if self.additional_synonyms is not None:
-            logger.info(
-                f"{len(self.additional_synonyms)} curated synonyms for {self.name} detected."
-            )
-            dataframes_to_add = []
-            for curated_term in self.additional_synonyms:
-                idx = curated_term.curated_id_mappings[self.name]
-                query_row = (
-                    self.parsed_dataframe[self.parsed_dataframe[IDX] == idx]
-                    .head(1)
-                    .copy()
-                    .reset_index()
+    def _attempt_to_add_database_entry_for_curation(self, id_set: Set[str], curated_synonym: str):
+        log_prefix = (
+            f"{self.name} attempting to create synonym term for {curated_synonym}, {id_set} "
+        )
+        new_equivalent_id_set = EquivalentIdSet(
+            ids_and_source=frozenset(
+                (
+                    idx,
+                    self.find_kb(idx),
                 )
-                query_row[SYN] = curated_term.term
-                query_row[MAPPING_TYPE] = "kazu_curated"
-                dataframes_to_add.append(query_row)
+                for idx in id_set  # type: ignore[union-attr]
+            )
+        )
+        if not new_equivalent_id_set.ids_and_source:
+            logger.warning(f"{log_prefix} but could not create EquivalentIdSet as no IDs specified")
+            return
 
-            if len(dataframes_to_add) > 0:
-                dataframes_to_add.append(self.parsed_dataframe)
+        # check ids exist
+        idx = None
+        try:
+            for idx in new_equivalent_id_set.ids:
+                self.metadata_db.get_by_idx(self.name, idx)
+        except KeyError:
+            logger.warning(f"{log_prefix} but could not find id {idx} in metadata database")
+            return
 
-                self.parsed_dataframe = pd.concat(dataframes_to_add)
-                self.parsed_dataframe.drop_duplicates(inplace=True)
-                self.parsed_dataframe.reset_index(inplace=True)
+        term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
+        try:
+            existing_synonym_term = self.synonym_db.get(self.name, term_norm)
+            logger.warning(
+                f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {existing_synonym_term.term_norm}"
+            )
+            return
+        except KeyError:
+            # we expect a KeyError, as we're going to add a new entry
+            is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
+            new_term = SynonymTerm(
+                term_norm=term_norm,
+                terms=frozenset([curated_synonym]),
+                is_symbolic=is_symbolic,
+                mapping_types=frozenset(("kazu_curated",)),
+                associated_id_sets=frozenset((new_equivalent_id_set,)),
+                parser_name=self.name,
+                aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+            )
+            self.synonym_db.add(self.name, synonyms=(new_term,))
+            logger.info(f"{new_term} created")
+
+    def _attempt_to_modify_database_entry_for_curation(
+        self, behaviour: ParserBehaviour, id_set: Set[str], curated_synonym: Optional[str]
+    ):
+        if behaviour == ParserBehaviour.DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS:
+
+            for idx in id_set:  # type: ignore[union-attr]
+                (
+                    terms_modified,
+                    terms_dropped,
+                ) = self.synonym_db.drop_equivalent_id_set_from_all_records(self.name, idx)
+                if terms_modified + terms_dropped == 0:
+                    logger.warning(
+                        f"failed to modify any SynonymTerms containing {idx} for {self.name}"
+                    )
+                else:
+                    logger.info(
+                        f"modified {terms_modified} and dropped {terms_dropped} SynonymTerms containing {idx} for {self.name}"
+                    )
+
+        elif behaviour == ParserBehaviour.DROP_ID_FROM_PARSER:
+            for idx in id_set:  # type: ignore[union-attr]
+                result = self.synonym_db.drop_id(self.name, idx)
+                if result == DBModificationResult.NO_ACTION:
+                    logger.warning(f"failed to drop {idx} from {self.name}")
+                else:
+                    logger.info(f"dropped ID {idx} from {self.name}")
+
+        else:
+            affected_term_key = StringNormalizer.normalize(
+                curated_synonym, entity_class=self.entity_class
+            )
+            if behaviour == ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
+                try:
+                    self.synonym_db.drop_record(self.name, affected_term_key)
+                    logger.warning(
+                        f"successfully dropped {affected_term_key} from database for {self.name}"
+                    )
+                except IndexError:
+                    logger.warning(
+                        f"tried to drop {affected_term_key} from database, but key doesn't exist for {self.name}"
+                    )
+
+            elif behaviour == ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
+                for idx in id_set:  # type: ignore[union-attr]
+                    result = self.synonym_db.drop_equivalent_id_set_from_record(
+                        self.name, affected_term_key, idx
+                    )
+                    if result == DBModificationResult.NO_ACTION:
+                        logger.warning(
+                            f"failed to drop {idx} from any EquivalentIdSet for key {affected_term_key} for {self.name}"
+                        )
+                    else:
+                        logger.info(
+                            f"dropped an EquivalentIdSet containing {idx} for key {affected_term_key} for {self.name}"
+                        )
+
+    def process_curations(self):
+        if self.curations is not None:
+            for curation in self.curations:
+                maybe_parser_behaviour_and_ids = curation.parser_behaviour(self.name)
+                if maybe_parser_behaviour_and_ids:
+                    behaviour, maybe_ids = maybe_parser_behaviour_and_ids
+                    if behaviour == ParserBehaviour.ADD:
+                        self._attempt_to_add_database_entry_for_curation(
+                            maybe_ids, curation.curated_synonym  # type: ignore[arg-type]
+                        )
+                    else:
+                        self._attempt_to_modify_database_entry_for_curation(
+                            behaviour, maybe_ids, curation.curated_synonym  # type: ignore[arg-type]
+                        )
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
             self.parsed_dataframe = self.parse_to_dataframe()
-            self._add_additional_synonyms()
-            self.drop_excluded_ids()
             self.parsed_dataframe[DATA_ORIGIN] = self.data_origin
             self.parsed_dataframe[IDX] = self.parsed_dataframe[IDX].astype(str)
             self.parsed_dataframe.loc[
