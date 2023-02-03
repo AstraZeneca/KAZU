@@ -195,3 +195,11 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+    @staticmethod
+    def clear_all():
+        for k in list(Singleton._instances):
+            try:
+                del Singleton._instances[k]
+            except KeyError:
+                pass
