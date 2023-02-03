@@ -166,15 +166,15 @@ class OntologyParser(ABC):
             )
 
             ids: Set[str] = row[IDX]
-            id_to_source = {}
-            ontologies = set()
-            for idx in ids:
-                source = self.find_kb(idx)
-                ontologies.add(source)
-                id_to_source[idx] = source
-
+            ids_and_source = set(
+                (
+                    idx,
+                    self.find_kb(idx),
+                )
+                for idx in ids
+            )
             associated_id_sets, agg_strategy = self.score_and_group_ids(
-                ids, id_to_source, is_symbolic, syn_set
+                ids_and_source, is_symbolic, syn_set
             )
 
             synonym_term = SynonymTerm(
@@ -193,8 +193,7 @@ class OntologyParser(ABC):
 
     def score_and_group_ids(
         self,
-        ids: Set[str],
-        id_to_source: Dict[str, str],
+        id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
@@ -225,8 +224,7 @@ class OntologyParser(ABC):
         IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
         DEFAULT_LABEL
 
-        :param ids: set of ids to decide upon
-        :param id_to_source: mapping of id to original source
+        :param id_and_source: set of tuple[id,source] to decide upon
         :param is_symbolic: is the underlying synonym symbolic?
         :param original_syn_set: original synonyms associated with ids
         :return:
@@ -234,52 +232,36 @@ class OntologyParser(ABC):
         if self.string_scorer is None:
             # the NO_STRATEGY aggregation strategy assumes all synonyms are ambiguous
             return (
-                frozenset(
-                    EquivalentIdSet(
-                        ids=frozenset((id_,)),
-                        ids_to_source={id_: id_to_source[id_]},
-                    )
-                    for id_ in ids
-                ),
+                frozenset((EquivalentIdSet(ids_and_source=frozenset(id_and_source)),)),
                 EquivalentIdAggregationStrategy.NO_STRATEGY,
             )
         else:
 
-            if len(ids) == 1:
+            if len(id_and_source) == 1:
                 return (
-                    frozenset(
-                        (
-                            EquivalentIdSet(
-                                ids=frozenset(ids),
-                                ids_to_source={idx: id_to_source[idx] for idx in ids},
-                            ),
-                        )
-                    ),
+                    frozenset((EquivalentIdSet(ids_and_source=frozenset(id_and_source)),)),
                     EquivalentIdAggregationStrategy.UNAMBIGUOUS,
                 )
 
-            id_to_label = {
-                idx: str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL]) for idx in ids
-            }
-
             if not is_symbolic:
                 return (
-                    frozenset(
-                        (
-                            EquivalentIdSet(
-                                ids=frozenset(ids),
-                                ids_to_source={idx: id_to_source[idx] for idx in ids},
-                            ),
-                        )
-                    ),
+                    frozenset((EquivalentIdSet(ids_and_source=frozenset(id_and_source)),)),
                     EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC,
                 )
             else:
+                id_to_label = {
+                    (
+                        idx,
+                        source,
+                    ): str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
+                    for idx, source in id_and_source
+                }
+
                 # use similarity to group ids into EquivalentIdSets
-                Ids = Set[str]
+                IdsAndSource = Set[Tuple[str, str]]
                 DefaultLabels = Set[str]
-                id_list: List[Tuple[Ids, DefaultLabels]] = []
-                for id_, default_label in id_to_label.items():
+                id_list: List[Tuple[IdsAndSource, DefaultLabels]] = []
+                for id_and_source_tuple, default_label in id_to_label.items():
                     most_similar_id_set = None
                     best_score = 0.0
                     for id_and_default_label_set in id_list:
@@ -298,21 +280,18 @@ class OntologyParser(ABC):
                     if not most_similar_id_set:
                         id_list.append(
                             (
-                                {id_},
+                                {id_and_source_tuple},
                                 {default_label},
                             )
                         )
                     else:
-                        most_similar_id_set[0].add(id_)
+                        most_similar_id_set[0].add(id_and_source_tuple)
                         most_similar_id_set[1].add(default_label)
 
                 return (
                     frozenset(
-                        EquivalentIdSet(
-                            ids=frozenset(ids),
-                            ids_to_source={id_: id_to_source[id_] for id_ in ids},
-                        )
-                        for ids, _ in id_list
+                        EquivalentIdSet(ids_and_source=frozenset(ids_and_source))
+                        for ids_and_source, _ in id_list
                     ),
                     EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
                 )
