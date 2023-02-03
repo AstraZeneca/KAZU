@@ -488,9 +488,10 @@ class OntologyParser(ABC):
         """
         populate the databases with the results of the parser
         """
-        # populate the databases
+
         self.populate_metadata_database()
         self.populate_synonym_database()
+        self.process_curations()
         self.parsed_dataframe = None  # clear the reference to save memory
 
     def parse_to_dataframe(self) -> pd.DataFrame:
