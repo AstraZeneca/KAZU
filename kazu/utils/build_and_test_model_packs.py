@@ -318,7 +318,7 @@ class ModelPackBuilder:
         :return:
         """
         logger.info("clearing singletons")
-        Singleton._instances = {}
+        Singleton.clear_all()
 
     @staticmethod
     def process_model_pack_path(
