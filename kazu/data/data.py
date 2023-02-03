@@ -1,15 +1,16 @@
 import dataclasses
 import json
 import uuid
+from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union
+from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, DefaultDict
+from numpy import ndarray, float32, float16
 
 from kazu.utils.string_normalizer import StringNormalizer
-from numpy import ndarray, float32, float16
 
 IS_SUBSPAN = "is_subspan"
 # BIO schema
