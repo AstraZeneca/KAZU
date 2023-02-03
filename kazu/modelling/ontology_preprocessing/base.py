@@ -605,8 +605,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
     def score_and_group_ids(
         self,
-        ids: Set[str],
-        id_to_source: Dict[str, str],
+        id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
@@ -615,21 +614,14 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         all synonym resolution, and rely on disambiguation to decide on 'true' mappings. Answers on a postcard if anyone
         has a better idea on how to do this!
 
-        :param ids:
-        :param id_to_source:
+        :param id_and_source:
         :param is_symbolic:
         :param original_syn_set:
         :return:
         """
 
         return (
-            frozenset(
-                EquivalentIdSet(
-                    ids=frozenset((id_,)),
-                    ids_to_source={id_: id_to_source[id_]},
-                )
-                for id_ in ids
-            ),
+            frozenset(EquivalentIdSet(ids_and_source=frozenset((id_,))) for id_ in id_and_source),
             EquivalentIdAggregationStrategy.CUSTOM,
         )
 
@@ -742,10 +734,9 @@ class RDFGraphParser(OntologyParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -755,8 +746,7 @@ class RDFGraphParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -858,8 +848,7 @@ class GeneOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -869,8 +858,7 @@ class GeneOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
         )
         self.instances.add(name)
         self.query = query
@@ -937,8 +925,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -947,9 +934,8 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
             name=name,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -977,8 +963,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -987,9 +972,8 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
             name=name,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1017,8 +1001,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1027,9 +1010,8 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
             name=name,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1063,8 +1045,7 @@ class UberonOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
 
         super().__init__(
@@ -1079,8 +1060,7 @@ class UberonOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1164,8 +1144,7 @@ class EnsemblOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1174,9 +1153,8 @@ class EnsemblOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
             name=name,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
         )
 
         with open(additional_syns_path, "r") as f:
@@ -1301,8 +1279,7 @@ class CLOOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1316,8 +1293,7 @@ class CLOOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1337,8 +1313,7 @@ class CellosaurusOntologyParser(OntologyParser):
 
     def score_and_group_ids(
         self,
-        ids: Set[str],
-        id_to_source: Dict[str, str],
+        id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
@@ -1355,10 +1330,9 @@ class CellosaurusOntologyParser(OntologyParser):
         return (
             frozenset(
                 EquivalentIdSet(
-                    ids=frozenset((id_,)),
-                    ids_to_source={id_: id_to_source[id_]},
+                    ids_and_source=frozenset((id_,)),
                 )
-                for id_ in ids
+                for id_ in id_and_source
             ),
             EquivalentIdAggregationStrategy.CUSTOM,
         )
@@ -1595,10 +1569,9 @@ class CLOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
 
         super().__init__(
@@ -1613,10 +1586,9 @@ class CLOntologyParser(RDFGraphParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
             include_entity_patterns=include_entity_patterns,
             exclude_entity_patterns=exclude_entity_patterns,
-            additional_synonyms=additional_synonyms,
+            curations=curations,
         )
 
     def find_kb(self, string: str) -> str:
