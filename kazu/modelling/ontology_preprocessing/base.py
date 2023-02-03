@@ -97,8 +97,7 @@ class OntologyParser(ABC):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        curations: Optional[List[Curation]] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -115,10 +114,7 @@ class OntologyParser(ABC):
             from the parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
-        :param excluded_ids: optional set of ids to exclude from the parsing process
-        :param additional_synonyms: terms to inject into the parser if given. Each term should have
-            :attr:`kazu.data.data.CuratedTerm.curated_id_mappings` populated with
-            key=self.parser_name, value: identifier
+        :param curations: Curations to apply to the parser
         """
 
         self.in_path = in_path
@@ -130,11 +126,10 @@ class OntologyParser(ABC):
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
-        self.excluded_ids = excluded_ids
-        self.additional_synonyms = additional_synonyms
-
+        self.curations = curations
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
+        self.synonym_db = SynonymDatabase()
 
     def find_kb(self, string: str) -> str:
         """
