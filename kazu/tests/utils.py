@@ -205,7 +205,17 @@ def make_dummy_synonym_term(
         search_score=search_score,
         embed_score=embed_score,
         associated_id_sets=frozenset(
-            (EquivalentIdSet(ids_to_source={id_: "test" for id_ in ids}, ids=frozenset(ids)),)
+            (
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        (
+                            id_,
+                            "test",
+                        )
+                        for id_ in ids
+                    )
+                ),
+            ),
         ),
         aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
         is_symbolic=True,
