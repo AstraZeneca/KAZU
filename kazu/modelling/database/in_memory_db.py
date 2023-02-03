@@ -1,8 +1,16 @@
+import dataclasses
 import logging
 from copy import deepcopy
+from enum import auto
 from typing import Optional, Dict, List, Tuple, Set, Iterable
 
-from kazu.data.data import SynonymTerm, SimpleValue, EquivalentIdAggregationStrategy
+from kazu.data.data import (
+    SynonymTerm,
+    SimpleValue,
+    EquivalentIdAggregationStrategy,
+    AutoNameEnum,
+    EquivalentIdSet,
+)
 from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
@@ -72,6 +80,13 @@ class MetadataDatabase(metaclass=Singleton):
         return self._database[name]
 
 
+class DBModificationResult(AutoNameEnum):
+    ID_SET_MODIFIED = auto()
+    SYNONYM_TERM_ADDED = auto()
+    SYNONYM_TERM_DROPPED = auto()
+    NO_ACTION = auto()
+
+
 class SynonymDatabase(metaclass=Singleton):
     """
     Singleton of a database of synonyms.
@@ -84,7 +99,7 @@ class SynonymDatabase(metaclass=Singleton):
         ] = {}
         self.loaded_parsers: Set[ParserName] = set()
 
-    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
+    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> DBModificationResult:
         """
         add synonyms to the database.
 
@@ -93,7 +108,9 @@ class SynonymDatabase(metaclass=Singleton):
         :return:
         """
         self.loaded_parsers.add(name)
-        self._syns_database_by_syn[name] = {}
+        result = DBModificationResult.NO_ACTION
+        if name not in self._syns_database_by_syn:
+            self._syns_database_by_syn[name] = {}
         for synonym in synonyms:
             self._syns_database_by_syn[name][synonym.term_norm] = synonym
             for equiv_ids in synonym.associated_id_sets:
@@ -104,6 +121,73 @@ class SynonymDatabase(metaclass=Singleton):
                     )
                     syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(idx, set())
                     syn_set_for_this_id.add(synonym.term_norm)
+                    result = DBModificationResult.SYNONYM_TERM_ADDED
+        return result
+
+    def drop_record(self, name: ParserName, synonym: NormalisedSynonymStr) -> DBModificationResult:
+        self._syns_database_by_syn[name].pop(synonym)
+        return DBModificationResult.SYNONYM_TERM_DROPPED
+
+    def drop_id(self, name: ParserName, idx: str) -> DBModificationResult:
+        result = DBModificationResult.NO_ACTION
+        for term in self._syns_database_by_syn[name].values():
+            for id_set in term.associated_id_sets:
+                if idx in id_set.ids:
+                    new_associated_id_sets = set(term.associated_id_sets)
+                    new_associated_id_sets.discard(id_set)
+                    updated_id_set = EquivalentIdSet(
+                        frozenset(id_tup for id_tup in id_set.ids_and_source if id_tup[0] != idx)
+                    )
+                    if len(updated_id_set.ids_and_source) > 0:
+                        new_associated_id_sets.add(updated_id_set)
+
+                    new_term = dataclasses.replace(
+                        term,
+                        associated_id_sets=frozenset(new_associated_id_sets),
+                        aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+                    )
+                    self._syns_database_by_syn[name][new_term.term_norm] = new_term
+                    result = DBModificationResult.ID_SET_MODIFIED
+
+        return result
+
+    def drop_equivalent_id_set_from_record(
+        self, name: ParserName, synonym: NormalisedSynonymStr, id_to_drop: str
+    ) -> DBModificationResult:
+        synonym_term = self._syns_database_by_syn[name][synonym]
+        id_sets = set(synonym_term.associated_id_sets)
+        result = DBModificationResult.NO_ACTION
+        for id_set in id_sets:
+            if id_to_drop in id_set.ids:
+                id_sets.discard(id_set)
+                result = DBModificationResult.ID_SET_MODIFIED
+                break
+        if result == DBModificationResult.ID_SET_MODIFIED:
+            if len(id_sets) > 0:
+                new_syn_term = dataclasses.replace(
+                    synonym_term,
+                    associated_id_sets=frozenset(id_sets),
+                    aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+                )
+                self._syns_database_by_syn[name][synonym_term.term_norm] = new_syn_term
+            else:
+                # if there are no longer any id sets associated with the record, remove it completely
+                self.drop_record(name, synonym)
+                result = DBModificationResult.SYNONYM_TERM_DROPPED
+        return result
+
+    def drop_equivalent_id_set_from_all_records(
+        self, name: ParserName, id_to_drop: str
+    ) -> Tuple[int, int]:
+        terms_modified = 0
+        terms_dropped = 0
+        for term_norm in list(self.get_all(name)):
+            result = self.drop_equivalent_id_set_from_record(name, term_norm, id_to_drop)
+            if result == DBModificationResult.ID_SET_MODIFIED:
+                terms_modified += 1
+            elif result == DBModificationResult.SYNONYM_TERM_DROPPED:
+                terms_dropped += 1
+        return terms_modified, terms_dropped
 
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
         """
