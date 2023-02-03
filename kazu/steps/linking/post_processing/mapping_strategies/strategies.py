@@ -60,8 +60,7 @@ class MappingFactory:
         additional_metadata: Optional[Dict] = None,
         strip_url: bool = True,
     ) -> Iterable[Mapping]:
-        for idx in id_set.ids:
-            source = id_set.ids_to_source[idx]
+        for idx, source in id_set.ids_and_source:
             yield MappingFactory.create_mapping(
                 parser_name=parser_name,
                 source=source,
