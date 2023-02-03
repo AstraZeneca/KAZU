@@ -115,6 +115,7 @@ class EquivalentIdAggregationStrategy(AutoNameEnum):
     CUSTOM = auto()  # a place holder for any strategy that
     UNAMBIGUOUS = auto()
     MERGED_AS_NON_SYMBOLIC = auto()  # used when non-symbolic synonyms are merged
+    MODIFIED_BY_CURATION = auto()
 
 
 @dataclass(frozen=True, eq=True, order=True)
