@@ -18,7 +18,16 @@ from kazu.modelling.language.language_phenomena import GREEK_SUBS
 from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
-dummy_equiv_ids = EquivalentIdSet(ids=frozenset(("text",)))
+dummy_equiv_ids = EquivalentIdSet(
+    ids_and_source=frozenset(
+        (
+            (
+                "text",
+                "text",
+            ),
+        ),
+    )
+)
 
 
 def check_generator_result(

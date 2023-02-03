@@ -106,7 +106,22 @@ def make_term_for_scorer_test(synonyms: Sequence[str]) -> SynonymTerm:
         associated_id_sets=frozenset(
             (
                 EquivalentIdSet(
-                    ids=frozenset(["1", "2", "3"]),
+                    ids_and_source=frozenset(
+                        [
+                            (
+                                "1",
+                                "1",
+                            ),
+                            (
+                                "2",
+                                "2",
+                            ),
+                            (
+                                "3",
+                                "3",
+                            ),
+                        ]
+                    ),
                 ),
             )
         ),
