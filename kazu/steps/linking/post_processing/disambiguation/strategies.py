@@ -107,10 +107,10 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     ) -> Set[EquivalentIdSet]:
         found_id_sets = set()
         for id_set in id_sets:
-            for idx in id_set.ids:
+            for idx, source in id_set.ids_and_source:
                 if (
                     parser_name,
-                    id_set.ids_to_source[idx],
+                    source,
                     idx,
                 ) in self.mapped_ids:
                     found_id_sets.add(id_set)
