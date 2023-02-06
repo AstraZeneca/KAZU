@@ -17,11 +17,12 @@
 
 import logging
 import os
-from typing import List
+from typing import List, Tuple, Iterable
 
 from transformers import InputExample, DataProcessor
 
 from kazu.modelling.distillation.data_utils import to_unicode
+from kazu.utils.utils import PathLike
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,9 @@ class NerProcessor(SeqTagProcessor):
     def get_aug_examples(self, data_dir: str) -> List[InputExample]:
         return self._create_examples(self._read_tsv(os.path.join(data_dir, "train_aug.tsv")), "aug")
 
-    def _create_examples(self, lines, set_type):
+    def _create_examples(
+        self, lines: Iterable[Tuple[str, str]], set_type: str
+    ) -> List[InputExample]:
         examples = []
         for (i, line) in enumerate(lines):
             guid = "%s-%s" % (set_type, i)
@@ -75,7 +78,7 @@ class NerProcessor(SeqTagProcessor):
         return examples
 
     @classmethod
-    def _read_data(cls, input_file):
+    def _read_data(cls, input_file: PathLike) -> List[Tuple[str, str]]:
         """Reads a BIO data."""
         with open(input_file) as inpFilept:
             lines = []
