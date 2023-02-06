@@ -85,8 +85,8 @@ class NerDataset(Dataset):
     def convert_single_example(self, ex_index, example: InputExample) -> Dict[str, List]:
         textlist = example.text_a.split()
         labellist = example.label.split()
-        tokens = []
-        labels = []
+        tokens: List[str] = []
+        labels: List[str] = []
         for i, word in enumerate(textlist):
             tokenized = self.tokenizer.tokenize(word)
             tokens.extend(tokenized)
@@ -97,9 +97,9 @@ class NerDataset(Dataset):
                 else:
                     labels.append("X")
 
-        ntokens = []
-        segment_ids = []
-        label_id = []
+        ntokens: List[str] = []
+        segment_ids: List[int] = []
+        label_id: List[int] = []
         ntokens.append("[CLS]")
         segment_ids.append(0)
         label_id.append(IGNORE_IDX)
