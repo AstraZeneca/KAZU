@@ -133,10 +133,10 @@ class NerDataset(Dataset):
             logger.info("guid: %s" % (example.guid))
             logger.info("tokens: %s" % " ".join(tokens))
             logger.info("ntokens: %s" % " ".join(ntokens))
-            logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-            logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
-            logger.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
-            logger.info("label_id: %s" % " ".join([str(x) for x in label_id]))
+            logger.info("input_ids: %s" % " ".join(str(x) for x in input_ids))
+            logger.info("input_mask: %s" % " ".join(str(x) for x in input_mask))
+            logger.info("segment_ids: %s" % " ".join(str(x) for x in segment_ids))
+            logger.info("label_id: %s" % " ".join(str(x) for x in label_id))
 
         result = {
             "labels": label_id,
