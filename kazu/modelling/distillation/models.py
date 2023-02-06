@@ -83,7 +83,7 @@ class NerDataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def convert_single_example(self, ex_index, example) -> Dict[str, List]:
+    def convert_single_example(self, ex_index, example: InputExample) -> Dict[str, List]:
         textlist = example.text_a.split()
         labellist = example.label.split()
         tokens = []
