@@ -408,7 +408,7 @@ class Section:
 
 @dataclass(unsafe_hash=True)
 class Document:
-    idx: str  # a document identifier
+    idx: str = field(default_factory=lambda: uuid.uuid4().hex)  # a document identifier
     sections: List[Section] = field(
         default_factory=list, hash=False
     )  # sections comprising this document
@@ -460,13 +460,11 @@ class Document:
         :param text:
         :return:
         """
-        idx = uuid.uuid4().hex
         sections = [Section(text=text, name="na")]
-        return cls(idx=idx, sections=sections)
+        return cls(sections=sections)
 
     @classmethod
     def simple_document_from_sents(cls, sents: List[str]) -> "Document":
-        idx = uuid.uuid4().hex
         section = Section(text=" ".join(sents), name="na")
         sent_spans = []
         curr_start = 0
@@ -474,13 +472,12 @@ class Document:
             sent_spans.append(CharSpan(start=curr_start, end=curr_start + len(sent)))
             curr_start += len(sent) + 1  # + 1 is for the joining space
         section.sentence_spans = sent_spans
-        return cls(idx=idx, sections=[section])
+        return cls(sections=[section])
 
     @classmethod
     def from_named_section_texts(cls, named_sections: Dict[str, str]) -> "Document":
-        idx = uuid.uuid4().hex
         sections = [Section(text=text, name=name) for name, text in named_sections.items()]
-        return cls(idx=idx, sections=sections)
+        return cls(sections=sections)
 
     def __len__(self):
         length = 0
