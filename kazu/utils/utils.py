@@ -198,8 +198,4 @@ class Singleton(type):
 
     @staticmethod
     def clear_all():
-        for k in list(Singleton._instances):
-            try:
-                del Singleton._instances[k]
-            except KeyError:
-                pass
+        Singleton._instances.clear()
