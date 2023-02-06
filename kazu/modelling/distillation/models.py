@@ -24,7 +24,6 @@ from transformers import (
 )
 from transformers.utils import check_min_version
 
-from kazu.modelling.distillation.data_utils import to_unicode
 from kazu.modelling.distillation.dataprocessor import NerProcessor
 from kazu.modelling.distillation.metrics import numeric_label_f1_score, IGNORE_IDX
 from kazu.modelling.distillation.tiny_transformers import TinyBertForSequenceTagging
@@ -132,8 +131,8 @@ class NerDataset(Dataset):
         if self.call_count < 4 and ex_index < 4:  # Examples. Executed only once per model run
             logger.info("*** Example ***")
             logger.info("guid: %s" % (example.guid))
-            logger.info("tokens: %s" % " ".join([to_unicode(x) for x in tokens]))
-            logger.info("ntokens: %s" % " ".join([to_unicode(x) for x in ntokens]))
+            logger.info("tokens: %s" % " ".join(tokens))
+            logger.info("ntokens: %s" % " ".join(ntokens))
             logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
             logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
             logger.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))

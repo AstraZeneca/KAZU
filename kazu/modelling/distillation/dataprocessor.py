@@ -21,7 +21,6 @@ from typing import List, Tuple, Iterable
 
 from transformers import InputExample, DataProcessor
 
-from kazu.modelling.distillation.data_utils import to_unicode
 from kazu.utils.utils import PathLike
 
 logger = logging.getLogger(__name__)
@@ -70,10 +69,9 @@ class NerProcessor(SeqTagProcessor):
         examples = []
         for (i, line) in enumerate(lines):
             guid = "%s-%s" % (set_type, i)
-            text = to_unicode(
-                line[1]
-            )  # TODO assert if tokenization from BERT and tokenization from pytorch mismatch
-            label = to_unicode(line[0])
+            # TODO assert if tokenization from BERT and tokenization from pytorch mismatch
+            text = line[1]
+            label = line[0]
             examples.append(InputExample(guid=guid, text_a=text, label=label))
         return examples
 
