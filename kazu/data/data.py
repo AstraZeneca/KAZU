@@ -460,8 +460,7 @@ class Document:
         :param text:
         :return:
         """
-        sections = [Section(text=text, name="na")]
-        return cls(sections=sections)
+        return cls(sections=[Section(text=text, name="na")])
 
     @classmethod
     def simple_document_from_sents(cls, sents: List[str]) -> "Document":
