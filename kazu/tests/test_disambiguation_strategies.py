@@ -6,7 +6,8 @@ from typing import Set, List
 from kazu.data.data import (
     Document,
     Mapping,
-    LinkRanks,
+    StringMatchConfidence,
+    DisambiguationConfidence,
     Entity,
     EquivalentIdAggregationStrategy,
     EquivalentIdSet,
@@ -83,7 +84,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     p27_ent.update_terms(terms)
 
     doc = create_doc_with_ents([autoantip27_ent, p27_ent])
-    strategy = DefinedElsewhereInDocumentDisambiguationStrategy()
+    strategy = DefinedElsewhereInDocumentDisambiguationStrategy(
+        DisambiguationConfidence.HIGHLY_LIKELY
+    )
 
     # first check no mappings are produced until we add the 'good' mapping info
     check_ids_are_represented(
@@ -100,9 +103,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
             parser_name=target_term.parser_name,
-            mapping_strategy="test",
+            string_match_strategy="test",
             disambiguation_strategy=None,
-            confidence=LinkRanks.HIGHLY_LIKELY,
+            string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
             additional_metadata=None,
         )
     )
@@ -128,14 +131,14 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     target_id_set_for_good_mapping = next(
         filter(lambda x: "1" in x.ids, target_term.associated_id_sets)
     )
-    target_mappings: Set[Mapping] = set()
+    target_mappings = set()
     target_mappings.update(
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
             parser_name=target_term.parser_name,
-            mapping_strategy="test",
+            string_match_strategy="test",
             disambiguation_strategy=None,
-            confidence=LinkRanks.HIGHLY_LIKELY,
+            string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
             additional_metadata=None,
         )
     )
@@ -181,9 +184,10 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
         )
 
         strategy = TfIdfDisambiguationStrategy(
-            TfIdfScorer(path=cache_dir),
+            scorer=TfIdfScorer(path=cache_dir),
             context_threshold=0.0,
             relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
+            confidence=DisambiguationConfidence.POSSIBLE,
         )
 
         check_ids_are_represented(
@@ -214,7 +218,7 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
             meta_dict["annotation_score"] = 10
         else:
             meta_dict["annotation_score"] = 5
-    strategy = AnnotationLevelDisambiguationStrategy()
+    strategy = AnnotationLevelDisambiguationStrategy(DisambiguationConfidence.POSSIBLE)
     check_ids_are_represented(
         ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[cdkn1b_ent]
     )

@@ -24,7 +24,7 @@ def test_AbbreviationFinderStep_copy_ents():
 
     step = AbbreviationFinderStep()
 
-    success, failure = step([doc])
+    processed, failure = step([doc])
     assert len(failure) == 0
 
     assert len(sec1.entities) == 3
@@ -46,7 +46,7 @@ def test_AbbreviationFinderStep_copy_ents():
     sec4.entities.append(ent5)
     doc = Document(idx="test removal of entity data", sections=[sec3, sec4])
 
-    success, failure = step([doc])
+    processed, failure = step([doc])
     assert len(failure) == 0
 
     ents = doc.get_entities()
@@ -69,7 +69,7 @@ def test_AbbreviationFinderStep_remove_ents(exclude_abbr):
     )
     sec4.entities.append(ent5)
     doc = Document(idx="test removal of entity data", sections=[sec3, sec4])
-    success, failure = step([doc])
+    processed, failure = step([doc])
     assert len(failure) == 0
     ents = doc.get_entities()
     if len(exclude_abbr) == 0:

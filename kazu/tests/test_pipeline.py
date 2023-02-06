@@ -50,6 +50,6 @@ def test_full_pipeline_and_serialisation(kazu_test_config):
     # test the default pipeline can load/configs are all correct
     pipeline: Pipeline = instantiate(kazu_test_config.Pipeline)
     doc = Document.create_simple_document("EGFR is an important gene in breast cancer")
-    doc: Document = pipeline([doc])[0]
+    doc = pipeline([doc])[0]
     with tempfile.TemporaryFile(mode="w") as f:
         f.write(doc.json())

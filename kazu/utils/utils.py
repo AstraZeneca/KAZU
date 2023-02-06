@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Tuple, Union, Iterable, Sequence, overload, Type, Any
 
-from transformers import AutoTokenizer, BatchEncoding
+from transformers import BatchEncoding, PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
 
@@ -69,7 +69,10 @@ def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entit
 
 
 def documents_to_document_section_batch_encodings_map(
-    docs: List[Document], tokenizer: AutoTokenizer, stride: int = 128, max_length: int = 512
+    docs: List[Document],
+    tokenizer: PreTrainedTokenizerBase,
+    stride: int = 128,
+    max_length: int = 512,
 ) -> Tuple[BatchEncoding, Dict[int, Section]]:
     """
     convert documents into a BatchEncoding. Also returns a list of <int + section> for the resulting encoding

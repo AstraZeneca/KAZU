@@ -1,5 +1,11 @@
 from typing import List, Protocol, Callable, Iterable
-from kazu.data.data import Document, Entity, Mapping, LinkRanks
+from kazu.data.data import (
+    Document,
+    Entity,
+    Mapping,
+    StringMatchConfidence,
+    DisambiguationConfidence,
+)
 from kazu.steps import Step, document_iterating_step
 
 EntityFilterFn = Callable[[Entity], bool]
@@ -36,11 +42,20 @@ class EntityFilterCleanupAction:
 
 
 class DropMappingsByConfidenceMappingFilter:
-    def __init__(self, ranks_to_drop: Iterable[LinkRanks]):
-        self.ranks_to_drop = set(ranks_to_drop)
+    def __init__(
+        self,
+        string_match_ranks_to_drop: Iterable[StringMatchConfidence],
+        disambiguation_ranks_to_drop: Iterable[DisambiguationConfidence],
+    ):
+        self.string_match_ranks_to_drop = set(string_match_ranks_to_drop)
+        self.disambiguation_ranks_to_drop = set(disambiguation_ranks_to_drop)
 
     def __call__(self, mapping: Mapping) -> bool:
-        return mapping.confidence in self.ranks_to_drop
+
+        return (
+            mapping.string_match_confidence in self.string_match_ranks_to_drop
+            or mapping.disambiguation_confidence in self.disambiguation_ranks_to_drop
+        )
 
 
 class DropUnmappedEntityFilter:

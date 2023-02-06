@@ -1,3 +1,4 @@
+from pathlib import Path
 from setuptools import setup, find_packages
 
 
@@ -6,19 +7,24 @@ webserver_dependencies = [
     "PyJWT>=2.0.0",
 ]
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name="kazu",
-    version="0.0.20",
+    version="0.0.23",
     license="Apache 2.0",
     author="AstraZeneca AI and Korea University",
-    description="NER",
+    description="Biomedical Named Entity Recognition and Entity Linking for Enterprise use cases",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     install_requires=[
         "spacy>=3.2.0",
         "torch>=1.12.0",
         "transformers>=4.0.0",
         "rdflib>=6.0.0",
         "requests>=2.20.0",
-        "hydra-core>=1.1.0",
+        "hydra-core>=1.3.0",
         "pytorch-lightning>=1.7.4",
         "pandas>=1.0.0",
         "pyarrow>=8.0.0",
@@ -37,6 +43,12 @@ setup(
         "dev": [
             "black~=22.0",
             "flake8",
+            "mypy",
+            "types-requests",
+            "types-cachetools",
+            "types-regex",
+            "types-psutil",
+            "pandas-stubs",
             "bump2version",
             "pre-commit",
             "pytest",

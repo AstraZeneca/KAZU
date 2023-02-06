@@ -22,7 +22,7 @@
 
     # create an instance of the AbbreviationFinderStep
     step = AbbreviationFinderStep()
-    # a step may fail to process a document, so it returns two lists, successes and failures
+    # a step may fail to process a document, so it returns two lists, all the docs, and just the failures
     processed, failed = step([doc])
     # check that a new entity has been created, attached to the EGFR span
     egfr_entity = next(iter(filter(lambda x: x.match == 'EGFR', doc.get_entities())))

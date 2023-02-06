@@ -1,5 +1,12 @@
 from kazu.steps.other.cleanup import CleanupStep
-from kazu.data.data import Document, Entity, Section, Mapping, LinkRanks
+from kazu.data.data import (
+    Document,
+    Entity,
+    Section,
+    Mapping,
+    StringMatchConfidence,
+    DisambiguationConfidence,
+)
 from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
 
 from hydra.utils import instantiate
@@ -25,8 +32,9 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
                     source="test",
                     parser_name="test",
                     idx="test",
-                    confidence=LinkRanks.HIGHLY_LIKELY,
-                    mapping_strategy="test",
+                    string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                    disambiguation_confidence=DisambiguationConfidence.HIGHLY_LIKELY,
+                    string_match_strategy="test",
                     disambiguation_strategy=None,
                 ),
                 Mapping(
@@ -34,8 +42,9 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
                     source="test",
                     parser_name="test",
                     idx="test",
-                    confidence=LinkRanks.AMBIGUOUS,
-                    mapping_strategy="test",
+                    string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                    disambiguation_confidence=DisambiguationConfidence.AMBIGUOUS,
+                    string_match_strategy="test",
                     disambiguation_strategy=None,
                 ),
             },
@@ -48,7 +57,7 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
     ent = doc.get_entities()[0]
     assert len(ent.mappings) == 1
     mapping = next(iter(ent.mappings))
-    assert mapping.confidence == LinkRanks.HIGHLY_LIKELY
+    assert mapping.string_match_confidence == StringMatchConfidence.HIGHLY_LIKELY
 
 
 def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_config):
@@ -76,8 +85,8 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
                     source="test",
                     parser_name="test",
                     idx="test",
-                    confidence=LinkRanks.HIGHLY_LIKELY,
-                    mapping_strategy="test",
+                    string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                    string_match_strategy="test",
                     disambiguation_strategy=None,
                 )
             },

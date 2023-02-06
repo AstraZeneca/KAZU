@@ -8,7 +8,19 @@ from abc import ABC
 from collections import defaultdict
 from functools import cache
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Iterable, Set, Optional, FrozenSet, Union, DefaultDict
+from typing import (
+    cast,
+    List,
+    Tuple,
+    Dict,
+    Any,
+    Iterable,
+    Set,
+    Optional,
+    FrozenSet,
+    Union,
+    DefaultDict,
+)
 from urllib import parse
 
 import pandas as pd
@@ -341,12 +353,14 @@ class OntologyParser(ABC):
                 )
 
     def drop_excluded_ids(self):
+        assert self.parsed_dataframe is not None
         if self.excluded_ids is not None:
             self.parsed_dataframe = self.parsed_dataframe[
                 ~self.parsed_dataframe[IDX].isin(self.excluded_ids)
             ].copy()
 
     def _add_additional_synonyms(self):
+        assert self.parsed_dataframe is not None
         if self.additional_synonyms is not None:
             logger.info(
                 f"{len(self.additional_synonyms)} curated synonyms for {self.name} detected."
@@ -392,7 +406,7 @@ class OntologyParser(ABC):
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
-        return metadata
+        return cast(Dict[str, Dict[str, SimpleValue]], metadata)
 
     def export_synonym_terms(self) -> Set[SynonymTerm]:
         self._parse_df_if_not_already_parsed()
@@ -774,7 +788,7 @@ class RDFGraphParser(OntologyParser):
                     default_labels.append(str(obj))
                     iris.append(str(sub))
                     syns.append(str(other_syn_obj))
-                    mapping_type.append(syn_predicate)
+                    mapping_type.append(str(syn_predicate))
 
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
@@ -854,15 +868,17 @@ class GeneOntologyParser(OntologyParser):
         syns = []
         mapping_type = []
 
-        for row in result:
-            idx = row.goid
-            if "obsolete" in row.label:
-                logger.info(f"skipping obsolete id: {row.goid}, {row.label}")
+        # there seems to be a bug in rdflib that means the iterator sometimes exits early unless we covert to list first
+        for row in list(result):
+            idx = str(row.goid)
+            label = str(row.label)
+            if "obsolete" in label:
+                logger.info(f"skipping obsolete id: {idx}, {label}")
                 continue
             if self._uri_regex.match(idx):
-                default_labels.append(row.label)
-                iris.append(row.goid)
-                syns.append(row.synonym)
+                default_labels.append(label)
+                iris.append(idx)
+                syns.append(str(row.synonym))
                 mapping_type.append("hasExactSynonym")
         df = pd.DataFrame.from_dict(
             {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
@@ -1415,20 +1431,25 @@ class MeddraOntologyParser(OntologyParser):
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
         llt_path = os.path.join(self.in_path, "llt.asc")
+        # note: this isn't true! But the pandas stubs currently think that the names argument
+        # here has to be a list of str, but it doesn't, it just has to be a sequence of strings
+        list_mdhier_names = cast(List[str], self._mdhier_asc_col_names)
         hier_df = pd.read_csv(
             mdheir_path,
             sep="$",
             header=None,
-            names=self._mdhier_asc_col_names,
+            names=list_mdhier_names,
             dtype="string",
         )
         hier_df = hier_df[~hier_df["soc_name"].isin(self._exclude_soc)]
 
+        # as above
+        list_llt_names = cast(List[str], self._llt_asc_column_names)
         llt_df = pd.read_csv(
             llt_path,
             sep="$",
             header=None,
-            names=self._llt_asc_column_names,
+            names=list_llt_names,
             usecols=("llt_name", "pt_code"),
             dtype="string",
         )
@@ -1482,10 +1503,12 @@ class CLOntologyParser(RDFGraphParser):
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
-        synonym_merge_threshold: float = 0.70,
+        synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         excluded_ids: Optional[Set[str]] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         additional_synonyms: Optional[List[CuratedTerm]] = None,
     ):
 
@@ -1502,8 +1525,47 @@ class CLOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             excluded_ids=excluded_ids,
+            include_entity_patterns=include_entity_patterns,
+            exclude_entity_patterns=exclude_entity_patterns,
             additional_synonyms=additional_synonyms,
         )
 
     def find_kb(self, string: str) -> str:
         return "CL"
+
+
+class HGNCGeneFamilyParser(OntologyParser):
+
+    syn_column_keys = {"Family alias", "Common root gene symbol"}
+
+    def find_kb(self, string: str) -> str:
+        return "HGNC_GENE_FAMILY"
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        df = pd.read_csv(self.in_path, sep="\t")
+        data = []
+        for family_id, row in (
+            df.groupby(by="Family ID").agg(lambda col_series: set(col_series.dropna())).iterrows()
+        ):
+            # in theory, there should only be one family name per ID
+            assert len(row["Family name"]) == 1
+            default_label = next(iter(row["Family name"]))
+            data.append(
+                {
+                    SYN: default_label,
+                    MAPPING_TYPE: "Family name",
+                    DEFAULT_LABEL: default_label,
+                    IDX: family_id,
+                }
+            )
+            data.extend(
+                {
+                    SYN: syn,
+                    MAPPING_TYPE: key,
+                    DEFAULT_LABEL: default_label,
+                    IDX: family_id,
+                }
+                for key in self.syn_column_keys
+                for syn in row[key]
+            )
+        return pd.DataFrame.from_records(data)

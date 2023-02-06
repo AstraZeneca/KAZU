@@ -1,4 +1,6 @@
 import re
+from os import getenv
+
 import regex
 from functools import lru_cache
 from typing import Optional, Dict, Protocol, Type, Tuple
@@ -442,14 +444,14 @@ class StringNormalizer:
     }
 
     @staticmethod
-    @lru_cache(maxsize=5000)
+    @lru_cache(maxsize=int(getenv("KAZU_STRING_NORMALIZER_CACHE_SIZE", 5000)))
     def classify_symbolic(original_string: str, entity_class: Optional[str] = None) -> bool:
         return StringNormalizer.normalizers.get(
             entity_class, DefaultStringNormalizer
         ).is_symbol_like(original_string)
 
     @staticmethod
-    @lru_cache(maxsize=5000)
+    @lru_cache(maxsize=int(getenv("KAZU_STRING_NORMALIZER_CACHE_SIZE", 5000)))
     def normalize(original_string: str, entity_class: Optional[str] = None) -> str:
         normaliser_for_entity_class = StringNormalizer.normalizers.get(
             entity_class, DefaultStringNormalizer

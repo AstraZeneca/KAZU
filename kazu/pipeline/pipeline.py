@@ -163,7 +163,7 @@ class Pipeline:
             idx_this_process = uuid.uuid1().hex
             dir_and_time = f"{profile_steps_dir}_{self.init_time}_{idx_this_process}"
             logger.info(f"profiling configured. log dir is {dir_and_time}")
-            self.summary_writer = SummaryWriter(log_dir=dir_and_time)
+            self.summary_writer: Optional[SummaryWriter] = SummaryWriter(log_dir=dir_and_time)
             self.call_count = 0
         else:
             logger.info("profiling not configured")

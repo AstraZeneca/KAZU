@@ -24,7 +24,7 @@ jobs:
         python-version: [ "3.9" ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: fetch tags
         run: |
@@ -33,7 +33,7 @@ jobs:
           git tag --list
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -65,7 +65,7 @@ jobs:
           pip install "${WHEEL_PATH}[dev,webserver]"  --cache-dir $PIP_CACHE_DIR
 
       - name: Set up JDK 11 (required for SETH)
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
@@ -83,11 +83,11 @@ jobs:
           . kazu-env/bin/activate
           
           python -m kazu.utils.build_and_test_model_packs \
-          --build_base_model_pack_from_path $DEFAULT_MODEL_PACK_PATH \
+          --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
+          --model_packs_to_build \
+          $DEFAULT_MODEL_PACK_PATH \
           --zip_model_pack \
-          --run_acceptance_tests \
-          --run_consistency_checks \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH
                     
           cd /tmp

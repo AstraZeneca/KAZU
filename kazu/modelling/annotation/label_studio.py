@@ -1,13 +1,22 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
+from functools import cached_property
 from typing import Dict, Tuple, Set, List, Iterable
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
 import requests
+from requests import HTTPError
 
-from kazu.data.data import Document, Section, Entity, Mapping, LinkRanks, CharSpan
+from kazu.data.data import (
+    Document,
+    Section,
+    Entity,
+    Mapping,
+    StringMatchConfidence,
+    CharSpan,
+)
 from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
@@ -195,9 +204,8 @@ class LSToKazuConversion:
                     source=source,
                     parser_name="gold",
                     idx=idx,
-                    mapping_strategy="gold",
-                    disambiguation_strategy=None,
-                    confidence=LinkRanks.HIGHLY_LIKELY,
+                    string_match_strategy="gold",
+                    string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
                 )
             )
         return mappings
@@ -387,23 +395,32 @@ class LabelStudioManager:
         self.headers = headers
         self.url = url
 
-    @property
+    @cached_property
     def project_id(self) -> int:
-        project_ids = [
-            result
-            for result in requests.get(f"{self.url}/api/projects", headers=self.headers).json()[
-                "results"
-            ]
-            if result["title"] == self.project_name
-        ]
-        if len(project_ids) == 0:
-            raise ValueError(f"no project with name: {self.project_name} found in Label Studio")
-        elif len(project_ids) == 1:
-            return project_ids[0]["id"]
-        else:
-            raise ValueError(
-                f"more than one project with name: {self.project_name} found in Label Studio"
+        projects_url = f"{self.url}/api/projects"
+        projects_resp = requests.get(projects_url, headers=self.headers)
+
+        if not projects_resp.ok:
+            raise HTTPError(
+                f"failed to get projects from {projects_url}: status:{projects_resp.status_code}\n"
+                f"{projects_resp.text}",
+                response=projects_resp,
             )
+        else:
+
+            project_ids = [
+                result
+                for result in projects_resp.json()["results"]
+                if result["title"] == self.project_name
+            ]
+            if len(project_ids) == 0:
+                raise ValueError(f"no project with name: {self.project_name} found in Label Studio")
+            elif len(project_ids) == 1:
+                return project_ids[0]["id"]
+            else:
+                raise ValueError(
+                    f"more than one project with name: {self.project_name} found in Label Studio"
+                )
 
     def delete_project_if_exists(self):
         try:

@@ -17,32 +17,53 @@ jobs:
         python-version: [ "3.9" ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ hashFiles('setup.py') }}
 
-      - name: Install dependencies
+      - name: create venv and install dependencies
         run: |
+          rm -r /tmp/kazu-env || true
+          
+          PIP_CACHE_DIR=$(pip cache dir)
+          echo "pip cache dir is "${PIP_CACHE_DIR}
+          python -m venv /tmp/kazu-env
+          . /tmp/kazu-env/bin/activate
           python -m pip install --upgrade pip
-          pip install -e ".[dev,webserver]"
+          pip install -e ."[dev,webserver]"  --cache-dir $PIP_CACHE_DIR
+
 
       - name: Check precommit
         run: |
+          . /tmp/kazu-env/bin/activate
           pre-commit run --all-files
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
+
+# TODO: network issue on gradle DL
+#      - name: Setup and execute Gradle 'test' task
+#        uses: gradle/gradle-build-action@v2
+#        with:
+#          arguments: test
+#          build-root-directory: kazu-jvm/
+
+      - name: Run Sphinx doctest
+        run: |
+          . /tmp/kazu-env/bin/activate
+          
+          make -C docs doctest          
 
       - name: Build model pack caches and test
         id: model_pack_cache_build
@@ -53,16 +74,24 @@ jobs:
      
           mkdir $MODEL_PACK_BUILD_PATH   
           
-          python -m kazu.utils.build_and_test_model_packs \
-          --build_base_model_pack_from_path $DEFAULT_MODEL_PACK_PATH \
-          --base_configuration_path $BASE_KAZU_CONF_PATH \
-          --model_pack_output_path $MODEL_PACK_BUILD_PATH
+          . /tmp/kazu-env/bin/activate
           
-          export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/*)
+          python -m kazu.utils.build_and_test_model_packs \
+          --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
+          --base_configuration_path $BASE_KAZU_CONF_PATH \
+          --model_packs_to_build \
+          $DEFAULT_MODEL_PACK_PATH \
+          --model_pack_output_path $MODEL_PACK_BUILD_PATH \
+          --skip_tests
+          
+          export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
           
           pytest
           
-          # need to call twice, for NFS bug         
+          # need to call twice, for NFS bug
+          rm -r /tmp/kazu-env || true
+          rm -r /tmp/kazu-env || true
+          
           rm -r $MODEL_PACK_BUILD_PATH || true
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:

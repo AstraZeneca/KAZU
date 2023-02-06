@@ -1,5 +1,13 @@
 _convert_: 'all'
 middlewares:
+  # this needs to go after the JWT auth middleware,
+  # as the middleware actually run in the reverse order here,
+  # and it's the below auth middleware that adds the req_id to the request
+  # in order for the below one to pick it up
+  - _target_: starlette.middleware.Middleware
+    cls:
+      _target_: hydra.utils.get_class
+      path: kazu.web.req_id_header.AddRequestIdMiddleware
   - _target_: starlette.middleware.Middleware
     cls:
       _target_: hydra.utils.get_class

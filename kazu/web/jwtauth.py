@@ -49,10 +49,10 @@ from starlette.authentication import (
     AuthenticationError,
     BaseUser,
 )
-from starlette.requests import Request
+from starlette.requests import Request, HTTPConnection
 from starlette.responses import JSONResponse
 
-from kazu.web.routes import EXLUDED_ENDPOINTS
+from kazu.web.routes import EXCLUDED_ENDPOINTS
 
 logger = logging.getLogger("ray")
 
@@ -100,7 +100,9 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             raise AuthenticationError(f"Authorization scheme {scheme} is not supported")
         return token
 
-    async def authenticate(self, request) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
+    async def authenticate(
+        self, request: HTTPConnection
+    ) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
         req_id = str(uuid.uuid4())
         request.headers.__dict__["_list"].append(
             (
@@ -108,34 +110,32 @@ class JWTAuthenticationBackend(AuthenticationBackend):
                 req_id.encode(),
             )
         )
-        if request.scope["raw_path"].decode() in EXLUDED_ENDPOINTS:
-
-            logger.info(
-                "ID: %s Request to %s, no authentication required"
-                % (req_id, request.scope["raw_path"]),
-            )
+        path: str = request.scope["raw_path"].decode()
+        if path in EXCLUDED_ENDPOINTS:
+            logger.info("ID: %s Request to %s, no authentication required", req_id, path)
             return None
 
         if "Authorization" not in request.headers:
-            raise AuthenticationError(
+            message = (
                 f"ID: {req_id} No 'Authorization' header specified: please use a valid Bearer token"
             )
-
+            logger.warn(message)
+            raise AuthenticationError(message)
         auth = request.headers["Authorization"]
         token = self.get_token_from_header(authorization=auth, prefix=self.prefix)
         try:
             payload = jwt.decode(
                 token,
                 key=self.secret_key,
-                algorithms=self.algorithm,
+                algorithms=[self.algorithm],
                 audience=self.audience,
                 options=self.options,
             )
         except jwt.InvalidTokenError as e:
-            logger.warn(f"ID: {req_id} {e}")
+            logger.warn("ID: %s %s", req_id, e)
             raise AuthenticationError(f"ID: {req_id} {e}")
         username = payload[self.username_field]
-        logger.info(f"ID: {req_id} Received request from {username}")
+        logger.info("ID: %s Received request from %s", req_id, username)
         return AuthCredentials(["authenticated"]), JWTUser(
             username=username, token=token, payload=payload
         )

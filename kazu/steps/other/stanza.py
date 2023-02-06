@@ -60,7 +60,7 @@ class StanzaStep(Step):
         self.stanza_nlp = stanza_pipeline.instance
 
     @document_iterating_step
-    def __call__(self, doc: Document):
+    def __call__(self, doc: Document) -> None:
         for section in doc.sections:
             stanza_doc = self.stanza_nlp(section.get_text())
             sentences: List[Sentence] = stanza_doc.sentences
