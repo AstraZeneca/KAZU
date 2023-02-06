@@ -77,40 +77,39 @@ class NerProcessor(SeqTagProcessor):
     @classmethod
     def _read_data(cls, input_file):
         """Reads a BIO data."""
-        inpFilept = open(input_file)
-        lines = []
-        words: List[str] = []
-        labels: List[str] = []
-        continualLineErrorCnt = 0
-        for lineIdx, line in enumerate(inpFilept):
-            contents = line.splitlines()[0]
-            lineList = contents.split()
-            if len(lineList) == 0:  # For blank line
-                assert len(words) == len(
-                    labels
-                ), "lineIdx: %s,  len(words)(%s) != len(labels)(%s) \n %s\n%s" % (
-                    lineIdx,
-                    len(words),
-                    len(labels),
-                    " ".join(words),
-                    " ".join(labels),
-                )
-                if len(words) != 0:
-                    wordSent = " ".join(words)
-                    labelSent = " ".join(labels)
-                    lines.append((labelSent, wordSent))
-                    words = []
-                    labels = []
+        with open(input_file) as inpFilept:
+            lines = []
+            words: List[str] = []
+            labels: List[str] = []
+            continualLineErrorCnt = 0
+            for lineIdx, line in enumerate(inpFilept):
+                contents = line.splitlines()[0]
+                lineList = contents.split()
+                if len(lineList) == 0:  # For blank line
+                    assert len(words) == len(
+                        labels
+                    ), "lineIdx: %s,  len(words)(%s) != len(labels)(%s) \n %s\n%s" % (
+                        lineIdx,
+                        len(words),
+                        len(labels),
+                        " ".join(words),
+                        " ".join(labels),
+                    )
+                    if len(words) != 0:
+                        wordSent = " ".join(words)
+                        labelSent = " ".join(labels)
+                        lines.append((labelSent, wordSent))
+                        words = []
+                        labels = []
+                    else:
+                        continualLineErrorCnt += 1
                 else:
-                    continualLineErrorCnt += 1
-            else:
-                words.append(lineList[0])
-                labels.append(lineList[-1])
-        if len(words) != 0:
-            wordSent = " ".join(words)
-            labelSent = " ".join(labels)
-            lines.append((labelSent, wordSent))
+                    words.append(lineList[0])
+                    labels.append(lineList[-1])
+            if len(words) != 0:
+                wordSent = " ".join(words)
+                labelSent = " ".join(labels)
+                lines.append((labelSent, wordSent))
 
-        inpFilept.close()
         logging.info("continualLineErrorCnt : %s" % (continualLineErrorCnt))
         return lines
