@@ -1,14 +1,48 @@
 from typing import List, Optional
 
 import spacy
+from spacy.lang.char_classes import (
+    LIST_ELLIPSES,
+    LIST_ICONS,
+    CONCAT_QUOTES,
+    ALPHA_LOWER,
+    ALPHA_UPPER,
+    ALPHA,
+    HYPHENS,
+)
+
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
 from kazu.modelling.ontology_preprocessing.base import OntologyParser
 from kazu.utils.utils import PathLike
 
 
+SPACY_DEFAULT_INFIXES = (
+    LIST_ELLIPSES
+    + LIST_ICONS
+    + [
+        r"(?<=[0-9])[+\-\*^](?=[0-9-])",
+        r"(?<=[{al}{q}])\.(?=[{au}{q}])".format(al=ALPHA_LOWER, au=ALPHA_UPPER, q=CONCAT_QUOTES),
+        r"(?<=[{a}]),(?=[{a}])".format(a=ALPHA),
+        # note: this will get removed below
+        r"(?<=[{a}0-9])(?:{h})(?=[{a}])".format(a=ALPHA, h=HYPHENS),
+        r"(?<=[{a}0-9])[:<>=/](?=[{a}])".format(a=ALPHA),
+    ]
+)
+
+# We remove the hypen infix pattern because splitting by hyphens causes problems like
+# splitting the company name 'ALK-Abello' into ['ALK', '-', 'Abello']
+# and then potentially recognising ALK as a gene.
+
+# A spacy PR that modified this hyphen pattern specifically mentions biomedical texts
+# as being potentially problematic for this rule:
+# https://github.com/explosion/spaCy/pull/5770#issuecomment-659389160
+DEFAULT_INFIXES_MINUS_HYPHENS = SPACY_DEFAULT_INFIXES[:-2] + SPACY_DEFAULT_INFIXES[-1:]
+
+
 def custom_tokenizer(nlp):
     custom_infixes = [r"\(", "/"]
-    infixes = custom_infixes + nlp.Defaults.infixes
+
+    infixes = custom_infixes + DEFAULT_INFIXES_MINUS_HYPHENS
     infix_re = spacy.util.compile_infix_regex(infixes)
     nlp.tokenizer.infix_finditer = infix_re.finditer
 
