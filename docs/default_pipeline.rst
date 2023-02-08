@@ -35,12 +35,14 @@ For most use cases we've encountered, the default configuration should suffice. 
           - OPENTARGETS_DISEASE
         gene:
           - OPENTARGETS_TARGET
+          - HGNC_GENE_FAMILY
         anatomy:
           - UBERON
         cell_line:
           - CELLOSAURUS
         cell_type:
           - CLO
+          - CL
         go_bp:
           - BP_GENE_ONTOLOGY
         go_mf:
