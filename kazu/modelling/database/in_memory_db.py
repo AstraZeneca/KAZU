@@ -2,7 +2,7 @@ import dataclasses
 import logging
 from copy import deepcopy
 from enum import auto
-from typing import Optional, Dict, List, Tuple, Set, Iterable
+from typing import Optional, Dict, List, Tuple, Set, Iterable, FrozenSet
 
 from kazu.data.data import (
     SynonymTerm,
@@ -97,6 +97,8 @@ class SynonymDatabase(metaclass=Singleton):
         self._syns_by_aggregation_strategy: Dict[
             ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
         ] = {}
+        self._associated_id_sets_by_id: Dict[ParserName, Dict[str, FrozenSet[EquivalentIdSet]]] = {}
+
         self.loaded_parsers: Set[ParserName] = set()
 
     def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> DBModificationResult:
@@ -111,6 +113,7 @@ class SynonymDatabase(metaclass=Singleton):
         result = DBModificationResult.NO_ACTION
         if name not in self._syns_database_by_syn:
             self._syns_database_by_syn[name] = {}
+            self._associated_id_sets_by_id[name] = {}
         for synonym in synonyms:
             self._syns_database_by_syn[name][synonym.term_norm] = synonym
             for equiv_ids in synonym.associated_id_sets:
@@ -121,6 +124,8 @@ class SynonymDatabase(metaclass=Singleton):
                     )
                     syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(idx, set())
                     syn_set_for_this_id.add(synonym.term_norm)
+                    self._associated_id_sets_by_id[name][idx] = synonym.associated_id_sets
+
                     result = DBModificationResult.SYNONYM_TERM_ADDED
         return result
 
@@ -130,59 +135,63 @@ class SynonymDatabase(metaclass=Singleton):
 
     def drop_id(self, name: ParserName, idx: str) -> DBModificationResult:
         result = DBModificationResult.NO_ACTION
+        target_id_set = next(
+            iter(x for x in self._associated_id_sets_by_id[name][idx] if idx in x.ids)
+        )
         for term in self._syns_database_by_syn[name].values():
-            for id_set in term.associated_id_sets:
-                if idx in id_set.ids:
-                    new_associated_id_sets = set(term.associated_id_sets)
-                    new_associated_id_sets.discard(id_set)
-                    updated_id_set = EquivalentIdSet(
-                        frozenset(id_tup for id_tup in id_set.ids_and_source if id_tup[0] != idx)
-                    )
-                    if len(updated_id_set.ids_and_source) > 0:
-                        new_associated_id_sets.add(updated_id_set)
+            if target_id_set in term.associated_id_sets:
+                new_associated_id_sets = set(term.associated_id_sets)
+                new_associated_id_sets.discard(target_id_set)
 
-                    new_term = dataclasses.replace(
-                        term,
-                        associated_id_sets=frozenset(new_associated_id_sets),
-                        aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
-                    )
-                    self._syns_database_by_syn[name][new_term.term_norm] = new_term
-                    result = DBModificationResult.ID_SET_MODIFIED
+                updated_id_set = EquivalentIdSet(
+                    frozenset(id_tup for id_tup in target_id_set.ids_and_source if id_tup[0] != idx)
+                )
+                if len(updated_id_set.ids_and_source) > 0:
+                    new_associated_id_sets.add(updated_id_set)
+
+                new_term = dataclasses.replace(
+                    term,
+                    associated_id_sets=frozenset(new_associated_id_sets),
+                    aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+                )
+                self._syns_database_by_syn[name][new_term.term_norm] = new_term
+                result = DBModificationResult.ID_SET_MODIFIED
 
         return result
 
     def drop_equivalent_id_set_from_record(
-        self, name: ParserName, synonym: NormalisedSynonymStr, id_to_drop: str
+        self, name: ParserName, synonym: NormalisedSynonymStr, id_set_to_drop: EquivalentIdSet
     ) -> DBModificationResult:
         synonym_term = self._syns_database_by_syn[name][synonym]
         id_sets = set(synonym_term.associated_id_sets)
-        result = DBModificationResult.NO_ACTION
-        for id_set in id_sets:
-            if id_to_drop in id_set.ids:
-                id_sets.discard(id_set)
-                result = DBModificationResult.ID_SET_MODIFIED
-                break
-        if result == DBModificationResult.ID_SET_MODIFIED:
-            if len(id_sets) > 0:
-                new_syn_term = dataclasses.replace(
-                    synonym_term,
-                    associated_id_sets=frozenset(id_sets),
-                    aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
-                )
-                self._syns_database_by_syn[name][synonym_term.term_norm] = new_syn_term
-            else:
-                # if there are no longer any id sets associated with the record, remove it completely
-                self.drop_record(name, synonym)
-                result = DBModificationResult.SYNONYM_TERM_DROPPED
+        id_sets.discard(id_set_to_drop)
+        if len(id_sets) > 0:
+            new_syn_term = dataclasses.replace(
+                synonym_term,
+                associated_id_sets=frozenset(id_sets),
+                aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+            )
+            self._syns_database_by_syn[name][synonym_term.term_norm] = new_syn_term
+            result = DBModificationResult.ID_SET_MODIFIED
+        else:
+            # if there are no longer any id sets associated with the record, remove it completely
+            self.drop_record(name, synonym)
+            result = DBModificationResult.SYNONYM_TERM_DROPPED
         return result
 
     def drop_equivalent_id_set_from_all_records(
-        self, name: ParserName, id_to_drop: str
+        self, name: ParserName, id_to_drop: Idx
     ) -> Tuple[int, int]:
         terms_modified = 0
         terms_dropped = 0
+
+        target_id_set = next(
+            iter(x for x in self._associated_id_sets_by_id[name][id_to_drop] if id_to_drop in x.ids)
+        )
+
         for term_norm in list(self.get_all(name)):
-            result = self.drop_equivalent_id_set_from_record(name, term_norm, id_to_drop)
+
+            result = self.drop_equivalent_id_set_from_record(name, term_norm, target_id_set)
             if result == DBModificationResult.ID_SET_MODIFIED:
                 terms_modified += 1
             elif result == DBModificationResult.SYNONYM_TERM_DROPPED:
@@ -255,3 +264,8 @@ class SynonymDatabase(metaclass=Singleton):
         :return:
         """
         return self._syns_database_by_syn[name]
+
+    def get_associated_id_sets_for_id(
+        self, name: ParserName, idx: Idx
+    ) -> FrozenSet[EquivalentIdSet]:
+        return self._associated_id_sets_by_id[name][idx]
