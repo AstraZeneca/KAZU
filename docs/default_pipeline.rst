@@ -6,26 +6,26 @@ For most use cases we've encountered, the default configuration should suffice. 
 1) Tag the following entity classes with a curated dictionary using the Spacy PhraseMatcher. This uses
    :py:class:`~kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`
 
-    a. gene
-    b. disease
-    c. drug
-    d. cell_line
-    e. cell_type
-    f. gene ontology (split into go_bp, go_cc and go_mf)
-    g. anatomy
+   a. gene
+   b. disease
+   c. drug
+   d. cell_line
+   e. cell_type
+   f. gene ontology (split into go_bp, go_cc and go_mf)
+   g. anatomy
 
 2) Tag the following entity classes with the TinyBERN2 model (see the EMNLP Kazu paper for more details - Link TBA ). This uses
    :py:class:`~kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep`
 
-    a. gene
-    b. disease
-    c. drug
-    d. cell_line
-    e. cell_type
+   a. gene
+   b. disease
+   c. drug
+   d. cell_line
+   e. cell_type
 
 3) Find candidates for linking the entities to knowledgebases according to the below yaml schema. This uses :py:class:`~kazu.steps.linking.dictionary.DictionaryEntityLinkingStep`
 
-    .. code-block:: yaml
+   .. code-block:: yaml
 
         drug:
           - CHEMBL
