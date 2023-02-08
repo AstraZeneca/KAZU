@@ -740,7 +740,7 @@ class Curation:
             ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER,
         }:
             raise ValueError(
-                f"a curated_term field is required to add or drop a SynonymTerm {self}"
+                f"a non-empty curated_term field is required to add or drop a SynonymTerm {self}"
             )
         else:
             for parser_name, maybe_id in parser_action.parser_to_target_id_mapping.items():
