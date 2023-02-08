@@ -58,4 +58,4 @@ For most use cases we've encountered, the default configuration should suffice. 
 
 8) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
 
-All of these steps are customisable via Hydra configuration
+All of these steps are customisable via Hydra configuration.
