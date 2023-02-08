@@ -3,7 +3,7 @@ At a glance: How to use the default Kazu pipeline
 
 For most use cases we've encountered, the default configuration should suffice. This will
 
-1) tag the following entity classes with a curated dictionary using the Spacy PhraseMatcher. This uses
+1) Tag the following entity classes with a curated dictionary using the Spacy PhraseMatcher. This uses
    :py:class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`
 
     a. gene
@@ -14,7 +14,7 @@ For most use cases we've encountered, the default configuration should suffice. 
     f. gene ontology (split into go_bp,go_cc and go_mf)
     g. anatomy
 
-2) tag the following entity classes with the TinyBERN2 model (see the EMNLP Kazu paper for more details - Link TBA ). This uses
+2) Tag the following entity classes with the TinyBERN2 model (see the EMNLP Kazu paper for more details - Link TBA ). This uses
    :py:class:`kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep`
 
     a. gene
@@ -50,9 +50,9 @@ For most use cases we've encountered, the default configuration should suffice. 
 
 4) Disambiguate the entity class of exactly overlappings entities within a document using :py:class:`kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep`
 
-5) decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
+5) Decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
 
-6) merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
+6) Merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
 
 7) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
 
