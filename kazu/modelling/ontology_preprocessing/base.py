@@ -484,15 +484,22 @@ class OntologyParser(ABC):
 
         SynonymDatabase().add(self.name, self.export_synonym_terms())
 
-    def populate_databases(self):
+    def populate_databases(self, force: bool = False):
         """
         populate the databases with the results of the parser
+
+        :param force: normally, this call does nothing if databases already have an entry for this parser.
+            this can be forced by setting this param to True
+        :return:
         """
 
-        self.populate_metadata_database()
-        self.populate_synonym_database()
-        self.process_curations()
-        self.parsed_dataframe = None  # clear the reference to save memory
+        if self.name in self.synonym_db.loaded_parsers and not force:
+            logger.info("will not repopulate databases as already populated for %s", self.name)
+        else:
+            self.populate_metadata_database()
+            self.populate_synonym_database()
+            self.process_curations()
+            self.parsed_dataframe = None  # clear the reference to save memory
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
