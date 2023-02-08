@@ -768,7 +768,9 @@ class Curation:
                     )
 
                 else:
-                    raise ValueError(f"behaviour is undefined {self}")
+                    raise ValueError(
+                        f"Unknown {parser_action.behaviour.__class__} value: {parser_action.behaviour}"
+                    )
             else:
                 self._parser_name_to_behaviour[parser_name][action_index] = (
                     parser_action.behaviour,
