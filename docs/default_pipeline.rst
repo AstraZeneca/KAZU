@@ -48,12 +48,14 @@ For most use cases we've encountered, the default configuration should suffice. 
         go_cc:
           - CC_GENE_ONTOLOGY
 
-4) decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
+4) Disambiguate the entity class of exactly overlappings entities within a document using :py:class:`kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep`
 
-5) merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
+5) decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
 
-6) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
+6) merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
 
-7) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
+7) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
+
+8) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
 
 All of these steps are customisable via Hydra configuration
