@@ -6,7 +6,6 @@ steps:
   - ${DictionaryEntityLinkingStep}
   - ${EntityClassDisambiguationStep}
   - ${MappingStep}
-  - ${SethStep}
   - ${MergeOverlappingEntsStep}
   - ${AbbreviationFinderStep}
   - ${CleanupStep}

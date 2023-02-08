@@ -3,7 +3,6 @@ steps:
   - ${ExplosionStringMatchingStep}
   - ${StanzaStep}
   - ${TransformersModelForTokenClassificationNerStep}
-  - ${SethStep}
   - ${DictionaryEntityLinkingStep}
   - ${MappingStep}
   - ${CleanupStep}

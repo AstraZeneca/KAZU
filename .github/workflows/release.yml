@@ -64,12 +64,6 @@ jobs:
           WHEEL_PATH=$(echo $GITHUB_WORKSPACE/dist/*whl)
           pip install "${WHEEL_PATH}[dev]"  --cache-dir $PIP_CACHE_DIR
 
-      - name: Set up JDK 11 (required for SETH)
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-
       - name: Build model pack caches and test (with acceptance tests)
         id: model_pack_cache_build_and_test
         run: |

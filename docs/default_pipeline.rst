@@ -23,9 +23,7 @@ For most use cases we've encountered, the default configuration should suffice. 
     f. gene ontology (split into go_bp,go_cc and go_mf)
     g. anatomy
 
-3) tag mutations with the `SETH tagger <https://rockt.github.io/SETH/>`_. This uses :py:class:`kazu.steps.ner.seth.SethStep`
-
-4) Find candidates for linking the entities to knowledgebases according to the below yaml schema. This uses :py:class:`kazu.steps.linking.dictionary.DictionaryEntityLinkingStep`
+3) Find candidates for linking the entities to knowledgebases according to the below yaml schema. This uses :py:class:`kazu.steps.linking.dictionary.DictionaryEntityLinkingStep`
 
     .. code-block:: yaml
 
@@ -50,12 +48,12 @@ For most use cases we've encountered, the default configuration should suffice. 
         go_cc:
           - CC_GENE_ONTOLOGY
 
-5) decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
+4) decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`kazu.steps.linking.mapping_step.MappingStep`
 
-6) merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
+5) merge overlapping entities (where appropriate). This uses :py:class:`kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
 
-7) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
+6) Detect abbreviations, and copy appropriate mapping information to the desired spans. This uses :py:class:`kazu.steps.document_post_processing.abbreviation_finder.AbbreviationFinderStep`
 
-8) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
+7) Perform some customisable cleanup. This uses :py:class:`kazu.steps.other.cleanup.CleanupStep`
 
 All of these steps are customisable via Hydra configuration
