@@ -11,7 +11,7 @@ For most use cases we've encountered, the default configuration should suffice. 
     c. drug
     d. cell_line
     e. cell_type
-    f. gene ontology (split into go_bp,go_cc and go_mf)
+    f. gene ontology (split into go_bp, go_cc and go_mf)
     g. anatomy
 
 2) Tag the following entity classes with the TinyBERN2 model (see the EMNLP Kazu paper for more details - Link TBA ). This uses
