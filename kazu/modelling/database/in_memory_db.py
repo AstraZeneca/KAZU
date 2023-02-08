@@ -154,7 +154,7 @@ class SynonymDatabase(metaclass=Singleton):
                     associated_id_sets=frozenset(new_associated_id_sets),
                     aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
                 )
-                self._syns_database_by_syn[name][new_term.term_norm] = new_term
+                assert self.add(name, (new_term,)) == DBModificationResult.SYNONYM_TERM_ADDED
                 result = DBModificationResult.ID_SET_MODIFIED
 
         return result
@@ -171,7 +171,7 @@ class SynonymDatabase(metaclass=Singleton):
                 associated_id_sets=frozenset(id_sets),
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
-            self._syns_database_by_syn[name][synonym_term.term_norm] = new_syn_term
+            assert self.add(name, (new_syn_term,)) == DBModificationResult.SYNONYM_TERM_ADDED
             result = DBModificationResult.ID_SET_MODIFIED
         else:
             # if there are no longer any id sets associated with the record, remove it completely
