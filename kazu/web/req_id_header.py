@@ -2,14 +2,14 @@
 
 Licensed under BSD 3 clause along with the rest of Starlette.
 
-Copyright © 2018, [Encode OSS Ltd](https://www.encode.io/).
+Copyright © 2018, `Encode OSS Ltd <https://www.encode.io/>`_.
 
 .. raw:: html
 
     <details>
     <summary>Full License</summary>
 
-Copyright © 2018, [Encode OSS Ltd](https://www.encode.io/).
+Copyright © 2018, `Encode OSS Ltd <https://www.encode.io/>`_.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
