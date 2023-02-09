@@ -1,25 +1,34 @@
-import dataclasses
 import json
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 
 import pytest
 import spacy
 from spacy.lang.en import English
 from spacy.lang.en.punctuation import TOKENIZER_INFIXES
 
-from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy, CuratedTerm
+from kazu.data.data import (
+    Curation,
+    DocumentJsonUtils,
+    MentionConfidence,
+    NerAction,
+    Behaviour,
+)
 from kazu.modelling.ontology_matching.assemble_pipeline import (
     main as assemble_pipeline,
     SPACY_DEFAULT_INFIXES,
 )
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
-from kazu.modelling.ontology_preprocessing.synonym_generation import (
-    SynonymGenerator,
-    CombinatorialSynonymGenerator,
+from kazu.modelling.ontology_preprocessing.base import (
+    IDX,
+    DEFAULT_LABEL,
+    SYN,
+    MAPPING_TYPE,
+    CurationException,
+    load_curated_terms,
 )
 from kazu.tests.utils import DummyParser
+from kazu.utils.utils import Singleton
 
 
 def test_constructor():
@@ -47,259 +56,381 @@ example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
-def write_curations(path: Path, terms: List[CuratedTerm]):
+def write_curations(path: Path, terms: List[Curation]):
     with open(path, "w") as f:
-        for term in terms:
-            f.write(json.dumps(term.__dict__) + "\n")
+        for curation in terms:
+            f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
 
 
-class DummySynGenerator(SynonymGenerator):
-    """
-    test generator to check that a generated SynonymTerm with .terms that
-    map to an exising value of .terms in another SynonymTerm is handled correctly
-    """
+FIRST_MOCK_PARSER = "first_mock_parser"
+SECOND_MOCK_PARSER = "second_mock_parser"
+COMPLEX_7_DISEASE_ALPHA_NORM = "COMPLEX 7 DISEASE ALPHA"
+TARGET_IDX = "http://my.fake.ontology/complex_disease_123"
+CONFUSING_IDX = "http://my.fake.ontology/i_m_very_confused_123"
+CONFUSING_SYNONYM = "IM_A_SYMBOL_TO_CONFUSE_THE_pARSERL0L0L0"
+ENT_TYPE_1 = "ent_type_1"
+ENT_TYPE_2 = "ent_type_2"
+PARSER_1_DEFAULT_DATA = {
+    IDX: [
+        "http://my.fake.ontology/synonym_term_id_123",
+        TARGET_IDX,
+        TARGET_IDX,
+        "http://my.fake.ontology_amongst_id_123",
+        "http://my.fake.ontology_amongst_id_124",
+    ],
+    DEFAULT_LABEL: [
+        "SynonymTerm",
+        "SynonymTerm",
+        "Complex Disease Alpha VII",
+        "Amongst",
+        "Amongst Us",
+    ],
+    SYN: [
+        "SynonymTerm",
+        "SynonymTerm",
+        "complexVII disease\u03B1",
+        "amongst",
+        "amongst us",
+    ],
+    MAPPING_TYPE: ["test", "test", "test", "test", "test"],
+}
 
-    def __init__(self, term_to_find: str, term_to_add: str):
+PARSER_2_DEFAULT_DATA = {
+    IDX: [
+        "http://my.fake.ontology/synonym_term_id_123",
+        "http://my.fake.ontology/synonym_term_id_456",
+        TARGET_IDX,
+        "http://my.fake.ontology_amongst_id_123",
+    ],
+    DEFAULT_LABEL: [
+        "SynonymTerm",
+        "SynonymTerm",
+        "Complex Disease Alpha VII",
+        "Amongst",
+    ],
+    SYN: ["SynonymTerm", "SynonymTerm", "complexVII disease\u03B1", "amongst"],
+    MAPPING_TYPE: ["test", "test", "test", "test"],
+}
 
-        self.term_to_add = term_to_add
-        self.term_to_find = term_to_find
-
-    def call(self, synonym: SynonymTerm) -> Optional[SynonymTerm]:
-        if self.term_to_find in synonym.terms:
-            return dataclasses.replace(
-                synonym,
-                terms=frozenset([self.term_to_add]),
-                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
-            )
-        else:
-            return None
+PARSER_1_AMBIGUOUS_DATA = {
+    IDX: [
+        CONFUSING_IDX,
+        TARGET_IDX,
+        TARGET_IDX,
+        "http://my.fake.ontology_amongst_id_123",
+        "http://my.fake.ontology_amongst_id_124",
+    ],
+    DEFAULT_LABEL: [
+        "SynonymTerm",
+        "Complex Disease Alpha VII",
+        "Complex Disease Alpha VII",
+        "Amongst",
+        "Amongst Us",
+    ],
+    SYN: [
+        CONFUSING_SYNONYM,
+        CONFUSING_SYNONYM,
+        "complexVII disease\u03B1",
+        "amongst",
+        "amongst us",
+    ],
+    MAPPING_TYPE: ["test", "test", "test", "test", "test"],
+}
 
 
 @pytest.mark.parametrize(
-    ("curated_terms", "match_len", "match_texts", "match_ontology_dicts", "syn_generator"),
+    (
+        "curated_terms",
+        "match_len",
+        "match_texts",
+        "match_ontology_dicts",
+        "parser_1_data",
+        "parser_2_data",
+        "throws_curation_exception",
+    ),
     [
         pytest.param(
             [
-                CuratedTerm(
-                    term="complexVII disease\u03B1",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="complexVII disease\u03B1",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={
+                                FIRST_MOCK_PARSER: {TARGET_IDX},
+                                SECOND_MOCK_PARSER: {TARGET_IDX},
+                            },
+                            entity_classes={ENT_TYPE_1, ENT_TYPE_2},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_1",
-                ),
-                CuratedTerm(
-                    term="complexVII disease\u03B1",
-                    action="keep",
-                    case_sensitive=False,
-                    entity_class="ent_type_2",
                 ),
             ],
             2,
             {"ComplexVII Disease\u03B1"},
             [
-                {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
-                {"ent_type_2": {("second_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM)}},
+                {ENT_TYPE_2: {(SECOND_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM)}},
             ],
-            None,
+            PARSER_1_DEFAULT_DATA,
+            PARSER_2_DEFAULT_DATA,
+            False,
             id="Two curated case insensitive terms from two parsers. Both should hit",
         ),
         pytest.param(
             [
-                CuratedTerm(
-                    term="complexVII disease\u03B1",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="complexVII disease\u03B1",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_1},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_1",
                 ),
-                CuratedTerm(
-                    term="complexVII disease\u03B1",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="complexVII disease\u03B1",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={SECOND_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_2},
+                        )
+                    ],
                     case_sensitive=True,
-                    entity_class="ent_type_2",
                 ),
             ],
             1,
             {"ComplexVII Disease\u03B1"},
             [
-                {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM)}},
             ],
-            None,
+            PARSER_1_DEFAULT_DATA,
+            PARSER_2_DEFAULT_DATA,
+            False,
             id="Two curated terms from two parsers. One should hit, to test case sensitivity",
         ),
         pytest.param(
             [
-                CuratedTerm(
-                    term="complexVII disease\u03B1",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="complexVII disease\u03B1",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_1},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_1",
                 ),
-                CuratedTerm(
-                    term="others",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="others",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={
+                                SECOND_MOCK_PARSER: {"I don't exist"}
+                            },  # should throw exception
+                            entity_classes={ENT_TYPE_2},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_2",
                 ),
             ],
-            1,
-            {"ComplexVII Disease\u03B1"},
-            [
-                {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
-            ],
-            None,
-            id="Two curated terms from two parsers. One should hit, one should miss "
-            "as it doesn't match a term string in the ontology",
+            0,
+            {},
+            [],
+            PARSER_1_DEFAULT_DATA,
+            PARSER_2_DEFAULT_DATA,
+            True,
+            id="Two curated terms from two parsers An exception should be thrown at build time, as the second ID doesn't exist",
         ),
         pytest.param(
             [
-                CuratedTerm(
-                    term="complexVII Disease\u03B1",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="complexVII disease\u03B1",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_1},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_1",
                 ),
-                CuratedTerm(
-                    term="ComplexVII disease\u03B1",
-                    action="drop",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="complexVII disease\u03B1",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.DROP,
+                            parser_to_target_id_mappings={SECOND_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_2},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_2",
                 ),
             ],
             1,
             {"ComplexVII Disease\u03B1"},
             [
-                {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
+                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM)}},
             ],
-            None,
+            PARSER_1_DEFAULT_DATA,
+            PARSER_2_DEFAULT_DATA,
+            False,
             id="Two curated terms from two parsers. One should hit, to test drop logic",
         ),
         pytest.param(
             [
-                CuratedTerm(
-                    term="amongst",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="This sentence is just to test",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_1},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_1",
                 ),
             ],
             1,
-            {"amongst"},
+            {"This sentence is just to test"},
             [
-                {"ent_type_1": {("first_mock_parser", "AMONGST")}},
+                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, "THIS SENTENCE IS JUST TO TEST")}},
             ],
-            CombinatorialSynonymGenerator(
-                [DummySynGenerator(term_to_find="amongst us", term_to_add="amongst")]
-            ),  # this generates a term that matches an existing ontology term, so we can test
-            # that we're only matching to one term_norm (should be handled by syn generator)
-            id="One curated term from one parser, with a synonym generator producing a term that"
-            "hits a separate term from the parser. Only one should hit",
+            PARSER_1_DEFAULT_DATA,
+            PARSER_2_DEFAULT_DATA,
+            False,
+            id="One curated term with a novel synonym. This should be added to the synonym DB and hit",
         ),
         pytest.param(
             [
-                CuratedTerm(
-                    term="amongst",
-                    action="keep",
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym="amongst-us",
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
+                            entity_classes={ENT_TYPE_1},
+                        )
+                    ],
                     case_sensitive=False,
-                    entity_class="ent_type_1",
-                ),
-                CuratedTerm(
-                    term="others",
-                    action="keep",
-                    case_sensitive=False,
-                    entity_class="ent_type_1",
                 ),
             ],
-            2,
-            {"amongst", "others"},
+            0,
+            {},
+            [],
+            PARSER_1_AMBIGUOUS_DATA,
+            {},
+            True,
+            id="Should throw exception on populate databases as the term norm of the curation returns a Synonym Term with IDs that don't match the target ids",
+        ),
+        pytest.param(
             [
-                {"ent_type_1": {("first_mock_parser", "AMONGST")}},
-                {"ent_type_1": {("first_mock_parser", "AMONGST")}},
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    parser_actions=[],
+                    curated_synonym=CONFUSING_SYNONYM,
+                    ner_actions=[
+                        NerAction(
+                            behaviour=Behaviour.ADD,
+                            parser_to_target_id_mappings={
+                                FIRST_MOCK_PARSER: {TARGET_IDX, CONFUSING_IDX}
+                            },
+                            entity_classes={ENT_TYPE_1},
+                        )
+                    ],
+                    case_sensitive=False,
+                ),
             ],
-            CombinatorialSynonymGenerator(
-                [DummySynGenerator(term_to_find="amongst", term_to_add="others")]
-            ),  # this generates a term that matches an existing ontology term, so we can test
-            # that we're only matching to one term_norm (should be handled by syn generator)
-            id="Two curated terms from one parser, with a synonym generator producing a term that"
-            "generates an alternative. There should be two hits on the same term norm",
+            0,
+            set(),
+            [],
+            PARSER_1_AMBIGUOUS_DATA,
+            PARSER_1_AMBIGUOUS_DATA,
+            False,
+            id="Should not throw exception on populate databases, as parser data is ambiguous and action specifies both ids",
         ),
     ],
 )
 def test_pipeline_build_from_parsers_and_curated_list(
-    tmp_path, curated_terms, match_len, match_texts, match_ontology_dicts, syn_generator
+    tmp_path,
+    curated_terms,
+    match_len,
+    match_texts,
+    match_ontology_dicts,
+    parser_1_data,
+    parser_2_data,
+    throws_curation_exception,
 ):
+    Singleton.clear_all()
+    TEST_CURATIONS_PATH = tmp_path / "curated_terms.jsonl"
+    write_curations(path=TEST_CURATIONS_PATH, terms=curated_terms)
     parser_1 = DummyParser(
         name="first_mock_parser",
         entity_class="ent_type_1",
         source="test",
-        data={
-            IDX: [
-                "http://my.fake.ontology/synonym_term_id_123",
-                "http://my.fake.ontology/complex_disease_123",
-                "http://my.fake.ontology/complex_disease_123",
-                "http://my.fake.ontology_amongst_id_123",
-                "http://my.fake.ontology_amongst_id_124",
-            ],
-            DEFAULT_LABEL: [
-                "SynonymTerm",
-                "Complex Disease Alpha VII",
-                "Complex Disease Alpha VII",
-                "Amongst",
-                "Amongst Us",
-            ],
-            SYN: [
-                "SynonymTerm",
-                "SynonymTerm",
-                "complexVII disease\u03B1",
-                "amongst",
-                "amongst us",
-            ],
-            MAPPING_TYPE: ["test", "test", "test", "test", "test"],
-        },
-        synonym_generator=syn_generator,
+        curations=load_curated_terms(path=TEST_CURATIONS_PATH),
+        data=parser_1_data,
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
         entity_class="ent_type_2",
         source="test",
-        data={
-            IDX: [
-                "http://my.fake.ontology/synonym_term_id_123",
-                "http://my.fake.ontology/complex_disease_123",
-                "http://my.fake.ontology/complex_disease_123",
-                "http://my.fake.ontology_amongst_id_123",
-            ],
-            DEFAULT_LABEL: [
-                "SynonymTerm",
-                "Complex Disease Alpha VII",
-                "Complex Disease Alpha VII",
-                "Amongst",
-            ],
-            SYN: ["SynonymTerm", "SynonymTerm", "complexVII disease\u03B1", "amongst"],
-            MAPPING_TYPE: ["test", "test", "test", "test"],
-        },
-        synonym_generator=syn_generator,
+        curations=load_curated_terms(path=TEST_CURATIONS_PATH),
+        data=parser_2_data,
     )
     TEST_SPAN_KEY = "my_hits"
-    TEST_CURATIONS_PATH = tmp_path / "curated_terms.jsonl"
     TEST_OUTPUT_DIR = tmp_path / "ontology_pipeline"
-    write_curations(path=TEST_CURATIONS_PATH, terms=curated_terms)
-    nlp = assemble_pipeline(
-        parsers=[parser_1, parser_2],
-        output_dir=TEST_OUTPUT_DIR,
-        span_key=TEST_SPAN_KEY,
-        curated_list=TEST_CURATIONS_PATH,
-    )
+    if throws_curation_exception:
+        with pytest.raises(CurationException):
+            assemble_pipeline(
+                parsers=[parser_1, parser_2],
+                output_dir=TEST_OUTPUT_DIR,
+                span_key=TEST_SPAN_KEY,
+                use_curations=True,
+            )
 
-    doc = nlp(example_text)
-    matches = doc.spans[TEST_SPAN_KEY]
-    assert_matches(matches, match_len, match_texts, match_ontology_dicts)
-    nlp2 = spacy.load(TEST_OUTPUT_DIR)
-    doc2 = nlp2(example_text)
-    matches2 = doc2.spans[TEST_SPAN_KEY]
-    assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
+    else:
+        nlp = assemble_pipeline(
+            parsers=[parser_1, parser_2],
+            output_dir=TEST_OUTPUT_DIR,
+            span_key=TEST_SPAN_KEY,
+            use_curations=True,
+        )
 
-    assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
-        (m.start_char, m.end_char, m.text) for m in matches
-    )
+        doc = nlp(example_text)
+        matches = doc.spans[TEST_SPAN_KEY]
+        assert_matches(matches, match_len, match_texts, match_ontology_dicts)
+        nlp2 = spacy.load(TEST_OUTPUT_DIR)
+        doc2 = nlp2(example_text)
+        matches2 = doc2.spans[TEST_SPAN_KEY]
+        assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
+
+        assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
+            (m.start_char, m.end_char, m.text) for m in matches
+        )
 
 
 def test_pipeline_build_from_parsers_alone(tmp_path):
