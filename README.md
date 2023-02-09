@@ -78,9 +78,21 @@ if __name__ == '__main__':
 
 Licensed under [Apache 2.0](https://github.com/AstraZeneca/KAZU/blob/main/LICENSE).
 
-Kazu includes elements under compatible licenses:
-- some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/README.md).
-- the doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/NUMPY_LICENSE.txt)
+Kazu includes elements under compatible licenses (full licenses are in relevant files or as indicated):
+- Some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/README.md).
+- The doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/NUMPY_LICENSE.txt)
+- Elements of the model distillation code are inspired by or modified from Huawei Noah's Ark Lab [TinyBERT](https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT) and DMIS-Lab's [BioBERT](https://github.com/dmis-lab/biobert/tree/master).
+  See the details in dataprocessor.py, models.py and tiny_transformer.py.
+- GildaUtils in the string_normalizer.py file is modified from [Gilda](https://github.com/indralab/gilda). See the file for full details
+  including the full BSD 2-Clause license.
+- the AbbreviationFinderStep uses KazuAbbreviationDetector, which is a modified version of
+  [SciSpacy](https://allenai.github.io/scispacy/)'s abbreviation finding algorithm, licensed under Apache 2.0 - see the files for full details.
+- The JWTAuthenticationBackend Starlette Middleware in jwtauth.py is originally from [starlette-jwt](https://raw.githubusercontent.com/amitripshtos/starlette-jwt/master/starlette_jwt/middleware.py), licensed under BSD 3-clause.
+- The AddRequestIdMiddleware Starlette Middleware in req_id_header.py is modified from 'CustomHeaderMiddleware' in the [Starlette Middleware docs](https://www.starlette.io/middleware/#basehttpmiddleware).
+  This is licensed under BSD 3 clause along with the rest of Starlette.
+- The kazu-jvm folder includes files like gradelw and gradelw.bat distributed by gradle under Apache 2.0 - see the files for details.
+- [kazu/data/data.py](https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py) contains `AutoNameEnum`, which is `AutoName` from
+  the [Python Enum Docs](https://docs.python.org/3/howto/enum.html#using-automatic-values) licensed under [Zero-Clause BSD](https://docs.python.org/3/license.html#zero-clause-bsd-license-for-code-in-the-python-release-documentation).
 
 ## Dataset licences
 
@@ -149,3 +161,12 @@ Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, Nigel Collier
 Self-Alignment Pretraining for Biomedical Entity Representations
 ACL 2021
 https://aclanthology.org/2021.naacl-main.334/
+
+#### SETH
+
+Kazu's SethStep uses Py4j to call the SETH mutation finder.
+
+Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).
+[SETH detects and normalizes genetic variants in text](https://pubmed.ncbi.nlm.nih.gov/27256315/)
+Bioinformatics (2016)
+http://dx.doi.org/10.1093/bioinformatics/btw234
