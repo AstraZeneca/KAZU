@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import spacy
 from spacy.lang.char_classes import (
@@ -50,7 +50,7 @@ def custom_tokenizer(nlp):
 def main(
     output_dir: PathLike,
     parsers: List[OntologyParser],
-    curated_list: Optional[PathLike] = None,
+    use_curations: bool = True,
     span_key: str = SPAN_KEY,
 ) -> spacy.language.Language:
     """Generates, serializes and returns a Spacy pipeline with an
@@ -60,20 +60,19 @@ def main(
     config, and an OntologyMatcher based on the input parameters. The pipeline is
     written to disk, and also returned to the caller.
 
-    If 'parsers' is provided without an argument for 'curated_list', the
+    If 'use_curations' is False,
     :class:`~kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher` is built directly
     from the configured synonyms from the parsers (with any associated generated synonyms). This is
     useful for trying to understand which strings are 'noisy', but not recommended for production as raw ontology
     data tends to need some curation before it can be applied.
 
-    If a curated_list is also provided, the build process will attempt to match these to the
-    :class:`~kazu.data.data.SynonymTerm`\\ s coming from each parser. If a curated item can't be matched
-    this will be logged as a warning.
+    If 'use_curations' is True, it will be built using the configured instances of :class:`~kazu.data.data.Curation`
+    associated with the parser. This is generally the recommended behaviour in production, although obviously
+    requires a set of high quality curations to be effective
 
     :param output_dir: the output directory to write the pipeline into.
     :param parsers: build the pipeline using these parsers as a data source.
-    :param curated_list: optional path to a jsonl file. Each line should be json with fields:
-        'term', 'case_sensitive', entity_class.
+    :param use_curations:
     :param span_key: the key to use within the generated Spacy Docs'
         `span attribute <https://spacy.io/api/doc#spans>`_ to store and access recognised NER
         spans.
@@ -88,10 +87,10 @@ def main(
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
 
-    if curated_list is None:
-        ontology_matcher.create_lowercase_phrasematcher_from_parsers(parsers)
+    if use_curations:
+        ontology_matcher.create_phrasematchers_from_curated_list(parsers)
     else:
-        ontology_matcher.create_phrasematchers_from_curated_list(curated_list, parsers)
+        ontology_matcher.create_lowercase_phrasematcher_from_parsers(parsers)
 
     nlp.to_disk(output_dir)
     return nlp
