@@ -26,7 +26,7 @@ JsonDictType = Union[Dict[str, Any], List, int, float, bool, str, NoneType]
 
 
 class AutoNameEnum(Enum):
-    """Subclass to create an Enum where values are the names when using enum.auto
+    """Subclass to create an Enum where values are the names when using :py:class:`enum.auto`\\ .
 
     Taken from the `Python Enum Docs <https://docs.python.org/3/howto/enum.html#using-automatic-values>`_.
 
