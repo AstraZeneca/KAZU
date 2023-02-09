@@ -142,7 +142,6 @@ Biomedical and Clinical English Model Packages in the Stanza Python NLP Library,
 Journal of the American Medical Informatics Association. 2021.
 https://doi.org/10.1093/jamia/ocab090
 
-
 #### SCISPACY
 
 Biomedical scispacy models are derived from
