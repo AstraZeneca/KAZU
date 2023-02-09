@@ -305,30 +305,50 @@ class OntologyParser(ABC):
                     EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
                 )
 
-    def _attempt_to_add_database_entry_for_curation(self, idx: str, curated_synonym: str):
-        log_prefix = f"{self.name} attempting to create synonym term for {curated_synonym}, {idx} "
+    def _attempt_to_add_database_entry_for_curation(
+        self, id_set: Set[str], curated_synonym: str
+    ) -> SynonymTerm:
+        log_prefix = (
+            f"{self.name} attempting to create synonym term for {curated_synonym}, {id_set} "
+        )
         try:
-            target_associated_id_set = self.synonym_db.get_associated_id_sets_for_id(self.name, idx)
+            maybe_associated_id_set = self.synonym_db.get_associated_id_set_for_id_set(
+                self.name, id_set
+            )
         except KeyError:
-            raise CurationException(f"{log_prefix} but could not find id {idx} in synonym database")
+            raise CurationException(
+                f"{log_prefix} but could not find an element of id_set {id_set} in synonym database"
+            )
+        if maybe_associated_id_set is None:
+            raise CurationException(
+                f"{log_prefix} but could not find a set of EquivalentIdSets that match all specified ids {id_set}"
+                f"in the database"
+            )
 
         term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
         # check term norm doesn't already exist, or if it does, has the same target Id set
         try:
             existing_synonym_term = self.synonym_db.get(self.name, term_norm)
-            if target_associated_id_set == existing_synonym_term.associated_id_sets:
+            if existing_synonym_term.associated_id_sets == maybe_associated_id_set:
                 logger.info(
                     f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {existing_synonym_term.term_norm}"
-                    f"since this SynonymTerm has the same associated id set, no action is required. {target_associated_id_set}"
+                    f"since this SynonymTerm has the same associated id set, no action is required. {maybe_associated_id_set}"
                 )
-                return
+                return existing_synonym_term
             else:
                 raise CurationException(
-                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {existing_synonym_term.term_norm} "
-                    f"since this SynonymTerm has a different associated id set, this action is not possible. Either change the string "
-                    f"normalizer function to generate unique term_norms, or drop the existing SynonymTerm from the database first."
-                    f"target id set"
-                    f". {target_associated_id_set}"
+                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and the "
+                    f"associated id set for this SynonymTerm is different to the one that Kazu is trying to "
+                    f"create. This can happen if the existing associated id set is ambiguous (i.e. composed of "
+                    f"two or more EquivalentIdSets), meaning in turn that {term_norm} refers to two or more "
+                    f"distinct concepts. Possible mitigations:\n"
+                    f"1) reflect the ambiguity of {term_norm} in the curation, by adding additional ID's to"
+                    f"the mapping action (e.g. {list(x.ids for x in existing_synonym_term.associated_id_sets)} "
+                    f"since this SynonymTerm has a different associated id set\n"
+                    f"2) use a ParserAction to drop the existing SynonymTerm from the database first.\n"
+                    f"3) Change the string normalizer function to generate unique term_norms\n"
+                    f"wanted ID set: {maybe_associated_id_set}\n"
+                    f"found ID set: {existing_synonym_term.associated_id_sets}\n"
                 )
         except KeyError:
             # we expect a KeyError, as we're going to add a new entry
@@ -338,12 +358,13 @@ class OntologyParser(ABC):
                 terms=frozenset([curated_synonym]),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
-                associated_id_sets=target_associated_id_set,
+                associated_id_sets=maybe_associated_id_set,
                 parser_name=self.name,
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
             self.synonym_db.add(self.name, synonyms=(new_term,))
             logger.info(f"{new_term} created")
+            return new_term
 
     def _attempt_to_modify_database_entry_for_curation(
         self, behaviour: ParserBehaviour, idx: str, curated_synonym: Optional[str]
@@ -385,24 +406,23 @@ class OntologyParser(ABC):
                     )
 
             elif behaviour == ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
-                target_id_set = next(
-                    iter(
-                        x
-                        for x in self.synonym_db.get_associated_id_sets_for_id(self.name, idx)
-                        if idx in x.ids
-                    )
+                target_associated_id_sets = self.synonym_db.get_associated_id_sets_for_id(
+                    self.name, idx
                 )
-                result = self.synonym_db.drop_equivalent_id_set_from_record(
-                    self.name, affected_term_key, target_id_set
-                )
-                if result == DBModificationResult.NO_ACTION:
-                    logger.warning(
-                        f"failed to drop {idx} from any EquivalentIdSet for key {affected_term_key} for {self.name}"
-                    )
-                else:
-                    logger.info(
-                        f"dropped an EquivalentIdSet containing {idx} for key {affected_term_key} for {self.name}"
-                    )
+                for target_associated_id_set in target_associated_id_sets:
+                    for equiv_id_set in target_associated_id_set:
+                        if idx in equiv_id_set.ids:
+                            result = self.synonym_db.drop_equivalent_id_set_from_record(
+                                self.name, affected_term_key, equiv_id_set
+                            )
+                            if result == DBModificationResult.NO_ACTION:
+                                logger.warning(
+                                    f"failed to drop {idx} from any EquivalentIdSet for key {affected_term_key} for {self.name}"
+                                )
+                            else:
+                                logger.info(
+                                    f"dropped an EquivalentIdSet containing {idx} for key {affected_term_key} for {self.name}"
+                                )
 
     def process_curations(self):
         if self.curations is not None:
