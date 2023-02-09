@@ -4,9 +4,14 @@ original source
 https://raw.githubusercontent.com/amitripshtos/starlette-jwt/master/starlette_jwt/middleware.py
 
 
-All code in this file is provided under:
+All code in this file is originally licensed under the BSD 3-Clause License as part of starlette-jwt above.
 
-BSD 3-Clause License
+Copyright (c) 2018, Amit Ripshtos All rights reserved.
+
+.. raw:: html
+
+    <details>
+    <summary>Full License</summary>
 
 Copyright (c) 2018, Amit Ripshtos
 All rights reserved.
@@ -36,6 +41,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+.. raw:: html
+
+    </details>
 """
 
 import logging

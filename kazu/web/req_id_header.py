@@ -1,6 +1,13 @@
 """Modified from 'CustomHeaderMiddleware' in the Starlette Middleware docs here:
 https://www.starlette.io/middleware/#basehttpmiddleware
-Which is licensed under BSD 3 clause along with the rest of Starlette:
+Which is licensed under BSD 3 clause along with the rest of Starlette.
+
+Copyright © 2018, [Encode OSS Ltd](https://www.encode.io/).
+
+.. raw:: html
+
+    <details>
+    <summary>Full License</summary>
 
 Copyright © 2018, [Encode OSS Ltd](https://www.encode.io/).
 All rights reserved.
@@ -29,6 +36,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.. raw:: html
+
+    </details>
 """
 
 import logging
