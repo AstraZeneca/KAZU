@@ -1,6 +1,6 @@
-"""Modified from 'CustomHeaderMiddleware' in the Starlette Middleware docs here:
-https://www.starlette.io/middleware/#basehttpmiddleware
-Which is licensed under BSD 3 clause along with the rest of Starlette.
+"""Modified from 'CustomHeaderMiddleware' in the `Starlette Middleware docs <https://www.starlette.io/middleware/#basehttpmiddleware>`_.
+
+Licensed under BSD 3 clause along with the rest of Starlette.
 
 Copyright © 2018, [Encode OSS Ltd](https://www.encode.io/).
 
