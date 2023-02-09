@@ -463,7 +463,8 @@ class StringNormalizer:
 
 
 class GildaUtils:
-    """
+    """Functions derived from `gilda <https://github.com/indralab/gilda>`_ used by (some of) the :py:class:`~StringNormalizer`\\ s.
+
     Original Credit:
 
     | https://github.com/indralab/gilda
