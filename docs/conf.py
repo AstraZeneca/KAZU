@@ -12,7 +12,6 @@
 #
 import inspect
 import os
-import subprocess
 import sys
 from typing import Any
 
@@ -74,14 +73,7 @@ autodoc_class_signature = "separated"
 modindex_common_prefix = ["kazu."]
 
 # used by both linkcode_resolve and furo's edit button
-
-# get the configured git remote. Get the url this way rather than hardcoding since
-# we don't want this to give internal links when we open source. We will need to consider
-# docs and hosting/linking more generally when open sourcing - this is just a basic precaution.
-remote_process = subprocess.run(
-    ["git", "config", "--get", "remote.origin.url"], capture_output=True, encoding="utf-8"
-)
-remote_base_url = remote_process.stdout.strip().removesuffix(".git")
+remote_base_url = "https://github.com/AstraZeneca/KAZU"
 
 
 # config for edit button
@@ -168,8 +160,4 @@ def linkcode_resolve(domain, info):
 
     fn_filepath = os.path.relpath(fn_filepath, start=os.path.dirname(kazu.__file__))
 
-    if not remote_base_url.startswith("https://github.com/"):
-        # something weird has happened, and the link structure below will probably be wrong
-        # so don't try to use it.
-        return None
     return f"{remote_base_url}/blob/main/kazu/{fn_filepath}{linespec}"
