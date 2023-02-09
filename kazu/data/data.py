@@ -158,6 +158,8 @@ class Mapping:
 
 NumericMetric = Union[bool, int, float]
 
+AssociatedIdSet = FrozenSet[EquivalentIdSet]
+
 
 @dataclass(frozen=True, eq=True)
 class SynonymTerm:
@@ -172,7 +174,7 @@ class SynonymTerm:
     term_norm: str  # normalised form
     parser_name: str  # ontology parser name
     is_symbolic: bool  # is the term symbolic? Determined by the OntologyParser
-    associated_id_sets: FrozenSet[EquivalentIdSet]
+    associated_id_sets: AssociatedIdSet
     mapping_types: FrozenSet[str] = field(hash=False)  # mapping type metadata
     aggregated_by: EquivalentIdAggregationStrategy = field(
         hash=False, compare=False
