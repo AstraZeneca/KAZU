@@ -246,7 +246,7 @@ class SapbertEvaluationDataManager:
 
 class PLSapbertModel(LightningModule):
     """
-    pytorch lightning production implementation of SapBert
+    Pytorch lightning production implementation of SapBert.
 
     Original source:
 

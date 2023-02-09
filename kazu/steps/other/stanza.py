@@ -9,8 +9,7 @@ from kazu.steps import Step, document_iterating_step
 
 class StanzaStep(Step):
     """
-    Stanza step
-    Currently used for just sentence-segmentation using a tokenizer trained on the genia treebank
+    Currently just provides sentence-segmentation using a tokenizer trained on the genia treebank.
 
     Stanza paper:
 
