@@ -56,6 +56,8 @@ IdsAndSource = Set[Tuple[str, str]]
 
 logger = logging.getLogger(__name__)
 
+CurationWithTermNorms = Tuple[Curation, str]
+
 
 class CurationException(Exception):
     pass
@@ -142,6 +144,7 @@ class OntologyParser(ABC):
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()
+        self.matched_curations: List[CurationWithTermNorms] = []
 
     def find_kb(self, string: str) -> str:
         """
@@ -520,8 +523,18 @@ class OntologyParser(ABC):
             logger.info("No curations provided for %s", self.name)
 
     def _process_ner_actions(self, curation: Curation):
-        # todo
-        pass
+        for ner_action in curation.ner_actions:
+            if ner_action.behaviour == Behaviour.DROP:
+                logger.debug(f"ignoring unwanted curation: {curation} for {self.name}")
+            else:
+                maybe_term_norm = self.find_term_norm_for_curation(curation, ner_action)
+                if maybe_term_norm is not None:
+                    self.matched_curations.append(
+                        (
+                            curation,
+                            maybe_term_norm,
+                        )
+                    )
 
     def _process_parser_behaviours(self, curation: Curation):
         for (behaviour, maybe_id) in curation.parser_behaviour(self.name):
@@ -635,6 +648,21 @@ class OntologyParser(ABC):
         given id in the relevant ontology.
         """
         raise NotImplementedError()
+
+    def find_term_norm_for_curation(
+        self,
+        curation: Curation,
+        ner_action: NerAction,
+    ) -> Optional[str]:
+        for entity_class in ner_action.entity_classes:
+            if entity_class == self.entity_class:
+                maybe_target_ids_set = ner_action.parser_to_target_id_mappings.get(self.name)
+                if maybe_target_ids_set is not None:
+                    new_or_existing_term = self._attempt_to_add_database_entry_for_curation(
+                        id_set=maybe_target_ids_set, curated_synonym=curation.curated_synonym  # type: ignore[arg-type]
+                    )
+                    return new_or_existing_term.term_norm
+        return None
 
 
 class JsonLinesOntologyParser(OntologyParser):
