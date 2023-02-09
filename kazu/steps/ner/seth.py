@@ -12,20 +12,38 @@ SETH_METADATA_KEY = "seth"
 
 class SethStep(Step):
     """
-    A Step that calls SETH (SNP Extraction Tool for Human Variations) over py4j
+    A Step that calls SETH (SNP Extraction Tool for Human Variations) over py4j.
 
-    @Article{SETH2016,
-      Title= {SETH detects and normalizes genetic variants in text.},
-      Author= {Thomas, Philippe and Rockt{\"{a}}schel, Tim and Hakenberg, J{\"{o}}rg and Lichtblau, Yvonne and Leser, Ulf},
-      Journal= {Bioinformatics},
-      Year= {2016},
-      Month= {Jun},
-      Doi= {10.1093/bioinformatics/btw234},
-      Language = {eng},
-      Medline-pst = {aheadofprint},
-      Pmid = {27256315},
-      Url = {http://dx.doi.org/10.1093/bioinformatics/btw234}
-    }
+    Paper:
+
+    Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).
+    `SETH detects and normalizes genetic variants in text. <https://pubmed.ncbi.nlm.nih.gov/27256315/>`_
+    Bioinformatics (2016)
+
+    .. raw:: html
+
+        <details>
+        <summary>Bibtex Citation Details</summary>
+
+    .. code:: bibtex
+
+        @Article{SETH2016,
+        Title= {SETH detects and normalizes genetic variants in text.},
+        Author= {Thomas, Philippe and Rockt{\"{a}}schel, Tim and Hakenberg, J{\"{o}}rg and Lichtblau, Yvonne and Leser, Ulf},
+        Journal= {Bioinformatics},
+        Year= {2016},
+        Month= {Jun},
+        Doi= {10.1093/bioinformatics/btw234},
+        Language = {eng},
+        Medline-pst = {aheadofprint},
+        Pmid = {27256315},
+        Url = {http://dx.doi.org/10.1093/bioinformatics/btw234}
+        }
+
+    .. raw:: html
+
+        </details>
+
     """
 
     def __init__(

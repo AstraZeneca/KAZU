@@ -248,19 +248,35 @@ class PLSapbertModel(LightningModule):
     """
     pytorch lightning production implementation of SapBert
 
-    Original source
+    Original source:
+
     https://github.com/cambridgeltl/sapbert
 
-    Credit
+    Paper:
 
-    @inproceedings{liu2021self,
-        title={Self-Alignment Pretraining for Biomedical Entity Representations},
-        author={Liu, Fangyu and Shareghi, Ehsan and Meng, Zaiqiao and Basaldella, Marco and Collier, Nigel},
-        booktitle={Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
-        pages={4228--4238},
-        month = jun,
-        year={2021}
-    }
+    Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, and Nigel Collier. 2021.
+    `Self-alignment pretraining for biomedical entity representations. <https://www.aclweb.org/anthology/2021.naacl-main.334.pdf>`_
+    In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pages 4228–4238.
+
+    .. raw:: html
+
+        <details>
+        <summary>Bibtex Citation Details</summary>
+
+    .. code:: bibtex
+
+        @inproceedings{liu2021self,
+            title={Self-Alignment Pretraining for Biomedical Entity Representations},
+            author={Liu, Fangyu and Shareghi, Ehsan and Meng, Zaiqiao and Basaldella, Marco and Collier, Nigel},
+            booktitle={Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+            pages={4228--4238},
+            month = jun,
+            year={2021}
+        }
+
+    .. raw:: html
+
+        </details>
 
     """
 
