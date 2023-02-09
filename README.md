@@ -83,6 +83,7 @@ Kazu includes elements under compatible licenses (full licenses are in relevant 
 - The doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/NUMPY_LICENSE.txt)
 - Elements of the model distillation code are inspired by or modified from Huawei Noah's Ark Lab [TinyBERT](https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT) and DMIS-Lab's [BioBERT](https://github.com/dmis-lab/biobert/tree/master).
   See the details in dataprocessor.py, models.py and tiny_transformer.py.
+- PLSapbertModel is inspired by the code from [sapbert](https://github.com/cambridgeltl/sapbert), licensed under MIT. See the file for details, and see the [SapBert](#sapbert) section below regarding use of the model.
 - GildaUtils in the string_normalizer.py file is modified from [Gilda](https://github.com/indralab/gilda). See the file for full details
   including the full BSD 2-Clause license.
 - the AbbreviationFinderStep uses KazuAbbreviationDetector, which is a modified version of
