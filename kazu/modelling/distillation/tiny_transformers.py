@@ -6,10 +6,26 @@ from transformers import BertModel, BertPreTrainedModel
 class TinyBertForSequenceTagging(BertPreTrainedModel):
     """PyTorch BERT model for sequence tagging.
 
+    Based off `TinyBERT from Huawei Noah's Ark Lab <https://github.com/huawei-noah/Pretrained-Language-Model/tree/master/TinyBERT>`_
+    - the `TinyBertForSequenceClassification <https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT/transformer/modeling.py#L1119>`_
+    class specifically.
+
     Modified for distillation using Pytorch Lightning by KAZU team.
 
-    Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team., and KAZU Team
-    Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+    Originally Licensed under Apache 2.0
+
+    | Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team., and KAZU Team
+    | Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+    | Copyright 2020 Huawei Technologies Co., Ltd
+
+    .. raw:: html
+
+        <details>
+        <summary>Full License Notice</summary>
+
+    | Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team., and KAZU Team
+    | Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+    | Copyright 2020 Huawei Technologies Co., Ltd
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,6 +38,10 @@ class TinyBertForSequenceTagging(BertPreTrainedModel):
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+    .. raw:: html
+
+        </details>
     """
 
     def __init__(self, config, num_labels=None, fit_size=768):

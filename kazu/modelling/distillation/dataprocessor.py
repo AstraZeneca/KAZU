@@ -1,7 +1,21 @@
 """Modified for distillation using Pytorch Lightning by KAZU team.
 
-Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team and Huawei Noah's Ark Lab.
-Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+Based off of the `DataProcessor <https://github.com/dmis-lab/biobert/blob/master/run_ner.py#L127>`_
+and `NerProcessor <https://github.com/dmis-lab/biobert/blob/master/run_ner.py#L175>`_ classes in BioBERT,
+also written in reference to Huawei Noah's Ark Lab `TinyBERT <https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT>`_.
+
+Licensed under Apache 2.0
+
+| Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team and Huawei Noah's Ark Lab.
+| Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+
+.. raw:: html
+
+    <details>
+    <summary>Full License Notice</summary>
+
+| Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team and Huawei Noah's Ark Lab.
+| Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +28,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+.. raw:: html
+
+    </details>
 """
 
 import logging
