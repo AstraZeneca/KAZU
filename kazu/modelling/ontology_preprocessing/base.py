@@ -464,17 +464,25 @@ class OntologyParser(ABC):
     def process_curations(self):
         if self.curations is not None:
             for curation in self.curations:
-                for maybe_parser_behaviour_and_id in curation.parser_behaviour(self.name):
-                    if maybe_parser_behaviour_and_id:
-                        behaviour, maybe_id = maybe_parser_behaviour_and_id
-                        if behaviour == ParserBehaviour.ADD:
-                            self._attempt_to_add_database_entry_for_curation(
-                                maybe_id, curation.curated_synonym  # type: ignore[arg-type]
-                            )
-                        else:
-                            self._attempt_to_modify_database_entry_for_curation(
-                                behaviour, maybe_id, curation.curated_synonym  # type: ignore[arg-type]
-                            )
+                self._process_parser_behaviours(curation)
+                self._process_ner_actions(curation)
+
+    def _process_ner_actions(self, curation: Curation):
+        # todo
+        pass
+
+    def _process_parser_behaviours(self, curation: Curation):
+        for maybe_parser_behaviour_and_id in curation.parser_behaviour(self.name):
+            if maybe_parser_behaviour_and_id:
+                behaviour, maybe_id = maybe_parser_behaviour_and_id
+                if behaviour == ParserBehaviour.ADD:
+                    self._attempt_to_add_database_entry_for_curation(
+                        {maybe_id}, curation.curated_synonym  # type: ignore[arg-type]
+                    )
+                else:
+                    self._attempt_to_modify_database_entry_for_curation(
+                        behaviour, maybe_id, curation.curated_synonym  # type: ignore[arg-type]
+                    )
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
