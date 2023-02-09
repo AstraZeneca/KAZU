@@ -641,15 +641,17 @@ class ParserBehaviour(AutoNameEnum):
 @dataclass(frozen=True)
 class NerAction:
     behaviour: Behaviour
-    entity_classes: Optional[Set[str]] = None
+    entity_classes: Set[str] = field(default_factory=set)
+    parser_to_target_id_mappings: Dict[str, Set[str]] = field(default_factory=dict)
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "NerAction":
         return cls(
             behaviour=Behaviour(json_dict["behaviour"]),
-            entity_classes=set(json_dict["entity_classes"])
-            if json_dict["entity_classes"] is not None
-            else None,
+            entity_classes=set(json_dict["entity_classes"]),
+            parser_to_target_id_mappings={
+                k: set(v) for k, v in json_dict["parser_to_target_id_mappings"].items()
+            },
         )
 
 
@@ -708,6 +710,28 @@ class Curation:
 
     def __post_init__(self):
         # data validation
+        self._validate_parser_actions()
+        self._validate_ner_actions()
+
+    def _validate_ner_actions(self):
+        for ner_action in self.ner_actions:
+            if ner_action.behaviour == Behaviour.ADD and self.curated_synonym is None:
+                raise ValueError(
+                    f"curation had NER add behaviour, but curated_synonym field is None. {self}"
+                )
+            if ner_action.behaviour == Behaviour.ADD and len(ner_action.entity_classes) == 0:
+                raise ValueError(
+                    f"curation had NER add behaviour, but no entity classes are specified. {self}"
+                )
+            if (
+                ner_action.behaviour == Behaviour.ADD
+                and len(ner_action.parser_to_target_id_mappings) == 0
+            ):
+                raise ValueError(
+                    f"curation had NER add behaviour, but no parser_to_target_id_mappings are specified. {self}"
+                )
+
+    def _validate_parser_actions(self):
         for action_index, parser_action in enumerate(self.parser_actions):
             if (
                 len(parser_action.parser_to_target_id_mapping) == 0
@@ -815,20 +839,4 @@ class Curation:
             parser_actions=[ParserAction.from_json(x) for x in json_dict["parser_actions"]],
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
-        )
-
-
-@dataclass(frozen=True)
-class CurationWithTermNorms(Curation):
-    term_norm_mapping: Dict[str, str] = field(default_factory=dict, hash=False)
-
-    @staticmethod
-    def from_curated_term(
-        term: Curation,
-        term_norm_mapping: Dict[str, str],
-    ):
-
-        return CurationWithTermNorms(
-            term_norm_mapping=term_norm_mapping,
-            **term.__dict__,
         )
