@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, DefaultDict, Set, cast
+from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, Set, cast
 
 import spacy
 import srsly
@@ -14,8 +14,10 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
-from kazu.data.data import SynonymTerm, Curation
-from kazu.modelling.ontology_preprocessing.base import OntologyParser, load_curated_terms
+from kazu.modelling.ontology_preprocessing.base import (
+    OntologyParser,
+    CurationWithTermNorms,
+)
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
 
@@ -135,71 +137,18 @@ class OntologyMatcher:
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
     def _match_curations_to_ontology_terms(
-        self, parsers: List[OntologyParser], curations: List[Curation]
-    ) -> List[Curation]:
+        self, parsers: List[OntologyParser]
+    ) -> List[CurationWithTermNorms]:
 
-        case_sensitive: DefaultDict[str, DefaultDict[str, Set[SynonymTerm]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        case_insensitive: DefaultDict[str, DefaultDict[str, Set[SynonymTerm]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
         matched_curations = []
         for parser in parsers:
-            terms = parser.generate_synonyms()
-            for term in terms:
-                for term_string in term.terms:
-                    case_sensitive[parser.entity_class][term_string].add(term)
-                    case_insensitive[parser.entity_class][term_string.lower()].add(term)
-
-        for curation in curations:
-            if curation.action != "keep":
-                logger.debug(f"dropping unwanted curation: {curation}")
-                continue
-            if curation.case_sensitive:
-                query_dict = case_sensitive
-                query_string = curation.term
-            else:
-                query_dict = case_insensitive
-                query_string = curation.term.lower()
-
-            matched_syn_terms = query_dict[curation.entity_class].get(query_string, set())
-            if len(matched_syn_terms) == 0:
-                logger.warning(f"failed to find ontology match for {curation}")
-            else:
-
-                non_redundant_syn_terms_by_parser = sort_then_group(
-                    matched_syn_terms,
-                    key_func=lambda x: (
-                        x.parser_name,
-                        x.associated_id_sets,
-                    ),
-                )
-                for (
-                    parser_name,
-                    associated_id_sets,
-                ), syn_terms_this_parser in non_redundant_syn_terms_by_parser:
-
-                    # sort when choosing a term to use (amongst redundant terms) so that
-                    # the chosen term is consistent between executions
-                    syn_term_for_this_id_set = sorted(
-                        syn_terms_this_parser, key=lambda x: x.term_norm
-                    )[0]
-                    curation.term_norm_mapping.setdefault(parser_name, set()).add(
-                        syn_term_for_this_id_set.term_norm
-                    )
-                    if len(curation.term_norm_mapping[parser_name]) > 1:
-                        logger.warning(
-                            f"multiple SynonymTerm's detected for string {query_string}, "
-                            f"This is probably means {query_string} is ambiguous in the "
-                            f"parser {parser_name}"
-                        )
-            matched_curations.append(curation)
+            parser.populate_databases()
+            matched_curations.extend(parser.matched_curations)
 
         return matched_curations
 
     def create_phrasematchers_from_curated_list(
-        self, curated_list: PathLike, parsers: List[OntologyParser]
+        self, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
         """
         in order to (non-redundantly) map a curated term to a :class:`.SynonymTerm`,
@@ -214,40 +163,38 @@ class OntologyMatcher:
         3) for all non-redundant :class:`.SynonymTerm`\\ s, map the curated term string
            to the :attr:`.SynonymTerm.term_norm`
 
-        :param curated_list:
         :param parsers:
         :return:
         """
 
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
-        self.set_labels(parser.entity_class for parser in parsers)
-        curations = load_curated_terms(curated_list)
-        matched_curations = self._match_curations_to_ontology_terms(
-            parsers=parsers, curations=curations
-        )
 
+        self.set_labels(parser.entity_class for parser in parsers)
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
 
-        # spacy's typing isn't smart enough to know this will have a 'pipe' attr
-        patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
-            # we need it lowercased for the case-insensitive matcher
-            curation.term if curation.case_sensitive else curation.term.lower()
-            for curation in matched_curations
-        )
+        for parser in parsers:
+            parser.populate_databases()
+            curation_with_term_norms = parser.matched_curations
+            # spacy's typing isn't smart enough to know this will have a 'pipe' attr
+            patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
+                # we need it lowercased for the case-insensitive matcher
+                curation_with_term_norm[0].curated_synonym
+                if curation_with_term_norm[0].case_sensitive
+                else curation_with_term_norm[0].curated_synonym.lower()  # type: ignore[union-attr]
+                for curation_with_term_norm in curation_with_term_norms
+            )
 
-        for curation, pattern in zip(matched_curations, patterns):
-            # a curation can have different term_norms for different parsers,
-            # since the string normalizer's output depends on the entity class.
-            # Also, a curation may exist in multiple SynonymTerm.terms
-            for parser_name, term_norms in curation.term_norm_mapping.items():
-                for term_norm in term_norms:
-                    match_id = parser_name + self.match_id_sep + term_norm
-                    if curation.case_sensitive:
-                        strict_matcher.add(match_id, [pattern])
-                    else:
-                        lowercase_matcher.add(match_id, [pattern])
+            for (curation, term_norm), pattern in zip(curation_with_term_norms, patterns):
+                # a curation can have different term_norms for different parsers,
+                # since the string normalizer's output depends on the entity class.
+                # Also, a curation may exist in multiple SynonymTerm.terms
+                match_id = parser.name + self.match_id_sep + term_norm
+                if curation.case_sensitive:
+                    strict_matcher.add(match_id, [pattern])
+                else:
+                    lowercase_matcher.add(match_id, [pattern])
 
         # only set the phrasematcher if we have any rules for them
         # this lets us skip running a phrasematcher if it has no rules when we come
