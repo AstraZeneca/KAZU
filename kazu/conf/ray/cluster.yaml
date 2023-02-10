@@ -14,4 +14,3 @@ serve:
     port: 8000
     location: EveryNode
     middlewares: ${Middlewares.middlewares}
-auth_required: ${Middlewares.auth_required}

@@ -133,15 +133,15 @@ class KazuWebApp:
 
     deploy: Callable
 
-    def __init__(self, cfg: DictConfig, auth_required: bool):
+    def __init__(self, cfg: DictConfig):
         """
         :param cfg: DictConfig from Hydra
-        :param auth_required: Does this require authentication to use?
-            If not, we'll make sure the openapi docs don't generate auth buttons.
         """
         self.pipeline: Pipeline = instantiate(cfg.Pipeline)
         self.ls_web_utils: LSWebUtils = instantiate(cfg.LSWebUtils)
-        if not auth_required:
+        if not cfg.Middlewares.auth_required:
+            # override the openapi doc generating method
+            # to remove authentication buttons.
             app.openapi = openapi_no_auth  # type: ignore[assignment]
             # we need the 'type: ignore' as otherwise mypy gives an error:
             # mypy doesn't like assigning to a method - it isn't able
@@ -196,7 +196,7 @@ def start(cfg: DictConfig) -> None:
     call(cfg.ray.init)
     call(cfg.ray.serve)
 
-    KazuWebApp.deploy(cfg, auth_required=cfg.ray.auth_required)
+    KazuWebApp.deploy(cfg)
     if not cfg.ray.serve.detached:
         while True:
             logger.info(serve.list_deployments())
