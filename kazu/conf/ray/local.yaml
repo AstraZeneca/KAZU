@@ -4,5 +4,5 @@ ray:
   serve:
     port: 8000
   detached: False
-  num_cpus: None
-  object_store_memory: None
+  num_cpus: ~
+  object_store_memory: ~
