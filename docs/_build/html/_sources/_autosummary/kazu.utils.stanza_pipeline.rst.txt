@@ -9,15 +9,15 @@ kazu.utils.stanza\_pipeline
 
    
    
-   
-
-   
-   
-   .. rubric:: Classes
+   .. rubric:: Functions
 
    .. autosummary::
    
-      StanzaPipeline
+      simple_stanza_init
+   
+   
+
+   
    
    
 

@@ -187,7 +187,6 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
@@ -236,6 +235,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.entity_class_disambiguation.html">kazu.steps.linking.entity_class_disambiguation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -275,6 +275,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.constants.html">kazu.utils.constants</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
@@ -286,6 +287,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.ls_web_utils.html">kazu.web.ls_web_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.req_id_header.html">kazu.web.req_id_header</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -312,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.utils.string_normalizer.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/_autosummary/kazu.utils.string_normalizer.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -343,22 +346,25 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer" title="kazu.utils.string_normalizer.AnatomyStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AnatomyStringNormalizer</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.DefaultStringNormalizer" title="kazu.utils.string_normalizer.DefaultStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefaultStringNormalizer</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.CompanyStringNormalizer" title="kazu.utils.string_normalizer.CompanyStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompanyStringNormalizer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.DefaultStringNormalizer" title="kazu.utils.string_normalizer.DefaultStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefaultStringNormalizer</span></code></a></p></td>
 <td><p>normalize a biomedical string for search.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer" title="kazu.utils.string_normalizer.DiseaseStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiseaseStringNormalizer</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer" title="kazu.utils.string_normalizer.DiseaseStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiseaseStringNormalizer</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p></td>
 <td><p>protocol describing methods a normalizer should implement</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.GeneStringNormalizer" title="kazu.utils.string_normalizer.GeneStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneStringNormalizer</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.GeneStringNormalizer" title="kazu.utils.string_normalizer.GeneStringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneStringNormalizer</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.GildaUtils" title="kazu.utils.string_normalizer.GildaUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GildaUtils</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.GildaUtils" title="kazu.utils.string_normalizer.GildaUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GildaUtils</span></code></a></p></td>
 <td><p>Original Credit: <a class="reference external" href="https://github.com/indralab/gilda">https://github.com/indralab/gilda</a> <a class="reference external" href="https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py">https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StringNormalizer</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StringNormalizer</span></code></a></p></td>
 <td><p>call custom entity class normalizers, or a default normalizer if none is available</p></td>
 </tr>
 </tbody>
@@ -366,11 +372,11 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.AnatomyStringNormalizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">AnatomyStringNormalizer</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L280-L305"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">AnatomyStringNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L281-L306"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.AnatomyStringNormalizer.is_symbol_like">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L281-L284"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L282-L285"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
 <dd><p>method to determine whether a string is a symbol (e.g. “AD”) or a noun phrase (e.g. “Alzheimers Disease”)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -387,7 +393,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.AnatomyStringNormalizer.normalize_noun_phrase">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L298-L305"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L299-L306"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
 <dd><p>revert to DefaultStringNormalizer.normalize_noun_phrase
 :param original_string:
 :return:</p>
@@ -403,7 +409,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.AnatomyStringNormalizer.normalize_symbol">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L286-L296"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L287-L297"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.AnatomyStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
 <dd><p>revert to DefaultStringNormalizer.normalize_noun_phrase (note, since
 all anatomy is non-symbolic, this is theoretically superfluous, but we
 include it anyway)</p>
@@ -423,13 +429,69 @@ include it anyway)</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="kazu.utils.string_normalizer.CompanyStringNormalizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">CompanyStringNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L408-L431"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.CompanyStringNormalizer" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.string_normalizer.CompanyStringNormalizer.is_symbol_like">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L409-L412"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.CompanyStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
+<dd><p>method to determine whether a string is a symbol (e.g. “AD”) or a noun phrase (e.g. “Alzheimers Disease”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>original_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.string_normalizer.CompanyStringNormalizer.normalize_noun_phrase">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L424-L431"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.CompanyStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
+<dd><p>revert to DefaultStringNormalizer.normalize_noun_phrase
+:param original_string:
+:return:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>original_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.string_normalizer.CompanyStringNormalizer.normalize_symbol">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L414-L422"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.CompanyStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
+<dd><p>just upper case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>original_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">DefaultStringNormalizer</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L45-L247"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">DefaultStringNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L47-L248"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p>
 <p>normalize a biomedical string for search. Suitable for most use cases</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.depluralize">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L142-L152"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.depluralize" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L143-L153"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.depluralize" title="Permalink to this definition">#</a></dt>
 <dd><p>apply some depluralisation rules</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -443,7 +505,7 @@ include it anyway)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.handle_lower_case_prefixes">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">handle_lower_case_prefixes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L166-L192"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.handle_lower_case_prefixes" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">handle_lower_case_prefixes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L167-L193"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.handle_lower_case_prefixes" title="Permalink to this definition">#</a></dt>
 <dd><p>preserve case only if first char of contiguous subsequence is lower case, and is alphanum, and upper
 case detected in rest of part. Currently unused as it causes problems with normalisation of e.g. erbB2, which
 is a commonly used form of the symbol</p>
@@ -462,7 +524,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.is_symbol_like">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L85-L125"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L87-L127"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
 <dd><p>checks for ratio of upper to lower case characters, and numeric to alpha characters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -479,7 +541,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.normalize_noun_phrase">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L131-L140"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L133-L141"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
 <dd><p>method for normalising a noun phrase</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -496,7 +558,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.normalize_symbol">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L127-L129"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L129-L131"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
 <dd><p>method for normalising a symbol</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -513,7 +575,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.remove_non_alphanum">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_non_alphanum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L194-L206"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.remove_non_alphanum" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_non_alphanum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L195-L207"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.remove_non_alphanum" title="Permalink to this definition">#</a></dt>
 <dd><p>removes all non alphanumeric characters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -527,7 +589,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.replace_greek">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_greek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L208-L219"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.replace_greek" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_greek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L209-L220"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.replace_greek" title="Permalink to this definition">#</a></dt>
 <dd><p>replaces greek characters with string representation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -541,7 +603,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.replace_substrings">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_substrings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L233-L247"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.replace_substrings" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_substrings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L234-L248"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.replace_substrings" title="Permalink to this definition">#</a></dt>
 <dd><p>replaces a range of other strings that might be confusing to a classifier, such as roman numerals</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -555,7 +617,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.split_on_numbers">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">split_on_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L221-L231"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.split_on_numbers" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">split_on_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L222-L232"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.split_on_numbers" title="Permalink to this definition">#</a></dt>
 <dd><p>splits a string on numbers, for consistency</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -569,7 +631,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DefaultStringNormalizer.sub_greek_char_abbreviations">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sub_greek_char_abbreviations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L154-L164"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.sub_greek_char_abbreviations" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sub_greek_char_abbreviations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L155-L165"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DefaultStringNormalizer.sub_greek_char_abbreviations" title="Permalink to this definition">#</a></dt>
 <dd><p>substitute single characters for alphanumeric representation - e.g. A -&gt; ALPHA B–&gt; BETA</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -630,11 +692,11 @@ is a commonly used form of the symbol</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DiseaseStringNormalizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">DiseaseStringNormalizer</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L250-L277"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">DiseaseStringNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L251-L278"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DiseaseStringNormalizer.is_symbol_like">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L253-L258"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L254-L259"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
 <dd><p>method to determine whether a string is a symbol (e.g. “AD”) or a noun phrase (e.g. “Alzheimers Disease”)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -651,7 +713,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DiseaseStringNormalizer.normalize_noun_phrase">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L270-L277"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L271-L278"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
 <dd><p>revert to DefaultStringNormalizer.normalize_noun_phrase
 :param original_string:
 :return:</p>
@@ -667,7 +729,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.DiseaseStringNormalizer.normalize_symbol">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L260-L268"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L261-L269"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.DiseaseStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
 <dd><p>revert to DefaultStringNormalizer.normalize_symbol</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -691,17 +753,17 @@ is a commonly used form of the symbol</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.EntityClassNormalizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">EntityClassNormalizer</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L9-L42"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">EntityClassNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L11-L44"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>protocol describing methods a normalizer should implement</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.EntityClassNormalizer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/../../../miniforge3/envs/kazu_39/lib/python3.9/typing.py#L1087-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../../../.pyenv/versions/3.9.13/lib/python3.9/typing.py#L1087-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.EntityClassNormalizer.is_symbol_like">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L14-L22"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L16-L24"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
 <dd><p>method to determine whether a string is a symbol (e.g. “AD”) or a noun phrase (e.g. “Alzheimers Disease”)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -718,7 +780,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.EntityClassNormalizer.normalize_noun_phrase">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L34-L42"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L36-L44"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
 <dd><p>method for normalising a noun phrase</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -735,7 +797,7 @@ is a commonly used form of the symbol</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.EntityClassNormalizer.normalize_symbol">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L24-L32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L26-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.EntityClassNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
 <dd><p>method for normalising a symbol</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -754,11 +816,11 @@ is a commonly used form of the symbol</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GeneStringNormalizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">GeneStringNormalizer</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L308-L405"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">GeneStringNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L309-L405"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntityClassNormalizer</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GeneStringNormalizer.gene_token_classifier">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gene_token_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L334-L362"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.gene_token_classifier" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gene_token_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L335-L363"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.gene_token_classifier" title="Permalink to this definition">#</a></dt>
 <dd><p>slightly modified version of DefaultStringNormalizer.is_symbol_like, designed to work on single tokens. Checks
 if the casing of the symbol changes from lower to upper (if so, is likely to be symbolic, e.g. erbB2)</p>
 <dl class="field-list simple">
@@ -773,7 +835,7 @@ if the casing of the symbol changes from lower to upper (if so, is likely to be 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GeneStringNormalizer.is_symbol_like">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L311-L332"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L312-L333"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.is_symbol_like" title="Permalink to this definition">#</a></dt>
 <dd><p>a symbol classifier that is designed to improve recall on natural text, especially gene symbols
 looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
 upper case or integers is higher, assume it’s a symbol. Also if the first char is lower case, and any
@@ -793,7 +855,7 @@ subsequent characters are upper case, it’s probably a symbol (e.g. erbB2)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GeneStringNormalizer.normalize_noun_phrase">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L397-L405"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_noun_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L397-L405"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.normalize_noun_phrase" title="Permalink to this definition">#</a></dt>
 <dd><p>revert to DefaultStringNormalizer.normalize_noun_phrase for non symbolic genes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -810,7 +872,7 @@ subsequent characters are upper case, it’s probably a symbol (e.g. erbB2)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GeneStringNormalizer.normalize_symbol">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L379-L395"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L380-L395"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.normalize_symbol" title="Permalink to this definition">#</a></dt>
 <dd><p>contrary to other entity classes, gene symbols require special handling because of their highly unusual
 nature</p>
 <dl class="field-list simple">
@@ -828,7 +890,7 @@ nature</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GeneStringNormalizer.remove_trailing_s_if_otherwise_capitalised">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_trailing_s_if_otherwise_capitalised</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L364-L377"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.remove_trailing_s_if_otherwise_capitalised" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_trailing_s_if_otherwise_capitalised</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L365-L378"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GeneStringNormalizer.remove_trailing_s_if_otherwise_capitalised" title="Permalink to this definition">#</a></dt>
 <dd><p>frustratingly, some gene symbols are pluralised like ERBBs. we can’t jsut remove trailing s as this breaks
 genuine symbols like ‘MDH-s’ and ‘GASP10ps’. So, we only strip the trailing ‘s’ if the char before is upper
 case</p>
@@ -851,7 +913,7 @@ case</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GildaUtils">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">GildaUtils</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L438-L543"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">GildaUtils</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L465-L570"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Original Credit:
 <a class="reference external" href="https://github.com/indralab/gilda">https://github.com/indralab/gilda</a>
@@ -893,7 +955,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GildaUtils.depluralize">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L487-L530"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.depluralize" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L514-L557"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.depluralize" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the depluralized version of the word, along with a status flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -916,7 +978,7 @@ plural_cap_s (e.g., MAPKs), and plural_s (e.g., receptors).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GildaUtils.replace_dashes">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_dashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L532-L543"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.replace_dashes" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_dashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L559-L570"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.replace_dashes" title="Permalink to this definition">#</a></dt>
 <dd><p>Replace all types of dashes in a given string with a given replacement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -944,12 +1006,12 @@ ASCII dash (-) is used.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.StringNormalizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">StringNormalizer</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L408-L435"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">StringNormalizer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L434-L462"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>call custom entity class normalizers, or a default normalizer if none is available</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.StringNormalizer.classify_symbolic">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">classify_symbolic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L419-L424"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer.classify_symbolic" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">classify_symbolic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L446-L451"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer.classify_symbolic" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -965,7 +1027,7 @@ ASCII dash (-) is used.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.StringNormalizer.normalize">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/string_normalizer.py#L426-L435"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer.normalize" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L453-L462"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer.normalize" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -981,7 +1043,7 @@ ASCII dash (-) is used.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.StringNormalizer.normalizers">
-<span class="sig-name descname"><span class="pre">normalizers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><span class="pre">EntityClassNormalizer</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'anatomy':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.AnatomyStringNormalizer'&gt;,</span> <span class="pre">'disease':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.DiseaseStringNormalizer'&gt;,</span> <span class="pre">'gene':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.GeneStringNormalizer'&gt;}</span></em><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer.normalizers" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">normalizers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.utils.string_normalizer.EntityClassNormalizer" title="kazu.utils.string_normalizer.EntityClassNormalizer"><span class="pre">EntityClassNormalizer</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'anatomy':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.AnatomyStringNormalizer'&gt;,</span> <span class="pre">'company':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.CompanyStringNormalizer'&gt;,</span> <span class="pre">'disease':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.DiseaseStringNormalizer'&gt;,</span> <span class="pre">'gene':</span> <span class="pre">&lt;class</span> <span class="pre">'kazu.utils.string_normalizer.GeneStringNormalizer'&gt;}</span></em><a class="headerlink" href="#kazu.utils.string_normalizer.StringNormalizer.normalizers" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

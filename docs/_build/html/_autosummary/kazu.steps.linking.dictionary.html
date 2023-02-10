@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.linking.mapping_step" href="kazu.steps.linking.mapping_step.html" /><link rel="prev" title="kazu.steps.linking" href="kazu.steps.linking.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.linking.entity_class_disambiguation" href="kazu.steps.linking.entity_class_disambiguation.html" /><link rel="prev" title="kazu.steps.linking" href="kazu.steps.linking.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
         <title>kazu.steps.linking.dictionary - Kazu documentation</title>
@@ -187,7 +187,6 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
@@ -236,6 +235,7 @@
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.entity_class_disambiguation.html">kazu.steps.linking.entity_class_disambiguation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -275,6 +275,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.constants.html">kazu.utils.constants</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
@@ -286,6 +287,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.ls_web_utils.html">kazu.web.ls_web_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.req_id_header.html">kazu.web.req_id_header</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -312,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.steps.linking.dictionary.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/_autosummary/kazu.steps.linking.dictionary.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -348,12 +351,12 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.dictionary.DictionaryEntityLinkingStep">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.dictionary.</span></span><span class="sig-name descname"><span class="pre">DictionaryEntityLinkingStep</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/dictionary.py#L15-L100"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.dictionary.DictionaryEntityLinkingStep" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.dictionary.</span></span><span class="sig-name descname"><span class="pre">DictionaryEntityLinkingStep</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/dictionary.py#L15-L100"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.dictionary.DictionaryEntityLinkingStep" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="kazu.steps.step.html#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a></p>
 <p>Uses <a class="reference internal" href="kazu.utils.link_index.html#kazu.utils.link_index.DictionaryIndex" title="kazu.utils.link_index.DictionaryIndex"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.utils.link_index.DictionaryIndex</span></code></a> to match entities to ontologies.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_ner_namespaces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/dictionary.py#L20-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_ner_namespaces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/dictionary.py#L20-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -369,7 +372,7 @@ these namespaces</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.load_or_build_caches">
-<span class="sig-name descname"><span class="pre">load_or_build_caches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/steps/linking/dictionary.py#L42-L48"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.load_or_build_caches" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">load_or_build_caches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/dictionary.py#L42-L48"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.load_or_build_caches" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -381,12 +384,12 @@ these namespaces</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="kazu.steps.linking.mapping_step.html">
+          <a class="next-page" href="kazu.steps.linking.entity_class_disambiguation.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">kazu.steps.linking.mapping_step</div>
+                <div class="title">kazu.steps.linking.entity_class_disambiguation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

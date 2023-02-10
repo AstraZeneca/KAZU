@@ -9,12 +9,6 @@ kazu.utils.build\_and\_test\_model\_packs
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      build_custom_pack_params
-   
    
 
    
@@ -23,6 +17,7 @@ kazu.utils.build\_and\_test\_model\_packs
 
    .. autosummary::
    
+      BuildConfiguration
       ModelPackBuilder
    
    

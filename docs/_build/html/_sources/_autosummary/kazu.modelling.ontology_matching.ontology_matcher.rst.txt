@@ -17,7 +17,6 @@ kazu.modelling.ontology\_matching.ontology\_matcher
 
    .. autosummary::
    
-      CuratedTerm
       OntologyMatcher
       OntologyMatcherConfig
    

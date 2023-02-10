@@ -187,7 +187,6 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
@@ -236,6 +235,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.entity_class_disambiguation.html">kazu.steps.linking.entity_class_disambiguation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -275,6 +275,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.constants.html">kazu.utils.constants</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
@@ -286,6 +287,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.ls_web_utils.html">kazu.web.ls_web_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.req_id_header.html">kazu.web.req_id_header</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -312,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.utils.build_and_test_model_packs.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/_autosummary/kazu.utils.build_and_test_model_packs.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -336,21 +339,14 @@
         <article role="main">
           <section id="module-kazu.utils.build_and_test_model_packs">
 <span id="kazu-utils-build-and-test-model-packs"></span><h1>kazu.utils.build_and_test_model_packs<a class="headerlink" href="#module-kazu.utils.build_and_test_model_packs" title="Permalink to this heading">#</a></h1>
-<p class="rubric">Functions</p>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.build_and_test_model_packs.build_custom_pack_params" title="kazu.utils.build_and_test_model_packs.build_custom_pack_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_custom_pack_params</span></code></a>(arguments)</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder" title="kazu.utils.build_and_test_model_packs.ModelPackBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelPackBuilder</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="kazu.utils.build_and_test_model_packs.BuildConfiguration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BuildConfiguration</span></code></a></p></td>
+<td><p>Dataclass that controls how a base model pack and config should be merged with a target model pack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder" title="kazu.utils.build_and_test_model_packs.ModelPackBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelPackBuilder</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -368,29 +364,124 @@
 </div>
 <dl class="py exception">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuildError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">ModelPackBuildError</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L22-L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuildError" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">ModelPackBuildError</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L64-L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuildError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">BuildConfiguration</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L29-L61"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Dataclass that controls how a base model pack and config should be merged with a
+target model pack.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requires_base_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontologies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_own_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_acceptance_tests</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_consistency_checks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../docs/&lt;string&gt;"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.__init__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>requires_base_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+<li><p><strong>models</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>curations</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>ontologies</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>has_own_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+<li><p><strong>run_acceptance_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+<li><p><strong>run_consistency_checks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.curations">
+<span class="sig-name descname"><span class="pre">curations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.curations" title="Permalink to this definition">#</a></dt>
+<dd><p>what entity classes should this model pack use from the curated list in the base model pack?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.has_own_config">
+<span class="sig-name descname"><span class="pre">has_own_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.has_own_config" title="Permalink to this definition">#</a></dt>
+<dd><p>does this model pack have its own config dir? (if used with use_base_config
+these will override any config files from the base config)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.models">
+<span class="sig-name descname"><span class="pre">models</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.models" title="Permalink to this definition">#</a></dt>
+<dd><p>what model directories should this model pack include from the base model pack?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.ontologies">
+<span class="sig-name descname"><span class="pre">ontologies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.ontologies" title="Permalink to this definition">#</a></dt>
+<dd><p>what ontologies should this model pack use from the base ontology pack?
+Arg should be a list of strings to the ontology root, from the root of the base pack</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.requires_base_config">
+<span class="sig-name descname"><span class="pre">requires_base_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.requires_base_config" title="Permalink to this definition">#</a></dt>
+<dd><p>should this model pack use the base config as a starting point?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.requires_base_model_pack">
+<span class="sig-name descname"><span class="pre">requires_base_model_pack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.requires_base_model_pack" title="Permalink to this definition">#</a></dt>
+<dd><p>Whether a base model pack is required to build this model pack
+This will be set automatically based on the values of the other fields,
+it’s not available to set when instantiating the class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.run_acceptance_tests">
+<span class="sig-name descname"><span class="pre">run_acceptance_tests</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.run_acceptance_tests" title="Permalink to this definition">#</a></dt>
+<dd><p>should acceptance tests be run?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.BuildConfiguration.run_consistency_checks">
+<span class="sig-name descname"><span class="pre">run_consistency_checks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration.run_consistency_checks" title="Permalink to this definition">#</a></dt>
+<dd><p>should consistency checks be run on the gold standard?</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">ModelPackBuilder</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L26-L230"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">ModelPackBuilder</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L68-L387"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.apply_merge_configurations">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_merge_configurations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">build_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_pack_build_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncached_model_pack_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L126-L180"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.apply_merge_configurations" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>build_config</strong> (<a class="reference internal" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="kazu.utils.build_and_test_model_packs.BuildConfiguration"><em>BuildConfiguration</em></a>) – </p></li>
+<li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – </p></li>
+<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – </p></li>
+<li><p><strong>model_pack_build_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
+<li><p><strong>uncached_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_all_model_packs">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_all_model_packs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_model_pack_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_acceptance_tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_consistency_checks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L60-L132"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_all_model_packs" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_all_model_packs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_pack_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_tests</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L258-L301"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_all_model_packs" title="Permalink to this definition">#</a></dt>
 <dd><p>build multiple model packs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – Path to the base model pack, if required</p></li>
 <li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – Path to the base configuration, if required</p></li>
-<li><p><strong>custom_model_pack_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>]</em><em>]</em><em>]</em>) – optional tuples of (&lt;path to custom pack resources&gt;,
-&lt;use base config&gt;, &lt;use base model pack&gt;,)</p></li>
+<li><p><strong>model_pack_paths</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – list of paths to model pack resources</p></li>
 <li><p><strong>zip_pack</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – should the pack be zipped at the end?</p></li>
-<li><p><strong>run_acceptance_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – should acceptance tests be run?</p></li>
-<li><p><strong>run_consistency_checks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – run against the annotated corpus, to highlight potential annotation errors</p></li>
 <li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – directory to build model packs in</p></li>
+<li><p><strong>skip_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – don’t run any tests</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -401,7 +492,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_caches">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_caches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L209-L230"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_caches" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_caches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L371-L387"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_caches" title="Permalink to this definition">#</a></dt>
 <dd><p>execute all processed required to build model pack caches</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -418,11 +509,11 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.clear_cached_resources_from_model_pack_dir">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clear_cached_resources_from_model_pack_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L27-L44"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.clear_cached_resources_from_model_pack_dir" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clear_cached_resources_from_model_pack_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pack_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L225-L242"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.clear_cached_resources_from_model_pack_dir" title="Permalink to this definition">#</a></dt>
 <dd><p>delete any cached data from the input path</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>model_path_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p>
+<dd class="field-odd"><p><strong>model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -431,21 +522,71 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.copy_base_model_pack_resources_to_target">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">copy_base_model_pack_resources_to_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">build_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_pack_build_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L182-L198"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.copy_base_model_pack_resources_to_target" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>build_config</strong> (<a class="reference internal" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="kazu.utils.build_and_test_model_packs.BuildConfiguration"><em>BuildConfiguration</em></a>) – </p></li>
+<li><p><strong>base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
+<li><p><strong>model_pack_build_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.load_build_configuration">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_build_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pack_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L69-L84"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.load_build_configuration" title="Permalink to this definition">#</a></dt>
+<dd><p>try to load a merge configuration from the model pack root. The merge configuration should be
+a json file called base_model_merge_config.json. None is returned if no model pack is found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="kazu.utils.build_and_test_model_packs.BuildConfiguration"><em>BuildConfiguration</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.load_curations">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_curations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class_filter</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L200-L223"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.load_curations" title="Permalink to this definition">#</a></dt>
+<dd><p>load curations indexed by term and entity class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – path to root of model pack</p></li>
+<li><p><strong>ent_class_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em>) – only return curations in this set of entity classes. If None, return all</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.process_model_pack_path">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process_model_pack_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kazu_version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_acceptance_tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_consistency_checks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncached_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L145-L207"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.process_model_pack_path" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process_model_pack_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kazu_version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncached_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_tests</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L314-L369"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.process_model_pack_path" title="Permalink to this definition">#</a></dt>
 <dd><p>run all configured options on a given model pack path</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – if this pack requires the base configuration, specify path</p></li>
 <li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – if this pack requires the base model pack, specify path</p></li>
+<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – if this pack requires the base configuration, specify path</p></li>
 <li><p><strong>kazu_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – version of kazu used to generate model pack</p></li>
-<li><p><strong>run_acceptance_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – should acceptance tests be run?</p></li>
-<li><p><strong>run_acceptance_tests</strong> – should consistency_checks be run on the annotated corpus?</p></li>
 <li><p><strong>zip_pack</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – should model pack be zipped?</p></li>
 <li><p><strong>uncached_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – path to model pack to process</p></li>
 <li><p><strong>build_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – directory pack should be built in</p></li>
-<li><p><strong>run_consistency_checks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
+<li><p><strong>skip_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – don’t run any tests</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -459,7 +600,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.reset_singletons">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset_singletons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L134-L143"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.reset_singletons" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset_singletons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L303-L312"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.reset_singletons" title="Permalink to this definition">#</a></dt>
 <dd><p>this is required between different instantiations of the pipeline config, as singleton states
 may conflict</p>
 <dl class="field-list simple">
@@ -470,8 +611,31 @@ may conflict</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.resolve_curations">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resolve_curations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L86-L124"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.resolve_curations" title="Permalink to this definition">#</a></dt>
+<dd><p>load curations from the base model pack based upon the required entity classes specified
+in the <a class="reference internal" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="kazu.utils.build_and_test_model_packs.BuildConfiguration"><code class="xref py py-class docutils literal notranslate"><span class="pre">BuildConfiguration</span></code></a>, then load any additional ones from the target
+model pack path. Finally, merge the two lists, warning on any inconsistencies that occur</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
+<li><p><strong>target_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
+<li><p><strong>merge_config</strong> (<a class="reference internal" href="#kazu.utils.build_and_test_model_packs.BuildConfiguration" title="kazu.utils.build_and_test_model_packs.BuildConfiguration"><em>BuildConfiguration</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.zip_model_pack">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zip_model_pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pack_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L46-L58"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.zip_model_pack" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zip_model_pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pack_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L244-L256"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.zip_model_pack" title="Permalink to this definition">#</a></dt>
 <dd><p>call the zip subprocess to compress model pack (requires zip on CLI)
 also moves it to parent dir</p>
 <dl class="field-list simple">
@@ -487,16 +651,6 @@ also moves it to parent dir</p>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.build_custom_pack_params">
-<span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">build_custom_pack_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/build_and_test_model_packs.py#L233-L243"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.build_custom_pack_params" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>]]]</p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>

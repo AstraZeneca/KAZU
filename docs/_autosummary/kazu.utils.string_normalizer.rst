@@ -18,6 +18,7 @@ kazu.utils.string\_normalizer
    .. autosummary::
    
       AnatomyStringNormalizer
+      CompanyStringNormalizer
       DefaultStringNormalizer
       DiseaseStringNormalizer
       EntityClassNormalizer

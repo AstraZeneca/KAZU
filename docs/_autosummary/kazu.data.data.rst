@@ -19,14 +19,16 @@ kazu.data.data
    
       AutoNameEnum
       CharSpan
+      CuratedTerm
+      DisambiguationConfidence
       Document
       DocumentJsonUtils
       Entity
       EquivalentIdAggregationStrategy
       EquivalentIdSet
-      LinkRanks
       Mapping
       Section
+      StringMatchConfidence
       SynonymTerm
       SynonymTermWithMetrics
    

@@ -28,6 +28,7 @@ kazu.steps.linking
    :recursive:
 
    kazu.steps.linking.dictionary
+   kazu.steps.linking.entity_class_disambiguation
    kazu.steps.linking.mapping_step
    kazu.steps.linking.post_processing
    kazu.steps.linking.sapbert

@@ -187,7 +187,6 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
@@ -236,6 +235,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.entity_class_disambiguation.html">kazu.steps.linking.entity_class_disambiguation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -275,6 +275,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.constants.html">kazu.utils.constants</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
@@ -286,6 +287,8 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.ls_web_utils.html">kazu.web.ls_web_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.req_id_header.html">kazu.web.req_id_header</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">kazu.web.server</a></li>
 </ul>
@@ -312,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.web.server.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/_autosummary/kazu.web.server.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -340,10 +343,19 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.start" title="kazu.web.server.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>(cfg)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.get_id_log_prefix_if_available" title="kazu.web.server.get_id_log_prefix_if_available"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_id_log_prefix_if_available</span></code></a>(request)</p></td>
+<td><p>Utility function for generating the appropriate prefix for logs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.web.server.get_request_id" title="kazu.web.server.get_request_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_request_id</span></code></a>(request)</p></td>
+<td><p>Utility function for extracting custom header from HTTPConnection Object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.openapi_no_auth" title="kazu.web.server.openapi_no_auth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openapi_no_auth</span></code></a>()</p></td>
+<td><p>Remove the bits of the openapi schema that put auth buttons on the Swagger UI.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.web.server.start" title="kazu.web.server.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>(cfg)</p></td>
 <td><p>deploy the web app to Ray Serve</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.web.server.stop" title="kazu.web.server.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.web.server.stop" title="kazu.web.server.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -364,11 +376,11 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.web.server.SectionedWebDocument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">SectionedWebDocument</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L22-L26"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SectionedWebDocument" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">SectionedWebDocument</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L111-L115"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SectionedWebDocument" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.web.server.SectionedWebDocument.to_kazu_document">
-<span class="sig-name descname"><span class="pre">to_kazu_document</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L25-L26"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SectionedWebDocument.to_kazu_document" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_kazu_document</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L114-L115"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SectionedWebDocument.to_kazu_document" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a></p>
@@ -385,11 +397,11 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.web.server.SimpleWebDocument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">SimpleWebDocument</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L29-L33"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SimpleWebDocument" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">SimpleWebDocument</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L118-L122"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SimpleWebDocument" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.web.server.SimpleWebDocument.to_kazu_document">
-<span class="sig-name descname"><span class="pre">to_kazu_document</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L32-L33"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SimpleWebDocument.to_kazu_document" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_kazu_document</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L121-L122"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.SimpleWebDocument.to_kazu_document" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a></p>
@@ -405,8 +417,56 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="kazu.web.server.get_id_log_prefix_if_available">
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">get_id_log_prefix_if_available</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L98-L108"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.get_id_log_prefix_if_available" title="Permalink to this definition">#</a></dt>
+<dd><p>Utility function for generating the appropriate prefix for logs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HTTPConnection</em>) – Starlette HTTPConnection object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Prefix to pre-pend to log messages containing the request id.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.web.server.get_request_id">
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">get_request_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L86-L95"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.get_request_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Utility function for extracting custom header from HTTPConnection Object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HTTPConnection</em>) – Starlette HTTPConnection object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ID string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.web.server.openapi_no_auth">
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">openapi_no_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L52-L80"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.openapi_no_auth" title="Permalink to this definition">#</a></dt>
+<dd><p>Remove the bits of the openapi schema that put auth buttons on the Swagger UI.</p>
+<p>When we don’t configure any Authentication middleware, we otherwise still get the
+buttons, even though they aren’t necessary to fill in and don’t do anything, which
+may be confusing to users.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kazu.web.server.start">
-<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L71-L92"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.start" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L188-L214"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.start" title="Permalink to this definition">#</a></dt>
 <dd><p>deploy the web app to Ray Serve</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -423,7 +483,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.web.server.stop">
-<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/web/server.py#L95-L98"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.stop" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.web.server.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/web/server.py#L217-L220"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.web.server.stop" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
