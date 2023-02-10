@@ -8,7 +8,7 @@ from kazu.web.routes import KAZU
 @requires_model_pack
 def test_api(ray_server, kazu_test_config):
     data = requests.post(
-        f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/",
+        f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/api/{KAZU}/",
         json={"text": "EGFR is an important gene in breast cancer"},
     ).json()
     section = data["sections"][0]
@@ -34,7 +34,7 @@ def test_batch_api(server_type, should_fail_auth, request, kazu_test_config):
         headers = {}
 
     response = requests.post(
-        f"http://127.0.0.1:{kazu_test_config.ray.serve.port}/api/{KAZU}/batch",
+        f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/api/{KAZU}/batch",
         headers=headers,
         json=[
             {"text": "EGFR is an important gene in breast cancer"},

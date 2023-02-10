@@ -27,3 +27,4 @@ middlewares:
       - "*"
     allow_headers:
       - "*"
+auth_required: True

@@ -9,12 +9,11 @@ from fastapi import Depends, FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
-from hydra.utils import instantiate
+from hydra.utils import instantiate, call
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
 from starlette.requests import HTTPConnection, Request
-from starlette.middleware.authentication import AuthenticationMiddleware
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
@@ -194,26 +193,11 @@ def start(cfg: DictConfig) -> None:
     :return: None
     """
     # Connect to the running Ray cluster, or run as single node
-    ray.init(
-        address=cfg.ray.address,
-        namespace="serve",
-        num_cpus=cfg.ray.num_cpus,
-        object_store_memory=cfg.ray.object_store_memory,
-    )
-    middlewares = instantiate(cfg.Middlewares)
-    # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
-    serve.start(
-        detached=cfg.ray.detached,
-        http_options={"host": "0.0.0.0", "location": "EveryNode", **middlewares},
-    )
+    call(cfg.ray.init)
+    call(cfg.ray.serve)
 
-    if any(m.cls is AuthenticationMiddleware for m in middlewares["middlewares"]):
-        auth_required = True
-    else:
-        auth_required = False
-
-    KazuWebApp.deploy(cfg, auth_required=auth_required)
-    if not cfg.ray.detached:
+    KazuWebApp.deploy(cfg, auth_required=cfg.ray.auth_required)
+    if not cfg.ray.serve.detached:
         while True:
             logger.info(serve.list_deployments())
             time.sleep(600)
