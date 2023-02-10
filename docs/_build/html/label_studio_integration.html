@@ -345,8 +345,7 @@ against your own data, as well as testing custom components.</p>
 <p>Our recommended workflow is as follows:</p>
 <ol class="arabic">
 <li><p>pre-annotate your documents with Kazu</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hydra</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hydra</span>
 <span class="kn">from</span> <span class="nn">hydra.utils</span> <span class="kn">import</span> <span class="n">instantiate</span>
 <span class="kn">from</span> <span class="nn">omegaconf</span> <span class="kn">import</span> <span class="n">DictConfig</span>
 <span class="kn">from</span> <span class="nn">kazu.utils.constants</span> <span class="kn">import</span> <span class="n">HYDRA_VERSION_BASE</span>
@@ -365,12 +364,13 @@ against your own data, as well as testing custom components.</p>
     <span class="n">run_docs</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
 </li>
 <li><p>load your annotations into Label Studio</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="n">LabelStudioManager</span><span class="p">,</span> <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span> \
-    <span class="n">LabelStudioAnnotationView</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LabelStudioManager</span><span class="p">,</span>
+    <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span>
+    <span class="n">LabelStudioAnnotationView</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="c1"># convert to LS Tasks</span>
 <span class="n">tasks</span> <span class="o">=</span> <span class="n">KazuToLabelStudioConverter</span><span class="o">.</span><span class="n">convert_docs_to_tasks</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
@@ -391,39 +391,39 @@ against your own data, as well as testing custom components.</p>
     <span class="p">}</span>
 <span class="p">)</span>
 
-<span class="c1">#if running locally...</span>
-<span class="n">label_studio_url_and_port</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:8080&#39;</span>
+<span class="c1"># if running locally...</span>
+<span class="n">label_studio_url_and_port</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:8080&quot;</span>
 <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token &lt;your token here&gt;&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">manager</span> <span class="o">=</span> <span class="n">LabelStudioManager</span><span class="p">(</span>
-    <span class="n">project_name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">label_studio_url_and_port</span>
+    <span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">label_studio_url_and_port</span>
 <span class="p">)</span>
-<span class="n">manager</span><span class="o">.</span><span class="n">create_linking_project</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span><span class="n">view</span><span class="p">)</span>
+<span class="n">manager</span><span class="o">.</span><span class="n">create_linking_project</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
 </li>
 <li><p>view/correct annotations in label studio. Once you’re finished, you can export back to Kazu Documents as follows:</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="n">LabelStudioManager</span><span class="p">,</span> <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span> \
-    <span class="n">LabelStudioAnnotationView</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kazu.modelling.annotation.label_studio</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LabelStudioManager</span><span class="p">,</span>
+    <span class="n">KazuToLabelStudioConverter</span><span class="p">,</span>
+    <span class="n">LabelStudioAnnotationView</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">kazu.data.data</span> <span class="kn">import</span> <span class="n">Document</span>
 
-<span class="n">label_studio_url_and_port</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:8080&#39;</span>
+<span class="n">label_studio_url_and_port</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:8080&quot;</span>
 <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token &lt;your token here&gt;&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">manager</span> <span class="o">=</span> <span class="n">LabelStudioManager</span><span class="p">(</span>
-    <span class="n">project_name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">label_studio_url_and_port</span>
+    <span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">label_studio_url_and_port</span>
 <span class="p">)</span>
 
-<span class="n">docs</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">export_from_ls</span><span class="p">()</span>
+<span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">export_from_ls</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
 </li>
 <li><p>Your ‘gold standard’ entities will now be accessible on the <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Section.metadata" title="kazu.data.data.Section.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.Section.metadata</span></code></a> dictionary with the key: ‘gold_entities’</p></li>
 </ol>
