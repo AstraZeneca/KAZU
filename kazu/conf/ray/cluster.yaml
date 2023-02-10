@@ -6,4 +6,3 @@ ray:
   detached: True
   num_cpus: None
   object_store_memory: None
-

@@ -194,7 +194,12 @@ def start(cfg: DictConfig) -> None:
     :return: None
     """
     # Connect to the running Ray cluster, or run as single node
-    ray.init(address=cfg.ray.address, namespace="serve", num_cpus=cfg.ray.num_cpus, object_store_memory=cfg.ray.object_store_memory)
+    ray.init(
+        address=cfg.ray.address,
+        namespace="serve",
+        num_cpus=cfg.ray.num_cpus,
+        object_store_memory=cfg.ray.object_store_memory,
+    )
     middlewares = instantiate(cfg.Middlewares)
     # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
     serve.start(
