@@ -1,16 +1,7 @@
+defaults:
+  - local
+
 init:
-  _target_: ray.init
   address: "auto"
-  namespace: serve
-  num_cpus: ~
-  object_store_memory: ~
 serve:
-  _convert_: all # http_options needs to be a dictionary, not a DictConfig
-  _target_: ray.serve.api.start
   detached: True
-  http_options:
-    # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
-    host: 0.0.0.0
-    port: 8000
-    location: EveryNode
-    middlewares: ${Middlewares.middlewares}
