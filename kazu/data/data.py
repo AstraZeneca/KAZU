@@ -454,7 +454,8 @@ class Document:
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
-        """Create an instance of document from a text string.
+        """
+        Create an instance of :py:class:`.Document` from a text string.
 
         :param text:
         :return:
