@@ -6,7 +6,7 @@ Installation
 
 .. code-block:: console
 
-   pip install kazu
+   $ pip install kazu
 
 Python version 3.9 or higher is required (tested with Python 3.9).
 
