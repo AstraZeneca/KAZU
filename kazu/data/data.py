@@ -454,8 +454,7 @@ class Document:
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
-        """
-        create an instance of document from a text string. The idx field will be generated from uuid.uuid4().hex
+        """Create an instance of document from a text string.
 
         :param text:
         :return:
