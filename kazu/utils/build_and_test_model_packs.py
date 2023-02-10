@@ -6,7 +6,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Tuple, List, Optional, Set, Dict
+from typing import List, Optional
 
 from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
@@ -23,7 +23,7 @@ from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
-EXPLOSION_WHITELIST_PATH = Path("ontologies/curations/explosion_whitelist.jsonl")
+CURATIONS_PATH = Path("curations.json")
 
 
 @dataclass
@@ -36,8 +36,6 @@ class BuildConfiguration:
     requires_base_config: bool
     #: what model directories should this model pack include from the base model pack?
     models: List[str]
-    #: what entity classes should this model pack use from the curated list in the base model pack?
-    curations: Set[str]
     #: what ontologies should this model pack use from the base ontology pack?
     #: Arg should be a list of strings to the ontology root, from the root of the base pack
     ontologies: List[str]
@@ -54,8 +52,7 @@ class BuildConfiguration:
     requires_base_model_pack: bool = field(init=False)
 
     def __post_init__(self):
-        self.curations = set(self.curations)
-        if len(self.models) > 0 or len(self.ontologies) > 0 or len(self.curations) > 0:
+        if len(self.models) > 0 or len(self.ontologies) > 0:
             self.requires_base_model_pack = True
         else:
             self.requires_base_model_pack = False
@@ -82,46 +79,6 @@ class ModelPackBuilder:
         with open(config_path, "r") as f:
             data = json.load(f)
         return BuildConfiguration(**data)
-
-    @staticmethod
-    def resolve_curations(
-        base_model_pack_path: Path,
-        target_model_pack_path: Path,
-        merge_config: BuildConfiguration,
-    ) -> List[Dict]:
-        """
-        load curations from the base model pack based upon the required entity classes specified
-        in the :class:`.BuildConfiguration`\\, then load any additional ones from the target
-        model pack path. Finally, merge the two lists, warning on any inconsistencies that occur
-
-        :param base_model_pack_path:
-        :param target_model_pack_path:
-        :param merge_config:
-        :return:
-        """
-
-        base_curations = ModelPackBuilder.load_curations(
-            base_model_pack_path, merge_config.curations
-        )
-        build_curations = ModelPackBuilder.load_curations(target_model_pack_path, None)
-        for k, v in base_curations.items():
-            equivalent_build_curation = build_curations.get(k)
-            if equivalent_build_curation is not None:
-                if (
-                    v["action"] != equivalent_build_curation["action"]
-                    and equivalent_build_curation["action"] == "keep"
-                ):
-                    logger.warning(
-                        f"previously dropped term is now being kept: {equivalent_build_curation}"
-                    )
-                if v["case_sensitive"] and not equivalent_build_curation["case_sensitive"]:
-                    logger.warning(
-                        f"case sensitivity is now less strict for {equivalent_build_curation}"
-                    )
-            else:
-                build_curations[k] = v
-
-        return list(build_curations.values())
 
     @staticmethod
     def apply_merge_configurations(
@@ -164,20 +121,6 @@ class ModelPackBuilder:
             ModelPackBuilder.copy_base_model_pack_resources_to_target(
                 build_config, maybe_base_model_pack_path, model_pack_build_path
             )
-            curations = ModelPackBuilder.resolve_curations(
-                maybe_base_model_pack_path, uncached_model_pack_path, build_config
-            )
-        else:
-            curations = list(
-                ModelPackBuilder.load_curations(uncached_model_pack_path, None).values()
-            )
-
-        if len(curations) > 0:
-            curations_dir = model_pack_build_path.joinpath(EXPLOSION_WHITELIST_PATH.parent)
-            curations_dir.mkdir(parents=True, exist_ok=True)
-            with open(curations_dir.joinpath(EXPLOSION_WHITELIST_PATH.name), "w") as f:
-                for curation in curations:
-                    f.write(json.dumps(curation) + "\n")
 
     @staticmethod
     def copy_base_model_pack_resources_to_target(
@@ -196,31 +139,6 @@ class ModelPackBuilder:
                 shutil.copytree(str(ontology_path), str(target_path), dirs_exist_ok=True)
             else:
                 shutil.copy(ontology_path, target_path)
-
-    @staticmethod
-    def load_curations(
-        model_pack_path: Path, ent_class_filter: Optional[Set[str]]
-    ) -> Dict[Tuple[str, str], Dict]:
-        """
-        load curations indexed by term and entity class
-
-        :param model_pack_path:  path to root of model pack
-        :param ent_class_filter: only return curations in this set of entity classes. If None, return all
-        :return:
-        """
-        curations: Dict[Tuple[str, str], Dict] = {}
-        target_path = model_pack_path.joinpath(EXPLOSION_WHITELIST_PATH)
-        if not target_path.exists():
-            logger.info(f"no curations found at {str(target_path)}")
-            return curations
-
-        with open(target_path) as f:
-            for line in f:
-                item: Dict = json.loads(line)
-                if ent_class_filter is None or item["entity_class"] in ent_class_filter:
-                    curations[(item["term"], item["entity_class"])] = item
-
-        return curations
 
     @staticmethod
     def clear_cached_resources_from_model_pack_dir(model_pack_path: Path):
@@ -404,8 +322,8 @@ how it is called, one or more of the following may be required:
  a) configurations for a pipeline to be created
  b) a LabelStudioManager configuration to run acceptance tests or consistency checks, pointing to a running
   and network-accessible instance of LabelStudio
-2) an explosion_whitelist.jsonl in the path <model_pack_root>/ontologies/curations/explosion_whitelist.jsonl
-  in order for an ExplosionStringMatchingStep to be created
+2) a curations.json in the path <model_pack_root>/curations.json to describe how the parsers should behave and
+   how to create the Explosion string matching pipeline
 3) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order for the
   acceptance tests to run. This file should specify the thresholds per NER class/Ontology for NER/linking
   respectively (see the provided model pack for an example)
