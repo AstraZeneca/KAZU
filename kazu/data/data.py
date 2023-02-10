@@ -703,6 +703,8 @@ class Curation:
     parser_actions: List[ParserAction]
     case_sensitive: bool
     curated_synonym: Optional[str] = None
+    # MongoDB compatible identifier for this curation
+    _id: Dict[str, str] = field(default_factory=dict)
     # parser specific behaviours
     _parser_name_to_behaviour: DefaultDict[str, List[ParserBehaviourIdandIndex]] = field(
         default_factory=lambda: defaultdict(list)
