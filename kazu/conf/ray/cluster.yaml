@@ -4,3 +4,6 @@ ray:
   serve:
     port: 8000
   detached: True
+  num_cpus: None
+  object_store_memory: None
+
