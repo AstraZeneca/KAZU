@@ -6,10 +6,9 @@ chembl_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
   entity_class: 'drug'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 mondo_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
@@ -18,15 +17,10 @@ mondo_parser:
   data_origin: 'MONDO-2022-07-29'
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
-  excluded_ids:
-    _target_: builtins.set
-    _args_:
-      - - http://purl.obolibrary.org/obo/HP_0000001
   entity_class: 'disease'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 ot_disease_parser:
   name: "OPENTARGETS_DISEASE"
@@ -36,10 +30,9 @@ ot_disease_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'disease'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 ot_molecule_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
@@ -49,10 +42,9 @@ ot_molecule_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.chemical}
   entity_class: 'drug'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 ot_target_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
@@ -62,10 +54,9 @@ ot_target_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.gene}
   entity_class: 'gene'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 hgnc_gene_family_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.HGNCGeneFamilyParser
@@ -76,6 +67,9 @@ hgnc_gene_family_parser:
   synonym_generator: ${SynonymGeneration.gene}
   # needs to be gene to pick up mis-recognised gene families by the transformers model
   entity_class: 'gene'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 uberon_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
@@ -85,10 +79,9 @@ uberon_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'anatomy'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 cellosaurus_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
@@ -97,10 +90,9 @@ cellosaurus_parser:
   data_origin: 'CELLOSAURUS'
   string_scorer: ${SapbertStringSimilarityScorer}
   entity_class: 'cell_line'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 clo_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CLOOntologyParser
@@ -109,10 +101,9 @@ clo_parser:
   data_origin: 'CLO'
   string_scorer: ${SapbertStringSimilarityScorer}
   entity_class: 'cell_type'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 go_bp_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
@@ -122,10 +113,9 @@ go_bp_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_bp'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 go_mf_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
@@ -135,10 +125,9 @@ go_mf_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_mf'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 go_cc_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
@@ -148,10 +137,9 @@ go_cc_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'go_cc'
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
 
 cl_parser:
   _target_: kazu.modelling.ontology_preprocessing.base.CLOntologyParser
@@ -161,11 +149,6 @@ cl_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'cell_type'
-  excluded_ids:
-    _target_: builtins.set
-    _args_:
-      - - http://purl.obolibrary.org/obo/CL_0000000
-  additional_synonyms:
-    _target_: kazu.modelling.ontology_preprocessing.base.get_curated_terms_for_parser
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/curations/explosion_whitelist.jsonl
-    parser_name: ${..name}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
