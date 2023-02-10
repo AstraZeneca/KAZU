@@ -1,8 +1,6 @@
-# @package _global_
-ray:
-  address: "auto"
-  serve:
-    port: 8000
-  detached: True
-  num_cpus: ~
-  object_store_memory: ~
+address: "auto"
+serve:
+  port: 8000
+detached: True
+num_cpus: ~
+object_store_memory: ~
