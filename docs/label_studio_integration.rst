@@ -11,7 +11,7 @@ Our recommended workflow is as follows:
 
    .. include:: pipeline_example.rst
 
-3) load your annotations into Label Studio
+2) load your annotations into Label Studio
 
    .. code-block:: python
 
@@ -48,7 +48,7 @@ Our recommended workflow is as follows:
         )
         manager.create_linking_project(tasks,view)
 
-4) view/correct annotations in label studio. Once you're finished, you can export back to Kazu Documents as follows:
+2) view/correct annotations in label studio. Once you're finished, you can export back to Kazu Documents as follows:
    
    .. code-block:: python
 
@@ -67,7 +67,7 @@ Our recommended workflow is as follows:
 
         docs:List[Document] = manager.export_from_ls()
 
-5) Your 'gold standard' entities will now be accessible on the :attr:`kazu.data.data.Section.metadata` dictionary with the key: 'gold_entities'
+4) Your 'gold standard' entities will now be accessible on the :attr:`kazu.data.data.Section.metadata` dictionary with the key: 'gold_entities'
 
 
 For an example of how we integrate label studio into the Kazu acceptance tests, take a look at :func:`kazu.modelling.annotation.acceptance_test.analyse_full_pipeline`
