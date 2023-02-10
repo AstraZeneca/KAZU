@@ -158,7 +158,7 @@ class SynonymDatabase(metaclass=Singleton):
         """
         result = DBModificationResult.NO_ACTION
         set_of_associated_id_set = self.get_associated_id_sets_for_id(name, idx)
-        for term in self._syns_database_by_syn[name].values():
+        for term in list(self._syns_database_by_syn[name].values()):
             if term.associated_id_sets in set_of_associated_id_set:
                 new_assoc_id_set = set()
                 for equiv_id_set in term.associated_id_sets:
