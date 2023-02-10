@@ -316,43 +316,44 @@ class OntologyParser(ABC):
             f"{self.name} attempting to create synonym term for {curated_synonym}, {id_set} "
         )
 
-        set_of_assoc_id_set = self.synonym_db.get_associated_id_set_for_id_set(self.name, id_set)
-        term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
-        if len(set_of_assoc_id_set) > 0:
-            # check term norm doesn't already exist, or if it does, has the same target Id set
-            try:
-                existing_synonym_term = self.synonym_db.get(self.name, term_norm)
-                if existing_synonym_term.associated_id_sets in set_of_assoc_id_set:
-                    logger.info(
-                        f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {existing_synonym_term.term_norm}"
-                        f"since this SynonymTerm has the same associated id set, no action is required. {existing_synonym_term.associated_id_sets}"
-                    )
-                    return existing_synonym_term
-                else:
-                    raise CurationException(
-                        f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and the "
-                        f"associated id set for this SynonymTerm is different to the one that Kazu is trying to "
-                        f"create. This can happen if the existing associated id set is ambiguous (i.e. composed of "
-                        f"two or more EquivalentIdSets), meaning in turn that {term_norm} refers to two or more "
-                        f"distinct concepts. Possible mitigations:\n"
-                        f"1) reflect the ambiguity of {term_norm} in the curation, by adding additional ID's to"
-                        f"the mapping action (e.g. {list(x.ids for x in existing_synonym_term.associated_id_sets)} "
-                        f"since this SynonymTerm has a different associated id set\n"
-                        f"2) use a ParserAction to drop the existing SynonymTerm from the database first.\n"
-                        f"3) Change the string normalizer function to generate unique term_norms\n"
-                        f"wanted one of : {set_of_assoc_id_set}\n"
-                        f"found ID set: {existing_synonym_term.associated_id_sets}\n"
-                    )
-            except KeyError:
-                logger.info(f"no term_norm found for {term_norm}. A new entry will be created")
-
-        # check target id's exist
-
         for idx in id_set:
             if len(self.synonym_db.get_associated_id_sets_for_id(self.name, idx)) == 0:
                 raise CurationException(
                     f"{log_prefix} but could not find an element of id_set {id_set} in synonym database"
                 )
+
+        set_of_assoc_id_set = self.synonym_db.get_associated_id_set_for_id_set(self.name, id_set)
+        term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
+        try:
+            maybe_existing_synonym_term = self.synonym_db.get(self.name, term_norm)
+        except KeyError:
+            maybe_existing_synonym_term = None
+
+        if maybe_existing_synonym_term is not None:
+            # if term already exists, does it have same target Id set
+            if maybe_existing_synonym_term.associated_id_sets in set_of_assoc_id_set:
+                logger.info(
+                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {maybe_existing_synonym_term.term_norm}"
+                    f"since this SynonymTerm has the same associated id set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
+                )
+                return maybe_existing_synonym_term
+            else:
+                raise CurationException(
+                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and no\n"
+                    f"existing AssociatedIdSet matches the id's specified in the curation. Creating a new\n"
+                    f"SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
+                    f"This can happen if a synonym appears twice in the underlying ontology,\n"
+                    f"with multiple identifiers attached\n"
+                    f"Possible mitigations:\n"
+                    f"1) use a ParserAction to drop the existing SynonymTerm from the database first.\n"
+                    f"2) change the target id set of the curation to match the existing entry\n"
+                    f"\t(i.e. {list(x.ids for x in maybe_existing_synonym_term.associated_id_sets)}\n"
+                    f"3) Change the string normalizer function to generate unique term_norms\n"
+                    f"wanted one of : {set_of_assoc_id_set}\n"
+                    f"found ID set: {maybe_existing_synonym_term.associated_id_sets}\n"
+                )
+        else:
+            logger.info(f"no term_norm found for {term_norm}. A new entry will be created")
 
         is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
         new_term = SynonymTerm(
@@ -360,7 +361,9 @@ class OntologyParser(ABC):
             terms=frozenset([curated_synonym]),
             is_symbolic=is_symbolic,
             mapping_types=frozenset(("kazu_curated",)),
-            associated_id_sets=self._build_new_associated_id_set(id_set, set_of_assoc_id_set),
+            associated_id_sets=self._find_or_build_new_associated_id_set(
+                id_set, set_of_assoc_id_set
+            ),
             parser_name=self.name,
             aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
         )
@@ -368,11 +371,12 @@ class OntologyParser(ABC):
         logger.info(f"{new_term} created")
         return new_term
 
-    def _build_new_associated_id_set(
+    def _find_or_build_new_associated_id_set(
         self, id_set: Set[Idx], set_of_assoc_id_set: Set[AssociatedIdSet]
     ) -> AssociatedIdSet:
         """
-        return the smallest AssociatedIdSet that matches all ids in the id_set
+        return the smallest AssociatedIdSet in set_of_assoc_id_set that matches all ids in the id_set
+        if none is found, create a new one
 
 
         :param name:
