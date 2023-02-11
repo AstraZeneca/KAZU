@@ -313,30 +313,3 @@ class SynonymDatabase(metaclass=Singleton):
 
     def get_associated_id_sets_for_id(self, name: ParserName, idx: Idx) -> Set[AssociatedIdSet]:
         return self._associated_id_sets_by_id[name][idx]
-
-    def get_associated_id_set_for_id_set(
-        self, name: ParserName, id_set: Set[Idx]
-    ) -> Set[AssociatedIdSet]:
-        """
-        return all AssociatedIdSets that contain a set of IDs
-
-
-        :param name:
-        :param id_set:
-        :return:
-        """
-
-        matched_assoc_id_set = set()
-        set_of_assoc_id_set = set()
-
-        for idx in id_set:
-            set_of_assoc_id_set.update(self.get_associated_id_sets_for_id(name, idx))
-
-        for assoc_id_set in sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False):
-            ids_this_assoc_id_set = set()
-            for equiv_id_set in assoc_id_set:
-                ids_this_assoc_id_set.update(equiv_id_set.ids)
-            if id_set.issubset(ids_this_assoc_id_set):
-                matched_assoc_id_set.add(assoc_id_set)
-
-        return matched_assoc_id_set
