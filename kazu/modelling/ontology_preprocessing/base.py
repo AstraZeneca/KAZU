@@ -331,14 +331,15 @@ class OntologyParser(ABC):
         set_of_assoc_id_set = set()
 
         for idx in id_set:
-            try:
-                set_of_assoc_id_set.update(
-                    self.synonym_db.get_associated_id_sets_for_id(self.name, idx)
-                )
-            except KeyError:
+            assoc_id_sets_for_this_id = self.synonym_db.get_associated_id_sets_for_id(
+                self.name, idx
+            )
+            if len(assoc_id_sets_for_this_id) == 0:
                 raise CurationException(
                     f"{log_prefix} but could not find an element of id_set {id_set} in synonym database"
                 )
+            set_of_assoc_id_set.update(assoc_id_sets_for_this_id)
+
         for assoc_id_set in sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False):
             ids_this_assoc_id_set = set()
             for equiv_id_set in assoc_id_set:
