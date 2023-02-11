@@ -14,7 +14,7 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
-from kazu.data.data import SynonymTerm, CuratedTerm
+from kazu.data.data import SynonymTerm, Curation
 from kazu.modelling.ontology_preprocessing.base import OntologyParser, load_curated_terms
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
@@ -135,8 +135,8 @@ class OntologyMatcher:
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
     def _match_curations_to_ontology_terms(
-        self, parsers: List[OntologyParser], curations: List[CuratedTerm]
-    ) -> List[CuratedTerm]:
+        self, parsers: List[OntologyParser], curations: List[Curation]
+    ) -> List[Curation]:
 
         case_sensitive: DefaultDict[str, DefaultDict[str, Set[SynonymTerm]]] = defaultdict(
             lambda: defaultdict(set)
