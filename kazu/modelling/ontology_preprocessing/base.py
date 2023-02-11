@@ -33,13 +33,11 @@ from kazu.data.data import (
     ParserBehaviour,
     Behaviour,
     NerAction,
-    AssociatedIdSet,
 )
 from kazu.modelling.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
     DBModificationResult,
-    Idx,
 )
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
@@ -312,32 +310,64 @@ class OntologyParser(ABC):
     def _attempt_to_add_database_entry_for_curation(
         self, id_set: Set[str], curated_synonym: str
     ) -> SynonymTerm:
-        log_prefix = (
-            f"{self.name} attempting to create synonym term for {curated_synonym}, {id_set} "
-        )
+        """
+        for a given set of ID's and a curated synonym String, insert a new SynonymTerm
+        into the database. If an appropriate one already exists, return that one instead
+
+
+        :param id_set:
+        :param curated_synonym:
+        :return:
+        """
+
+        term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
+        log_prefix = f"{self.name} attempting to create synonym term for <{curated_synonym}> term_norm: <{term_norm}> IDs: {id_set} "
+
+        # first, find all associated id sets that contain the ID's we're trying to map.
+        # we need these to check any existing term in the database has an appropriate AssociatedIdSet
+        # Since a given ID can exist in multiple EquivalentIdSets, and multiple AssociatedIdSets
+        # we need to execute a series of set operations to do this
+        matched_assoc_id_set = set()
+        set_of_assoc_id_set = set()
 
         for idx in id_set:
-            if len(self.synonym_db.get_associated_id_sets_for_id(self.name, idx)) == 0:
+            try:
+                set_of_assoc_id_set.update(
+                    self.synonym_db.get_associated_id_sets_for_id(self.name, idx)
+                )
+            except KeyError:
                 raise CurationException(
                     f"{log_prefix} but could not find an element of id_set {id_set} in synonym database"
                 )
+        for assoc_id_set in sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False):
+            ids_this_assoc_id_set = set()
+            for equiv_id_set in assoc_id_set:
+                ids_this_assoc_id_set.update(equiv_id_set.ids)
+            if id_set.issubset(ids_this_assoc_id_set):
+                matched_assoc_id_set.add(assoc_id_set)
 
-        set_of_assoc_id_set = self.synonym_db.get_associated_id_set_for_id_set(self.name, id_set)
-        term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
+        # now look up the term norm in the db
         try:
             maybe_existing_synonym_term = self.synonym_db.get(self.name, term_norm)
         except KeyError:
             maybe_existing_synonym_term = None
 
         if maybe_existing_synonym_term is not None:
-            # if term already exists, does it have same target Id set
-            if maybe_existing_synonym_term.associated_id_sets in set_of_assoc_id_set:
+            # if term already exists, does it's AssociatedIdSet match one of the ones we found for the target ids?
+            if maybe_existing_synonym_term.associated_id_sets in matched_assoc_id_set:
                 logger.info(
                     f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {maybe_existing_synonym_term.term_norm}"
                     f"since this SynonymTerm has the same associated id set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
                 )
                 return maybe_existing_synonym_term
             else:
+                if len(matched_assoc_id_set) == 0:
+                    wanted_str = f"<no appropriate AssociatedIdSets exist for ids {id_set}>"
+                else:
+                    wanted_str = "\n".join(str(x) for x in matched_assoc_id_set)
+                found_str = "\n".join(
+                    str(x) for x in maybe_existing_synonym_term.associated_id_sets
+                )
                 raise CurationException(
                     f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and no\n"
                     f"existing AssociatedIdSet matches the id's specified in the curation. Creating a new\n"
@@ -349,47 +379,23 @@ class OntologyParser(ABC):
                     f"2) change the target id set of the curation to match the existing entry\n"
                     f"\t(i.e. {list(x.ids for x in maybe_existing_synonym_term.associated_id_sets)}\n"
                     f"3) Change the string normalizer function to generate unique term_norms\n"
-                    f"wanted one of : {set_of_assoc_id_set}\n"
-                    f"found ID set: {maybe_existing_synonym_term.associated_id_sets}\n"
+                    f"curated synonym: <{curated_synonym}> asked for one of:\n{wanted_str}\n\n"
+                    f"existing term synonyms: <{maybe_existing_synonym_term.terms}> has associated ID set:\n{found_str}\n"
                 )
         else:
             logger.info(f"no term_norm found for {term_norm}. A new entry will be created")
 
-        is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
-        new_term = SynonymTerm(
-            term_norm=term_norm,
-            terms=frozenset([curated_synonym]),
-            is_symbolic=is_symbolic,
-            mapping_types=frozenset(("kazu_curated",)),
-            associated_id_sets=self._find_or_build_new_associated_id_set(
-                id_set, set_of_assoc_id_set
-            ),
-            parser_name=self.name,
-            aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
-        )
-        self.synonym_db.add(self.name, synonyms=(new_term,))
-        logger.info(f"{new_term} created")
-        return new_term
-
-    def _find_or_build_new_associated_id_set(
-        self, id_set: Set[Idx], set_of_assoc_id_set: Set[AssociatedIdSet]
-    ) -> AssociatedIdSet:
-        """
-        return the smallest AssociatedIdSet in set_of_assoc_id_set that matches all ids in the id_set
-        if none is found, create a new one
-
-
-        :param name:
-        :param id_set:
-        :return:
-        """
-
-        if len(set_of_assoc_id_set) > 0:
-            smallest = sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False)[0]
-            return smallest
-        else:
-            # if no existing AssociatedIdSets sets are reusable, we must create a new one
-            return frozenset(
+        if len(matched_assoc_id_set) == 0:
+            # something to be careful about here: we assume that if no appropriate AssociatedIdSet can be
+            # reused, we need to create a new one. If one cannot be found, we 'assume' that the input
+            # id_sets must relate to different concepts (i.e. - we create a new equivalent ID set for each
+            # id, which must later be disambiguated. This assumption may be inappropriate in cases. This is
+            # best avoided by having the curation contain as few ID's as possible, such that the chances
+            # that an existing AssociatedIdSet can be reused are higher
+            logger.info(
+                f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
+            )
+            associated_id_set = frozenset(
                 [
                     EquivalentIdSet(
                         ids_and_source=frozenset(
@@ -404,6 +410,25 @@ class OntologyParser(ABC):
                     for idx in id_set
                 ]
             )
+        else:
+            associated_id_set = sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False)[0]
+            logger.info(
+                f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_set}"
+            )
+
+        is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
+        new_term = SynonymTerm(
+            term_norm=term_norm,
+            terms=frozenset([curated_synonym]),
+            is_symbolic=is_symbolic,
+            mapping_types=frozenset(("kazu_curated",)),
+            associated_id_sets=associated_id_set,
+            parser_name=self.name,
+            aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+        )
+        self.synonym_db.add(self.name, synonyms=(new_term,))
+        logger.info(f"{new_term} created")
+        return new_term
 
     def _attempt_to_modify_database_entry_for_curation(
         self, behaviour: ParserBehaviour, idx: str, curated_synonym: Optional[str]
