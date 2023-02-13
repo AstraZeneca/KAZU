@@ -88,9 +88,9 @@ Kazu includes elements under compatible licenses (full licenses are in relevant 
   including the full BSD 2-Clause license.
 - The AbbreviationFinderStep uses KazuAbbreviationDetector, which is a modified version of
   [SciSpacy](https://allenai.github.io/scispacy/)'s abbreviation finding algorithm, licensed under Apache 2.0 - see the files for full details.
-- The JWTAuthenticationBackend Starlette Middleware in jwtauth.py is originally from [starlette-jwt](https://raw.githubusercontent.com/amitripshtos/starlette-jwt/master/starlette_jwt/middleware.py), licensed under BSD 3-clause.
+- The JWTAuthenticationBackend Starlette Middleware in jwtauth.py is originally from [starlette-jwt](https://raw.githubusercontent.com/amitripshtos/starlette-jwt/master/starlette_jwt/middleware.py), licensed under BSD 3-Clause.
 - The AddRequestIdMiddleware Starlette Middleware in req_id_header.py is modified from 'CustomHeaderMiddleware' in the [Starlette Middleware docs](https://www.starlette.io/middleware/#basehttpmiddleware).
-  This is licensed under BSD 3 clause along with the rest of Starlette.
+  This is licensed under BSD 3-Clause along with the rest of Starlette.
 - The kazu-jvm folder includes files like gradelw and gradelw.bat distributed by gradle under Apache 2.0 - see the files for details.
 - [kazu/data/data.py](https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py) contains `AutoNameEnum`, which is `AutoName` from
   the [Python Enum Docs](https://docs.python.org/3/howto/enum.html#using-automatic-values) licensed under [Zero-Clause BSD](https://docs.python.org/3/license.html#zero-clause-bsd-license-for-code-in-the-python-release-documentation).
