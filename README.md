@@ -86,7 +86,7 @@ Kazu includes elements under compatible licenses (full licenses are in relevant 
 - PLSapbertModel is inspired by the code from [sapbert](https://github.com/cambridgeltl/sapbert), licensed under MIT. See the file for details, and see the [SapBert](#sapbert) section below regarding use of the model.
 - GildaUtils in the string_normalizer.py file is modified from [Gilda](https://github.com/indralab/gilda). See the file for full details
   including the full BSD 2-Clause license.
-- the AbbreviationFinderStep uses KazuAbbreviationDetector, which is a modified version of
+- The AbbreviationFinderStep uses KazuAbbreviationDetector, which is a modified version of
   [SciSpacy](https://allenai.github.io/scispacy/)'s abbreviation finding algorithm, licensed under Apache 2.0 - see the files for full details.
 - The JWTAuthenticationBackend Starlette Middleware in jwtauth.py is originally from [starlette-jwt](https://raw.githubusercontent.com/amitripshtos/starlette-jwt/master/starlette_jwt/middleware.py), licensed under BSD 3-clause.
 - The AddRequestIdMiddleware Starlette Middleware in req_id_header.py is modified from 'CustomHeaderMiddleware' in the [Starlette Middleware docs](https://www.starlette.io/middleware/#basehttpmiddleware).
