@@ -56,14 +56,17 @@ from pathlib import Path
 import os
 
 # the hydra config is kept in the model pack
-cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath('conf')
-@hydra.main(version_base=HYDRA_VERSION_BASE,config_path=str(cdir),config_name='config')
+cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("conf")
+
+
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path=str(cdir), config_name="config")
 def kazu_test(cfg):
     pipeline: Pipeline = instantiate(cfg.Pipeline)
     text = "EGFR mutations are often implicated in lung cancer"
     doc = Document.create_simple_document(text)
     pipeline([doc])
     print(f"{doc.get_entities()}")
+
 
 if __name__ == "__main__":
     kazu_test()

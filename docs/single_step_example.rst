@@ -10,12 +10,10 @@
         # start and end are the character indices for the entity
         start=0,
         end=len("Epidermal Growth Factor Receptor"),
-        namespace='example',
-        entity_class='gene',
+        namespace="example",
+        entity_class="gene",
         match="Epidermal Growth Factor Receptor",
     )
-
-
 
     # add it to the documents first (and only) section
     doc.sections[0].entities.append(entity)
@@ -25,8 +23,8 @@
     # a step may fail to process a document, so it returns two lists, all the docs, and just the failures
     processed, failed = step([doc])
     # check that a new entity has been created, attached to the EGFR span
-    egfr_entity = next(iter(filter(lambda x: x.match == 'EGFR', doc.get_entities())))
-    assert egfr_entity.entity_class =='gene'
+    egfr_entity = next(iter(filter(lambda x: x.match == "EGFR", doc.get_entities())))
+    assert egfr_entity.entity_class == "gene"
     print(egfr_entity.match)
 
 .. testoutput::
