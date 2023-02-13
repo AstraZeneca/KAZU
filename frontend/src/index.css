@@ -64,7 +64,7 @@ code {
 
 #textWidget {
     background-color: #fafafa;
-    grid-area: 3 / 1 / 4 / 14 ;
+    grid-area: 3 / 1 / 4 / 14;
     display: grid;
     grid-auto-rows: fit-content(100%);
     grid-template-columns: repeat(10, 1fr);
@@ -104,14 +104,16 @@ code {
 
 
 #textWidgetInput > button {
-  border-radius: 2px;
-  border: 2px solid #000000;
-  background-color: #fafafa;
-  max-width: 10%;
+    border-radius: 4px;
+    border: 2px solid #eaeaea;
+    background-color: rgb(68, 151, 246);
+    max-width: 10%;
     min-width: 80px;
     max-height: 70%;
     min-height: 40px;
     grid-area: 3 / 1 / 4 / 2;
+    color: #ffffff;
+    font-weight: bold;
 }
 
 .errorBox {
@@ -125,3 +127,11 @@ code {
 #jsonOutput {
     grid-area: 5 / 1 / 6 / 21;
 }
+
+#jsonOutput > button {
+    color: #202020;
+    border-radius: 4px;
+    border: 2px solid #dadada;
+    background-color: #eaeaea;
+}
+
