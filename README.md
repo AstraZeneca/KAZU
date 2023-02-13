@@ -65,7 +65,7 @@ def kazu_test(cfg):
     pipeline([doc])
     print(f"{doc.get_entities()}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     kazu_test()
 
 ```

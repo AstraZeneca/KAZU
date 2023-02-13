@@ -50,7 +50,7 @@ Processing your first document
         pipeline([doc])
         print(f"{doc.sections[0].text}")
 
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         kazu_test()
 
 
