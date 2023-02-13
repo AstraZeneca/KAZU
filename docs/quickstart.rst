@@ -54,6 +54,25 @@ Processing your first document
         kazu_test()
 
 
+.. This hidden block is needed because the above testcode block doesn't actually run kazu_test -
+   since __name__ is "builtins", not "__main__" when run by sphinx.ext.doctest.
+
+   In the below block, we have to use initialize_config_dir to provide the config to kazu_test,
+   otherwise Hydra uses argparse, which sphinx isn't expecting, so we get a strange looking error.
+
+.. testcode::
+    :skipif: kazu_model_pack_missing
+    :hide:
+
+    from hydra import initialize_config_dir, compose
+
+    with initialize_config_dir(
+            version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)
+        ):
+            cfg = compose(config_name="config")
+
+    kazu_test(cfg)
+
 .. testoutput::
     :hide:
     :skipif: kazu_model_pack_missing
