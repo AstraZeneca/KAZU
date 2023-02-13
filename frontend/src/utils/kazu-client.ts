@@ -72,8 +72,6 @@ class KazuClient implements IKazuClient {
                     parsedDocument: KazuClient.parseKazuResponse(kazuWebResponseJson),
                     rawDocument: kazuWebResponseJson.data
                 }
-            }).catch((e: JsonParseError) => {
-                return Promise.reject(e.message);
             })
     }
 
@@ -108,8 +106,6 @@ class KazuClient implements IKazuClient {
                     ls_tasks: lsTasks,
                     rawDocument: rawDocument
                 }
-            }).catch((e: JsonParseError) => {
-                return Promise.reject(e.message);
             })
     }
 }
