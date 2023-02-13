@@ -362,7 +362,7 @@
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.GildaUtils" title="kazu.utils.string_normalizer.GildaUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GildaUtils</span></code></a></p></td>
-<td><p>Original Credit: <a class="reference external" href="https://github.com/indralab/gilda">https://github.com/indralab/gilda</a> <a class="reference external" href="https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py">https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py</a></p></td>
+<td><p>Functions derived from <a class="reference external" href="https://github.com/indralab/gilda">gilda</a> used by (some of) the <a class="reference internal" href="#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringNormalizer</span></code></a>s.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StringNormalizer</span></code></a></p></td>
 <td><p>call custom entity class normalizers, or a default normalizer if none is available</p></td>
@@ -913,25 +913,36 @@ case</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GildaUtils">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">GildaUtils</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L465-L570"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.string_normalizer.</span></span><span class="sig-name descname"><span class="pre">GildaUtils</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L465-L602"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Original Credit:
-<a class="reference external" href="https://github.com/indralab/gilda">https://github.com/indralab/gilda</a>
-<a class="reference external" href="https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py">https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py</a></p>
-<dl class="simple">
-<dt>&#64;article{gyori2022gilda,</dt><dd><p>author = {Gyori, Benjamin M and Hoyt, Charles Tapley and Steppi, Albert},
-title = “{{Gilda: biomedical entity text normalization with machine-learned disambiguation as a service}}”,
-journal = {Bioinformatics Advances},
-year = {2022},
-month = {05},
-issn = {2635-0041},
-doi = {10.1093/bioadv/vbac034},
-url = {<a class="reference external" href="https://doi.org/10.1093/bioadv/vbac034">https://doi.org/10.1093/bioadv/vbac034</a>},
-note = {vbac034}</p>
-</dd>
-</dl>
-<p>}</p>
-<p>BSD 2-Clause License</p>
+<p>Functions derived from <a class="reference external" href="https://github.com/indralab/gilda">gilda</a> used by (some of) the <a class="reference internal" href="#kazu.utils.string_normalizer.StringNormalizer" title="kazu.utils.string_normalizer.StringNormalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringNormalizer</span></code></a>s.</p>
+<p>Original Credit:</p>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://github.com/indralab/gilda">https://github.com/indralab/gilda</a></div>
+<div class="line"><a class="reference external" href="https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py">https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py</a></div>
+</div>
+<p>Paper:</p>
+<p>Benjamin M Gyori, Charles Tapley Hoyt, and Albert Steppi. 2022.
+<a class="reference external" href="https://doi.org/10.1093/bioadv/vbac034">Gilda: biomedical entity text normalization with machine-learned disambiguation as a service.</a>
+Bioinformatics Advances. Vbac034.</p>
+<details>
+<summary>Bibtex Citation Details</summary><div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">gyori2022gilda</span><span class="p">,</span>
+<span class="w">    </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Gyori, Benjamin M and Hoyt, Charles Tapley and Steppi, Albert}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;{{Gilda: biomedical entity text normalization with machine-learned disambiguation as a service}}&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Bioinformatics Advances}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{05}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2635-0041}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1093/bioadv/vbac034}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1093/bioadv/vbac034}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{vbac034}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details><p>Licensed under BSD 2-Clause.</p>
+<p>Copyright (c) 2019, Benjamin M. Gyori, Harvard Medical School All rights reserved.</p>
+<details>
+<summary>Full License</summary><p>BSD 2-Clause License</p>
 <p>Copyright (c) 2019, Benjamin M. Gyori, Harvard Medical School
 All rights reserved.</p>
 <p>Redistribution and use in source and binary forms, with or without
@@ -953,9 +964,9 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
-<dl class="py method">
+</details><dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GildaUtils.depluralize">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L514-L557"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.depluralize" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L546-L589"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.depluralize" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the depluralized version of the word, along with a status flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -978,7 +989,7 @@ plural_cap_s (e.g., MAPKs), and plural_s (e.g., receptors).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.string_normalizer.GildaUtils.replace_dashes">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_dashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L559-L570"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.replace_dashes" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">replace_dashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/string_normalizer.py#L591-L602"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.string_normalizer.GildaUtils.replace_dashes" title="Permalink to this definition">#</a></dt>
 <dd><p>Replace all types of dashes in a given string with a given replacement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

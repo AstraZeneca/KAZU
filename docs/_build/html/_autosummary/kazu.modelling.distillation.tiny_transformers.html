@@ -339,30 +339,55 @@
         <article role="main">
           <section id="module-kazu.modelling.distillation.tiny_transformers">
 <span id="kazu-modelling-distillation-tiny-transformers"></span><h1>kazu.modelling.distillation.tiny_transformers<a class="headerlink" href="#module-kazu.modelling.distillation.tiny_transformers" title="Permalink to this heading">#</a></h1>
-<p>PyTorch BERT model.</p>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging" title="kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TinyBertForSequenceTagging</span></code></a></p></td>
-<td><p></p></td>
+<td><p>PyTorch BERT model for sequence tagging.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.tiny_transformers.</span></span><span class="sig-name descname"><span class="pre">TinyBertForSequenceTagging</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/tiny_transformers.py#L23-L59"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.tiny_transformers.</span></span><span class="sig-name descname"><span class="pre">TinyBertForSequenceTagging</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/tiny_transformers.py#L6-L82"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BertPreTrainedModel</span></code></p>
-<dl class="py method">
+<p>PyTorch BERT model for sequence tagging.</p>
+<p>Based off <a class="reference external" href="https://github.com/huawei-noah/Pretrained-Language-Model/tree/master/TinyBERT">TinyBERT from Huawei Noah’s Ark Lab</a>
+- the <a class="reference external" href="https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT/transformer/modeling.py#L1119">TinyBertForSequenceClassification</a>
+class specifically.</p>
+<p>Modified for distillation using Pytorch Lightning by KAZU team.</p>
+<p>Originally Licensed under Apache 2.0</p>
+<div class="line-block">
+<div class="line">Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team., and KAZU Team</div>
+<div class="line">Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.</div>
+<div class="line">Copyright 2020 Huawei Technologies Co., Ltd</div>
+</div>
+<details>
+<summary>Full License Notice</summary><div class="line-block">
+<div class="line">Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team., and KAZU Team</div>
+<div class="line">Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.</div>
+<div class="line">Copyright 2020 Huawei Technologies Co., Ltd</div>
+</div>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</details><dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">768</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/tiny_transformers.py#L24-L35"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">768</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/tiny_transformers.py#L47-L58"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_type_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_student</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/tiny_transformers.py#L37-L59"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging.forward" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_type_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_student</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/tiny_transformers.py#L60-L82"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.tiny_transformers.TinyBertForSequenceTagging.forward" title="Permalink to this definition">#</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">

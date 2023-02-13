@@ -339,7 +339,50 @@
         <article role="main">
           <section id="module-kazu.utils.abbreviation_detector">
 <span id="kazu-utils-abbreviation-detector"></span><h1>kazu.utils.abbreviation_detector<a class="headerlink" href="#module-kazu.utils.abbreviation_detector" title="Permalink to this heading">#</a></h1>
-<p class="rubric">Functions</p>
+<p>Original Credit:</p>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://github.com/allenai/scispacy">https://github.com/allenai/scispacy</a></div>
+<div class="line"><a class="reference external" href="https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py">https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py</a></div>
+</div>
+<p>Licensed under Apache 2.0</p>
+<p>Copyright 2019 the Allen Institute for Artificial Intelligence (AI2)</p>
+<details>
+<summary>Full License Notice</summary><p>Copyright 2019 the Allen Institute for Artificial Intelligence (AI2)</p>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</details><p>Paper:</p>
+<p>Mark Neumann, Daniel King, Iz Beltagy, and Waleed Ammar. 2019.
+<a class="reference external" href="https://doi.org/10.18653/v1/W19-5034">ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing.</a>
+In Proceedings of the 18th BioNLP Workshop and Shared Task, pages 319–327 Florence, Italy.
+Association for Computational Linguistics.</p>
+<details>
+<summary>Bibtex Citation Details</summary><div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">neumann-etal-2019-scispacy</span><span class="p">,</span>
+<span class="w">    </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;{S}cispa{C}y: {F}ast and {R}obust {M}odels for {B}iomedical {N}atural {L}anguage {P}rocessing&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Neumann, Mark  and</span>
+<span class="s">    King, Daniel  and</span>
+<span class="s">    Beltagy, Iz  and</span>
+<span class="s">    Ammar, Waleed&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">booktitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Proceedings of the 18th BioNLP Workshop and Shared Task&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">aug</span><span class="p">,</span>
+<span class="w">    </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;2019&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">address</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Florence, Italy&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Association for Computational Linguistics&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;https://www.aclweb.org/anthology/W19-5034&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;10.18653/v1/W19-5034&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;319--327&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="na">eprint</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{arXiv:1902.07669}</span><span class="p">,</span>
+<span class="w">    </span><span class="na">abstract</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Despite recent advances in natural language processing, many statistical models for processing text perform extremely poorly under domain shift. Processing biomedical and clinical text is a critically important application area of natural language processing, for which there are few robust, practical, publicly available models. This paper describes scispaCy, a new Python library and models for practical biomedical/scientific text processing, which heavily leverages the spaCy library. We detail the performance of two packages of models released in scispaCy and demonstrate their robustness on several tasks and datasets. Models and code are available at https://allenai.github.io/scispacy/.&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details><p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -367,7 +410,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.abbreviation_detector.KazuAbbreviationDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">KazuAbbreviationDetector</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L174-L395"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.KazuAbbreviationDetector" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">KazuAbbreviationDetector</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L222-L443"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.KazuAbbreviationDetector" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Modified version of <a class="reference external" href="https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py">https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py</a></p>
 <p>see top of file for original implementation credit</p>
@@ -381,7 +424,7 @@ Note, however, that the abbreviation detection is always preferred, so if a long
 will always be chosen</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.abbreviation_detector.KazuAbbreviationDetector.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_abbrvs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L192-L209"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.KazuAbbreviationDetector.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_abbrvs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L240-L257"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.KazuAbbreviationDetector.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -401,7 +444,7 @@ entities are found</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.utils.abbreviation_detector.filter_matches">
-<span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">filter_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matcher_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L108-L149"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.filter_matches" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">filter_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matcher_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L156-L197"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.filter_matches" title="Permalink to this definition">#</a></dt>
 <dd><p>from <a class="reference external" href="https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py">https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -422,7 +465,7 @@ entities are found</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.utils.abbreviation_detector.find_abbreviation">
-<span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">find_abbreviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">long_form_candidate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_form_candidate</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L42-L105"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.find_abbreviation" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">find_abbreviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">long_form_candidate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_form_candidate</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L90-L153"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.find_abbreviation" title="Permalink to this definition">#</a></dt>
 <dd><p>from <a class="reference external" href="https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py">https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py</a></p>
 <p>Implements the abbreviation detection algorithm in “A simple algorithm
 for identifying abbreviation definitions in biomedical text.”, (Schwartz &amp; Hearst, 2003).
@@ -449,7 +492,7 @@ or None if a match is not found</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.utils.abbreviation_detector.short_form_filter">
-<span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">short_form_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L152-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.short_form_filter" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.abbreviation_detector.</span></span><span class="sig-name descname"><span class="pre">short_form_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/abbreviation_detector.py#L200-L219"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.abbreviation_detector.short_form_filter" title="Permalink to this definition">#</a></dt>
 <dd><p>from <a class="reference external" href="https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py">https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
