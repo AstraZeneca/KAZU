@@ -347,23 +347,22 @@
     <span class="c1"># start and end are the character indices for the entity</span>
     <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">end</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;Epidermal Growth Factor Receptor&quot;</span><span class="p">),</span>
-    <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
-    <span class="n">entity_class</span><span class="o">=</span><span class="s1">&#39;gene&#39;</span><span class="p">,</span>
+    <span class="n">namespace</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">,</span>
+    <span class="n">entity_class</span><span class="o">=</span><span class="s2">&quot;gene&quot;</span><span class="p">,</span>
     <span class="n">match</span><span class="o">=</span><span class="s2">&quot;Epidermal Growth Factor Receptor&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-
-
 
 <span class="c1"># add it to the documents first (and only) section</span>
 <span class="n">doc</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
 
 <span class="c1"># create an instance of the AbbreviationFinderStep</span>
 <span class="n">step</span> <span class="o">=</span> <span class="n">AbbreviationFinderStep</span><span class="p">()</span>
-<span class="c1"># a step may fail to process a document, so it returns two lists, all the docs, and just the failures</span>
+<span class="c1"># a step may fail to process a document, so it returns two lists:</span>
+<span class="c1"># all the docs, and just the failures</span>
 <span class="n">processed</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">step</span><span class="p">([</span><span class="n">doc</span><span class="p">])</span>
 <span class="c1"># check that a new entity has been created, attached to the EGFR span</span>
-<span class="n">egfr_entity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">match</span> <span class="o">==</span> <span class="s1">&#39;EGFR&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">get_entities</span><span class="p">())))</span>
-<span class="k">assert</span> <span class="n">egfr_entity</span><span class="o">.</span><span class="n">entity_class</span> <span class="o">==</span><span class="s1">&#39;gene&#39;</span>
+<span class="n">egfr_entity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;EGFR&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">get_entities</span><span class="p">()))</span>
+<span class="k">assert</span> <span class="n">egfr_entity</span><span class="o">.</span><span class="n">entity_class</span> <span class="o">==</span> <span class="s2">&quot;gene&quot;</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">egfr_entity</span><span class="o">.</span><span class="n">match</span><span class="p">)</span>
 </pre></div>
 </div>
