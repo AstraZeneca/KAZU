@@ -1,4 +1,4 @@
-# do envsubst on the to inject kazu API location into the app just before serving
+# do envsubst on the config to inject kazu API location into the app just before serving
 envsubst '\$KAZU_API_URL' < src/config.json > src/config.tmp.json
 cp src/config.tmp.json src/config.json
 
