@@ -1,37 +1,123 @@
 @import "https://unpkg.com/@heartexlabs/label-studio@latest/build/static/css/main.css";
+
+html {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    margin: 0;
+    min-height: 100%;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: grid;
+    grid-template-columns: 1fr [content-start] 8fr [content-end] 1fr;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
 
-
-#root, #textWidget {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: stretch;
-  align-content: stretch;
+#root {
+    grid-column-start: content-start;
+    grid-column-end: content-end;
 }
 
-#textWidget > textarea {
-  min-height: 150px;
-  min-width: 400px;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  background-color: #f8f8f8;
+.app-root {
+    min-width: 800px;
+    height: 100%;
+    background-color: #fafafa;
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    grid-auto-rows: fit-content(100%);
 }
 
-#textWidget > button {
-  max-height: 50px;
-  max-width: 100px;
+.app-title-text {
+    background-color: #fafafa;
+    grid-area: 1 / 1 / 3 / 21;
+    min-height: 10%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+.app-title-text > span {
+    font-size: 30px;
+}
+
+.kazu-blurb {
+    background-color: #fafafa;
+    grid-area: 3 / 14 / 4 / 21;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+#textWidget {
+    background-color: #fafafa;
+    grid-area: 3 / 1 / 4 / 14 ;
+    display: grid;
+    grid-auto-rows: fit-content(100%);
+    grid-template-columns: repeat(10, 1fr);
+}
+
+#textWidgetInput {
+    background-color: #fafafa;
+    grid-area: 1 / 1 / 2 / 11;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: fit-content(100%);
+}
+
+.text-input-area {
+    background-color: #fafafa;
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+.text-input-prompt {
+    background-color: #fafafa;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    font-size: 20px;
+}
+
+.text-input-prompt > span {
+    background-color: #fafafa;
+}
+
+.text-input-area > textarea {
+    background-color: #eaeaea;
+    min-height: 400px;
+    width: 98%;
+    border: #1a1c1e solid;
+    border-radius: 1px;
+}
+
+
+#textWidgetInput > button {
+  border-radius: 2px;
+  border: 2px solid #000000;
+  background-color: #fafafa;
+  max-width: 10%;
+    min-width: 80px;
+    max-height: 70%;
+    min-height: 40px;
+    grid-area: 3 / 1 / 4 / 2;
+}
+
+.errorBox {
+    grid-area: 2 / 1 / 3 / 11;
+}
+
+#label-studio {
+    grid-area: 4 / 1 / 5 / 21;
+}
+
+#jsonOutput {
+    grid-area: 5 / 1 / 6 / 21;
 }
