@@ -24,7 +24,7 @@
     # all the docs, and just the failures
     processed, failed = step([doc])
     # check that a new entity has been created, attached to the EGFR span
-    egfr_entity = next(iter(filter(lambda x: x.match == "EGFR", doc.get_entities())))
+    egfr_entity = next(filter(lambda x: x.match == "EGFR", doc.get_entities()))
     assert egfr_entity.entity_class == "gene"
     print(egfr_entity.match)
 
