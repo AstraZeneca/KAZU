@@ -27,10 +27,10 @@ class KazuClient implements IKazuClient {
     }
 
     private static parseKazuSection(kazuSection: any): Section {
-        const entitiesJson = "entities" in kazuSection? kazuSection["entities"] as Array<string> : [];
+        const entitiesJson = "entities" in kazuSection? kazuSection["entities"] as Array<object> : [];
         return {
             text: kazuSection["text"],
-            entities: R.map((entityJson: string) => KazuClient.parseKazuEntity(entityJson))(entitiesJson)
+            entities: R.map((entityJson: object) => KazuClient.parseKazuEntity(entityJson))(entitiesJson)
         }
     }
 
