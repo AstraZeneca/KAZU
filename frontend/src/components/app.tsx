@@ -25,7 +25,7 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     setKazuResponse(kazuResponse: KazuLSResponse) {
-        this.setState((state) => ({
+        this.setState((_) => ({
             text_ner_result: kazuResponse,
         }))
     }
