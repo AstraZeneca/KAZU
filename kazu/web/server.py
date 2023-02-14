@@ -174,7 +174,7 @@ class KazuWebApp:
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
     @app.post(f"/{KAZU}/ls-annotations")
-    def ls_annotations(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
+    def ls_annotations(self, doc: WebDocument, request: Request):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/ls-annotations endpoint")
         logger.info(id_log_prefix + "Document: %s", doc)
