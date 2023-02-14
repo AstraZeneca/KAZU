@@ -1387,7 +1387,7 @@ class CellosaurusOntologyParser(OntologyParser):
 class MeddraOntologyParser(OntologyParser):
     """
     input is an unzipped directory to a Meddra release (Note, requires licence). This
-    should contain the files 'mdhier.asc' and 'llt.asc'
+    should contain the files 'mdhier.asc' and 'llt.asc'.
     """
 
     def __init__(
