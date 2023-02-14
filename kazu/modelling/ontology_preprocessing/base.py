@@ -1390,6 +1390,37 @@ class MeddraOntologyParser(OntologyParser):
     should contain the files 'mdhier.asc' and 'llt.asc'
     """
 
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        excluded_ids: Optional[Set[str]] = None,
+        additional_synonyms: Optional[List[CuratedTerm]] = None,
+        exclude_socs: List[str] = [
+            "Surgical and medical procedures",
+            "Social circumstances",
+            "Investigations",
+        ],
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            excluded_ids=excluded_ids,
+            name=name,
+            additional_synonyms=additional_synonyms,
+        )
+
+        self.exclude_socs = exclude_socs
+
     _mdhier_asc_col_names = (
         "pt_code",
         "hlt_code",
@@ -1421,8 +1452,6 @@ class MeddraOntologyParser(OntologyParser):
         "NULL",
     )
 
-    _exclude_soc = ["Surgical and medical procedures", "Social circumstances", "Investigations"]
-
     def find_kb(self, string: str) -> str:
         return "MEDDRA"
 
@@ -1441,7 +1470,7 @@ class MeddraOntologyParser(OntologyParser):
             names=list_mdhier_names,
             dtype="string",
         )
-        hier_df = hier_df[~hier_df["soc_name"].isin(self._exclude_soc)]
+        hier_df = hier_df[~hier_df["soc_name"].isin(self.exclude_socs)]
 
         # as above
         list_llt_names = cast(List[str], self._llt_asc_column_names)
