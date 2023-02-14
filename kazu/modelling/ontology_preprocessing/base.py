@@ -1386,7 +1386,7 @@ class CellosaurusOntologyParser(OntologyParser):
 
 class MeddraOntologyParser(OntologyParser):
     """
-    input is an unzipped directory to a MEddra release (Note, requires licence). This
+    input is an unzipped directory to a Meddra release (Note, requires licence). This
     should contain the files 'mdhier.asc' and 'llt.asc'
     """
 
