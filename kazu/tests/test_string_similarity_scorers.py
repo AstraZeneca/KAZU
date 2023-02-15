@@ -107,7 +107,7 @@ def make_term_for_scorer_test(synonyms: Sequence[str]) -> SynonymTerm:
             (
                 EquivalentIdSet(
                     ids_and_source=frozenset(
-                        [
+                        (
                             (
                                 "1",
                                 "1",
@@ -120,7 +120,7 @@ def make_term_for_scorer_test(synonyms: Sequence[str]) -> SynonymTerm:
                                 "3",
                                 "3",
                             ),
-                        ]
+                        )
                     ),
                 ),
             )
