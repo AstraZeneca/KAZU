@@ -141,7 +141,7 @@ jobs:
           hatch publish --user $ARTIFACT_USERNAME --auth $ARTIFACT_TOKEN --repo $ARTIFACT_PYPI_URL
           export KAZU_BASE_CONF_ZIP="base-conf-"$(echo "${{ env.KAZU_RELEASE_VERSION }}")".zip"
           (cd kazu && zip -r ../${KAZU_BASE_CONF_ZIP} conf )
-          curl -u$ARTIFACT_USERNAME:$ARTIFACT_TOKEN  -T ${KAZU_BASE_CONF_ZIP} "${ARTIFACT_GENERIC_URL}${KAZU_BASE_CONF_ZIP}"
+          curl -u $ARTIFACT_USERNAME:$ARTIFACT_TOKEN  -T ${KAZU_BASE_CONF_ZIP} "${ARTIFACT_GENERIC_URL}${KAZU_BASE_CONF_ZIP}"
 
         env:
           ARTIFACT_USERNAME: ${{ secrets.ARTIFACT_USERNAME }}
