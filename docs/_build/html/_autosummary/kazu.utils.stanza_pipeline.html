@@ -187,7 +187,6 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
@@ -236,6 +235,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.entity_class_disambiguation.html">kazu.steps.linking.entity_class_disambiguation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -275,6 +275,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.constants.html">kazu.utils.constants</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
@@ -286,6 +287,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.ls_web_utils.html">kazu.web.ls_web_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.req_id_header.html">kazu.web.req_id_header</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -312,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.utils.stanza_pipeline.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/_autosummary/kazu.utils.stanza_pipeline.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -336,43 +339,19 @@
         <article role="main">
           <section id="module-kazu.utils.stanza_pipeline">
 <span id="kazu-utils-stanza-pipeline"></span><h1>kazu.utils.stanza_pipeline<a class="headerlink" href="#module-kazu.utils.stanza_pipeline" title="Permalink to this heading">#</a></h1>
-<p class="rubric">Classes</p>
+<p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.stanza_pipeline.StanzaPipeline" title="kazu.utils.stanza_pipeline.StanzaPipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StanzaPipeline</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.stanza_pipeline.simple_stanza_init" title="kazu.utils.stanza_pipeline.simple_stanza_init"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simple_stanza_init</span></code></a>(path, download, use_gpu)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.stanza_pipeline.StanzaPipeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.stanza_pipeline.</span></span><span class="sig-name descname"><span class="pre">StanzaPipeline</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/stanza_pipeline.py#L12-L45"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.stanza_pipeline.StanzaPipeline" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.stanza_pipeline.StanzaPipeline.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stanza_nlp</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/stanza_pipeline.py#L16-L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.stanza_pipeline.StanzaPipeline.__init__" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stanza_nlp</strong> (<em>Pipeline</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.stanza_pipeline.StanzaPipeline.from_stanza_kwargs">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_stanza_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/stanza_pipeline.py#L27-L30"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.stanza_pipeline.StanzaPipeline.from_stanza_kwargs" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#kazu.utils.stanza_pipeline.StanzaPipeline" title="kazu.utils.stanza_pipeline.StanzaPipeline"><em>StanzaPipeline</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.utils.stanza_pipeline.StanzaPipeline.simple_init">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simple_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_gpu</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/utils/stanza_pipeline.py#L32-L45"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.stanza_pipeline.StanzaPipeline.simple_init" title="Permalink to this definition">#</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="kazu.utils.stanza_pipeline.simple_stanza_init">
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.stanza_pipeline.</span></span><span class="sig-name descname"><span class="pre">simple_stanza_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_gpu</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/stanza_pipeline.py#L9-L21"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.stanza_pipeline.simple_stanza_init" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -382,16 +361,9 @@
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#kazu.utils.stanza_pipeline.StanzaPipeline" title="kazu.utils.stanza_pipeline.StanzaPipeline"><em>StanzaPipeline</em></a></p>
+<dd class="field-even"><p><em>Pipeline</em></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="kazu.utils.stanza_pipeline.StanzaPipeline.instance">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Pipeline</span></em><a class="headerlink" href="#kazu.utils.stanza_pipeline.StanzaPipeline.instance" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 </section>

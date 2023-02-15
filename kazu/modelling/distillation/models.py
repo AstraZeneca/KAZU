@@ -1,3 +1,41 @@
+"""Influenced by Huawei Noah's Ark Lab `TinyBERT <https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT>`_,
+but heavily modified structurally to fit in our PyTorch Lightning training setup.
+
+`This section of the TinyBERT code <https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT/task_distill.py#L789-L1081>`_
+in particular is relevant.
+
+Licensed under Apache 2.0
+
+| Copyright 2020 Huawei Technologies Co., Ltd.
+| Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team.
+| Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+
+.. raw:: html
+
+    <details>
+    <summary>Full License Notice</summary>
+
+| Copyright 2020 Huawei Technologies Co., Ltd.
+| Copyright 2018 The Google AI Language Team Authors, The HuggingFace Inc. team.
+| Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+.. raw:: html
+
+    </details>
+"""
+
 import logging
 from typing import List, Dict, Union, Tuple, Optional, Callable
 
@@ -24,7 +62,6 @@ from transformers import (
 )
 from transformers.utils import check_min_version
 
-from kazu.modelling.distillation.data_utils import to_unicode
 from kazu.modelling.distillation.dataprocessor import NerProcessor
 from kazu.modelling.distillation.metrics import numeric_label_f1_score, IGNORE_IDX
 from kazu.modelling.distillation.tiny_transformers import TinyBertForSequenceTagging
@@ -83,11 +120,11 @@ class NerDataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def convert_single_example(self, ex_index, example) -> Dict[str, List]:
+    def convert_single_example(self, ex_index, example: InputExample) -> Dict[str, List]:
         textlist = example.text_a.split()
         labellist = example.label.split()
-        tokens = []
-        labels = []
+        tokens: List[str] = []
+        labels: List[str] = []
         for i, word in enumerate(textlist):
             tokenized = self.tokenizer.tokenize(word)
             tokens.extend(tokenized)
@@ -98,9 +135,9 @@ class NerDataset(Dataset):
                 else:
                     labels.append("X")
 
-        ntokens = []
-        segment_ids = []
-        label_id = []
+        ntokens: List[str] = []
+        segment_ids: List[int] = []
+        label_id: List[int] = []
         ntokens.append("[CLS]")
         segment_ids.append(0)
         label_id.append(IGNORE_IDX)
@@ -132,12 +169,12 @@ class NerDataset(Dataset):
         if self.call_count < 4 and ex_index < 4:  # Examples. Executed only once per model run
             logger.info("*** Example ***")
             logger.info("guid: %s" % (example.guid))
-            logger.info("tokens: %s" % " ".join([to_unicode(x) for x in tokens]))
-            logger.info("ntokens: %s" % " ".join([to_unicode(x) for x in ntokens]))
-            logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-            logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
-            logger.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
-            logger.info("label_id: %s" % " ".join([str(x) for x in label_id]))
+            logger.info("tokens: %s" % " ".join(tokens))
+            logger.info("ntokens: %s" % " ".join(ntokens))
+            logger.info("input_ids: %s" % " ".join(str(x) for x in input_ids))
+            logger.info("input_mask: %s" % " ".join(str(x) for x in input_mask))
+            logger.info("segment_ids: %s" % " ".join(str(x) for x in segment_ids))
+            logger.info("label_id: %s" % " ".join(str(x) for x in label_id))
 
         result = {
             "labels": label_id,

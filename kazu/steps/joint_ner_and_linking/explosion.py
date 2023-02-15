@@ -92,10 +92,9 @@ class ExplosionStringMatchingStep(Step):
 
             # add sentence offsets
             if self.include_sentence_offsets:
-                sent_metadata = []
-                for sent in processed_text.sents:
-                    sent_metadata.append(CharSpan(sent.start_char, sent.end_char))
-                section.sentence_spans = sent_metadata
+                section.sentence_spans = (
+                    CharSpan(sent.start_char, sent.end_char) for sent in processed_text.sents
+                )
 
             # if one section of a doc fails after others have succeeded, this will leave failed docs
             # in a partially processed state. It's actually unclear to me whether this is desireable or not.

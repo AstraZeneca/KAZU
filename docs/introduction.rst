@@ -43,7 +43,7 @@ Kazu is:
 1) An attempt to wrap a curated set of the best open source BioNLP components from the community in a consistent and scalable fashion.
 2) Extensible, so that integrating new components should be relatively easy.
 3) Configurable - since a Kazu pipeline may have many steps, and each step might have a plethora of configuration options, we manage this complexity by using
-   `Hydra.cc <https://hydra.cc/docs/intro/>`_.
+   `Hydra <https://hydra.cc/docs/intro/>`_.
 4) In production! We're already using Kazu in live drug discovery/development projects, such as the `BIKG knowledge graph <https://www.biorxiv.org/content/10.1101/2021.10.28.466262v1.full>`_.
 5) Open source under a permissive Apache 2.0 license - including allowing commercial use.
 

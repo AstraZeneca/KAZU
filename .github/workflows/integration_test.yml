@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ hashFiles('setup.py') }}
+          key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
 
       - name: create venv and install dependencies
         run: |
@@ -38,7 +38,7 @@ jobs:
           python -m venv /tmp/kazu-env
           . /tmp/kazu-env/bin/activate
           python -m pip install --upgrade pip
-          pip install -e ."[dev,webserver]"  --cache-dir $PIP_CACHE_DIR
+          pip install -e ."[dev]"  --cache-dir $PIP_CACHE_DIR
 
 
       - name: Check precommit
@@ -58,12 +58,6 @@ jobs:
 #        with:
 #          arguments: test
 #          build-root-directory: kazu-jvm/
-
-      - name: Run Sphinx doctest
-        run: |
-          . /tmp/kazu-env/bin/activate
-          
-          make -C docs doctest          
 
       - name: Build model pack caches and test
         id: model_pack_cache_build
@@ -87,6 +81,10 @@ jobs:
           export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
           
           pytest
+          # run sphinx doctests
+          # this needs to be after the model pack build because they depend on the
+          # model pack being present for doctests that load the full pipeline.
+          make -C docs doctest
           
           # need to call twice, for NFS bug
           rm -r /tmp/kazu-env || true

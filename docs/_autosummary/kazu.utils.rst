@@ -30,6 +30,7 @@ kazu.utils
    kazu.utils.abbreviation_detector
    kazu.utils.build_and_test_model_packs
    kazu.utils.caching
+   kazu.utils.constants
    kazu.utils.grouping
    kazu.utils.link_index
    kazu.utils.spacy_pipeline

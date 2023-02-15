@@ -14,5 +14,5 @@ echo "running ray deployment"
 #RAY_SERVE_CONFIG="${RAY_SERVE_CONFIG:-local}"
 #echo "ray config set to ${RAY_SERVE_CONFIG}"
 export TOKENIZERS_PARALLELISM=false
-python -m kazu.web.server --config-path "/home/ray/kazu/conf" hydra.run.dir="." pipeline=web
+python -m kazu.web.server --config-path "/home/ray/kazu/conf" hydra.run.dir="."
 echo "ray deployment complete"

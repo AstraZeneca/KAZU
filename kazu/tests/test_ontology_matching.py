@@ -6,9 +6,13 @@ from typing import List, Optional, Dict, Any
 import pytest
 import spacy
 from spacy.lang.en import English
+from spacy.lang.en.punctuation import TOKENIZER_INFIXES
 
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy, CuratedTerm
-from kazu.modelling.ontology_matching.assemble_pipeline import main as assemble_pipeline
+from kazu.modelling.ontology_matching.assemble_pipeline import (
+    main as assemble_pipeline,
+    SPACY_DEFAULT_INFIXES,
+)
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.modelling.ontology_preprocessing.synonym_generation import (
@@ -406,3 +410,12 @@ def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
     assert len(matches) == match_len
     assert set(m.text for m in matches) == match_texts
     assert [m._.ontology_dict_ for m in matches] == match_ontology_dicts
+
+
+def test_no_spacy_tokenization_update():
+    # have this as a test rather than an assert because we don't want this to break things for our users -
+    # it doesn't really matter to them if the tokenization is a bit outdated relative to spacy, we just
+    # want to know as developers that we should look at updating.
+    assert set(TOKENIZER_INFIXES) == set(
+        SPACY_DEFAULT_INFIXES
+    ), "Our tokenization rules are outdated to spacy's"

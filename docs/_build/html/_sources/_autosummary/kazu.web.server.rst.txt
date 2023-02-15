@@ -13,6 +13,9 @@ kazu.web.server
 
    .. autosummary::
    
+      get_id_log_prefix_if_available
+      get_request_id
+      openapi_no_auth
       start
       stop
    

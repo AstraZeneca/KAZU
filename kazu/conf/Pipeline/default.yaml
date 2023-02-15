@@ -1,12 +1,10 @@
 _target_: kazu.pipeline.pipeline.Pipeline
 steps:
   - ${ExplosionStringMatchingStep}
-  - ${StanzaStep}
   - ${TransformersModelForTokenClassificationNerStep}
   - ${DictionaryEntityLinkingStep}
   - ${EntityClassDisambiguationStep}
   - ${MappingStep}
-  - ${SethStep}
   - ${MergeOverlappingEntsStep}
   - ${AbbreviationFinderStep}
   - ${CleanupStep}

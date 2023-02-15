@@ -463,23 +463,51 @@ class StringNormalizer:
 
 
 class GildaUtils:
-    """
+    """Functions derived from `gilda <https://github.com/indralab/gilda>`_ used by (some of) the :py:class:`~StringNormalizer`\\ s.
+
     Original Credit:
-    https://github.com/indralab/gilda
-    https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py
 
-    @article{gyori2022gilda,
-        author = {Gyori, Benjamin M and Hoyt, Charles Tapley and Steppi, Albert},
-        title = "{{Gilda: biomedical entity text normalization with machine-learned disambiguation as a service}}",
-        journal = {Bioinformatics Advances},
-        year = {2022},
-        month = {05},
-        issn = {2635-0041},
-        doi = {10.1093/bioadv/vbac034},
-        url = {https://doi.org/10.1093/bioadv/vbac034},
-        note = {vbac034}
-    }
+    | https://github.com/indralab/gilda
+    | https://github.com/indralab/gilda/blob/9e383213098144fe82103a3a5aa1bf4c14059e57/gilda/process.py
 
+    Paper:
+
+    Benjamin M Gyori, Charles Tapley Hoyt, and Albert Steppi. 2022.
+    `Gilda: biomedical entity text normalization with machine-learned disambiguation as a service. <https://doi.org/10.1093/bioadv/vbac034>`_
+    Bioinformatics Advances. Vbac034.
+
+    .. raw:: html
+
+        <details>
+        <summary>Bibtex Citation Details</summary>
+
+    .. code:: bibtex
+
+        @article{gyori2022gilda,
+            author = {Gyori, Benjamin M and Hoyt, Charles Tapley and Steppi, Albert},
+            title = "{{Gilda: biomedical entity text normalization with machine-learned disambiguation as a service}}",
+            journal = {Bioinformatics Advances},
+            year = {2022},
+            month = {05},
+            issn = {2635-0041},
+            doi = {10.1093/bioadv/vbac034},
+            url = {https://doi.org/10.1093/bioadv/vbac034},
+            note = {vbac034}
+        }
+
+    .. raw:: html
+
+        </details>
+
+
+    Licensed under BSD 2-Clause.
+
+    Copyright (c) 2019, Benjamin M. Gyori, Harvard Medical School All rights reserved.
+
+    .. raw:: html
+
+        <details>
+        <summary>Full License</summary>
 
     BSD 2-Clause License
 
@@ -506,6 +534,10 @@ class GildaUtils:
     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
     OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    .. raw:: html
+
+        </details>
 
     """
 

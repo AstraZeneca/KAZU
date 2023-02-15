@@ -187,7 +187,6 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.distillation.html">kazu.modelling.distillation</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.data_utils.html">kazu.modelling.distillation.data_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html">kazu.modelling.distillation.dataprocessor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.lightning_plugins.html">kazu.modelling.distillation.lightning_plugins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.distillation.metrics.html">kazu.modelling.distillation.metrics</a></li>
@@ -236,6 +235,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.linking.html">kazu.steps.linking</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.dictionary.html">kazu.steps.linking.dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.entity_class_disambiguation.html">kazu.steps.linking.entity_class_disambiguation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.mapping_step.html">kazu.steps.linking.mapping_step</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.html">kazu.steps.linking.post_processing</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l5 has-children"><a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.html">kazu.steps.linking.post_processing.disambiguation</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -275,6 +275,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.abbreviation_detector.html">kazu.utils.abbreviation_detector</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.build_and_test_model_packs.html">kazu.utils.build_and_test_model_packs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.caching.html">kazu.utils.caching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.utils.constants.html">kazu.utils.constants</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.grouping.html">kazu.utils.grouping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.link_index.html">kazu.utils.link_index</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.utils.spacy_pipeline.html">kazu.utils.spacy_pipeline</a></li>
@@ -286,6 +287,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="kazu.web.html">kazu.web</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.jwtauth.html">kazu.web.jwtauth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.ls_web_utils.html">kazu.web.ls_web_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kazu.web.req_id_header.html">kazu.web.req_id_header</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.routes.html">kazu.web.routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kazu.web.server.html">kazu.web.server</a></li>
 </ul>
@@ -312,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AZ-AI/kazu/edit/main/docs/_autosummary/kazu.modelling.ontology_matching.ontology_matcher.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/_autosummary/kazu.modelling.ontology_matching.ontology_matcher.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -340,78 +343,24 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm" title="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CuratedTerm</span></code></a></p></td>
-<td><p>CuratedTerm(term: str, action: str, case_sensitive: bool, entity_class: str, term_norm_mapping: Dict[str, Set[str]] = &lt;factory&gt;)</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher" title="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OntologyMatcher</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher" title="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OntologyMatcher</span></code></a></p></td>
 <td><p>String matching to synonyms.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig" title="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OntologyMatcherConfig</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig" title="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OntologyMatcherConfig</span></code></a></p></td>
 <td><p>OntologyMatcherConfig(span_key: str, match_id_sep: str, labels: List[str], parser_name_to_entity_type: Dict[str, str])</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_matching.ontology_matcher.</span></span><span class="sig-name descname"><span class="pre">CuratedTerm</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L44-L50"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>CuratedTerm(term: str, action: str, case_sensitive: bool, entity_class: str, term_norm_mapping: Dict[str, Set[str]] = &lt;factory&gt;)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_sensitive</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term_norm_mapping=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/../docs/&lt;string&gt;"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.__init__" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>action</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>case_sensitive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>entity_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>term_norm_mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.action">
-<span class="sig-name descname"><span class="pre">action</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.action" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.case_sensitive">
-<span class="sig-name descname"><span class="pre">case_sensitive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.case_sensitive" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.entity_class">
-<span class="sig-name descname"><span class="pre">entity_class</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.entity_class" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.term">
-<span class="sig-name descname"><span class="pre">term</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.term" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.term_norm_mapping">
-<span class="sig-name descname"><span class="pre">term_norm_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><span class="pre">Set</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.CuratedTerm.term_norm_mapping" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_matching.ontology_matcher.</span></span><span class="sig-name descname"><span class="pre">OntologyMatcher</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L61-L571"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_matching.ontology_matcher.</span></span><span class="sig-name descname"><span class="pre">OntologyMatcher</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L54-L576"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>String matching to synonyms.</p>
 <p>Core strict matching is done by Spacy’s <a class="reference external" href="https://spacy.io/api/phrasematcher">PhraseMatcher</a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ontology_matcher'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RAW_HITS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_id_sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">':::'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name_to_entity_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L74-L102"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ontology_matcher'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RAW_HITS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_id_sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">':::'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name_to_entity_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L67-L96"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -427,7 +376,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_lowercase_phrasematcher_from_parsers">
-<span class="sig-name descname"><span class="pre">create_lowercase_phrasematcher_from_parsers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsers</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L269-L316"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_lowercase_phrasematcher_from_parsers" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_lowercase_phrasematcher_from_parsers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsers</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L259-L307"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_lowercase_phrasematcher_from_parsers" title="Permalink to this definition">#</a></dt>
 <dd><p>Initialize the phrase matchers when creating this component.
 This method should not be run on an existing or deserialized pipeline.</p>
 <p>Returns the lowercase phrasematcher and None - so it matches the return shape of
@@ -444,7 +393,7 @@ This method should not be run on an existing or deserialized pipeline.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_phrasematchers_from_curated_list">
-<span class="sig-name descname"><span class="pre">create_phrasematchers_from_curated_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curated_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L212-L267"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_phrasematchers_from_curated_list" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_phrasematchers_from_curated_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curated_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsers</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L201-L257"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.create_phrasematchers_from_curated_list" title="Permalink to this definition">#</a></dt>
 <dd><p>in order to (non-redundantly) map a curated term to a <a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>,
 we need to perform the following steps:</p>
 <ol class="arabic simple">
@@ -473,13 +422,13 @@ to the <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Sy
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.filter_by_contexts">
-<span class="sig-name descname"><span class="pre">filter_by_contexts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spans</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L368-L404"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.filter_by_contexts" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">filter_by_contexts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spans</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L360-L396"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.filter_by_contexts" title="Permalink to this definition">#</a></dt>
 <dd><p>These filters work best when there is sentence segmentation available.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.from_disk">
-<span class="sig-name descname"><span class="pre">from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L547-L571"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.from_disk" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L550-L576"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.from_disk" title="Permalink to this definition">#</a></dt>
 <dd><p>Load the pipe from disk. Modifies the object in place and returns it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -496,12 +445,12 @@ to the <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Sy
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.set_context_matchers">
-<span class="sig-name descname"><span class="pre">set_context_matchers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L139-L141"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.set_context_matchers" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_context_matchers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L133-L135"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.set_context_matchers" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.set_labels">
-<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L135-L137"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.set_labels" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L129-L131"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.set_labels" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p>
@@ -511,7 +460,7 @@ to the <a class="reference internal" href="kazu.data.data.html#kazu.data.data.Sy
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_FP_context">
-<span class="sig-name descname"><span class="pre">span_in_FP_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L422-L432"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_FP_context" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">span_in_FP_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L414-L424"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_FP_context" title="Permalink to this definition">#</a></dt>
 <dd><p>When an entity type has a FP matcher defined, spans that match
 are regarded as FPs.</p>
 <dl class="field-list simple">
@@ -523,7 +472,7 @@ are regarded as FPs.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_FP_coocc">
-<span class="sig-name descname"><span class="pre">span_in_FP_coocc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L446-L456"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_FP_coocc" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">span_in_FP_coocc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L438-L448"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_FP_coocc" title="Permalink to this definition">#</a></dt>
 <dd><p>When an entity type has a FP co-occ dic defined, a hit defined in the dict
 is regarded as a false positive when it matches at least one of its co-occ terms.</p>
 <dl class="field-list simple">
@@ -538,7 +487,7 @@ is regarded as a false positive when it matches at least one of its co-occ terms
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_TP_context">
-<span class="sig-name descname"><span class="pre">span_in_TP_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L410-L420"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_TP_context" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">span_in_TP_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L402-L412"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_TP_context" title="Permalink to this definition">#</a></dt>
 <dd><p>When an entity type has a TP matcher defined, it should match for this
 span to be regarded as a true hit.</p>
 <dl class="field-list simple">
@@ -550,7 +499,7 @@ span to be regarded as a true hit.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_TP_coocc">
-<span class="sig-name descname"><span class="pre">span_in_TP_coocc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L434-L444"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_TP_coocc" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">span_in_TP_coocc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L426-L436"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.span_in_TP_coocc" title="Permalink to this definition">#</a></dt>
 <dd><p>When an entity type has a TP co-occ dict defined, a hit defined in the dict
 is only regarded as a true hit when it matches at least one of its co-occ terms.</p>
 <dl class="field-list simple">
@@ -565,7 +514,7 @@ is only regarded as a true hit when it matches at least one of its co-occ terms.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.to_disk">
-<span class="sig-name descname"><span class="pre">to_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L525-L545"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.to_disk" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L528-L548"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher.to_disk" title="Permalink to this definition">#</a></dt>
 <dd><p>Serialize the pipe to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -615,12 +564,12 @@ is only regarded as a true hit when it matches at least one of its co-occ terms.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_matching.ontology_matcher.</span></span><span class="sig-name descname"><span class="pre">OntologyMatcherConfig</span></span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L36-L41"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_matching.ontology_matcher.</span></span><span class="sig-name descname"><span class="pre">OntologyMatcherConfig</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/ontology_matcher.py#L35-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>OntologyMatcherConfig(span_key: str, match_id_sep: str, labels: List[str], parser_name_to_entity_type: Dict[str, str])</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_id_sep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name_to_entity_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AZ-AI/kazu/blob/main/kazu/../docs/&lt;string&gt;"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_id_sep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name_to_entity_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../docs/&lt;string&gt;"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcherConfig.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

@@ -9,15 +9,15 @@ kazu.utils.spacy\_pipeline
 
    
    
-   
-
-   
-   
-   .. rubric:: Classes
+   .. rubric:: Functions
 
    .. autosummary::
    
-      SpacyPipeline
+      cached_spacy_pipeline_load
+   
+   
+
+   
    
    
 

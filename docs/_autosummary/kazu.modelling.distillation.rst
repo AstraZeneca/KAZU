@@ -27,7 +27,6 @@ kazu.modelling.distillation
    :toctree:
    :recursive:
 
-   kazu.modelling.distillation.data_utils
    kazu.modelling.distillation.dataprocessor
    kazu.modelling.distillation.lightning_plugins
    kazu.modelling.distillation.metrics

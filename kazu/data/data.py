@@ -26,9 +26,32 @@ JsonDictType = Union[Dict[str, Any], List, int, float, bool, str, NoneType]
 
 
 class AutoNameEnum(Enum):
-    """Subclass to create an Enum where values are the names when using enum.auto
+    """Subclass to create an Enum where values are the names when using :py:class:`enum.auto`\\ .
 
-    Taken from the Python Enum Docs (licensed under Zero-Clause BSD)."""
+    Taken from the `Python Enum Docs <https://docs.python.org/3/howto/enum.html#using-automatic-values>`_.
+
+    This is `licensed under Zero-Clause BSD. <https://docs.python.org/3/license.html#zero-clause-bsd-license-for-code-in-the-python-release-documentation>`_
+
+    .. raw:: html
+
+        <details>
+        <summary>Full License</summary>
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+
+    .. raw:: html
+
+        </details>
+    """
 
     def _generate_next_value_(name, start, count, last_values):
         return name
@@ -47,7 +70,7 @@ class DisambiguationConfidence(AutoNameEnum):
     AMBIGUOUS = auto()  # could not disambiguate
 
 
-@dataclass
+@dataclass(frozen=True)
 class CharSpan:
     """A concept similar to a Spacy Span, except is character index based rather than token based"""
 
@@ -77,9 +100,6 @@ class CharSpan:
 
     def __gt__(self, other):
         return self.end > other.end
-
-    def __hash__(self):
-        return hash((self.start, self.end))
 
 
 class EquivalentIdAggregationStrategy(AutoNameEnum):
@@ -366,16 +386,16 @@ class Section:
     entities: List[Entity] = field(
         default_factory=list, hash=False
     )  # entities detected in this section
-    _sentence_spans: Optional[Dict[CharSpan, Any]] = field(
+    _sentence_spans: Optional[Tuple[CharSpan, ...]] = field(
         default=None, hash=False, init=False
-    )  # hidden implem. for an ordered, immutable set of sentence spans
+    )  # hidden implem. to prevent overwriting existing sentence spans
 
     @property
     def sentence_spans(self) -> Iterable[CharSpan]:
-        if self._sentence_spans:
-            yield from self._sentence_spans.keys()
+        if self._sentence_spans is not None:
+            return self._sentence_spans
         else:
-            yield from ()
+            return ()
 
     @sentence_spans.setter
     def sentence_spans(self, sent_spans: Iterable[CharSpan]):
@@ -386,8 +406,12 @@ class Section:
         :param sent_spans:
         :return:
         """
-        if not self._sentence_spans:
-            self._sentence_spans = {sent_span: True for sent_span in sent_spans}
+        if self._sentence_spans is None:
+            sent_spans_tuple = tuple(sent_spans)
+            assert len(sent_spans_tuple) == len(
+                set(sent_spans_tuple)
+            ), "There are duplicate sentence spans"
+            self._sentence_spans = sent_spans_tuple
         else:
             raise AttributeError("Immutable sentence_spans is already set")
 
@@ -407,7 +431,7 @@ class Section:
 
 @dataclass(unsafe_hash=True)
 class Document:
-    idx: str  # a document identifier
+    idx: str = field(default_factory=lambda: uuid.uuid4().hex)  # a document identifier
     sections: List[Section] = field(
         default_factory=list, hash=False
     )  # sections comprising this document
@@ -454,18 +478,15 @@ class Document:
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
         """
-        create an instance of document from a text string. The idx field will be generated from uuid.uuid4().hex
+        Create an instance of :py:class:`.Document` from a text string.
 
         :param text:
         :return:
         """
-        idx = uuid.uuid4().hex
-        sections = [Section(text=text, name="na")]
-        return cls(idx=idx, sections=sections)
+        return cls(sections=[Section(text=text, name="na")])
 
     @classmethod
     def simple_document_from_sents(cls, sents: List[str]) -> "Document":
-        idx = uuid.uuid4().hex
         section = Section(text=" ".join(sents), name="na")
         sent_spans = []
         curr_start = 0
@@ -473,13 +494,12 @@ class Document:
             sent_spans.append(CharSpan(start=curr_start, end=curr_start + len(sent)))
             curr_start += len(sent) + 1  # + 1 is for the joining space
         section.sentence_spans = sent_spans
-        return cls(idx=idx, sections=[section])
+        return cls(sections=[section])
 
     @classmethod
     def from_named_section_texts(cls, named_sections: Dict[str, str]) -> "Document":
-        idx = uuid.uuid4().hex
         sections = [Section(text=text, name=name) for name, text in named_sections.items()]
-        return cls(idx=idx, sections=sections)
+        return cls(sections=sections)
 
     def __len__(self):
         length = 0
@@ -553,7 +573,7 @@ class DocumentJsonUtils:
             # v is a dict of CharSpan->CharSpan, needs conversion
             return k, list(v.items())
         elif k == "_sentence_spans":
-            return "sentence_spans", list(v.keys())
+            return "sentence_spans", list(v)
         elif k == "syn_term_to_synonym_terms":
             return "synonym_terms", list(v.values())
         else:

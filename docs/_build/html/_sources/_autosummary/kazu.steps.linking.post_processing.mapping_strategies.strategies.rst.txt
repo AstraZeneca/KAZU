@@ -17,10 +17,10 @@ kazu.steps.linking.post\_processing.mapping\_strategies.strategies
 
    .. autosummary::
    
-      DefinedElsewhereInDocumentMappingStrategy
       ExactMatchMappingStrategy
       MappingFactory
       MappingStrategy
+      NoopMappingStrategy
       StrongMatchMappingStrategy
       StrongMatchWithEmbeddingConfirmationStringMatchingStrategy
       SymbolMatchMappingStrategy

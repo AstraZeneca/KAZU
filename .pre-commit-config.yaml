@@ -15,13 +15,12 @@ repos:
     language: system
     entry:  flake8
     types: [python]
-    exclude: setup.py
 
   - id: mypy
     name: mypy
     stages: [commit]
     language: python
-    entry:  mypy --ignore-missing-imports --check-untyped-defs
+    entry:  mypy
     types: [python] 
     types_or: [python, pyi]
     require_serial: true
