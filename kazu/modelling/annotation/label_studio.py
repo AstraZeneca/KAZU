@@ -116,7 +116,7 @@ class KazuToLabelStudioConverter:
                         (mapping.source, f"{mapping.default_label}|{mapping.idx}")
                         for mapping in ent.mappings
                     )
-                ),
+                ) if len(ent.mappings) > 0 else [("None", "unmapped")],
             },
         }
 
