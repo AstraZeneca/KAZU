@@ -1,0 +1,4 @@
+{
+  "kazuApiUrl": "$KAZU_API_URL",
+  "authEnabled": false
+}
