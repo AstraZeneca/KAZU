@@ -59,7 +59,8 @@ code {
     grid-area: 3 / 14 / 4 / 21;
     display: flex;
     align-items: center;
-    justify-content: center
+    justify-content: center;
+    padding: 10%;
 }
 
 #textWidget {
@@ -97,7 +98,8 @@ code {
 .text-input-area > textarea {
     background-color: #eaeaea;
     min-height: 400px;
-    width: 98%;
+    max-width: 98%;
+    min-width: 70%;
     border: #1a1c1e solid;
     border-radius: 1px;
 }
