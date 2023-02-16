@@ -90,8 +90,6 @@ class TextSubmit extends React.Component<TextSubmitProps, TextSubmitState> {
                     </div>
                 )
             }
-        } else {
-            authInputComponent = undefined
         }
 
         if(this.state.authenticationError) {
@@ -106,9 +104,8 @@ class TextSubmit extends React.Component<TextSubmitProps, TextSubmitState> {
                     <span>Error, please try again later</span>
                 </div>
             )
-        } else {
-            errorBox = undefined;
         }
+
         return (
             <div id={"textWidget"}>
                 <div id={"textWidgetInput"}>
@@ -119,7 +116,6 @@ class TextSubmit extends React.Component<TextSubmitProps, TextSubmitState> {
                 </div>
                 {errorBox}
             </div>
-
         );
     }
 }
