@@ -20,5 +20,5 @@ COPY nginx.template /etc/nginx/templates/nginx.template
 RUN npm install --omit dev
 
 COPY start-server.sh ./start-server.sh
-RUN chmod a+x ./start-server.sh
+RUN chmod u+x ./start-server.sh
 CMD ["./start-server.sh"]
