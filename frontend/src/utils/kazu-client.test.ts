@@ -1,4 +1,4 @@
-import {KazuClient, IKazuClient} from "./kazu-client";
+import {KazuClient} from "./kazu-client";
 
 const testif = (condition: boolean) => {
     if(condition){
