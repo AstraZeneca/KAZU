@@ -12,7 +12,7 @@ const testif = (condition: boolean) => {
 describe("Kazu client tests", () => {
     const kazuApiUrl: string|undefined = process.env.KAZU_API_URL;
 
-    itif(kazuApiUrl !== undefined)("should parse kazu responses", () => {
+    testif(kazuApiUrl !== undefined)("should parse kazu responses", () => {
         const kazu_client = new KazuClient(kazuApiUrl as string)
         kazu_client.ner_with_ls("EGFR is a gene implicated in breast cancer")
             .then(kazu_web_response => {
