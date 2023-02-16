@@ -1,10 +1,10 @@
 import {KazuClient, IKazuClient} from "./kazu-client";
 
-const itif = (condition: boolean) => {
+const testif = (condition: boolean) => {
     if(condition){
-        return it;
+        return test;
     } else {
-        return it.skip;
+        return test.skip;
     }
 }
 
