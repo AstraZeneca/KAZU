@@ -60,24 +60,23 @@ class LSComponent extends React.Component<LSComponentProps, LSComponentState> {
     }
 
     render() {
-        if (this.props.kazuLSAnnotations !== undefined) {
-            const kazuLSAnnotations = this.props.kazuLSAnnotations
-            const lsTasks = kazuLSAnnotations.ls_tasks
-            const lsView = kazuLSAnnotations.ls_view
-            return <LabelStudioReact config={lsView} task={lsTasks[0]} interfaces={[
-                "panel",
-                "update",
-                "controls",
-                "side-column",
-                "annotations:menu",
-                "annotations:add-new",
-                "annotations:delete",
-                "predictions:menu"
-            ]}/>
-
-        } else {
+        if (this.props.kazuLSAnnotations === undefined) {
             return undefined
         }
+
+        const kazuLSAnnotations = this.props.kazuLSAnnotations
+        const lsTasks = kazuLSAnnotations.ls_tasks
+        const lsView = kazuLSAnnotations.ls_view
+        return <LabelStudioReact config={lsView} task={lsTasks[0]} interfaces={[
+            "panel",
+            "update",
+            "controls",
+            "side-column",
+            "annotations:menu",
+            "annotations:add-new",
+            "annotations:delete",
+            "predictions:menu"
+        ]}/>
 
     }
 }
