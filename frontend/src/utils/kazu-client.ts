@@ -7,28 +7,19 @@ interface IKazuClient {
 
 class KazuClient implements IKazuClient {
     private kazuApiUrl: string;
+
     constructor(kazuApiUrl: string) {
-       this.kazuApiUrl = kazuApiUrl
+        this.kazuApiUrl = kazuApiUrl
     }
 
     ner_with_ls(text: string, auth?: string | undefined): Promise<KazuLSResponse> {
-        let req;
-        if(auth === undefined) {
-            req = {
-                url: `${this.kazuApiUrl}/api/kazu/ls-annotations`,
-                data: {text: text},
-                method: "POST"
-            }
-        } else {
-            req = {
-                url: `${this.kazuApiUrl}/api/kazu/ls-annotations`,
-                data: {text: text},
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${auth}`
-                }
-            }
+        const basicReq: any = {
+            url: `${this.kazuApiUrl}/api/kazu/ls-annotations`,
+            data: {text: text},
+            method: "POST"
         }
+
+        const req: any = auth !== undefined ? {...basicReq, headers: {"Authorization": `Bearer ${auth}`}} : basicReq;
 
         return axios(req)
             .then((resp: any) => {
@@ -47,4 +38,4 @@ class KazuClient implements IKazuClient {
 }
 
 export {KazuClient};
-export type { IKazuClient };
+export type {IKazuClient};
