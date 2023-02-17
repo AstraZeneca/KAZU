@@ -46,16 +46,18 @@ webserver = [
   "ray[serve]>=1.10.0",
   "PyJWT>=2.0.0",
   ]
-dev = [
-  "kazu[webserver]",
-  "black~=22.0",
-  "flake8",
-  "mypy",
+typed = [
   "types-requests",
   "types-cachetools",
   "types-regex",
   "types-psutil",
   "pandas-stubs",
+]
+dev = [
+  "kazu[webserver,typed]",
+  "black~=22.0",
+  "flake8",
+  "mypy",
   "bump2version",
   "pre-commit",
   "pytest",
