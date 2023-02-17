@@ -10,6 +10,7 @@ authors = [
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "License :: OSI Approved :: Apache Software License",
+    "Typing :: Typed",
     "Operating System :: OS Independent",
     "Intended Audience :: Healthcare Industry",
     "Natural Language :: English",
