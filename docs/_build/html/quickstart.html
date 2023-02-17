@@ -345,6 +345,15 @@
 </pre></div>
 </div>
 <p>Python version 3.9 or higher is required (tested with Python 3.9).</p>
+<p>If you intend to use <a class="reference external" href="https://mypy.readthedocs.io/en/stable/#">Mypy</a> on your own codebase, consider installing Kazu using:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>kazu<span class="o">[</span>typed<span class="o">]</span>
+</pre></div>
+</div>
+<p>This will pull in typing stubs for kazu’s dependencies (such as <a class="reference external" href="https://pypi.org/project/types-requests/">types-requests</a> for <a class="reference external" href="https://requests.readthedocs.io/en/latest/">Requests</a>)
+so that mypy has access to as much relevant typing information as possible when type checking your codebase. Otherwise (depending on mypy config), you may see errors when running mypy like:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">.venv/lib/python3.10/site-packages/kazu/steps/linking/post_processing/xref_manager.py:10: error: Library stubs not installed for &quot;requests&quot; [import]</span>
+</pre></div>
+</div>
 </section>
 <section id="model-pack">
 <h2>Model Pack<a class="headerlink" href="#model-pack" title="Permalink to this heading">#</a></h2>
