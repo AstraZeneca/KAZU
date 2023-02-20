@@ -104,7 +104,7 @@ def label_studio_manager(make_label_studio_manager) -> LabelStudioManager:
 @pytest.fixture(scope="function")
 def ray_server(override_kazu_test_config):
     cfg = override_kazu_test_config(
-        overrides=["ray=local", "ray.detached=true"],
+        overrides=["ray=local", "ray.serve.detached=true"],
     )
     start(cfg)
     yield {}
@@ -115,7 +115,7 @@ def ray_server(override_kazu_test_config):
 def ray_server_with_jwt_auth(override_kazu_test_config):
     os.environ["KAZU_JWT_KEY"] = "this secret key is not secret"
     cfg = override_kazu_test_config(
-        overrides=["ray=local", "ray.detached=true", "Middlewares=jwt"],
+        overrides=["ray=local", "ray.serve.detached=true", "Middlewares=jwt"],
     )
     start(cfg)
     yield {
