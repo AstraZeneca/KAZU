@@ -67,6 +67,7 @@ dev = [
   # to allow profiling
   # of the steps.
   "tensorboard",
+  "towncrier",
 ]
 
 [build-system]
@@ -125,4 +126,12 @@ module = [
     "srsly.*",
     "py4j.*",
 ]
+
+[tool.towncrier]
+package = "kazu"
+directory = "docs/_changelog.d"
+package-dir = "kazu"
+filename = "docs/changelog.rst"
+underlines = "-^~"
+
 ignore_missing_imports = true
