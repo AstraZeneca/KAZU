@@ -106,7 +106,13 @@ jobs:
           git config --global user.email $GITHUB_BOT
           git reset --hard
           
-          python -m towncrier --version=${KAZU_NEW_VERSION}
+          # first, generate release notes for just this release, to pass
+          # to the gh release command further down
+          current_release_file="/tmp/${KAZU_NEW_VERSION}-notes.rst"
+          echo "CURRENT_RELEASE_FILE=$current_release_file" >> $GITHUB_ENV
+          python -m towncrier build --draft --version=${KAZU_NEW_VERSION} > $CURRENT_RELEASE_FILE
+          
+          python -m towncrier build --version=${KAZU_NEW_VERSION}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -133,7 +139,7 @@ jobs:
           # todo: auto merge when we have a solution for this
           # gh pr merge $PR_ID --admin --rebase
           NEW_MODEL_PACK_ZIP=$(echo "${{ env.NEW_MODEL_PACK_ZIP }}")          
-          gh release create $KAZU_RELEASE_VERSION --notes "TBA" --title $KAZU_RELEASE_VERSION          
+          gh release create $KAZU_RELEASE_VERSION --notes-file $CURRENT_RELEASE_FILE --title $KAZU_RELEASE_VERSION          
           gh release upload $KAZU_RELEASE_VERSION dist/* --clobber
           gh release upload $KAZU_RELEASE_VERSION $NEW_MODEL_PACK_ZIP --clobber
           rm -r $NEW_MODEL_PACK_ZIP
