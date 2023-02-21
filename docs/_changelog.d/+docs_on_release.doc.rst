@@ -1,1 +1,1 @@
-Generating and committing docs during release workflow.
+Generating and committing changelog during release workflow.
