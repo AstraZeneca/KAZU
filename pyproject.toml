@@ -131,7 +131,12 @@ module = [
 package = "kazu"
 directory = "docs/_changelog.d"
 package-dir = "kazu"
-filename = "docs/changelog.rst"
-underlines = "-^~"
+filename = "docs/changelog.md"
+template = "docs/_changelog.d/changelog_template.jinja"
+title_format = "## {version} - {project_date}"
+underlines = ["", "", ""]
+start_string= "<!-- towncrier release notes start -->\n"
+
+
 
 ignore_missing_imports = true

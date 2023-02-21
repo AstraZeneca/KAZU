@@ -108,7 +108,7 @@ jobs:
           
           # first, generate release notes for just this release, to pass
           # to the gh release command further down
-          current_release_file="/tmp/${KAZU_NEW_VERSION}-notes.rst"
+          current_release_file="/tmp/${KAZU_NEW_VERSION}-notes.md"
           echo "CURRENT_RELEASE_FILE=$current_release_file" >> $GITHUB_ENV
           python -m towncrier build --draft --version=${KAZU_NEW_VERSION} > $CURRENT_RELEASE_FILE
           
