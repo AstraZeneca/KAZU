@@ -1491,33 +1491,56 @@ class MeddraOntologyParser(OntologyParser):
         default_labels = []
         all_syns = []
         mapping_type = []
+        soc_names = []
+        soc_codes = []
 
         for i, row in hier_df.iterrows():
             idx = row["pt_code"]
             pt_name = row["pt_name"]
+            soc_name = row["soc_name"]
+            soc_code = row["soc_code"]
             llts = llt_df[llt_df["pt_code"] == idx]
             ids.append(idx)
             default_labels.append(pt_name)
             all_syns.append(pt_name)
+            soc_names.append(soc_name)
+            soc_codes.append(soc_code)
             mapping_type.append("meddra_link")
             for j, llt_row in llts.iterrows():
                 ids.append(idx)
                 default_labels.append(pt_name)
+                soc_names.append(soc_name)
+                soc_codes.append(soc_code)
                 all_syns.append(llt_row["llt_name"])
                 mapping_type.append("meddra_link")
 
-        for i, row in hier_df[["hlt_code", "hlt_name"]].drop_duplicates().iterrows():
+        for i, row in (
+            hier_df[["hlt_code", "hlt_name", "soc_name", "soc_code"]].drop_duplicates().iterrows()
+        ):
             ids.append(row["hlt_code"])
             default_labels.append(row["hlt_name"])
+            soc_names.append(row["soc_name"])
+            soc_codes.append(row["soc_code"])
             all_syns.append(row["hlt_name"])
             mapping_type.append("meddra_link")
-        for i, row in hier_df[["hlgt_code", "hlgt_name"]].drop_duplicates().iterrows():
+        for i, row in (
+            hier_df[["hlgt_code", "hlgt_name", "soc_name", "soc_code"]].drop_duplicates().iterrows()
+        ):
             ids.append(row["hlgt_code"])
             default_labels.append(row["hlgt_name"])
+            soc_names.append(row["soc_name"])
+            soc_codes.append(row["soc_code"])
             all_syns.append(row["hlgt_name"])
             mapping_type.append("meddra_link")
         df = pd.DataFrame.from_dict(
-            {IDX: ids, DEFAULT_LABEL: default_labels, SYN: all_syns, MAPPING_TYPE: mapping_type}
+            {
+                IDX: ids,
+                DEFAULT_LABEL: default_labels,
+                SYN: all_syns,
+                MAPPING_TYPE: mapping_type,
+                "soc_name": soc_names,
+                "soc_code": soc_codes,
+            }
         )
         return df
 
