@@ -474,6 +474,9 @@ class OntologyParser(ABC):
         MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by the ontology
 
         Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.
+
+        Any 'extra' columns will be added to the :class:`~kazu.modelling.database.in_memory_db.MetadataDatabase` as metadata fields for the
+        given id in the relevant ontology.
         """
         raise NotImplementedError()
 
