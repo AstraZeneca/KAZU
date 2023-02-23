@@ -252,8 +252,17 @@ class ModelPackBuilder:
         :return:
         """
         logger.info(f"zipping model pack {model_pack_name}")
-        subprocess.run(["zip", "-r", model_pack_name, "."], cwd=build_dir)
-        shutil.move(build_dir.joinpath(model_pack_name), build_dir.parent.joinpath(model_pack_name))
+        parent_directory = build_dir.parent
+        model_pack_name_with_version = model_pack_name.removesuffix(".zip")
+        subprocess.run(
+            # make a symlink so the top-level directory in the resulting zip file
+            # has the version of the model pack in it
+            ["ln", "-s", build_dir.name, model_pack_name_with_version],
+            cwd=parent_directory,
+        )
+        subprocess.run(
+            ["zip", "-r", model_pack_name, model_pack_name_with_version], cwd=parent_directory
+        )
 
     @staticmethod
     def build_all_model_packs(
