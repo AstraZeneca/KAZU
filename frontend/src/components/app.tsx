@@ -55,7 +55,7 @@ class App extends React.Component<AppProps, AppState> {
                 the complexities of BioNER. It's designed to be production grade, resilient, fast, scalable, and easy to
                 extend, allowing you to quickly deploy emergent state-of-the-art NLP methods.
 
-                For more information and support, please visit <a href={"https://astrazeneca.github.com/kazu"}>https://astrazeneca.github.com/kazu</a>
+                For more information and support, please visit <a href={"https://astrazeneca.github.io/KAZU"}>https://astrazeneca.github.io/KAZU</a>
             </span>
             </div>
         )
