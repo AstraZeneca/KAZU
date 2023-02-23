@@ -34,6 +34,17 @@ Either:
 
 or download the wheel from the release page and install locally.
 
+If you intend to use [Mypy](https://mypy.readthedocs.io/en/stable/#) on your own codebase, consider installing Kazu using:
+
+`pip install kazu[typed]`
+
+This will pull in typing stubs for kazu's dependencies (such as [types-requests](https://pypi.org/project/types-requests/) for [Requests](https://requests.readthedocs.io/en/latest/))
+so that mypy has access to as much relevant typing information as possible when type checking your codebase. Otherwise (depending on mypy config), you may see errors when running mypy like:
+
+```
+.venv/lib/python3.10/site-packages/kazu/steps/linking/post_processing/xref_manager.py:10: error: Library stubs not installed for "requests" [import] 
+```
+
 ## Getting the model pack
 
 For most functionality, you will also need the Kazu model pack. This is tied to each release, and can be found on the [release page](https://github.com/astrazeneca/kazu/releases). Once downloaded,

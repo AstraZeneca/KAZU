@@ -25,7 +25,7 @@ def acceptance_criteria() -> Dict[str, Dict[str, Dict[str, float]]]:
     return data
 
 
-@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../", config_name="conf")
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path=".", config_name="config")
 def execute_full_pipeline_acceptance_test(cfg):
     manager = instantiate(cfg.LabelStudioManager)
     pipeline: Pipeline = instantiate(cfg.Pipeline)

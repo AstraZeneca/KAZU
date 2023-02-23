@@ -100,7 +100,6 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_2": {("second_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
-            marks=pytest.mark.basic,
             id="Two curated case insensitive terms from two parsers. Both should hit",
         ),
         pytest.param(
@@ -124,7 +123,6 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
-            marks=pytest.mark.basic,
             id="Two curated terms from two parsers. One should hit, to test case sensitivity",
         ),
         pytest.param(
@@ -148,7 +146,6 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
-            marks=pytest.mark.basic,
             id="Two curated terms from two parsers. One should hit, one should miss "
             "as it doesn't match a term string in the ontology",
         ),
@@ -173,7 +170,6 @@ class DummySynGenerator(SynonymGenerator):
                 {"ent_type_1": {("first_mock_parser", "COMPLEX 7 DISEASE ALPHA")}},
             ],
             None,
-            marks=pytest.mark.basic,
             id="Two curated terms from two parsers. One should hit, to test drop logic",
         ),
         pytest.param(
@@ -194,7 +190,6 @@ class DummySynGenerator(SynonymGenerator):
                 [DummySynGenerator(term_to_find="amongst us", term_to_add="amongst")]
             ),  # this generates a term that matches an existing ontology term, so we can test
             # that we're only matching to one term_norm (should be handled by syn generator)
-            marks=pytest.mark.basic,
             id="One curated term from one parser, with a synonym generator producing a term that"
             "hits a separate term from the parser. Only one should hit",
         ),
@@ -223,7 +218,6 @@ class DummySynGenerator(SynonymGenerator):
                 [DummySynGenerator(term_to_find="amongst", term_to_add="others")]
             ),  # this generates a term that matches an existing ontology term, so we can test
             # that we're only matching to one term_norm (should be handled by syn generator)
-            marks=pytest.mark.basic,
             id="Two curated terms from one parser, with a synonym generator producing a term that"
             "generates an alternative. There should be two hits on the same term norm",
         ),

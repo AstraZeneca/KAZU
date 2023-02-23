@@ -1,0 +1,138 @@
+@import "https://unpkg.com/@heartexlabs/label-studio@latest/build/static/css/main.css";
+
+html {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background-color: #ffffff;
+    margin: 0;
+    min-height: 100%;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: grid;
+    grid-template-columns: 1fr [content-start] 8fr [content-end] 1fr;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+#root {
+    grid-column-start: content-start;
+    grid-column-end: content-end;
+}
+
+.app-root {
+    padding: 5px;
+    border-left: 1px solid #eaeaea;
+    border-right: 1px solid #eaeaea;
+    min-width: 800px;
+    height: 100%;
+    background-color: #fafafa;
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    grid-auto-rows: fit-content(100%);
+}
+
+.app-title-text {
+    background-color: #fafafa;
+    grid-area: 1 / 1 / 3 / 21;
+    min-height: 10%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+.app-title-text > span {
+    font-size: 30px;
+}
+
+.kazu-blurb {
+    background-color: #fafafa;
+    grid-area: 3 / 14 / 4 / 21;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10%;
+}
+
+#textWidget {
+    background-color: #fafafa;
+    grid-area: 3 / 1 / 4 / 14;
+    display: grid;
+    grid-auto-rows: fit-content(100%);
+    grid-template-columns: repeat(10, 1fr);
+}
+
+#textWidgetInput {
+    background-color: #fafafa;
+    grid-area: 1 / 1 / 2 / 11;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: fit-content(100%);
+}
+
+.text-input-area {
+    background-color: #fafafa;
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+.text-input-prompt {
+    background-color: #fafafa;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    font-size: 20px;
+}
+
+.text-input-prompt > span {
+    background-color: #fafafa;
+}
+
+.text-input-area > textarea {
+    background-color: #eaeaea;
+    min-height: 400px;
+    max-width: 98%;
+    min-width: 70%;
+    border: #1a1c1e solid;
+    border-radius: 1px;
+}
+
+
+#textWidgetInput > button {
+    border-radius: 4px;
+    border: 2px solid #eaeaea;
+    background-color: rgb(68, 151, 246);
+    max-width: 10%;
+    min-width: 80px;
+    max-height: 70%;
+    min-height: 40px;
+    grid-area: 3 / 1 / 4 / 2;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.errorBox {
+    grid-area: 2 / 1 / 3 / 11;
+}
+
+#label-studio {
+    grid-area: 4 / 1 / 5 / 21;
+}
+
+#jsonOutput {
+    grid-area: 5 / 1 / 6 / 21;
+}
+
+#jsonOutput > button {
+    color: #202020;
+    border-radius: 4px;
+    border: 2px solid #dadada;
+    background-color: #eaeaea;
+}
