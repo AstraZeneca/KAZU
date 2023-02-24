@@ -37,8 +37,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: bump version without commit or tag and build wheel
-        id: build_wheel
+      - name: bump version without commit or tag and build
+        id: build
         run: |
           rm -r dist || true
           pip install hatch
@@ -46,7 +46,7 @@ jobs:
           hatch version $KAZU_NEW_VERSION_SEGMENT
           echo "KAZU_NEW_VERSION=$(hatch version)" >> $GITHUB_ENV
           
-          hatch build -t wheel
+          hatch build
           
           PIP_CACHE_DIR=$(pip cache dir)
           echo "pip cache dir is "${PIP_CACHE_DIR}
@@ -131,7 +131,7 @@ jobs:
           rm -r dist || true
           . kazu-env/bin/activate
 
-          hatch build --clean -t wheel
+          hatch build --clean
 
           git push -u origin --follow-tags releases/$KAZU_RELEASE_VERSION
           
