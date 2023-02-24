@@ -94,5 +94,3 @@ jobs:
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:
           DEFAULT_MODEL_PACK_PATH: /home/github/runner/.kazu_data/kazu_model_pack_public
-          TOKENIZERS_PARALLELISM: false
-          PL_DISABLE_FORK: 1
