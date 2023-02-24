@@ -129,6 +129,7 @@ module = [
     "srsly.*",
     "py4j.*",
 ]
+ignore_missing_imports = true
 
 [tool.towncrier]
 package = "kazu"
@@ -139,7 +140,3 @@ template = "docs/_changelog.d/changelog_template.jinja"
 title_format = "## {version} - {project_date}"
 underlines = ["", "", ""]
 start_string= "<!-- towncrier release notes start -->\n"
-
-
-
-ignore_missing_imports = true
