@@ -205,7 +205,7 @@ class OntologyParser(ABC):
 
     def score_and_group_ids(
         self,
-        id_and_source: Set[Tuple[str, str]],
+        ids_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
@@ -236,7 +236,7 @@ class OntologyParser(ABC):
         IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
         DEFAULT_LABEL
 
-        :param id_and_source: set of tuple[id,source] to decide upon
+        :param ids_and_source: set of tuple[id,source] to decide upon
         :param is_symbolic: is the underlying synonym symbolic?
         :param original_syn_set: original synonyms associated with ids
         :return:
@@ -244,20 +244,20 @@ class OntologyParser(ABC):
         if self.string_scorer is None:
             # the NO_STRATEGY aggregation strategy assumes all synonyms are ambiguous
             return (
-                frozenset((EquivalentIdSet(ids_and_source=frozenset(id_and_source)),)),
+                frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
                 EquivalentIdAggregationStrategy.NO_STRATEGY,
             )
         else:
 
-            if len(id_and_source) == 1:
+            if len(ids_and_source) == 1:
                 return (
-                    frozenset((EquivalentIdSet(ids_and_source=frozenset(id_and_source)),)),
+                    frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
                     EquivalentIdAggregationStrategy.UNAMBIGUOUS,
                 )
 
             if not is_symbolic:
                 return (
-                    frozenset((EquivalentIdSet(ids_and_source=frozenset(id_and_source)),)),
+                    frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
                     EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC,
                 )
             else:
@@ -266,7 +266,7 @@ class OntologyParser(ABC):
                         idx,
                         source,
                     ): str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
-                    for idx, source in id_and_source
+                    for idx, source in ids_and_source
                 }
 
                 # use similarity to group ids into EquivalentIdSets
