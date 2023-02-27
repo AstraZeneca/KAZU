@@ -236,7 +236,7 @@ class OntologyParser(ABC):
         IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
         DEFAULT_LABEL
 
-        :param ids_and_source: set of tuple[id,source] to decide upon
+        :param ids_and_source: ids to determine appropriate groupings of, and their associated sources
         :param is_symbolic: is the underlying synonym symbolic?
         :param original_syn_set: original synonyms associated with ids
         :return:
@@ -244,7 +244,10 @@ class OntologyParser(ABC):
         if self.string_scorer is None:
             # the NO_STRATEGY aggregation strategy assumes all synonyms are ambiguous
             return (
-                frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
+                frozenset(
+                    EquivalentIdSet(ids_and_source=frozenset((single_id_and_source,)))
+                    for single_id_and_source in ids_and_source
+                ),
                 EquivalentIdAggregationStrategy.NO_STRATEGY,
             )
         else:
