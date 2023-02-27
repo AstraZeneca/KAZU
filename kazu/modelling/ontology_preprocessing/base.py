@@ -64,7 +64,7 @@ class CurationException(Exception):
 @functools.cache
 def load_curated_terms(path: PathLike) -> List[Curation]:
     """
-    load curated terms from a Path
+    Load curated terms from a file path.
 
     :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
