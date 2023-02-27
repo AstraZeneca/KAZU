@@ -232,7 +232,7 @@ class SynonymDatabase(metaclass=Singleton):
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
             add_result = self.add(name, (new_term,))
-            assert add_result == DBModificationResult.SYNONYM_TERM_ADDED
+            assert add_result is DBModificationResult.SYNONYM_TERM_ADDED
             result = DBModificationResult.ID_SET_MODIFIED
         else:
             # if there are no longer any id sets associated with the record, remove it completely
