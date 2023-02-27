@@ -263,9 +263,9 @@ class SynonymDatabase(metaclass=Singleton):
                         result = self.drop_equivalent_id_set_from_synonym_term(
                             name, term_norm, equiv_id_set
                         )
-                        if result == DBModificationResult.ID_SET_MODIFIED:
+                        if result is DBModificationResult.ID_SET_MODIFIED:
                             terms_modified += 1
-                        elif result == DBModificationResult.SYNONYM_TERM_DROPPED:
+                        elif result is DBModificationResult.SYNONYM_TERM_DROPPED:
                             terms_dropped += 1
         return terms_modified, terms_dropped
 
