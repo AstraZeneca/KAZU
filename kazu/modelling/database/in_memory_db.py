@@ -147,7 +147,12 @@ class SynonymDatabase(metaclass=Singleton):
         :param synonym:
         :return:
         """
-        self._syns_database_by_syn[name].pop(synonym)
+        dropped_syn_term = self._syns_database_by_syn[name].pop(synonym)
+        for equiv_ids in dropped_syn_term.associated_id_sets:
+            for idx in equiv_ids.ids:
+                self._syns_by_aggregation_strategy[name][dropped_syn_term.aggregated_by][
+                    idx
+                ].remove(dropped_syn_term.term_norm)
         return DBModificationResult.SYNONYM_TERM_DROPPED
 
     def drop_id_from_all_synonym_terms(
