@@ -171,6 +171,7 @@ class SynonymDatabase(metaclass=Singleton):
             DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION
         ] = DBModificationResult.NO_ACTION
         set_of_associated_id_set = self.get_associated_id_sets_for_id(name, idx)
+        # list() call because we modify self._syns_database_by_syn within the loop
         for term in list(self._syns_database_by_syn[name].values()):
             if term.associated_id_sets in set_of_associated_id_set:
                 new_assoc_id_set = set()
