@@ -313,8 +313,8 @@ class OntologyParser(ABC):
         self, id_set: Set[str], curated_synonym: str
     ) -> SynonymTerm:
         """
-        for a given set of ID's and a curated synonym String, insert a new SynonymTerm
-        into the database. If an appropriate one already exists, return that one instead
+        Insert a new :class:`~kazu.data.data.SynonymTerm` into the database, or return an existing
+        matching one if already present.
 
 
         :param id_set:
@@ -323,109 +323,104 @@ class OntologyParser(ABC):
         """
 
         term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
-        log_prefix = f"{self.name} attempting to create synonym term for <{curated_synonym}> term_norm: <{term_norm}> IDs: {id_set} "
+        log_prefix = f"{self.name} attempting to create synonym term for <{curated_synonym}> term_norm: <{term_norm}> IDs: {id_set}"
 
-        # first, find all associated id sets that contain the ID's we're trying to map.
-        # we need these to check any existing term in the database has an appropriate AssociatedIdSet
-        # Since a given ID can exist in multiple EquivalentIdSets, and multiple AssociatedIdSets
-        # we need to execute a series of set operations to do this
-        matched_assoc_id_set = set()
-        set_of_assoc_id_set = set()
-
-        for idx in id_set:
-            assoc_id_sets_for_this_id = self.synonym_db.get_associated_id_sets_for_id(
-                self.name, idx
-            )
-            if len(assoc_id_sets_for_this_id) == 0:
-                raise CurationException(
-                    f"{log_prefix} but could not find an element of id_set {id_set} in synonym database"
-                )
-            set_of_assoc_id_set.update(assoc_id_sets_for_this_id)
-
-        for assoc_id_set in sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False):
-            ids_this_assoc_id_set = set()
-            for equiv_id_set in assoc_id_set:
-                ids_this_assoc_id_set.update(equiv_id_set.ids)
-            if id_set.issubset(ids_this_assoc_id_set):
-                matched_assoc_id_set.add(assoc_id_set)
-
-        # now look up the term norm in the db
+        # look up the term norm in the db
         try:
             maybe_existing_synonym_term = self.synonym_db.get(self.name, term_norm)
         except KeyError:
             maybe_existing_synonym_term = None
 
         if maybe_existing_synonym_term is not None:
-            # if term already exists, does it's AssociatedIdSet match one of the ones we found for the target ids?
-            if maybe_existing_synonym_term.associated_id_sets in matched_assoc_id_set:
+            all_ids_on_existing_syn_term = set(
+                id_
+                for equiv_id_set in maybe_existing_synonym_term.associated_id_sets
+                for id_ in equiv_id_set.ids
+            )
+            if id_set.issubset(all_ids_on_existing_syn_term):
                 logger.info(
-                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database: {maybe_existing_synonym_term.term_norm}"
-                    f"since this SynonymTerm has the same associated id set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
+                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database."
+                    f"since this SynonymTerm includes all ids in id_set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
                 )
                 return maybe_existing_synonym_term
             else:
-                if len(matched_assoc_id_set) == 0:
-                    wanted_str = f"<no appropriate AssociatedIdSets exist for ids {id_set}>"
-                else:
-                    wanted_str = "\n".join(str(x) for x in matched_assoc_id_set)
-                found_str = "\n".join(
-                    str(x) for x in maybe_existing_synonym_term.associated_id_sets
-                )
                 raise CurationException(
-                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and no\n"
-                    f"existing AssociatedIdSet matches the id's specified in the curation. Creating a new\n"
+                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and its\n"
+                    f"associated_id_sets don't contain all the ids in id_set. Creating a new\n"
                     f"SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
                     f"This can happen if a synonym appears twice in the underlying ontology,\n"
                     f"with multiple identifiers attached\n"
                     f"Possible mitigations:\n"
                     f"1) use a ParserAction to drop the existing SynonymTerm from the database first.\n"
                     f"2) change the target id set of the curation to match the existing entry\n"
-                    f"\t(i.e. {list(x.ids for x in maybe_existing_synonym_term.associated_id_sets)}\n"
+                    f"\t(i.e. {all_ids_on_existing_syn_term}\n"
                     f"3) Change the string normalizer function to generate unique term_norms\n"
-                    f"curated synonym: <{curated_synonym}> asked for one of:\n{wanted_str}\n\n"
-                    f"existing term synonyms: <{maybe_existing_synonym_term.terms}> has associated ID set:\n{found_str}\n"
                 )
-        else:
-            logger.info(f"no term_norm found for {term_norm}. A new entry will be created")
 
-        if len(matched_assoc_id_set) == 0:
+        logger.info(
+            f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
+        )
+        # see if we've already had to group all the ids in this id_set in some way for a different synonym
+        set_of_assoc_id_set = set()
+        for idx in id_set:
+            assoc_id_sets_for_this_id = self.synonym_db.get_associated_id_sets_for_id(
+                self.name, idx
+            )
+            if len(assoc_id_sets_for_this_id) == 0:
+                raise CurationException(
+                    f"{log_prefix} but could not find element {idx} of id_set {id_set} in synonym database"
+                )
+            set_of_assoc_id_set.update(assoc_id_sets_for_this_id)
+
+        associated_id_set_for_new_synonym_term = None
+
+        # see if an existing AssociatedIdSet contains all the relevant IDs
+        # we need the sort as we want to try to match to the smallest instance of AssociatedIdSets first.
+        # This is because this is the least ambiguous - if we don't sort, we're potentially matching to
+        # a larger, more ambiguous one than we need, and are potentially creating a disambiguation problem
+        # where none exists
+        for associated_id_set in sorted(set_of_assoc_id_set, key=len, reverse=False):
+            all_ids_in_assoc_id_set = set(
+                id_ for equiv_id_set in associated_id_set for id_ in equiv_id_set.ids
+            )
+            if id_set.issubset(all_ids_in_assoc_id_set):
+                associated_id_set_for_new_synonym_term = associated_id_set
+                logger.info(
+                    f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_set}"
+                )
+                break
+
+        if associated_id_set_for_new_synonym_term is None:
             # something to be careful about here: we assume that if no appropriate AssociatedIdSet can be
             # reused, we need to create a new one. If one cannot be found, we 'assume' that the input
             # id_sets must relate to different concepts (i.e. - we create a new equivalent ID set for each
-            # id, which must later be disambiguated. This assumption may be inappropriate in cases. This is
-            # best avoided by having the curation contain as few ID's as possible, such that the chances
-            # that an existing AssociatedIdSet can be reused are higher
+            # id, which must later be disambiguated). This assumption may be inappropriate in cases. This is
+            # best avoided by having the curation contain as few IDs as possible, such that the chances
+            # that an existing AssociatedIdSet can be reused are higher.
             logger.info(
                 f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
             )
-            associated_id_sets = frozenset(
-                [
-                    EquivalentIdSet(
-                        ids_and_source=frozenset(
-                            [
-                                (
-                                    idx,
-                                    self.find_kb(idx),
-                                )
-                            ]
+            associated_id_set_for_new_synonym_term = frozenset(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        (
+                            (
+                                idx,
+                                self.find_kb(idx),
+                            ),
                         )
                     )
-                    for idx in id_set
-                ]
-            )
-        else:
-            associated_id_sets = sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False)[0]
-            logger.info(
-                f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_sets}"
+                )
+                for idx in id_set
             )
 
         is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
         new_term = SynonymTerm(
             term_norm=term_norm,
-            terms=frozenset([curated_synonym]),
+            terms=frozenset((curated_synonym,)),
             is_symbolic=is_symbolic,
             mapping_types=frozenset(("kazu_curated",)),
-            associated_id_sets=associated_id_sets,
+            associated_id_sets=associated_id_set_for_new_synonym_term,
             parser_name=self.name,
             aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
         )
