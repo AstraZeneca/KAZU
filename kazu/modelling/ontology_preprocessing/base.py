@@ -438,7 +438,7 @@ class OntologyParser(ABC):
             ) = self.synonym_db.drop_equivalent_id_set_containing_id_from_all_synonym_terms(
                 self.name, idx
             )
-            if terms_modified + terms_dropped == 0:
+            if terms_modified == 0 and terms_dropped == 0:
                 logger.warning(
                     f"failed to modify any SynonymTerms containing {idx} for {self.name}"
                 )
