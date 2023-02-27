@@ -33,6 +33,7 @@ from kazu.data.data import (
     ParserBehaviour,
     Behaviour,
     NerAction,
+    AssociatedIdSets,
 )
 from kazu.modelling.database.in_memory_db import (
     MetadataDatabase,
@@ -207,7 +208,7 @@ class OntologyParser(ABC):
         id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
-    ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
+    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """
         for a given data source, one normalised synonym may map to one or more id. In some cases, the ID may be
         duplicate/redundant (e.g. there are many chembl ids for paracetamol). In other cases, the ID may refer to
@@ -396,7 +397,7 @@ class OntologyParser(ABC):
             logger.info(
                 f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
             )
-            associated_id_set = frozenset(
+            associated_id_sets = frozenset(
                 [
                     EquivalentIdSet(
                         ids_and_source=frozenset(
@@ -412,9 +413,9 @@ class OntologyParser(ABC):
                 ]
             )
         else:
-            associated_id_set = sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False)[0]
+            associated_id_sets = sorted(set_of_assoc_id_set, key=lambda x: len(x), reverse=False)[0]
             logger.info(
-                f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_set}"
+                f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_sets}"
             )
 
         is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
@@ -423,7 +424,7 @@ class OntologyParser(ABC):
             terms=frozenset([curated_synonym]),
             is_symbolic=is_symbolic,
             mapping_types=frozenset(("kazu_curated",)),
-            associated_id_sets=associated_id_set,
+            associated_id_sets=associated_id_sets,
             parser_name=self.name,
             aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
         )
@@ -709,7 +710,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
-    ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
+    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """
         since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
         all synonym resolution, and rely on disambiguation to decide on 'true' mappings. Answers on a postcard if anyone
@@ -1417,7 +1418,7 @@ class CellosaurusOntologyParser(OntologyParser):
         id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
-    ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
+    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """
         treat all synonyms as seperate cell lines
 

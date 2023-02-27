@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from copy import deepcopy
-from typing import Set, Tuple, FrozenSet
+from typing import Set, Tuple
 
 import pytest
 
@@ -14,6 +14,7 @@ from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     ParserBehaviour,
+    AssociatedIdSets,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import (
@@ -42,7 +43,7 @@ class DummyParserWithAggOverride(DummyParser):
         id_and_source: Set[Tuple[str, str]],
         is_symbolic: bool,
         original_syn_set: Set[str],
-    ) -> Tuple[FrozenSet[EquivalentIdSet], EquivalentIdAggregationStrategy]:
+    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         if TARGET_SYNONYM in original_syn_set:
             return (
                 frozenset(

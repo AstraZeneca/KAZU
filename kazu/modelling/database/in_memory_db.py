@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from enum import auto
-from typing import Optional, Dict, List, Tuple, Set, Iterable, FrozenSet
+from typing import Optional, Dict, List, Tuple, Set, Iterable
 
 from kazu.data.data import (
     SynonymTerm,
@@ -11,7 +11,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     AutoNameEnum,
     EquivalentIdSet,
-    AssociatedIdSet,
+    AssociatedIdSets,
 )
 from kazu.utils.utils import Singleton
 
@@ -99,9 +99,7 @@ class SynonymDatabase(metaclass=Singleton):
         self._syns_by_aggregation_strategy: Dict[
             ParserName, Dict[EquivalentIdAggregationStrategy, Dict[Idx, Set[NormalisedSynonymStr]]]
         ] = {}
-        self._associated_id_sets_by_id: Dict[
-            ParserName, Dict[str, Set[FrozenSet[EquivalentIdSet]]]
-        ] = {}
+        self._associated_id_sets_by_id: Dict[ParserName, Dict[str, Set[AssociatedIdSets]]] = {}
 
         self.loaded_parsers: Set[ParserName] = set()
 
@@ -311,5 +309,5 @@ class SynonymDatabase(metaclass=Singleton):
         """
         return self._syns_database_by_syn[name]
 
-    def get_associated_id_sets_for_id(self, name: ParserName, idx: Idx) -> Set[AssociatedIdSet]:
+    def get_associated_id_sets_for_id(self, name: ParserName, idx: Idx) -> Set[AssociatedIdSets]:
         return self._associated_id_sets_by_id[name][idx]
