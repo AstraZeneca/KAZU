@@ -258,6 +258,7 @@ class SynonymDatabase(metaclass=Singleton):
         for assoc_id_set in self.get_associated_id_sets_for_id(name, id_to_drop):
             for equiv_id_set in assoc_id_set:
                 if id_to_drop in equiv_id_set.ids:
+                    # list call because we modify the underlying structure within the loop
                     for term_norm in list(self.get_all(name)):
                         result = self.drop_equivalent_id_set_from_synonym_term(
                             name, term_norm, equiv_id_set
