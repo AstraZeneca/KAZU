@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from enum import auto
-from typing import Optional, Dict, List, Tuple, Set, Iterable
+from typing import Optional, Dict, List, Tuple, Set, Iterable, Literal
 
 from kazu.data.data import (
     SynonymTerm,
@@ -103,7 +103,9 @@ class SynonymDatabase(metaclass=Singleton):
 
         self.loaded_parsers: Set[ParserName] = set()
 
-    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> DBModificationResult:
+    def add(
+        self, name: ParserName, synonyms: Iterable[SynonymTerm]
+    ) -> Literal[DBModificationResult.SYNONYM_TERM_ADDED, DBModificationResult.NO_ACTION]:
         """
         add synonyms to the database.
 
@@ -112,7 +114,9 @@ class SynonymDatabase(metaclass=Singleton):
         :return:
         """
         self.loaded_parsers.add(name)
-        result = DBModificationResult.NO_ACTION
+        result: Literal[
+            DBModificationResult.SYNONYM_TERM_ADDED, DBModificationResult.NO_ACTION
+        ] = DBModificationResult.NO_ACTION
         if name not in self._syns_database_by_syn:
             self._syns_database_by_syn[name] = {}
             self._associated_id_sets_by_id[name] = defaultdict(set)
@@ -133,7 +137,7 @@ class SynonymDatabase(metaclass=Singleton):
 
     def drop_synonym_term(
         self, name: ParserName, synonym: NormalisedSynonymStr
-    ) -> DBModificationResult:
+    ) -> Literal[DBModificationResult.SYNONYM_TERM_DROPPED]:
         """
         remove a synonym term from the database
 
@@ -145,7 +149,9 @@ class SynonymDatabase(metaclass=Singleton):
         self._syns_database_by_syn[name].pop(synonym)
         return DBModificationResult.SYNONYM_TERM_DROPPED
 
-    def drop_id_from_all_synonym_terms(self, name: ParserName, idx: str) -> DBModificationResult:
+    def drop_id_from_all_synonym_terms(
+        self, name: ParserName, idx: str
+    ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION]:
         """
         remove a given id from all synonym terms. If no other ids remain, drop the synonym term all together
 
@@ -154,7 +160,9 @@ class SynonymDatabase(metaclass=Singleton):
         :param idx:
         :return:
         """
-        result = DBModificationResult.NO_ACTION
+        result: Literal[
+            DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION
+        ] = DBModificationResult.NO_ACTION
         set_of_associated_id_set = self.get_associated_id_sets_for_id(name, idx)
         for term in list(self._syns_database_by_syn[name].values()):
             if term.associated_id_sets in set_of_associated_id_set:
@@ -179,7 +187,7 @@ class SynonymDatabase(metaclass=Singleton):
 
     def drop_equivalent_id_set_from_synonym_term(
         self, name: ParserName, synonym: NormalisedSynonymStr, id_set_to_drop: EquivalentIdSet
-    ) -> DBModificationResult:
+    ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.SYNONYM_TERM_DROPPED]:
         """
         remove an EquivalentIdSet from a synonym term, dropping the term all together if
         no others remain
@@ -198,7 +206,10 @@ class SynonymDatabase(metaclass=Singleton):
 
     def _modify_or_drop_synonym_term_after_id_set_change(
         self, id_sets: Set[EquivalentIdSet], name: ParserName, synonym_term: SynonymTerm
-    ):
+    ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.SYNONYM_TERM_DROPPED]:
+        result: Literal[
+            DBModificationResult.ID_SET_MODIFIED, DBModificationResult.SYNONYM_TERM_DROPPED
+        ]
         if len(id_sets) > 0:
             new_term = dataclasses.replace(
                 synonym_term,
