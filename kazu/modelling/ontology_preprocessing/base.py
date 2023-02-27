@@ -452,11 +452,11 @@ class OntologyParser(ABC):
                 )
 
         elif behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
-            result = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[union-attr]
+            result = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)
             if result == DBModificationResult.NO_ACTION:
-                logger.warning(f"failed to drop {idx} from {self.name}")
+                logger.warning("failed to drop %s from %s", idx, self.name)
             else:
-                logger.info(f"dropped ID {idx} from {self.name}")
+                logger.info("dropped ID %s from %s", idx, self.name)
 
         else:
             affected_term_key = StringNormalizer.normalize(
@@ -465,12 +465,14 @@ class OntologyParser(ABC):
             if behaviour is ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
                 try:
                     self.synonym_db.drop_synonym_term(self.name, affected_term_key)
-                    logger.warning(
-                        f"successfully dropped {affected_term_key} from database for {self.name}"
+                    logger.info(
+                        "successfully dropped %s from database for %s", affected_term_key, self.name
                     )
                 except IndexError:
                     logger.warning(
-                        f"tried to drop {affected_term_key} from database, but key doesn't exist for {self.name}"
+                        "tried to drop %s from database, but key doesn't exist for %s",
+                        affected_term_key,
+                        self.name,
                     )
 
             elif behaviour is ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
@@ -483,13 +485,19 @@ class OntologyParser(ABC):
                             result = self.synonym_db.drop_equivalent_id_set_from_synonym_term(
                                 self.name, affected_term_key, equiv_id_set
                             )
-                            if result == DBModificationResult.NO_ACTION:
+                            if result is DBModificationResult.NO_ACTION:
                                 logger.warning(
-                                    f"failed to drop {idx} from any EquivalentIdSet for key {affected_term_key} for {self.name}"
+                                    "failed to drop %s from any EquivalentIdSet for key %s for %s",
+                                    idx,
+                                    affected_term_key,
+                                    self.name,
                                 )
                             else:
                                 logger.info(
-                                    f"dropped an EquivalentIdSet containing {idx} for key {affected_term_key} for {self.name}"
+                                    "dropped an EquivalentIdSet containing %s for key %s for %s",
+                                    idx,
+                                    affected_term_key,
+                                    self.name,
                                 )
 
     def process_curations(self):
