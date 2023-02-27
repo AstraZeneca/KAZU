@@ -70,6 +70,7 @@ dev = [
   # to allow profiling
   # of the steps.
   "tensorboard",
+  "towncrier",
 ]
 
 [build-system]
@@ -129,3 +130,13 @@ module = [
     "py4j.*",
 ]
 ignore_missing_imports = true
+
+[tool.towncrier]
+package = "kazu"
+directory = "docs/_changelog.d"
+package-dir = "kazu"
+filename = "CHANGELOG.md"
+template = "docs/_changelog.d/changelog_template.jinja"
+title_format = "## {version} - {project_date}"
+underlines = ["", "", ""]
+start_string= "<!-- towncrier release notes start -->\n"
