@@ -431,7 +431,7 @@ class OntologyParser(ABC):
     def _attempt_to_modify_database_entry_for_curation(
         self, behaviour: ParserBehaviour, idx: str, curated_synonym: Optional[str]
     ):
-        if behaviour == ParserBehaviour.DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS:
+        if behaviour is ParserBehaviour.DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS:
             (
                 terms_modified,
                 terms_dropped,
@@ -447,7 +447,7 @@ class OntologyParser(ABC):
                     f"modified {terms_modified} and dropped {terms_dropped} SynonymTerms containing {idx} for {self.name}"
                 )
 
-        elif behaviour == ParserBehaviour.DROP_ID_FROM_PARSER:
+        elif behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
             result = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[union-attr]
             if result == DBModificationResult.NO_ACTION:
                 logger.warning(f"failed to drop {idx} from {self.name}")
@@ -458,7 +458,7 @@ class OntologyParser(ABC):
             affected_term_key = StringNormalizer.normalize(
                 curated_synonym, entity_class=self.entity_class
             )
-            if behaviour == ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
+            if behaviour is ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
                 try:
                     self.synonym_db.drop_synonym_term(self.name, affected_term_key)
                     logger.warning(
@@ -469,7 +469,7 @@ class OntologyParser(ABC):
                         f"tried to drop {affected_term_key} from database, but key doesn't exist for {self.name}"
                     )
 
-            elif behaviour == ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
+            elif behaviour is ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
                 target_associated_id_sets = self.synonym_db.get_associated_id_sets_for_id(
                     self.name, idx
                 )
