@@ -688,7 +688,7 @@ class Curation:
     A Curation is a means to provide override behaviour to dictionary based NER methods
     and the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`.
 
-    For instance, by specifying Actions, one can tell such systems to ignore certain terms or IDs
+    For instance, by specifying :class:`~kazu.data.data.Action`\ s, one can tell such systems to ignore certain terms or IDs
     whilst doing their work. This is useful for eliminating unwanted behaviour, e.g. the root of the Mondo
     ontology is http://purl.obolibrary.org/obo/HP_0000001, which has a default label of 'All'. Since this is
     such a common word, and not very useful in terms of linking, we would want to eliminate it from both
@@ -733,28 +733,21 @@ class Curation:
 
     def _validate_parser_actions(self):
         for action_index, parser_action in enumerate(self.parser_actions):
-            if (
-                len(parser_action.parser_to_target_id_mapping) == 0
-                and self.curated_synonym is not None
-            ):
+            if len(parser_action.parser_to_target_id_mapping) == 0:
+                if self.curated_synonym is None:
+                    raise ValueError(
+                        f"curation has neither curated_synonym nor parser_to_id_mappings specified {self}"
+                    )
+
                 self._general_behaviours[action_index] = self._resolve_no_mappings_with_synonym(
                     parser_action
                 )
-            elif (
-                len(parser_action.parser_to_target_id_mapping) > 0
-                and self.curated_synonym is not None
-            ):
-                self._resolve_with_mappings_with_synonym(action_index, parser_action)
-            elif (
-                len(parser_action.parser_to_target_id_mapping) == 0 and self.curated_synonym is None
-            ):
-                raise ValueError(
-                    f"curation has neither curated_synonym nor parser_to_id_mappings specified {self}"
-                )
-            elif (
-                len(parser_action.parser_to_target_id_mapping) > 0 and self.curated_synonym is None
-            ):
-                self._resolve_with_mappings_no_synonym(action_index, parser_action)
+
+            else:
+                if self.curated_synonym is None:
+                    self._resolve_with_mappings_no_synonym(action_index, parser_action)
+                else:
+                    self._resolve_with_mappings_with_synonym(action_index, parser_action)
 
     def _resolve_with_mappings_no_synonym(
         self,
@@ -771,7 +764,7 @@ class Curation:
         else:
             for parser_name, maybe_id in parser_action.parser_to_target_id_mapping.items():
                 if maybe_id is None:
-                    raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR} {self}")
+                    raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
                 else:
                     self._parser_name_to_behaviour[parser_name][action_index] = (
                         parser_action.behaviour,
@@ -808,7 +801,7 @@ class Curation:
     ) -> ParserBehaviourAndId:
         if parser_action.behaviour != ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
             raise ValueError(
-                f"curation is configured to interact with IDs, but no parser/id mappings are specified {self}"
+                f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}"
             )
         return parser_action.behaviour, None
 
