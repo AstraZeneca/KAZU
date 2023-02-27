@@ -176,16 +176,15 @@ class SynonymDatabase(metaclass=Singleton):
             if term.associated_id_sets in set_of_associated_id_set:
                 new_assoc_id_set = set()
                 for equiv_id_set in term.associated_id_sets:
-                    if idx in equiv_id_set.ids:
-                        updated_id_set = EquivalentIdSet(
-                            frozenset(
-                                id_tup for id_tup in equiv_id_set.ids_and_source if id_tup[0] != idx
-                            )
-                        )
-                        if len(updated_id_set.ids_and_source) > 0:
-                            new_assoc_id_set.add(updated_id_set)
-                    else:
+                    updated_ids_and_source = frozenset(
+                        id_tup for id_tup in equiv_id_set.ids_and_source if id_tup[0] != idx
+                    )
+                    if len(updated_ids_and_source) == len(equiv_id_set.ids_and_source):
+                        # no change - just use the original EquivalentIdSet
                         new_assoc_id_set.add(equiv_id_set)
+                    elif len(updated_ids_and_source) > 0:
+                        updated_equiv_id_set = EquivalentIdSet(updated_ids_and_source)
+                        new_assoc_id_set.add(updated_equiv_id_set)
                 self._modify_or_drop_synonym_term_after_id_set_change(
                     id_sets=new_assoc_id_set, name=name, synonym_term=term
                 )
@@ -197,8 +196,9 @@ class SynonymDatabase(metaclass=Singleton):
         self, name: ParserName, synonym: NormalisedSynonymStr, id_set_to_drop: EquivalentIdSet
     ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.SYNONYM_TERM_DROPPED]:
         """
-        remove an EquivalentIdSet from a synonym term, dropping the term all together if
-        no others remain
+        Remove an :class:`~kazu.data.data.EquivalentIdSet` from a :class:`~kazu.data.data.SynonymTerm`\\ ,
+        dropping the term altogether if no others remain.
+
 
         :param name:
         :param synonym:
