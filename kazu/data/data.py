@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
 from math import inf
+from operator import itemgetter
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, DefaultDict
 
 from numpy import ndarray, float32, float16
@@ -680,11 +681,12 @@ ID_MODIFYING_BEHAVIOURS = {
     ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
 }
 ParserBehaviourAndId = Tuple[ParserBehaviour, Optional[str]]
+ParserBehaviourIdandIndex = Tuple[ParserBehaviour, Optional[str], int]
 
 
 @dataclass(frozen=True)
 class Curation:
-    """
+    r"""
     A Curation is a means to provide override behaviour to dictionary based NER methods
     and the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`.
 
@@ -702,11 +704,11 @@ class Curation:
     case_sensitive: bool
     curated_synonym: Optional[str] = None
     # parser specific behaviours
-    _parser_name_to_behaviour: DefaultDict[str, Dict[int, ParserBehaviourAndId]] = field(
-        default_factory=lambda: defaultdict(dict)
+    _parser_name_to_behaviour: DefaultDict[str, List[ParserBehaviourIdandIndex]] = field(
+        default_factory=lambda: defaultdict(list)
     )
     # general behaviours affect all parsers
-    _general_behaviours: Dict[int, ParserBehaviourAndId] = field(default_factory=dict)
+    _general_behaviours: List[ParserBehaviourIdandIndex] = field(default_factory=list)
 
     def __post_init__(self):
         # data validation
@@ -739,9 +741,7 @@ class Curation:
                         f"curation has neither curated_synonym nor parser_to_id_mappings specified {self}"
                     )
 
-                self._general_behaviours[action_index] = self._resolve_no_mappings_with_synonym(
-                    parser_action
-                )
+                self._resolve_no_mappings_with_synonym(action_index, parser_action)
 
             else:
                 if self.curated_synonym is None:
@@ -766,9 +766,12 @@ class Curation:
                 if maybe_id is None:
                     raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
                 else:
-                    self._parser_name_to_behaviour[parser_name][action_index] = (
-                        parser_action.behaviour,
-                        maybe_id,
+                    self._parser_name_to_behaviour[parser_name].append(
+                        (
+                            parser_action.behaviour,
+                            maybe_id,
+                            action_index,
+                        )
                     )
 
     def _resolve_with_mappings_with_synonym(
@@ -781,9 +784,12 @@ class Curation:
                 if parser_action.behaviour in ID_MODIFYING_BEHAVIOURS:
                     raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
                 elif parser_action.behaviour == ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
-                    self._parser_name_to_behaviour[parser_name][action_index] = (
-                        parser_action.behaviour,
-                        None,
+                    self._parser_name_to_behaviour[parser_name].append(
+                        (
+                            parser_action.behaviour,
+                            None,
+                            action_index,
+                        )
                     )
 
                 else:
@@ -791,22 +797,24 @@ class Curation:
                         f"Unknown {parser_action.behaviour.__class__} value: {parser_action.behaviour}"
                     )
             else:
-                self._parser_name_to_behaviour[parser_name][action_index] = (
-                    parser_action.behaviour,
-                    maybe_id,
+                self._parser_name_to_behaviour[parser_name].append(
+                    (
+                        parser_action.behaviour,
+                        maybe_id,
+                        action_index,
+                    )
                 )
 
-    def _resolve_no_mappings_with_synonym(
-        self, parser_action: ParserAction
-    ) -> ParserBehaviourAndId:
+    def _resolve_no_mappings_with_synonym(self, action_index: int, parser_action: ParserAction):
         if parser_action.behaviour != ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
-            raise ValueError(
-                f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}"
+            raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
+        self._general_behaviours.append(
+            (
+                parser_action.behaviour,
+                None,
+                action_index,
             )
-        return parser_action.behaviour, None
-
-    def ner_action(self, entity_class=str) -> NerAction:
-        raise NotImplementedError()
+        )
 
     def parser_behaviour(self, parser_name: str) -> Iterable[ParserBehaviourAndId]:
         """
@@ -817,12 +825,15 @@ class Curation:
         :param parser_name:
         :return:
         """
-        for action_index in range(len(self.parser_actions)):
-            maybe_parser_behaviour_and_id = self._general_behaviours.get(
-                action_index, self._parser_name_to_behaviour.get(parser_name, {}).get(action_index)
+        parser_specific_behaviours = self._parser_name_to_behaviour.get(parser_name)
+        if parser_specific_behaviours is None:
+            behaviour_iterable = self._general_behaviours
+        else:
+            behaviour_iterable = sorted(
+                parser_specific_behaviours + self._general_behaviours, key=itemgetter(2)
             )
-            if maybe_parser_behaviour_and_id is not None:
-                yield maybe_parser_behaviour_and_id
+
+        yield from ((behaviour, id_) for (behaviour, id_, action_index) in behaviour_iterable)
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "Curation":
