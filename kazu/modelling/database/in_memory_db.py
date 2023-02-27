@@ -1,6 +1,5 @@
 import dataclasses
 import logging
-from collections import defaultdict
 from copy import deepcopy
 from enum import auto
 from typing import Optional, Dict, List, Tuple, Set, Iterable, Literal
@@ -119,7 +118,7 @@ class SynonymDatabase(metaclass=Singleton):
         ] = DBModificationResult.NO_ACTION
         if name not in self._syns_database_by_syn:
             self._syns_database_by_syn[name] = {}
-            self._associated_id_sets_by_id[name] = defaultdict(set)
+            self._associated_id_sets_by_id[name] = {}
         for synonym in synonyms:
             self._syns_database_by_syn[name][synonym.term_norm] = synonym
             for equiv_ids in synonym.associated_id_sets:
@@ -130,7 +129,9 @@ class SynonymDatabase(metaclass=Singleton):
                     )
                     syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(idx, set())
                     syn_set_for_this_id.add(synonym.term_norm)
-                    self._associated_id_sets_by_id[name][idx].add(synonym.associated_id_sets)
+                    self._associated_id_sets_by_id[name].setdefault(idx, set()).add(
+                        synonym.associated_id_sets
+                    )
 
                     result = DBModificationResult.SYNONYM_TERM_ADDED
         return result
@@ -322,4 +323,4 @@ class SynonymDatabase(metaclass=Singleton):
         return self._syns_database_by_syn[name]
 
     def get_associated_id_sets_for_id(self, name: ParserName, idx: Idx) -> Set[AssociatedIdSets]:
-        return self._associated_id_sets_by_id[name][idx]
+        return self._associated_id_sets_by_id[name].get(idx, set())
