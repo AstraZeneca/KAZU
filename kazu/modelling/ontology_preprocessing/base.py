@@ -264,19 +264,17 @@ class OntologyParser(ABC):
                     EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC,
                 )
             else:
-                id_to_label = {
-                    (
-                        idx,
-                        source,
-                    ): str(self.metadata_db.get_by_idx(self.name, idx)[DEFAULT_LABEL])
-                    for idx, source in ids_and_source
-                }
-
                 # use similarity to group ids into EquivalentIdSets
                 IdsAndSource = Set[Tuple[str, str]]
                 DefaultLabels = Set[str]
                 id_list: List[Tuple[IdsAndSource, DefaultLabels]] = []
-                for id_and_source_tuple, default_label in id_to_label.items():
+                for id_and_source_tuple in ids_and_source:
+                    default_label = cast(
+                        str,
+                        self.metadata_db.get_by_idx(self.name, id_and_source_tuple[0])[
+                            DEFAULT_LABEL
+                        ],
+                    )
                     most_similar_id_set = None
                     best_score = 0.0
                     for id_and_default_label_set in id_list:
