@@ -244,8 +244,8 @@ class SynonymDatabase(metaclass=Singleton):
         self, name: ParserName, id_to_drop: Idx
     ) -> Tuple[int, int]:
         """
-        remove all EquivalentIdSet's that contain this id from all SynonymTerms
-        in the database
+        Remove all :class:`~kazu.data.data.EquivalentIdSet`\\ s that contain this id from all
+        :class:`~kazu.data.data.SynonymTerm`\\ s in the database.
 
         :param name:
         :param id_to_drop:
