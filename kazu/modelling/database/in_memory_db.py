@@ -219,6 +219,13 @@ class SynonymDatabase(metaclass=Singleton):
             DBModificationResult.ID_SET_MODIFIED, DBModificationResult.SYNONYM_TERM_DROPPED
         ]
         if len(id_sets) > 0:
+            if id_sets == synonym_term.associated_id_sets:
+                raise ValueError(
+                    "function called inappropriately where the id sets haven't changed. This"
+                    "has failed as it will otherwise modify the value of aggregated_by, when"
+                    "nothing has changed"
+                )
+
             new_term = dataclasses.replace(
                 synonym_term,
                 associated_id_sets=frozenset(id_sets),
