@@ -150,7 +150,7 @@ class SynonymDatabase(metaclass=Singleton):
         return DBModificationResult.SYNONYM_TERM_DROPPED
 
     def drop_id_from_all_synonym_terms(
-        self, name: ParserName, idx: str
+        self, name: ParserName, idx: Idx
     ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION]:
         """
         remove a given id from all synonym terms. If no other ids remain, drop the synonym term all together
