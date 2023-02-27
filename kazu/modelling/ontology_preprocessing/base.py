@@ -52,7 +52,7 @@ SYN = "syn"
 MAPPING_TYPE = "mapping_type"
 SOURCE = "source"
 DATA_ORIGIN = "data_origin"
-
+IdsAndSource = Set[Tuple[str, str]]
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ class OntologyParser(ABC):
 
     def score_and_group_ids(
         self,
-        ids_and_source: Set[Tuple[str, str]],
+        ids_and_source: IdsAndSource,
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
@@ -265,7 +265,7 @@ class OntologyParser(ABC):
                 )
             else:
                 # use similarity to group ids into EquivalentIdSets
-                IdsAndSource = Set[Tuple[str, str]]
+
                 DefaultLabels = Set[str]
                 id_list: List[Tuple[IdsAndSource, DefaultLabels]] = []
                 for id_and_source_tuple in ids_and_source:
@@ -708,7 +708,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
     def score_and_group_ids(
         self,
-        id_and_source: Set[Tuple[str, str]],
+        ids_and_source: IdsAndSource,
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
@@ -724,7 +724,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         """
 
         return (
-            frozenset(EquivalentIdSet(ids_and_source=frozenset((id_,))) for id_ in id_and_source),
+            frozenset(EquivalentIdSet(ids_and_source=frozenset((id_,))) for id_ in ids_and_source),
             EquivalentIdAggregationStrategy.CUSTOM,
         )
 
@@ -1416,7 +1416,7 @@ class CellosaurusOntologyParser(OntologyParser):
 
     def score_and_group_ids(
         self,
-        id_and_source: Set[Tuple[str, str]],
+        ids_and_source: IdsAndSource,
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
@@ -1435,7 +1435,7 @@ class CellosaurusOntologyParser(OntologyParser):
                 EquivalentIdSet(
                     ids_and_source=frozenset((id_,)),
                 )
-                for id_ in id_and_source
+                for id_ in ids_and_source
             ),
             EquivalentIdAggregationStrategy.CUSTOM,
         )
