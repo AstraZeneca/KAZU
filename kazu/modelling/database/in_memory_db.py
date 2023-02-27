@@ -153,7 +153,8 @@ class SynonymDatabase(metaclass=Singleton):
         self, name: ParserName, idx: Idx
     ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION]:
         """
-        remove a given id from all synonym terms. If no other ids remain, drop the synonym term all together
+        Remove a given id from all :class:`~kazu.data.data.SynonymTerm`\\ s.
+        Drop any :class:`~kazu.data.data.SynonymTerm`\\ s with no remaining ID after removal.
 
 
         :param name:
