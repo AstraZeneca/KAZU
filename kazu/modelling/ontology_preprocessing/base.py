@@ -440,11 +440,15 @@ class OntologyParser(ABC):
             )
             if terms_modified == 0 and terms_dropped == 0:
                 logger.warning(
-                    f"failed to modify any SynonymTerms containing {idx} for {self.name}"
+                    "failed to modify any SynonymTerms containing %s for %s", idx, self.name
                 )
             else:
                 logger.info(
-                    f"modified {terms_modified} and dropped {terms_dropped} SynonymTerms containing {idx} for {self.name}"
+                    "modified %s and dropped %s SynonymTerms containing %s for %s",
+                    terms_modified,
+                    terms_dropped,
+                    idx,
+                    self.name,
                 )
 
         elif behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
