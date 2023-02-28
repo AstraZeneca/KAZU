@@ -519,7 +519,7 @@ class OntologyParser(ABC):
 
     def _process_parser_behaviours(self, curation: Curation):
         for (behaviour, maybe_id) in curation.parser_behaviour(self.name):
-            if behaviour == ParserBehaviour.ADD:
+            if behaviour is ParserBehaviour.ADD:
                 # we know that maybe_id is a string through the data validation of Curation
                 self._attempt_to_add_database_entry_for_curation(
                     {maybe_id}, curation.curated_synonym  # type: ignore[arg-type]
