@@ -2,9 +2,10 @@ import json
 import logging
 import re
 from copy import deepcopy
-from typing import Set, Tuple
-from contextlib import nullcontext as does_not_raise
+from typing import Set, Tuple, Union
+from contextlib import nullcontext
 import pytest
+from _pytest.python_api import RaisesContext
 
 from kazu.data.data import (
     Curation,
@@ -392,10 +393,11 @@ def test_declarative_curation_logic(
         # temporary directory set up using the tmp_path fixture inside the test
         parser_1, parser_2 = get_test_parsers(test_id, path)
 
+        expectation: Union[RaisesContext[CurationException], nullcontext]
         if should_raise_exception_when_attempting_to_add_term in test_id:
             expectation = pytest.raises(CurationException)
         else:
-            expectation = does_not_raise(True)
+            expectation = nullcontext(True)
 
         with expectation:
             parser_1.populate_databases()
