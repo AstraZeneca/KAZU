@@ -505,6 +505,8 @@ class OntologyParser(ABC):
             for curation in self.curations:
                 self._process_parser_behaviours(curation)
                 self._process_ner_actions(curation)
+        else:
+            logger.info("No curations provided for %s", self.name)
 
     def _process_ner_actions(self, curation: Curation):
         # todo
