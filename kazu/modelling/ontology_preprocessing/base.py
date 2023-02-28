@@ -429,14 +429,14 @@ class OntologyParser(ABC):
         return new_term
 
     def _attempt_to_modify_database_entry_for_curation(
-        self, behaviour: ParserBehaviour, idx: str, curated_synonym: Optional[str]
+        self, behaviour: ParserBehaviour, idx: Optional[str], curated_synonym: Optional[str]
     ):
         if behaviour is ParserBehaviour.DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS:
             (
                 terms_modified,
                 terms_dropped,
             ) = self.synonym_db.drop_equivalent_id_set_containing_id_from_all_synonym_terms(
-                self.name, idx
+                self.name, idx  # type: ignore[arg-type]
             )
             if terms_modified == 0 and terms_dropped == 0:
                 logger.warning(
@@ -452,8 +452,8 @@ class OntologyParser(ABC):
                 )
 
         elif behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
-            result = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)
-            if result == DBModificationResult.NO_ACTION:
+            drop_id_from_parser_result = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
+            if drop_id_from_parser_result == DBModificationResult.NO_ACTION:
                 logger.warning("failed to drop %s from %s", idx, self.name)
             else:
                 logger.info("dropped ID %s from %s", idx, self.name)
@@ -477,15 +477,20 @@ class OntologyParser(ABC):
 
             elif behaviour is ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
                 target_associated_id_sets = self.synonym_db.get_associated_id_sets_for_id(
-                    self.name, idx
+                    self.name, idx  # type: ignore[arg-type]
                 )
                 for target_associated_id_set in target_associated_id_sets:
                     for equiv_id_set in target_associated_id_set:
                         if idx in equiv_id_set.ids:
-                            result = self.synonym_db.drop_equivalent_id_set_from_synonym_term(
-                                self.name, affected_term_key, equiv_id_set
+                            drop_equivalent_id_set_from_synonym_term_result = (
+                                self.synonym_db.drop_equivalent_id_set_from_synonym_term(
+                                    self.name, affected_term_key, equiv_id_set
+                                )
                             )
-                            if result is DBModificationResult.ID_SET_MODIFIED:
+                            if (
+                                drop_equivalent_id_set_from_synonym_term_result
+                                is DBModificationResult.ID_SET_MODIFIED
+                            ):
                                 logger.info(
                                     "dropped an EquivalentIdSet containing %s for key %s for %s",
                                     idx,
