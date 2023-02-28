@@ -157,6 +157,15 @@ class OntologyMatcher:
 
         for parser in parsers:
             curation_with_term_norms = parser.populate_databases(force=True)
+            assert (
+                curation_with_term_norms is not None
+            ), f"tried to create PhraseMatchers from Curations for parser {parser.name}, but none have been provided"
+            if len(curation_with_term_norms) == 0:
+                logger.warning(
+                    "tried to create PhraseMatchers from Curations for parser %s, but no CurationWithTermNorms were created",
+                    parser.name,
+                )
+
             # spacy's typing isn't smart enough to know this will have a 'pipe' attr
             patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
                 # we need it lowercased for the case-insensitive matcher
