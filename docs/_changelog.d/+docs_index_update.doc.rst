@@ -1,1 +1,0 @@
-Added link to changelogs on main documentation page.
