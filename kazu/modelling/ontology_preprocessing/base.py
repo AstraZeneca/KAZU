@@ -1258,7 +1258,6 @@ class EnsemblOntologyParser(OntologyParser):
         in_path: str,
         entity_class: str,
         name: str,
-        additional_syns_path: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
@@ -1275,9 +1274,6 @@ class EnsemblOntologyParser(OntologyParser):
             name=name,
             curations=curations,
         )
-
-        with open(additional_syns_path, "r") as f:
-            self.additional_syns = json.load(f)
 
     def find_kb(self, string: str) -> str:
         return "ENSEMBL"
@@ -1337,12 +1333,6 @@ class EnsemblOntologyParser(OntologyParser):
                 for synonym_str, mapping_t in synonyms:
                     all_mapping_type.append(mapping_t)
                     synonyms_strings.append(synonym_str)
-
-                # also include any additional synonyms we've defined
-                additional_syns = self.additional_syns["additional_syns"].get(ensembl_gene_id, [])
-                for additional_syn in additional_syns:
-                    synonyms_strings.append(additional_syn)
-                    all_mapping_type.append("kazu_curated")
 
                 num_syns = len(synonyms_strings)
                 ids.extend([ensembl_gene_id] * num_syns)
