@@ -23,9 +23,6 @@ from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
-CURATIONS_PATH = Path("curations.json")
-
-
 @dataclass
 class BuildConfiguration:
     """Dataclass that controls how a base model pack and config should be merged with a
