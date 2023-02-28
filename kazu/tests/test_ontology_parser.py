@@ -47,7 +47,7 @@ class DummyParserWithAggOverride(DummyParser):
         if TARGET_SYNONYM in original_syn_set:
             return (
                 frozenset(
-                    [
+                    (
                         EquivalentIdSet(
                             ids_and_source=frozenset(
                                 [
@@ -60,12 +60,12 @@ class DummyParserWithAggOverride(DummyParser):
                         ),
                         EquivalentIdSet(
                             ids_and_source=frozenset(
-                                [
+                                (
                                     (ID_TO_BE_REMOVED, self.find_kb(TARGET_SYNONYM)),
-                                ]
+                                )
                             )
                         ),
-                    ]
+                )
                 ),
                 EquivalentIdAggregationStrategy.CUSTOM,
             )
