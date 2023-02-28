@@ -322,12 +322,10 @@ how it is called, one or more of the following may be required:
  a) configurations for a pipeline to be created
  b) a LabelStudioManager configuration to run acceptance tests or consistency checks, pointing to a running
   and network-accessible instance of LabelStudio
-2) a curations.json in the path <model_pack_root>/curations.json to describe how the parsers should behave and
-   how to create the Explosion string matching pipeline
-3) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order for the
+2) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order for the
   acceptance tests to run. This file should specify the thresholds per NER class/Ontology for NER/linking
   respectively (see the provided model pack for an example)
-4) a merge config in the path <model_pack_root>/base_model_merge_config.json, which determines which elements
+3) a merge config in the path <model_pack_root>/base_model_merge_config.json, which determines which elements
   of the base configuration and model pack should be used
 """
 
