@@ -664,15 +664,14 @@ class OntologyParser(ABC):
         :param ner_action:
         :return:
         """
-        for entity_class in ner_action.entity_classes:
-            if entity_class == self.entity_class:
-                maybe_target_ids_set = ner_action.parser_to_target_id_mappings.get(self.name)
-                if maybe_target_ids_set is not None:
-                    # type ignore because the function assumes a curation where there's a synonym.
-                    new_or_existing_term = self._attempt_to_add_database_entry_for_curation(
-                        id_set=maybe_target_ids_set, curated_synonym=curation.curated_synonym  # type: ignore[arg-type]
-                    )
-                    return new_or_existing_term.term_norm
+        if self.entity_class in ner_action.entity_classes:
+            maybe_target_ids_set = ner_action.parser_to_target_id_mappings.get(self.name)
+            if maybe_target_ids_set is not None:
+                # type ignore because the function assumes a curation where there's a synonym.
+                new_or_existing_term = self._attempt_to_add_database_entry_for_curation(
+                    id_set=maybe_target_ids_set, curated_synonym=curation.curated_synonym  # type: ignore[arg-type]
+                )
+                return new_or_existing_term.term_norm
         return None
 
 
