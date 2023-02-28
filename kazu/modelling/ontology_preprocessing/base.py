@@ -525,7 +525,7 @@ class OntologyParser(ABC):
     def _process_ner_actions(self, curation: Curation):
         for ner_action in curation.ner_actions:
             if ner_action.behaviour == Behaviour.DROP:
-                logger.debug(f"ignoring unwanted curation: {curation} for {self.name}")
+                logger.debug("ignoring unwanted curation: %s for %s", curation, self.name)
             else:
                 maybe_term_norm = self.find_term_norm_for_curation(curation, ner_action)
                 if maybe_term_norm is not None:
@@ -654,10 +654,21 @@ class OntologyParser(ABC):
         curation: Curation,
         ner_action: NerAction,
     ) -> Optional[str]:
+        """Find a matching term norm for the given :class:`~kazu.data.data.Curation`\\ , or create and return a new one.
+        If there's no relevant term norm, for example if the :class:`~kazu.data.data.Curation`
+        doesn't relate to this parser, return :py:data:`python:None`\\ .
+
+
+        :param curation: Expected to be a curation where the :attr:`~kazu.data.data.Curation.curated_synonym`
+            is a str (i.e. not :py:data:`python:None`\\ ).
+        :param ner_action:
+        :return:
+        """
         for entity_class in ner_action.entity_classes:
             if entity_class == self.entity_class:
                 maybe_target_ids_set = ner_action.parser_to_target_id_mappings.get(self.name)
                 if maybe_target_ids_set is not None:
+                    # type ignore because the function assumes a curation where there's a synonym.
                     new_or_existing_term = self._attempt_to_add_database_entry_for_curation(
                         id_set=maybe_target_ids_set, curated_synonym=curation.curated_synonym  # type: ignore[arg-type]
                     )
