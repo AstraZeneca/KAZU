@@ -168,11 +168,12 @@ class OntologyMatcher:
 
             # spacy's typing isn't smart enough to know this will have a 'pipe' attr
             patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
-                # we need it lowercased for the case-insensitive matcher
-                curation_with_term_norm[0].curated_synonym
-                if curation_with_term_norm[0].case_sensitive
-                else curation_with_term_norm[0].curated_synonym.lower()  # type: ignore[union-attr]
-                for curation_with_term_norm in curation_with_term_norms
+                curation.curated_synonym if curation.case_sensitive
+                # we need it lowercased for the case-insensitive matcher.
+                # type ignore as curated_synonym will not be None, as only
+                # curations with a curated_synonym will be 'matched'.
+                else curation.curated_synonym.lower()  # type: ignore[union-attr]
+                for curation, _ in curation_with_term_norms
             )
 
             for (curation, term_norm), pattern in zip(curation_with_term_norms, patterns):
