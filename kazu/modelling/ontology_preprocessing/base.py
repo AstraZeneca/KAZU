@@ -737,7 +737,10 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         """
 
         return (
-            frozenset(EquivalentIdSet(ids_and_source=frozenset((id_,))) for id_ in ids_and_source),
+            frozenset(
+                EquivalentIdSet(ids_and_source=frozenset((single_id_and_source,)))
+                for single_id_and_source in ids_and_source
+            ),
             EquivalentIdAggregationStrategy.CUSTOM,
         )
 
