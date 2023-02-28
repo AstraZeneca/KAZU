@@ -1781,3 +1781,134 @@ class HGNCGeneFamilyParser(OntologyParser):
                 for syn in row[key]
             )
         return pd.DataFrame.from_records(data)
+
+
+class TabularOntologyParser(OntologyParser):
+    """
+    for already tabulated data
+    """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        **kwargs,
+    ):
+        """
+
+        :param in_path:
+        :param entity_class:
+        :param name:
+        :param string_scorer:
+        :param synonym_merge_threshold:
+        :param data_origin:
+        :param synonym_generator:
+        :param curations:
+        :param kwargs: passed to pandas.read_csv
+        """
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            curations=curations,
+        )
+        self._raw_dataframe = pd.read_csv(self.in_path, **kwargs)
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        """
+        by default, assume input file is already in correct format. Override if different behaviour is
+        required
+
+        :return:
+        """
+        return self._raw_dataframe
+
+    def find_kb(self, string: str) -> str:
+        return self.name
+
+
+class ATCDrugClassificationParser(TabularOntologyParser):
+    def __init__(self, in_path: str, entity_class: str, name: str, **kwargs):
+        super().__init__(
+            in_path,
+            entity_class,
+            name,
+            sep="     ",
+            header=None,
+            names=["code", "level_and_description"],
+        )
+
+    levels_to_ignore = {1, 2, 3}
+
+    def find_kb(self, string: str) -> str:
+        return "ATC_DRUG_CLASS"
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        # for some reason, the level and description codes are merged, so we need to fix this here
+        df = self._raw_dataframe.applymap(str.strip)
+        df["level"] = df["level_and_description"].apply(lambda x: x[0]).astype(int)
+        df["description"] = df["level_and_description"].apply(lambda x: x[1:])
+        del df["level_and_description"]
+        data = []
+        for i, row in df.iterrows():
+            if row["level"] not in self.levels_to_ignore:
+                default_label = row["description"]
+                data.append(
+                    {
+                        SYN: default_label,
+                        MAPPING_TYPE: row["level"],
+                        DEFAULT_LABEL: default_label,
+                        IDX: row["code"],
+                    }
+                )
+        return pd.DataFrame.from_records(data)
+
+
+class StatoParser(RDFGraphParser):
+    """
+    input should be an owl file
+    e.g.
+    https://www.ebi.ac.uk/ols/ontologies/stato
+    """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        curations: Optional[List[Curation]] = None,
+    ):
+
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            uri_regex=re.compile("^http://purl.obolibrary.org/obo/(OBI|STATO)_[0-9]+$"),
+            synonym_predicates=(rdflib.URIRef("http://purl.obolibrary.org/obo/IAO_0000111"),),
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            include_entity_patterns=include_entity_patterns,
+            exclude_entity_patterns=exclude_entity_patterns,
+            curations=curations,
+        )
+
+    def find_kb(self, string: str) -> str:
+        return "OBI" if "OBI" in string else "STATO"
