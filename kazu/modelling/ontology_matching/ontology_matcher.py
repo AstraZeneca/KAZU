@@ -136,32 +136,13 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
-    def _match_curations_to_ontology_terms(
-        self, parsers: List[OntologyParser]
-    ) -> List[CurationWithTermNorms]:
-
-        matched_curations = []
-        for parser in parsers:
-            parser.populate_databases()
-            matched_curations.extend(parser.matched_curations)
-
-        return matched_curations
-
-    def create_phrasematchers_from_curated_list(
+    def create_phrasematchers_using_curations(
         self, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
-        """
-        in order to (non-redundantly) map a curated term to a :class:`.SynonymTerm`,
-        we need to perform the following steps:
+        """Create Spacy :class:`.PhraseMatcher`\\ s based on :class:`.Curation`\\ s.
+        The :class:`.Curation`\\ s are provided to the OntologyParser :attr:`.OntologyParser.curations`\\ s
+        when it is created, which are matched to appropriate entries in the :class:`.SynonymDatabase`
 
-        1) look for the curated term string in the :attr:`.SynonymTerm.terms` field,
-           checking for case sensitivity as we go
-
-        2) for all matched :class:`.SynonymTerm`\\ s, check for redundancy by looking
-           at the hash of :attr:`.SynonymTerm.associated_id_sets`
-
-        3) for all non-redundant :class:`.SynonymTerm`\\ s, map the curated term string
-           to the :attr:`.SynonymTerm.term_norm`
 
         :param parsers:
         :return:
@@ -175,8 +156,7 @@ class OntologyMatcher:
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
 
         for parser in parsers:
-            parser.populate_databases()
-            curation_with_term_norms = parser.matched_curations
+            curation_with_term_norms = parser.populate_databases(force=True)
             # spacy's typing isn't smart enough to know this will have a 'pipe' attr
             patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
                 # we need it lowercased for the case-insensitive matcher
@@ -203,14 +183,19 @@ class OntologyMatcher:
         self.lowercase_matcher = lowercase_matcher if len(lowercase_matcher) != 0 else None
         return self.strict_matcher, self.lowercase_matcher
 
-    def create_lowercase_phrasematcher_from_parsers(
+    def create_uncurated_lowercase_phrasematcher(
         self, parsers: List[OntologyParser]
     ) -> Tuple[PhraseMatcher, None]:
-        """Initialize the phrase matchers when creating this component.
-        This method should not be run on an existing or deserialized pipeline.
+        """
+        Create a lower case Spacy PhraseMatcher using just the synonyms in the :class:`.OntologyParser`\\ s
+        and the parser's configured :attr:`.OntologyParser.synonym_generator` .
+        This is intended for use primarily when first adding a parser, to then run over relevant documents and
+        create :class:`.Curation`\\ s based on the result. You could also use it if you have a very simple set
+        of terms to recognise that aren't case-sensitive and you don't intend to do any curation at all.
 
-        Returns the lowercase phrasematcher and None - so it matches the return shape of
-        :meth:`create_phrasematchers_from_curated_list`\\ .
+
+        :param parsers:
+        :return: The lowercase PhraseMatcher and None
         """
 
         if self.strict_matcher is not None or self.lowercase_matcher is not None:

@@ -88,9 +88,9 @@ def main(
     assert isinstance(ontology_matcher, OntologyMatcher)
 
     if use_curations:
-        ontology_matcher.create_phrasematchers_from_curated_list(parsers)
+        ontology_matcher.create_phrasematchers_using_curations(parsers)
     else:
-        ontology_matcher.create_lowercase_phrasematcher_from_parsers(parsers)
+        ontology_matcher.create_uncurated_lowercase_phrasematcher(parsers)
 
     nlp.to_disk(output_dir)
     return nlp
