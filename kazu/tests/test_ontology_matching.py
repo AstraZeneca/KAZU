@@ -177,7 +177,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             False,
-            id="Two curated case insensitive terms from two parsers. Both should hit",
+            id="Two curated case insensitive terms from two parsers Both should hit",
         ),
         pytest.param(
             [
@@ -216,7 +216,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             False,
-            id="Two curated terms from two parsers. One should hit, to test case sensitivity",
+            id="Two curated terms from two parsers One should hit to test case sensitivity",
         ),
         pytest.param(
             [
@@ -255,7 +255,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             True,
-            id="Two curated terms from two parsers An exception should be thrown at build time, as the second ID doesn't exist",
+            id="Two curated terms from two parsers An exception should be thrown at build time as the second ID doesnt exist",
         ),
         pytest.param(
             [
@@ -294,7 +294,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             False,
-            id="Two curated terms from two parsers. One should hit, to test drop logic",
+            id="Two curated terms from two parsers One should hit to test drop logic",
         ),
         pytest.param(
             [
@@ -320,7 +320,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             False,
-            id="One curated term with a novel synonym. This should be added to the synonym DB and hit",
+            id="One curated term with a novel synonym This should be added to the synonym DB and hit",
         ),
         pytest.param(
             [
@@ -344,7 +344,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_AMBIGUOUS_DATA,
             {},
             True,
-            id="Should throw exception on populate databases as the term norm of the curation returns a Synonym Term with IDs that don't match the target ids",
+            id="Should throw exception on populate databases as the term norm of the curation returns a Synonym Term with IDs that dont match the target ids",
         ),
         pytest.param(
             [
@@ -370,7 +370,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_AMBIGUOUS_DATA,
             PARSER_1_AMBIGUOUS_DATA,
             False,
-            id="Should not throw exception on populate databases, as parser data is ambiguous and action specifies both ids",
+            id="Should not throw exception on populate databases as parser data is ambiguous and action specifies both ids",
         ),
     ],
 )
