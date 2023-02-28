@@ -839,10 +839,16 @@ class Curation:
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "Curation":
+        # we call str on json_dict["_id"] in case it's a bson ObjectId
+        if not isinstance(json_dict["_id"], dict):
+            _id = {"$oid": str(json_dict["_id"])}
+        else:
+            _id = json_dict["_id"]
         return cls(
             mention_confidence=MentionConfidence(json_dict["mention_confidence"]),
             ner_actions=[NerAction.from_json(x) for x in json_dict["ner_actions"]],
             parser_actions=[ParserAction.from_json(x) for x in json_dict["parser_actions"]],
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
+            _id=_id,
         )
