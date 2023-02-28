@@ -1,1 +1,0 @@
-Added a Kazu web interface for demoing NER results on text snippets.
