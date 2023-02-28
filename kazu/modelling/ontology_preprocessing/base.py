@@ -1323,10 +1323,7 @@ class EnsemblOntologyParser(OntologyParser):
                 for hgnc_key in keys_to_check:
                     synonyms_this_entity = get_with_default_list(hgnc_key)
                     for potential_synonym in synonyms_this_entity:
-                        synonyms.extend(
-                            (potential_synonym, hgnc_key)
-                            for potential_synonym in synonyms_this_entity
-                        )
+                        synonyms.append((potential_synonym, hgnc_key))
 
                 synonyms = list(set(synonyms))
                 synonyms_strings = []
