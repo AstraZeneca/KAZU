@@ -452,11 +452,17 @@ class OntologyParser(ABC):
                 )
 
         elif behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
-            drop_id_from_parser_result = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
-            if drop_id_from_parser_result == DBModificationResult.NO_ACTION:
+            terms_modified, terms_dropped = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
+            if terms_modified == 0 and terms_dropped == 0:
                 logger.warning("failed to drop %s from %s", idx, self.name)
             else:
-                logger.info("dropped ID %s from %s", idx, self.name)
+                logger.info(
+                    "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm modified count: %s",
+                    idx,
+                    self.name,
+                    terms_modified,
+                    terms_dropped,
+                )
 
         else:
             affected_term_key = StringNormalizer.normalize(

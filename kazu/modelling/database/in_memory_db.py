@@ -155,9 +155,7 @@ class SynonymDatabase(metaclass=Singleton):
                 ].remove(dropped_syn_term.term_norm)
         return DBModificationResult.SYNONYM_TERM_DROPPED
 
-    def drop_id_from_all_synonym_terms(
-        self, name: ParserName, idx: Idx
-    ) -> Literal[DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION]:
+    def drop_id_from_all_synonym_terms(self, name: ParserName, idx: Idx) -> Tuple[int, int]:
         """
         Remove a given id from all :class:`~kazu.data.data.SynonymTerm`\\ s.
         Drop any :class:`~kazu.data.data.SynonymTerm`\\ s with no remaining ID after removal.
@@ -165,11 +163,10 @@ class SynonymDatabase(metaclass=Singleton):
 
         :param name:
         :param idx:
-        :return:
+        :return: terms modified count, terms dropped count
         """
-        result: Literal[
-            DBModificationResult.ID_SET_MODIFIED, DBModificationResult.NO_ACTION
-        ] = DBModificationResult.NO_ACTION
+        terms_modified = 0
+        terms_dropped = 0
         set_of_associated_id_set = self.get_associated_id_sets_for_id(name, idx)
         # list() call because we modify self._syns_database_by_syn within the loop
         for term in list(self._syns_database_by_syn[name].values()):
@@ -185,12 +182,15 @@ class SynonymDatabase(metaclass=Singleton):
                     elif len(updated_ids_and_source) > 0:
                         updated_equiv_id_set = EquivalentIdSet(updated_ids_and_source)
                         new_assoc_id_set.add(updated_equiv_id_set)
-                self._modify_or_drop_synonym_term_after_id_set_change(
+                mod_result = self._modify_or_drop_synonym_term_after_id_set_change(
                     id_sets=new_assoc_id_set, name=name, synonym_term=term
                 )
-                result = DBModificationResult.ID_SET_MODIFIED
+                if mod_result is DBModificationResult.SYNONYM_TERM_DROPPED:
+                    terms_dropped += 1
+                else:
+                    terms_modified += 1
 
-        return result
+        return terms_modified, terms_dropped
 
     def drop_equivalent_id_set_from_synonym_term(
         self, name: ParserName, synonym: NormalisedSynonymStr, id_set_to_drop: EquivalentIdSet
