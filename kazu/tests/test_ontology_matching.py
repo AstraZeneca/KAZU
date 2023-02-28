@@ -493,6 +493,7 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         parsers=[parser_1, parser_2, parser_3],
         output_dir=TEST_OUTPUT_DIR,
         span_key=TEST_SPAN_KEY,
+        use_curations=False,
     )
 
     doc = nlp(example_text)
