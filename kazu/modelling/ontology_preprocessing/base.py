@@ -1436,9 +1436,9 @@ class CellosaurusOntologyParser(OntologyParser):
         return (
             frozenset(
                 EquivalentIdSet(
-                    ids_and_source=frozenset((id_,)),
+                    ids_and_source=frozenset((single_id_and_source,)),
                 )
-                for id_ in ids_and_source
+                for single_id_and_source in ids_and_source
             ),
             EquivalentIdAggregationStrategy.CUSTOM,
         )
