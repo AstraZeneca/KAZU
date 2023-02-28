@@ -60,12 +60,10 @@ class DummyParserWithAggOverride(DummyParser):
                         ),
                         EquivalentIdSet(
                             ids_and_source=frozenset(
-                                (
-                                    (ID_TO_BE_REMOVED, self.find_kb(TARGET_SYNONYM)),
-                                )
+                                ((ID_TO_BE_REMOVED, self.find_kb(TARGET_SYNONYM)),)
                             )
                         ),
-                )
+                    )
                 ),
                 EquivalentIdAggregationStrategy.CUSTOM,
             )
@@ -246,7 +244,10 @@ def get_test_parsers(test_id, path):
                 parser_actions=[
                     ParserAction(
                         behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={PARSER_1_NAME: "first", PARSER_2_NAME: "first"},
+                        parser_to_target_id_mapping={
+                            PARSER_1_NAME: "first",
+                            PARSER_2_NAME: "first",
+                        },
                     )
                 ],
                 curated_synonym=TARGET_SYNONYM,
@@ -387,7 +388,8 @@ def test_declarative_curation_logic(
         with open(path, "w") as f:
             f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
 
-        # we can't parameterise the parsers as they
+        # we can't parameterise the parsers as they need to load the curations from the
+        # temporary directory set up using the tmp_path fixture inside the test
         parser_1, parser_2 = get_test_parsers(test_id, path)
 
         if should_raise_exception_when_attempting_to_add_term in test_id:
@@ -410,7 +412,9 @@ def test_declarative_curation_logic(
             or should_not_add_a_synonym_term_to_db_as_one_already_exists in test_id
         ):
             assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(PARSER_2_NAME))
-            assert len(syn_db.get_all(PARSER_1_NAME)) == len(DummyParser.DEFAULT_DUMMY_DATA[SYN]) + 1
+            assert (
+                len(syn_db.get_all(PARSER_1_NAME)) == len(DummyParser.DEFAULT_DUMMY_DATA[SYN]) + 1
+            )
         elif should_drop_from_both_parsers_via_general_rule in test_id:
             assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(PARSER_2_NAME))
             assert len(syn_db.get_all(PARSER_1_NAME)) == len(DummyParser.DEFAULT_DUMMY_DATA[SYN])
