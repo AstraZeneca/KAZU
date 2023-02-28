@@ -485,16 +485,16 @@ class OntologyParser(ABC):
                             result = self.synonym_db.drop_equivalent_id_set_from_synonym_term(
                                 self.name, affected_term_key, equiv_id_set
                             )
-                            if result is DBModificationResult.NO_ACTION:
-                                logger.warning(
-                                    "failed to drop %s from any EquivalentIdSet for key %s for %s",
+                            if result is DBModificationResult.ID_SET_MODIFIED:
+                                logger.info(
+                                    "dropped an EquivalentIdSet containing %s for key %s for %s",
                                     idx,
                                     affected_term_key,
                                     self.name,
                                 )
                             else:
                                 logger.info(
-                                    "dropped an EquivalentIdSet containing %s for key %s for %s",
+                                    "dropped a SynonymTerm containing %s for key %s for %s",
                                     idx,
                                     affected_term_key,
                                     self.name,
