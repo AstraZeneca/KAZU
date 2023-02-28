@@ -1,0 +1,11 @@
+stato_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.StatoParser
+  name: "STATO"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/stato.owl
+  data_origin: 'Feb_2023'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'measurement'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json

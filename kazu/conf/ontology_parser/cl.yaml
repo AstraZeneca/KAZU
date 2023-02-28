@@ -1,0 +1,11 @@
+cl_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.CLOntologyParser
+  name: "CL"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cl.owl
+  data_origin: 'CL'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'cell_type'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json

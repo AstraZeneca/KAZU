@@ -1,0 +1,4 @@
+go_mf_index:
+  _target_: kazu.utils.link_index.DictionaryIndex
+  parser: ${ontology_parser.go_mf_parser}
+  boolean_scorers: ${StringScorers.go}

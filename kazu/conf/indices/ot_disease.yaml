@@ -1,0 +1,4 @@
+ot_disease_index:
+  _target_: kazu.utils.link_index.DictionaryIndex
+  parser: ${ontology_parser.ot_disease_parser}
+  boolean_scorers: ${StringScorers.disease}

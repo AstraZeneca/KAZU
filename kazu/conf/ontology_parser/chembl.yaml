@@ -1,0 +1,11 @@
+chembl_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_31_sqlite/chembl_31.db
+  data_origin: 'chembl_31_sqlite'
+  name: "CHEMBL"
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.chemical}
+  entity_class: 'drug'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json

@@ -1,0 +1,11 @@
+ot_molecule_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
+  name: "OPENTARGETS_MOLECULE"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
+  data_origin: 'OPENTARGETS-MOLECULE'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.chemical}
+  entity_class: 'drug'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json

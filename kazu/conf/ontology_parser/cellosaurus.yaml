@@ -1,0 +1,10 @@
+cellosaurus_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+  name: "CELLOSAURUS"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
+  data_origin: 'CELLOSAURUS'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  entity_class: 'cell_line'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json

@@ -1,0 +1,12 @@
+hgnc_gene_family_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.HGNCGeneFamilyParser
+  name: "HGNC_GENE_FAMILY"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/gene_family.tsv
+  data_origin: 'HGNC Mart 13.01.23'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.gene}
+  # needs to be gene to pick up mis-recognised gene families by the transformers model
+  entity_class: 'gene'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json

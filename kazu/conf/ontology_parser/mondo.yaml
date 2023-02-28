@@ -1,0 +1,11 @@
+mondo_parser:
+  _target_: kazu.modelling.ontology_preprocessing.base.MondoOntologyParser
+  name: "MONDO"
+  in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
+  data_origin: 'MONDO-2022-07-29'
+  string_scorer: ${SapbertStringSimilarityScorer}
+  synonym_generator: ${SynonymGeneration.default}
+  entity_class: 'disease'
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
