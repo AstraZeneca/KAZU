@@ -144,7 +144,6 @@ class OntologyParser(ABC):
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()
-        self.matched_curations: List[CurationWithTermNorms] = []
 
     def find_kb(self, string: str) -> str:
         """
@@ -514,27 +513,28 @@ class OntologyParser(ABC):
                                     self.name,
                                 )
 
-    def process_curations(self):
+    def process_curations(self) -> Optional[List[CurationWithTermNorms]]:
         if self.curations is not None:
+            curations_with_term_norms = []
             for curation in self.curations:
                 self._process_parser_behaviours(curation)
-                self._process_ner_actions(curation)
+                maybe_curation_with_term_norm = self._process_ner_actions(curation)
+                if maybe_curation_with_term_norm is not None:
+                    curations_with_term_norms.append(maybe_curation_with_term_norm)
+            return curations_with_term_norms
         else:
             logger.info("No curations provided for %s", self.name)
+            return None
 
-    def _process_ner_actions(self, curation: Curation):
+    def _process_ner_actions(self, curation: Curation) -> Optional[CurationWithTermNorms]:
         for ner_action in curation.ner_actions:
             if ner_action.behaviour == Behaviour.DROP:
                 logger.debug("ignoring unwanted curation: %s for %s", curation, self.name)
             else:
                 maybe_term_norm = self.find_term_norm_for_curation(curation, ner_action)
                 if maybe_term_norm is not None:
-                    self.matched_curations.append(
-                        (
-                            curation,
-                            maybe_term_norm,
-                        )
-                    )
+                    return curation, maybe_term_norm
+        return None
 
     def _process_parser_behaviours(self, curation: Curation):
         for (behaviour, maybe_id) in curation.parser_behaviour(self.name):
@@ -612,22 +612,25 @@ class OntologyParser(ABC):
 
         self.synonym_db.add(self.name, self.export_synonym_terms())
 
-    def populate_databases(self, force: bool = False):
+    def populate_databases(self, force: bool = False) -> Optional[List[CurationWithTermNorms]]:
         """
-        populate the databases with the results of the parser
+        populate the databases with the results of the parser. Also calculates the term norms associated with
+        any curations (if provided) which can then be used for Dictionary based NER
 
         :param force: normally, this call does nothing if databases already have an entry for this parser.
             this can be forced by setting this param to True
-        :return:
+        :return: curations with term norms
         """
 
         if self.name in self.synonym_db.loaded_parsers and not force:
             logger.info("will not repopulate databases as already populated for %s", self.name)
+            return None
         else:
             self.populate_metadata_database()
             self.populate_synonym_database()
-            self.process_curations()
+            curations_with_term_norms = self.process_curations()
             self.parsed_dataframe = None  # clear the reference to save memory
+            return curations_with_term_norms
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
