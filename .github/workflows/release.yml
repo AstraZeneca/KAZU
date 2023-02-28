@@ -110,9 +110,9 @@ jobs:
           # to the gh release command further down
           current_release_file="/tmp/${KAZU_NEW_VERSION}-notes.md"
           echo "CURRENT_RELEASE_FILE=$current_release_file" >> $GITHUB_ENV
-          python -m towncrier build --draft --version=${KAZU_NEW_VERSION} > $CURRENT_RELEASE_FILE
+          python -m towncrier build --draft --version=${KAZU_NEW_VERSION} > $current_release_file
           
-          python -m towncrier build --version=${KAZU_NEW_VERSION}
+          python -m towncrier build --yes --version=${KAZU_NEW_VERSION}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
