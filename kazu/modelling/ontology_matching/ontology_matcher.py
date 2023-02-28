@@ -16,7 +16,6 @@ from spacy.util import SimpleFrozenList
 
 from kazu.modelling.ontology_preprocessing.base import (
     OntologyParser,
-    CurationWithTermNorms,
 )
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
