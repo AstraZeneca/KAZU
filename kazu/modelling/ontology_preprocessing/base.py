@@ -585,7 +585,7 @@ class OntologyParser(ABC):
         """
         populate the metadata database with this ontology
         """
-        MetadataDatabase().add_parser(self.name, self.export_metadata())
+        self.metadata_db.add_parser(self.name, self.export_metadata())
 
     def generate_synonyms(self) -> Set[SynonymTerm]:
         """
@@ -595,7 +595,7 @@ class OntologyParser(ABC):
         for appropriate synonym resolution.
         """
         self.populate_databases()
-        synonym_data = set(SynonymDatabase().get_all(self.name).values())
+        synonym_data = set(self.synonym_db.get_all(self.name).values())
         generated_synonym_data = set()
         if self.synonym_generator:
             generated_synonym_data = self.synonym_generator(synonym_data)
@@ -610,7 +610,7 @@ class OntologyParser(ABC):
         populate the synonym database
         """
 
-        SynonymDatabase().add(self.name, self.export_synonym_terms())
+        self.synonym_db.add(self.name, self.export_synonym_terms())
 
     def populate_databases(self, force: bool = False):
         """
