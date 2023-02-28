@@ -3,7 +3,7 @@ import logging
 import re
 from copy import deepcopy
 from typing import Set, Tuple
-
+from contextlib import nullcontext as does_not_raise
 import pytest
 
 from kazu.data.data import (
@@ -393,10 +393,11 @@ def test_declarative_curation_logic(
         parser_1, parser_2 = get_test_parsers(test_id, path)
 
         if should_raise_exception_when_attempting_to_add_term in test_id:
-            with pytest.raises(CurationException):
-                parser_1.populate_databases()
-                parser_2.populate_databases()
+            expectation = pytest.raises(CurationException)
         else:
+            expectation = does_not_raise(True)
+
+        with expectation:
             parser_1.populate_databases()
             parser_2.populate_databases()
         assert all(x.search(caplog.text) is not None for x in expected_log_messages)
