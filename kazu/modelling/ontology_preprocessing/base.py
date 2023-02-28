@@ -1563,13 +1563,12 @@ class MeddraOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        excluded_ids: Optional[Set[str]] = None,
-        additional_synonyms: Optional[List[CuratedTerm]] = None,
-        exclude_socs: List[str] = [
+        curations: Optional[List[Curation]] = None,
+        exclude_socs: Iterable[str] = (
             "Surgical and medical procedures",
             "Social circumstances",
             "Investigations",
-        ],
+        ),
     ):
         super().__init__(
             in_path=in_path,
@@ -1578,9 +1577,8 @@ class MeddraOntologyParser(OntologyParser):
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
-            excluded_ids=excluded_ids,
+            curations=curations,
             name=name,
-            additional_synonyms=additional_synonyms,
         )
 
         self.exclude_socs = exclude_socs
