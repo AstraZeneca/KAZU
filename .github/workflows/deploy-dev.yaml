@@ -25,7 +25,7 @@ jobs:
         id: short-sha
         shell: bash
         run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name:  Get Release Version
         id: get-release-id
@@ -64,7 +64,7 @@ jobs:
             KAZU_VERSION=${{env.KAZU_VERSION}}
           build-context: ./deploy
           dockerfile-name: deploy/Dockerfile
-          tag: ${{steps.short-sha.outputs.sha_short}}
+          tag: ${{steps.short-sha.outputs.short_sha}}
           use-proxies: 'true'
           needs-sudo: 'true'
 
@@ -73,15 +73,6 @@ jobs:
         run: |
           rm -rf deploy/kazu_model_pack*
   
-  test_sha:
-    name: test sha id works
-    runs-on: [self-hosted, kazu-runners]
-    needs: build
-    steps:
-      - name: Test
-        shell: bash
-        run: | 
-          echo ${{needs.build.outputs.short_sha}}
   deploy-dev:
     name: "Deploy image to K8s Dev cluster"
     runs-on: [self-hosted, kazu-runners]
