@@ -20,13 +20,19 @@ jobs:
 
   build:
     runs-on: [self-hosted, kazu-runners]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: "Building Docker Image"
     steps:
       - name: "checkout"
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      
+      - name: "set short_sha tgo output"
+        id: short-sha
+        shell: bash
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name:  Get Release Version
         id: get-release-id
@@ -65,7 +71,7 @@ jobs:
             KAZU_VERSION=${{env.KAZU_VERSION}}
           build-context: ./deploy
           dockerfile-name: deploy/Dockerfile
-          tag: ${{needs.short-sha.outputs.sha_short}}
+          tag: ${{steps.short-sha.outputs.sha_short}}
           use-proxies: 'true'
           needs-sudo: 'true'
 
