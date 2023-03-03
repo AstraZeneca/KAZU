@@ -13,6 +13,8 @@ jobs:
     runs-on: [self-hosted, kazu-runners]
     # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: "Building Docker Image"
+    outputs:
+      short_sha: ${{ steps.short-sha.outputs.short_sha }}
     steps:
       - name: "checkout"
         uses: actions/checkout@v3
@@ -79,7 +81,7 @@ jobs:
       - name: Test
         shell: bash
         run: | 
-          echo ${{needs.build.steps.short-sha.outputs.sha_short}}
+          echo ${{needs.build.outputs.short_sha}}
   deploy-dev:
     name: "Deploy image to K8s Dev cluster"
     runs-on: [self-hosted, kazu-runners]
@@ -104,8 +106,7 @@ jobs:
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
           ingress_name: dev-kazu
-          project_name: dev-kazu
-          image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.build.outputs.sha_short}}
+          image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.build.outputs.short_sha}}
           docker_registry: ${{vars.REGISTRY}}
           docker_username: ${{secrets.HARBOR_USERNAME}}
           docker_password: ${{secrets.HARBOR_PASSWORD}}
