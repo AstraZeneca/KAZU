@@ -2,7 +2,7 @@ name: Build & Deploy
 on:
   push:
     branches:
-      - "add-dev-deployment"
+      - add-dev-deployment
   # workflow_run:
   #   workflows: ["Create Release"]
   #   types:
