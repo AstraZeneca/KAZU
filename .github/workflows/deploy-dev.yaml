@@ -9,15 +9,6 @@ on:
   #     - completed
 
 jobs:
-  short-sha: 
-    runs-on: [self-hosted, kazu-runners]
-    name: "Get Short Sha for tags"
-    steps:
-      - name: "set short_sha to output"
-        shell: bash
-        run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
   build:
     runs-on: [self-hosted, kazu-runners]
     # if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -28,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: "set short_sha tgo output"
+      - name: "set short_sha to output"
         id: short-sha
         shell: bash
         run: |
@@ -63,7 +54,7 @@ jobs:
           registry: ${{vars.REGISTRY}}
           username: ${{secrets.HARBOR_USERNAME}}
           password: ${{secrets.HARBOR_PASSWORD}}
-          image-name: nlp/kazu/kazu-deployment
+          image-name: nlp/kazu/kazu-dev
           build-args: |
             ARTIFACTORY_USER=${{secrets.ARTIFACT_USERNAME}}
             ARTIFACTORY_TOKEN=${{secrets.ARTIFACT_TOKEN}}
@@ -79,13 +70,21 @@ jobs:
         shell: bash
         run: |
           rm -rf deploy/kazu_model_pack*
-
+  
+  test_sha:
+    name: test sha id works
+    runs-on: [self-hosted, kazu-runners]
+    needs: build
+    steps:
+      - name: Test
+        shell: bash
+        run: | 
+          echo ${{needs.build.steps.short-sha.outputs.sha_short}}
   deploy-dev:
     name: "Deploy image to K8s Dev cluster"
     runs-on: [self-hosted, kazu-runners]
     needs: build
     steps:
-
       - name:  Get Release Version
         shell: bash
         run: |
@@ -101,12 +100,12 @@ jobs:
           echo "KAZU_VERSION=${TEMP_KAZU_VERSION#v}" >> $GITHUB_ENV
 
       - name: deploy to dev
-        uses: az-ai/az-action-k8s-deploy-rest-api@0.6.1
+        uses: az-ai/az-action-k8s-deploy-rest-api@0.6.2
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
           ingress_name: dev-kazu
           project_name: dev-kazu
-          image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.short-sha.outputs.sha_short}}
+          image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.build.outputs.sha_short}}
           docker_registry: ${{vars.REGISTRY}}
           docker_username: ${{secrets.HARBOR_USERNAME}}
           docker_password: ${{secrets.HARBOR_PASSWORD}}
