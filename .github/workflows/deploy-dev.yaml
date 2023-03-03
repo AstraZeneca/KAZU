@@ -1,0 +1,122 @@
+name: Build & Deploy
+on:
+  push:
+    branches:
+      - "add-dev-deployment"
+  # workflow_run:
+  #   workflows: ["Create Release"]
+  #   types:
+  #     - completed
+
+jobs:
+  short-sha: 
+    runs-on: [self-hosted, kazu-runners]
+    name: "Get Short Sha for tags"
+    steps:
+      - name: "set short_sha to output"
+        shell: bash
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: [self-hosted, kazu-runners]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: "Building Docker Image"
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name:  Get Release Version
+        id: get-release-id
+        shell: bash
+        run: |
+          echo "RELEASE_VERSION=$(git tag -l | sort -V | tail -n 1 )" >> $GITHUB_ENV
+
+      - name: Check release version
+        run: echo ${{ env.RELEASE_VERSION }}
+
+      - name: Get package Version
+        shell: bash
+        run: |
+          export TEMP_KAZU_VERSION=${{env.RELEASE_VERSION}}
+          echo "KAZU_VERSION=${TEMP_KAZU_VERSION#v}" >> $GITHUB_ENV
+
+      - name: download release
+        shell: bash
+        run: |
+         gh release download --repo=https://github.com/AZ-AI/kazu/ ${{env.RELEASE_VERSION}} --pattern=kazu_model_pack_public*
+         mv kazu_model_pack_public* deploy/
+        env:
+         GH_TOKEN: ${{ github.token }}
+
+      - name: Build
+        uses: az-ai/az-action-registry@v4.0.1
+        with:
+          registry: ${{vars.REGISTRY}}
+          username: ${{secrets.HARBOR_USERNAME}}
+          password: ${{secrets.HARBOR_PASSWORD}}
+          image-name: nlp/kazu/kazu-deployment
+          build-args: |
+            ARTIFACTORY_USER=${{secrets.ARTIFACT_USERNAME}}
+            ARTIFACTORY_TOKEN=${{secrets.ARTIFACT_TOKEN}}
+            MODEL_PACK_PATH=kazu_model_pack_public-${{env.RELEASE_VERSION}}.zip
+            KAZU_VERSION=${{env.KAZU_VERSION}}
+          build-context: ./deploy
+          dockerfile-name: deploy/Dockerfile
+          tag: ${{needs.short-sha.outputs.sha_short}}
+          use-proxies: 'true'
+          needs-sudo: 'true'
+
+      - name: Clean up
+        shell: bash
+        run: |
+          rm -rf deploy/kazu_model_pack*
+
+  deploy-dev:
+    name: "Deploy image to K8s Dev cluster"
+    runs-on: [self-hosted, kazu-runners]
+    needs: build
+    steps:
+
+      - name:  Get Release Version
+        shell: bash
+        run: |
+          echo "RELEASE_VERSION=$(git tag -l | sort -V | tail -n 1 )" >> $GITHUB_ENV
+
+      - name: Check release version
+        run: echo ${{ env.RELEASE_VERSION }}
+
+      - name: Get package Version
+        shell: bash
+        run: |
+          export TEMP_KAZU_VERSION=${{env.RELEASE_VERSION}}
+          echo "KAZU_VERSION=${TEMP_KAZU_VERSION#v}" >> $GITHUB_ENV
+
+      - name: deploy to dev
+        uses: az-ai/az-action-k8s-deploy-rest-api@0.6.1
+        with:
+          kube_config: ${{secrets.KUBE_CONFIG}}
+          ingress_name: dev-kazu
+          project_name: dev-kazu
+          image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.short-sha.outputs.sha_short}}
+          docker_registry: ${{vars.REGISTRY}}
+          docker_username: ${{secrets.HARBOR_USERNAME}}
+          docker_password: ${{secrets.HARBOR_PASSWORD}}
+          namespace: kazu-test
+          host_url: ${{vars.AZ_URL}}
+          docker_email: "None"
+          external_port: 80
+          internal_port: 8000
+          limits_memory: "8Gi"
+          requests_memory: "8Gi"
+          project_label: nlp
+          env_label: test
+          env_secrets: |
+            KAZU_JWT_KEY=${{secrets.JWT_TOKEN}}
+            CORS_ORIGIN_REGEX=https://kazu-ui.${{vars.AZ_URL}}
+          replicas: 1
+          enable_autoscaling: "yes"
+          max_replicas: 2
+          target_cpu_utilisation: 80
