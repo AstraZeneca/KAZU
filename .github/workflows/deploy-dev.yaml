@@ -106,7 +106,7 @@ jobs:
           host_url: ${{vars.AZ_URL}}
           docker_email: "None"
           external_port: 80
-          internal_port: 8000
+          internal_port: 8080
           limits_memory: "8Gi"
           requests_memory: "8Gi"
           project_label: nlp
