@@ -4,7 +4,9 @@ on:
   #   workflows: ["Create Release"]
   #   types:
   #     - completed
-
+  push:
+    branches: 
+      - add-dev-depoyment
 jobs:
   build:
     runs-on: [self-hosted, kazu-runners]
