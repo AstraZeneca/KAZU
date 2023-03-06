@@ -365,8 +365,16 @@ how it is called, one or more of the following may be required:
         action="store_true",
         help="don't run any tests",
     )
+    parser.add_argument(
+        "--logging_config_path",
+        type=Path,
+        required=False,
+        help="path to a logging config file, if required",
+    )
 
     args = parser.parse_args()
+    if args.logging_config_path:
+        logging.config.fileConfig(args.logging_config_path)
 
     ModelPackBuilder.build_all_model_packs(
         maybe_base_model_pack_path=args.base_model_pack_path,
