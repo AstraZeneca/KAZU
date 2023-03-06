@@ -96,6 +96,7 @@ jobs:
         uses: az-ai/az-action-k8s-deploy-rest-api@0.6.2
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
+          project_name: dev-kazu
           ingress_name: dev-kazu
           image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.build.outputs.short_sha}}
           docker_registry: ${{vars.REGISTRY}}
