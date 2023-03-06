@@ -1,8 +1,5 @@
 name: Build & Deploy
 on:
-  push:
-    branches:
-      - add-dev-depoyment
   # workflow_run:
   #   workflows: ["Create Release"]
   #   types:
@@ -96,8 +93,8 @@ jobs:
         uses: az-ai/az-action-k8s-deploy-rest-api@0.6.2
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
-          project_name: dev-kazu
-          ingress_name: dev-kazu
+          project_name: kazu
+          ingress_name: kazu
           image:  ${{vars.REGISTRY}}/nlp/kazu/kazu-dev:${{needs.build.outputs.short_sha}}
           docker_registry: ${{vars.REGISTRY}}
           docker_username: ${{secrets.HARBOR_USERNAME}}
@@ -127,7 +124,7 @@ jobs:
             --env-var
             auth_token=${{secrets.KAZU_AUTH_KEY}}
             --env-var
-            base_url=dev-kazu.${{vars.AZ_URL}}
+            base_url=kazu.${{vars.AZ_URL}}
           test_image: ${{vars.REGISTRY}}/bc-sai-test/postman-kazu:0.0.1
           test_file_path: deploy/kazu-tests.postman_collection.json
           test_file_name: config.json
