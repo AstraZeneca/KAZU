@@ -118,3 +118,17 @@ jobs:
           enable_autoscaling: "yes"
           max_replicas: 2
           target_cpu_utilisation: 80
+          run_tests: 'true'
+          test_arguments: |
+            run
+            /data/config.json
+            --env-var
+            kazu_version=${{ env.KAZU_VERSION }}
+            --env-var
+            auth_token=${{inputs.${{secrets.KAZU_AUTH_KEY}}
+            --env-var
+            base_url=dev-kazu.${{vars.AZ_URL}}
+          test_image: ${{vars.REGISTRY}}/bc-sai-test/postman-kazu:0.0.1
+          test_file_path: deploy/kazu-tests.postman_collection.json
+          test_file_name: config.json
+          test_path_to_mount: /data

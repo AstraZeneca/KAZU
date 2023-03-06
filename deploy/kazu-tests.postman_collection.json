@@ -1,0 +1,266 @@
+{
+	"info": {
+		"_postman_id": "5fd6d6f9-f9ca-48e1-b8a6-3910ce35defa",
+		"name": "kazu-tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Docs",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{base_url}}/api/docs",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"docs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kazu endpoint standard string",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response time is less than 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"text\": \"EGFR may be mutated in breast cancer\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{base_url}}/api/kazu",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"kazu"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "openapi",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let kazuVersion = pm.environment.get(\"kazu_version\");",
+							"pm.test(\"test version is as expected\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData['info']['version']).to.eql(kazuVersion);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{base_url}}/api/openapi.json",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"openapi.json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kazu abstracts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const queries = pm.collectionVariables.get(\"queries\");",
+							"let totalTiming = pm.collectionVariables.get(\"timings\");",
+							"",
+							"const currentTiming = pm.response.responseTime;",
+							"",
+							"if (totalTiming.length === 0) {",
+							"   // This is the case for the first or single request",
+							"   totalTiming = currentTiming;",
+							"   array = [totalTiming];",
+							"} else {",
+							"   totalTiming = `${totalTiming},${currentTiming}`;",
+							"   array = totalTiming.split(',');",
+							"}",
+							"pm.collectionVariables.set(\"timings\", totalTiming);",
+							"",
+							"let sumOfArray = 0;",
+							"",
+							"for (let i = 0; i < array.length; i++) {",
+							"   sumOfArray += Number(array[i]);",
+							"}",
+							"",
+							"const average = sumOfArray / (array.length);",
+							"",
+							"if (queries && queries.length > 0){",
+							"    postman.setNextRequest(\"Kazu abstracts\");",
+							"} else {",
+							"    postman.setNextRequest(null);",
+							"}",
+							"if (array.length > 30){",
+							"",
+							"    pm.test(\"Average response time is less than 1000ms\", function () {",
+							"        pm.expect(average).to.be.below(1000);",
+							"    });",
+							"",
+							"}",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let queries = pm.collectionVariables.get(\"queries\");",
+							"let timings = pm.collectionVariables.get(\"timings\");",
+							"",
+							"if(!timings || timings.length == 0){",
+							"    pm.collectionVariables.set(\"timings\", []);",
+							"}",
+							"if(!queries || queries.length == 0) {",
+							"    queries = [\"Kyowa Hakko Kirin, AstraZeneca and subsidiaries are developing benralizumab (Fasenra\\u2122)-a humanised anti-interleukin-5 receptor alpha chain (IL-5R\\u03b1) monoclonal antibody-as a treatment of severe eosinophilic asthma and chronic obstructive pulmonary disease (COPD). Eosinophilia is a characteristic of certain asthma and COPD phenotypes and depletion of eosinophils has demonstrated therapeutic benefit. Benralizumab was recently approved by the US FDA as add-on maintenance therapy for patients with severe asthma who have an eosinophilic phenotype. This article summarizes the milestones in the development of benralizumab leading to this first approval for the treatment of severe eosinophilic asthma.\", \"Benralizumab: First Global Approval.\", \"Asthma and chronic obstructive pulmonary disease (COPD) both have a high prevalence worldwide and yet each condition remains underdiagnosed. Despite a number of common features, these inflammatory respiratory syndromes have distinct clinical outcomes. COPD represents a greater economic burden than asthma because it has a less favourable prognosis and is associated with greater morbidity and mortality. Therefore, it is important to distinguish between these two diseases at an early stage, so that appropriate therapy can be prescribed to prevent deterioration. However, effective treatments that may be used in both conditions can minimise the effects of misdiagnosis and maximise the impact of treatment without the associated complexity when both conditions occur together. The current review summarises the differences and similarities of asthma and COPD, in terms of risk factors, pathophysiology, symptoms and diagnosis, to provide greater understanding of the role of budesonide/formoterol in a single inhaler in both diseases.\", \"Asthma and COPD: differences and similarities. With special reference to the usefulness of budesonide/formoterol in a single inhaler (Symbicort) in both diseases.\", \"Parasitism by Cuscuta and Orobanche on Petunia hybrida resulted in decreased choline kinase activity and phospholipids in the host shoots. The Cuscuta-infected host roots suffered a decline in phospholipid concentration with no appreciable change in enzyme activity, whereas the roots of the Orobanche-infected plants exhibited a substantial increase in phospholipid concentration despite a marked lowering in enzymic activity. Superimposition of infection by Cuscuta on Orobanche-infected plants resulted in an increase in both enzyme activity and phospholipid in host shoots; the host roots recorded a decline in phospholipid, although enzyme activity was increased. As compared to the filaments infecting singly, Cuscuta, in sequential infection, registered an increase in phospholipid concomitant with a fall in enzyme activity, whereas the root parasite revealed a lowered enzyme activity and a slight decrease in phospholipid. It is hypothesized that a physiological response to infection by root parasite was an accumulation of phospholipids at the region under infection, and to that by shoot parasite was an uptake of phospholipids by the parasite from the host; this was effected not by de novo synthesis but rather by mobilization from distal regions.\", \"Studies on Sequential Parasitism by Orobanche and Cuscuta on Petunia hybrida: Choline Kinase and Phospholipid.\", \"Proton pump inhibitors are the standard of treatment for acid-related disorders. These disorders include gastroesophageal reflux disease and its complications (i.e., erosive esophagitis and Barrett's esophagus), peptic ulcer disease, Zollinger-Ellison syndrome, and idiopathic hypersecretion. Proton pump inhibitors are also successfully used for the treatment of Helicobacter pylori infection and upper gastrointestinal bleeding. There are currently five proton pump inhibitors approved by the Food and Drug Administration and available in the United States. These are omeprazole (Prilosec), lansoprazole (Prevacid), rabeprazole (Aciphex), pantoprazole (Protonix), and esomeprazole (Nexium). This review discusses the history of proton pump inhibitors and compares and evaluates the pharmacology including mechanism of action, pharmacokinetics, pharmacodynamics, administration, dosage, and drug interactions. Information regarding therapeutic indications, clinical efficacy, short- and long-term side effects, and cost is also presented. A case presentation offers an analysis of the use of proton pump inhibitors in individualized patient care.\", \"An overview of proton pump inhibitors.\", \"It has been suggested that the supermarket of today will be the pharmacy of tomorrow. Such statements have been derived from recognition of our increasing ability to optimize nutrition, and maintain a state of good health through longer periods of life. The new field of nutrigenomics, which focuses on the interaction between bioactive dietary components and the genome, recognizes that current nutritional guidelines may be ideal for only a relatively small proportion of the population. There is good evidence that nutrition has significant influences on the expression of genes, and, likewise, genetic variation can have a significant effect on food intake, metabolic response to food, individual nutrient requirements, food safety, and the efficacy of disease-protective dietary factors. For example, a significant number of human studies in various areas are increasing the evidence for interactions between single nucleotide polymorphisms (SNPs) in various genes and the metabolic response to diet, including the risk of obesity. Many of the same genetic polymorphisms and dietary patterns that influence obesity or cardiovascular disease also affect cancer, since overweight individuals are at increased risk of cancer development. The control of food intake is profoundly affected by polymorphisms either in genes encoding taste receptors or in genes encoding a number of peripheral signaling peptides such as insulin, leptin, ghrelin, cholecystokinin, and corresponding receptors. Total dietary intake, and the satiety value of various foods, will profoundly influence the effects of these genes. Identifying key SNPs that are likely to influence the health of an individual provides an approach to understanding and, ultimately, to optimizing nutrition at the population or individual level. Traditional methods for identification of SNPs may involve consideration of individual variants, using methodologies such as restriction fragment length polymorphisms or quantitative real-time PCR assays. New developments allow identification of up to 500,000 SNPs in an individual, and with increasingly lowered pricings these developments may explode the population-level potential for dietary optimization based on nutrigenomic approaches.\", \"Nutrigenomics: integrating genomic approaches into nutrition research.\", \"On July 20, 2011, the Food and Drug Administration (FDA) approved ticagrelor (Brilinta\\u2122) for use during acute coronary syndromes. The drug labeling includes a 'black box' warning for bleeding risks, conventional for antithrombotics, and a unique warning that higher than 100 mg/daily maintenance treatment with aspirin may reduce ticagrelor effectiveness. The approval was granted following ticagrelor secondary reviews, and review of complete response by FDA officials.\", \"To summarize the recommendations of different FDA reviewers, and their impact on drug approval.\", \"Review of the Platelet Inhibition and Clinical Outcomes (PLATO) trial comparing the efficacy of ticagrelor versus standard care treatment with clopidogrel. Patients (n = 18,624) with moderate- to high-risk acute coronary syndromes undergoing coronary intervention or being medically managed were randomized to ticagrelor (180-mg loading dose followed by 90 mg twice daily thereafter) or clopidogrel (300-600-mg loading dose followed by 75 mg once daily) for 6-12 months.\", \"The facts outlined in official reviews suggest that ticagrelor has been approved despite objections from both clinical primary reviewers assessing drug efficacy and safety. In addition, the statistical reviewer and cross-discipline team leader also recommended against approval. The putative grounds for their concerns were retrieved from the public FDA records and are briefly outlined here.\", \"Ticagrelor FDA approval issues revisited.\", \"Alstrom syndrome is a rare autosomal recessive disorder characterized by retinal degeneration, sensorineural hearing loss, obesity, type 2 diabetes mellitus and chronic nephropathy. It may be associated with acanthosis nigricans, hypergonadotropic hypogonadism, hepatic dysfunction, hepatic steatosis, hyperlipidaemia, dilated cardiomyopathy and short stature. We report a patient with Alstrom syndrome who had hypergonadotropic hypogonadism, hepatic dysfunction, hepatic steatosis and short stature with normal body weight, all of which are seen infrequently with this syndrome.\", \"Rare case of Alstrom syndrome without obesity and with short stature, diagnosed in adulthood.\", \"Agents that inhibit platelet function are used routinely in the treatment and prevention of acute coronary syndromes. The main antiplatelet treatments used combine aspirin with one of the thienopyridine P2Y(12) antagonists, either clopidogrel or prasugrel. By blocking the synthesis of thromboxane A(2) in platelets and by blocking the effects of ADP, respectively, these agents reduce platelet activity, platelet aggregation and thrombus formation. Ticagrelor (marketed by AstraZeneca as Brilinta\\u2122 in the USA, and as Brilique(\\u00ae) or Possia(\\u00ae) in Europe) is a cyclopentyl-triazolo-pyrimidine, a new chemical class of P2Y(12) antagonist that is now approved for use in the wide spectrum of acute coronary syndromes. In this article we provide an overview of ticagrelor. We discuss the differences in mode of action compared with other P2Y(12) antagonists, examine its pharmacodynamic, pharmacokinetic and safety profile, and summarize the various clinical trials that have provided information on its efficacy in combination with aspirin. Ticagrelor appears to overcome some of the difficulties that have been encountered with other antiplatelet treatments, clopidogrel in particular.\", \"Ticagrelor: a P2Y12 antagonist for use in acute coronary syndromes.\", \"This study was designed to report a patient with a vernal shield ulcer that did not respond to medical therapy but healed in 1 week after surgical debridement of the ulcer base.\", \"Case report and literature review.\", \"A 12-year-old girl with a history of asthma and eczema was seen with a 5.7- x 5.7-mm corneal epithelial defect in the right eye. Her uncorrected visual acuity was 20/200 OD and 20/70 OS. Slit-lamp examination revealed giant papillae on the tarsal conjunctivae, diffuse punctate epitheliopathy, and a thick mucoid discharge in both eyes. A diagnosis of vernal keratoconjunctivitis both eyes (OU) with a shield ulcer OD was made and prednisolone 1% was started 4 times per day OD. Topical ofloxacin 0.3% 3 times per day and topical cyclosporine 0.05% every 2 hours were added OD 2 days later. On minimal improvement in the epithelial defect in 1 week, surgical debridement of the ulcer base was performed. The epithelial defect healed smoothly in 1 week with an underlying stromal scar and the uncorrected visual acuity improved to 20/70 OD at 1 month and 20/40 at 10 months.\", \"Corneal shield ulcers and plaques are rare but serious complications of vernal keratoconjunctivitis, which may be unresponsive to standard medical therapy. Surgical debridement is a fast and effective procedure yielding rapid healing of the ulcer and minimizing complications, such as infections.\", \"Rapid healing of vernal shield ulcer after surgical debridement: A case report.\", \"Several advances in lipid-lowering pharmacotherapy and changes in generic formulation availability occurred between 2013 and\\u00a02017.\", \"We sought to examine nationwide trends in Medicare Part D and Medicaid expenditures on lipid-lowering therapies from 2013 to\\u00a02017.\", \"We aggregated 662.2 million Medicare Part D and Medicaid prescription claims with associated expense data for 2013 to 2017 from the Medicare and Medicaid Drug Spending Dashboards for nine therapeutic classes of lipid-lowering therapies.\", \"Total Medicare Part D expenditures on lipid-lowering therapies was $7.01 billion in 2013 and $5.07 billion in 2017. Total Medicaid lipid-lowering therapy expenditures decreased from $440.9 million in 2013 to $398.7 million in 2017. Annual Medicare expenditures on Crestor were $2.2 billion in 2013 and $0.31 billion in 2017. Annual Medicaid Crestor expenditures decreased from $92.4 million in 2013 to $30.1 million in 2017. From 2013 to 2016, Medicare expenditures on Zetia decreased from $0.89 billion to $0.70 billion, whereas Medicaid Zetia expenditures decreased from $38.6 million in 2013 to $25.4 million in 2017. In 2017, PCSK9 inhibitors accounted for $317.3 million and $14.2 million in Medicare and Medicaid expenditures, respectively.\", \"Overall Medicare and Medicaid expenditures on lipid-lowering therapies decreased by $2.5 billion from 2013 to\\u00a02017.\", \"Changes in nationwide Medicare and Medicaid expenditures on lipid-lowering therapies after proprotein convertase/subtilisin type 9 inhibitor availability.\", \"Keratoconus and cataract are common causes of visual morbidity. Both conditions show genetic predisposition. The purpose of this study was to map the disease locus in a large three-generation family affected by combined early-onset autosomal dominant anterior polar cataract and clinically severe keratoconus. Uniquely, in this family both disorders were present and fully penetrant in those affected.\", \"Thirty members of the family were examined clinically on two occasions, at an interval of 5 years, to establish their phenotypes and determine the progression of the disease. Genomic DNA was extracted from blood samples of 16 affected and 14 unaffected individuals, and typed with more than 350 highly polymorphic microsatellite loci in a genome-wide linkage screen. Markers were amplified by PCR with fluorescently labeled primers and sized with an automated DNA analyser before calculation of lod scores. After linkage was established, several positional candidate genes were assessed by PCR-based DNA sequencing.\", \"The locus for keratoconus with cataract was mapped to a 6.5-Mb region of the long arm of chromosome 15, at 22.33-24.2 between CYP11A and D15S211. The positional and functional candidate genes CTSH, CRABP1, IREB2, and RASGRF1 were excluded as the cause of keratoconus with cataract in this family.\", \"This is the first report of a family with autosomal dominant inheritance of keratoconus in association with cataract. The causative gene maps to the long arm of chromosome 15 but has not yet been identified.\", \"Familial keratoconus with cataract: linkage to the long arm of chromosome 15 and exclusion of candidate genes.\", \"Interdependence of Nitrogen Nutrition and Photosynthesis in Pisum sativum L: II. Host Plant Response to Nitrogen Fixation by Rhizobium Strains.\", \"The regulator of cell cycle progression, cyclin D1, is up-regulated in breast cancer cells; its expression is, in part, dependent on ERalpha signaling. However, many ERalpha-negative tumors and tumor cell lines (e.g., SKBR3) also show over-expression of cyclin D1. This suggests that, in addition to ERalpha signaling, cyclin D1 expression is under the control of other signaling pathways; these pathways may even be over-expressed in the ERalpha-negative cells. We previously noticed that both ERalpha-positive and -negative cell lines over-express BRCA1-IRIS mRNA and protein. Furthermore, the level of over-expression of BRCA1-IRIS in ERalpha-negative cell lines even exceeded its over-expression level in ERalpha-positive cell lines. In this study, we show that: (1) BRCA1-IRIS forms complex with two of the nuclear receptor co-activators, namely, SRC1 and SRC3 (AIB1) in an ERalpha-independent manner. (2) BRCA1-IRIS alone, or in connection with co-activators, is recruited to the cyclin D1 promoter through its binding to c-Jun/AP1 complex; this binding activates the cyclin D1 expression. (3) Over-expression of BRCA1-IRIS in breast cells over-activates JNK/c-Jun; this leads to the induction of cyclin D1 expression and cellular proliferation. (4) BRCA1-IRIS activation of JNK/c-Jun/AP1 appears to account for this, because in cells that were depleted from BRCA1-IRIS, JNK remained inactive. However, depletion of SRC1 or SRC3 instead reduced c-Jun expression. Our data suggest that this novel signaling pathway links BRCA1-IRIS to cellular proliferation through c-Jun/AP1 nuclear pathway; finally, this culminates in the increased expression of the cyclin D1 gene.\", \"BRCA1-IRIS regulates cyclin D1 expression in breast cancer cells.\", \"A ribonuclease fraction previously purified from flax by gel filtration was further resolved into two components by hydroxyl apatite chromatography. These were homogeneous with respect to electrophoresis and isoelectric focusing. Both enzymes are of RNase I type but differ in substrate specificity, kinetic properties, pH response, and isoelectric point.The two RNase isozymes show consistent properties when extracted from variety Bison (susceptible) or variety Bombay (resistant) with or without infection with race 3 of flax rust. The relative amounts of these isozymes change markedly during infection. These observations provide an explanation for the apparent qualitative changes in RNase noted previously. Differences between susceptible and resistant reactions in the early stages of disease are discussed.\", \"Changes in two ribonuclease isozymes during rust infection of flax cotyledons.\", \"The mechanism responsible for phosphorus inhibition of vesicular-arbuscular mycorrhiza formation in sudangrass (Sorghum vulgare Pers.) was investigated in a phosphorus-deficient sandy soil (0.5 micrograms phosphorus per gram soil) amended with increasing levels of phosphorus as superphosphate (0, 28, 56, 228 micrograms per gram soil). The root phosphorus content of 4-week-old plants was correlated with the amount of phosphorus added to the soil. Root exudation of amino acids and reducing sugars was greater for plants grown in phosphorus-deficient soil than for those grown in the phosphorus-treated soils. The increase in exudation corresponded with changes in membrane permeability of phosphorus-deficient roots, as measured by K(+) ((86)Rb) efflux, rather than with changes in root content of reducing sugars and amino acids. The roots of phosphorus-deficient plants inoculated at 4 weeks with Glomus fasciculatus were 88% infected after 9 weeks as compared to less than 25% infection in phosphorus-sufficient roots; these differences were correlated with root exudation at the time of inoculation. For plants grown in phosphorus-deficient soil, infection by vesicular-arbuscular mycorrhizae increased root phosphorus which resulted in a decrease in root membrane permeability and exudation compared to nonmycorrhizal plants. It is proposed that, under low phosphorus nutrition, increased root membrane permeability leads to net loss of metabolites at sufficient levels to sustain the germination and growth of the mycorrhizal fungus during pre- and postinfection. Subsequently, mycorrhizal infection leads to improvement of root phosphorus nutrition and a reduction in membrane-mediated loss of root metabolites.\", \"Membrane-mediated decrease in root exudation responsible for phorphorus inhibition of vesicular-arbuscular mycorrhiza formation.\"];",
+							"}",
+							"let currentQuery = queries.shift();",
+							"",
+							"pm.collectionVariables.set(\"query\", currentQuery);",
+							"pm.collectionVariables.set(\"queries\", queries);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"text\": \"{{query}}\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{base_url}}/api/kazu",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"kazu"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is 200\", function () {",
+					"    pm.response.to.have.status(200);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "kazu_version",
+			"value": "0.0.24",
+			"type": "default",
+			"disabled": true
+		},
+		{
+			"key": "query",
+			"value": ""
+		},
+		{
+			"key": "queries",
+			"value": ""
+		},
+		{
+			"key": "timings",
+			"value": ""
+		}
+	]
+}
