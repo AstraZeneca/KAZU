@@ -125,7 +125,7 @@ jobs:
             --env-var
             kazu_version=${{ env.KAZU_VERSION }}
             --env-var
-            auth_token=${{inputs.${{secrets.KAZU_AUTH_KEY}}
+            auth_token=${{secrets.KAZU_AUTH_KEY}}
             --env-var
             base_url=dev-kazu.${{vars.AZ_URL}}
           test_image: ${{vars.REGISTRY}}/bc-sai-test/postman-kazu:0.0.1
