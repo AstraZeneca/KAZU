@@ -135,7 +135,9 @@ class OntologyParser(ABC):
         self.entity_class = entity_class
         self.name = name
         if string_scorer is None:
-            logger.warning("no string scorer configured. Synonym resolution disabled.")
+            logger.warning(
+                "no string scorer configured for %s. Synonym resolution disabled.", self.name
+            )
         self.string_scorer = string_scorer
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
@@ -340,7 +342,7 @@ class OntologyParser(ABC):
                 for id_ in equiv_id_set.ids
             )
             if id_set.issubset(all_ids_on_existing_syn_term):
-                logger.info(
+                logger.debug(
                     f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database."
                     f"since this SynonymTerm includes all ids in id_set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
                 )
@@ -1029,7 +1031,7 @@ class GeneOntologyParser(OntologyParser):
         self.instances.add(name)
         self.query = query
 
-    def populate_databases(self):
+    def populate_databases(self, force: bool = False):
         super().populate_databases()
         self.instances_in_dbs.add(self.name)
 
@@ -1838,11 +1840,26 @@ class TabularOntologyParser(OntologyParser):
 
 
 class ATCDrugClassificationParser(TabularOntologyParser):
-    def __init__(self, in_path: str, entity_class: str, name: str, **kwargs):
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+    ):
         super().__init__(
-            in_path,
-            entity_class,
-            name,
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            curations=curations,
             sep="     ",
             header=None,
             names=["code", "level_and_description"],
