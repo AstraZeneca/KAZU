@@ -22,8 +22,6 @@ RUN apt-get update
 RUN apt-get install -y openjdk-11-jre
 
 ENV KAZU_MODEL_PACK /model_pack
-ENV PL_DISABLE_FORK 1
-ENV TOKENIZERS_PARALLELISM false
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV HYDRA_FULL_ERROR 1
 

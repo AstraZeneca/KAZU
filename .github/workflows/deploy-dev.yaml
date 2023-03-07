@@ -1,9 +1,12 @@
 name: Build & Deploy
 on:
-  workflow_run:
-    workflows: ["Create Release"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["Create Release"]
+  #   types:
+  #     - completed
+  push:
+    branches:
+      - add-dev-depoyment
 
 jobs:
   build:
@@ -43,7 +46,7 @@ jobs:
         shell: bash
         run: |
          gh release download --repo=https://github.com/AZ-AI/kazu/ ${{env.RELEASE_VERSION}} --pattern=kazu_model_pack_public*
-         mv kazu_model_pack_public* deploy/
+         mv kazu_model_pack_public* --dir deploy
         env:
          GH_TOKEN: ${{ github.token }}
 
