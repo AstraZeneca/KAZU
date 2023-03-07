@@ -246,9 +246,7 @@
 	"variable": [
 		{
 			"key": "kazu_version",
-			"value": "0.0.24",
-			"type": "default",
-			"disabled": true
+			"value": ""
 		},
 		{
 			"key": "query",
