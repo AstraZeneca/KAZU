@@ -81,10 +81,11 @@ jobs:
           export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
           
           pytest
-          # run sphinx doctests
+          # build sphinx html and run doctests
           # this needs to be after the model pack build because they depend on the
           # model pack being present for doctests that load the full pipeline.
-          make -C docs doctest
+          # build the html as well in case of sphinx issues, which will error here.
+          make -C docs html doctest
           
           # need to call twice, for NFS bug
           rm -r /tmp/kazu-env || true
