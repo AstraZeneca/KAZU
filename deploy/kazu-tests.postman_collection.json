@@ -129,16 +129,12 @@
 							"   totalTiming = currentTiming;",
 							"   array = [totalTiming];",
 							"} else {",
-							"   totalTiming = `${totalTiming},${currentTiming}`;",
-							"   array = totalTiming.split(',');",
+							"    totalTiming += \",\" + currentTiming;",
+							"   array = totalTiming.split(',').map(Number);",
 							"}",
 							"pm.collectionVariables.set(\"timings\", totalTiming);",
 							"",
-							"let sumOfArray = 0;",
-							"",
-							"for (let i = 0; i < array.length; i++) {",
-							"   sumOfArray += Number(array[i]);",
-							"}",
+							"let sumOfArray = array.reduce((a,b)=>a+b);",
 							"",
 							"const average = sumOfArray / (array.length);",
 							"",
@@ -244,10 +240,6 @@
 		}
 	],
 	"variable": [
-		{
-			"key": "kazu_version",
-			"value": ""
-		},
 		{
 			"key": "query",
 			"value": ""
