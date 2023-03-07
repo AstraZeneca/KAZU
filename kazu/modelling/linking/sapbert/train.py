@@ -347,6 +347,7 @@ class PLSapbertModel(LightningModule):
             self.ontology_embeddings = None
 
     def configure_optimizers(self):
+        """Implementation of :external+pytorch_lightning:ref:`LightningModule.configure_optimizers </common/lightning_module.rst#configure-optimizers>`\\ ."""
         assert self.sapbert_training_params is not None
         optimizer = optim.AdamW(
             [
@@ -374,6 +375,7 @@ class PLSapbertModel(LightningModule):
         }
 
     def training_step(self, batch, batch_idx, *args, **kwargs) -> STEP_OUTPUT:
+        """Implementation of :external+pytorch_lightning:ref:`LightningModule.training_step </common/lightning_module.rst#training-step>`\\ ."""
         query_toks1, query_toks2 = batch
         # labels should be identical, so we only need one
         labels = query_toks1.pop("labels")
@@ -388,6 +390,7 @@ class PLSapbertModel(LightningModule):
         return self.loss(query_embed, labels, hard_pairs)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
+        """Implementation of :external+pytorch_lightning:ref:`LightningModule.train_dataloader </common/lightning_module.rst#train-dataloader>`\\ ."""
         assert self.sapbert_training_params is not None
         training_df = pd.read_parquet(self.sapbert_training_params.train_file)
         labels = training_df["id"].astype("category").cat.codes.to_numpy()
@@ -411,6 +414,7 @@ class PLSapbertModel(LightningModule):
         return train_loader
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
+        """Implementation of :external+pytorch_lightning:ref:`LightningModule.val_dataloader </common/lightning_module.rst#val-dataloader>`\\ ."""
         dataloaders = []
         assert self.sapbert_evaluation_manager is not None
         assert self.sapbert_training_params is not None
@@ -433,9 +437,11 @@ class PLSapbertModel(LightningModule):
         return dataloaders
 
     def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
+        """Implementation of :external+pytorch_lightning:ref:`LightningModule.validation_step </common/lightning_module.rst#validation-step>`\\ ."""
         return self(batch)
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
+        """Implementation of :external+pytorch_lightning:ref:`LightningModule.predict_step </common/lightning_module.rst#predict-step>`\\ ."""
         return self(batch)
 
     def get_embeddings(self, output: List[Dict[int, torch.Tensor]]) -> torch.Tensor:
