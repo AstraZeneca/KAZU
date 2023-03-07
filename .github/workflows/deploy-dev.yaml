@@ -1,12 +1,9 @@
 name: Build & Deploy
 on:
-  # workflow_run:
-  #   workflows: ["Create Release"]
-  #   types:
-  #     - completed
-  push:
-    branches:
-      - add-dev-depoyment
+  workflow_run:
+    workflows: ["Create Release"]
+    types:
+      - completed
 
 jobs:
   build:
