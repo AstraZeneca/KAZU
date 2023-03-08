@@ -161,3 +161,63 @@ def linkcode_resolve(domain, info):
     fn_filepath = os.path.relpath(fn_filepath, start=os.path.dirname(kazu.__file__))
 
     return f"{remote_base_url}/blob/main/kazu/{fn_filepath}{linespec}"
+
+
+# raise failed links as warning, except for the ignored ones below
+nitpicky = True
+
+nitpick_ignore = [
+    ###### Checked that there's no obvious solution #####
+    # sphinx doesn't seem to handle typeVars here, see https://github.com/sphinx-doc/sphinx/issues/10974
+    ("py:class", "kazu.utils.grouping.Item"),
+    ("py:class", "kazu.utils.grouping.Key"),
+    ("py:class", "kazu.steps.step.Self"),
+    # to work, this has to be # transformers.BatchEncoding, but this isn't
+    # the location of the 'live object' after importing.
+    # This is an issue related to https://github.com/sphinx-doc/sphinx/issues/4826
+    # I want to try and resolve this via https://github.com/theislab/scanpydoc/issues/64
+    # this may affect other ignored errors below here too, I haven't fully chcked
+    ("py:class", "transformers.tokenization_utils_base.BatchEncoding"),
+    # This doesn't seem to have a py:class reference in the Python docs, but there is this in std:doc :
+    # dom-document-objects                     Document Objects                        : library/xml.dom.html#dom-document-objects
+    # again, with type hints though, overriding would be a pain
+    ("py:class", "xml.dom.minidom.Document"),
+    # suspect related to the above
+    ("py:class", "xml.dom.minidom.Element"),
+    ##### Not Checked, may be trivial to fix (just ignoring so we can avoid introducing new problems going forward) ######
+    ("py:class", "JWTAuthenticationBackend"),
+    ("py:class", "Module"),
+    ("py:class", "batch"),
+    (
+        "py:class",
+        "pytorch_lightning.core.module.LightningModule.forward",
+    ),
+    ("py:class", "omegaconf.dictconfig.DictConfig"),
+    ("py:class", "omegaconf.listconfig.ListConfig"),
+    ("py:class", "pydantic.main.BaseModel"),
+    ("py:class", "rdflib.graph.Graph"),
+    ("py:class", "rdflib.paths.Path"),
+    ("py:class", "rdflib.term.Node"),
+    ("py:class", "re.Pattern"),
+    ("py:class", "spacy.language.Language"),
+    ("py:class", "spacy.matcher.phrasematcher.PhraseMatcher"),
+    ("py:class", "spacy.tokens.doc.Doc"),
+    ("py:class", "spacy.tokens.span.Span"),
+    ("py:class", "stanza.pipeline.core.Pipeline"),
+    ("py:class", "starlette.authentication.AuthCredentials"),
+    ("py:class", "starlette.authentication.AuthenticationBackend"),
+    ("py:class", "starlette.authentication.BaseUser"),
+    ("py:class", "starlette.middleware.base.BaseHTTPMiddleware"),
+    ("py:class", "starlette.requests.HTTPConnection"),
+    ("py:class", "starlette.requests.Request"),
+    ("py:class", "starlette.responses.Response"),
+    ("py:class", "transformers.data.data_collator.DataCollatorWithPadding"),
+    ("py:class", "transformers.data.processors.utils.DataProcessor"),
+    ("py:class", "transformers.data.processors.utils.InputExample"),
+    ("py:class", "transformers.modeling_utils.PreTrainedModel"),
+    ("py:class", "transformers.models.bert.modeling_bert.BertPreTrainedModel"),
+    ("py:class", "transformers.tokenization_utils.PreTrainedTokenizer"),
+    ("py:class", "transformers.tokenization_utils_base.PreTrainedTokenizerBase"),
+    ("py:class", "transformers.tokenization_utils_fast.PreTrainedTokenizerFast"),
+    ("py:class", "transformers.utils.generic.PaddingStrategy"),
+]
