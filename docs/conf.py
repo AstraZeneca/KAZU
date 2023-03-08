@@ -104,7 +104,7 @@ autodoc_mock_imports = ["kazu.conf", "kazu.tests"]
 autodoc_member_order = "groupwise"
 
 intersphinx_mapping = {
-    "transformers": ("https://huggingface.co/docs/transformers/master/en/", None),
+    "transformers": ("https://huggingface.co/docs/transformers/main/en/", None),
     "pytorch_lightning": ("https://pytorch-lightning.readthedocs.io/en/stable/", None),
     "torch": ("https://pytorch.org/docs/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
