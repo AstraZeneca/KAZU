@@ -1031,14 +1031,15 @@ class GeneOntologyParser(OntologyParser):
         self.instances.add(name)
         self.query = query
 
-    def populate_databases(self, force: bool = False):
-        super().populate_databases()
+    def populate_databases(self, force: bool = False) -> Optional[List[CurationWithTermNorms]]:
+        curations_with_term_norms = super().populate_databases(force=force)
         self.instances_in_dbs.add(self.name)
 
         if self.instances_in_dbs >= self.instances:
             # all existing instances are in the database, so we can free up
             # the memory used by the cached parsed gene ontology, which is significant.
             self.load_go.cache_clear()
+        return curations_with_term_norms
 
     def __del__(self):
         GeneOntologyParser.instances.discard(self.name)
