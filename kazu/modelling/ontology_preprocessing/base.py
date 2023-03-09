@@ -361,7 +361,7 @@ class OntologyParser(ABC):
                     f"3) Change the string normalizer function to generate unique term_norms\n"
                 )
 
-        logger.info(
+        logger.debug(
             f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
         )
         # see if we've already had to group all the ids in this id_set in some way for a different synonym
@@ -389,7 +389,7 @@ class OntologyParser(ABC):
             )
             if id_set.issubset(all_ids_in_assoc_id_set):
                 associated_id_set_for_new_synonym_term = associated_id_set
-                logger.info(
+                logger.debug(
                     f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_set}"
                 )
                 break
@@ -401,7 +401,7 @@ class OntologyParser(ABC):
             # id, which must later be disambiguated). This assumption may be inappropriate in cases. This is
             # best avoided by having the curation contain as few IDs as possible, such that the chances
             # that an existing AssociatedIdSet can be reused are higher.
-            logger.info(
+            logger.debug(
                 f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
             )
             associated_id_set_for_new_synonym_term = frozenset(
@@ -429,7 +429,7 @@ class OntologyParser(ABC):
             aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
         )
         self.synonym_db.add(self.name, synonyms=(new_term,))
-        logger.info(f"{new_term} created")
+        logger.debug(f"{new_term} created")
         return new_term
 
     def _attempt_to_modify_database_entry_for_curation(
@@ -447,7 +447,7 @@ class OntologyParser(ABC):
                     "failed to modify any SynonymTerms containing %s for %s", idx, self.name
                 )
             else:
-                logger.info(
+                logger.debug(
                     "modified %s and dropped %s SynonymTerms containing %s for %s",
                     terms_modified,
                     terms_dropped,
@@ -460,7 +460,7 @@ class OntologyParser(ABC):
             if terms_modified == 0 and terms_dropped == 0:
                 logger.warning("failed to drop %s from %s", idx, self.name)
             else:
-                logger.info(
+                logger.debug(
                     "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm modified count: %s",
                     idx,
                     self.name,
@@ -475,7 +475,7 @@ class OntologyParser(ABC):
             if behaviour is ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
                 try:
                     self.synonym_db.drop_synonym_term(self.name, affected_term_key)
-                    logger.info(
+                    logger.debug(
                         "successfully dropped %s from database for %s", affected_term_key, self.name
                     )
                 except IndexError:
@@ -501,14 +501,14 @@ class OntologyParser(ABC):
                                 drop_equivalent_id_set_from_synonym_term_result
                                 is DBModificationResult.ID_SET_MODIFIED
                             ):
-                                logger.info(
+                                logger.debug(
                                     "dropped an EquivalentIdSet containing %s for key %s for %s",
                                     idx,
                                     affected_term_key,
                                     self.name,
                                 )
                             else:
-                                logger.info(
+                                logger.debug(
                                     "dropped a SynonymTerm containing %s for key %s for %s",
                                     idx,
                                     affected_term_key,
