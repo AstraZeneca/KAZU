@@ -1067,7 +1067,7 @@ class GeneOntologyParser(OntologyParser):
             idx = str(row.goid)
             label = str(row.label)
             if "obsolete" in label:
-                logger.info(f"skipping obsolete id: {idx}, {label}")
+                logger.debug(f"skipping obsolete id: {idx}, {label}")
                 continue
             if self._uri_regex.match(idx):
                 default_labels.append(label)
