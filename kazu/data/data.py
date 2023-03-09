@@ -707,10 +707,10 @@ class Curation:
     _id: Dict[str, str] = field(default_factory=dict)
     # parser specific behaviours
     _parser_name_to_behaviour: DefaultDict[str, List[ParserBehaviourIdandIndex]] = field(
-        default_factory=lambda: defaultdict(list)
+        default_factory=lambda: defaultdict(list), init=False
     )
     # general behaviours affect all parsers
-    _general_behaviours: List[ParserBehaviourIdandIndex] = field(default_factory=list)
+    _general_behaviours: List[ParserBehaviourIdandIndex] = field(default_factory=list, init=False)
 
     def __post_init__(self):
         # data validation
