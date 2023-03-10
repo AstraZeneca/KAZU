@@ -193,7 +193,11 @@ class KazuWebUI:
     deploy: Callable
 
     def __init__(self, ui_cfg: DictConfig):
-        app.mount(ui_cfg.baseURL, StaticFiles(directory=ui_cfg.staticFilesPath, html=True), name="static-ui-content")
+        app.mount(
+            ui_cfg.baseURL,
+            StaticFiles(directory=ui_cfg.staticFilesPath, html=True),
+            name="static-ui-content",
+        )
 
     @app.get("/")
     def root(self):
