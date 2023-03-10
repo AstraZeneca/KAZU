@@ -60,7 +60,7 @@ from starlette.authentication import (
 from starlette.requests import Request, HTTPConnection
 from starlette.responses import JSONResponse
 
-from kazu.web.routes import EXCLUDED_ENDPOINTS
+from kazu.web.routes import NO_AUTH_ENDPOINTS
 
 logger = logging.getLogger("ray")
 
@@ -119,7 +119,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             )
         )
         path: str = request.scope["raw_path"].decode()
-        if path in EXCLUDED_ENDPOINTS:
+        if path in NO_AUTH_ENDPOINTS:
             logger.info("ID: %s Request to %s, no authentication required", req_id, path)
             return None
 

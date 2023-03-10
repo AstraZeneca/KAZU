@@ -9,11 +9,13 @@ from fastapi import Depends, FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
+from fastapi.staticfiles import StaticFiles
 from hydra.utils import instantiate, call
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
 from starlette.requests import HTTPConnection, Request
+from starlette.responses import RedirectResponse
 
 from kazu.data.data import Document
 from kazu.pipeline import Pipeline
@@ -126,7 +128,7 @@ WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
 
 @serve.deployment(route_prefix="/api")
 @serve.ingress(app)
-class KazuWebApp:
+class KazuWebAPI:
     """
     Web app to serve results
     """
@@ -184,6 +186,20 @@ class KazuWebApp:
         )
 
 
+@serve.deployment(route_prefix="/ui")
+@serve.ingress(app)
+class KazuWebUI:
+
+    deploy: Callable
+
+    def __init__(self, ui_cfg: DictConfig):
+        app.mount(ui_cfg.baseURL, StaticFiles(directory=ui_cfg.staticFilesPath, html=True), name="static-ui-content")
+
+    @app.get("/")
+    def root(self):
+        return RedirectResponse("/index.html")
+
+
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
     """
@@ -196,7 +212,10 @@ def start(cfg: DictConfig) -> None:
     call(cfg.ray.init)
     call(cfg.ray.serve)
 
-    KazuWebApp.deploy(cfg)
+    KazuWebAPI.deploy(cfg)
+    if "ui" in cfg.ray and cfg.ray.ui is not None and cfg.ray.ui.enabled:
+        KazuWebUI.deploy(cfg.ray.ui)
+
     if not cfg.ray.serve.detached:
         while True:
             logger.info(serve.list_deployments())
