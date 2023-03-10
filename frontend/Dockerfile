@@ -7,7 +7,7 @@ RUN mkdir $APP_ROOT
 WORKDIR $APP_ROOT
 
 RUN apk update
-RUN apk add nodejs npm
+RUN apk add nodejs npm jq
 
 COPY package.json ./package.json
 COPY tsconfig.json ./tsconfig.json
