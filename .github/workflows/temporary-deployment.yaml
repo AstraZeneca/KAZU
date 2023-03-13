@@ -11,6 +11,7 @@ on:
       seconds:
         description: time to keep deployment alive
         required: true
+  pull_request: 
       
 jobs:
   build-temporary-deployment:
