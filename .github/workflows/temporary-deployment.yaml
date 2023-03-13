@@ -24,8 +24,8 @@ jobs:
       - name: download release
         shell: bash
         run: |
-         gh release download --repo=https://github.com/AZ-AI/kazu/ ${{inputs.release-version}} --pattern=kazu_model_pack_public*
-         mv kazu_model_pack_public* --dir deploy
+         gh release download --repo=https://github.com/AZ-AI/kazu/ ${{inputs.release-version}}
+         mv kazu_model_pack_public* deploy
         env:
          GH_TOKEN: ${{ github.token }}
 
