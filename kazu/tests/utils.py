@@ -12,6 +12,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTermWithMetrics,
     Curation,
+    GlobalParserActions,
 )
 from kazu.modelling.ontology_preprocessing.base import (
     IDX,
@@ -163,6 +164,7 @@ class DummyParser(OntologyParser):
         source: str = "test_parser",
         data: Optional[Dict[str, List[str]]] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path,
@@ -173,6 +175,7 @@ class DummyParser(OntologyParser):
             data_origin,
             synonym_generator,
             curations=curations,
+            global_actions=global_actions,
         )
         self.source = source
         if data is not None:
