@@ -1,0 +1,85 @@
+name: Temporary Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: git ref
+        required: true
+      release-version:
+        description: version of release for model pack
+        required: true
+      seconds:
+        description: time to keep deployment alive
+        required: true
+      
+jobs:
+  build-temporary-deployment:
+    runs-on: [self-hosted, az-ai-runners]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+        with: 
+          ref: ${{inputs.git-ref}}
+      
+      - name: download release
+        shell: bash
+        run: |
+         gh release download --repo=https://github.com/AZ-AI/kazu/ ${{inputs.release-version}} --pattern=kazu_model_pack_public*
+         mv kazu_model_pack_public* --dir deploy
+        env:
+         GH_TOKEN: ${{ github.token }}
+
+      - name: Build
+        uses: az-ai/az-action-registry@v4.0.1
+        with:
+          registry: ${{vars.REGISTRY}}
+          username: ${{secrets.HARBOR_USERNAME}}
+          password: ${{secrets.HARBOR_PASSWORD}}
+          image-name: nlp/kazu/temp-kazu-dev
+          build-args: |
+            ARTIFACTORY_USER=${{secrets.ARTIFACT_USERNAME}}
+            ARTIFACTORY_TOKEN=${{secrets.ARTIFACT_TOKEN}}
+            MODEL_PACK_PATH=deploy/kazu_model_pack_public-${{env.RELEASE_VERSION}}.zip
+            KAZU_PACKAGE=.
+          build-context: .
+          dockerfile-name: deploy/temporary/Dockerfile
+          tag: temp-${{github.sha}}
+          use-proxies: 'true'
+          needs-sudo: 'true'
+
+      - name: Clean up
+        shell: bash
+        run: |
+          rm -rf deploy/kazu_model_pack*
+  
+  deploy-temp:
+    name: "Deploy image to K8s Dev cluster"
+    runs-on: [self-hosted, kazu-runners]
+    needs: build
+    steps:
+      - name: deploy to dev
+        uses: az-ai/az-action-k8s-deploy-rest-api@0.6.2
+        with:
+          kube_config: ${{secrets.KUBE_CONFIG}}
+          project_name: temporary-kazu
+          ingress_name: temporary-kazu
+          image:  ${{vars.REGISTRY}}/nlp/kazu/temp-kazu-dev:temp-${{github.sha}}
+          docker_registry: ${{vars.REGISTRY}}
+          docker_username: ${{secrets.HARBOR_USERNAME}}
+          docker_password: ${{secrets.HARBOR_PASSWORD}}
+          namespace: kazu-test
+          host_url: ${{vars.AZ_URL}}
+          docker_email: "None"
+          external_port: 80
+          internal_port: 8080
+          limits_memory: "8Gi"
+          requests_memory: "8Gi"
+          project_label: nlp
+          env_label: test
+          env_secrets: |
+            KAZU_JWT_KEY=${{secrets.JWT_TOKEN}}
+            CORS_ORIGIN_REGEX=https://kazu-ui.${{vars.AZ_URL}}
+          replicas: 1
+          enable_autoscaling: "yes"
+          max_replicas: 2
+          target_cpu_utilisation: 80
