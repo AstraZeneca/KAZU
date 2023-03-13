@@ -16,6 +16,9 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     ParserBehaviour,
     AssociatedIdSets,
+    GlobalParserActions,
+    SynonymTermAction,
+    SynonymTermBehaviour,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import (
@@ -25,6 +28,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
     load_curated_terms,
     CurationException,
+    load_global_actions,
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.string_normalizer import StringNormalizer
@@ -89,20 +93,22 @@ should_remove_an_EquivalentIdSet_from_a_synonym_term = (
     "should_remove_an_EquivalentIdSet_from_a_synonym_term"
 )
 
-should_remove_an_id_from_equivalent_id_set = "should_remove_an_id_from_equivalent_id_set"
-
 should_drop_curated_term_followed_by_adding_new_one = (
     "should_drop_curated_term_followed_by_adding_new_one"
 )
 
 TERM_ADDED_REGEX = re.compile(".*SynonymTerm.*created")
-TERM_MODIFIED_OR_DROPPED_REGEX = re.compile(".*modified .* and dropped .* SynonymTerms containing")
+GLOBAL_ACTION_MODIFICATION_REGEX = re.compile(
+    ".*SynonymTerm modified count: .*, SynonymTerm dropped count: .*"
+)
 TERM_MODIFIED_REGEX = re.compile(".*dropped an EquivalentIdSet containing .* for key .*")
 TERM_DROPPED_REXEG = re.compile(".*successfully dropped .* from database for.*")
 ID_DROPPED_REXEG = re.compile(".*dropped ID .* from.*")
 NO_NEED_TO_ADD_SYNONYM_TERM_REGEX = re.compile(
     ".*but term_norm <.*> already exists in synonym database.*"
 )
+
+ENTITY_CLASS = "action_test"
 
 
 def parser_data_with_target_synonym():
@@ -127,7 +133,7 @@ def parser_data_with_split_equiv_id_set():
     return parser_data
 
 
-def get_test_parsers(test_id, path):
+def get_test_parsers(test_id, curations_path, global_actions_path):
     if any(
         rule in test_id
         for rule in {should_add_synonym_term_to_parser_1, should_add_synonym_term_to_both_parsers}
@@ -135,28 +141,48 @@ def get_test_parsers(test_id, path):
         parser_1 = DummyParser(
             name=PARSER_1_NAME,
             in_path="",
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
         parser_2 = DummyParser(
             name=PARSER_2_NAME,
             in_path="",
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
     elif should_add_synonym_term_to_both_parser_1_and_drop_from_parser_2 in test_id:
         parser_1 = DummyParser(
             name=PARSER_1_NAME,
             in_path="",
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
         parser_2 = DummyParser(
             name=PARSER_2_NAME,
             in_path="",
             data=parser_data_with_target_synonym(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
     elif any(
         rule in test_id
@@ -171,45 +197,50 @@ def get_test_parsers(test_id, path):
             name=PARSER_1_NAME,
             in_path="",
             data=parser_data_with_target_synonym(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
         parser_2 = DummyParser(
             name=PARSER_2_NAME,
             in_path="",
             data=parser_data_with_target_synonym(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
     elif should_remove_an_EquivalentIdSet_from_a_synonym_term in test_id:
         parser_1 = DummyParserWithAggOverride(
             name=PARSER_1_NAME,
             in_path="",
             data=parser_data_with_split_equiv_id_set(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
         parser_2 = DummyParserWithAggOverride(
             name=PARSER_2_NAME,
             in_path="",
             data=parser_data_with_split_equiv_id_set(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
-        )
-    elif should_remove_an_id_from_equivalent_id_set in test_id:
-        parser_1 = DummyParserWithAggOverride(
-            name=PARSER_1_NAME,
-            in_path="",
-            data=parser_data_with_split_equiv_id_set(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
-        )
-        parser_2 = DummyParserWithAggOverride(
-            name=PARSER_2_NAME,
-            in_path="",
-            data=parser_data_with_split_equiv_id_set(),
-            entity_class="injection_test",
-            curations=load_curated_terms(path=path),
+            entity_class=ENTITY_CLASS,
+            curations=load_curated_terms(path=curations_path)
+            if curations_path is not None
+            else None,
+            global_actions=load_global_actions(global_actions_path)
+            if global_actions_path is not None
+            else None,
         )
     else:
         raise RuntimeError("test misconfigured")
@@ -219,179 +250,187 @@ def get_test_parsers(test_id, path):
 @pytest.mark.parametrize(
     (
         "curation",
+        "global_actions",
         "expected_log_messages",
     ),
     [
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={PARSER_1_NAME: "first"},
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {"first"}},
+                        entity_class=ENTITY_CLASS,
                     )
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [TERM_ADDED_REGEX],
             id=should_add_synonym_term_to_parser_1,
         ),
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={
-                            PARSER_1_NAME: "first",
-                            PARSER_2_NAME: "first",
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={
+                            PARSER_1_NAME: {"first"},
+                            PARSER_2_NAME: {"first"},
                         },
+                        entity_class=ENTITY_CLASS,
                     )
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [TERM_ADDED_REGEX],
             id=should_add_synonym_term_to_both_parsers,
         ),
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={PARSER_1_NAME: "first"},
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {"first"}},
+                        entity_class=ENTITY_CLASS,
                     ),
-                    ParserAction(
-                        behaviour=ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER,
-                        parser_to_target_id_mapping={PARSER_2_NAME: None},
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+                        parser_to_target_id_mappings={PARSER_2_NAME: {"first"}},
+                        entity_class=ENTITY_CLASS,
                     ),
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [TERM_ADDED_REGEX, TERM_DROPPED_REXEG],
             id=should_add_synonym_term_to_both_parser_1_and_drop_from_parser_2,
         ),
         pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
+            None,
+            GlobalParserActions(
+                actions=[
                     ParserAction(
-                        behaviour=ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER,
-                        parser_to_target_id_mapping={},
+                        behaviour=ParserBehaviour.DROP_ID_FROM_PARSER,
+                        parser_to_target_id_mapping={
+                            PARSER_1_NAME: "first",
+                            PARSER_2_NAME: "first",
+                        },
                     )
-                ],
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
+                ]
             ),
-            [TERM_DROPPED_REXEG],
+            [GLOBAL_ACTION_MODIFICATION_REGEX],
             id=should_drop_from_both_parsers_via_general_rule,
         ),
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={PARSER_1_NAME: "first"},
-                    ),
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {"first"}},
+                        entity_class=ENTITY_CLASS,
+                    )
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [],
             id=should_raise_exception_when_attempting_to_add_term,
         ),
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER,
-                        parser_to_target_id_mapping={},
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {"first"}},
+                        entity_class=ENTITY_CLASS,
                     ),
-                    ParserAction(
-                        behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={PARSER_1_NAME: "first"},
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {"first"}},
+                        entity_class=ENTITY_CLASS,
                     ),
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [TERM_DROPPED_REXEG, TERM_ADDED_REGEX],
             id=should_drop_curated_term_followed_by_adding_new_one,
         ),
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.ADD,
-                        parser_to_target_id_mapping={PARSER_1_NAME: TARGET_SYNONYM},
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {TARGET_SYNONYM}},
+                        entity_class=ENTITY_CLASS,
                     ),
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [NO_NEED_TO_ADD_SYNONYM_TERM_REGEX],
             id=should_not_add_a_synonym_term_to_db_as_one_already_exists,
         ),
         pytest.param(
             Curation(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                        parser_to_target_id_mapping={PARSER_1_NAME: ID_TO_BE_REMOVED},
-                    )
+                actions=[
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
+                        parser_to_target_id_mappings={PARSER_1_NAME: {ID_TO_BE_REMOVED}},
+                        entity_class=ENTITY_CLASS,
+                    ),
                 ],
                 curated_synonym=TARGET_SYNONYM,
                 case_sensitive=False,
             ),
+            None,
             [TERM_MODIFIED_REGEX],
             id=should_remove_an_EquivalentIdSet_from_a_synonym_term,
-        ),
-        pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                ner_actions=[],
-                parser_actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.DROP_ID_FROM_PARSER,
-                        parser_to_target_id_mapping={PARSER_1_NAME: ID_TO_BE_REMOVED},
-                    )
-                ],
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
-            ),
-            [ID_DROPPED_REXEG],
-            id=should_remove_an_id_from_equivalent_id_set,
         ),
     ],
 )
 def test_declarative_curation_logic(
-    tmp_path, curation: Curation, expected_log_messages, caplog, request
+    tmp_path,
+    curation: Curation,
+    global_actions: GlobalParserActions,
+    expected_log_messages,
+    caplog,
+    request,
 ):
     test_id = request.node.callspec.id
     Singleton.clear_all()
-    with caplog.at_level(logging.INFO):
-        path = tmp_path.joinpath("injections.jsonl")
-        with open(path, "w") as f:
-            f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
+    with caplog.at_level(logging.DEBUG):
+
+        curations_path = None
+        if curation is not None:
+            curations_path = tmp_path.joinpath("curations.jsonl")
+            with open(curations_path, "w") as f:
+                f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
+
+        global_actions_path = None
+        if global_actions is not None:
+            global_actions_path = tmp_path.joinpath("global_actions.json")
+            with open(global_actions_path, "w") as f:
+                f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(global_actions)) + "\n")
 
         # we can't parameterise the parsers as they need to load the curations from the
         # temporary directory set up using the tmp_path fixture inside the test
-        parser_1, parser_2 = get_test_parsers(test_id, path)
+        parser_1, parser_2 = get_test_parsers(test_id, curations_path, global_actions_path)
 
         expectation: Union[RaisesContext[CurationException], nullcontext]
         if should_raise_exception_when_attempting_to_add_term in test_id:
@@ -420,10 +459,9 @@ def test_declarative_curation_logic(
             )
         elif should_drop_from_both_parsers_via_general_rule in test_id:
             assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(PARSER_2_NAME))
-            assert len(syn_db.get_all(PARSER_1_NAME)) == len(DummyParser.DEFAULT_DUMMY_DATA[SYN])
+            assert (
+                len(syn_db.get_all(PARSER_1_NAME)) == len(DummyParser.DEFAULT_DUMMY_DATA[SYN]) - 1
+            )
         elif should_remove_an_EquivalentIdSet_from_a_synonym_term in test_id:
-            term_norm = StringNormalizer.normalize(TARGET_SYNONYM)
-            assert len(syn_db.get(PARSER_1_NAME, term_norm).associated_id_sets) == 1
-        elif should_remove_an_id_from_equivalent_id_set in test_id:
             term_norm = StringNormalizer.normalize(TARGET_SYNONYM)
             assert len(syn_db.get(PARSER_1_NAME, term_norm).associated_id_sets) == 1
