@@ -12,6 +12,11 @@ dev server.
 - Run `PUBLIC_URL=/ui npm run build` and note the full path to the resulting `build` directory e.g likely `/home/.../kazu/frontend/build`.
 - Ensure that the frontend server has been enabled in the Ray `ui` hydra configuration.
 - Set env var `BUILT_FRONTEND_PATH` to the noted full path from above, and start the Ray server in local mode.
+- Set `ray: local_with_frontend` in the `conf/config.yaml` hydra config:
+    ```yaml
+    defaults:
+      - ray: local_with_frontend
+    ```
 
 
 # Running with Docker

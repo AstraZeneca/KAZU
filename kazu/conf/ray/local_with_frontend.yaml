@@ -1,0 +1,6 @@
+defaults:
+  - local
+
+ui:
+  baseURL: "/"
+  staticFilesPath: ${oc.env:BUILT_FRONTEND_PATH}

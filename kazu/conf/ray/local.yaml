@@ -14,6 +14,4 @@ serve:
     port: 8080
     location: EveryNode
     middlewares: ${Middlewares.middlewares}
-ui:
-  baseURL: "/"
-  staticFilesPath: ${oc.env:BUILT_FRONTEND_PATH}
+ui: ~
