@@ -217,7 +217,7 @@ def start(cfg: DictConfig) -> None:
     call(cfg.ray.serve)
 
     KazuWebAPI.deploy(cfg)
-    if (ui_conf:= cfg.ray.get("ui")) is not None:
+    if (ui_conf := cfg.ray.get("ui")) is not None:
         KazuWebUI.deploy(ui_conf)
 
     if not cfg.ray.serve.detached:
