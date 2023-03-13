@@ -14,6 +14,7 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
+from kazu.data.data import SynonymTermBehaviour
 from kazu.modelling.ontology_preprocessing.base import (
     OntologyParser,
 )
@@ -176,18 +177,20 @@ class OntologyMatcher:
                 # type ignore as curated_synonym will not be None, as only
                 # curations with a curated_synonym will be 'matched'.
                 else curation.curated_synonym.lower()  # type: ignore[union-attr]
-                for curation, _ in curation_with_term_norms
+                for curation in curation_with_term_norms
             )
 
-            for (curation, term_norm), pattern in zip(curation_with_term_norms, patterns):
+            for curation, pattern in zip(curation_with_term_norms, patterns):
                 # a curation can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
-                match_id = parser.name + self.match_id_sep + term_norm
-                if curation.case_sensitive:
-                    strict_matcher.add(match_id, [pattern])
-                else:
-                    lowercase_matcher.add(match_id, [pattern])
+                for action in curation.parser_behaviour(parser_name=parser.name):
+                    if action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING:
+                        match_id = parser.name + self.match_id_sep + action.term_norm
+                        if curation.case_sensitive:
+                            strict_matcher.add(match_id, [pattern])
+                        else:
+                            lowercase_matcher.add(match_id, [pattern])
 
         # only set the phrasematcher if we have any rules for them
         # this lets us skip running a phrasematcher if it has no rules when we come
