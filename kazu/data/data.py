@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto
 from math import inf
-from operator import itemgetter
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, DefaultDict
 
 from numpy import ndarray, float32, float16
@@ -624,32 +623,43 @@ class DocumentJsonUtils:
 SimpleValue = Union[NumericMetric, str]
 
 
-class Behaviour(AutoNameEnum):
-    DROP = auto()
-    ADD = auto()
+class SynonymTermBehaviour(AutoNameEnum):
+    IGNORE = auto()
+    ADD_FOR_NER_AND_LINKING = auto()
+    ADD_FOR_LINKING_ONLY = auto()
+    DROP_SYNONYM_TERM_FOR_LINKING = auto()  # do not use this term as a linking target
+    DROP_ID_SET_FROM_SYNONYM_TERM = auto()  # do not use these ids for this term
 
 
 class ParserBehaviour(AutoNameEnum):
-    ADD = auto()
-    DROP_SYNONYM_TERM_FROM_PARSER = auto()
-    DROP_ID_FROM_PARSER = auto()
-    DROP_ID_SET_FROM_SYNONYM_TERM = auto()
-    DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS = (
-        auto()
-    )  # note, also removes the synonymterm from the db if no id sets are associated with that term
+    DROP_ID_FROM_PARSER = auto()  # id should never be produced anywhere
 
 
-@dataclass(frozen=True)
-class NerAction:
-    behaviour: Behaviour
-    entity_classes: Set[str] = field(default_factory=set)
+@dataclass()
+class SynonymTermAction:
+    behaviour: SynonymTermBehaviour
+    entity_class: str
     parser_to_target_id_mappings: Dict[str, Set[str]] = field(default_factory=dict)
+    term_norm: str = field(init=False)
+
+    def __post_init__(self):
+        if (
+            self.behaviour is not SynonymTermBehaviour.IGNORE
+            or self.behaviour is not SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+        ):
+            if len(self.parser_to_target_id_mappings) == 0:
+                raise ValueError(
+                    f"parser_to_target_id_mappings must be specified for behaviour {self.behaviour}"
+                )
+            for key, values in self.parser_to_target_id_mappings.items():
+                if len(values) == 0:
+                    raise ValueError(f"at least one ID must be specified for key: {key}")
 
     @classmethod
-    def from_json(cls, json_dict: Dict) -> "NerAction":
+    def from_json(cls, json_dict: Dict) -> "SynonymTermAction":
         return cls(
-            behaviour=Behaviour(json_dict["behaviour"]),
-            entity_classes=set(json_dict["entity_classes"]),
+            behaviour=SynonymTermBehaviour(json_dict["behaviour"]),
+            entity_class=json_dict["entity_class"],
             parser_to_target_id_mappings={
                 k: set(v) for k, v in json_dict["parser_to_target_id_mappings"].items()
             },
@@ -663,7 +673,7 @@ class ParserAction:
     """
 
     behaviour: ParserBehaviour
-    parser_to_target_id_mapping: Dict[str, Optional[str]] = field(default_factory=dict)
+    parser_to_target_id_mapping: Dict[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "ParserAction":
@@ -672,16 +682,53 @@ class ParserAction:
             parser_to_target_id_mapping=json_dict["parser_to_target_id_mapping"],
         )
 
+    def __post_init__(self):
+        if len(self.parser_to_target_id_mapping) == 0:
+            raise ValueError(
+                f"parser_to_target_id_mapping must be specified for global actions: {self}"
+            )
+        for key, values in self.parser_to_target_id_mapping.items():
+            if len(values) == 0:
+                raise ValueError(f"at least one ID must be specified for key: {key}, {self}")
 
-CURATION_CANNOT_MODIFY_IDS_ERR = "curation is configured to interact with IDs, but either no parser/id mappings or curated_term are specified "
-ID_MODIFYING_BEHAVIOURS = {
-    ParserBehaviour.ADD,
-    ParserBehaviour.DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS,
-    ParserBehaviour.DROP_ID_FROM_PARSER,
-    ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-}
-ParserBehaviourAndId = Tuple[ParserBehaviour, Optional[str]]
-ParserBehaviourIdandIndex = Tuple[ParserBehaviour, Optional[str], int]
+
+@dataclass(frozen=True)
+class GlobalParserActions:
+    actions: List[ParserAction]
+    # general behaviours affect all parsers
+    _parser_name_to_action: DefaultDict[str, List[ParserAction]] = field(
+        default_factory=lambda: defaultdict(list), init=False
+    )
+    # MongoDB compatible identifier for this curation
+    _id: Dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self):
+        for action in self.actions:
+            for parser_name in action.parser_to_target_id_mapping.keys():
+                self._parser_name_to_action[parser_name].append(action)
+
+    def parser_behaviour(self, parser_name: str) -> Iterable[ParserAction]:
+        """
+        generator that yields behaviours for a specific parser, based on the order they are
+        specified in
+
+
+        :param parser_name:
+        :return:
+        """
+        yield from self._parser_name_to_action.get(parser_name, [])
+
+    @classmethod
+    def from_json(cls, json_dict: Dict) -> "GlobalParserActions":
+        # we call str on json_dict["_id"] in case it's a bson ObjectId
+        if not isinstance(json_dict["_id"], dict):
+            _id = {"$oid": str(json_dict["_id"])}
+        else:
+            _id = json_dict["_id"]
+        return cls(
+            actions=[ParserAction.from_json(x) for x in json_dict["actions"]],
+            _id=_id,
+        )
 
 
 @dataclass(frozen=True)
@@ -699,126 +746,25 @@ class Curation:
     """
 
     mention_confidence: MentionConfidence
-    ner_actions: List[NerAction]
-    parser_actions: List[ParserAction]
+    actions: List[SynonymTermAction]
     case_sensitive: bool
-    curated_synonym: Optional[str] = None
+    curated_synonym: str
     # MongoDB compatible identifier for this curation
     _id: Dict[str, str] = field(default_factory=dict)
     # parser specific behaviours
-    _parser_name_to_behaviour: DefaultDict[str, List[ParserBehaviourIdandIndex]] = field(
+    _parser_name_to_action: DefaultDict[str, List[SynonymTermAction]] = field(
         default_factory=lambda: defaultdict(list), init=False
     )
-    # general behaviours affect all parsers
-    _general_behaviours: List[ParserBehaviourIdandIndex] = field(default_factory=list, init=False)
 
     def __post_init__(self):
         # data validation
-        self._validate_parser_actions()
-        self._validate_ner_actions()
+        if not isinstance(self.curated_synonym, str):
+            raise ValueError(f"curated_synonym should be a string, {self}")
+        for action in self.actions:
+            for parser_name in action.parser_to_target_id_mappings.keys():
+                self._parser_name_to_action[parser_name].append(action)
 
-    def _validate_ner_actions(self):
-        for ner_action in self.ner_actions:
-            if ner_action.behaviour == Behaviour.ADD and self.curated_synonym is None:
-                raise ValueError(
-                    f"curation had NER add behaviour, but curated_synonym field is None. {self}"
-                )
-            if ner_action.behaviour == Behaviour.ADD and len(ner_action.entity_classes) == 0:
-                raise ValueError(
-                    f"curation had NER add behaviour, but no entity classes are specified. {self}"
-                )
-            if (
-                ner_action.behaviour == Behaviour.ADD
-                and len(ner_action.parser_to_target_id_mappings) == 0
-            ):
-                raise ValueError(
-                    f"curation had NER add behaviour, but no parser_to_target_id_mappings are specified. {self}"
-                )
-
-    def _validate_parser_actions(self):
-        for action_index, parser_action in enumerate(self.parser_actions):
-            if len(parser_action.parser_to_target_id_mapping) == 0:
-                if self.curated_synonym is None:
-                    raise ValueError(
-                        f"curation has neither curated_synonym nor parser_to_id_mappings specified {self}"
-                    )
-
-                self._resolve_no_mappings_with_synonym(action_index, parser_action)
-
-            else:
-                if self.curated_synonym is None:
-                    self._resolve_with_mappings_no_synonym(action_index, parser_action)
-                else:
-                    self._resolve_with_mappings_with_synonym(action_index, parser_action)
-
-    def _resolve_with_mappings_no_synonym(
-        self,
-        action_index: int,
-        parser_action: ParserAction,
-    ):
-        if parser_action.behaviour in {
-            ParserBehaviour.ADD,
-            ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER,
-        }:
-            raise ValueError(
-                f"a non-empty curated_term field is required to add or drop a SynonymTerm {self}"
-            )
-        else:
-            for parser_name, maybe_id in parser_action.parser_to_target_id_mapping.items():
-                if maybe_id is None:
-                    raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
-                else:
-                    self._parser_name_to_behaviour[parser_name].append(
-                        (
-                            parser_action.behaviour,
-                            maybe_id,
-                            action_index,
-                        )
-                    )
-
-    def _resolve_with_mappings_with_synonym(
-        self,
-        action_index: int,
-        parser_action: ParserAction,
-    ):
-        for parser_name, maybe_id in parser_action.parser_to_target_id_mapping.items():
-            if maybe_id is None:
-                if parser_action.behaviour in ID_MODIFYING_BEHAVIOURS:
-                    raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
-                elif parser_action.behaviour == ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
-                    self._parser_name_to_behaviour[parser_name].append(
-                        (
-                            parser_action.behaviour,
-                            None,
-                            action_index,
-                        )
-                    )
-
-                else:
-                    raise ValueError(
-                        f"Unknown {parser_action.behaviour.__class__} value: {parser_action.behaviour}"
-                    )
-            else:
-                self._parser_name_to_behaviour[parser_name].append(
-                    (
-                        parser_action.behaviour,
-                        maybe_id,
-                        action_index,
-                    )
-                )
-
-    def _resolve_no_mappings_with_synonym(self, action_index: int, parser_action: ParserAction):
-        if parser_action.behaviour != ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
-            raise ValueError(f"{CURATION_CANNOT_MODIFY_IDS_ERR}{self}")
-        self._general_behaviours.append(
-            (
-                parser_action.behaviour,
-                None,
-                action_index,
-            )
-        )
-
-    def parser_behaviour(self, parser_name: str) -> Iterable[ParserBehaviourAndId]:
+    def parser_behaviour(self, parser_name: str) -> Iterable[SynonymTermAction]:
         """
         generator that yields behaviours for a specific parser, based on the order they are
         specified in
@@ -827,15 +773,7 @@ class Curation:
         :param parser_name:
         :return:
         """
-        parser_specific_behaviours = self._parser_name_to_behaviour.get(parser_name)
-        if parser_specific_behaviours is None:
-            behaviour_iterable = self._general_behaviours
-        else:
-            behaviour_iterable = sorted(
-                parser_specific_behaviours + self._general_behaviours, key=itemgetter(2)
-            )
-
-        yield from ((behaviour, id_) for (behaviour, id_, action_index) in behaviour_iterable)
+        yield from self._parser_name_to_action.get(parser_name, [])
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "Curation":
@@ -846,8 +784,7 @@ class Curation:
             _id = json_dict["_id"]
         return cls(
             mention_confidence=MentionConfidence(json_dict["mention_confidence"]),
-            ner_actions=[NerAction.from_json(x) for x in json_dict["ner_actions"]],
-            parser_actions=[ParserAction.from_json(x) for x in json_dict["parser_actions"]],
+            actions=[SynonymTermAction.from_json(x) for x in json_dict["actions"]],
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
             _id=_id,
