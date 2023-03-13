@@ -31,9 +31,10 @@ from kazu.data.data import (
     SimpleValue,
     Curation,
     ParserBehaviour,
-    Behaviour,
-    NerAction,
+    SynonymTermBehaviour,
+    SynonymTermAction,
     AssociatedIdSets,
+    GlobalParserActions,
 )
 from kazu.modelling.database.in_memory_db import (
     MetadataDatabase,
@@ -56,23 +57,45 @@ IdsAndSource = Set[Tuple[str, str]]
 
 logger = logging.getLogger(__name__)
 
-CurationWithTermNorms = Tuple[Curation, str]
-
 
 class CurationException(Exception):
     pass
 
 
 @functools.cache
-def load_curated_terms(path: PathLike) -> List[Curation]:
+def load_curated_terms(
+    path: PathLike,
+) -> Optional[List[Curation]]:
     """
     Load curated terms from a file path.
 
     :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
     """
-    with open(path, mode="r") as jsonlf:
-        return [Curation.from_json(json.loads(line)) for line in jsonlf]
+    curations_path = Path(path)
+    curations: Optional[List[Curation]] = None
+    if curations_path.exists():
+        with curations_path.open(mode="r") as jsonlf:
+            curations = [Curation.from_json(json.loads(line)) for line in jsonlf]
+    return curations
+
+
+@functools.cache
+def load_global_actions(
+    path: PathLike,
+) -> Optional[GlobalParserActions]:
+    """
+    Load curated terms from a file path.
+
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :return:
+    """
+    global_actions_path = Path(path)
+    global_actions = None
+    if global_actions_path.exists():
+        with global_actions_path.open(mode="r") as jsonlf:
+            global_actions = GlobalParserActions.from_json(json.load(jsonlf))
+    return global_actions
 
 
 class OntologyParser(ABC):
@@ -112,6 +135,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         """
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
@@ -143,6 +167,7 @@ class OntologyParser(ABC):
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
         self.curations = curations
+        self.global_actions = global_actions
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()
@@ -432,123 +457,168 @@ class OntologyParser(ABC):
         logger.debug(f"{new_term} created")
         return new_term
 
-    def _attempt_to_modify_database_entry_for_curation(
-        self, behaviour: ParserBehaviour, idx: Optional[str], curated_synonym: Optional[str]
-    ):
-        if behaviour is ParserBehaviour.DROP_ID_SETS_FROM_ALL_SYNONYM_TERMS:
-            (
-                terms_modified,
-                terms_dropped,
-            ) = self.synonym_db.drop_equivalent_id_set_containing_id_from_all_synonym_terms(
-                self.name, idx  # type: ignore[arg-type]
+    def _drop_synonym_term_for_linking(self, curated_synonym: str):
+        affected_term_key = StringNormalizer.normalize(
+            curated_synonym, entity_class=self.entity_class
+        )
+        try:
+            self.synonym_db.drop_synonym_term(self.name, affected_term_key)
+            logger.debug(
+                "successfully dropped %s from database for %s", affected_term_key, self.name
             )
-            if terms_modified == 0 and terms_dropped == 0:
-                logger.warning(
-                    "failed to modify any SynonymTerms containing %s for %s", idx, self.name
-                )
-            else:
-                logger.debug(
-                    "modified %s and dropped %s SynonymTerms containing %s for %s",
-                    terms_modified,
-                    terms_dropped,
-                    idx,
-                    self.name,
-                )
-
-        elif behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
-            terms_modified, terms_dropped = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
-            if terms_modified == 0 and terms_dropped == 0:
-                logger.warning("failed to drop %s from %s", idx, self.name)
-            else:
-                logger.debug(
-                    "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm modified count: %s",
-                    idx,
-                    self.name,
-                    terms_modified,
-                    terms_dropped,
-                )
-
-        else:
-            affected_term_key = StringNormalizer.normalize(
-                curated_synonym, entity_class=self.entity_class
+        except IndexError:
+            logger.warning(
+                "tried to drop %s from database, but key doesn't exist for %s",
+                affected_term_key,
+                self.name,
             )
-            if behaviour is ParserBehaviour.DROP_SYNONYM_TERM_FROM_PARSER:
-                try:
-                    self.synonym_db.drop_synonym_term(self.name, affected_term_key)
-                    logger.debug(
-                        "successfully dropped %s from database for %s", affected_term_key, self.name
+
+    def _drop_id_set_from_synonym_term(self, id_set: Set[str], curated_synonym: Optional[str]):
+        # make a mutable copy so we can discard as we go
+        mutable_id_set = set(id_set)
+        affected_term_key = StringNormalizer.normalize(
+            curated_synonym, entity_class=self.entity_class
+        )
+        target_term_to_modify = self.synonym_db.get(self.name, affected_term_key)
+        for equiv_id_set in target_term_to_modify.associated_id_sets:
+            if len(mutable_id_set) == 0:
+                break
+
+            if len(mutable_id_set.intersection(equiv_id_set.ids)) > 0:
+                drop_equivalent_id_set_from_synonym_term_result = (
+                    self.synonym_db.drop_equivalent_id_set_from_synonym_term(
+                        self.name, affected_term_key, equiv_id_set
                     )
-                except IndexError:
-                    logger.warning(
-                        "tried to drop %s from database, but key doesn't exist for %s",
+                )
+                if (
+                    drop_equivalent_id_set_from_synonym_term_result
+                    is DBModificationResult.ID_SET_MODIFIED
+                ):
+                    logger.debug(
+                        "dropped an EquivalentIdSet containing an id from %s for key %s for %s",
+                        id_set,
                         affected_term_key,
                         self.name,
                     )
+                else:
+                    logger.debug(
+                        "dropped a SynonymTerm containing an id from %s for key %s for %s",
+                        id_set,
+                        affected_term_key,
+                        self.name,
+                    )
+                mutable_id_set.difference_update(equiv_id_set.ids)
+        else:
+            logger.warning(
+                "Was asked to remove ids associated with a SynonymTerm (key: <%s>). However, after inspecting all"
+                "EquivalentIdSets, the following ids were not found in any of them: %s. Parser name: %s",
+                affected_term_key,
+                mutable_id_set,
+                self.name,
+            )
 
-            elif behaviour is ParserBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
-                target_associated_id_sets = self.synonym_db.get_associated_id_sets_for_id(
-                    self.name, idx  # type: ignore[arg-type]
-                )
-                for target_associated_id_set in target_associated_id_sets:
-                    for equiv_id_set in target_associated_id_set:
-                        if idx in equiv_id_set.ids:
-                            drop_equivalent_id_set_from_synonym_term_result = (
-                                self.synonym_db.drop_equivalent_id_set_from_synonym_term(
-                                    self.name, affected_term_key, equiv_id_set
-                                )
-                            )
-                            if (
-                                drop_equivalent_id_set_from_synonym_term_result
-                                is DBModificationResult.ID_SET_MODIFIED
-                            ):
-                                logger.debug(
-                                    "dropped an EquivalentIdSet containing %s for key %s for %s",
-                                    idx,
-                                    affected_term_key,
-                                    self.name,
-                                )
-                            else:
-                                logger.debug(
-                                    "dropped a SynonymTerm containing %s for key %s for %s",
-                                    idx,
-                                    affected_term_key,
-                                    self.name,
-                                )
-
-    def process_curations(self) -> Optional[List[CurationWithTermNorms]]:
+    def process_curations(self) -> Optional[List[Curation]]:
+        if self.global_actions is not None:
+            ids_dropped_through_global_actions = self._process_global_actions(self.global_actions)
+        else:
+            ids_dropped_through_global_actions = set()
         if self.curations is not None:
-            curations_with_term_norms = []
+            curation_with_term_norm_actions = []
             for curation in self.curations:
-                self._process_parser_behaviours(curation)
-                maybe_curation_with_term_norm = self._process_ner_actions(curation)
-                if maybe_curation_with_term_norm is not None:
-                    curations_with_term_norms.append(maybe_curation_with_term_norm)
-            return curations_with_term_norms
+                maybe_curation_with_term_norm_actions = self._process_curations(
+                    curation, ids_dropped_through_global_actions
+                )
+                if maybe_curation_with_term_norm_actions is not None:
+                    curation_with_term_norm_actions.append(maybe_curation_with_term_norm_actions)
+            return curation_with_term_norm_actions
         else:
             logger.info("No curations provided for %s", self.name)
             return None
 
-    def _process_ner_actions(self, curation: Curation) -> Optional[CurationWithTermNorms]:
-        for ner_action in curation.ner_actions:
-            if ner_action.behaviour == Behaviour.DROP:
-                logger.debug("ignoring unwanted curation: %s for %s", curation, self.name)
-            else:
-                maybe_term_norm = self.find_term_norm_for_curation(curation, ner_action)
-                if maybe_term_norm is not None:
-                    return curation, maybe_term_norm
-        return None
+    def update_action_for_globally_dropped_ids(
+        self,
+        curation_id: Dict[str, str],
+        action: SynonymTermAction,
+        ids_dropped_through_global_actions: Set[str],
+    ) -> Optional[SynonymTermAction]:
+        original_ids = action.parser_to_target_id_mappings[self.name]
 
-    def _process_parser_behaviours(self, curation: Curation):
-        for (behaviour, maybe_id) in curation.parser_behaviour(self.name):
-            if behaviour is ParserBehaviour.ADD:
-                # we know that maybe_id is a string through the data validation of Curation
-                self._attempt_to_add_database_entry_for_curation(
-                    {maybe_id}, curation.curated_synonym  # type: ignore[arg-type]
+        filtered_ids = original_ids.difference(ids_dropped_through_global_actions)
+        if len(filtered_ids) == 0:
+            logger.warning(
+                "curation id %s has had all linking target ids removed by a global action, and will be"
+                " ignored. Parser name: %s",
+                curation_id,
+                self.name,
+            )
+            return None
+        if len(filtered_ids) < len(original_ids):
+            logger.warning(
+                "curation found with ids that have been removed via a global action. These will be filtered"
+                "from the curation action. Parser name: %s, new ids: %s, curation id: %s",
+                self.name,
+                filtered_ids,
+                curation_id,
+            )
+            action.parser_to_target_id_mappings[self.name] = filtered_ids
+            return action
+        else:
+            return action
+
+    def _process_curations(
+        self, curation: Curation, ids_dropped_through_global_actions: Set[str]
+    ) -> Optional[Curation]:
+        maybe_updated_curation = None
+        for action in curation.parser_behaviour(self.name):
+            if action.behaviour is SynonymTermBehaviour.IGNORE:
+                logger.debug("ignoring unwanted curation: %s for %s", curation, self.name)
+            elif action.behaviour is SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
+                self._drop_synonym_term_for_linking(curated_synonym=curation.curated_synonym)
+            elif action.behaviour is SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
+                self._drop_id_set_from_synonym_term(
+                    action.parser_to_target_id_mappings[self.name],
+                    curated_synonym=curation.curated_synonym,
                 )
+            elif (
+                action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
+                or action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
+            ):
+                updated_action = self.update_action_for_globally_dropped_ids(
+                    curation._id, action, ids_dropped_through_global_actions
+                )
+                if updated_action is not None:
+                    new_or_existing_term = self._attempt_to_add_database_entry_for_curation(
+                        action.parser_to_target_id_mappings[self.name],
+                        curated_synonym=curation.curated_synonym,
+                    )
+                    if action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING:
+                        action.term_norm = new_or_existing_term.term_norm
+                        maybe_updated_curation = curation
             else:
-                self._attempt_to_modify_database_entry_for_curation(
-                    behaviour, maybe_id, curation.curated_synonym
-                )
+                raise ValueError(f"unknown behaviour for parser {self.name}, {action}")
+
+        return maybe_updated_curation
+
+    def _process_global_actions(self, global_actions: GlobalParserActions) -> Set[str]:
+        dropped_ids = set()
+        for action in global_actions.parser_behaviour(self.name):
+            if action.behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
+                idx = action.parser_to_target_id_mapping[self.name]
+                terms_modified, terms_dropped = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
+                if terms_modified == 0 and terms_dropped == 0:
+                    logger.warning("failed to drop %s from %s", idx, self.name)
+                else:
+                    dropped_ids.add(idx)
+                    logger.debug(
+                        "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
+                        idx,
+                        self.name,
+                        terms_modified,
+                        terms_dropped,
+                    )
+            else:
+                raise ValueError(f"unknown behaviour for parser {self.name}, {action}")
+        return dropped_ids
 
     def _parse_df_if_not_already_parsed(self):
         if self.parsed_dataframe is None:
@@ -614,7 +684,7 @@ class OntologyParser(ABC):
 
         self.synonym_db.add(self.name, self.export_synonym_terms())
 
-    def populate_databases(self, force: bool = False) -> Optional[List[CurationWithTermNorms]]:
+    def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
         """
         populate the databases with the results of the parser. Also calculates the term norms associated with
         any curations (if provided) which can then be used for Dictionary based NER
@@ -653,31 +723,6 @@ class OntologyParser(ABC):
         given id in the relevant ontology.
         """
         raise NotImplementedError()
-
-    def find_term_norm_for_curation(
-        self,
-        curation: Curation,
-        ner_action: NerAction,
-    ) -> Optional[str]:
-        """Find a matching term norm for the given :class:`~kazu.data.data.Curation`\\ , or create and return a new one.
-        If there's no relevant term norm, for example if the :class:`~kazu.data.data.Curation`
-        doesn't relate to this parser, return :py:data:`python:None`\\ .
-
-
-        :param curation: Expected to be a curation where the :attr:`~kazu.data.data.Curation.curated_synonym`
-            is a str (i.e. not :py:data:`python:None`\\ ).
-        :param ner_action:
-        :return:
-        """
-        if self.entity_class in ner_action.entity_classes:
-            maybe_target_ids_set = ner_action.parser_to_target_id_mappings.get(self.name)
-            if maybe_target_ids_set is not None:
-                # type ignore because the function assumes a curation where there's a synonym.
-                new_or_existing_term = self._attempt_to_add_database_entry_for_curation(
-                    id_set=maybe_target_ids_set, curated_synonym=curation.curated_synonym  # type: ignore[arg-type]
-                )
-                return new_or_existing_term.term_norm
-        return None
 
 
 class JsonLinesOntologyParser(OntologyParser):
@@ -905,6 +950,7 @@ class RDFGraphParser(OntologyParser):
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -915,6 +961,7 @@ class RDFGraphParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -1017,6 +1064,7 @@ class GeneOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1027,11 +1075,12 @@ class GeneOntologyParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
         )
         self.instances.add(name)
         self.query = query
 
-    def populate_databases(self, force: bool = False) -> Optional[List[CurationWithTermNorms]]:
+    def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
         curations_with_term_norms = super().populate_databases(force=force)
         self.instances_in_dbs.add(self.name)
 
@@ -1095,6 +1144,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1105,6 +1155,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             synonym_generator=synonym_generator,
             name=name,
             curations=curations,
+            global_actions=global_actions,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1133,6 +1184,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1143,6 +1195,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             synonym_generator=synonym_generator,
             name=name,
             curations=curations,
+            global_actions=global_actions,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1171,6 +1224,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1181,6 +1235,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             synonym_generator=synonym_generator,
             name=name,
             curations=curations,
+            global_actions=global_actions,
             query="""
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1215,6 +1270,7 @@ class UberonOntologyParser(RDFGraphParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
 
         super().__init__(
@@ -1230,6 +1286,7 @@ class UberonOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1313,6 +1370,7 @@ class EnsemblOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1323,6 +1381,7 @@ class EnsemblOntologyParser(OntologyParser):
             synonym_generator=synonym_generator,
             name=name,
             curations=curations,
+            global_actions=global_actions,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1436,6 +1495,7 @@ class CLOOntologyParser(RDFGraphParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1450,6 +1510,7 @@ class CLOOntologyParser(RDFGraphParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1567,6 +1628,7 @@ class MeddraOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
         exclude_socs: Iterable[str] = (
             "Surgical and medical procedures",
             "Social circumstances",
@@ -1581,6 +1643,7 @@ class MeddraOntologyParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
             name=name,
         )
 
@@ -1726,6 +1789,7 @@ class CLOntologyParser(RDFGraphParser):
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
 
         super().__init__(
@@ -1743,6 +1807,7 @@ class CLOntologyParser(RDFGraphParser):
             include_entity_patterns=include_entity_patterns,
             exclude_entity_patterns=exclude_entity_patterns,
             curations=curations,
+            global_actions=global_actions,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1801,6 +1866,7 @@ class TabularOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
         **kwargs,
     ):
         """
@@ -1824,6 +1890,7 @@ class TabularOntologyParser(OntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
         )
         self._raw_dataframe = pd.read_csv(self.in_path, **kwargs)
 
@@ -1860,6 +1927,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1870,6 +1938,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
             data_origin=data_origin,
             synonym_generator=synonym_generator,
             curations=curations,
+            global_actions=global_actions,
             sep="     ",
             header=None,
             names=["code", "level_and_description"],
@@ -1916,6 +1985,7 @@ class StatoParser(RDFGraphParser):
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
 
         super().__init__(
@@ -1931,6 +2001,7 @@ class StatoParser(RDFGraphParser):
             include_entity_patterns=include_entity_patterns,
             exclude_entity_patterns=exclude_entity_patterns,
             curations=curations,
+            global_actions=global_actions,
         )
 
     def find_kb(self, string: str) -> str:
