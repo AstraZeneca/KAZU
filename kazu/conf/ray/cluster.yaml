@@ -5,5 +5,4 @@ init:
   address: "auto"
 serve:
   detached: True
-ui:
-  enabled: False
+ui: ~
