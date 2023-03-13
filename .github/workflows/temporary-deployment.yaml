@@ -13,7 +13,7 @@ on:
         required: true
       
 jobs:
-  build-temporary-deployment:
+  build:
     runs-on: [self-hosted, az-ai-runners]
     steps:
       - name: Git checkout
