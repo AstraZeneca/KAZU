@@ -39,7 +39,7 @@ jobs:
           build-args: |
             ARTIFACTORY_USER=${{secrets.ARTIFACT_USERNAME}}
             ARTIFACTORY_TOKEN=${{secrets.ARTIFACT_TOKEN}}
-            MODEL_PACK_PATH=deploy/kazu_model_pack_public-${{env.RELEASE_VERSION}}.zip
+            MODEL_PACK_PATH=deploy/kazu_model_pack_public-${{inputs.release-version}}.zip
             KAZU_PACKAGE=.
           build-context: .
           dockerfile-name: deploy/temporary/Dockerfile
