@@ -659,16 +659,18 @@ class SynonymTermAction:
 
     def __post_init__(self):
         if (
-            self.behaviour is not SynonymTermBehaviour.IGNORE
-            or self.behaviour is not SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+            self.behaviour is SynonymTermBehaviour.IGNORE
+            or self.behaviour is SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
         ):
-            if len(self.parser_to_target_id_mappings) == 0:
-                raise ValueError(
-                    f"parser_to_target_id_mappings must be specified for behaviour {self.behaviour}"
-                )
-            for key, values in self.parser_to_target_id_mappings.items():
-                if len(values) == 0:
-                    raise ValueError(f"at least one ID must be specified for key: {key}")
+            # map not needed for these
+            pass
+        elif len(self.parser_to_target_id_mappings) == 0:
+            raise ValueError(
+                f"parser_to_target_id_mappings must be specified for behaviour {self.behaviour}"
+            )
+        for key, values in self.parser_to_target_id_mappings.items():
+            if len(values) == 0:
+                raise ValueError(f"at least one ID must be specified for key: {key}")
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "SynonymTermAction":
