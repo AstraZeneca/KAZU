@@ -45,6 +45,7 @@ jobs:
             MODEL_PACK_PATH=deploy/kazu_model_pack_public-${{inputs.release-version}}.zip
             KAZU_PACKAGE=.
             KAZU_VERSION=${{inputs.kazu-version}}
+            DEPLOYMENT=temporary
           build-context: .
           dockerfile-name: deploy/temporary/Dockerfile
           tag: temp-${{github.sha}}
