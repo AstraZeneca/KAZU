@@ -11,8 +11,10 @@ ARG HTTPS_PROXY
 ARG http_proxy
 ARG https_proxy
 ARG no_proxy
+ARG KAZU_VERSION
 
 ENV GH_TOKEN $TOKEN_GITHUB
+ENV KAZU_VERSION $KAZU_VERSION
 
 COPY $KAZU_PACKAGE .
 COPY $MODEL_PACK_PATH /model_pack.zip
@@ -28,6 +30,6 @@ ENV HYDRA_FULL_ERROR 1
 RUN pip install --upgrade pip
 RUN pip install hatch
 RUN hatch build
-RUN pip install "./dist/*.whl[dev]"
+RUN pip install "./dist/kazu-{$KAZU_VERSION}.whl[dev]"
 
 CMD python -m kazu.web.server --config-path "/model_pack/conf" hydra.run.dir="." Middlewares=jwt
