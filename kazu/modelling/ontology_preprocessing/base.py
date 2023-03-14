@@ -1788,7 +1788,7 @@ class HGNCGeneFamilyParser(OntologyParser):
 
 class TabularOntologyParser(OntologyParser):
     """
-    for already tabulated data
+    For already tabulated data.
     """
 
     def __init__(
@@ -1829,8 +1829,9 @@ class TabularOntologyParser(OntologyParser):
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
-        by default, assume input file is already in correct format. Override if different behaviour is
-        required
+        Assume input file is already in correct format.
+        
+        Inherit and override this method if different behaviour is required.
 
         :return:
         """
