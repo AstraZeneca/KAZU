@@ -30,6 +30,6 @@ ENV HYDRA_FULL_ERROR 1
 RUN pip install --upgrade pip
 RUN pip install hatch
 RUN hatch build
-RUN pip install "./dist/kazu-{$KAZU_VERSION}.whl[dev]"
+RUN pip install "./dist/kazu-$KAZU_VERSION-py3-none-any.whl[dev]"
 
 CMD python -m kazu.web.server --config-path "/model_pack/conf" hydra.run.dir="." Middlewares=jwt
