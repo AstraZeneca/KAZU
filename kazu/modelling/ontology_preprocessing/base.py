@@ -1830,7 +1830,7 @@ class TabularOntologyParser(OntologyParser):
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
         Assume input file is already in correct format.
-        
+
         Inherit and override this method if different behaviour is required.
 
         :return:
@@ -1842,6 +1842,12 @@ class TabularOntologyParser(OntologyParser):
 
 
 class ATCDrugClassificationParser(TabularOntologyParser):
+    """
+    parser for the ATC Drug classification dataset. This requires a licence from WHO,
+    available at https://www.who.int/tools/atc-ddd-toolkit/atc-classification
+
+    """
+
     def __init__(
         self,
         in_path: str,
