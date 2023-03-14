@@ -9,4 +9,7 @@ hgnc_gene_family_parser:
   entity_class: 'gene'
   curations:
     _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
-    path: ${oc.env:KAZU_MODEL_PACK}/curations.json
+    path: ${oc.env:KAZU_MODEL_PACK}/curations/curations.json
+  global_actions:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_global_actions
+    path: ${oc.env:KAZU_MODEL_PACK}/curations/global_parser_actions.json
