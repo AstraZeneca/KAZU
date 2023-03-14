@@ -1866,30 +1866,21 @@ class ATCDrugClassificationParser(TabularOntologyParser):
             names=["code", "level_and_description"],
         )
 
-    levels_to_ignore = {1, 2, 3}
-
-    def find_kb(self, string: str) -> str:
-        return "ATC_DRUG_CLASS"
+    levels_to_ignore = {"1", "2", "3"}
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         # for some reason, the level and description codes are merged, so we need to fix this here
         df = self._raw_dataframe.applymap(str.strip)
-        df["level"] = df["level_and_description"].apply(lambda x: x[0]).astype(int)
-        df["description"] = df["level_and_description"].apply(lambda x: x[1:])
-        del df["level_and_description"]
-        data = []
-        for i, row in df.iterrows():
-            if row["level"] not in self.levels_to_ignore:
-                default_label = row["description"]
-                data.append(
-                    {
-                        SYN: default_label,
-                        MAPPING_TYPE: row["level"],
-                        DEFAULT_LABEL: default_label,
-                        IDX: row["code"],
-                    }
-                )
-        return pd.DataFrame.from_records(data)
+        res_df = pd.DataFrame()
+        res_df[[MAPPING_TYPE, DEFAULT_LABEL]] = df.apply(
+            lambda row: [row["level_and_description"][0], row["level_and_description"][1:]],
+            axis=1,
+            result_type="expand",
+        )
+        res_df[IDX] = df["code"]
+        res_df = res_df[~res_df[MAPPING_TYPE].isin(self.levels_to_ignore)]
+        res_df[SYN] = res_df[DEFAULT_LABEL]
+        return res_df
 
 
 class StatoParser(RDFGraphParser):
