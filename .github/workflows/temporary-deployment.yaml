@@ -8,6 +8,9 @@ on:
       release-version:
         description: version of release for model pack
         required: true
+      kazu-version:
+        description: version of release for model pack
+        required: true
       seconds:
         description: time to keep deployment alive
         required: true
