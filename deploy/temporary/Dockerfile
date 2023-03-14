@@ -28,6 +28,6 @@ ENV HYDRA_FULL_ERROR 1
 RUN pip install --upgrade pip
 RUN pip install hatch
 RUN hatch build
-RUN pip install ./dist/*.whl
+RUN pip install "./dist/*.whl[dev]"
 
 CMD python -m kazu.web.server --config-path "/model_pack/conf" hydra.run.dir="." Middlewares=jwt
