@@ -1843,8 +1843,10 @@ class TabularOntologyParser(OntologyParser):
 
 class ATCDrugClassificationParser(TabularOntologyParser):
     """
-    parser for the ATC Drug classification dataset. This requires a licence from WHO,
-    available at https://www.who.int/tools/atc-ddd-toolkit/atc-classification
+    Parser for the ATC Drug classification dataset.
+    
+    This requires a licence from WHO, available at
+    https://www.who.int/tools/atc-ddd-toolkit/atc-classification .
 
     """
 
@@ -1896,9 +1898,10 @@ class ATCDrugClassificationParser(TabularOntologyParser):
 
 class StatoParser(RDFGraphParser):
     """
-    input should be an owl file
-    e.g.
-    https://www.ebi.ac.uk/ols/ontologies/stato
+    Parse stato: input should be an owl file.
+    
+    Available at e.g.
+    https://www.ebi.ac.uk/ols/ontologies/stato .
     """
 
     def __init__(
