@@ -51,6 +51,8 @@ jobs:
           tag: temp-${{github.sha}}
           use-proxies: 'true'
           needs-sudo: 'true'
+        env: 
+          DOCKER_BUILDKIT: 1
 
       - name: Clean up
         shell: bash
