@@ -1871,6 +1871,10 @@ class ATCDrugClassificationParser(TabularOntologyParser):
             sep="     ",
             header=None,
             names=["code", "level_and_description"],
+            # Because the c engine can't handle multi-char sep
+            # removing this results in the same behaviour, but
+            # pandas logs a warning.
+            engine="python",
         )
 
     levels_to_ignore = {"1", "2", "3"}
