@@ -624,19 +624,34 @@ SimpleValue = Union[NumericMetric, str]
 
 
 class SynonymTermBehaviour(AutoNameEnum):
-    IGNORE = auto()
-    ADD_FOR_NER_AND_LINKING = auto()
-    ADD_FOR_LINKING_ONLY = auto()
+    IGNORE = (
+        auto()
+    )  # do nothing. Useful if you want to catalogue a term as "I've looked at this but don't want it"
+    ADD_FOR_NER_AND_LINKING = (
+        auto()
+    )  # accept term for both dictonary based NER and as a linking target"
+    ADD_FOR_LINKING_ONLY = auto()  # accept term as a linking target only"
     DROP_SYNONYM_TERM_FOR_LINKING = auto()  # do not use this term as a linking target
     DROP_ID_SET_FROM_SYNONYM_TERM = auto()  # do not use these ids for this term
 
 
 class ParserBehaviour(AutoNameEnum):
-    DROP_ID_FROM_PARSER = auto()  # id should never be produced anywhere
+    DROP_ID_FROM_PARSER = auto()  # id should never used anywhere
 
 
 @dataclass()
 class SynonymTermAction:
+    """
+    A SynonymTermAction is an action that affects the :py:class:`.SynonymTerm`\\s that a parser
+    produces. Note, the term_norm field is calculated by the :py:class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
+    if required, and should not be set manually.
+
+    The parser_to_target_id_mappings field should specify the parser name and a set of affected ID's if required
+
+    See :py:class:`.SynonymTermBehaviour` for the type of actions that are possible
+
+    """
+
     behaviour: SynonymTermBehaviour
     entity_class: str
     parser_to_target_id_mappings: Dict[str, Set[str]] = field(default_factory=dict)
@@ -669,7 +684,20 @@ class SynonymTermAction:
 @dataclass(frozen=True)
 class ParserAction:
     """
-    A declarative intention to perform some modification to the data a parser produced
+    A ParserAction changes the behaviour of a :py:class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in
+    a global sense - i.e. overrides any default behaviour of the parser, and also any conflicts that may occur with
+    :py:class:`.SynonymTermAction`\\s.
+
+    These actions are useful for eliminating unwanted behaviour. For example, the root of the Mondo
+    ontology is http://purl.obolibrary.org/obo/HP_0000001, which has a default label of 'All'. Since this is
+    such a common word, and not very useful in terms of linking, we might want a global action so that this
+    ID is not used anywhere in a Kazu pipeline.
+
+    The parser_to_target_id_mapping field should specify the parser name and an affected ID if required
+
+    See :py:class:`.ParserBehaviour` for the type of actions that are possible
+
+
     """
 
     behaviour: ParserBehaviour
@@ -694,8 +722,12 @@ class ParserAction:
 
 @dataclass(frozen=True)
 class GlobalParserActions:
+    """
+    Container for all :py:class:`.ParserAction`\\s
+
+    """
+
     actions: List[ParserAction]
-    # general behaviours affect all parsers
     _parser_name_to_action: DefaultDict[str, List[ParserAction]] = field(
         default_factory=lambda: defaultdict(list), init=False
     )
@@ -734,14 +766,63 @@ class GlobalParserActions:
 @dataclass(frozen=True)
 class Curation:
     r"""
-    A Curation is a means to provide override behaviour to dictionary based NER methods
-    and the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`.
+    A Curation is a means to modify the behaviour of a specific :py:class:`.SynonymTerm`. This can
+    affect both the behaviour of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`, and
+    dictionary based NER (if using the :py:class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`)
 
-    For instance, by specifying :class:`~kazu.data.data.Action`\ s, one can tell such systems to ignore certain terms or IDs
-    whilst doing their work. This is useful for eliminating unwanted behaviour, e.g. the root of the Mondo
-    ontology is http://purl.obolibrary.org/obo/HP_0000001, which has a default label of 'All'. Since this is
-    such a common word, and not very useful in terms of linking, we would want to eliminate it from both
-    Dictionary based NER and as a Linking target.
+    This is controlled by the list of :py:class:`.SynonymTermAction`\s attached.
+
+    Example 1:
+
+    The string 'ALL' is highly ambiguous. It might mean several diseases, or simply 'all'. Therefore, we want
+    to add a curation as follows, so that it will only be used as a linking target and not for dictionary based NER:
+
+    Curation(curated_synonym='ALL',
+         case_sensitive=True,
+         actions=[
+            SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                              parser_to_target_id_mappings={'OPENTARGETS_DISEASE': {'MONDO:0004967'}}}, entity_class='disease'),
+        ],
+         mention_confidence=MentionConfidence.POSSIBLE)
+
+
+    Example 2:
+
+    The string 'LH' is incorrectly identified as a synonym of the PLOD1 (ENSG00000083444) gene, whereas more often than not, it's actually an abbreviation of Lutenising Hormone.
+    We therefore want to drop this reference, and add a new one to LHB (ENSG00000104826, or Lutenising Hormone Subunit Beta)
+
+    The Curation we therefore want is:
+
+    Curation(curated_synonym='LH',
+         case_sensitive=True,
+         actions=[
+            SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': set()}, entity_class='gene'),
+            SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'ENSG00000104826'}}, entity_class='gene'),
+        ],
+         mention_confidence=MentionConfidence.POSSIBLE)
+
+    Example 3:
+
+    A :py:class:`.SynonymTerm` has an unwanted :py:class:`.EquivalentIDSet attached to it`, but is otherwise good. We want to remove this set
+
+    Curation(curated_synonym='some good synonym',
+     case_sensitive=True,
+     actions=[
+        SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
+                          parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'an id from the bad set'}}}, entity_class='gene'),
+    ],
+     mention_confidence=MentionConfidence.POSSIBLE)
+
+    Notes:
+
+    The term_norm field is calculated by the :py:class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
+    if required, and should not be set manually.
+
+    mention_confidence is currently non-functional, and will be expanded upon at a later date
+
+
 
     """
 
