@@ -27,8 +27,7 @@ jobs:
       - name: download release
         shell: bash
         run: |
-         gh release download --repo=https://github.com/AZ-AI/kazu/ ${{inputs.release-version}}
-         mv kazu_model_pack_public* deploy
+         gh release download --repo=https://github.com/AZ-AI/kazu/ ${{inputs.release-version}} --dir deploy
         env:
          GH_TOKEN: ${{ github.token }}
 
@@ -51,8 +50,6 @@ jobs:
           tag: temp-${{github.sha}}
           use-proxies: 'true'
           needs-sudo: 'true'
-        env: 
-          DOCKER_BUILDKIT: 1
 
       - name: Clean up
         shell: bash
