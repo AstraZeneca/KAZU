@@ -346,8 +346,13 @@ class OntologyParser(ABC):
         matching one if already present.
 
 
-        :param id_set:
-        :param curated_synonym:
+
+        :param id_set: if a :class:`.SynonymTerm` already exists for the normalised version of curated_synonym, this should be
+            a subset of one of the :class:`.EquivalentIdSet`\\s assocaited with that term. If a :class:`.SynonymTerm` does not
+            exist, the parser will attempt to find an existing instance of :class:`.EquivalentIdSet` that matches the ids in
+            id_set. If no appropriate :class:`.EquivalentIdSet` exists, a new instance of :class:`kazu.data.data.AssociatedIdSets`
+            will be created, containing an instance of :class:`.EquivalentIdSet` for each id in id_set
+        :param curated_synonym: passed to :class:`.StringNormalizer` to see if a suitable :class:`.SynonymTerm` exists
         :return:
         """
 
@@ -458,6 +463,12 @@ class OntologyParser(ABC):
         return new_term
 
     def _drop_synonym_term_for_linking(self, curated_synonym: str):
+        """
+        remove a :class:`.SynonymTerm` from the database
+
+        :param curated_synonym: passed to :class:`.StringNormalizer` to look up the :class:`.SynonymTerm`
+        :return:
+        """
         affected_term_key = StringNormalizer.normalize(
             curated_synonym, entity_class=self.entity_class
         )
@@ -473,7 +484,14 @@ class OntologyParser(ABC):
                 self.name,
             )
 
-    def _drop_id_set_from_synonym_term(self, id_set: Set[str], curated_synonym: Optional[str]):
+    def _drop_id_set_from_synonym_term(self, id_set: Set[str], curated_synonym: str):
+        """
+        remove an id set from a :class:`.SynonymTerm`
+
+        :param id_set: a set of ids that should be removed from the :class:`.SynonymTerm`
+        :param curated_synonym: passed to :class:`.StringNormalizer` to look up the :class:`.SynonymTerm`
+        :return:
+        """
         # make a mutable copy so we can discard as we go
         mutable_id_set = set(id_set)
         affected_term_key = StringNormalizer.normalize(
@@ -517,7 +535,14 @@ class OntologyParser(ABC):
                 self.name,
             )
 
-    def process_curations(self) -> Optional[List[Curation]]:
+    def process_actions(self) -> Optional[List[Curation]]:
+        """
+        process any global actions or curations associated with this parser, returning
+        a list of curations that are suitable for dictionary based NER for this parser.
+
+
+        :return:
+        """
         if self.global_actions is not None:
             ids_dropped_through_global_actions = self._process_global_actions(self.global_actions)
         else:
@@ -525,7 +550,7 @@ class OntologyParser(ABC):
         if self.curations is not None:
             curation_with_term_norm_actions = []
             for curation in self.curations:
-                maybe_curation_with_term_norm_actions = self._process_curations(
+                maybe_curation_with_term_norm_actions = self._process_curation(
                     curation, ids_dropped_through_global_actions
                 )
                 if maybe_curation_with_term_norm_actions is not None:
@@ -535,12 +560,22 @@ class OntologyParser(ABC):
             logger.info("No curations provided for %s", self.name)
             return None
 
-    def update_action_for_globally_dropped_ids(
+    def _update_action_for_globally_dropped_ids(
         self,
         curation_id: Dict[str, str],
         action: SynonymTermAction,
         ids_dropped_through_global_actions: Set[str],
     ) -> Optional[SynonymTermAction]:
+        """
+        checks the action to see if it's id has been dropped by a global action elsewhere. If so, it's
+        modified accordingly and returned. If the action will no longer work after modification, None is
+        returned.
+
+        :param curation_id:
+        :param action:
+        :param ids_dropped_through_global_actions:
+        :return:
+        """
         original_ids = action.parser_to_target_id_mappings[self.name]
 
         filtered_ids = original_ids.difference(ids_dropped_through_global_actions)
@@ -565,9 +600,16 @@ class OntologyParser(ABC):
         else:
             return action
 
-    def _process_curations(
+    def _process_curation(
         self, curation: Curation, ids_dropped_through_global_actions: Set[str]
     ) -> Optional[Curation]:
+        """
+        handle any parser specific behaviour associated with a :class:`.Curation`
+
+        :param curation:
+        :param ids_dropped_through_global_actions:
+        :return:
+        """
         maybe_updated_curation = None
         for action in curation.parser_behaviour(self.name):
             if action.behaviour is SynonymTermBehaviour.IGNORE:
@@ -583,7 +625,7 @@ class OntologyParser(ABC):
                 action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
                 or action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
             ):
-                updated_action = self.update_action_for_globally_dropped_ids(
+                updated_action = self._update_action_for_globally_dropped_ids(
                     curation._id, action, ids_dropped_through_global_actions
                 )
                 if updated_action is not None:
@@ -600,6 +642,13 @@ class OntologyParser(ABC):
         return maybe_updated_curation
 
     def _process_global_actions(self, global_actions: GlobalParserActions) -> Set[str]:
+        """
+        process global actions associated with this parser, returning a set of any ids
+        that have been dropped
+
+        :param global_actions:
+        :return:
+        """
         dropped_ids = set()
         for action in global_actions.parser_behaviour(self.name):
             if action.behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
@@ -700,7 +749,7 @@ class OntologyParser(ABC):
         else:
             self.populate_metadata_database()
             self.populate_synonym_database()
-            curations_with_term_norms = self.process_curations()
+            curations_with_term_norms = self.process_actions()
             self.parsed_dataframe = None  # clear the reference to save memory
             return curations_with_term_norms
 
