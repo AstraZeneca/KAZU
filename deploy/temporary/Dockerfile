@@ -25,6 +25,9 @@ ENV KAZU_MODEL_PACK /model_pack
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV HYDRA_FULL_ERROR 1
 
-RUN pip install -e kazu[dev]
+RUN pip install --upgrade pip
+RUN pip install hatch
+RUN hatch build
+RUN pip install ./dist/*.whl
 
 CMD python -m kazu.web.server --config-path "/model_pack/conf" hydra.run.dir="." Middlewares=jwt
