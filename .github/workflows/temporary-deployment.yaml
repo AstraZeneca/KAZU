@@ -83,3 +83,17 @@ jobs:
           enable_autoscaling: "yes"
           max_replicas: 2
           target_cpu_utilisation: 80
+  
+  time-to-live:
+    name: Apply time to live to Deployment 
+    runs-on: [self-hosted, kazu-runners]
+    needs: deploy-temp
+    steps:
+      - name: ttl for deployment
+        uses: az-ai/az-action-ttl-for-k8s-deployment@0.0.1
+        with:
+          kube_config: ${{secrets.KUBE_CONFIG}}
+          namespace: kazu-test
+          project_name: temporary-kazu
+          seconds: 100
+    
