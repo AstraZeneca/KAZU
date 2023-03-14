@@ -1960,7 +1960,7 @@ class TabularOntologyParser(OntologyParser):
 class ATCDrugClassificationParser(TabularOntologyParser):
     """
     Parser for the ATC Drug classification dataset.
-    
+
     This requires a licence from WHO, available at
     https://www.who.int/tools/atc-ddd-toolkit/atc-classification .
 
@@ -2017,7 +2017,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
 class StatoParser(RDFGraphParser):
     """
     Parse stato: input should be an owl file.
-    
+
     Available at e.g.
     https://www.ebi.ac.uk/ols/ontologies/stato .
     """
