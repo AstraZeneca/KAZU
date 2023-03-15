@@ -44,7 +44,7 @@ from kazu.modelling.database.in_memory_db import (
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.string_normalizer import StringNormalizer
-from kazu.utils.utils import PathLike
+from kazu.utils.utils import PathLike, as_path
 
 # dataframe column keys
 DEFAULT_LABEL = "default_label"
@@ -72,7 +72,7 @@ def load_curated_terms(
     :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
     """
-    curations_path = Path(path)
+    curations_path = as_path(path)
     curations: Optional[List[Curation]] = None
     if curations_path.exists():
         with curations_path.open(mode="r") as jsonlf:
@@ -90,7 +90,7 @@ def load_global_actions(
     :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
     """
-    global_actions_path = Path(path)
+    global_actions_path = as_path(path)
     global_actions = None
     if global_actions_path.exists():
         with global_actions_path.open(mode="r") as jsonlf:
