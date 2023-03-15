@@ -240,35 +240,6 @@ class SynonymDatabase(metaclass=Singleton):
             result = DBModificationResult.SYNONYM_TERM_DROPPED
         return result
 
-    def drop_equivalent_id_set_containing_id_from_all_synonym_terms(
-        self, name: ParserName, id_to_drop: Idx
-    ) -> Tuple[int, int]:
-        """
-        Remove all :class:`~kazu.data.data.EquivalentIdSet`\\ s that contain this id from all
-        :class:`~kazu.data.data.SynonymTerm`\\ s in the database.
-
-        :param name:
-        :param id_to_drop:
-        :return:
-        """
-
-        terms_modified = 0
-        terms_dropped = 0
-
-        for assoc_id_set in self.get_associated_id_sets_for_id(name, id_to_drop):
-            for equiv_id_set in assoc_id_set:
-                if id_to_drop in equiv_id_set.ids:
-                    # list call because we modify the underlying structure within the loop
-                    for term_norm in list(self.get_all(name)):
-                        result = self.drop_equivalent_id_set_from_synonym_term(
-                            name, term_norm, equiv_id_set
-                        )
-                        if result is DBModificationResult.ID_SET_MODIFIED:
-                            terms_modified += 1
-                        elif result is DBModificationResult.SYNONYM_TERM_DROPPED:
-                            terms_dropped += 1
-        return terms_modified, terms_dropped
-
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
         """
         get a set of EquivalentIdSets associated with an ontology and synonym string
