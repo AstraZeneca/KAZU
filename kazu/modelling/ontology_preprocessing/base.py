@@ -651,20 +651,24 @@ class OntologyParser(ABC):
         """
         dropped_ids = set()
         for action in global_actions.parser_behaviour(self.name):
-            if action.behaviour is ParserBehaviour.DROP_ID_FROM_PARSER:
-                idx = action.parser_to_target_id_mapping[self.name]
-                terms_modified, terms_dropped = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
-                if terms_modified == 0 and terms_dropped == 0:
-                    logger.warning("failed to drop %s from %s", idx, self.name)
-                else:
-                    dropped_ids.add(idx)
-                    logger.debug(
-                        "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
-                        idx,
-                        self.name,
-                        terms_modified,
-                        terms_dropped,
-                    )
+            if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
+                ids = action.parser_to_target_id_mappings[self.name]
+                terms_modified, terms_dropped = 0, 0
+                for idx in ids:
+                    terms_modified_this_id, terms_dropped_this_id = self.synonym_db.drop_id_from_all_synonym_terms(self.name, idx)  # type: ignore[arg-type]
+                    terms_modified += terms_modified_this_id
+                    terms_dropped += terms_dropped_this_id
+                    if terms_modified_this_id == 0 and terms_dropped_this_id == 0:
+                        logger.warning("failed to drop %s from %s", idx, self.name)
+                    else:
+                        dropped_ids.add(idx)
+                        logger.debug(
+                            "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
+                            idx,
+                            self.name,
+                            terms_modified_this_id,
+                            terms_dropped_this_id,
+                        )
             else:
                 raise ValueError(f"unknown behaviour for parser {self.name}, {action}")
         return dropped_ids

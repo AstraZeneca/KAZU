@@ -318,10 +318,10 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             GlobalParserActions(
                 actions=[
                     ParserAction(
-                        behaviour=ParserBehaviour.DROP_ID_FROM_PARSER,
-                        parser_to_target_id_mapping={
-                            PARSER_1_NAME: "first",
-                            PARSER_2_NAME: "first",
+                        behaviour=ParserBehaviour.DROP_IDS_FROM_PARSER,
+                        parser_to_target_id_mappings={
+                            PARSER_1_NAME: {"first"},
+                            PARSER_2_NAME: {"first"},
                         },
                     )
                 ]
