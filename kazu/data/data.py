@@ -28,7 +28,7 @@ JsonDictType = Union[Dict[str, Any], List, int, float, bool, str, NoneType]
 
 
 class AutoNameEnum(Enum):
-    """Subclass to create an Enum where values are the names when using :py:class:`enum.auto`\\ .
+    """Subclass to create an Enum where values are the names when using :class:`enum.auto`\\ .
 
     Taken from the `Python Enum Docs <https://docs.python.org/3/howto/enum.html#using-automatic-values>`_.
 
@@ -496,7 +496,7 @@ class Document:
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
         """
-        Create an instance of :py:class:`.Document` from a text string.
+        Create an instance of :class:`.Document` from a text string.
 
         :param text:
         :return:
@@ -624,31 +624,39 @@ SimpleValue = Union[NumericMetric, str]
 
 
 class SynonymTermBehaviour(AutoNameEnum):
-    IGNORE = (
-        auto()
-    )  # do nothing. Useful if you want to catalogue a term as "I've looked at this but don't want it"
-    ADD_FOR_NER_AND_LINKING = (
-        auto()
-    )  # accept term for both dictonary based NER and as a linking target"
-    ADD_FOR_LINKING_ONLY = auto()  # accept term as a linking target only"
-    DROP_SYNONYM_TERM_FOR_LINKING = auto()  # do not use this term as a linking target
-    DROP_ID_SET_FROM_SYNONYM_TERM = auto()  # do not use these ids for this term
+    #: do nothing. Useful if you want to catalogue a term as "I've looked at this but don't want to use it for NER"
+    IGNORE = auto()
+    #: use the term for both dictionary based NER and as a linking target.
+    ADD_FOR_NER_AND_LINKING = auto()
+    #: use the term only as a linking target. Note, this is not required if the term is already in the
+    #: underlying ontology, as all ontology terms are included as linking targets by default
+    #: (Also see DROP_SYNONYM_TERM_FOR_LINKING)
+    ADD_FOR_LINKING_ONLY = auto()
+    #: do not use this term as a linking target. Normally, you would use this for a term you want to remove
+    #: from the underlying ontology (e.g. a 'bad' synonym). If the term does not exist, has no effect
+    DROP_SYNONYM_TERM_FOR_LINKING = auto()
+    #: removes an EquivalentIDSet from the term. The EquivalentIDSet to remove is selected via being a
+    #: superset of the IDs in the associated parser_to_target_id_mappings value
+    DROP_ID_SET_FROM_SYNONYM_TERM = auto()
 
 
 class ParserBehaviour(AutoNameEnum):
-    DROP_ID_FROM_PARSER = auto()  # id should never used anywhere
+    #: completely remove the id from the parser - i.e. should never used anywhere
+    DROP_ID_FROM_PARSER = auto()
 
 
 @dataclass()
 class SynonymTermAction:
     """
-    A SynonymTermAction is an action that affects the :py:class:`.SynonymTerm`\\s that a parser
-    produces. Note, the term_norm field is calculated by the :py:class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
+    A SynonymTermAction is an action that affects the :class:`.SynonymTerm`\\s that a parser
+    produces.
+
+    Note, the term_norm field is calculated by the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
     if required, and should not be set manually.
 
-    The parser_to_target_id_mappings field should specify the parser name and a set of affected ID's if required
+    The parser_to_target_id_mappings field should specify the parser name and a set of affected ID's if required.
 
-    See :py:class:`.SynonymTermBehaviour` for the type of actions that are possible
+    See :class:`.SynonymTermBehaviour` for the type of actions that are possible.
 
     """
 
@@ -686,19 +694,19 @@ class SynonymTermAction:
 @dataclass(frozen=True)
 class ParserAction:
     """
-    A ParserAction changes the behaviour of a :py:class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in
-    a global sense - i.e. overrides any default behaviour of the parser, and also any conflicts that may occur with
-    :py:class:`.SynonymTermAction`\\s.
+    A ParserAction changes the behaviour of a :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in
+    a global sense.
+
+    A ParserAction overrides any default behaviour of the parser, and also any conflicts that may occur with
+    :class:`.SynonymTermAction`\\s.
 
     These actions are useful for eliminating unwanted behaviour. For example, the root of the Mondo
     ontology is http://purl.obolibrary.org/obo/HP_0000001, which has a default label of 'All'. Since this is
     such a common word, and not very useful in terms of linking, we might want a global action so that this
     ID is not used anywhere in a Kazu pipeline.
 
-    The parser_to_target_id_mapping field should specify the parser name and an affected ID if required
-
-    See :py:class:`.ParserBehaviour` for the type of actions that are possible
-
+    The parser_to_target_id_mapping field should specify the parser name and an affected ID if required.
+    See :class:`.ParserBehaviour` for the type of actions that are possible.
 
     """
 
@@ -725,7 +733,7 @@ class ParserAction:
 @dataclass(frozen=True)
 class GlobalParserActions:
     """
-    Container for all :py:class:`.ParserAction`\\s
+    Container for all :class:`.ParserAction`\\s.
 
     """
 
@@ -743,9 +751,8 @@ class GlobalParserActions:
 
     def parser_behaviour(self, parser_name: str) -> Iterable[ParserAction]:
         """
-        generator that yields behaviours for a specific parser, based on the order they are
-        specified in
-
+        Generator that yields behaviours for a specific parser, based on the order they are
+        specified in.
 
         :param parser_name:
         :return:
@@ -767,25 +774,27 @@ class GlobalParserActions:
 
 @dataclass(frozen=True)
 class Curation:
-    r"""
-    A Curation is a means to modify the behaviour of a specific :py:class:`.SynonymTerm`. This can
-    affect both the behaviour of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`, and
-    dictionary based NER (if using the :py:class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`)
+    """
+    A Curation is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
 
-    This is controlled by the list of :py:class:`.SynonymTermAction`\s attached.
+    This can affect both the behaviour of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`,
+    and dictionary based NER (if using the :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`).
+    This is controlled by the list of :class:`.SynonymTermAction`\\s attached.
 
     Example 1:
 
     The string 'ALL' is highly ambiguous. It might mean several diseases, or simply 'all'. Therefore, we want
     to add a curation as follows, so that it will only be used as a linking target and not for dictionary based NER:
 
-    Curation(curated_synonym='ALL',
-         case_sensitive=True,
-         actions=[
-            SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                              parser_to_target_id_mappings={'OPENTARGETS_DISEASE': {'MONDO:0004967'}}}, entity_class='disease'),
-        ],
-         mention_confidence=MentionConfidence.POSSIBLE)
+    .. code-block:: python
+
+        Curation(curated_synonym='ALL',
+             case_sensitive=True,
+             actions=[
+                SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                                  parser_to_target_id_mappings={'OPENTARGETS_DISEASE': {'MONDO:0004967'}}}, entity_class='disease'),
+            ],
+             mention_confidence=MentionConfidence.POSSIBLE)
 
 
     Example 2:
@@ -795,31 +804,35 @@ class Curation:
 
     The Curation we therefore want is:
 
-    Curation(curated_synonym='LH',
-         case_sensitive=True,
-         actions=[
-            SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
-                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': set()}, entity_class='gene'),
-            SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'ENSG00000104826'}}, entity_class='gene'),
-        ],
-         mention_confidence=MentionConfidence.POSSIBLE)
+    .. code-block:: python
+
+        Curation(curated_synonym='LH',
+             case_sensitive=True,
+             actions=[
+                SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+                                  parser_to_target_id_mappings={'OPENTARGETS_TARGET': set()}, entity_class='gene'),
+                SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                  parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'ENSG00000104826'}}, entity_class='gene'),
+            ],
+             mention_confidence=MentionConfidence.POSSIBLE)
 
     Example 3:
 
-    A :py:class:`.SynonymTerm` has an unwanted :py:class:`.EquivalentIDSet attached to it`, but is otherwise good. We want to remove this set
+    A :class:`.SynonymTerm` has an unwanted :class:`.EquivalentIDSet attached to it`, but is otherwise good. We want to remove this set
 
-    Curation(curated_synonym='some good synonym',
-     case_sensitive=True,
-     actions=[
-        SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                          parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'an id from the bad set'}}}, entity_class='gene'),
-    ],
-     mention_confidence=MentionConfidence.POSSIBLE)
+    .. code-block:: python
+
+        Curation(curated_synonym='some good synonym',
+         case_sensitive=True,
+         actions=[
+            SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
+                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'an id from the bad set'}}}, entity_class='gene'),
+        ],
+         mention_confidence=MentionConfidence.POSSIBLE)
 
     Notes:
 
-    The term_norm field is calculated by the :py:class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
+    The term_norm field is calculated by the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
     if required, and should not be set manually.
 
     mention_confidence is currently non-functional, and will be expanded upon at a later date
@@ -832,9 +845,9 @@ class Curation:
     actions: List[SynonymTermAction]
     case_sensitive: bool
     curated_synonym: str
-    # MongoDB compatible identifier for this curation
+    #: MongoDB compatible identifier for this curation
     _id: Dict[str, str] = field(default_factory=dict)
-    # parser specific behaviours
+    #: parser specific behaviours
     _parser_name_to_action: DefaultDict[str, List[SynonymTermAction]] = field(
         default_factory=lambda: defaultdict(list), init=False
     )
@@ -849,9 +862,8 @@ class Curation:
 
     def parser_behaviour(self, parser_name: str) -> Iterable[SynonymTermAction]:
         """
-        generator that yields behaviours for a specific parser, based on the order they are
-        specified in
-
+        Generator that yields behaviours for a specific parser, based on the order they are
+        specified in.
 
         :param parser_name:
         :return:
