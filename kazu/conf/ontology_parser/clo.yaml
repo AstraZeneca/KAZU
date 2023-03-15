@@ -5,9 +5,5 @@ clo_parser:
   data_origin: 'CLO'
   string_scorer: ${SapbertStringSimilarityScorer}
   entity_class: 'cell_type'
-  curations:
-    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
-    path: ${oc.env:KAZU_MODEL_PACK}/curations/curations.json
-  global_actions:
-    _target_: kazu.modelling.ontology_preprocessing.base.load_global_actions
-    path: ${oc.env:KAZU_MODEL_PACK}/curations/global_parser_actions.json
+  curations: ${curations}
+  global_actions: ${global_actions}

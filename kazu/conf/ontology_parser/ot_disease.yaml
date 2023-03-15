@@ -6,9 +6,5 @@ ot_disease_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'disease'
-  curations:
-    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
-    path: ${oc.env:KAZU_MODEL_PACK}/curations/curations.json
-  global_actions:
-    _target_: kazu.modelling.ontology_preprocessing.base.load_global_actions
-    path: ${oc.env:KAZU_MODEL_PACK}/curations/global_parser_actions.json
+  curations: ${curations}
+  global_actions: ${global_actions}

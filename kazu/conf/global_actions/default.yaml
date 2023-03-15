@@ -1,0 +1,3 @@
+# @_global_
+_target_: kazu.modelling.ontology_preprocessing.base.load_global_actions
+path: ${oc.env:KAZU_MODEL_PACK}/curations/global_parser_actions.json

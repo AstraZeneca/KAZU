@@ -1,0 +1,3 @@
+# @_global_
+_target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+path: ${oc.env:KAZU_MODEL_PACK}/curations/curations.json
