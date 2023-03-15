@@ -477,7 +477,7 @@ class OntologyParser(ABC):
             logger.debug(
                 "successfully dropped %s from database for %s", affected_term_key, self.name
             )
-        except IndexError:
+        except KeyError:
             logger.warning(
                 "tried to drop %s from database, but key doesn't exist for %s",
                 affected_term_key,
