@@ -666,10 +666,11 @@ class SynonymTermAction:
     term_norm: str = field(init=False)
 
     def __post_init__(self):
-        if self.behaviour is SynonymTermBehaviour.IGNORE:
+        if (
             # map not needed for ignore
-            pass
-        elif len(self.parser_to_target_id_mappings) == 0:
+            self.behaviour is not SynonymTermBehaviour.IGNORE
+            and len(self.parser_to_target_id_mappings) == 0
+        ):
             raise ValueError(
                 f"parser_to_target_id_mappings must be specified for behaviour {self.behaviour}"
             )
