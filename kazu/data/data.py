@@ -641,8 +641,8 @@ class SynonymTermBehaviour(AutoNameEnum):
 
 
 class ParserBehaviour(AutoNameEnum):
-    #: completely remove the id from the parser - i.e. should never used anywhere
-    DROP_ID_FROM_PARSER = auto()
+    #: completely remove the ids from the parser - i.e. should never used anywhere
+    DROP_IDS_FROM_PARSER = auto()
 
 
 @dataclass()
@@ -706,27 +706,29 @@ class ParserAction:
     such a common word, and not very useful in terms of linking, we might want a global action so that this
     ID is not used anywhere in a Kazu pipeline.
 
-    The parser_to_target_id_mapping field should specify the parser name and an affected ID if required.
+    The parser_to_target_id_mappings field should specify the parser name and an affected IDs if required.
     See :class:`.ParserBehaviour` for the type of actions that are possible.
 
     """
 
     behaviour: ParserBehaviour
-    parser_to_target_id_mapping: Dict[str, str] = field(default_factory=dict)
+    parser_to_target_id_mappings: Dict[str, Set[str]] = field(default_factory=dict)
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "ParserAction":
         return cls(
             behaviour=ParserBehaviour(json_dict["behaviour"]),
-            parser_to_target_id_mapping=json_dict["parser_to_target_id_mapping"],
+            parser_to_target_id_mappings={
+                k: set(v) for k, v in json_dict["parser_to_target_id_mappings"].items()
+            },
         )
 
     def __post_init__(self):
-        if len(self.parser_to_target_id_mapping) == 0:
+        if len(self.parser_to_target_id_mappings) == 0:
             raise ValueError(
-                f"parser_to_target_id_mapping must be specified for global actions: {self}"
+                f"parser_to_target_id_mappings must be specified for global actions: {self}"
             )
-        for key, values in self.parser_to_target_id_mapping.items():
+        for key, values in self.parser_to_target_id_mappings.items():
             if len(values) == 0:
                 raise ValueError(f"at least one ID must be specified for key: {key}, {self}")
 
@@ -742,12 +744,10 @@ class GlobalParserActions:
     _parser_name_to_action: DefaultDict[str, List[ParserAction]] = field(
         default_factory=lambda: defaultdict(list), init=False
     )
-    # MongoDB compatible identifier for this curation
-    _id: Dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         for action in self.actions:
-            for parser_name in action.parser_to_target_id_mapping.keys():
+            for parser_name in action.parser_to_target_id_mappings.keys():
                 self._parser_name_to_action[parser_name].append(action)
 
     def parser_behaviour(self, parser_name: str) -> Iterable[ParserAction]:
@@ -762,14 +762,8 @@ class GlobalParserActions:
 
     @classmethod
     def from_json(cls, json_dict: Dict) -> "GlobalParserActions":
-        # we call str on json_dict["_id"] in case it's a bson ObjectId
-        if not isinstance(json_dict["_id"], dict):
-            _id = {"$oid": str(json_dict["_id"])}
-        else:
-            _id = json_dict["_id"]
         return cls(
             actions=[ParserAction.from_json(x) for x in json_dict["actions"]],
-            _id=_id,
         )
 
 
