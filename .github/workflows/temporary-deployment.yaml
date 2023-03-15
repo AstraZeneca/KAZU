@@ -9,10 +9,10 @@ on:
         description: version of release for model pack
         required: true
       kazu-version:
-        description: version of release for model pack
+        description: version of release for kazu
         required: true
       seconds:
-        description: time to keep deployment alive
+        description: time to keep deployment alive in seconds
         required: true
       
 jobs:
@@ -99,5 +99,5 @@ jobs:
           kube_config: ${{secrets.KUBE_CONFIG}}
           namespace: kazu-test
           project_name: temporary-kazu
-          seconds: 100
+          seconds: ${{inputs.seconds}}
     
