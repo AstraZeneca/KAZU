@@ -85,9 +85,9 @@ def load_global_actions(
     path: PathLike,
 ) -> Optional[GlobalParserActions]:
     """
-    Load curated terms from a file path.
+    Load an instance of GlobalParserActions  from a file path.
 
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :param path: path to a json serialised GlobalParserActions`
     :return:
     """
     global_actions_path = as_path(path)
@@ -464,7 +464,7 @@ class OntologyParser(ABC):
 
     def _drop_synonym_term_for_linking(self, curated_synonym: str):
         """
-        remove a :class:`.SynonymTerm` from the database
+        Remove a :class:`.SynonymTerm` from the database.
 
         :param curated_synonym: passed to :class:`.StringNormalizer` to look up the :class:`.SynonymTerm`
         :return:
@@ -486,9 +486,9 @@ class OntologyParser(ABC):
 
     def _drop_id_set_from_synonym_term(self, id_set: Set[str], curated_synonym: str):
         """
-        remove an id set from a :class:`.SynonymTerm`
+        Remove an id set from a :class:`.SynonymTerm`.
 
-        :param id_set: a set of ids that should be removed from the :class:`.SynonymTerm`
+        :param id_set: ids that should be removed from the :class:`.SynonymTerm`
         :param curated_synonym: passed to :class:`.StringNormalizer` to look up the :class:`.SynonymTerm`
         :return:
         """
@@ -529,7 +529,7 @@ class OntologyParser(ABC):
         else:
             logger.warning(
                 "Was asked to remove ids associated with a SynonymTerm (key: <%s>). However, after inspecting all"
-                "EquivalentIdSets, the following ids were not found in any of them: %s. Parser name: %s",
+                " EquivalentIdSets, the following ids were not found in any of them: %s. Parser name: %s",
                 affected_term_key,
                 mutable_id_set,
                 self.name,
@@ -537,11 +537,9 @@ class OntologyParser(ABC):
 
     def process_actions(self) -> Optional[List[Curation]]:
         """
-        process any global actions or curations associated with this parser, returning
-        a list of curations that are suitable for dictionary based NER for this parser.
+        Process any global actions or curations associated with this parser.
 
-
-        :return:
+        :return: curations that are suitable for dictionary based NER for this parser.
         """
         if self.global_actions is not None:
             ids_dropped_through_global_actions = self._process_global_actions(self.global_actions)
@@ -567,7 +565,7 @@ class OntologyParser(ABC):
         ids_dropped_through_global_actions: Set[str],
     ) -> Optional[SynonymTermAction]:
         """
-        checks the action to see if it's id has been dropped by a global action elsewhere. If so, it's
+        Checks the action to see if it's id has been dropped by a global action elsewhere. If so, it's
         modified accordingly and returned. If the action will no longer work after modification, None is
         returned.
 
@@ -596,15 +594,14 @@ class OntologyParser(ABC):
                 curation_id,
             )
             action.parser_to_target_id_mappings[self.name] = filtered_ids
-            return action
-        else:
-            return action
+
+        return action
 
     def _process_curation(
         self, curation: Curation, ids_dropped_through_global_actions: Set[str]
     ) -> Optional[Curation]:
         """
-        handle any parser specific behaviour associated with a :class:`.Curation`
+        Handle any parser specific behaviour associated with a :class:`.Curation`\\.
 
         :param curation:
         :param ids_dropped_through_global_actions:
@@ -643,8 +640,8 @@ class OntologyParser(ABC):
 
     def _process_global_actions(self, global_actions: GlobalParserActions) -> Set[str]:
         """
-        process global actions associated with this parser, returning a set of any ids
-        that have been dropped
+        Process global actions associated with this parser, returning a set of any ids
+        that have been dropped.
 
         :param global_actions:
         :return:
