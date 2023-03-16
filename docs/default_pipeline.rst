@@ -14,8 +14,9 @@ For most use cases we've encountered, the default configuration should suffice. 
    f. gene ontology (split into go_bp, go_cc and go_mf)
    g. anatomy
 
-2) Tag the following entity classes with the TinyBERN2 model (see the EMNLP Kazu paper for more details - Link TBA ). This uses
-   :py:class:`~kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep`
+2) Tag the following entity classes with the TinyBERN2 model (see the
+   `EMNLP Kazu paper <https://aclanthology.org/2022.emnlp-industry.63>`_ for more details).
+   This uses :py:class:`~kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep`
 
    a. gene
    b. disease
