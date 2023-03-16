@@ -25,7 +25,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     CurationException,
-    load_curated_terms,
+    load_curations,
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
@@ -388,14 +388,14 @@ def test_pipeline_build_from_parsers_and_curated_list(
         name="first_mock_parser",
         entity_class="ent_type_1",
         source="test",
-        curations=load_curated_terms(path=TEST_CURATIONS_PATH),
+        curations=load_curations(path=TEST_CURATIONS_PATH),
         data=parser_1_data,
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
         entity_class="ent_type_2",
         source="test",
-        curations=load_curated_terms(path=TEST_CURATIONS_PATH),
+        curations=load_curations(path=TEST_CURATIONS_PATH),
         data=parser_2_data,
     )
     TEST_SPAN_KEY = "my_hits"

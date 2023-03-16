@@ -26,7 +26,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
     SYN,
     MAPPING_TYPE,
-    load_curated_terms,
+    load_curations,
     CurationException,
     load_global_actions,
 )
@@ -142,9 +142,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             name=PARSER_1_NAME,
             in_path="",
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -153,9 +151,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             name=PARSER_2_NAME,
             in_path="",
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -165,9 +161,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             name=PARSER_1_NAME,
             in_path="",
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -177,9 +171,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             in_path="",
             data=parser_data_with_target_synonym(),
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -198,9 +190,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             in_path="",
             data=parser_data_with_target_synonym(),
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -210,9 +200,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             in_path="",
             data=parser_data_with_target_synonym(),
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -223,9 +211,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             in_path="",
             data=parser_data_with_split_equiv_id_set(),
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,
@@ -235,9 +221,7 @@ def get_test_parsers(test_id, curations_path, global_actions_path):
             in_path="",
             data=parser_data_with_split_equiv_id_set(),
             entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
+            curations=load_curations(path=curations_path) if curations_path is not None else None,
             global_actions=load_global_actions(global_actions_path)
             if global_actions_path is not None
             else None,

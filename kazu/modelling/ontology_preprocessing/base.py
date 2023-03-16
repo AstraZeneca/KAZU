@@ -64,7 +64,7 @@ class CurationException(Exception):
 
 
 @functools.cache
-def load_curated_terms(
+def load_curations(
     path: PathLike,
 ) -> Optional[List[Curation]]:
     """
