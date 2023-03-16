@@ -168,6 +168,16 @@ nitpicky = True
 
 nitpick_ignore = [
     ###### Checked that there's no obvious solution #####
+    # This has moved in PyTorch lightning 2.0 to lightning.fabric.plugins.io.checkpoint_io.CheckpointIO, (and similar below)
+    # but we can't seem to get intersphinx for old versions for pytorch lightning as far as I can see.
+    ("py:class", "lightning_fabric.plugins.io.checkpoint_io.CheckpointIO"),
+    ("py:meth", "lightning_fabric.plugins.io.checkpoint_io.CheckpointIO.load_checkpoint"),
+    # moved to lightning.pytorch.core.LightningModule
+    ("py:class", "pytorch_lightning.core.module.LightningModule"),
+    # moved to lightning.pytorch.trainer.trainer.Trainer
+    ("py:class", "pytorch_lightning.trainer.trainer.Trainer"),
+    # this doesn't exist anymore in lightning 2.0, it becomes on_validation_epoch_end, and there's some migration work for changing to it
+    ("py:meth", "pytorch_lightning.core.LightningModule.validation_epoch_end"),
     # sphinx doesn't seem to handle typeVars here, see https://github.com/sphinx-doc/sphinx/issues/10974
     ("py:class", "kazu.utils.grouping.Item"),
     ("py:class", "kazu.utils.grouping.Key"),
