@@ -67,9 +67,9 @@ def load_curated_terms(
     path: PathLike,
 ) -> Optional[List[Curation]]:
     """
-    Load curated terms from a file path.
+    Load :class:`kazu.data.data.Curation`\\ s from a file path.
 
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :param path: path to json lines file that map to :class:`kazu.data.data.Curation`
     :return:
     """
     curations_path = as_path(path)
