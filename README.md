@@ -13,7 +13,7 @@ designed to handle production workloads.
 This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
-If you want to use Kazu, please cite our [EMNLP 2022 publication](https://aclanthology.org/2022.emnlp-industry.63/)!
+If you want to use Kazu, please cite our [EMNLP 2022 publication](https://aclanthology.org/2022.emnlp-industry.63)!
 ([**citation link**](https://aclanthology.org/2022.emnlp-industry.63.bib))
 
 [Please click here for the **web live demo** (Swagger UI) from http://kazu.korea.ac.kr/](http://kazu.korea.ac.kr/)
