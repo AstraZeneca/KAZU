@@ -139,10 +139,10 @@ class OntologyMatcher:
     def create_phrasematchers_using_curations(
         self, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
-        """Create Spacy :class:`.PhraseMatcher`\\ s based on :class:`.Curation`\\ s.
-        The :class:`.Curation`\\ s are provided to the OntologyParser :attr:`.OntologyParser.curations`\\ s
-        when it is created, which are matched to appropriate entries in the :class:`.SynonymDatabase`
+        """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\ s based on :class:`.Curation`\\ s.
 
+        The :class:`.Curation`\\ s are provided to the :class:`.OntologyParser`\\ s as the ``curations`` parameter
+        when they are created, which are matched to appropriate entries in the :class:`.SynonymDatabase`\\ .
 
         :param parsers:
         :return:
@@ -203,15 +203,17 @@ class OntologyMatcher:
         self, parsers: List[OntologyParser]
     ) -> Tuple[PhraseMatcher, None]:
         """
-        Create a lower case Spacy PhraseMatcher using just the synonyms in the :class:`.OntologyParser`\\ s
-        and the parser's configured :attr:`.OntologyParser.synonym_generator` .
+        Create a lower case Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_ using just the synonyms in the
+        :class:`.OntologyParser`\\ s and their configured ``synonym_generator``\\ s (see
+        :meth:`.OntologyParser.__init__`\\ ).
+
         This is intended for use primarily when first adding a parser, to then run over relevant documents and
         create :class:`.Curation`\\ s based on the result. You could also use it if you have a very simple set
         of terms to recognise that aren't case-sensitive and you don't intend to do any curation at all.
 
-
         :param parsers:
-        :return: The lowercase PhraseMatcher and None
+        :return: The lowercase PhraseMatcher and None - to match the return shape of
+            :meth:`create_phrasematchers_using_curations`\\ .
         """
 
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
