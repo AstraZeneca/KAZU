@@ -177,6 +177,12 @@ cross_reference_override_mapping = {
     # which is how Sphinx tries to look these up.
     "transformers.tokenization_utils_base.BatchEncoding": "transformers.BatchEncoding",
     "transformers.data.processors.utils.InputExample": "transformers.InputExample",
+    "transformers.data.data_collator.DataCollatorWithPadding": "transformers.DataCollatorWithPadding",
+    "transformers.data.processors.utils.DataProcessor": "transformers.DataProcessor",
+    "transformers.modeling_utils.PreTrainedModel": "transformers.PreTrainedModel",
+    "transformers.tokenization_utils.PreTrainedTokenizer": "transformers.PreTrainedTokenizer",
+    "transformers.tokenization_utils_base.PreTrainedTokenizerBase": "transformers.PreTrainedTokenizerBase",
+    "transformers.tokenization_utils_fast.PreTrainedTokenizerFast": "transformers.PreTrainedTokenizerFast",
     "transformers.utils.generic.PaddingStrategy": "transformers.utils.PaddingStrategy",
     "lightning_fabric.plugins.io.checkpoint_io.CheckpointIO": "lightning.pytorch.plugins.io.CheckpointIO",
     "pytorch_lightning.core.module.LightningModule": "lightning.pytorch.core.LightningModule",
@@ -188,6 +194,8 @@ nitpick_ignore = [
     ###### Checked that there's no obvious solution #####
     # this doesn't exist anymore in lightning 2.0, it becomes on_validation_epoch_end, and there's some migration work for changing to it
     ("py:meth", "pytorch_lightning.core.LightningModule.validation_epoch_end"),
+    # this doesn't appear to have an entry in the transformers docs for some reason.
+    ("py:class", "transformers.models.bert.modeling_bert.BertPreTrainedModel"),
     # the kazu.utils.grouping.Key TypeVar tries to generate this automatically.
     # Sphinx doesn't find it because the class is in _typeshed, which doesn't exist at runtime.
     # We link to _typeshed docs from the docstring anyway, so this is fine for the user.
@@ -218,11 +226,4 @@ nitpick_ignore = [
     ("py:class", "starlette.requests.HTTPConnection"),
     ("py:class", "starlette.requests.Request"),
     ("py:class", "starlette.responses.Response"),
-    ("py:class", "transformers.data.data_collator.DataCollatorWithPadding"),
-    ("py:class", "transformers.data.processors.utils.DataProcessor"),
-    ("py:class", "transformers.modeling_utils.PreTrainedModel"),
-    ("py:class", "transformers.models.bert.modeling_bert.BertPreTrainedModel"),
-    ("py:class", "transformers.tokenization_utils.PreTrainedTokenizer"),
-    ("py:class", "transformers.tokenization_utils_base.PreTrainedTokenizerBase"),
-    ("py:class", "transformers.tokenization_utils_fast.PreTrainedTokenizerFast"),
 ]
