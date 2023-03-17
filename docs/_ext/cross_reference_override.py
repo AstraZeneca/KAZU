@@ -42,10 +42,7 @@ def override_cross_reference(app: Sphinx, env, node, contnode):
     """
     xref_override = app.config.cross_reference_override_mapping.get(node["reftarget"])
     if xref_override is not None:
-        if isinstance(xref_override, tuple):
-            node["refdomain"], node["reftype"], node["reftarget"] = xref_override
-        else:
-            node["reftarget"] = xref_override
+        node["reftarget"] = xref_override
         return resolve_reference_detect_inventory(env, node, contnode)
 
 

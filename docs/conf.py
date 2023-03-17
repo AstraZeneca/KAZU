@@ -178,12 +178,6 @@ cross_reference_override_mapping = {
     "transformers.tokenization_utils_base.BatchEncoding": "transformers.BatchEncoding",
     "transformers.data.processors.utils.InputExample": "transformers.InputExample",
     "transformers.utils.generic.PaddingStrategy": "transformers.utils.PaddingStrategy",
-    # This doesn't have a py:class reference in the Python docs, but there is this in std:label :
-    # dom-document-objects                     Document Objects                        : library/xml.dom.html#dom-document-objects
-    # which we can access with the 'ref' reference type.
-    "xml.dom.minidom.Document": ("std", "ref", "dom-document-objects"),
-    # as above
-    "xml.dom.minidom.Element": ("std", "ref", "dom-element-objects"),
 }
 
 

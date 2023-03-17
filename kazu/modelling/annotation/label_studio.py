@@ -286,6 +286,15 @@ class LabelStudioAnnotationView:
 
     @staticmethod
     def getDOM() -> XMLDocument:
+        """
+        ..
+           (comment about why we've written this docstring like this for Sphinx)
+           Explicit link with rtype because it's tricky to get the type hint to automatically:
+           1. link to the python library docs
+           2. have the link title make it obvious where the class is
+
+        :rtype: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
+        """
         impl = getDOMImplementation()
         if not isinstance(impl, DOMImplementation):
             raise RuntimeError("failed to get DOMImplementation")
@@ -299,6 +308,12 @@ class LabelStudioAnnotationView:
         return doc
 
     def build_labels(self, dom: XMLDocument, element: Element):
+        """
+        .. (sphinx comment) as above for why we have explicit type links here.
+
+        :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
+        :type element: :external+python:ref:`xml.dom.minidom.Element <dom-element-objects>`
+        """
         labels = dom.createElement("Labels")
         labels.setAttribute("name", "ner")
         labels.setAttribute("toName", "text")
@@ -312,6 +327,12 @@ class LabelStudioAnnotationView:
 
     @staticmethod
     def build_taxonomy(dom: XMLDocument, element: Element, tasks: List[Dict], name: str):
+        """
+        .. (sphinx comment) as above for why we have explicit type links here.
+
+        :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
+        :type element: :external+python:ref:`xml.dom.minidom.Element <dom-element-objects>`
+        """
         taxonomy = dom.createElement("Taxonomy")
         element.appendChild(taxonomy)
         taxonomy.setAttribute("visibleWhen", "region-selected")
