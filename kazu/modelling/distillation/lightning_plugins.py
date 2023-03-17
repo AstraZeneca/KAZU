@@ -61,8 +61,8 @@ class StudentModelCheckpointIO(CheckpointIO):
     ) -> Dict[str, Any]:
         """Not currently implementated.
 
-        See :meth:`CheckpointIO.load_checkpoint <lightning_fabric.plugins.io.checkpoint_io.CheckpointIO.load_checkpoint>` for details
-        of the abstract method."""
+        See :external+pytorch_lightning:meth:`CheckpointIO.load_checkpoint <lightning.pytorch.plugins.io.CheckpointIO.load_checkpoint>`
+        for details of the abstract method."""
         raise NotImplementedError()
 
     def remove_checkpoint(
