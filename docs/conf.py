@@ -204,7 +204,6 @@ nitpick_ignore = [
     ("py:class", "kazu.utils.grouping.Key"),
     ("py:class", "kazu.steps.step.Self"),
     ##### Not Checked, may be trivial to fix (just ignoring so we can avoid introducing new problems going forward) ######
-    ("py:class", "JWTAuthenticationBackend"),
     ("py:class", "Module"),
     ("py:class", "batch"),
     (

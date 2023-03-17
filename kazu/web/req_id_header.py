@@ -56,7 +56,7 @@ logger = logging.getLogger("ray")
 class AddRequestIdMiddleware(BaseHTTPMiddleware):
     """A middleware that puts a request-id from the request's header onto the response.
 
-    This was written to be used in conjunction with :class:`JWTAuthenticationBackend`, which adds
+    This was written to be used in conjunction with :class:`.JWTAuthenticationBackend`, which adds
     a request id header to the request as part of authentication.
     """
 
