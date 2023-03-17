@@ -59,7 +59,7 @@ class StudentModelCheckpointIO(CheckpointIO):
     def load_checkpoint(
         self, path: Union[str, Path], storage_options: Optional[Any] = None
     ) -> Dict[str, Any]:
-        """Not currently implementated.
+        """Not currently implemented.
 
         See :external+pytorch_lightning:meth:`CheckpointIO.load_checkpoint <lightning.pytorch.plugins.io.CheckpointIO.load_checkpoint>`
         for details of the abstract method."""
