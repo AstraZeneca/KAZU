@@ -193,10 +193,10 @@ nitpick_ignore = [
     ("py:class", "pytorch_lightning.trainer.trainer.Trainer"),
     # this doesn't exist anymore in lightning 2.0, it becomes on_validation_epoch_end, and there's some migration work for changing to it
     ("py:meth", "pytorch_lightning.core.LightningModule.validation_epoch_end"),
-    # sphinx doesn't seem to handle typeVars here, see https://github.com/sphinx-doc/sphinx/issues/10974
-    ("py:class", "kazu.utils.grouping.Item"),
-    ("py:class", "kazu.utils.grouping.Key"),
-    ("py:class", "kazu.steps.step.Self"),
+    # the kazu.utils.grouping.Key TypeVar tries to generate this automatically.
+    # Sphinx doesn't find it because the class is in _typeshed, which doesn't exist at runtime.
+    # We link to _typeshed docs from the docstring anyway, so this is fine for the user.
+    ("py:class", "SupportsRichComparison"),
     ##### Not Checked, may be trivial to fix (just ignoring so we can avoid introducing new problems going forward) ######
     ("py:class", "Module"),
     ("py:class", "batch"),

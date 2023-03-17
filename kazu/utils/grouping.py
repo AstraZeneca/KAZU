@@ -8,9 +8,15 @@ if TYPE_CHECKING:
     from _typeshed import SupportsRichComparison
 
 Item = TypeVar("Item")
+"""The type of an element in the iterable being grouped."""
 # we need to use Supports RichComparison here otherwise mypy complains
 # about the 'key' argument to sorted
 Key = TypeVar("Key", bound="SupportsRichComparison")
+"""The type of the sort key provided by the key_func.
+
+Bound to 'SupportsRichComparison' from `_typeshed <https://github.com/python/typeshed/tree/main/stdlib/_typeshed>`_
+as the keys must support comparison in order to be sorted using :func:`sorted`\\ .
+"""
 
 
 def sort_then_group(

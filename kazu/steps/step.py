@@ -33,6 +33,8 @@ class Step(Protocol):
 
 
 Self = TypeVar("Self")
+"""A TypeVar for the type of the class whose method is decorated with :func:`document_iterating_step`
+or :func:`document_batch_step`\\ ."""
 
 
 def document_iterating_step(
