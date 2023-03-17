@@ -94,7 +94,7 @@ jobs:
     needs: deploy-temp
     steps:
       - name: ttl for deployment
-        uses: az-ai/az-action-ttl-for-k8s-deployment@0.0.1
+        uses: az-ai/az-action-ttl-for-k8s-deployment@0.1.0
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
           namespace: kazu-test
