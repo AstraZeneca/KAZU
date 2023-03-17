@@ -18,6 +18,7 @@ from typing import Any
 import kazu
 
 sys.path.insert(0, os.path.abspath("../kazu"))
+sys.path.append(os.path.abspath("./_ext"))
 
 
 # -- Project information -----------------------------------------------------
@@ -39,6 +40,9 @@ extensions = [
     "myst_parser",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
+    # custom extension, see docs/_ext.
+    # saves effort by adding after intersphinx.
+    "cross_reference_override",
 ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -46,7 +50,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv", "_changelog.d"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv", "_changelog.d", "_ext"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -166,6 +170,23 @@ def linkcode_resolve(domain, info):
 # raise failed links as warning, except for the ignored ones below
 nitpicky = True
 
+
+# for custom cross_reference_override extension
+cross_reference_override_mapping = {
+    # these are cases where the location in the intersphinx object inventory doesn't match the __qualname__ on the live object
+    # which is how Sphinx tries to look these up.
+    "transformers.tokenization_utils_base.BatchEncoding": "transformers.BatchEncoding",
+    "transformers.data.processors.utils.InputExample": "transformers.InputExample",
+    "transformers.utils.generic.PaddingStrategy": "transformers.utils.PaddingStrategy",
+    # This doesn't have a py:class reference in the Python docs, but there is this in std:label :
+    # dom-document-objects                     Document Objects                        : library/xml.dom.html#dom-document-objects
+    # which we can access with the 'ref' reference type.
+    "xml.dom.minidom.Document": ("std", "ref", "dom-document-objects"),
+    # as above
+    "xml.dom.minidom.Element": ("std", "ref", "dom-element-objects"),
+}
+
+
 nitpick_ignore = [
     ###### Checked that there's no obvious solution #####
     # This has moved in PyTorch lightning 2.0 to lightning.fabric.plugins.io.checkpoint_io.CheckpointIO, (and similar below)
@@ -182,18 +203,6 @@ nitpick_ignore = [
     ("py:class", "kazu.utils.grouping.Item"),
     ("py:class", "kazu.utils.grouping.Key"),
     ("py:class", "kazu.steps.step.Self"),
-    # to work, this has to be # transformers.BatchEncoding, but this isn't
-    # the location of the 'live object' after importing.
-    # This is an issue related to https://github.com/sphinx-doc/sphinx/issues/4826
-    # I want to try and resolve this via https://github.com/theislab/scanpydoc/issues/64
-    # this may affect other ignored errors below here too, I haven't fully chcked
-    ("py:class", "transformers.tokenization_utils_base.BatchEncoding"),
-    # This doesn't seem to have a py:class reference in the Python docs, but there is this in std:doc :
-    # dom-document-objects                     Document Objects                        : library/xml.dom.html#dom-document-objects
-    # again, with type hints though, overriding would be a pain
-    ("py:class", "xml.dom.minidom.Document"),
-    # suspect related to the above
-    ("py:class", "xml.dom.minidom.Element"),
     ##### Not Checked, may be trivial to fix (just ignoring so we can avoid introducing new problems going forward) ######
     ("py:class", "JWTAuthenticationBackend"),
     ("py:class", "Module"),
@@ -223,11 +232,9 @@ nitpick_ignore = [
     ("py:class", "starlette.responses.Response"),
     ("py:class", "transformers.data.data_collator.DataCollatorWithPadding"),
     ("py:class", "transformers.data.processors.utils.DataProcessor"),
-    ("py:class", "transformers.data.processors.utils.InputExample"),
     ("py:class", "transformers.modeling_utils.PreTrainedModel"),
     ("py:class", "transformers.models.bert.modeling_bert.BertPreTrainedModel"),
     ("py:class", "transformers.tokenization_utils.PreTrainedTokenizer"),
     ("py:class", "transformers.tokenization_utils_base.PreTrainedTokenizerBase"),
     ("py:class", "transformers.tokenization_utils_fast.PreTrainedTokenizerFast"),
-    ("py:class", "transformers.utils.generic.PaddingStrategy"),
 ]
