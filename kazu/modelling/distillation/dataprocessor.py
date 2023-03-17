@@ -71,6 +71,7 @@ class NerProcessor(SeqTagProcessor):
         return self._create_examples(self._read_data(os.path.join(data_dir, "devel.tsv")), "dev")
 
     def get_test_examples(self, data_dir: str) -> List[InputExample]:
+        """Gets a collection of :class:`transformers.InputExample` for the test set."""
         return self._create_examples(self._read_data(os.path.join(data_dir, "test.tsv")), "test")
 
     def get_aug_examples(self, data_dir: str) -> List[InputExample]:
