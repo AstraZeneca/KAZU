@@ -201,13 +201,7 @@ nitpick_ignore = [
     # Sphinx doesn't find it because the class is in _typeshed, which doesn't exist at runtime.
     # We link to _typeshed docs from the docstring anyway, so this is fine for the user.
     ("py:class", "SupportsRichComparison"),
-    ##### Not Checked, may be trivial to fix (just ignoring so we can avoid introducing new problems going forward) ######
-    ("py:class", "Module"),
     ("py:class", "batch"),
-    (
-        "py:class",
-        "pytorch_lightning.core.module.LightningModule.forward",
-    ),
     ("py:class", "omegaconf.dictconfig.DictConfig"),
     ("py:class", "omegaconf.listconfig.ListConfig"),
     ("py:class", "pydantic.main.BaseModel"),
