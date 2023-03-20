@@ -521,7 +521,10 @@ class PLSapbertModel(LightningModule):
         self, texts: List[str], trainer: Optional[Trainer] = None, batch_size: Optional[int] = None
     ) -> torch.Tensor:
         """
-        convenience function: for a list of strings, generate embeddings
+        For a list of strings, generate embeddings.
+
+        This is a convenience function for users, as we need to carry out these steps several times
+        in the codebase.
 
         :param texts:
         :param trainer: an optional PL Trainer to use. If not specified, uses the default one
