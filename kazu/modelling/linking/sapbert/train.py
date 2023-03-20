@@ -525,7 +525,7 @@ class PLSapbertModel(LightningModule):
 
         :param texts:
         :param trainer: an optional PL Trainer to use. If not specified, uses the default one
-        :param batch size: optional batch size to use. If not specified, use 16
+        :param batch_size: optional batch size to use. If not specified, use 16
         :return: a 2d tensor of embeddings
         """
         if trainer is None:

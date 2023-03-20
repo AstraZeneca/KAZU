@@ -201,7 +201,6 @@ nitpick_ignore = [
     # Sphinx doesn't find it because the class is in _typeshed, which doesn't exist at runtime.
     # We link to _typeshed docs from the docstring anyway, so this is fine for the user.
     ("py:class", "SupportsRichComparison"),
-    ("py:class", "batch"),
     ("py:class", "omegaconf.dictconfig.DictConfig"),
     ("py:class", "omegaconf.listconfig.ListConfig"),
     ("py:class", "pydantic.main.BaseModel"),
