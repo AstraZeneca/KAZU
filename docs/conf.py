@@ -115,6 +115,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "python": ("https://docs.python.org/3", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    "rdflib": ("https://rdflib.readthedocs.io/en/stable/", None),
 }
 
 
@@ -210,9 +211,6 @@ nitpick_ignore = [
     ("py:class", "omegaconf.dictconfig.DictConfig"),
     ("py:class", "omegaconf.listconfig.ListConfig"),
     ("py:class", "pydantic.main.BaseModel"),
-    ("py:class", "rdflib.graph.Graph"),
-    ("py:class", "rdflib.paths.Path"),
-    ("py:class", "rdflib.term.Node"),
     ("py:class", "re.Pattern"),
     ("py:class", "spacy.language.Language"),
     ("py:class", "spacy.matcher.phrasematcher.PhraseMatcher"),
