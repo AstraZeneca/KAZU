@@ -192,7 +192,6 @@ cross_reference_override_mapping = {
 
 
 nitpick_ignore = [
-    ###### Checked that there's no obvious solution #####
     # this doesn't exist anymore in lightning 2.0, it becomes on_validation_epoch_end, and there's some migration work for changing to it
     ("py:meth", "pytorch_lightning.core.LightningModule.validation_epoch_end"),
     # this doesn't appear to have an entry in the transformers docs for some reason.
@@ -201,15 +200,22 @@ nitpick_ignore = [
     # Sphinx doesn't find it because the class is in _typeshed, which doesn't exist at runtime.
     # We link to _typeshed docs from the docstring anyway, so this is fine for the user.
     ("py:class", "SupportsRichComparison"),
+    # This isn't a class in the Python docs, there's a :ref: re-objects , but it's
+    # used within a Union[str, re.Pattern], so a custom :type: override doesn't work nicely
+    ("py:class", "re.Pattern"),
+    # we can access omegaconf with intersphinx using https://omegaconf.readthedocs.io/en/latest/objects.inv
+    # but their docs don't include an entry for DictConfig or ListConfig!
     ("py:class", "omegaconf.dictconfig.DictConfig"),
     ("py:class", "omegaconf.listconfig.ListConfig"),
-    ("py:class", "pydantic.main.BaseModel"),
-    ("py:class", "re.Pattern"),
+    # spacy don't use Sphinx, they use a custom docs build process - they don't appear to have an objects.inv
+    # we could go back and link at least some of these 'manually' with a :rtype: or :type: annotation
     ("py:class", "spacy.language.Language"),
     ("py:class", "spacy.matcher.phrasematcher.PhraseMatcher"),
     ("py:class", "spacy.tokens.doc.Doc"),
     ("py:class", "spacy.tokens.span.Span"),
+    # stanza doesn't appear to build API docs (and the build process is unclear - they may not even use Sphinx at all)
     ("py:class", "stanza.pipeline.core.Pipeline"),
+    # starlette doesn't appear to build API docs, and doesn't seem to use Sphinx.
     ("py:class", "starlette.authentication.AuthCredentials"),
     ("py:class", "starlette.authentication.AuthenticationBackend"),
     ("py:class", "starlette.authentication.BaseUser"),
@@ -217,4 +223,6 @@ nitpick_ignore = [
     ("py:class", "starlette.requests.HTTPConnection"),
     ("py:class", "starlette.requests.Request"),
     ("py:class", "starlette.responses.Response"),
+    # pydantic uses mkdocs, not Sphinx, and doesn't seem to have full API docs
+    ("py:class", "pydantic.main.BaseModel"),
 ]
