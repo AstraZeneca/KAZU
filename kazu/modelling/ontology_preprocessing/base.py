@@ -25,6 +25,7 @@ from urllib import parse
 import pandas as pd
 import rdflib
 
+from kazu.utils.caching import kazu_disk_cache
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
@@ -697,28 +698,36 @@ class OntologyParser(ABC):
             ] = self.parsed_dataframe[IDX]
 
     def export_metadata(self) -> Dict[str, Dict[str, SimpleValue]]:
-        self._parse_df_if_not_already_parsed()
-        assert isinstance(self.parsed_dataframe, pd.DataFrame)
-        metadata_columns = self.parsed_dataframe.columns
-        metadata_columns.drop([MAPPING_TYPE, SYN])
-        metadata_df = self.parsed_dataframe[metadata_columns]
-        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
-        metadata_df.set_index(inplace=True, drop=True, keys=IDX)
-        assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
-        metadata = metadata_df.to_dict(orient="index")
-        return cast(Dict[str, Dict[str, SimpleValue]], metadata)
+        @kazu_disk_cache.memoize(name=f"{self.name}.export_metadata")
+        def _export_metadata():
+            self._parse_df_if_not_already_parsed()
+            assert isinstance(self.parsed_dataframe, pd.DataFrame)
+            metadata_columns = self.parsed_dataframe.columns
+            metadata_columns.drop([MAPPING_TYPE, SYN])
+            metadata_df = self.parsed_dataframe[metadata_columns]
+            metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
+            metadata_df.set_index(inplace=True, drop=True, keys=IDX)
+            assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
+            metadata = metadata_df.to_dict(orient="index")
+            return cast(Dict[str, Dict[str, SimpleValue]], metadata)
+
+        return _export_metadata()
 
     def export_synonym_terms(self) -> Set[SynonymTerm]:
-        self._parse_df_if_not_already_parsed()
-        assert isinstance(self.parsed_dataframe, pd.DataFrame)
-        # ensure correct order
-        syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
-        syn_df = syn_df.dropna(subset=[SYN])
-        syn_df[SYN] = syn_df[SYN].apply(str.strip)
-        syn_df.drop_duplicates(subset=self.all_synonym_column_names)
-        assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-        synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
-        return synonym_terms
+        @kazu_disk_cache.memoize(name=f"{self.name}.export_synonym_terms")
+        def _export_synonym_terms():
+            self._parse_df_if_not_already_parsed()
+            assert isinstance(self.parsed_dataframe, pd.DataFrame)
+            # ensure correct order
+            syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
+            syn_df = syn_df.dropna(subset=[SYN])
+            syn_df[SYN] = syn_df[SYN].apply(str.strip)
+            syn_df.drop_duplicates(subset=self.all_synonym_column_names)
+            assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
+            synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
+            return synonym_terms
+
+        return _export_synonym_terms()
 
     def populate_metadata_database(self):
         """
@@ -762,9 +771,10 @@ class OntologyParser(ABC):
         """
 
         if self.name in self.synonym_db.loaded_parsers and not force:
-            logger.info("will not repopulate databases as already populated for %s", self.name)
+            logger.debug("will not repopulate databases as already populated for %s", self.name)
             return None
         else:
+            logger.info("populating database for %s", self.name)
             self.populate_metadata_database()
             self.populate_synonym_database()
             curations_with_term_norms = self.process_actions()
