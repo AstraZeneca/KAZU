@@ -3,7 +3,7 @@ import logging
 import os
 import time
 import uuid
-from typing import List, Dict, Optional, Protocol
+from typing import List, Dict, Optional, Protocol, Iterable
 
 import psutil
 from hydra.utils import instantiate
@@ -134,6 +134,7 @@ class Pipeline:
         self.skip_doc_len = skip_doc_len
         self.failure_handlers = failure_handler
         self.steps = steps
+        self._namespace_to_step = {step.namespace(): step for step in steps}
         # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
         self.failed_docs: Dict[str, List[Document]] = {}
         # performance tracking
@@ -173,17 +174,30 @@ class Pipeline:
                 docs_to_process.append(doc)
         return docs_to_process
 
-    def __call__(self, docs: List[Document]) -> List[Document]:
+    def __call__(
+        self, docs: List[Document], step_namespaces: Optional[Iterable[str]] = None
+    ) -> List[Document]:
         """
         run the pipeline
 
         :param docs: Docs to process
+        :param step_namespaces: The namespaces of the steps to use in processing. Default behaviour is
+            to use all steps on the pipeline in the order given when creating the pipeline. This parameter
+            gives the flexibility to sometimes only run some of the steps, for example 'just NER' or
+            'just linking'.
         :return: processed docs
         """
         docs_to_process = self.prefilter_docs(docs)
         step_times = {}
         batch_start = time.time()
-        for step in self.steps:
+
+        steps_to_run: Iterable[Step]
+        if step_namespaces is None:
+            steps_to_run = self.steps
+        else:
+            steps_to_run = (self._namespace_to_step[namespace] for namespace in step_namespaces)
+
+        for step in steps_to_run:
             start = time.time()
             _processed_docs, failed_docs = step(docs_to_process)
             step_times[step.namespace()] = round(time.time() - start, 4)
