@@ -3,7 +3,7 @@ import os.path
 import time
 import uuid
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Protocol
 
 import psutil
 from hydra.utils import instantiate
@@ -60,7 +60,7 @@ def batch_metrics(docs: List[Document]):
     }
 
 
-class FailedDocsHandler:
+class FailedDocsHandler(Protocol):
     """
     class to somehow handle failed docs
     """
