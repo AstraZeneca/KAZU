@@ -36,7 +36,6 @@ defaults:
   - AbbreviationFinderStep: default
   - SpacyNerStep: default
   - TransformersModelForTokenClassificationNerStep: default
-  - SapBertForEntityLinkingStep: default
   - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
   - Pipeline: default
