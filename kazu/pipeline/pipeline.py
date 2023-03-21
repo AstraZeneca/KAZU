@@ -61,9 +61,7 @@ def batch_metrics(docs: List[Document]):
 
 
 class FailedDocsHandler(Protocol):
-    """
-    class to somehow handle failed docs
-    """
+    """Handle failed docs."""
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
         """
@@ -76,9 +74,7 @@ class FailedDocsHandler(Protocol):
 
 
 class FailedDocsLogHandler(FailedDocsHandler):
-    """
-    implementation that logs to warning
-    """
+    """Log failed docs as warnings."""
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
         for step_namespace, docs in step_docs_map.items():
@@ -95,9 +91,7 @@ class FailedDocsLogHandler(FailedDocsHandler):
 
 
 class FailedDocsFileHandler(FailedDocsHandler):
-    """
-    implementation logs docs to a directory, along with exception message
-    """
+    """Log failed docs to a directory along with the relevant exception."""
 
     def __init__(self, log_dir: Path):
         self.log_dir = log_dir
