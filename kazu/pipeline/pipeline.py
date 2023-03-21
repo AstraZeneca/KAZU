@@ -177,8 +177,6 @@ class Pipeline:
 
     def __call__(self, docs: List[Document]) -> List[Document]:
         """
-        :meta public:
-
         run the pipeline
 
         :param docs: Docs to process
