@@ -5,23 +5,13 @@ import os
 import shutil
 import subprocess
 from dataclasses import dataclass, field
+from logging.config import fileConfig
 from pathlib import Path
 from typing import List, Optional
-
+import ray
 from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
 from omegaconf import DictConfig
-
-from kazu.modelling.annotation.acceptance_test import (
-    execute_full_pipeline_acceptance_test,
-    check_annotation_consistency,
-)
-from kazu.modelling.ontology_matching import assemble_pipeline
-from kazu.pipeline import load_steps_and_log_memory_usage
-from kazu.utils.constants import HYDRA_VERSION_BASE
-from kazu.utils.utils import Singleton
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -61,8 +51,101 @@ class ModelPackBuildError(Exception):
 
 
 class ModelPackBuilder:
-    @staticmethod
-    def load_build_configuration(model_pack_path: Path) -> BuildConfiguration:
+    def __init__(
+        self,
+        logging_config_path: Optional[Path],
+        target_model_pack_path: Path,
+        kazu_version: str,
+        build_dir: Path,
+        maybe_base_model_pack_path: Optional[Path],
+        maybe_base_configuration_path: Optional[Path],
+        skip_tests: bool,
+        zip_pack: bool,
+    ):
+        """
+        A ModelPackBuilder is a helper class to assist in the building of a model pack.
+        WARNING! since this class will configure the kazu global cache, executing
+        multiple builds within the same python process could potentially lead to the
+        pollution of the cache. This is because the KAZU_MODEL_PACK env variable
+        is modified by this object, which should normally not happen. Rather
+        than instantiating this object directly, one should instead use
+        :func:`.build_all_model_packs`\\, which will control this process for you.
+
+
+        :param logging_config_path: passed to logging.config.fileConfig
+        :param target_model_pack_path: path to model pack to process
+        :param kazu_version: version of kazu used to generate model pack
+        :param build_dir: build the pack in this directory
+        :param maybe_base_model_pack_path: if this pack requires the base model pack, specify path
+        :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
+        :param skip_tests: don't run any tests
+        :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
+        """
+        if logging_config_path:
+            fileConfig(logging_config_path)
+        self.logger = logging.getLogger(__name__)
+        self.zip_pack = zip_pack
+        self.skip_tests = skip_tests
+        self.maybe_base_configuration_path = maybe_base_configuration_path
+        self.maybe_base_model_pack_path = maybe_base_model_pack_path
+        self.build_dir = build_dir
+        self.kazu_version = kazu_version
+        self.target_model_pack_path = target_model_pack_path
+        self.model_pack_build_path = self.build_dir.joinpath(self.target_model_pack_path.name)
+        os.environ["KAZU_MODEL_PACK"] = str(self.model_pack_build_path)
+        self.build_config = self.load_build_configuration()
+
+    def __repr__(self):
+        """
+        For nice log messages
+
+
+        :return:
+        """
+        return f"ModelPackBuilder({self.target_model_pack_path.name})"
+
+    def build_model_pack(self) -> Path:
+        """
+        Execute the build process
+
+
+        :return: path of new pack
+        """
+
+        self.logger.info("building model pack at %s", self.model_pack_build_path)
+        self.model_pack_build_path.mkdir()
+        self.apply_merge_configurations()
+
+        self.clear_cached_resources_from_model_pack_dir()
+        # set the env param so that hydra conf is correctly configured
+        # local import so the cache is correctly configured with KAZU_MODEL_PACK
+        from kazu.utils.constants import HYDRA_VERSION_BASE
+
+        with initialize_config_dir(
+            version_base=HYDRA_VERSION_BASE,
+            config_dir=str(self.model_pack_build_path.joinpath("conf")),
+        ):
+            cfg = compose(
+                config_name="config",
+                overrides=["hydra/job_logging=none", "hydra/hydra_logging=none"],
+            )
+            ModelPackBuilder.build_caches(cfg)
+            if not self.skip_tests:
+                from kazu.modelling.annotation.acceptance_test import (
+                    execute_full_pipeline_acceptance_test,
+                    check_annotation_consistency,
+                )
+
+                if self.build_config.run_consistency_checks:
+                    check_annotation_consistency(cfg)
+                if self.build_config.run_acceptance_tests:
+                    execute_full_pipeline_acceptance_test(cfg)
+            if self.zip_pack:
+
+                self.zip_model_pack()
+        return self.model_pack_build_path
+
+    def load_build_configuration(self) -> BuildConfiguration:
         """
         try to load a merge configuration from the model pack root. The merge configuration should be
         a json file called base_model_merge_config.json. None is returned if no model pack is found
@@ -70,7 +153,7 @@ class ModelPackBuilder:
         :param model_pack_path:
         :return:
         """
-        config_path = model_pack_path.joinpath("build_config.json")
+        config_path = self.target_model_pack_path.joinpath("build_config.json")
         if not config_path.exists():
             raise ModelPackBuildError(f"no merge config found at {str(config_path)}")
 
@@ -78,87 +161,76 @@ class ModelPackBuilder:
             data = json.load(f)
         return BuildConfiguration(**data)
 
-    @staticmethod
-    def apply_merge_configurations(
-        build_config: BuildConfiguration,
-        maybe_base_model_pack_path: Optional[Path],
-        maybe_base_configuration_path: Optional[Path],
-        model_pack_build_path: Path,
-        uncached_model_pack_path: Path,
-    ):
+    def apply_merge_configurations(self):
 
         # copy the target pack to the target build dir
         shutil.copytree(
-            str(uncached_model_pack_path), str(model_pack_build_path), dirs_exist_ok=True
+            str(self.target_model_pack_path), str(self.model_pack_build_path), dirs_exist_ok=True
         )
         # copy base config if required
-        if build_config.requires_base_config:
-            if maybe_base_configuration_path is None:
+        if self.build_config.requires_base_config:
+            if self.maybe_base_configuration_path is None:
                 raise ModelPackBuildError(
-                    f"merge config asked for base configuration path but none was provided: {build_config}"
+                    f"merge config asked for base configuration path but none was provided: {self.build_config}"
                 )
-            model_pack_build_path.joinpath("conf").mkdir(exist_ok=True)
+            self.model_pack_build_path.joinpath("conf").mkdir(exist_ok=True)
             shutil.copytree(
-                str(maybe_base_configuration_path),
-                str(model_pack_build_path.joinpath("conf")),
+                str(self.maybe_base_configuration_path),
+                str(self.model_pack_build_path.joinpath("conf")),
                 dirs_exist_ok=True,
             )
-        if build_config.has_own_config:
+        if self.build_config.has_own_config:
             # and copy target config to override required elements (if required)
             shutil.copytree(
-                str(uncached_model_pack_path.joinpath("conf")),
-                str(model_pack_build_path.joinpath("conf")),
+                str(self.target_model_pack_path.joinpath("conf")),
+                str(self.model_pack_build_path.joinpath("conf")),
                 dirs_exist_ok=True,
             )
 
-        if maybe_base_model_pack_path is None and build_config.requires_base_model_pack:
+        if self.maybe_base_model_pack_path is None and self.build_config.requires_base_model_pack:
             raise ModelPackBuildError(
-                f"merge config asked for base model pack path but none was provided: {build_config}"
+                f"merge config asked for base model pack path but none was provided: {self.build_config}"
             )
-        elif maybe_base_model_pack_path is not None and build_config.requires_base_model_pack:
-            ModelPackBuilder.copy_base_model_pack_resources_to_target(
-                build_config, maybe_base_model_pack_path, model_pack_build_path
-            )
+        elif (
+            self.maybe_base_model_pack_path is not None
+            and self.build_config.requires_base_model_pack
+        ):
+            self.copy_base_model_pack_resources_to_target()
 
-    @staticmethod
-    def copy_base_model_pack_resources_to_target(
-        build_config: BuildConfiguration,
-        base_model_pack_path: Path,
-        model_pack_build_path: Path,
-    ):
-        for model in build_config.models:
-            model_source_path = base_model_pack_path.joinpath(model)
-            target_dir = model_pack_build_path.joinpath(model_source_path.name)
+    def copy_base_model_pack_resources_to_target(self):
+        assert isinstance(self.maybe_base_model_pack_path, Path)
+
+        for model in self.build_config.models:
+
+            model_source_path = self.maybe_base_model_pack_path.joinpath(model)
+            target_dir = self.model_pack_build_path.joinpath(model_source_path.name)
             shutil.copytree(str(model_source_path), str(target_dir), dirs_exist_ok=True)
-        for ontology_path_str in build_config.ontologies:
-            ontology_path = base_model_pack_path.joinpath(ontology_path_str)
-            target_path = model_pack_build_path.joinpath(ontology_path_str)
+        for ontology_path_str in self.build_config.ontologies:
+            ontology_path = self.maybe_base_model_pack_path.joinpath(ontology_path_str)
+            target_path = self.model_pack_build_path.joinpath(ontology_path_str)
             if ontology_path.is_dir():
                 shutil.copytree(str(ontology_path), str(target_path), dirs_exist_ok=True)
             else:
                 shutil.copy(ontology_path, target_path)
 
-    @staticmethod
-    def clear_cached_resources_from_model_pack_dir(model_pack_path: Path):
+    def clear_cached_resources_from_model_pack_dir(self):
         """
-        delete any cached data from the input path
+        Delete any cached data from the input path
+
 
         :param model_pack_path:
         :return:
         """
-        for root, d_names, f_names in os.walk(model_pack_path):
-            for d_name in d_names:
-                if (
-                    d_name.startswith("cached")
-                    or d_name.startswith("tfidf")
-                    or d_name.startswith("spacy_pipeline")
-                ):
-                    deletion_path = os.path.join(root, d_name)
-                    logger.info(f"deleting cached resource: {deletion_path}")
-                    shutil.rmtree(deletion_path)
+        # local import so the cache is correctly configured with KAZU_MODEL_PACK
+        from kazu.utils.caching import kazu_disk_cache
 
-    @staticmethod
-    def zip_model_pack(model_pack_name: str, build_dir: Path):
+        kazu_disk_cache.clear()
+
+        maybe_spacy_pipeline = self.model_pack_build_path.joinpath("spacy_pipeline")
+        if maybe_spacy_pipeline.exists():
+            shutil.rmtree(maybe_spacy_pipeline)
+
+    def zip_model_pack(self):
         """
         call the zip subprocess to compress model pack (requires zip on CLI)
         also moves it to parent dir
@@ -167,131 +239,32 @@ class ModelPackBuilder:
         :param build_dir:
         :return:
         """
-        logger.info(f"zipping model pack {model_pack_name}")
-        parent_directory = build_dir.parent
+        model_pack_name = f"{self.model_pack_build_path.name}-v{self.kazu_version}.zip"
+        self.logger.info(f"zipping model pack {model_pack_name}")
+        parent_directory = self.model_pack_build_path.parent
         model_pack_name_with_version = model_pack_name.removesuffix(".zip")
         subprocess.run(
             # make a symlink so the top-level directory in the resulting zip file
             # has the version of the model pack in it
-            ["ln", "-s", build_dir.name, model_pack_name_with_version],
+            ["ln", "-s", self.model_pack_build_path.name, model_pack_name_with_version],
             cwd=parent_directory,
         )
         subprocess.run(
             ["zip", "-r", model_pack_name, model_pack_name_with_version], cwd=parent_directory
         )
 
-    @staticmethod
-    def build_all_model_packs(
-        maybe_base_model_pack_path: Optional[Path],
-        maybe_base_configuration_path: Optional[Path],
-        model_pack_paths: List[Path],
-        zip_pack: bool,
-        output_dir: Path,
-        skip_tests: bool,
-    ):
-        """
-        build multiple model packs
-
-        :param maybe_base_model_pack_path: Path to the base model pack, if required
-        :param maybe_base_configuration_path: Path to the base configuration, if required
-        :param model_pack_paths: list of paths to model pack resources
-        :param zip_pack: should the pack be zipped at the end?
-        :param output_dir: directory to build model packs in
-        :param skip_tests: don't run any tests
-        :return:
-        """
-        if not output_dir.is_dir():
-            raise ModelPackBuildError(f"{str(output_dir)} is not a directory")
-        if len(os.listdir(output_dir)) > 0:
-            raise ModelPackBuildError(f"{str(output_dir)} is not empty")
-
-        kazu_version = (
-            subprocess.check_output("pip show kazu | grep Version", shell=True)
-            .decode("utf-8")
-            .split(" ")[1]
-            .strip()
-        )
-
-        for model_pack_path in model_pack_paths:
-            ModelPackBuilder.reset_singletons()
-            logger.info(f"building model pack at {model_pack_path}")
-            ModelPackBuilder.process_model_pack_path(
-                maybe_base_model_pack_path=maybe_base_model_pack_path,
-                maybe_base_configuration_path=maybe_base_configuration_path,
-                kazu_version=kazu_version,
-                zip_pack=zip_pack,
-                uncached_model_pack_path=model_pack_path,
-                build_dir=output_dir,
-                skip_tests=skip_tests,
-            )
-
-    @staticmethod
-    def reset_singletons():
+    def reset_singletons(self):
         """
         this is required between different instantiations of the pipeline config, as singleton states
         may conflict
 
         :return:
         """
-        logger.info("clearing singletons")
+        self.logger.info("clearing singletons")
+        # local import so the cache is correctly configured with KAZU_MODEL_PACK
+        from kazu.utils.utils import Singleton
+
         Singleton.clear_all()
-
-    @staticmethod
-    def process_model_pack_path(
-        maybe_base_model_pack_path: Optional[Path],
-        maybe_base_configuration_path: Optional[Path],
-        kazu_version: str,
-        zip_pack: bool,
-        uncached_model_pack_path: Path,
-        build_dir: Path,
-        skip_tests: bool,
-    ) -> Path:
-        """
-        run all configured options on a given model pack path
-
-        :param maybe_base_model_pack_path: if this pack requires the base model pack, specify path
-        :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
-        :param kazu_version: version of kazu used to generate model pack
-        :param zip_pack: should model pack be zipped?
-        :param uncached_model_pack_path: path to model pack to process
-        :param build_dir: directory pack should be built in
-        :param skip_tests: don't run any tests
-        :return:
-        """
-
-        model_pack_build_path = build_dir.joinpath(uncached_model_pack_path.name)
-        model_pack_build_path.mkdir()
-
-        build_config = ModelPackBuilder.load_build_configuration(uncached_model_pack_path)
-
-        ModelPackBuilder.apply_merge_configurations(
-            build_config=build_config,
-            maybe_base_model_pack_path=maybe_base_model_pack_path,
-            maybe_base_configuration_path=maybe_base_configuration_path,
-            model_pack_build_path=model_pack_build_path,
-            uncached_model_pack_path=uncached_model_pack_path,
-        )
-
-        ModelPackBuilder.clear_cached_resources_from_model_pack_dir(model_pack_build_path)
-        # set the env param so that hydra conf is correctly configured
-        os.environ["KAZU_MODEL_PACK"] = str(model_pack_build_path)
-        with initialize_config_dir(
-            version_base=HYDRA_VERSION_BASE, config_dir=str(model_pack_build_path.joinpath("conf"))
-        ):
-            cfg = compose(
-                config_name="config",
-                overrides=[],
-            )
-            ModelPackBuilder.build_caches(cfg)
-            if not skip_tests:
-                if build_config.run_consistency_checks:
-                    check_annotation_consistency(cfg)
-                if build_config.run_acceptance_tests:
-                    execute_full_pipeline_acceptance_test(cfg)
-            if zip_pack:
-                model_pack_name = f"{uncached_model_pack_path.name}-v{kazu_version}.zip"
-                ModelPackBuilder.zip_model_pack(model_pack_name, model_pack_build_path)
-        return model_pack_build_path
 
     @staticmethod
     def build_caches(cfg: DictConfig) -> None:
@@ -303,12 +276,79 @@ class ModelPackBuilder:
         """
         parsers = instantiate(cfg.ontology_parser).values()
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
+        # local import so the cache is correctly configured with KAZU_MODEL_PACK
+        from kazu.modelling.ontology_matching import assemble_pipeline
+
         assemble_pipeline.main(
             parsers=parsers,
             use_curations=True,
             output_dir=explosion_path,
         )
+        from kazu.pipeline import load_steps_and_log_memory_usage
+
         load_steps_and_log_memory_usage(cfg)
+
+
+@ray.remote(num_cpus=1)
+class ModelPackBuilderActor(ModelPackBuilder):
+    pass
+
+
+def build_all_model_packs(
+    maybe_base_model_pack_path: Optional[Path],
+    maybe_base_configuration_path: Optional[Path],
+    model_pack_paths: List[Path],
+    zip_pack: bool,
+    output_dir: Path,
+    skip_tests: bool,
+    logging_config_path: Optional[Path],
+    max_parallel_build: int,
+):
+    """
+    Build multiple model packs
+
+
+    :param maybe_base_model_pack_path: Path to the base model pack, if required
+    :param maybe_base_configuration_path: Path to the base configuration, if required
+    :param model_pack_paths: list of paths to model pack resources
+    :param zip_pack: should the pack be zipped at the end?
+    :param output_dir: directory to build model packs in
+    :param skip_tests: don't run any tests
+    :param logging_config_path: passed to logging.config.fileConfig
+    :param max_parallel_build: build this many model packs simultaneously
+    :return:
+    """
+    if not output_dir.is_dir():
+        raise ModelPackBuildError(f"{str(output_dir)} is not a directory")
+    if len(os.listdir(output_dir)) > 0:
+        raise ModelPackBuildError(f"{str(output_dir)} is not empty")
+
+    kazu_version = (
+        subprocess.check_output("pip show kazu | grep Version", shell=True)
+        .decode("utf-8")
+        .split(" ")[1]
+        .strip()
+    )
+    runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
+    ray.init(num_cpus=max_parallel_build, runtime_env=runtime_env)
+    futures = []
+
+    for model_pack_path in model_pack_paths:
+        builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
+            logging_config_path=logging_config_path,
+            maybe_base_model_pack_path=maybe_base_model_pack_path,
+            maybe_base_configuration_path=maybe_base_configuration_path,
+            kazu_version=kazu_version,
+            zip_pack=zip_pack,
+            target_model_pack_path=model_pack_path,
+            build_dir=output_dir,
+            skip_tests=skip_tests,
+        )
+        futures.append(builder.build_model_pack.remote())
+
+    for future in futures:
+        # allow a max 45 mins per model pack build
+        print(f"model pack {ray.get(future, timeout=45.0 * 60.0)} build complete")
 
 
 if __name__ == "__main__":
@@ -371,16 +411,22 @@ how it is called, one or more of the following may be required:
         required=False,
         help="path to a logging config file, if required",
     )
+    parser.add_argument(
+        "--max_parallel_build",
+        type=int,
+        default=1,
+        help="build this many model packs simultaneously",
+    )
 
     args = parser.parse_args()
-    if args.logging_config_path:
-        logging.config.fileConfig(args.logging_config_path)
 
-    ModelPackBuilder.build_all_model_packs(
+    build_all_model_packs(
         maybe_base_model_pack_path=args.base_model_pack_path,
         maybe_base_configuration_path=args.base_configuration_path,
         model_pack_paths=args.model_packs_to_build,
         zip_pack=args.zip_model_pack,
         output_dir=args.model_pack_output_path,
         skip_tests=args.skip_tests,
+        logging_config_path=args.logging_config_path,
+        max_parallel_build=args.max_parallel_build,
     )
