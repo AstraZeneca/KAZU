@@ -1,7 +1,5 @@
 import json
 import logging
-import os
-import shutil
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
@@ -9,9 +7,9 @@ from typing import Iterable, Set, Tuple, DefaultDict, Dict, List
 
 import requests
 
+from kazu.utils.caching import kazu_disk_cache
 from kazu.data.data import Mapping
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
-from kazu.utils.utils import get_cache_dir
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +37,7 @@ class CrossReferenceManager(ABC):
         :param path: path to cross ref mapping resources required by this manager
         """
         self.source_to_parser_metadata_lookup = source_to_parser_metadata_lookup
-        self.load_or_build_cache(path)
+        self.xref_db = self.build_xref_cache(path)
 
     @abstractmethod
     def build_xref_cache(self, path: Path) -> XrefDatabase:
@@ -50,59 +48,6 @@ class CrossReferenceManager(ABC):
         :return:
         """
         raise NotImplementedError()
-
-    def load_or_build_cache(self, path: Path, force_rebuild_cache: bool = False):
-        """
-        build the index, or if a cached version is available, load it instead
-
-        :param path:
-        :param force_rebuild_cache:
-        :return:
-        """
-        cache_dir = get_cache_dir(
-            path,
-            prefix=f"{self.__class__.__name__}",
-            create_if_not_exist=False,
-        )
-        if force_rebuild_cache:
-            logger.info("forcing a rebuild of the cache")
-            if cache_dir.exists():
-                shutil.rmtree(cache_dir)
-            self.xref_db = self.build_xref_cache(path)
-            self.save(cache_dir, self.xref_db)
-        elif cache_dir.exists():
-            logger.info(f"loading cached file from {cache_dir}")
-            self.load(cache_dir)
-        else:
-            logger.info("No cache file found. Building a new one")
-            self.xref_db = self.build_xref_cache(path)
-            self.save(cache_dir, self.xref_db)
-
-    def save(self, cache_path: Path, xref_db: XrefDatabase) -> Path:
-        """
-        save to disk. Makes a directory at the path location with all the index assets
-
-        :param cache_path: a dir to save the index.
-        :param xref_db: data to save
-        :return: a Path to where the data was saved
-        """
-        if cache_path.exists():
-            raise RuntimeError(f"{cache_path} already exists")
-
-        os.makedirs(cache_path, exist_ok=False)
-        with open(cache_path.joinpath("xref_db.json"), "w") as f:
-            json.dump(xref_db, f)
-        return cache_path
-
-    def load(self, cache_path: Path):
-        """
-        load from disk
-
-        :param cache_path: the path to the cached files. Normally created via .save
-        :return:
-        """
-        with open(cache_path.joinpath("xref_db.json"), "r") as f:
-            self.xref_db = json.load(f)
 
     def create_xref_mappings(self, mapping: Mapping) -> Iterable[Mapping]:
         """
@@ -180,17 +125,21 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         super().__init__(source_to_parser_metadata_lookup, path)
 
     def build_xref_cache(self, path: Path) -> XrefDatabase:
-        oxo_dump_path = path.joinpath("oxo_dump.json")
-        logger.info(f"looking for oxo dump at {oxo_dump_path}")
-        if oxo_dump_path.exists():
-            with open(oxo_dump_path, "r") as f:
-                oxo_dump = json.load(f)
-        else:
-            logger.info(f"oxo dump not found. Attempting to download from {self.oxo_url}")
-            oxo_dump = self.create_oxo_dump(oxo_dump_path)
-        logger.info(f"loading from oxo dump at {oxo_dump_path}")
-        xref_db = self.parse_oxo_dump(oxo_dump)
-        return xref_db
+        @kazu_disk_cache.memoize(name=f"{self.__class__.__name__}.build_xref_cache")
+        def _build_xref_cache():
+            oxo_dump_path = path.joinpath("oxo_dump.json")
+            logger.info(f"looking for oxo dump at {oxo_dump_path}")
+            if oxo_dump_path.exists():
+                with open(oxo_dump_path, "r") as f:
+                    oxo_dump = json.load(f)
+            else:
+                logger.info(f"oxo dump not found. Attempting to download from {self.oxo_url}")
+                oxo_dump = self.create_oxo_dump(oxo_dump_path)
+            logger.info(f"loading from oxo dump at {oxo_dump_path}")
+            xref_db = self.parse_oxo_dump(oxo_dump)
+            return xref_db
+
+        return _build_xref_cache()
 
     def _split_and_convert_curie(self, curie: str) -> Tuple[str, str]:
         """
