@@ -1,6 +1,6 @@
 """A sphinx extension to allow specifying where to look for cross reference links, particularly useful for type hint linking.
 
-This particularly helps for when using external types in a type hint, that you expect to be resolvable with intersphinx, but intersphinx
+This particularly helps when using external types in a type hint, that you expect to be resolvable with intersphinx, but intersphinx
 doesn't find the class documented where it expects it to be.
 
 Effort will be saved if this is configured after intersphinx (although the behaviour will not change).
@@ -37,7 +37,7 @@ def override_cross_reference(app: Sphinx, env, node, contnode):
     cross-reference has failed to resolve. For more info, see
     https://www.sphinx-doc.org/en/master/extdev/appapi.html#event-missing-reference .
 
-    The function ovverides the target of the cross-reference and then cals intersphinx's normal
+    The function overrides the target of the cross-reference and then cals intersphinx's normal
     cross-reference resolution mechanism.
     """
     xref_override = app.config.cross_reference_override_mapping.get(node["reftarget"])
