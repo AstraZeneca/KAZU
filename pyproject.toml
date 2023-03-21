@@ -77,6 +77,7 @@ dev = [
   # of the steps.
   "tensorboard",
   "towncrier",
+  "ray[serve]>=1.10.0",
 ]
 
 [build-system]
