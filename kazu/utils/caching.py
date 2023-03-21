@@ -1,9 +1,60 @@
+import logging
+import os
+import sys
+import tempfile
 from copy import deepcopy
+from pathlib import Path
 from typing import Iterable, List
 
 from cachetools import LFUCache
+from diskcache import Cache
+
 from kazu.data.data import Entity, SynonymTermWithMetrics
 from kazu.utils.utils import get_match_entity_class_hash
+
+logger = logging.getLogger(__name__)
+kazu_model_pack_dir = os.getenv("KAZU_MODEL_PACK")
+KAZU_DISK_CACHE_NAME = "kazu_disk_cache"
+
+"""
+We use the diskcache.Cache concept to cache expensive to produce resources
+to disk. Methods and functions can be decorated with
+kazu_disk_cache.memoize()
+to use this feature. Note, when used with a class method, the
+default behaviour of this function is to generate a key based
+on the constructor arguments of the class instance. Since these can
+be large (e.g. OntologyParser), it may be better to define an anonymous
+inner function where the cache key can be manually specified as something
+sensible.
+
+e.g.
+
+def method_of_class_with_lots_of_args(self):
+
+    kazu_disk_cache.memoize(name=f"something sensible and gloablly unique")
+    def _method_of_class_with_lots_of_args():
+        ...do stuff and cache
+    return _method_of_class_with_lots_of_args()
+"""
+if kazu_model_pack_dir is None:
+    temp_disk_cache = str(Path(tempfile.mkdtemp()).joinpath(KAZU_DISK_CACHE_NAME))
+    logger.warning(
+        "KAZU_MODEL_PACK env variable not set. Using %s for caching. "
+        "This will not be reused if the process is exited",
+        temp_disk_cache,
+    )
+    kazu_disk_cache = Cache(
+        directory=temp_disk_cache, eviction_policy="none", size_limit=sys.maxsize, cull_limit=0
+    )
+else:
+    kazu_disk_cache_path_str = str(Path(kazu_model_pack_dir).joinpath(KAZU_DISK_CACHE_NAME))
+    logger.info("using disk cache at %s", kazu_disk_cache_path_str)
+    kazu_disk_cache = Cache(
+        directory=kazu_disk_cache_path_str,
+        eviction_policy="none",
+        size_limit=sys.maxsize,
+        cull_limit=0,
+    )
 
 
 class EntityLinkingLookupCache:
