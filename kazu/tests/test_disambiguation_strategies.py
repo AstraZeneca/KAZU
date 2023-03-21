@@ -1,7 +1,5 @@
-import tempfile
 from itertools import chain
 from typing import Set, List
-
 
 from kazu.data.data import (
     Document,
@@ -22,7 +20,7 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 from kazu.tests.utils import DummyParser
-from kazu.utils.utils import get_cache_dir, Singleton
+from kazu.utils.utils import Singleton
 
 
 def check_ids_are_represented(
@@ -161,44 +159,38 @@ def test_TfIdfContextStrategy(set_up_p27_test_case):
     if TfIdfScorer in Singleton._instances:
         Singleton._instances.pop(TfIdfScorer)
     terms, parser = set_up_p27_test_case
-    with tempfile.TemporaryDirectory("kazu") as f:
-        text = "p27 is often confused, but in this context it's CDKN1B"
-        doc = Document.create_simple_document(text)
-        cdkn1b_ent = Entity.load_contiguous_entity(
-            start=len(text) - len("CDKN1B"),
-            end=len(text),
-            match="CDKN1B",
-            entity_class="gene",
-            namespace="test",
-        )
-        doc.sections[0].entities.append(cdkn1b_ent)
-        p27_ent = Entity.load_contiguous_entity(
-            start=0,
-            end=len("p27"),
-            match="p27",
-            entity_class="gene",
-            namespace="test",
-        )
 
-        p27_ent.update_terms(terms)
-        doc.sections[0].entities.append(p27_ent)
+    text = "p27 is often confused, but in this context it's CDKN1B"
+    doc = Document.create_simple_document(text)
+    cdkn1b_ent = Entity.load_contiguous_entity(
+        start=len(text) - len("CDKN1B"),
+        end=len(text),
+        match="CDKN1B",
+        entity_class="gene",
+        namespace="test",
+    )
+    doc.sections[0].entities.append(cdkn1b_ent)
+    p27_ent = Entity.load_contiguous_entity(
+        start=0,
+        end=len("p27"),
+        match="p27",
+        entity_class="gene",
+        namespace="test",
+    )
 
-        cache_dir = get_cache_dir(
-            f,
-            prefix=f"{parser.name}_{TfIdfDisambiguationStrategy.__name__}",
-            create_if_not_exist=False,
-        )
+    p27_ent.update_terms(terms)
+    doc.sections[0].entities.append(p27_ent)
 
-        strategy = TfIdfDisambiguationStrategy(
-            scorer=TfIdfScorer(path=cache_dir),
-            context_threshold=0.0,
-            relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
-            confidence=DisambiguationConfidence.POSSIBLE,
-        )
+    strategy = TfIdfDisambiguationStrategy(
+        scorer=TfIdfScorer(),
+        context_threshold=0.0,
+        relevant_aggregation_strategies=[EquivalentIdAggregationStrategy.NO_STRATEGY],
+        confidence=DisambiguationConfidence.POSSIBLE,
+    )
 
-        check_ids_are_represented(
-            ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
-        )
+    check_ids_are_represented(
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+    )
 
 
 def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
