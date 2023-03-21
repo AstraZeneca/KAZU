@@ -15,10 +15,6 @@ default:
           - MERGED_AS_NON_SYMBOLIC
     scorer:
       _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
-      path:
-        _target_: pathlib.Path
-        _args_:
-          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
 
 gene:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
@@ -31,10 +27,6 @@ gene:
           - CUSTOM
     scorer:
       _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
-      path:
-        _target_: pathlib.Path
-        _args_:
-          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy
     confidence: ${confidence.disambiguation_possible}
 
@@ -49,7 +41,3 @@ cell_line:
           - CUSTOM
     scorer:
       _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
-      path:
-        _target_: pathlib.Path
-        _args_:
-          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf
