@@ -177,8 +177,7 @@ class Pipeline:
     def __call__(
         self, docs: List[Document], step_namespaces: Optional[Iterable[str]] = None
     ) -> List[Document]:
-        """
-        run the pipeline
+        """Run the pipeline.
 
         :param docs: Docs to process
         :param step_namespaces: The namespaces of the steps to use in processing. Default behaviour is
