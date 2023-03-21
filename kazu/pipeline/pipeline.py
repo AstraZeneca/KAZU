@@ -65,8 +65,6 @@ class FailedDocsHandler(Protocol):
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
         """
-        :meta public:
-
         :param step_docs_map: a dict of step namespace and the docs that failed for it
         :return:
         """
