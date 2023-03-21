@@ -19,7 +19,7 @@ apply some pragmaticism in order to produce a set of precise labels we want to u
 In Kazu, we take the following approach:
 
 1. Generate synonym candidates from the raw ontology to build a putative list of terms we might want to use. Synonyms are generated
-   via the :attr:`synonym_generator` to an instance of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`, which can
+   via the ``synonym_generator`` parameter of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`, which can
    then be retrieved via the method :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms`\. The
    generated strings can be retrieved from :attr:`kazu.data.data.SynonymTerm.terms`\.
 2. Build a pipeline from this list, execute this pipeline over a large corpora of target data, and explore the results to get a sense of
