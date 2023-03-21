@@ -1,13 +1,12 @@
 import logging
-import pickle
-from pathlib import Path
 from typing import List, Tuple, Dict, Iterable
 
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
+from kazu.utils.caching import kazu_disk_cache
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.utils.utils import create_char_ngrams, create_word_ngrams, Singleton
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,7 @@ class TfIdfScorer(metaclass=Singleton):
     load them into memory multiple times.
     """
 
-    def __init__(self, path: Path):
+    def __init__(self):
         """
 
         :param path: to a directory of files containing serialised
@@ -56,34 +55,20 @@ class TfIdfScorer(metaclass=Singleton):
             are used to map the models to the relevant parser
         """
         self.synonym_db = SynonymDatabase()
-        self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = {}
-        self.build_or_load_vectorizers(path)
+        self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = self.build_vectorizers()
 
-    def build_or_load_vectorizers(self, path: Path):
-        if path.exists():
-            self.load_vectorizers(path)
-        else:
-            self.build_vectorizers(path)
+    def build_vectorizers(self) -> Dict[str, TfidfVectorizer]:
+        @kazu_disk_cache.memoize(name=f"{self.__class__.__name__}.build_vectorizers")
+        def _build_vectorizers():
+            result: Dict[str, TfidfVectorizer] = {}
+            for parser_name in self.synonym_db.loaded_parsers:
+                synonyms = self.synonym_db.get_all(parser_name).keys()
+                vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
+                vectoriser.fit(synonyms)
+                result[parser_name] = vectoriser
+            return result
 
-    def build_vectorizers(self, path: Path):
-        path.mkdir(parents=True)
-        for parser_name in self.synonym_db.loaded_parsers:
-            synonyms = self.synonym_db.get_all(parser_name).keys()
-            vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
-            vectoriser.fit(synonyms)
-            with path.joinpath(parser_name).open(mode="wb") as vectorizer_f:
-                pickle.dump(vectoriser, vectorizer_f)
-            self.parser_to_vectorizer[parser_name] = vectoriser
-
-    def load_vectorizers(self, path: Path):
-        self.parser_to_vectorizer.update(
-            {parser_path.name: self.load_vectorizer(parser_path) for parser_path in path.iterdir()}
-        )
-
-    @staticmethod
-    def load_vectorizer(path: Path) -> TfidfVectorizer:
-        with open(path, "rb") as f:
-            return pickle.load(f)
+        return _build_vectorizers()
 
     def __call__(
         self, strings: List[str], matrix: np.ndarray, parser: str
