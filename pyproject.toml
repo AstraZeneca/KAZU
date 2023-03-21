@@ -32,7 +32,8 @@ dependencies = [
   "stanza>=1.0.0",
   "regex>=2020.1.7",
   "psutil>=5.3.0",
-  "cachetools>=5.2.0"
+  "cachetools>=5.2.0",
+  "diskcache>=5.4.0"
 ]
 
 [project.urls]
