@@ -1182,7 +1182,11 @@ class GeneOntologyParser(OntologyParser):
         mapping_type = []
 
         # there seems to be a bug in rdflib that means the iterator sometimes exits early unless we covert to list first
-        for row in list(result):
+        # type cast is necessary because iterating over an rdflib query result gives different types depending on the kind
+        # of query, so rdflib gives a Union here, but we know it should be a ResultRow because we know we should have a
+        # select query
+        list_res = cast(List[rdflib.query.ResultRow], list(result))
+        for row in list_res:
             idx = str(row.goid)
             label = str(row.label)
             if "obsolete" in label:
