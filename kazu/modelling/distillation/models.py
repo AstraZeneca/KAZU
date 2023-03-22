@@ -46,7 +46,7 @@ from cachetools import LRUCache
 from omegaconf import ListConfig, OmegaConf
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 from torch.nn import CrossEntropyLoss, MSELoss
-from torch.optim.lr_scheduler import _LRScheduler
+from torch.optim.lr_scheduler import LRScheduler
 from torch.utils.data import Dataset, DataLoader
 from transformers import (
     AdamW,
@@ -489,7 +489,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         # Logging
         self.log("training_loss", loss, prog_bar=True, on_step=True)
         scheduler = self.lr_schedulers()
-        assert isinstance(scheduler, _LRScheduler)
+        assert isinstance(scheduler, LRScheduler)
         lr_list = scheduler.get_last_lr()
         self.log("lr", lr_list[0], prog_bar=True, on_step=True)
         if lr_list[0] != lr_list[1]:
@@ -682,7 +682,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.log("att_loss", att_loss, on_step=True)
         self.log("rep_loss", rep_loss, on_step=True)
         scheduler = self.lr_schedulers()
-        assert isinstance(scheduler, _LRScheduler)
+        assert isinstance(scheduler, LRScheduler)
         lr_list = scheduler.get_last_lr()
         self.log("lr", lr_list[0], prog_bar=True, on_step=True)
         if lr_list[0] != lr_list[1]:
