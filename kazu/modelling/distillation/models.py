@@ -47,9 +47,9 @@ from omegaconf import ListConfig, OmegaConf
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 from torch.nn import CrossEntropyLoss, MSELoss
 from torch.optim.lr_scheduler import LRScheduler
+from torch.optim import AdamW
 from torch.utils.data import Dataset, DataLoader
 from transformers import (
-    AdamW,
     AutoTokenizer,
     InputExample,
     DataCollatorForTokenClassification,
