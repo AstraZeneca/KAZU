@@ -431,7 +431,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
 
 
 def test_pipeline_build_from_parsers_alone(tmp_path):
-
+    Singleton.clear_all()
     parser_1 = DummyParser(
         name="first_mock_parser",
         source="test",
