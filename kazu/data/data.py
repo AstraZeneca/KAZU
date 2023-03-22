@@ -635,7 +635,7 @@ class SynonymTermBehaviour(AutoNameEnum):
     #: do not use this term as a linking target. Normally, you would use this for a term you want to remove
     #: from the underlying ontology (e.g. a 'bad' synonym). If the term does not exist, has no effect
     DROP_SYNONYM_TERM_FOR_LINKING = auto()
-    #: removes an EquivalentIDSet from the term. The EquivalentIDSet to remove is selected via being a
+    #: removes an EquivalentIdSet from the term. The EquivalentIdSet to remove is selected via being a
     #: superset of the IDs in the associated parser_to_target_id_mappings value
     DROP_ID_SET_FROM_SYNONYM_TERM = auto()
 
@@ -813,7 +813,7 @@ class Curation:
 
     Example 3:
 
-    A :class:`.SynonymTerm` has an unwanted :class:`.EquivalentIDSet attached to it`, but is otherwise good. We want to remove this set
+    A :class:`.SynonymTerm` has an unwanted :class:`.EquivalentIdSet` attached to it, but is otherwise good. We want to remove this set
 
     .. code-block:: python
 
