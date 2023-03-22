@@ -9,6 +9,7 @@ from functools import cache
 from pathlib import Path
 from typing import (
     cast,
+    overload,
     List,
     Tuple,
     Dict,
@@ -1044,8 +1045,23 @@ class RDFGraphParser(OntologyParser):
         # If more complex behaviour is necessary, write a custom subclass and override this method.
         return self.name
 
+    @overload
     @staticmethod
-    def convert_to_rdflib_ref(pred: RdfRef) -> Union[rdflib.paths.Path, rdflib.term.Node]:
+    def convert_to_rdflib_ref(pred: rdflib.paths.Path) -> rdflib.paths.Path:
+        ...
+
+    @overload
+    @staticmethod
+    def convert_to_rdflib_ref(pred: rdflib.term.Node) -> rdflib.term.Node:
+        ...
+
+    @overload
+    @staticmethod
+    def convert_to_rdflib_ref(pred: str) -> rdflib.URIRef:
+        ...
+
+    @staticmethod
+    def convert_to_rdflib_ref(pred):
         if isinstance(pred, (rdflib.term.Node, rdflib.paths.Path)):
             return pred
         else:
