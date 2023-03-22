@@ -26,6 +26,7 @@ Welcome to Kazu's documentation!
 |
 
 .. toctree::
+   :titlesonly:
    :caption: API Documentation
 
    _autosummary/kazu
