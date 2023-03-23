@@ -9,7 +9,6 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
     Mapping,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
 from kazu.steps.linking.post_processing.xref_manager import CrossReferenceManager
 from kazu.utils.grouping import sort_then_group
@@ -213,7 +212,6 @@ class StrategyRunner:
         self.non_symbolic_strategies = non_symbolic_strategies
         self.cross_ref_managers = cross_ref_managers
         self.ner_namespace_processing_order = ner_namespace_processing_order
-        self.metadata_db = MetadataDatabase()
 
         if len(self.ner_namespace_processing_order) == 0:
             # no sort order given: sort alphabetically just to get some consistent (but arbitrary) sort key
