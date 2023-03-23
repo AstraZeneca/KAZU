@@ -115,18 +115,6 @@ def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
     return docs, iris, sources
 
 
-def add_whole_document_entity(doc: Document, entity_class: str):
-    doc.sections[0].entities = [
-        Entity.load_contiguous_entity(
-            namespace="test",
-            match=doc.sections[0].get_text(),
-            entity_class=entity_class,
-            start=0,
-            end=len(doc.sections[0].get_text()),
-        )
-    ]
-
-
 def get_TransformersModelForTokenClassificationNerStep_model_path():
     return getenv("TransformersModelForTokenClassificationPath")
 
