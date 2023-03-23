@@ -29,7 +29,7 @@ Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedic
 designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
-The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentaion for the library is available
+The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentation for the library is available
 *[here](https://astrazeneca.github.io/KAZU/_build/html/index.html)*.
 """
 logger = logging.getLogger("ray")
