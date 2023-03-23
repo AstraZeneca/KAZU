@@ -152,7 +152,14 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
 
 def test_TfIdfContextStrategy(set_up_p27_test_case):
     # we need to clear out the scorer singleton.
-    Singleton.clear_all()
+    # TODO: find a better way to handle this
+    # we can't call Singleton.clear_all() because we need the modifications made
+    # to the databases by set_up_p27_test_case to be preserved.
+    # maybe we can refactor how our test fixtures work to enable
+    # clearing before the set_up_p27_test_case is run (but currently
+    # that fixture is session scoped).
+    if TfIdfScorer in Singleton._instances:
+        Singleton._instances.pop(TfIdfScorer)
     terms, parser = set_up_p27_test_case
     with tempfile.TemporaryDirectory("kazu") as f:
         text = "p27 is often confused, but in this context it's CDKN1B"
