@@ -136,7 +136,7 @@ jobs:
           git push -u origin --follow-tags releases/$KAZU_RELEASE_VERSION
           
           PR_MERGING_WARNING="Make sure to merge using 'create a merge commit' or the tag for the release will no longer point to a commit on main"
-          PR_ID=$(gh pr create -b main --title "version bump: ${KAZU_NEW_VERSION_SEGMENT} to ${KAZU_RELEASE_VERSION}" --body $PR_MERGING_WARNING)
+          PR_ID=$(gh pr create -b main --title "version bump: ${KAZU_NEW_VERSION_SEGMENT} to ${KAZU_RELEASE_VERSION}" --body "${PR_MERGING_WARNING}")
           # todo: auto merge when we have a solution for this
           # gh pr merge $PR_ID --admin --rebase
           NEW_MODEL_PACK_ZIP=$(echo "${{ env.NEW_MODEL_PACK_ZIP }}")          
