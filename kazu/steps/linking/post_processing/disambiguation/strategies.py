@@ -244,8 +244,6 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
     strategy, so should generally only be used as a last resort!
     """
 
-    metadata_db = MetadataDatabase()
-
     def prepare(self, document: Document):
         pass
 
@@ -258,7 +256,7 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
         for id_set in id_sets:
             for idx in id_set.ids:
                 score = int(
-                    self.metadata_db.get_by_idx(parser_name, idx).get("annotation_score", 0)
+                    MetadataDatabase().get_by_idx(parser_name, idx).get("annotation_score", 0)
                 )
                 if score > best_score:
                     best_score = score

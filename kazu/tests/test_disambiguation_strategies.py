@@ -151,9 +151,8 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
 
 
 def test_TfIdfContextStrategy(set_up_p27_test_case):
-    # we need to clear out the scorer singleton. TODO: find a better way to handle this
-    if TfIdfScorer in Singleton._instances:
-        Singleton._instances.pop(TfIdfScorer)
+    # we need to clear out the scorer singleton.
+    Singleton.clear_all()
     terms, parser = set_up_p27_test_case
     with tempfile.TemporaryDirectory("kazu") as f:
         text = "p27 is often confused, but in this context it's CDKN1B"

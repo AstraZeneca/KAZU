@@ -23,8 +23,6 @@ class MappingFactory:
     factory class to produce mappings
     """
 
-    metadata_db = MetadataDatabase()
-
     @staticmethod
     def create_mapping_from_id_sets(
         id_sets: Set[EquivalentIdSet],
@@ -77,7 +75,7 @@ class MappingFactory:
     def _get_default_label_and_metadata_from_parser(
         parser_name: str, idx: str
     ) -> Tuple[str, Metadata]:
-        metadata = MappingFactory.metadata_db.get_by_idx(name=parser_name, idx=idx)
+        metadata = MetadataDatabase().get_by_idx(name=parser_name, idx=idx)
         default_label = metadata.pop(DEFAULT_LABEL)
         assert isinstance(default_label, str)
         return default_label, metadata
