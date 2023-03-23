@@ -199,9 +199,9 @@ class Singleton(type):
     @staticmethod
     def clear_all():
         logger.warning(
-            "When clearing singletons, check that instances of classes with metaclass=Singleton are"
-            "not used as class fields, as this will cause unexpected behaviour. Also note that any existing"
-            "classes that use a Singleton will need to be re-instantiated to work correctly!. Much pain"
+            "When clearing singletons, check that instances of classes with metaclass=Singleton are "
+            "not used as class fields, as this will cause unexpected behaviour. Also note that any existing "
+            "classes that use a Singleton will need to be re-instantiated to work correctly!. Much pain "
             "can be avoided by observing this simple principle! Some people consider Singletons an "
             "anti-pattern, and this is a reason why!!!"
         )
