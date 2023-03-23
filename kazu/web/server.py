@@ -1,7 +1,7 @@
 import logging
 import subprocess
 import time
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Union, Optional
 
 import hydra
 import ray
@@ -17,7 +17,7 @@ from ray import serve
 from starlette.requests import HTTPConnection, Request
 from starlette.responses import RedirectResponse
 
-from kazu.data.data import Document
+from kazu.data.data import Document, Entity
 from kazu.pipeline import Pipeline
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.routes import KAZU
@@ -126,6 +126,54 @@ class SimpleWebDocument(BaseModel):
 WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
 
 
+class DocumentCollection(BaseModel):
+    __root__: Union[List[WebDocument], WebDocument]
+
+    def convert_to_kazu_documents(self) -> List[Document]:
+        if isinstance(self.__root__, list):
+            return [doc.to_kazu_document() for doc in self.__root__]
+        else:
+            return [self.__root__.to_kazu_document()]
+
+    def __len__(self) -> int:
+        if isinstance(self.__root__, list):
+            return len(self.__root__)
+        else:
+            return 1
+
+
+class SingleEntityDocumentConverter:
+    """Add an entity for the whole of every section in every document you provide.
+
+    Essentially a subclass of :class:`DocumentCollection`, but pydantic makes this a pain to do with inheritance,
+    so use composition instead of inheritance here."""
+
+    def __init__(self, entity_free_doc_collection: DocumentCollection, entity_class: str) -> None:
+        self.entity_class = entity_class
+        self.entity_free_doc_collection = entity_free_doc_collection
+
+    def convert_to_kazu_documents(self) -> List[Document]:
+        documents = self.entity_free_doc_collection.convert_to_kazu_documents()
+        for doc in documents:
+            for section in doc.sections:
+                section.entities = [
+                    Entity.load_contiguous_entity(
+                        # NOTE: our mapping logic is currently very dependent on the namespace
+                        # I think though that we intend to get away from this with the 'putative' (not actually called this)
+                        # flag on SynonymTerms after the Curation refactor?
+                        namespace="TransformersModelForTokenClassificationNerStep",
+                        match=section.get_text(),
+                        entity_class=self.entity_class,
+                        start=0,
+                        end=len(section.get_text()),
+                    )
+                ]
+        return documents
+
+    def __len__(self) -> int:
+        return self.entity_free_doc_collection.__len__()
+
+
 @serve.deployment(route_prefix="/api")
 @serve.ingress(app)
 class KazuWebAPI:
@@ -157,7 +205,78 @@ class KazuWebAPI:
         logger.info("received request to root /")
         return "Welcome to KAZU."
 
-    @app.post(f"/{KAZU}")
+    def base_request_optional_steps(
+        self,
+        doc_collection: Union[DocumentCollection, SingleEntityDocumentConverter],
+        request: Request,
+        step_namespaces: Optional[List[str]] = None,
+    ):
+        id_log_prefix = get_id_log_prefix_if_available(request)
+        logger.info(id_log_prefix + "Request to kazu/batch_or_not endpoint")
+        logger.info(id_log_prefix + "Documents sent: %s", len(doc_collection))
+        result = self.pipeline(
+            doc_collection.convert_to_kazu_documents(), step_namespaces=step_namespaces
+        )
+        return JSONResponse(content=[res.as_minified_dict() for res in result])
+
+    @app.post(f"/{KAZU}/ner_and_linking")
+    def ner_and_linking(
+        self,
+        doc_collection: DocumentCollection,
+        request: Request,
+        token=Depends(oauth2_scheme),
+    ):
+        return self.base_request_optional_steps(
+            doc_collection=doc_collection, request=request, step_namespaces=None
+        )
+
+    @app.post(f"/{KAZU}/custom_pipeline_steps")
+    def custom_steps(
+        self,
+        doc_collection: DocumentCollection,
+        steps: List[str],
+        request: Request,
+        token=Depends(oauth2_scheme),
+    ):
+        return self.base_request_optional_steps(
+            doc_collection=doc_collection, request=request, step_namespaces=steps
+        )
+
+    @app.post(f"/{KAZU}/ner_only")
+    def ner_only(
+        self,
+        doc_collection: DocumentCollection,
+        request: Request,
+        token=Depends(oauth2_scheme),
+    ):
+        # TODO: probably get this from hydra config instead
+        ner_steps = [
+            "ExplosionStringMatchingStep",
+            "TransformersModelForTokenClassificationNerStep}",
+        ]
+        return self.base_request_optional_steps(
+            doc_collection=doc_collection, request=request, step_namespaces=ner_steps
+        )
+
+    @app.post(f"/{KAZU}/linking_only")
+    def linking_only(
+        self,
+        doc_collection: DocumentCollection,
+        entity_class: str,
+        request: Request,
+        token=Depends(oauth2_scheme),
+    ):
+        # TODO: probably get this from hydra config instead
+        linking_steps = ["DictionaryEntityLinkingStep", "MappingStep"]
+        linking_doc_collection = SingleEntityDocumentConverter(
+            doc_collection, entity_class=entity_class
+        )
+        return self.base_request_optional_steps(
+            doc_collection=linking_doc_collection, request=request, step_namespaces=linking_steps
+        )
+
+    # To be deprecated, after we check how often it gets called after being 'hidden'
+    @app.post(f"/{KAZU}", include_in_schema=False)
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu endpoint")
@@ -166,7 +285,8 @@ class KazuWebAPI:
         resp_dict = result[0].as_minified_dict()
         return JSONResponse(content=resp_dict)
 
-    @app.post(f"/{KAZU}/batch")
+    # To be deprecated, after we check how often it gets called after being 'hidden'
+    @app.post(f"/{KAZU}/batch", include_in_schema=False)
     def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch endpoint")
