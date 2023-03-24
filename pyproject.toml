@@ -66,6 +66,7 @@ dev = [
   "blacken-docs",
   "flake8",
   "mypy",
+  "vulture",
   "bump2version",
   "pre-commit",
   "pytest",
@@ -169,3 +170,10 @@ template = "docs/_changelog.d/changelog_template.jinja"
 title_format = "## {version} - {project_date}"
 underlines = ["", "", ""]
 start_string= "<!-- towncrier release notes start -->\n"
+
+[tool.vulture]
+exclude = ["kazu/tests/*"]
+make_whitelist = false
+# we may need to change this to 80 or 100 if we find it too noisy
+min_confidence = 60
+paths = ["kazu", ".vulture_whitelist.py"]

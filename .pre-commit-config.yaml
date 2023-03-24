@@ -56,3 +56,6 @@ repos:
       ^docs/_build|\
       ^docs/_autosummary|\
       ^kazu/tests/test_assets/tinybern"
+# this isn't *really* a python file
+# but vulture wants it to seem that way
+exclude: .vulture_whitelist.py
