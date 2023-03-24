@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.ontology_matching" href="kazu.modelling.ontology_matching.html" /><link rel="prev" title="kazu.modelling.linking.sapbert" href="kazu.modelling.linking.sapbert.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kazu.modelling.linking.sapbert.train - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -151,7 +151,7 @@
   
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -164,9 +164,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -331,7 +332,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -472,7 +473,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.HFSapbertInferenceDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">HFSapbertInferenceDataset</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L81-L107"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.HFSapbertInferenceDataset" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
 <p>A dataset to be used for inferencing. In addition to standard BERT  encodings, this
 uses an ‘indices’ encoding that can be used to track the vector index of an embedding.
 This is needed in a multi GPU environment</p>
@@ -482,7 +483,7 @@ This is needed in a multi GPU environment</p>
 <dd><p>simple implementation of IterableDataset, producing HF tokenizer input_id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>encodings</strong> (<em>BatchEncoding</em>) – </p>
+<dd class="field-odd"><p><strong>encodings</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.BatchEncoding" title="(in transformers vmain)"><em>BatchEncoding</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -492,7 +493,7 @@ This is needed in a multi GPU environment</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.HFSapbertPairwiseDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">HFSapbertPairwiseDataset</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L110-L144"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.HFSapbertPairwiseDataset" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
 <p>Dataset used for training SapBert.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.HFSapbertPairwiseDataset.__init__">
@@ -500,8 +501,8 @@ This is needed in a multi GPU environment</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>encodings_1</strong> (<em>BatchEncoding</em>) – encodings for example 1</p></li>
-<li><p><strong>encodings_2</strong> (<em>BatchEncoding</em>) – encodings for example 2</p></li>
+<li><p><strong>encodings_1</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.BatchEncoding" title="(in transformers vmain)"><em>BatchEncoding</em></a>) – encodings for example 1</p></li>
+<li><p><strong>encodings_2</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.BatchEncoding" title="(in transformers vmain)"><em>BatchEncoding</em></a>) – encodings for example 2</p></li>
 <li><p><strong>labels</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><em>ndarray</em></a>) – labels i.e. knowledgebase identifier for both encodings, as an int</p></li>
 </ul>
 </dd>
@@ -512,8 +513,8 @@ This is needed in a multi GPU environment</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">PLSapbertModel</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L247-L546"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html#pytorch_lightning.core.LightningModule" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">PLSapbertModel</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L247-L555"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.core.LightningModule.html#lightning.pytorch.core.LightningModule" title="(in PyTorch Lightning v2.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a></p>
 <p>Pytorch lightning production implementation of SapBert.</p>
 <p>Original source:</p>
 <p><a class="reference external" href="https://github.com/cambridgeltl/sapbert">https://github.com/cambridgeltl/sapbert</a></p>
@@ -559,8 +560,8 @@ In Proceedings of the 2021 Conference of the North American Chapter of the Assoc
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_name_or_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – passed to AutoModel.from_pretrained</p></li>
-<li><p><strong>sapbert_training_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams" title="kazu.modelling.linking.sapbert.train.SapbertTrainingParams"><em>SapbertTrainingParams</em></a><em>]</em>) – optional SapbertTrainingParams, only needed if training a model</p></li>
-<li><p><strong>sapbert_evaluation_manager</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager" title="kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager"><em>SapbertEvaluationDataManager</em></a><em>]</em>) – optional SapbertEvaluationDataManager, only needed if training a model</p></li>
+<li><p><strong>sapbert_training_params</strong> (<a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams" title="kazu.modelling.linking.sapbert.train.SapbertTrainingParams"><em>SapbertTrainingParams</em></a><em> | </em><em>None</em>) – optional SapbertTrainingParams, only needed if training a model</p></li>
+<li><p><strong>sapbert_evaluation_manager</strong> (<a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager" title="kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager"><em>SapbertEvaluationDataManager</em></a><em> | </em><em>None</em>) – optional SapbertEvaluationDataManager, only needed if training a model</p></li>
 <li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – passed to LightningModule</p></li>
 <li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – passed to LightningModule</p></li>
 </ul>
@@ -570,181 +571,13 @@ In Proceedings of the 2021 Conference of the North American Chapter of the Assoc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.configure_optimizers">
-<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L349-L358"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.configure_optimizers" title="Permalink to this definition">#</a></dt>
-<dd><p>Choose what optimizers and learning-rate schedulers to use in your optimization.
-Normally you’d need one. But in the case of GANs or similar you might have multiple.</p>
-<dl class="simple">
-<dt>Return:</dt><dd><p>Any of these 6 options.</p>
-<ul class="simple">
-<li><p><strong>Single optimizer</strong>.</p></li>
-<li><p><strong>List or Tuple</strong> of optimizers.</p></li>
-<li><p><strong>Two lists</strong> - The first list has multiple optimizers, and the second has multiple LR schedulers
-(or multiple <code class="docutils literal notranslate"><span class="pre">lr_scheduler_config</span></code>).</p></li>
-<li><p><strong>Dictionary</strong>, with an <code class="docutils literal notranslate"><span class="pre">&quot;optimizer&quot;</span></code> key, and (optionally) a <code class="docutils literal notranslate"><span class="pre">&quot;lr_scheduler&quot;</span></code>
-key whose value is a single LR scheduler or <code class="docutils literal notranslate"><span class="pre">lr_scheduler_config</span></code>.</p></li>
-<li><p><strong>Tuple of dictionaries</strong> as described above, with an optional <code class="docutils literal notranslate"><span class="pre">&quot;frequency&quot;</span></code> key.</p></li>
-<li><p><strong>None</strong> - Fit will run without any optimizer.</p></li>
-</ul>
-</dd>
-</dl>
-<p>The <code class="docutils literal notranslate"><span class="pre">lr_scheduler_config</span></code> is a dictionary which contains the scheduler and its associated configuration.
-The default configuration is shown below.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lr_scheduler_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="c1"># REQUIRED: The scheduler instance</span>
-    <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">lr_scheduler</span><span class="p">,</span>
-    <span class="c1"># The unit of the scheduler&#39;s step size, could also be &#39;step&#39;.</span>
-    <span class="c1"># &#39;epoch&#39; updates the scheduler on epoch end whereas &#39;step&#39;</span>
-    <span class="c1"># updates it after a optimizer update.</span>
-    <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="s2">&quot;epoch&quot;</span><span class="p">,</span>
-    <span class="c1"># How many epochs/steps should pass between calls to</span>
-    <span class="c1"># `scheduler.step()`. 1 corresponds to updating the learning</span>
-    <span class="c1"># rate after every epoch/step.</span>
-    <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="c1"># Metric to to monitor for schedulers like `ReduceLROnPlateau`</span>
-    <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;val_loss&quot;</span><span class="p">,</span>
-    <span class="c1"># If set to `True`, will enforce that the value specified &#39;monitor&#39;</span>
-    <span class="c1"># is available when the scheduler is updated, thus stopping</span>
-    <span class="c1"># training if not found. If set to `False`, it will only produce a warning</span>
-    <span class="s2">&quot;strict&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="c1"># If using the `LearningRateMonitor` callback to monitor the</span>
-    <span class="c1"># learning rate progress, this keyword can be used to specify</span>
-    <span class="c1"># a custom logged name</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>When there are schedulers in which the <code class="docutils literal notranslate"><span class="pre">.step()</span></code> method is conditioned on a value, such as the
-<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html#torch.optim.lr_scheduler.ReduceLROnPlateau" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler.ReduceLROnPlateau</span></code></a> scheduler, Lightning requires that the
-<code class="docutils literal notranslate"><span class="pre">lr_scheduler_config</span></code> contains the keyword <code class="docutils literal notranslate"><span class="pre">&quot;monitor&quot;</span></code> set to the metric name that the scheduler
-should be conditioned on.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The ReduceLROnPlateau scheduler requires a monitor</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span>
-        <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span>
-            <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;metric_to_track&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="s2">&quot;indicates how often the metric is updated&quot;</span>
-            <span class="c1"># If &quot;monitor&quot; references validation metrics, then &quot;frequency&quot; should be set to a</span>
-            <span class="c1"># multiple of &quot;trainer.check_val_every_n_epoch&quot;.</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-
-
-<span class="c1"># In the case of two optimizers, only one using the ReduceLROnPlateau scheduler</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">optimizer1</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="n">optimizer2</span> <span class="o">=</span> <span class="n">SGD</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="n">scheduler1</span> <span class="o">=</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">optimizer1</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-    <span class="n">scheduler2</span> <span class="o">=</span> <span class="n">LambdaLR</span><span class="p">(</span><span class="n">optimizer2</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer1</span><span class="p">,</span>
-            <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler1</span><span class="p">,</span>
-                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;metric_to_track&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer2</span><span class="p">,</span> <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">scheduler2</span><span class="p">},</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
-<p>Metrics can be made available to monitor by simply logging it using
-<code class="docutils literal notranslate"><span class="pre">self.log('metric_to_track',</span> <span class="pre">metric_val)</span></code> in your <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html#pytorch_lightning.core.LightningModule" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a>.</p>
-<dl>
-<dt>Note:</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">frequency</span></code> value specified in a dict along with the <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> key is an int corresponding
-to the number of sequential batches optimized with the specific optimizer.
-It should be given to none or to all of the optimizers.
-There is a difference between passing multiple optimizers in a list,
-and passing multiple optimizers in dictionaries with a frequency of 1:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>In the former case, all optimizers will operate on the given batch in each optimization step.</p></li>
-<li><p>In the latter, only one optimizer will operate on the given batch at every step.</p></li>
-</ul>
-</div></blockquote>
-<p>This is different from the <code class="docutils literal notranslate"><span class="pre">frequency</span></code> value specified in the <code class="docutils literal notranslate"><span class="pre">lr_scheduler_config</span></code> mentioned above.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">optimizer_one</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-    <span class="n">optimizer_two</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer_one</span><span class="p">,</span> <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer_two</span><span class="p">,</span> <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
-    <span class="p">]</span>
-</pre></div>
-</div>
-<p>In this example, the first optimizer will be used for the first 5 steps,
-the second optimizer for the next 10 steps and that cycle will continue.
-If an LR scheduler is specified for an optimizer using the <code class="docutils literal notranslate"><span class="pre">lr_scheduler</span></code> key in the above dict,
-the scheduler will only be updated when its optimizer is being used.</p>
-</dd>
-</dl>
-<p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># most cases. no learning rate scheduler</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-
-<span class="c1"># multiple optimizer case (e.g.: GAN)</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">gen_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_gen</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-    <span class="n">dis_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dis</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">gen_opt</span><span class="p">,</span> <span class="n">dis_opt</span>
-
-<span class="c1"># example with learning rate schedulers</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">gen_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_gen</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-    <span class="n">dis_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dis</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
-    <span class="n">dis_sch</span> <span class="o">=</span> <span class="n">CosineAnnealing</span><span class="p">(</span><span class="n">dis_opt</span><span class="p">,</span> <span class="n">T_max</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">gen_opt</span><span class="p">,</span> <span class="n">dis_opt</span><span class="p">],</span> <span class="p">[</span><span class="n">dis_sch</span><span class="p">]</span>
-
-<span class="c1"># example with step-based learning rate schedulers</span>
-<span class="c1"># each optimizer has its own scheduler</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">gen_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_gen</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-    <span class="n">dis_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dis</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
-    <span class="n">gen_sch</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;scheduler&#39;</span><span class="p">:</span> <span class="n">ExponentialLR</span><span class="p">(</span><span class="n">gen_opt</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">),</span>
-        <span class="s1">&#39;interval&#39;</span><span class="p">:</span> <span class="s1">&#39;step&#39;</span>  <span class="c1"># called after each training step</span>
-    <span class="p">}</span>
-    <span class="n">dis_sch</span> <span class="o">=</span> <span class="n">CosineAnnealing</span><span class="p">(</span><span class="n">dis_opt</span><span class="p">,</span> <span class="n">T_max</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># called every epoch</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">gen_opt</span><span class="p">,</span> <span class="n">dis_opt</span><span class="p">],</span> <span class="p">[</span><span class="n">gen_sch</span><span class="p">,</span> <span class="n">dis_sch</span><span class="p">]</span>
-
-<span class="c1"># example with optimizer frequencies</span>
-<span class="c1"># see training procedure in `Improved Training of Wasserstein GANs`, Algorithm 1</span>
-<span class="c1"># https://arxiv.org/abs/1704.00028</span>
-<span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">gen_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_gen</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-    <span class="n">dis_opt</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dis</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
-    <span class="n">n_critic</span> <span class="o">=</span> <span class="mi">5</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">dis_opt</span><span class="p">,</span> <span class="s1">&#39;frequency&#39;</span><span class="p">:</span> <span class="n">n_critic</span><span class="p">},</span>
-        <span class="p">{</span><span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">gen_opt</span><span class="p">,</span> <span class="s1">&#39;frequency&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt>Note:</dt><dd><p>Some things to know:</p>
-<ul class="simple">
-<li><p>Lightning calls <code class="docutils literal notranslate"><span class="pre">.backward()</span></code> and <code class="docutils literal notranslate"><span class="pre">.step()</span></code> on each optimizer as needed.</p></li>
-<li><p>If learning rate scheduler is specified in <code class="docutils literal notranslate"><span class="pre">configure_optimizers()</span></code> with key
-<code class="docutils literal notranslate"><span class="pre">&quot;interval&quot;</span></code> (default “epoch”) in the scheduler configuration, Lightning will call
-the scheduler’s <code class="docutils literal notranslate"><span class="pre">.step()</span></code> method automatically in case of automatic optimization.</p></li>
-<li><p>If you use 16-bit precision (<code class="docutils literal notranslate"><span class="pre">precision=16</span></code>), Lightning will automatically handle the optimizers.</p></li>
-<li><p>If you use multiple optimizers, <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.training_step" title="kazu.modelling.linking.sapbert.train.PLSapbertModel.training_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">training_step()</span></code></a> will have an additional <code class="docutils literal notranslate"><span class="pre">optimizer_idx</span></code> parameter.</p></li>
-<li><p>If you use <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.optim.LBFGS.html#torch.optim.LBFGS" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.LBFGS</span></code></a>, Lightning handles the closure function automatically for you.</p></li>
-<li><p>If you use multiple optimizers, gradients will be calculated only for the parameters of current optimizer
-at each training step.</p></li>
-<li><p>If you need to control how often those optimizers step or override the default <code class="docutils literal notranslate"><span class="pre">.step()</span></code> schedule,
-override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">optimizer_step()</span></code> hook.</p></li>
-</ul>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L349-L359"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.configure_optimizers" title="Permalink to this definition">#</a></dt>
+<dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#configure-optimizers" title="(in PyTorch Lightning v2.0.0)"><span class="xref std std-ref">LightningModule.configure_optimizers</span></a>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.evaluate_topk_acc">
-<span class="sig-name descname"><span class="pre">evaluate_topk_acc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queries</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L495-L512"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.evaluate_topk_acc" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">evaluate_topk_acc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queries</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L501-L518"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.evaluate_topk_acc" title="Permalink to this definition">#</a></dt>
 <dd><p>get a dictionary of accuracy results at different levels of k (nearest neighbours)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -761,7 +594,7 @@ override the <code class="xref py py-meth docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L360-L374"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.forward" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L361-L375"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.forward" title="Permalink to this definition">#</a></dt>
 <dd><p>for inference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -775,7 +608,7 @@ override the <code class="xref py py-meth docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.get_candidate_dict">
-<span class="sig-name descname"><span class="pre">get_candidate_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">np_candidates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">golden_iri</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L475-L493"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_candidate_dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_candidate_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">np_candidates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">golden_iri</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L481-L499"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_candidate_dict" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert rows in a dataframe representing candidate KB entries into a corresponding
 <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.Candidate" title="kazu.modelling.linking.sapbert.train.Candidate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Candidate</span></code></a> per row</p>
 <dl class="field-list simple">
@@ -796,106 +629,79 @@ override the <code class="xref py py-meth docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings">
-<span class="sig-name descname"><span class="pre">get_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L441-L455"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L447-L461"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings" title="Permalink to this definition">#</a></dt>
 <dd><p>get a tensor of embeddings in original order</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a><em>]</em><em>]</em>) – int is the original index of the input (i.e. what comes out of self.forward)</p>
+<dd class="field-odd"><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a><em>]</em><em>]</em>) – int is the original index of the input (i.e. what comes out of self.forward)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_for_strings">
-<span class="sig-name descname"><span class="pre">get_embeddings_for_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L514-L532"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_for_strings" title="Permalink to this definition">#</a></dt>
-<dd><p>convenience function: for a list of strings, generate embeddings</p>
+<span class="sig-name descname"><span class="pre">get_embeddings_for_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L520-L541"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_for_strings" title="Permalink to this definition">#</a></dt>
+<dd><p>For a list of strings, generate embeddings.</p>
+<p>This is a convenience function for users, as we need to carry out these steps several times
+in the codebase.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>texts</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.9.3)"><em>Trainer</em></a><em>]</em>) – an optional PL Trainer to use. If not specified, uses the default one</p></li>
-<li><p><strong>size</strong> (<em>batch</em>) – optional batch size to use. If not specified, use 16</p></li>
-<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – </p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.trainer.trainer.Trainer.html#lightning.pytorch.trainer.trainer.Trainer" title="(in PyTorch Lightning v2.0.0)"><em>Trainer</em></a><em> | </em><em>None</em>) – an optional PL Trainer to use. If not specified, uses the default one</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – optional batch size to use. If not specified, use 16</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a 2d tensor of embeddings</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_from_dataloader">
-<span class="sig-name descname"><span class="pre">get_embeddings_from_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L534-L546"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_from_dataloader" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_embeddings_from_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L543-L555"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_from_dataloader" title="Permalink to this definition">#</a></dt>
 <dd><p>get the cls token output from all data in a dataloader as a 2d tensor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>loader</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>) – </p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.9.3)"><em>Trainer</em></a>) – the PL Trainer to use</p></li>
+<li><p><strong>loader</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>) – </p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.trainer.trainer.Trainer.html#lightning.pytorch.trainer.trainer.Trainer" title="(in PyTorch Lightning v2.0.0)"><em>Trainer</em></a>) – the PL Trainer to use</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>2d tensor of cls  output</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.log_results">
-<span class="sig-name descname"><span class="pre">log_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L469-L473"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.log_results" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">log_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L475-L479"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.log_results" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.predict_step">
-<span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L438-L439"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.predict_step" title="Permalink to this definition">#</a></dt>
-<dd><p>Step function called during <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.predict" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code></a>. By default, it
-calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code>. Override to add any processing logic.</p>
-<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">predict_step()</span></code> is used
-to scale inference on multi-devices.</p>
-<p>To prevent an OOM error, it is possible to use <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.callbacks.BasePredictionWriter.html#pytorch_lightning.callbacks.BasePredictionWriter" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code></a>
-callback to write the predictions to disk or database after each batch or on epoch end.</p>
-<p>The <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.callbacks.BasePredictionWriter.html#pytorch_lightning.callbacks.BasePredictionWriter" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePredictionWriter</span></code></a> should be used while using a spawn
-based accelerator. This happens for <code class="docutils literal notranslate"><span class="pre">Trainer(strategy=&quot;ddp_spawn&quot;)</span></code>
-or training on 8 TPU cores with <code class="docutils literal notranslate"><span class="pre">Trainer(accelerator=&quot;tpu&quot;,</span> <span class="pre">devices=8)</span></code> as predictions won’t be returned.</p>
-<p>Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">LightningModule</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">predict_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-
-<span class="n">dm</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">accelerator</span><span class="o">=</span><span class="s2">&quot;gpu&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">predictions</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dm</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt>Args:</dt><dd><p>batch: Current batch.
-batch_idx: Index of current batch.
-dataloader_idx: Index of the current dataloader.</p>
-</dd>
-<dt>Return:</dt><dd><p>Predicted output</p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L443-L445"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.predict_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#predict-step" title="(in PyTorch Lightning v2.0.0)"><span class="xref std std-ref">LightningModule.predict_step</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
 <li><p><strong>batch_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>dataloader_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – </p></li>
+<li><p><strong>dataloader_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -906,226 +712,46 @@ dataloader_idx: Index of the current dataloader.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.train_dataloader">
-<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L390-L411"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.train_dataloader" title="Permalink to this definition">#</a></dt>
-<dd><p>Implement one or more PyTorch DataLoaders for training.</p>
-<dl class="simple">
-<dt>Return:</dt><dd><p>A collection of <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code></a> specifying training samples.
-In the case of multiple dataloaders, please see this <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/guides/data.html#multiple-dataloaders" title="(in PyTorch Lightning v1.9.3)"><span class="xref std std-ref">section</span></a>.</p>
-</dd>
-</dl>
-<p>The dataloader you return will not be reloaded unless you set
-<a href="#id1"><span class="problematic" id="id2">:paramref:`~pytorch_lightning.trainer.Trainer.reload_dataloaders_every_n_epochs`</span></a> to
-a positive integer.</p>
-<p>For data processing use the following pattern:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>download in <code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code></p></li>
-<li><p>process and split in <code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></p></li>
-</ul>
-</div></blockquote>
-<p>However, the above are only necessary for distributed processing.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>do not assign state in prepare_data</p>
-</div>
-<ul class="simple">
-<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.fit" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></p></li>
-</ul>
-<dl class="simple">
-<dt>Note:</dt><dd><p>Lightning adds the correct sampler for distributed and arbitrary hardware.
-There is no need to set it yourself.</p>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># single dataloader</span>
-<span class="k">def</span> <span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-                                    <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,))])</span>
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;/path/to/mnist/&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
-                    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">loader</span>
-
-<span class="c1"># multiple dataloaders, return as list</span>
-<span class="k">def</span> <span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">mnist</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="n">cifar</span> <span class="o">=</span> <span class="n">CIFAR</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="n">mnist_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="o">=</span><span class="n">mnist</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="n">cifar_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="o">=</span><span class="n">cifar</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="c1"># each batch will be a list of tensors: [batch_mnist, batch_cifar]</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">mnist_loader</span><span class="p">,</span> <span class="n">cifar_loader</span><span class="p">]</span>
-
-<span class="c1"># multiple dataloader, return as dict</span>
-<span class="k">def</span> <span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">mnist</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="n">cifar</span> <span class="o">=</span> <span class="n">CIFAR</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="n">mnist_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="o">=</span><span class="n">mnist</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="n">cifar_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="o">=</span><span class="n">cifar</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="c1"># each batch will be a dict of tensors: {&#39;mnist&#39;: batch_mnist, &#39;cifar&#39;: batch_cifar}</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;mnist&#39;</span><span class="p">:</span> <span class="n">mnist_loader</span><span class="p">,</span> <span class="s1">&#39;cifar&#39;</span><span class="p">:</span> <span class="n">cifar_loader</span><span class="p">}</span>
-</pre></div>
-</div>
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L392-L414"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.train_dataloader" title="Permalink to this definition">#</a></dt>
+<dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#train-dataloader" title="(in PyTorch Lightning v2.0.0)"><span class="xref std std-ref">LightningModule.train_dataloader</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>]]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.training_step">
-<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L376-L388"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.training_step" title="Permalink to this definition">#</a></dt>
-<dd><p>Here you compute and return the training loss and some additional metrics for e.g.
-the progress bar or logger.</p>
-<dl>
-<dt>Args:</dt><dd><dl class="simple">
-<dt>batch (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> | (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, …) | [<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, …]):</dt><dd><p>The output of your <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code></a>. A tensor, tuple or list.</p>
-</dd>
-</dl>
-<p>batch_idx (<code class="docutils literal notranslate"><span class="pre">int</span></code>): Integer displaying index of this batch
-optimizer_idx (<code class="docutils literal notranslate"><span class="pre">int</span></code>): When using multiple optimizers, this argument will also be present.
-hiddens (<code class="docutils literal notranslate"><span class="pre">Any</span></code>): Passed in if</p>
-<blockquote>
-<div><p><a href="#id3"><span class="problematic" id="id4">:paramref:`~pytorch_lightning.core.module.LightningModule.truncated_bptt_steps`</span></a> &gt; 0.</p>
-</div></blockquote>
-</dd>
-<dt>Return:</dt><dd><p>Any of.</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> - The loss tensor</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dict</span></code> - A dictionary. Can include any keys, but must include the key <code class="docutils literal notranslate"><span class="pre">'loss'</span></code></p></li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">None</span></code> - Training will skip to the next batch. This is only for automatic optimization.</dt><dd><p>This is not supported for multi-GPU, TPU, IPU, or DeepSpeed.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-<p>In this step you’d normally do the forward pass and calculate the loss for a batch.
-You can also do fancier things like multiple forward passes or something model specific.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">batch</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">loss</span>
-</pre></div>
-</div>
-<p>If you define multiple optimizers, this step will be called with an additional
-<code class="docutils literal notranslate"><span class="pre">optimizer_idx</span></code> parameter.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Multiple optimizers (e.g.: GANs)</span>
-<span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">optimizer_idx</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">optimizer_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># do training_step with encoder</span>
-        <span class="o">...</span>
-    <span class="k">if</span> <span class="n">optimizer_idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># do training_step with decoder</span>
-        <span class="o">...</span>
-</pre></div>
-</div>
-<p>If you add truncated back propagation through time you will also get an additional
-argument with the hidden states of the previous step.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Truncated back-propagation through time</span>
-<span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">hiddens</span><span class="p">):</span>
-    <span class="c1"># hiddens are the hidden states from the previous truncated backprop step</span>
-    <span class="n">out</span><span class="p">,</span> <span class="n">hiddens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">hiddens</span><span class="p">)</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="o">...</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;hiddens&quot;</span><span class="p">:</span> <span class="n">hiddens</span><span class="p">}</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt>Note:</dt><dd><p>The loss value shown in the progress bar is smoothed (averaged) over the last values,
-so it differs from the actual loss returned in train/validation step.</p>
-</dd>
-<dt>Note:</dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">accumulate_grad_batches</span></code> &gt; 1, the loss returned here will be automatically
-normalized by <code class="docutils literal notranslate"><span class="pre">accumulate_grad_batches</span></code> internally.</p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L377-L390"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.training_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#training-step" title="(in PyTorch Lightning v2.0.0)"><span class="xref std std-ref">LightningModule.training_step</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.val_dataloader">
-<span class="sig-name descname"><span class="pre">val_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L413-L433"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.val_dataloader" title="Permalink to this definition">#</a></dt>
-<dd><p>Implement one or multiple PyTorch DataLoaders for validation.</p>
-<p>The dataloader you return will not be reloaded unless you set
-<a href="#id5"><span class="problematic" id="id6">:paramref:`~pytorch_lightning.trainer.Trainer.reload_dataloaders_every_n_epochs`</span></a> to
-a positive integer.</p>
-<p>It’s recommended that all data downloads and preparation happen in <code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code>.</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.fit" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a></p></li>
-<li><p><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer.validate" title="(in PyTorch Lightning v1.9.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate()</span></code></a></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">prepare_data()</span></code></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></p></li>
-</ul>
-<dl class="simple">
-<dt>Note:</dt><dd><p>Lightning adds the correct sampler for distributed and arbitrary hardware
-There is no need to set it yourself.</p>
-</dd>
-<dt>Return:</dt><dd><p>A <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code></a> or a sequence of them specifying validation samples.</p>
-</dd>
-</dl>
-<p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-                                    <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,))])</span>
-    <span class="n">dataset</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;/path/to/mnist/&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">loader</span>
-
-<span class="c1"># can also return multiple dataloaders</span>
-<span class="k">def</span> <span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">loader_a</span><span class="p">,</span> <span class="n">loader_b</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">loader_n</span><span class="p">]</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt>Note:</dt><dd><p>If you don’t need a validation dataset and a <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step" title="kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validation_step()</span></code></a>, you don’t need to
-implement this method.</p>
-</dd>
-<dt>Note:</dt><dd><p>In the case where you return multiple validation dataloaders, the <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step" title="kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validation_step()</span></code></a>
-will have an argument <code class="docutils literal notranslate"><span class="pre">dataloader_idx</span></code> which matches the order here.</p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">val_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L416-L437"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.val_dataloader" title="Permalink to this definition">#</a></dt>
+<dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#val-dataloader" title="(in PyTorch Lightning v2.0.0)"><span class="xref std std-ref">LightningModule.val_dataloader</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><em>DataLoader</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_epoch_end">
-<span class="sig-name descname"><span class="pre">validation_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L457-L467"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_epoch_end" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">validation_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L463-L473"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_epoch_end" title="Permalink to this definition">#</a></dt>
 <dd><p>lightning override
 generate new embeddings for each <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.ontology_source" title="kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.ontology_source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SapbertEvaluationDataset.ontology_source</span></code></a> and query them with
 <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.query_source" title="kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.query_source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SapbertEvaluationDataset.query_source</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>outputs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em><em>]</em><em>]</em><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>outputs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -1138,101 +764,14 @@ generate new embeddings for each <a class="reference internal" href="#kazu.model
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step">
-<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_idx</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L435-L436"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step" title="Permalink to this definition">#</a></dt>
-<dd><p>Operates on a single batch of data from the validation set.
-In this step you’d might generate examples or calculate anything of interest like accuracy.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the pseudocode for these calls</span>
-<span class="n">val_outs</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">val_batch</span> <span class="ow">in</span> <span class="n">val_data</span><span class="p">:</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">validation_step</span><span class="p">(</span><span class="n">val_batch</span><span class="p">)</span>
-    <span class="n">val_outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-<span class="n">validation_epoch_end</span><span class="p">(</span><span class="n">val_outs</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl>
-<dt>Args:</dt><dd><p>batch: The output of your <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code></a>.
-batch_idx: The index of this batch.
-dataloader_idx: The index of the dataloader that produced this batch.</p>
-<blockquote>
-<div><p>(only if multiple val dataloaders used)</p>
-</div></blockquote>
-</dd>
-<dt>Return:</dt><dd><ul class="simple">
-<li><p>Any object or value</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code> - Validation will skip to the next batch</p></li>
-</ul>
-</dd>
-</dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># pseudocode of order</span>
-<span class="n">val_outs</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">val_batch</span> <span class="ow">in</span> <span class="n">val_data</span><span class="p">:</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">validation_step</span><span class="p">(</span><span class="n">val_batch</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">defined</span><span class="p">(</span><span class="s2">&quot;validation_step_end&quot;</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">validation_step_end</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-    <span class="n">val_outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-<span class="n">val_outs</span> <span class="o">=</span> <span class="n">validation_epoch_end</span><span class="p">(</span><span class="n">val_outs</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># if you have one val dataloader:</span>
-<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-    <span class="o">...</span>
-
-
-<span class="c1"># if you have multiple val dataloaders:</span>
-<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="o">...</span>
-</pre></div>
-</div>
-<p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># CASE 1: A single validation dataset</span>
-<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
-
-    <span class="c1"># implement your own</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-    <span class="c1"># log 6 example images</span>
-    <span class="c1"># or generated text... or whatever</span>
-    <span class="n">sample_imgs</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
-    <span class="n">grid</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">make_grid</span><span class="p">(</span><span class="n">sample_imgs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s1">&#39;example_images&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-    <span class="c1"># calculate acc</span>
-    <span class="n">labels_hat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">val_acc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">labels_hat</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">)</span>
-
-    <span class="c1"># log the outputs!</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">log_dict</span><span class="p">({</span><span class="s1">&#39;val_loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s1">&#39;val_acc&#39;</span><span class="p">:</span> <span class="n">val_acc</span><span class="p">})</span>
-</pre></div>
-</div>
-<p>If you pass in multiple val dataloaders, <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step" title="kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validation_step()</span></code></a> will have an additional argument. We recommend
-setting the default value of 0 so that you can quickly switch between single and multiple dataloaders.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># CASE 2: multiple validation dataloaders</span>
-<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="c1"># dataloader_idx tells you which dataset this is.</span>
-    <span class="o">...</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt>Note:</dt><dd><p>If you don’t need to validate you don’t need to implement this method.</p>
-</dd>
-<dt>Note:</dt><dd><p>When the <a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step" title="kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validation_step()</span></code></a> is called, the model has been put in eval mode
-and PyTorch gradients have been disabled. At the end of validation,
-the model goes back to training mode and gradients are enabled.</p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_idx</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L439-L441"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step" title="Permalink to this definition">#</a></dt>
+<dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#validation-step" title="(in PyTorch Lightning v2.0.0)"><span class="xref std std-ref">LightningModule.validation_step</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>]]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.PLSapbertModel.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.training" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -1243,14 +782,14 @@ the model goes back to training mode and gradients are enabled.</p>
 <p>data collator to be used with HFSapbertPairwiseDataset</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_to_multiple_of</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../docs/&lt;string&gt;"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_to_multiple_of</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../../../../../../kazu2/docs/&lt;string&gt;"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tokenizer</strong> (<em>PreTrainedTokenizerBase</em>) – </p></li>
-<li><p><strong>padding</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>PaddingStrategy</em><em>]</em>) – </p></li>
-<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – </p></li>
-<li><p><strong>pad_to_multiple_of</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – </p></li>
+<li><p><strong>tokenizer</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase" title="(in transformers vmain)"><em>PreTrainedTokenizerBase</em></a>) – </p></li>
+<li><p><strong>padding</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://huggingface.co/docs/transformers/main/en/internal/file_utils#transformers.utils.PaddingStrategy" title="(in transformers vmain)"><em>PaddingStrategy</em></a>) – </p></li>
+<li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>pad_to_multiple_of</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1261,22 +800,22 @@ the model goes back to training mode and gradients are enabled.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.max_length">
-<span class="sig-name descname"><span class="pre">max_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.max_length" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">max_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.max_length" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.pad_to_multiple_of">
-<span class="sig-name descname"><span class="pre">pad_to_multiple_of</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.pad_to_multiple_of" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">pad_to_multiple_of</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.pad_to_multiple_of" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.padding">
-<span class="sig-name descname"><span class="pre">padding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">PaddingStrategy</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.padding" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">padding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://huggingface.co/docs/transformers/main/en/internal/file_utils#transformers.utils.PaddingStrategy" title="(in transformers vmain)"><span class="pre">PaddingStrategy</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.padding" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.tokenizer">
-<span class="sig-name descname"><span class="pre">tokenizer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PreTrainedTokenizerBase</span></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.tokenizer" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">tokenizer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://huggingface.co/docs/transformers/main/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase" title="(in transformers vmain)"><span class="pre">PreTrainedTokenizerBase</span></a></em><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.tokenizer" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1392,7 +931,7 @@ generate embeddings for strings of interest</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>texts</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – strings to use in the dataset</p></li>
-<li><p><strong>tokenizer</strong> (<em>PreTrainedTokenizerBase</em>) – </p></li>
+<li><p><strong>tokenizer</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase" title="(in transformers vmain)"><em>PreTrainedTokenizerBase</em></a>) – </p></li>
 <li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>num_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
@@ -1410,20 +949,20 @@ generate embeddings for strings of interest</p>
 <dd><p>get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tokenizer</strong> (<em>PreTrainedTokenizerBase</em>) – </p>
+<dd class="field-odd"><p><strong>tokenizer</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase" title="(in transformers vmain)"><em>PreTrainedTokenizerBase</em></a>) – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>DataCollatorWithPadding</em></p>
+<dd class="field-odd"><p><a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/data_collator#transformers.DataCollatorWithPadding" title="(in transformers vmain)"><em>DataCollatorWithPadding</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.modelling.linking.sapbert.train.start">
-<span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L549-L553"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.start" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.modelling.linking.sapbert.train.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/linking/sapbert/train.py#L558-L562"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.linking.sapbert.train.start" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cfg</strong> (<em>DictConfig</em>) – </p>
@@ -1473,25 +1012,111 @@ generate embeddings for strings of interest</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kazu.modelling.linking.sapbert.train</a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.Candidate"><code class="docutils literal notranslate"><span class="pre">Candidate</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.Candidate.__new__"><code class="docutils literal notranslate"><span class="pre">Candidate.__new__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.Candidate.correct"><code class="docutils literal notranslate"><span class="pre">Candidate.correct</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.Candidate.default_label"><code class="docutils literal notranslate"><span class="pre">Candidate.default_label</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.Candidate.iri"><code class="docutils literal notranslate"><span class="pre">Candidate.iri</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.GoldStandardExample"><code class="docutils literal notranslate"><span class="pre">GoldStandardExample</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.GoldStandardExample.__new__"><code class="docutils literal notranslate"><span class="pre">GoldStandardExample.__new__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.GoldStandardExample.candidates"><code class="docutils literal notranslate"><span class="pre">GoldStandardExample.candidates</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.GoldStandardExample.gold_default_label"><code class="docutils literal notranslate"><span class="pre">GoldStandardExample.gold_default_label</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.GoldStandardExample.gold_iri"><code class="docutils literal notranslate"><span class="pre">GoldStandardExample.gold_iri</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.HFSapbertInferenceDataset"><code class="docutils literal notranslate"><span class="pre">HFSapbertInferenceDataset</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.HFSapbertInferenceDataset.__init__"><code class="docutils literal notranslate"><span class="pre">HFSapbertInferenceDataset.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.HFSapbertPairwiseDataset"><code class="docutils literal notranslate"><span class="pre">HFSapbertPairwiseDataset</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.HFSapbertPairwiseDataset.__init__"><code class="docutils literal notranslate"><span class="pre">HFSapbertPairwiseDataset.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.__init__"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.configure_optimizers()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.evaluate_topk_acc"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.evaluate_topk_acc()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.forward"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.forward()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_candidate_dict"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.get_candidate_dict()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.get_embeddings()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_for_strings"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.get_embeddings_for_strings()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.get_embeddings_from_dataloader"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.get_embeddings_from_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.log_results"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.log_results()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.predict_step"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.predict_step()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.train_dataloader"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.train_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.training_step"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.training_step()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.val_dataloader"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.val_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.validation_epoch_end()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.PLSapbertModel.validation_step"><code class="docutils literal notranslate"><span class="pre">PLSapbertModel.validation_step()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding"><code class="docutils literal notranslate"><span class="pre">SapbertDataCollatorWithPadding</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.__init__"><code class="docutils literal notranslate"><span class="pre">SapbertDataCollatorWithPadding.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.max_length"><code class="docutils literal notranslate"><span class="pre">SapbertDataCollatorWithPadding.max_length</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.pad_to_multiple_of"><code class="docutils literal notranslate"><span class="pre">SapbertDataCollatorWithPadding.pad_to_multiple_of</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.padding"><code class="docutils literal notranslate"><span class="pre">SapbertDataCollatorWithPadding.padding</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertDataCollatorWithPadding.tokenizer"><code class="docutils literal notranslate"><span class="pre">SapbertDataCollatorWithPadding.tokenizer</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager"><code class="docutils literal notranslate"><span class="pre">SapbertEvaluationDataManager</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager.__init__"><code class="docutils literal notranslate"><span class="pre">SapbertEvaluationDataManager.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset"><code class="docutils literal notranslate"><span class="pre">SapbertEvaluationDataset</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.__new__"><code class="docutils literal notranslate"><span class="pre">SapbertEvaluationDataset.__new__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.ontology_source"><code class="docutils literal notranslate"><span class="pre">SapbertEvaluationDataset.ontology_source</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertEvaluationDataset.query_source"><code class="docutils literal notranslate"><span class="pre">SapbertEvaluationDataset.query_source</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.lr"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.lr</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.miner_margin"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.miner_margin</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.num_workers"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.num_workers</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.topk"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.topk</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.train_batch_size"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.train_batch_size</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.train_file"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.train_file</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.type_of_triplets"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.type_of_triplets</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.SapbertTrainingParams.weight_decay"><code class="docutils literal notranslate"><span class="pre">SapbertTrainingParams.weight_decay</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.get_embedding_dataloader_from_strings"><code class="docutils literal notranslate"><span class="pre">get_embedding_dataloader_from_strings()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.init_hf_collate_fn"><code class="docutils literal notranslate"><span class="pre">init_hf_collate_fn()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.linking.sapbert.train.start"><code class="docutils literal notranslate"><span class="pre">start()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

@@ -5,6 +5,13 @@ kazu.utils.grouping
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      Item
+      Key
+   
    
 
    

@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.utils.spacy_pipeline" href="kazu.utils.spacy_pipeline.html" /><link rel="prev" title="kazu.utils.grouping" href="kazu.utils.grouping.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kazu.utils.link_index - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -151,7 +151,7 @@
   
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -164,9 +164,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -331,7 +332,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -384,7 +385,7 @@ query string and the term_norm of all SynonymTerms associated with the provided 
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parser</strong> (<a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><em>OntologyParser</em></a>) – </p></li>
-<li><p><strong>boolean_scorers</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.modelling.language.string_similarity_scorers.html#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer"><em>BooleanStringSimilarityScorer</em></a><em>]</em><em>]</em>) – precision can be increased by applying boolean checks on the returned result, for
+<li><p><strong>boolean_scorers</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.modelling.language.string_similarity_scorers.html#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer"><em>BooleanStringSimilarityScorer</em></a><em>] </em><em>| </em><em>None</em>) – precision can be increased by applying boolean checks on the returned result, for
 instance, checking that all integers are represented, that any noun modifiers are present etc</p></li>
 </ul>
 </dd>
@@ -462,7 +463,7 @@ instance, checking that all integers are represented, that any noun modifiers ar
 <dd class="field-even"><p></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]]]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -480,7 +481,7 @@ and add them to the index sequentially</p>
 <dd class="field-even"><p>partition number, metadata and embeddings</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]], <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.11)"><em>Iterator</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]], <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -491,7 +492,7 @@ and add them to the index sequentially</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.13)"><em>Tensor</em></a>) – a query tensor</p></li>
+<li><p><strong>query</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a>) – a query tensor</p></li>
 <li><p><strong>top_n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – return top_n instances of SynonymTermWithMetrics</p></li>
 </ul>
 </dd>
@@ -514,7 +515,7 @@ configured with default params will be used otherwise)</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>embedding_model</strong> (<a class="reference internal" href="kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="kazu.modelling.linking.sapbert.train.PLSapbertModel"><em>PLSapbertModel</em></a>) – </p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html#pytorch_lightning.trainer.trainer.Trainer" title="(in PyTorch Lightning v1.9.3)"><em>Trainer</em></a><em>]</em>) – </p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.trainer.trainer.Trainer.html#lightning.pytorch.trainer.trainer.Trainer" title="(in PyTorch Lightning v2.0.0)"><em>Trainer</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -548,7 +549,7 @@ configured with default params will be used otherwise)</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
-<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -741,25 +742,78 @@ configured with default params will be used otherwise)</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kazu.utils.link_index</a><ul>
+<li><a class="reference internal" href="#kazu.utils.link_index.CDistTensorEmbeddingIndex"><code class="docutils literal notranslate"><span class="pre">CDistTensorEmbeddingIndex</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.DictionaryIndex"><code class="docutils literal notranslate"><span class="pre">DictionaryIndex</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.utils.link_index.DictionaryIndex.__init__"><code class="docutils literal notranslate"><span class="pre">DictionaryIndex.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.DictionaryIndex.apply_boolean_scorers"><code class="docutils literal notranslate"><span class="pre">DictionaryIndex.apply_boolean_scorers()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.DictionaryIndex.search"><code class="docutils literal notranslate"><span class="pre">DictionaryIndex.search()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex"><code class="docutils literal notranslate"><span class="pre">EmbeddingIndex</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex.__init__"><code class="docutils literal notranslate"><span class="pre">EmbeddingIndex.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex.enumerate_database_chunks"><code class="docutils literal notranslate"><span class="pre">EmbeddingIndex.enumerate_database_chunks()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex.predict_ontology_embeddings"><code class="docutils literal notranslate"><span class="pre">EmbeddingIndex.predict_ontology_embeddings()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex.search"><code class="docutils literal notranslate"><span class="pre">EmbeddingIndex.search()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.EmbeddingIndex.set_embedding_model"><code class="docutils literal notranslate"><span class="pre">EmbeddingIndex.set_embedding_model()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index"><code class="docutils literal notranslate"><span class="pre">Index</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.__init__"><code class="docutils literal notranslate"><span class="pre">Index.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.add"><code class="docutils literal notranslate"><span class="pre">Index.add()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.build_ontology_cache"><code class="docutils literal notranslate"><span class="pre">Index.build_ontology_cache()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.get_index_data_path"><code class="docutils literal notranslate"><span class="pre">Index.get_index_data_path()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.get_metadata_path"><code class="docutils literal notranslate"><span class="pre">Index.get_metadata_path()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.get_synonym_data_path"><code class="docutils literal notranslate"><span class="pre">Index.get_synonym_data_path()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.load"><code class="docutils literal notranslate"><span class="pre">Index.load()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.load_or_build_cache"><code class="docutils literal notranslate"><span class="pre">Index.load_or_build_cache()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.save"><code class="docutils literal notranslate"><span class="pre">Index.save()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.Index.column_type_dict"><code class="docutils literal notranslate"><span class="pre">Index.column_type_dict</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.utils.link_index.MatMulTensorEmbeddingIndex"><code class="docutils literal notranslate"><span class="pre">MatMulTensorEmbeddingIndex</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.utils.link_index.MatMulTensorEmbeddingIndex.metadata_db"><code class="docutils literal notranslate"><span class="pre">MatMulTensorEmbeddingIndex.metadata_db</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.MatMulTensorEmbeddingIndex.synonym_db"><code class="docutils literal notranslate"><span class="pre">MatMulTensorEmbeddingIndex.synonym_db</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.utils.link_index.TensorEmbeddingIndex"><code class="docutils literal notranslate"><span class="pre">TensorEmbeddingIndex</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.utils.link_index.TensorEmbeddingIndex.__init__"><code class="docutils literal notranslate"><span class="pre">TensorEmbeddingIndex.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.TensorEmbeddingIndex.metadata_db"><code class="docutils literal notranslate"><span class="pre">TensorEmbeddingIndex.metadata_db</span></code></a></li>
+<li><a class="reference internal" href="#kazu.utils.link_index.TensorEmbeddingIndex.synonym_db"><code class="docutils literal notranslate"><span class="pre">TensorEmbeddingIndex.synonym_db</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

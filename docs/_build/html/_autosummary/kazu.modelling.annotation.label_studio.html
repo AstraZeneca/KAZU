@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.database" href="kazu.modelling.database.html" /><link rel="prev" title="kazu.modelling.annotation.acceptance_test" href="kazu.modelling.annotation.acceptance_test.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kazu.modelling.annotation.label_studio - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -151,7 +151,7 @@
   
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -164,9 +164,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -331,7 +332,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -460,7 +461,7 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LabelStudioAnnotationView</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L278-L391"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LabelStudioAnnotationView</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L278-L412"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.__init__">
@@ -474,12 +475,12 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels">
-<span class="sig-name descname"><span class="pre">build_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L301-L311"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">build_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L310-L326"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dom</strong> (<em>Document</em>) – </p></li>
-<li><p><strong>element</strong> (<em>Element</em>) – </p></li>
+<li><p><strong>dom</strong> (<a class="reference external" href="https://docs.python.org/3/library/xml.dom.html#dom-document-objects" title="(in Python v3.11)"><span class="xref std std-ref">xml.dom.minidom.Document</span></a>) – </p></li>
+<li><p><strong>element</strong> (<a class="reference external" href="https://docs.python.org/3/library/xml.dom.html#dom-element-objects" title="(in Python v3.11)"><span class="xref std std-ref">xml.dom.minidom.Element</span></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -487,12 +488,12 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_taxonomy">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_taxonomy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L313-L343"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_taxonomy" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_taxonomy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L328-L364"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_taxonomy" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dom</strong> (<em>Document</em>) – </p></li>
-<li><p><strong>element</strong> (<em>Element</em>) – </p></li>
+<li><p><strong>dom</strong> (<a class="reference external" href="https://docs.python.org/3/library/xml.dom.html#dom-document-objects" title="(in Python v3.11)"><span class="xref std std-ref">xml.dom.minidom.Document</span></a>) – </p></li>
+<li><p><strong>element</strong> (<a class="reference external" href="https://docs.python.org/3/library/xml.dom.html#dom-element-objects" title="(in Python v3.11)"><span class="xref std std-ref">xml.dom.minidom.Element</span></a>) – </p></li>
 <li><p><strong>tasks</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>]</em>) – </p></li>
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
@@ -502,7 +503,7 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.create_main_view">
-<span class="sig-name descname"><span class="pre">create_main_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L345-L374"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.create_main_view" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_main_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L366-L395"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.create_main_view" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>tasks</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>]</em>) – </p>
@@ -515,17 +516,17 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.getDOM">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDOM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L287-L299"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.getDOM" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDOM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L287-L308"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.getDOM" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Document</em></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/xml.dom.html#dom-document-objects" title="(in Python v3.11)"><span class="xref std std-ref">xml.dom.minidom.Document</span></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.with_default_colours">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_default_colours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L376-L391"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.with_default_colours" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_default_colours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L397-L412"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.with_default_colours" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView"><em>LabelStudioAnnotationView</em></a></p>
@@ -537,11 +538,11 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LabelStudioManager</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L394-L491"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.annotation.label_studio.</span></span><span class="sig-name descname"><span class="pre">LabelStudioManager</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L415-L512"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://localhost:8080'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L395-L398"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://localhost:8080'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L416-L419"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -554,7 +555,7 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.create_linking_project">
-<span class="sig-name descname"><span class="pre">create_linking_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L438-L462"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.create_linking_project" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_linking_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L459-L483"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.create_linking_project" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>view</strong> (<a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView" title="kazu.modelling.annotation.label_studio.LabelStudioAnnotationView"><em>LabelStudioAnnotationView</em></a>) – </p>
@@ -564,12 +565,12 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.delete_project_if_exists">
-<span class="sig-name descname"><span class="pre">delete_project_if_exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L427-L436"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.delete_project_if_exists" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">delete_project_if_exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L448-L457"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.delete_project_if_exists" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.export_from_ls">
-<span class="sig-name descname"><span class="pre">export_from_ls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L489-L491"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.export_from_ls" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">export_from_ls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L510-L512"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.export_from_ls" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]</p>
@@ -579,12 +580,12 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.get_all_tasks">
-<span class="sig-name descname"><span class="pre">get_all_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L470-L476"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_all_tasks" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_all_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L491-L497"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_all_tasks" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.get_tasks">
-<span class="sig-name descname"><span class="pre">get_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L478-L487"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_tasks" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L499-L508"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_tasks" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – </p>
@@ -594,7 +595,7 @@ and add entity information (class, mappings etc) to the region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.annotation.label_studio.LabelStudioManager.import_to_ls">
-<span class="sig-name descname"><span class="pre">import_to_ls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L464-L468"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.import_to_ls" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">import_to_ls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/annotation/label_studio.py#L485-L489"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.import_to_ls" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>docs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a><em>]</em>) – </p>
@@ -648,25 +649,72 @@ and add entity information (class, mappings etc) to the region.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kazu.modelling.annotation.label_studio</a><ul>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter"><code class="docutils literal notranslate"><span class="pre">KazuToLabelStudioConverter</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_docs_to_tasks"><code class="docutils literal notranslate"><span class="pre">KazuToLabelStudioConverter.convert_docs_to_tasks()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.KazuToLabelStudioConverter.convert_single_doc_to_tasks"><code class="docutils literal notranslate"><span class="pre">KazuToLabelStudioConverter.convert_single_doc_to_tasks()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion"><code class="docutils literal notranslate"><span class="pre">LSToKazuConversion</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.__init__"><code class="docutils literal notranslate"><span class="pre">LSToKazuConversion.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.convert_tasks_to_docs"><code class="docutils literal notranslate"><span class="pre">LSToKazuConversion.convert_tasks_to_docs()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_ents"><code class="docutils literal notranslate"><span class="pre">LSToKazuConversion.create_ents()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_mappings"><code class="docutils literal notranslate"><span class="pre">LSToKazuConversion.create_mappings()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LSToKazuConversion.create_section"><code class="docutils literal notranslate"><span class="pre">LSToKazuConversion.create_section()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.__init__"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_labels"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView.build_labels()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.build_taxonomy"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView.build_taxonomy()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.create_main_view"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView.create_main_view()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.getDOM"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView.getDOM()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioAnnotationView.with_default_colours"><code class="docutils literal notranslate"><span class="pre">LabelStudioAnnotationView.with_default_colours()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.__init__"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.create_linking_project"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.create_linking_project()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.delete_project_if_exists"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.delete_project_if_exists()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.export_from_ls"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.export_from_ls()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_all_tasks"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.get_all_tasks()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.get_tasks"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.get_tasks()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.import_to_ls"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.import_to_ls()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.annotation.label_studio.LabelStudioManager.project_id"><code class="docutils literal notranslate"><span class="pre">LabelStudioManager.project_id</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

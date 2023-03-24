@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="TBA" href="scaling_kazu.html" /><link rel="prev" title="The OntologyParser" href="ontology_parser.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>Curating a knowledge base for NER and Linking - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="_static/kazu_logo.png" alt="Logo"/>
@@ -151,7 +151,7 @@
   
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -167,6 +167,7 @@
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kazu_webservice.html">Kazu as a WebService</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
@@ -315,7 +316,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/curating_for_explosion.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/AstraZeneca/KAZU/edit/main/docs/curating_a_knowledgebase.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -351,15 +352,25 @@ we can safely assume it refers to this GO id.</p>
 apply some pragmaticism in order to produce a set of precise labels we want to use for dictionary based NER and linking.</p>
 <p>In Kazu, we take the following approach:</p>
 <ol class="arabic simple">
-<li><p>Generate synonym candidates from the raw ontology to build a putative list of terms we might want to use. If the term is symbolic,
-we assume it’s case sensitive. Otherwise assume case insensitive.</p></li>
+<li><p>Generate synonym candidates from the raw ontology to build a putative list of terms we might want to use. Synonyms are generated
+via the <code class="docutils literal notranslate"><span class="pre">synonym_generator</span></code> parameter of <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a>, which can
+then be retrieved via the method <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms()</span></code></a>. The
+generated strings can be retrieved from <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTerm.terms" title="kazu.data.data.SynonymTerm.terms"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTerm.terms</span></code></a>.</p></li>
 <li><p>Build a pipeline from this list, execute this pipeline over a large corpora of target data, and explore the results to get a sense of
-which terms are ‘noisy’</p></li>
-<li><p>Curate the top x hits by frequency, to determine whether a given term is precise enough in it’s own right to be valid for dictionary based NER.
-We assume here that if a term doesn’t hit frequently enough to be considered in step 2, it’s probably safe to include. Depending on your target
-data, this may be invalid -  so in practice, the curation approach is iterative.</p></li>
+which terms are ‘noisy’. We recommend loading json serialised versions of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Document</span></code></a> into a MongoDB instance for this,
+as this makes it very easy to navigate the data.</p></li>
+<li><p>These hits can now be curated, by forming instance of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Curation" title="kazu.data.data.Curation"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Curation</span></code></a>. This class is a container for
+<a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTermAction" title="kazu.data.data.SynonymTermAction"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTermAction</span></code></a>, which offers a range of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.SynonymTermBehaviour" title="kazu.data.data.SynonymTermBehaviour"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.SynonymTermBehaviour</span></code></a>s,
+such as ‘use this string NER and linking’, or ‘remove this string as a linking target. See the API documentation
+of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Curation" title="kazu.data.data.Curation"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Curation</span></code></a> for examples and details.</p></li>
+<li><p>You can also create an instance of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.GlobalParserActions" title="kazu.data.data.GlobalParserActions"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.GlobalParserActions</span></code></a> to modify the behaviour of a
+<a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a> in a ‘global’ sense, Again, see the API documentation for this.</p></li>
 </ol>
-<p>TODO: add a worked example</p>
+<p>We provide some curations for common ontologies in the default model pack, within the ‘curations’ subdirectory, which are then
+passed to the constructor of <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a>. When
+<a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases"><code class="xref py py-meth docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases()</span></code></a> is called, these curation triggers are activated.
+Note that this method also returns a ‘cleaned’ list of <a class="reference internal" href="_autosummary/kazu.data.data.html#kazu.data.data.Curation" title="kazu.data.data.Curation"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.Curation</span></code></a>, which can then be used for dictionary based NER
+(as is used for <a class="reference internal" href="_autosummary/kazu.steps.joint_ner_and_linking.explosion.html#kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep" title="kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep</span></code></a>).</p>
 </section>
 
         </article>
@@ -399,9 +410,7 @@ data, this may be invalid -  so in practice, the curation approach is iterative.
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -414,10 +423,8 @@ data, this may be invalid -  so in practice, the curation approach is iterative.
     </aside>
   </div>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

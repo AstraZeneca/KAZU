@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.linking.mapping_step" href="kazu.steps.linking.mapping_step.html" /><link rel="prev" title="kazu.steps.linking.dictionary" href="kazu.steps.linking.dictionary.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kazu.steps.linking.entity_class_disambiguation - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -151,7 +151,7 @@
   
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -164,9 +164,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -331,7 +332,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -653,25 +654,75 @@ used to allow the tf-idf model to choose the most suitable entity class.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kazu.steps.linking.entity_class_disambiguation</a><ul>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.DisambiguationEntry"><code class="docutils literal notranslate"><span class="pre">DisambiguationEntry</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.DisambiguationEntry.entity_class"><code class="docutils literal notranslate"><span class="pre">DisambiguationEntry.entity_class</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.DisambiguationEntry.relevant_text"><code class="docutils literal notranslate"><span class="pre">DisambiguationEntry.relevant_text</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.DisambiguationEntry.thresh"><code class="docutils literal notranslate"><span class="pre">DisambiguationEntry.thresh</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep"><code class="docutils literal notranslate"><span class="pre">EntityClassDisambiguationStep</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep.__init__"><code class="docutils literal notranslate"><span class="pre">EntityClassDisambiguationStep.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep.sentence_context_for_entity"><code class="docutils literal notranslate"><span class="pre">EntityClassDisambiguationStep.sentence_context_for_entity()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep.spangrouped_ent_section_pairs"><code class="docutils literal notranslate"><span class="pre">EntityClassDisambiguationStep.spangrouped_ent_section_pairs()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer.__init__"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer.build_tfidf_documents"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer.build_tfidf_documents()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer.disambiguation_entry_to_tfidf_entry"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer.disambiguation_entry_to_tfidf_entry()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer.score_entity_context"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer.score_entity_context()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.EntityClassTfIdfScorer.tfidf_score"><code class="docutils literal notranslate"><span class="pre">EntityClassTfIdfScorer.tfidf_score()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.ScoredContext"><code class="docutils literal notranslate"><span class="pre">ScoredContext</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.ScoredContext.__new__"><code class="docutils literal notranslate"><span class="pre">ScoredContext.__new__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.ScoredContext.entity_class"><code class="docutils literal notranslate"><span class="pre">ScoredContext.entity_class</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.ScoredContext.score"><code class="docutils literal notranslate"><span class="pre">ScoredContext.score</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.ScoredContext.thresh"><code class="docutils literal notranslate"><span class="pre">ScoredContext.thresh</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.TfIdfDisambiguationEntry"><code class="docutils literal notranslate"><span class="pre">TfIdfDisambiguationEntry</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.TfIdfDisambiguationEntry.__new__"><code class="docutils literal notranslate"><span class="pre">TfIdfDisambiguationEntry.__new__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.TfIdfDisambiguationEntry.entity_class"><code class="docutils literal notranslate"><span class="pre">TfIdfDisambiguationEntry.entity_class</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.TfIdfDisambiguationEntry.tfidf_document"><code class="docutils literal notranslate"><span class="pre">TfIdfDisambiguationEntry.tfidf_document</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.TfIdfDisambiguationEntry.tfidf_vectorizer"><code class="docutils literal notranslate"><span class="pre">TfIdfDisambiguationEntry.tfidf_vectorizer</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.entity_class_disambiguation.TfIdfDisambiguationEntry.thresh"><code class="docutils literal notranslate"><span class="pre">TfIdfDisambiguationEntry.thresh</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

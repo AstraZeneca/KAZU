@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.pipeline" href="kazu.pipeline.html" /><link rel="prev" title="kazu.modelling.ontology_preprocessing.base" href="kazu.modelling.ontology_preprocessing.base.html" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.09.15"/>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>kazu.modelling.ontology_preprocessing.synonym_generation - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -151,7 +151,7 @@
   
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -164,9 +164,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
@@ -331,7 +332,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -439,7 +440,7 @@
 <dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -456,7 +457,7 @@
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L300-L305"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -469,7 +470,7 @@
 <dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -489,7 +490,7 @@
 <dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -511,8 +512,8 @@
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>digit_aware_replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>digit_aware_replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
 <li><p><strong>include_greek</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
 </ul>
 </dd>
@@ -527,7 +528,7 @@
 <dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -541,7 +542,7 @@
 <p>Interchange all suffixes within a provided set to produce new synonyms.</p>
 <p>Note, this is expected to be noisy, and for most of the generated synonyms not to be valid
 words. This class is present as a generation step for high recall, with curation of synonyms
-expected later (see <a class="reference internal" href="../curating_for_explosion.html#curating-for-explosion"><span class="std std-ref">Curating a knowledge base for NER and Linking</span></a>).</p>
+expected later (see <a class="reference internal" href="../curating_a_knowledgebase.html#curating-for-explosion"><span class="std std-ref">Curating a knowledge base for NER and Linking</span></a>).</p>
 <p>In particular, note that this also doesn’t check for the longest matching suffix - e.g. for a
 synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new synonyms ‘anaemic’ and
 ‘amaemiic’ will both be generated.</p>
@@ -563,7 +564,7 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
 <dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -582,7 +583,7 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
 <dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -628,25 +629,80 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">kazu.modelling.ontology_preprocessing.synonym_generation</a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator"><code class="docutils literal notranslate"><span class="pre">CombinatorialSynonymGenerator</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__init__"><code class="docutils literal notranslate"><span class="pre">CombinatorialSynonymGenerator.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution"><code class="docutils literal notranslate"><span class="pre">GreekSymbolSubstitution</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution.ALL_SUBS"><code class="docutils literal notranslate"><span class="pre">GreekSymbolSubstitution.ALL_SUBS</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution.greek_letter"><code class="docutils literal notranslate"><span class="pre">GreekSymbolSubstitution.greek_letter</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution.lower_greek_letter"><code class="docutils literal notranslate"><span class="pre">GreekSymbolSubstitution.lower_greek_letter</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution.spelling"><code class="docutils literal notranslate"><span class="pre">GreekSymbolSubstitution.spelling</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution.upper_greek_letter"><code class="docutils literal notranslate"><span class="pre">GreekSymbolSubstitution.upper_greek_letter</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion"><code class="docutils literal notranslate"><span class="pre">SeparatorExpansion</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.__init__"><code class="docutils literal notranslate"><span class="pre">SeparatorExpansion.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.call"><code class="docutils literal notranslate"><span class="pre">SeparatorExpansion.call()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement"><code class="docutils literal notranslate"><span class="pre">SpellingVariationReplacement</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.__init__"><code class="docutils literal notranslate"><span class="pre">SpellingVariationReplacement.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.call"><code class="docutils literal notranslate"><span class="pre">SpellingVariationReplacement.call()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover"><code class="docutils literal notranslate"><span class="pre">StopWordRemover</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover.call"><code class="docutils literal notranslate"><span class="pre">StopWordRemover.call()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover.all_stopwords"><code class="docutils literal notranslate"><span class="pre">StopWordRemover.all_stopwords</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement"><code class="docutils literal notranslate"><span class="pre">StringReplacement</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.__init__"><code class="docutils literal notranslate"><span class="pre">StringReplacement.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.call"><code class="docutils literal notranslate"><span class="pre">StringReplacement.call()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement"><code class="docutils literal notranslate"><span class="pre">SuffixReplacement</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.__init__"><code class="docutils literal notranslate"><span class="pre">SuffixReplacement.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.call"><code class="docutils literal notranslate"><span class="pre">SuffixReplacement.call()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.call"><code class="docutils literal notranslate"><span class="pre">SynonymGenerator.call()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

@@ -5,6 +5,12 @@ kazu.steps.step
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      Self
+   
    
 
    

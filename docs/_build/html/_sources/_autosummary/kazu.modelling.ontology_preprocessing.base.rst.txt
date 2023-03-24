@@ -13,9 +13,8 @@ kazu.modelling.ontology\_preprocessing.base
 
    .. autosummary::
    
-      get_curated_terms_by_parser
-      get_curated_terms_for_parser
-      load_curated_terms
+      load_curations
+      load_global_actions
    
    
 
@@ -25,6 +24,7 @@ kazu.modelling.ontology\_preprocessing.base
 
    .. autosummary::
    
+      ATCDrugClassificationParser
       BiologicalProcessGeneOntologyParser
       CLOOntologyParser
       CLOntologyParser
@@ -43,11 +43,19 @@ kazu.modelling.ontology\_preprocessing.base
       OpenTargetsMoleculeOntologyParser
       OpenTargetsTargetOntologyParser
       RDFGraphParser
+      StatoParser
+      TabularOntologyParser
       UberonOntologyParser
    
    
 
    
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      CurationException
    
    
 
