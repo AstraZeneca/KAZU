@@ -26,4 +26,4 @@ ENV KAZU_MODEL_PACK $MODEL_PACK_CONFIG_PATH
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV HYDRA_FULL_ERROR 1
 
-CMD python -m kazu.web.server --config-path "${KAZU_MODEL_PACK}/conf/" hydra.run.dir="." Middlewares=jwt
+CMD python -m kazu.web.server --config-path "${KAZU_MODEL_PACK}/conf/" hydra.run.dir="." Middlewares=jwt +ray.init.num_cpus=1 +ray.init.object_store_memory=1000000000

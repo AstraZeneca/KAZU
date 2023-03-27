@@ -1,6 +1,7 @@
 FROM $BASE_IMAGE 
 
 ARG MODEL_PACK_PATH
+ARG MODEL_PACK_CONFIG_PATH
 ARG KAZU_PACKAGE
 ARG TOKEN_GITHUB
 ARG ARTIFACTORY_USER
@@ -22,7 +23,7 @@ COPY $MODEL_PACK_PATH /model_pack.zip
 RUN apt-get update
 RUN apt-get install -y openjdk-11-jre
 
-ENV KAZU_MODEL_PACK /model_pack
+ENV KAZU_MODEL_PACK $MODEL_PACK_CONFIG_PATH
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV HYDRA_FULL_ERROR 1
 
@@ -33,4 +34,4 @@ RUN hatch build
 RUN pip install "./dist/kazu-$KAZU_VERSION-py3-none-any.whl[dev]"
 
 RUN unzip model_pack.zip -d /model_pack
-CMD python -m kazu.web.server --config-path "/model_pack/conf" hydra.run.dir="." Middlewares=jwt
+CMD python -m kazu.web.server --config-path "${KAZU_MODEL_PACK}/conf/" hydra.run.dir="." Middlewares=jwt +ray.init.num_cpus=1 +ray.init.object_store_memory=1000000000
