@@ -60,7 +60,7 @@ jobs:
             ARTIFACTORY_USER=${{secrets.ARTIFACT_USERNAME}}
             ARTIFACTORY_TOKEN=${{secrets.ARTIFACT_TOKEN}}
             MODEL_PACK_PATH=kazu_model_pack_public-${{env.RELEASE_VERSION}}.zip
-            MODEL_PACK_CONFIG_PATH=/model_pack/kazu_model_pack_public-${{env.RELEASE_VERSION}}/conf/
+            MODEL_PACK_CONFIG_PATH="/model_pack/kazu_model_pack_public-${{env.RELEASE_VERSION}}/conf/"
             KAZU_VERSION=${{env.KAZU_VERSION}}
           build-context: ./deploy
           dockerfile-name: deploy/Dockerfile
