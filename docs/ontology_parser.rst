@@ -177,11 +177,11 @@ Finally, when we want to use our new parser, we need to give it information abou
     # Here, we use a trivial example for brevity.
     string_scorer = lambda string_1, string_2: 0.75
     parser = ChemblOntologyParser(
-        in_path='path to chembl DB goes here',
+        in_path="path to chembl DB goes here",
         # if used in entity linking, entities with class 'drug'
         # will be associated with this parser
-        entity_class='drug',
-        name='CHEMBL', # a globally unique name for the parser
+        entity_class="drug",
+        name="CHEMBL", # a globally unique name for the parser
         string_scorer = string_scorer,
     )
 
