@@ -22,7 +22,7 @@ RUN pip install --extra-index-url https://$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN@$
 RUN apt-get update
 RUN apt-get install -y openjdk-11-jre
 
-ENV KAZU_MODEL_PACK /model_pack/kazu_model_pack_public-v0.1.0
+ENV KAZU_MODEL_PACK $MODEL_PACK_CONFIG_PATH
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV HYDRA_FULL_ERROR 1
 
