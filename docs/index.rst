@@ -31,9 +31,10 @@ Welcome to Kazu's documentation!
 
    _autosummary/kazu
 
+|
 
-Site index
-==================
+.. toctree::
+   :caption: Site Index
 
-* :ref:`genindex`
-* :ref:`modindex`
+   genindex
+   modindex
