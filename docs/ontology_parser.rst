@@ -111,7 +111,7 @@ There are two methods you need to override: :meth:`.OntologyParser.parse_to_data
             FROM molecule_dictionary AS md
                      JOIN molecule_synonyms ms ON md.molregno = ms.molregno
             UNION ALL
-            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE}
+            SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, 'pref_name' AS {MAPPING_TYPE}
             FROM molecule_dictionary
         """
         df = pd.read_sql(query, conn)
@@ -152,7 +152,7 @@ The full class looks like:
                 FROM molecule_dictionary AS md
                          JOIN molecule_synonyms ms ON md.molregno = ms.molregno
                 UNION ALL
-                SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, "pref_name" AS {MAPPING_TYPE}
+                SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, 'pref_name' AS {MAPPING_TYPE}
                 FROM molecule_dictionary
             """
             df = pd.read_sql(query, conn)
