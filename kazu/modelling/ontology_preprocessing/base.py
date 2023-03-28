@@ -201,7 +201,7 @@ class OntologyParser(ABC):
             mapping_type_set: FrozenSet[str] = frozenset(row[MAPPING_TYPE])
             syn_norm = row["syn_norm"]
             if len(syn_set) > 1:
-                logger.debug(f"normaliser has merged {syn_set} into a single term: {syn_norm}")
+                logger.debug("normaliser has merged %s into a single term: %s", syn_set, syn_norm)
 
             is_symbolic = all(
                 StringNormalizer.classify_symbolic(x, self.entity_class) for x in syn_set
@@ -358,7 +358,13 @@ class OntologyParser(ABC):
         """
 
         term_norm = StringNormalizer.normalize(curated_synonym, entity_class=self.entity_class)
-        log_prefix = f"{self.name} attempting to create synonym term for <{curated_synonym}> term_norm: <{term_norm}> IDs: {id_set}"
+        log_prefix = "%(parser_name)s attempting to create synonym term for <%(synonym)s> term_norm: <%(term_norm)s> IDs: %(ids)s}"
+        log_formatting_dict: Dict[str, Any] = {
+            "parser_name": self.name,
+            "synonym": curated_synonym,
+            "term_norm": term_norm,
+            "ids": id_set,
+        }
 
         # look up the term norm in the db
         try:
@@ -373,14 +379,20 @@ class OntologyParser(ABC):
                 for id_ in equiv_id_set.ids
             )
             if id_set.issubset(all_ids_on_existing_syn_term):
+                log_formatting_dict[
+                    "existing_id_set"
+                ] = maybe_existing_synonym_term.associated_id_sets
                 logger.debug(
-                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database."
-                    f"since this SynonymTerm includes all ids in id_set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
+                    log_prefix
+                    + " but term_norm <%(term_norm)s> already exists in synonym database."
+                    + "since this SynonymTerm includes all ids in id_set, no action is required. %(existing_id_set)s",
+                    log_formatting_dict,
                 )
                 return maybe_existing_synonym_term
             else:
+                formatted_log_prefix = log_prefix % log_formatting_dict
                 raise CurationException(
-                    f"{log_prefix} but term_norm <{term_norm}> already exists in synonym database, and its\n"
+                    f"{formatted_log_prefix} but term_norm <{term_norm}> already exists in synonym database, and its\n"
                     f"associated_id_sets don't contain all the ids in id_set. Creating a new\n"
                     f"SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
                     f"This can happen if a synonym appears twice in the underlying ontology,\n"
@@ -393,7 +405,8 @@ class OntologyParser(ABC):
                 )
 
         logger.debug(
-            f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
+            "no appropriate AssociatedIdSets exist for the set %s, so a new one will be created",
+            id_set,
         )
         # see if we've already had to group all the ids in this id_set in some way for a different synonym
         set_of_assoc_id_set = set()
@@ -402,8 +415,9 @@ class OntologyParser(ABC):
                 self.name, idx
             )
             if len(assoc_id_sets_for_this_id) == 0:
+                formatted_log_prefix = log_prefix % log_formatting_dict
                 raise CurationException(
-                    f"{log_prefix} but could not find element {idx} of id_set {id_set} in synonym database"
+                    f"{formatted_log_prefix} but could not find element {idx} of id_set {id_set} in synonym database"
                 )
             set_of_assoc_id_set.update(assoc_id_sets_for_this_id)
 
@@ -421,7 +435,8 @@ class OntologyParser(ABC):
             if id_set.issubset(all_ids_in_assoc_id_set):
                 associated_id_set_for_new_synonym_term = associated_id_set
                 logger.debug(
-                    f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {associated_id_set}"
+                    "using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: %s",
+                    associated_id_set,
                 )
                 break
 
@@ -433,7 +448,8 @@ class OntologyParser(ABC):
             # best avoided by having the curation contain as few IDs as possible, such that the chances
             # that an existing AssociatedIdSet can be reused are higher.
             logger.debug(
-                f"no appropriate AssociatedIdSets exist for the set {id_set}, so a new one will be created"
+                "no appropriate AssociatedIdSets exist for the set %s, so a new one will be created",
+                id_set,
             )
             associated_id_set_for_new_synonym_term = frozenset(
                 EquivalentIdSet(
@@ -460,7 +476,7 @@ class OntologyParser(ABC):
             aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
         )
         self.synonym_db.add(self.name, synonyms=(new_term,))
-        logger.debug(f"{new_term} created")
+        logger.debug("%s created", new_term)
         return new_term
 
     def _drop_synonym_term_for_linking(self, curated_synonym: str):
@@ -1190,7 +1206,7 @@ class GeneOntologyParser(OntologyParser):
             idx = str(row.goid)
             label = str(row.label)
             if "obsolete" in label:
-                logger.debug(f"skipping obsolete id: {idx}, {label}")
+                logger.debug("skipping obsolete id: %s, %s", idx, label)
                 continue
             if self._uri_regex.match(idx):
                 default_labels.append(label)
