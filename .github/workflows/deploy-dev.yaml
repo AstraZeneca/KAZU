@@ -1,17 +1,14 @@
 name: Build & Deploy
 on:
-  push:
-    branches:
-      - remove-az
-  # workflow_run:
-  #   workflows: ["Create Release"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["Create Release"]
+    types:
+      - completed
 
 jobs:
   build:
     runs-on: [self-hosted, kazu-runners]
-    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: "Building Docker Image"
     outputs:
       short_sha: ${{ steps.short-sha.outputs.short_sha }}
@@ -78,7 +75,6 @@ jobs:
   deploy-dev:
     name: "Deploy image to K8s Dev cluster"
     runs-on: [self-hosted, kazu-runners]
-    if: false # For test 
     needs: build
     steps:
       - name: "checkout"
