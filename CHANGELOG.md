@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 0.1.0 - 2023-03-29
+
+
+### Features
+
+- Kazu frontend can now be served from the Ray HTTP deployment. 
+- Upgraded SETH to 1.4.0 . 
+- removed CuratedTerm and replaced with more flexible Curation and GlobalAction system
+
+
 ## 0.0.25 - 2023-02-28
 
 
