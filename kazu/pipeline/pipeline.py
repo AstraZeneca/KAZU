@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import os
 import time
@@ -11,7 +12,6 @@ from omegaconf import DictConfig
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import Step
 from kazu.utils.utils import PathLike, as_path
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
