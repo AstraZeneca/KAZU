@@ -1,5 +1,5 @@
 import logging
-import os.path
+import os
 import time
 import uuid
 from pathlib import Path
@@ -98,15 +98,14 @@ class FailedDocsFileHandler(FailedDocsHandler):
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
         for step_namespace, docs in step_docs_map.items():
-            step_logging_dir = os.path.join(self.log_dir, step_namespace)
-            if not os.path.exists(step_logging_dir):
-                os.makedirs(step_logging_dir, exist_ok=True)
+            step_logging_dir = self.log_dir.joinpath(step_namespace)
+            step_logging_dir.mkdir(parents=True, exist_ok=True)
 
             for doc in docs:
                 serialisable_doc = doc.json()
                 doc_id = doc.idx
-                doc_path = os.path.join(step_logging_dir, doc_id + ".json")
-                doc_error_path = os.path.join(step_logging_dir, doc_id + "_error.txt")
+                doc_path = step_logging_dir.joinpath(doc_id + ".json")
+                doc_error_path = step_logging_dir.joinpath(doc_id + "_error.txt")
                 with open(doc_path, "w") as f:
                     f.write(serialisable_doc)
                 with open(doc_error_path, "w") as f:
