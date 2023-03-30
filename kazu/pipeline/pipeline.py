@@ -2,7 +2,6 @@ import logging
 import os
 import time
 import uuid
-from pathlib import Path
 from typing import List, Dict, Optional, Protocol
 
 import psutil
@@ -11,6 +10,7 @@ from omegaconf import DictConfig
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import Step
+from kazu.utils.utils import PathLike, as_path
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -93,8 +93,8 @@ class FailedDocsLogHandler(FailedDocsHandler):
 class FailedDocsFileHandler(FailedDocsHandler):
     """Log failed docs to a directory along with the relevant exception."""
 
-    def __init__(self, log_dir: Path):
-        self.log_dir = log_dir
+    def __init__(self, log_dir: PathLike):
+        self.log_dir = as_path(log_dir)
 
     def __call__(self, step_docs_map: Dict[str, List[Document]]):
         for step_namespace, docs in step_docs_map.items():
