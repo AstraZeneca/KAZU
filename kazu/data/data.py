@@ -787,7 +787,7 @@ class Curation:
              case_sensitive=True,
              actions=[
                 SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                                  parser_to_target_id_mappings={'OPENTARGETS_DISEASE': {'MONDO:0004967'}}}, entity_class='disease'),
+                                  parser_to_target_id_mappings={'OPENTARGETS_DISEASE': {'MONDO:0004967'}}, entity_class='disease'),
             ],
              mention_confidence=MentionConfidence.POSSIBLE)
 
@@ -821,7 +821,7 @@ class Curation:
          case_sensitive=True,
          actions=[
             SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'an id from the bad set'}}}, entity_class='gene'),
+                              parser_to_target_id_mappings={'OPENTARGETS_TARGET': {'an id from the bad set'}}, entity_class='gene'),
         ],
          mention_confidence=MentionConfidence.POSSIBLE)
 
