@@ -58,6 +58,7 @@ model_training = [
 dev = [
   "kazu[webserver,typed,model_training]",
   "black~=22.0",
+  "blacken-docs",
   "flake8",
   "mypy",
   "bump2version",

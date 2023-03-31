@@ -8,6 +8,13 @@ repos:
     language: system
     entry: black .
     types: [python]
+  
+  - id: blacken-docs
+    name: blacken-docs
+    stages: [commit]
+    language: system
+    entry: blacken-docs
+    types_or: [python, rst, markdown]
 
   - id: flake8
     name: flake8

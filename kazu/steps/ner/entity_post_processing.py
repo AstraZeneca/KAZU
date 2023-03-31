@@ -103,7 +103,9 @@ class SplitOnNumericalListPatternWithPrefix:
     .. testcode::
 
         splitter = SplitOnNumericalListPatternWithPrefix()
-        ent = Entity.load_contiguous_entity(start=0, end=8, namespace="test", entity_class="gene", match="BRCA1/2/3")
+        ent = Entity.load_contiguous_entity(
+            start=0, end=8, namespace="test", entity_class="gene", match="BRCA1/2/3"
+        )
         print(splitter(ent, "BRCA1/2/3 are oncogenes"))
 
     .. testoutput::

@@ -55,7 +55,6 @@ Kazu is highly configurable (using [Hydra](https://hydra.cc/docs/intro/)), altho
 To make use of these, and process a simple document:
 
 ```python
-
 import hydra
 from hydra.utils import instantiate
 
@@ -69,7 +68,9 @@ import os
 cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("conf")
 
 
-@hydra.main(version_base=HYDRA_VERSION_BASE, config_path=str(cdir), config_name="config")
+@hydra.main(
+    version_base=HYDRA_VERSION_BASE, config_path=str(cdir), config_name="config"
+)
 def kazu_test(cfg):
     pipeline: Pipeline = instantiate(cfg.Pipeline)
     text = "EGFR mutations are often implicated in lung cancer"
@@ -80,7 +81,6 @@ def kazu_test(cfg):
 
 if __name__ == "__main__":
     kazu_test()
-
 ```
 
 # Documentation

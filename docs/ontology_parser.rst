@@ -145,7 +145,6 @@ The full class looks like:
 .. code-block:: python
 
     class ChemblOntologyParser(OntologyParser):
-
         def find_kb(self, string: str) -> str:
             return "CHEMBL"
 
@@ -181,8 +180,8 @@ Finally, when we want to use our new parser, we need to give it information abou
         # if used in entity linking, entities with class 'drug'
         # will be associated with this parser
         entity_class="drug",
-        name="CHEMBL", # a globally unique name for the parser
-        string_scorer = string_scorer,
+        name="CHEMBL",  # a globally unique name for the parser
+        string_scorer=string_scorer,
     )
 
 That's it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.
