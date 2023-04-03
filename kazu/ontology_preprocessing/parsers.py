@@ -351,14 +351,10 @@ class RDFGraphParser(OntologyParser):
             if not self.is_valid_iri(str(sub)):
                 continue
 
-            # type ignore is necessary because rdflib's typing thinks that for Graph.__contains__ can't use an rdflib.paths.Path
-            # as a predicate, but you can, because __contains__ calls Graph.triples(), which is type hinted to allow Paths (and
-            # reading the implementation it clearly handles Paths).
-            if any((sub, pred, value) not in g for pred, value in self.include_entity_patterns):  # type: ignore[operator]
+            if any((sub, pred, value) not in g for pred, value in self.include_entity_patterns):
                 continue
 
-            # as above
-            if any((sub, pred, value) in g for pred, value in self.exclude_entity_patterns):  # type: ignore[operator]
+            if any((sub, pred, value) in g for pred, value in self.exclude_entity_patterns):
                 continue
 
             default_labels.append(str(obj))
