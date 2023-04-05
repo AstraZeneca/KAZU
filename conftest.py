@@ -119,6 +119,6 @@ def ray_server_with_jwt_auth(override_kazu_test_config):
     )
     start(cfg)
     yield {
-        "Authorization": f'Bearer {jwt.encode(dict(username="user"), os.environ["KAZU_JWT_KEY"], algorithm="HS256")}'
+        "Authorization": f'Bearer {jwt.encode({"username": "user"}, os.environ["KAZU_JWT_KEY"], algorithm="HS256")}'
     }
     stop()
