@@ -1778,25 +1778,20 @@ class MeddraOntologyParser(OntologyParser):
         mdheir_path = os.path.join(self.in_path, "mdhier.asc")
         # low level term path
         llt_path = os.path.join(self.in_path, "llt.asc")
-        # note: this isn't true! But the pandas stubs currently think that the names argument
-        # here has to be a list of str, but it doesn't, it just has to be a sequence of strings
-        list_mdhier_names = cast(List[str], self._mdhier_asc_col_names)
         hier_df = pd.read_csv(
             mdheir_path,
             sep="$",
             header=None,
-            names=list_mdhier_names,
+            names=self._mdhier_asc_col_names,
             dtype="string",
         )
         hier_df = hier_df[~hier_df["soc_name"].isin(self.exclude_socs)]
 
-        # as above
-        list_llt_names = cast(List[str], self._llt_asc_column_names)
         llt_df = pd.read_csv(
             llt_path,
             sep="$",
             header=None,
-            names=list_llt_names,
+            names=self._llt_asc_column_names,
             usecols=("llt_name", "pt_code"),
             dtype="string",
         )
