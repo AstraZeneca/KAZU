@@ -1,6 +1,14 @@
 from typing import List
 
-from seqeval.metrics import f1_score
+try:
+    from seqeval.metrics import f1_score
+except ImportError as e:
+    raise ImportError(
+        "Running the model distillation code requires seqeval to be installed.\n"
+        "We recommend running 'pip install kazu[model_training]' to get all model training"
+        " dependencies."
+    ) from e
+
 
 IGNORE_IDX = -100
 

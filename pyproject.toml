@@ -26,9 +26,7 @@ dependencies = [
   "pytorch-lightning>=1.7.4,<2.0.0",
   "pandas>=1.0.0",
   "pyarrow>=8.0.0",
-  "pytorch-metric-learning>=0.9.99",
   "rapidfuzz>=1.0.0",
-  "seqeval>=1.0.0",
   "py4j>=0.10.9",
   "scikit-learn>=0.24.0",
   "stanza>=1.0.0",
@@ -53,8 +51,12 @@ typed = [
   "types-psutil",
   "pandas-stubs",
 ]
+model_training = [
+  "pytorch-metric-learning>=0.9.99",
+  "seqeval>=1.0.0",
+]
 dev = [
-  "kazu[webserver,typed]",
+  "kazu[webserver,typed,model_training]",
   "black~=22.0",
   "flake8",
   "mypy",
