@@ -13,7 +13,13 @@ repos:
     name: blacken-docs
     stages: [commit]
     language: system
-    entry: blacken-docs
+    # note that this doesn't access pyproject.toml
+    # black settings by default, so defaults to a line
+    # length of 88, rather than 100.
+    # This is actually good for us, since a line length
+    # of 100 would introduce horizontal scroll bars
+    # in code blocks in the docs.
+    entry: blacken-docs -t py38
     types_or: [python, rst, markdown]
 
   - id: flake8
