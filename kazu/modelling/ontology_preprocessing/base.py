@@ -1018,6 +1018,7 @@ class RDFGraphParser(OntologyParser):
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         curations: Optional[List[Curation]] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        label_predicate: RdfRef = rdflib.RDFS.label,
     ):
         super().__init__(
             in_path=in_path,
@@ -1039,6 +1040,7 @@ class RDFGraphParser(OntologyParser):
         self.synonym_predicates = tuple(
             self.convert_to_rdflib_ref(pred) for pred in synonym_predicates
         )
+        self.label_predicate = self.convert_to_rdflib_ref(label_predicate)
 
         if include_entity_patterns is not None:
             self.include_entity_patterns = tuple(
@@ -1086,14 +1088,14 @@ class RDFGraphParser(OntologyParser):
     def parse_to_dataframe(self) -> pd.DataFrame:
         g = rdflib.Graph()
         g.parse(self.in_path)
-        label_pred_str = "http://www.w3.org/2000/01/rdf-schema#label"
-        label_predicates = rdflib.URIRef(label_pred_str)
         default_labels = []
         iris = []
         syns = []
         mapping_type = []
 
-        for sub, obj in g.subject_objects(label_predicates):
+        label_pred_str = str(self.label_predicate)
+
+        for sub, obj in g.subject_objects(self.label_predicate):
             if not self.is_valid_iri(str(sub)):
                 continue
 
