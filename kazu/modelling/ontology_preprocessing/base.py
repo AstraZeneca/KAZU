@@ -1135,6 +1135,58 @@ class RDFGraphParser(OntologyParser):
         return bool(match)
 
 
+SKOS_XL_PREF_LABEL_PATH: rdflib.paths.Path = rdflib.URIRef(
+    "http://www.w3.org/2008/05/skos-xl#prefLabel"
+) / rdflib.URIRef("http://www.w3.org/2008/05/skos-xl#literalForm")
+SKOS_XL_ALT_LABEL_PATH: rdflib.paths.Path = rdflib.URIRef(
+    "http://www.w3.org/2008/05/skos-xl#altLabel"
+) / rdflib.URIRef("http://www.w3.org/2008/05/skos-xl#literalForm")
+
+
+class SKOSXLGraphParser(RDFGraphParser):
+    """Parse SKOS-XL RDF Files.
+
+    Note that this just sets a default label predicate and synonym predicate to SKOS-XL
+    appropriate paths, and then passes to the parent RDFGraphParser class. This class is just a convenience
+    to make specifying a SKOS-XL parser easier, this functionality is still available via RDFGraphParser
+    directly.
+    """
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        uri_regex: Union[str, re.Pattern],
+        synonym_predicates: Iterable[RdfRef] = (SKOS_XL_ALT_LABEL_PATH,),
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+        label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
+    ):
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            uri_regex=uri_regex,
+            synonym_predicates=synonym_predicates,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            include_entity_patterns=include_entity_patterns,
+            exclude_entity_patterns=exclude_entity_patterns,
+            curations=curations,
+            global_actions=global_actions,
+            label_predicate=label_predicate,
+        )
+
+
 class GeneOntologyParser(OntologyParser):
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
 
