@@ -205,17 +205,20 @@ class KazuWebAPI:
         logger.info("received request to root /")
         return "Welcome to KAZU."
 
-    def base_request_optional_steps(
+    def base_pipeline_request(
         self,
         doc_collection: Union[DocumentCollection, SingleEntityDocumentConverter],
         request: Request,
         step_namespaces: Optional[List[str]] = None,
+        step_group: Optional[str] = None,
     ):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch_or_not endpoint")
         logger.info(id_log_prefix + "Documents sent: %s", len(doc_collection))
         result = self.pipeline(
-            doc_collection.convert_to_kazu_documents(), step_namespaces=step_namespaces
+            doc_collection.convert_to_kazu_documents(),
+            step_namespaces=step_namespaces,
+            step_group=step_group,
         )
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
@@ -226,7 +229,7 @@ class KazuWebAPI:
         request: Request,
         token=Depends(oauth2_scheme),
     ):
-        return self.base_request_optional_steps(
+        return self.base_pipeline_request(
             doc_collection=doc_collection, request=request, step_namespaces=None
         )
 
@@ -234,12 +237,16 @@ class KazuWebAPI:
     def custom_steps(
         self,
         doc_collection: DocumentCollection,
-        steps: List[str],
         request: Request,
         token=Depends(oauth2_scheme),
+        steps: Optional[List[str]] = None,
+        step_group: Optional[str] = None,
     ):
-        return self.base_request_optional_steps(
-            doc_collection=doc_collection, request=request, step_namespaces=steps
+        return self.base_pipeline_request(
+            doc_collection=doc_collection,
+            request=request,
+            step_namespaces=steps,
+            step_group=step_group,
         )
 
     @app.post(f"/{KAZU}/ner_only")
@@ -249,13 +256,12 @@ class KazuWebAPI:
         request: Request,
         token=Depends(oauth2_scheme),
     ):
-        # TODO: probably get this from hydra config instead
-        ner_steps = [
-            "ExplosionStringMatchingStep",
-            "TransformersModelForTokenClassificationNerStep}",
-        ]
-        return self.base_request_optional_steps(
-            doc_collection=doc_collection, request=request, step_namespaces=ner_steps
+        """An endpoint that only calls steps that do Named Entity Recognition (NER).
+
+        Note that this functionality was already available via the custom_steps endpoint,
+        this just provided a convenient and visible/discoverable endpoint for users."""
+        return self.base_pipeline_request(
+            doc_collection=doc_collection, request=request, step_group="ner_only"
         )
 
     @app.post(f"/{KAZU}/linking_only")
@@ -266,13 +272,11 @@ class KazuWebAPI:
         request: Request,
         token=Depends(oauth2_scheme),
     ):
-        # TODO: probably get this from hydra config instead
-        linking_steps = ["DictionaryEntityLinkingStep", "MappingStep"]
         linking_doc_collection = SingleEntityDocumentConverter(
             doc_collection, entity_class=entity_class
         )
-        return self.base_request_optional_steps(
-            doc_collection=linking_doc_collection, request=request, step_namespaces=linking_steps
+        return self.base_pipeline_request(
+            doc_collection=linking_doc_collection, request=request, step_group="linking_only"
         )
 
     # To be deprecated, after we check how often it gets called after being 'hidden'
