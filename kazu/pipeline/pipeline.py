@@ -203,8 +203,7 @@ class Pipeline:
         :param docs: Docs to process
         :param step_namespaces: The namespaces of the steps to use in processing. Default behaviour
             is to use all steps on the pipeline in the order given when creating the pipeline.
-            This parameter gives the flexibility to sometimes only run some of the steps, for
-            example 'just NER' or 'just linking'.
+            This parameter gives the flexibility to sometimes only run some of the steps.
         :param step_group: One of the pipeline's configured step_groups to run. This is just a
             convenience over needing to specify common groups of step_namespaces. Note that passing
             both step_group and step_namespaces is incohorent and a :exc:`ValueError` will be
