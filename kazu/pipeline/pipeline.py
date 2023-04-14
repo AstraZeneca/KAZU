@@ -124,8 +124,7 @@ class Pipeline:
         profile_steps_dir: Optional[str] = None,
         skip_doc_len: Optional[int] = 200000,
     ):
-        """
-        A basic pipeline, used to help run a series of steps
+        """A basic pipeline, used to help run a series of steps.
 
         :param steps: list of steps to run
         :param failure_handler: optional list of handlers to process failed docs
