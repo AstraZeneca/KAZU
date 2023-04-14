@@ -129,6 +129,9 @@ class Pipeline:
         :param steps: list of steps to run
         :param failure_handler: optional list of handlers to process failed docs
         :param profile_steps_dir: profile throughout of each step with tensorboard. path to log dir
+        :param skip_doc_len: a maximum length for documents (in characters), above which they will
+            be skipped. Extremely long inputs can be symptomatic of very strange text which can
+            result in errors and excessive memory usage.
         """
         self.skip_doc_len = skip_doc_len
         self.failure_handlers = failure_handler
