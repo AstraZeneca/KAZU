@@ -89,7 +89,7 @@ def document_batch_step(
 
     Use this to decorate a method that processes a batch of :class:`~kazu.data.data.Document`\\ s
     at a time. The resulting method will wrap a call to the decorated function with error handling
-    which will added exceptions to the ``PROCESSING_EXCEPTION`` metadata of documents. Failed
+    which will add exceptions to the ``PROCESSING_EXCEPTION`` metadata of documents. Failed
     documents will be returned as the second element of the return value, as expected by
     :meth:`Step.__call__`\\ .
 
