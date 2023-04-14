@@ -3,7 +3,7 @@ import logging
 import os
 import time
 import uuid
-from typing import List, Dict, Optional, Protocol, Iterable
+from typing import List, Dict, Optional, Protocol, Iterable, Collection
 
 import psutil
 from hydra.utils import instantiate
@@ -123,6 +123,7 @@ class Pipeline:
         failure_handler: Optional[List[FailedDocsHandler]] = None,
         profile_steps_dir: Optional[str] = None,
         skip_doc_len: Optional[int] = 200000,
+        step_groups: Optional[Dict[str, Collection[str]]] = None,
     ):
         """A basic pipeline, used to help run a series of steps.
 
@@ -132,6 +133,11 @@ class Pipeline:
         :param skip_doc_len: a maximum length for documents (in characters), above which they will
             be skipped. Extremely long inputs can be symptomatic of very strange text which can
             result in errors and excessive memory usage.
+        :param step_groups: groups of steps to make available for running together as a
+            convenience. The keys are names of groups to create, and values are the namespaces of
+            steps. Order of running steps is still taken from the steps argument, not the order
+            within each group. To customize step running order, you can instead use the
+            ``step_namespaces`` parameter of :meth:`__call__`\\ .
         """
         self.skip_doc_len = skip_doc_len
         self.failure_handlers = failure_handler
@@ -163,6 +169,16 @@ class Pipeline:
             logger.info("profiling not configured")
             self.summary_writer = None
 
+        self.step_groups: Optional[Dict[str, List[Step]]]
+        if step_groups is None:
+            self.step_groups = None
+        else:
+            self.step_groups = {group_name: [] for group_name in step_groups}
+            for step_name, step in self._namespace_to_step.items():
+                for group_name, group in step_groups.items():
+                    if step_name in group:
+                        self.step_groups[group_name].append(step)
+
     def prefilter_docs(self, docs: List[Document]):
         docs_to_process = []
         for doc in docs:
@@ -177,7 +193,10 @@ class Pipeline:
         return docs_to_process
 
     def __call__(
-        self, docs: List[Document], step_namespaces: Optional[Iterable[str]] = None
+        self,
+        docs: List[Document],
+        step_namespaces: Optional[Iterable[str]] = None,
+        step_group: Optional[str] = None,
     ) -> List[Document]:
         """Run the pipeline.
 
@@ -186,6 +205,10 @@ class Pipeline:
             to use all steps on the pipeline in the order given when creating the pipeline. This parameter
             gives the flexibility to sometimes only run some of the steps, for example 'just NER' or
             'just linking'.
+        :param step_group: One of the pipeline's configured step_groups to run. This is just a
+            convenience over needing to specify common groups of step_namespaces. Note that passing
+            both step_group and step_namespaces is incohorent and a :exc:`ValueError` will be
+            raised.
         :return: processed docs
         """
         docs_to_process = self.prefilter_docs(docs)
@@ -193,10 +216,35 @@ class Pipeline:
         batch_start = time.time()
 
         steps_to_run: Iterable[Step]
-        if step_namespaces is None:
-            steps_to_run = self.steps
-        else:
+        if step_namespaces is not None:
+            if step_group is not None:
+                raise ValueError(
+                    "Passing both step_namespaces and step_group to Pipeline.__call__ is incomptable."
+                    " Only one may be passed in a single call."
+                )
+
             steps_to_run = (self._namespace_to_step[namespace] for namespace in step_namespaces)
+
+        elif step_group is not None:
+            if self.step_groups is None:
+                raise ValueError(
+                    "This pipeline does not have any step groups configured, so cannot run the"
+                    " requested step_group %s" % step_group
+                )
+
+            # we can't assign directly to steps_to_run, because the type is Optional[List[Step]]
+            # rather than the Iterable[Step] declared above (and required below).
+            steps_or_none = self.step_groups.get(step_group)
+            if steps_or_none is None:
+                raise ValueError(
+                    "%s is not a valid step_group for this pipeline. Available step_groups:\n%s"
+                    % (step_group, self.step_groups)
+                )
+            else:
+                steps_to_run = steps_or_none
+
+        else:
+            steps_to_run = self.steps
 
         for step in steps_to_run:
             start = time.time()
