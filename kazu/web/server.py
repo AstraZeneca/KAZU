@@ -205,6 +205,25 @@ class KazuWebAPI:
         logger.info("received request to root /")
         return "Welcome to KAZU."
 
+    @app.get("/steps")
+    def steps(self, request: Request):
+        id_log_prefix = get_id_log_prefix_if_available(request)
+        logger.info(id_log_prefix + "Request to kazu/steps endpoint")
+        return JSONResponse(content=list(self.pipeline._namespace_to_step))
+
+    @app.get("/step_groups")
+    def step_groups(self, request: Request):
+        id_log_prefix = get_id_log_prefix_if_available(request)
+        logger.info(id_log_prefix + "Request to kazu/step_groups endpoint")
+        if self.pipeline.step_groups is None:
+            return JSONResponse(content=None)
+        return JSONResponse(
+            content={
+                group_name: [step.namespace() for step in steps]
+                for group_name, steps in self.pipeline.step_groups.items()
+            }
+        )
+
     def base_pipeline_request(
         self,
         doc_collection: Union[DocumentCollection, SingleEntityDocumentConverter],
