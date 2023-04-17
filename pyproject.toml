@@ -49,7 +49,7 @@ typed = [
   "types-cachetools",
   "types-regex",
   "types-psutil",
-  "pandas-stubs",
+  "pandas-stubs>=2.0.0",
 ]
 model_training = [
   "pytorch-metric-learning>=0.9.99",
