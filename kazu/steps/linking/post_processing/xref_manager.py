@@ -47,7 +47,7 @@ class CrossReferenceManager(ABC):
         :param path:
         :return:
         """
-        raise NotImplementedError()
+        pass
 
     def create_xref_mappings(self, mapping: Mapping) -> Iterable[Mapping]:
         """

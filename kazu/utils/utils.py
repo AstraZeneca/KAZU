@@ -152,12 +152,12 @@ class EntityClassFilter:
 
 @overload
 def _create_ngrams_iter(tokens: str, n: int) -> Iterable[str]:
-    ...
+    pass
 
 
 @overload
 def _create_ngrams_iter(tokens: Sequence[str], n: int) -> Iterable[Sequence[str]]:
-    ...
+    pass
 
 
 def _create_ngrams_iter(tokens, n=2):

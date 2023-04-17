@@ -318,17 +318,17 @@ class RDFGraphParser(OntologyParser):
     @overload
     @staticmethod
     def convert_to_rdflib_ref(pred: rdflib.paths.Path) -> rdflib.paths.Path:
-        ...
+        pass
 
     @overload
     @staticmethod
     def convert_to_rdflib_ref(pred: rdflib.term.Node) -> rdflib.term.Node:
-        ...
+        pass
 
     @overload
     @staticmethod
     def convert_to_rdflib_ref(pred: str) -> rdflib.URIRef:
-        ...
+        pass
 
     @staticmethod
     def convert_to_rdflib_ref(pred):

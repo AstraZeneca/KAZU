@@ -185,7 +185,7 @@ class MappingStrategy(ABC):
         :param parser_name: parser name associated with these terms.
         :return: a set of filtered terms
         """
-        raise NotImplementedError()
+        pass
 
     def disambiguate_if_required(
         self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str

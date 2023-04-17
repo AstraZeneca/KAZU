@@ -21,7 +21,7 @@ class EntityClassNormalizer(Protocol):
         :param original_string:
         :return:
         """
-        ...
+        pass
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
@@ -31,7 +31,7 @@ class EntityClassNormalizer(Protocol):
         :param original_string:
         :return:
         """
-        ...
+        pass
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
@@ -41,7 +41,7 @@ class EntityClassNormalizer(Protocol):
         :param original_string:
         :return:
         """
-        ...
+        pass
 
 
 class DefaultStringNormalizer(EntityClassNormalizer):

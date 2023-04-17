@@ -1,7 +1,7 @@
 import dataclasses
 import json
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import defaultdict, Counter
 from enum import auto
 from typing import (
@@ -825,6 +825,7 @@ class OntologyParser(ABC):
         self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()
 
+    @abstractmethod
     def find_kb(self, string: str) -> str:
         """
         split an IDX somehow to find the ontology SOURCE reference
@@ -832,7 +833,7 @@ class OntologyParser(ABC):
         :param string: the IDX string to process
         :return:
         """
-        raise NotImplementedError()
+        pass
 
     def resolve_synonyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
 
@@ -1195,6 +1196,7 @@ class OntologyParser(ABC):
 
         return maybe_curations if return_curations else None
 
+    @abstractmethod
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
         implementations should override this method, returning a 'long, thin' pd.DataFrame of at least the following
@@ -1213,4 +1215,4 @@ class OntologyParser(ABC):
         Any 'extra' columns will be added to the :class:`~kazu.modelling.database.in_memory_db.MetadataDatabase` as metadata fields for the
         given id in the relevant ontology.
         """
-        raise NotImplementedError()
+        pass

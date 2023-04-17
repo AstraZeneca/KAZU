@@ -18,12 +18,12 @@ class StringSimilarityScorer(Protocol):
     """
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
-        ...
+        raise NotImplementedError
 
 
 class BooleanStringSimilarityScorer(StringSimilarityScorer, Protocol):
     def __call__(self, reference_term: str, query_term: str) -> bool:
-        ...
+        raise NotImplementedError
 
 
 class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
