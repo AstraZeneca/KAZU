@@ -477,7 +477,7 @@ class PLSapbertModel(LightningModule):
         :return:
         """
         assert self.sapbert_evaluation_manager is not None
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def log_results(self, dataset_name, metrics):
         for key, val in metrics.items():

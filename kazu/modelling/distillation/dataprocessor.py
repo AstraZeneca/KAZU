@@ -50,15 +50,15 @@ class SeqTagProcessor(DataProcessor):
 
     def get_train_examples(self, data_dir) -> List[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the train set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_dev_examples(self, data_dir) -> List[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the dev set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_aug_examples(self, data_dir) -> List[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the aug set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class NerProcessor(SeqTagProcessor):

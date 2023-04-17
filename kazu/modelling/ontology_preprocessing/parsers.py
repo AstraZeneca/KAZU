@@ -70,7 +70,7 @@ class JsonLinesOntologyParser(OntologyParser):
         :param jsons_gen: iterator of python dict representing json objects
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):

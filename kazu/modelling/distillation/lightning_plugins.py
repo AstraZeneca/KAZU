@@ -63,7 +63,7 @@ class StudentModelCheckpointIO(CheckpointIO):
 
         See :external+pytorch_lightning:meth:`CheckpointIO.load_checkpoint <lightning.pytorch.plugins.io.CheckpointIO.load_checkpoint>`
         for details of the abstract method."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def remove_checkpoint(
         self,

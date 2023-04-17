@@ -239,7 +239,7 @@ class TaskSpecificDistillation(pl.LightningModule):
 
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_optimizer_grouped_parameters(self, student_model):
         param_optimizer = list(student_model.named_parameters())

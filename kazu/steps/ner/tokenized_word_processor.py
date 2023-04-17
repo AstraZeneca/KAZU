@@ -73,7 +73,7 @@ class SpanFinder:
         :return:
         """
 
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
@@ -85,7 +85,7 @@ class SpanFinder:
         :param bio_and_class_labels:
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _update_active_spans(
         self, bio_and_class_labels: Set[Tuple[str, Optional[str]]], word: TokenizedWord
@@ -142,7 +142,7 @@ class SpanFinder:
         :param word:
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __call__(self, words: List[TokenizedWord]):
         for word in words:

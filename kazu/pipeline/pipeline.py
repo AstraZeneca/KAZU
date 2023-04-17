@@ -68,7 +68,7 @@ class FailedDocsHandler(Protocol):
         :param step_docs_map: a dict of step namespace and the docs that failed for it
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class FailedDocsLogHandler(FailedDocsHandler):

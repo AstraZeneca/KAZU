@@ -30,7 +30,7 @@ class Step(Protocol):
         :return: The first element is all the provided docs (now modified by the processing), the
             second is the docs that failed to (fully) process correctly.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class ParserDependentStep(Step):
