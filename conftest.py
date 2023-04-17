@@ -5,7 +5,7 @@ import jwt
 import pytest
 from hydra import compose, initialize_config_dir
 
-from kazu.data.data import SynonymTermWithMetrics
+from kazu.data.data import Document, SynonymTermWithMetrics
 from kazu.modelling.annotation.label_studio import (
     LabelStudioManager,
 )
@@ -35,6 +35,24 @@ def override_kazu_test_config():
 @pytest.fixture(scope="session")
 def kazu_test_config(override_kazu_test_config):
     return override_kazu_test_config(overrides=[])
+
+
+_SIMPLE_TEST_CASE_DATA = [
+    ("EGFR is a gene", "gene"),
+    ("CAT1 is a gene", "gene"),
+    ("my cat sat on the mat", "species"),
+    ("For the treatment of anorexia nervosa.", "disease"),
+]
+
+
+@pytest.fixture(scope="function")
+def ner_simple_test_cases() -> List[Document]:
+    """Return simple Documents testing NER functionality.
+
+    This needs to be function-scoped because Documents can be mutated.
+    """
+    docs = [Document.create_simple_document(x[0]) for x in _SIMPLE_TEST_CASE_DATA]
+    return docs
 
 
 @pytest.fixture(scope="session")

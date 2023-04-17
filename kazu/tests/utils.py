@@ -73,19 +73,6 @@ def full_pipeline_test_cases() -> Tuple[List[Document], List[pd.DataFrame]]:
     return docs, dfs
 
 
-def ner_simple_test_cases() -> List[Tuple[str, str]]:
-    """
-    should return list of tuples: 0 = the text, 1 = the entity class
-    """
-    texts = [
-        ("EGFR is a gene", "gene"),
-        ("CAT1 is a gene", "gene"),
-        ("my cat sat on the mat", "species"),
-        ("For the treatment of anorexia nervosa.", "disease"),
-    ]
-    return texts
-
-
 def ner_long_document_test_cases() -> List[Tuple[str, int, str]]:
     """
     should return list of tuples: 0 = the text, 1 = the number of times an entity class is expected to be found,
