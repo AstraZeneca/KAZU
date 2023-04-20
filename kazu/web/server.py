@@ -299,7 +299,7 @@ class KazuWebAPI:
         )
 
     # To be deprecated, after we check how often it gets called after being 'hidden'
-    @app.post(f"/{KAZU}", include_in_schema=False)
+    @app.post(f"/{KAZU}", deprecated=True)
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu endpoint")
@@ -309,7 +309,7 @@ class KazuWebAPI:
         return JSONResponse(content=resp_dict)
 
     # To be deprecated, after we check how often it gets called after being 'hidden'
-    @app.post(f"/{KAZU}/batch", include_in_schema=False)
+    @app.post(f"/{KAZU}/batch", deprecated=True)
     def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch endpoint")
