@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Union, Optional
 
 import hydra
 import ray
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Body
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
@@ -257,9 +257,9 @@ class KazuWebAPI:
         self,
         doc_collection: DocumentCollection,
         request: Request,
+        step_group: Optional[str] = Body(default=None),
         token=Depends(oauth2_scheme),
         steps: Optional[List[str]] = None,
-        step_group: Optional[str] = None,
     ):
         return self.base_pipeline_request(
             doc_collection=doc_collection,
