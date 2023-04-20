@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Union, Optional
 
 import hydra
 import ray
-from fastapi import Depends, FastAPI, Body
+from fastapi import Depends, FastAPI, HTTPException, Body
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
@@ -234,11 +234,14 @@ class KazuWebAPI:
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch_or_not endpoint")
         logger.info(id_log_prefix + "Documents sent: %s", len(doc_collection))
-        result = self.pipeline(
-            doc_collection.convert_to_kazu_documents(),
-            step_namespaces=step_namespaces,
-            step_group=step_group,
-        )
+        try:
+            result = self.pipeline(
+                doc_collection.convert_to_kazu_documents(),
+                step_namespaces=step_namespaces,
+                step_group=step_group,
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=e.args[0]) from e
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
     @app.post(f"/{KAZU}/ner_and_linking")
