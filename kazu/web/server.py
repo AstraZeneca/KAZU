@@ -18,7 +18,7 @@ from starlette.requests import HTTPConnection, Request
 from starlette.responses import RedirectResponse
 
 from kazu.data.data import Document, Entity
-from kazu.pipeline import Pipeline
+from kazu.pipeline import Pipeline, PipelineValueError
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.routes import KAZU
 from kazu.web.ls_web_utils import LSWebUtils
@@ -240,7 +240,7 @@ class KazuWebAPI:
                 step_namespaces=step_namespaces,
                 step_group=step_group,
             )
-        except ValueError as e:
+        except PipelineValueError as e:
             raise HTTPException(status_code=422, detail=e.args[0]) from e
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 

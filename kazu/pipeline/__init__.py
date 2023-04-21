@@ -4,4 +4,5 @@ from kazu.pipeline.pipeline import (
     FailedDocsHandler,
     FailedDocsFileHandler,
     FailedDocsLogHandler,
+    PipelineValueError,
 )

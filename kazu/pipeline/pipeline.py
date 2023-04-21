@@ -116,6 +116,10 @@ class FailedDocsFileHandler(FailedDocsHandler):
                         )
 
 
+class PipelineValueError(ValueError):
+    pass
+
+
 class Pipeline:
     def __init__(
         self,
@@ -217,7 +221,7 @@ class Pipeline:
         steps_to_run: Iterable[Step]
         if step_namespaces is not None:
             if step_group is not None:
-                raise ValueError(
+                raise PipelineValueError(
                     "Passing both step_namespaces and step_group to Pipeline.__call__ is incomptable."
                     " Only one may be passed in a single call."
                 )
@@ -226,7 +230,7 @@ class Pipeline:
 
         elif step_group is not None:
             if self.step_groups is None:
-                raise ValueError(
+                raise PipelineValueError(
                     "This pipeline does not have any step groups configured, so cannot run the"
                     " requested step_group %s" % step_group
                 )
@@ -235,7 +239,7 @@ class Pipeline:
             # rather than the Iterable[Step] declared above (and required below).
             steps_or_none = self.step_groups.get(step_group)
             if steps_or_none is None:
-                raise ValueError(
+                raise PipelineValueError(
                     "%s is not a valid step_group for this pipeline. Available step_groups:\n%s"
                     % (step_group, self.step_groups)
                 )
