@@ -371,8 +371,8 @@ class KazuWebAPI:
     def ner_and_linking(
         self,
         request: Request,
-        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         token=Depends(oauth2_scheme),
+        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
     ):
         """Run NER and Linking over the input document or documents.
 
@@ -385,9 +385,9 @@ class KazuWebAPI:
     def custom_pipeline_steps(
         self,
         request: Request,
+        token=Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         step_group: Optional[str] = Body(default=None),
-        token=Depends(oauth2_scheme),
         steps: Optional[List[str]] = None,
     ):
         """Run specific steps over the provided document or documents.
@@ -410,8 +410,8 @@ class KazuWebAPI:
     def ner_only(
         self,
         request: Request,
-        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         token=Depends(oauth2_scheme),
+        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
     ):
         """Call only steps that do Named Entity Recognition (NER).
 
@@ -427,8 +427,8 @@ class KazuWebAPI:
         self,
         entity_class: str,
         request: Request,
-        doc_collection: DocumentCollection = Body(examples=linking_only_examples),
         token=Depends(oauth2_scheme),
+        doc_collection: DocumentCollection = Body(examples=linking_only_examples),
     ):
         """Call only steps that do Entity Linking (EL). Also known as 'entity normalization'.
 
