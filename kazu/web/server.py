@@ -267,8 +267,8 @@ class SingleEntityDocumentConverter:
                 section.entities = [
                     Entity.load_contiguous_entity(
                         # NOTE: our mapping logic is currently very dependent on the namespace
-                        # I think though that we intend to get away from this with the 'putative' (not actually called this)
-                        # flag on SynonymTerms after the Curation refactor?
+                        # I think though that we intend to get away from this with the 'mention_confidence' attribute
+                        # on Entity and Curation
                         namespace="TransformersModelForTokenClassificationNerStep",
                         match=section.get_text(),
                         entity_class=self.entity_class,
