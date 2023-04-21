@@ -315,12 +315,14 @@ class KazuWebAPI:
 
     @app.get("/steps")
     def steps(self, request: Request):
+        """Get a list of the steps in the the deployed pipeline."""
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/steps endpoint")
         return JSONResponse(content=list(self.pipeline._namespace_to_step))
 
     @app.get("/step_groups")
     def step_groups(self, request: Request):
+        """Get the step groups configured in the deployed pipeline, (including showing the steps in each group)."""
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/step_groups endpoint")
         if self.pipeline.step_groups is None:
@@ -359,6 +361,9 @@ class KazuWebAPI:
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         token=Depends(oauth2_scheme),
     ):
+        """Run NER and Linking over the input document or documents.
+
+        This is the default behaviour of the kazu library."""
         return self.base_pipeline_request(
             doc_collection=doc_collection, request=request, step_namespaces=None
         )
@@ -372,6 +377,15 @@ class KazuWebAPI:
         token=Depends(oauth2_scheme),
         steps: Optional[List[str]] = None,
     ):
+        """Run specific steps over the provided document or documents.
+
+        This is advanced functionality not expected to be needed by most ordinary users.
+
+        The steps must be contained in the current pipeline (call the steps api to see what is
+        available). The order the steps run in is the order provided in the API, not the order
+        specified in the pipeline. Note that this means you can customize the order steps run in
+        (although doing so effectively requires a good understanding of the steps and their
+        behaviour)."""
         return self.base_pipeline_request(
             doc_collection=doc_collection,
             request=request,
@@ -386,10 +400,11 @@ class KazuWebAPI:
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         token=Depends(oauth2_scheme),
     ):
-        """An endpoint that only calls steps that do Named Entity Recognition (NER).
+        """Call only steps that do Named Entity Recognition (NER).
 
-        Note that this functionality was already available via the custom_steps endpoint,
-        this just provided a convenient and visible/discoverable endpoint for users."""
+        Note that this functionality is already available via the custom_steps endpoint,
+        this just provides a convenient and visible/discoverable endpoint for users.
+        """
         return self.base_pipeline_request(
             doc_collection=doc_collection, request=request, step_group="ner_only"
         )
@@ -402,6 +417,17 @@ class KazuWebAPI:
         doc_collection: DocumentCollection = Body(examples=linking_only_examples),
         token=Depends(oauth2_scheme),
     ):
+        """Call only steps that do Entity Linking (EL). Also known as 'entity normalization'.
+
+        This API assumes that the whole of each section in each document is an entity mention. It
+        will also try to link all entities to a single type of entity, specified in the
+        entity_class query parameter. You can of course call the API multiple times with different
+        entity_class values with the relevant documents for each entity_class.
+
+        If you don't know what the entity type of the entities is, you can just call the
+        ner_and_linking endpoint instead. It may however give you back entities that don't span the
+        whole section.
+        """
         linking_doc_collection = SingleEntityDocumentConverter(
             doc_collection, entity_class=entity_class
         )
@@ -412,6 +438,12 @@ class KazuWebAPI:
     # To be deprecated, after we check how often it gets called after being 'hidden'
     @app.post(f"/{KAZU}", deprecated=True)
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
+        """Deprecated endpoint: use ner_and_linking.
+
+        This endpoint will be removed in future.
+
+        Behaves the same as ner_and_linking, but now we have the ner_only and
+        linking_only endpoints, the naming here had the potential to be confusing."""
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu endpoint")
         logger.info(id_log_prefix + "Document: %s", doc)
@@ -422,6 +454,16 @@ class KazuWebAPI:
     # To be deprecated, after we check how often it gets called after being 'hidden'
     @app.post(f"/{KAZU}/batch", deprecated=True)
     def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
+        """Deprecated endpoint: use ner_and_linking.
+
+        This endpoint will be removed in future.
+
+        Behaves the same as ner_and_linking, but now we have the ner_only and
+        linking_only endpoints, the naming here had the potential to be confusing.
+
+        In addition, we refactored ner_and_linking so that we no longer need separate
+        'batch' and single document endpoints, now ner_and_linking handles both."""
+
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch endpoint")
         logger.info(id_log_prefix + "Documents sent: %s", len(docs))
@@ -430,6 +472,12 @@ class KazuWebAPI:
 
     @app.post(f"/{KAZU}/ls-annotations")
     def ls_annotations(self, doc: WebDocument, request: Request):
+        """Provide LabelStudio annotations from the kazu results on the given document.
+
+        This is not expected to be called by ordinary users. This endpoint was added in order
+        to support the Kazu frontend, which makes uses of LabelStudio's frontend code, so
+        relies on this endpoint."""
+
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/ls-annotations endpoint")
         logger.info(id_log_prefix + "Document: %s", doc)
