@@ -342,7 +342,7 @@ class KazuWebAPI:
         step_group: Optional[str] = None,
     ):
         id_log_prefix = get_id_log_prefix_if_available(request)
-        logger.info(id_log_prefix + "Request to kazu/batch_or_not endpoint")
+        logger.info(id_log_prefix + "Request to " + str(request.scope["path"]) + " endpoint")
         logger.info(id_log_prefix + "Documents sent: %s", len(doc_collection))
         try:
             result = self.pipeline(
