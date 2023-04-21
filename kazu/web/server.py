@@ -435,7 +435,7 @@ class KazuWebAPI:
             doc_collection=linking_doc_collection, request=request, step_group="linking_only"
         )
 
-    # To be deprecated, after we check how often it gets called after being 'hidden'
+    # To be removed, after we check how often it gets called after being 'hidden'
     @app.post(f"/{KAZU}", deprecated=True)
     def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
         """Deprecated endpoint: use ner_and_linking.
@@ -451,7 +451,7 @@ class KazuWebAPI:
         resp_dict = result[0].as_minified_dict()
         return JSONResponse(content=resp_dict)
 
-    # To be deprecated, after we check how often it gets called after being 'hidden'
+    # To be removed, after we check how often it gets called after being 'hidden'
     @app.post(f"/{KAZU}/batch", deprecated=True)
     def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
         """Deprecated endpoint: use ner_and_linking.
