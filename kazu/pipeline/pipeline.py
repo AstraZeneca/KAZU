@@ -226,7 +226,21 @@ class Pipeline:
                     " Only one may be passed in a single call."
                 )
 
-            steps_to_run = (self._namespace_to_step[namespace] for namespace in step_namespaces)
+            steps_to_run = []
+            nonexistent_steps = []
+            for namespace in step_namespaces:
+                maybe_step = self._namespace_to_step.get(namespace)
+                if maybe_step is None:
+                    nonexistent_steps.append(namespace)
+                else:
+                    steps_to_run.append(maybe_step)
+
+            if len(nonexistent_steps) >= 1:
+                raise PipelineValueError(
+                    "The following steps do not exist in the pipeline:\n%s"
+                    "The valid steps for this pipeline are:\n%s"
+                    % (nonexistent_steps, list(self._namespace_to_step))
+                )
 
         elif step_group is not None:
             if self.step_groups is None:
