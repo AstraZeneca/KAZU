@@ -109,6 +109,21 @@ def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
         return ""
 
 
+def log_request_to_path_with_prefix(
+    request: HTTPConnection, log_prefix: Optional[str] = None
+) -> None:
+    """Utility function to log the log prefix plus the endpoint the request was sent to.
+
+    :param request: Starlette HTTPConnection object
+    :param log_prefix: the prefix to log. Provided in case the log prefix has already been
+        calculated in order to save re-calculation. Will call
+        :func:`get_id_log_prefix_if_available` if not provided (or None is provided).
+    """
+    if log_prefix is None:
+        log_prefix = get_id_log_prefix_if_available(request)
+    logger.info(log_prefix + "Request to " + str(request.scope["path"]) + " endpoint")
+
+
 _simple_doc_example = {
     "text": "A single string document that you want to recognise entities in."
     " Using the default kazu pipeline, this will recognise things like asthma, acetaminophen,"
@@ -316,15 +331,13 @@ class KazuWebAPI:
     @app.get("/steps")
     def steps(self, request: Request):
         """Get a list of the steps in the the deployed pipeline."""
-        id_log_prefix = get_id_log_prefix_if_available(request)
-        logger.info(id_log_prefix + "Request to kazu/steps endpoint")
+        log_request_to_path_with_prefix(request)
         return JSONResponse(content=list(self.pipeline._namespace_to_step))
 
     @app.get("/step_groups")
     def step_groups(self, request: Request):
         """Get the step groups configured in the deployed pipeline, (including showing the steps in each group)."""
-        id_log_prefix = get_id_log_prefix_if_available(request)
-        logger.info(id_log_prefix + "Request to kazu/step_groups endpoint")
+        log_request_to_path_with_prefix(request)
         if self.pipeline.step_groups is None:
             return JSONResponse(content=None)
         return JSONResponse(
@@ -342,7 +355,7 @@ class KazuWebAPI:
         step_group: Optional[str] = None,
     ):
         id_log_prefix = get_id_log_prefix_if_available(request)
-        logger.info(id_log_prefix + "Request to " + str(request.scope["path"]) + " endpoint")
+        log_request_to_path_with_prefix(request, log_prefix=id_log_prefix)
         logger.info(id_log_prefix + "Documents sent: %s", len(doc_collection))
         try:
             result = self.pipeline(
@@ -479,7 +492,7 @@ class KazuWebAPI:
         relies on this endpoint."""
 
         id_log_prefix = get_id_log_prefix_if_available(request)
-        logger.info(id_log_prefix + "Request to kazu/ls-annotations endpoint")
+        log_request_to_path_with_prefix(request, log_prefix=id_log_prefix)
         logger.info(id_log_prefix + "Document: %s", doc)
         result = self.pipeline([doc.to_kazu_document()])[0]
         ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
