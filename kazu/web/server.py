@@ -109,12 +109,12 @@ def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
         return ""
 
 
-_simple_data = {
+_simple_doc_example = {
     "text": "A single string document that you want to recognise entities in."
     " Using the default kazu pipeline, this will recognise things like asthma, acetaminophen,"
     " EGFR and many others."
 }
-_sectioned_data = {
+_sectioned_doc_example = {
     "sections": {
         "title": "a study about HER2 in breast cancer",
         "abstract": "We carried out a study on trastuzumab.",
@@ -122,6 +122,18 @@ _sectioned_data = {
         " breast and gastric cancer, and trastuzumab.",
     }
 }
+_multiple_docs_mixed_type_example = [
+    _simple_doc_example,
+    _sectioned_doc_example,
+    {"text": "Another simple doc, this one is about hypertension"},
+    {
+        "sections": {
+            "first section": "A section about non-small cell lung cancer",
+            "second section": "A section with nothing interesting in it",
+            "final section": "A section about drugs: paracetamol, naproxin, ibuprofen.",
+        }
+    },
+]
 
 
 class SectionedWebDocument(BaseModel):
@@ -131,7 +143,7 @@ class SectionedWebDocument(BaseModel):
         return Document.from_named_section_texts(self.sections)
 
     class Config:
-        schema_extra = {"example": _sectioned_data}
+        schema_extra = {"example": _sectioned_doc_example}
 
 
 class SimpleWebDocument(BaseModel):
@@ -141,7 +153,7 @@ class SimpleWebDocument(BaseModel):
         return Document.create_simple_document(self.text)
 
     class Config:
-        schema_extra = {"example": _simple_data}
+        schema_extra = {"example": _simple_doc_example}
 
 
 WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
@@ -163,20 +175,79 @@ class DocumentCollection(BaseModel):
             return 1
 
     class Config:
-        schema_extra = {
-            "example": [
-                _simple_data,
-                _sectioned_data,
-                {"text": "Another simple doc, this one is about hypertension"},
-                {
-                    "sections": {
-                        "first section": "A section about non-small cell lung cancer",
-                        "second section": "A section with nothing interesting in it",
-                        "final section": "A section about drugs: paracetamol, naproxin, ibuprofen.",
-                    }
-                },
-            ]
-        }
+        schema_extra = {"example": _multiple_docs_mixed_type_example}
+
+
+# You appear not to be able to provide multiple examples in the
+# pydantic Config.schema_extra, so save this var for the Body
+document_collection_examples = {
+    "single_simple_doc": {
+        "summary": "A single simple doc",
+        "value": _simple_doc_example,
+    },
+    "multiple_simple_docs": {
+        "summary": "Multiple simple docs",
+        "value": [
+            _simple_doc_example,
+            {"text": "Another doc, this one is about hypertension"},
+            {
+                "text": "The last doc. This one doesn't have anything that should be picked up as an entity."
+            },
+        ],
+    },
+    "single_sectioned_doc": {"summary": "A single sectioned doc", "value": _sectioned_doc_example},
+    "multiple_sectioned_docs": {
+        "summary": "Multiple sectioned docs",
+        "value": [
+            _sectioned_doc_example,
+            {
+                "sections": {
+                    "first section": "A section about non-small cell lung cancer",
+                    "second section": "A section with nothing interesting in it",
+                    "final section": "A section about drugs: paracetamol, naproxin, ibuprofen.",
+                }
+            },
+        ],
+    },
+    "multiple_docs_mixed_types": {
+        "summary": "Multiple docs, both simple and sectioned",
+        "value": _multiple_docs_mixed_type_example,
+    },
+}
+# the examples above don't make much sense for linking
+linking_only_examples = {
+    "single_simple_doc": {
+        "summary": "A single simple doc",
+        "value": {"text": "paracetamol"},
+    },
+    "multiple_simple_docs": {
+        "summary": "Multiple simple docs",
+        "value": [
+            {"text": "paracetamol"},
+            {"text": "acetaminophen"},
+            {"text": "naproxin"},
+        ],
+    },
+    "single_sectioned_doc": {
+        "summary": "A single sectioned doc",
+        "value": {"sections": {"first": "paracetamol", "second": "ibuprofen"}},
+    },
+    "multiple_sectioned_docs": {
+        "summary": "Multiple sectioned docs",
+        "value": [
+            {"sections": {"first": "paracetamol", "second": "ibuprofen"}},
+            {"sections": {"sec1": "naproxin", "sec2": "morphine"}},
+        ],
+    },
+    "multiple_docs_mixed_types": {
+        "summary": "Multiple docs, both simple and sectioned",
+        "value": [
+            {"text": "paracetamol"},
+            {"sections": {"sec1": "naproxin", "sec2": "morphine"}},
+            {"text": "acetaminophen"},
+        ],
+    },
+}
 
 
 class SingleEntityDocumentConverter:
@@ -284,8 +355,8 @@ class KazuWebAPI:
     @app.post(f"/{KAZU}/ner_and_linking")
     def ner_and_linking(
         self,
-        doc_collection: DocumentCollection,
         request: Request,
+        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         token=Depends(oauth2_scheme),
     ):
         return self.base_pipeline_request(
@@ -293,10 +364,10 @@ class KazuWebAPI:
         )
 
     @app.post(f"/{KAZU}/custom_pipeline_steps")
-    def custom_steps(
+    def custom_pipeline_steps(
         self,
-        doc_collection: DocumentCollection,
         request: Request,
+        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         step_group: Optional[str] = Body(default=None),
         token=Depends(oauth2_scheme),
         steps: Optional[List[str]] = None,
@@ -311,8 +382,8 @@ class KazuWebAPI:
     @app.post(f"/{KAZU}/ner_only")
     def ner_only(
         self,
-        doc_collection: DocumentCollection,
         request: Request,
+        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
         token=Depends(oauth2_scheme),
     ):
         """An endpoint that only calls steps that do Named Entity Recognition (NER).
@@ -326,9 +397,9 @@ class KazuWebAPI:
     @app.post(f"/{KAZU}/linking_only")
     def linking_only(
         self,
-        doc_collection: DocumentCollection,
         entity_class: str,
         request: Request,
+        doc_collection: DocumentCollection = Body(examples=linking_only_examples),
         token=Depends(oauth2_scheme),
     ):
         linking_doc_collection = SingleEntityDocumentConverter(
