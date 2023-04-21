@@ -109,11 +109,29 @@ def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
         return ""
 
 
+_simple_data = {
+    "text": "A single string document that you want to recognise entities in."
+    " Using the default kazu pipeline, this will recognise things like asthma, acetaminophen,"
+    " EGFR and many others."
+}
+_sectioned_data = {
+    "sections": {
+        "title": "a study about HER2 in breast cancer",
+        "abstract": "We carried out a study on trastuzumab.",
+        "fulltext": "A much longer text that probably mentions all of HER2,"
+        " breast and gastric cancer, and trastuzumab.",
+    }
+}
+
+
 class SectionedWebDocument(BaseModel):
     sections: Dict[str, str]
 
     def to_kazu_document(self) -> Document:
         return Document.from_named_section_texts(self.sections)
+
+    class Config:
+        schema_extra = {"example": _sectioned_data}
 
 
 class SimpleWebDocument(BaseModel):
@@ -121,6 +139,9 @@ class SimpleWebDocument(BaseModel):
 
     def to_kazu_document(self) -> Document:
         return Document.create_simple_document(self.text)
+
+    class Config:
+        schema_extra = {"example": _simple_data}
 
 
 WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
@@ -140,6 +161,22 @@ class DocumentCollection(BaseModel):
             return len(self.__root__)
         else:
             return 1
+
+    class Config:
+        schema_extra = {
+            "example": [
+                _simple_data,
+                _sectioned_data,
+                {"text": "Another simple doc, this one is about hypertension"},
+                {
+                    "sections": {
+                        "first section": "A section about non-small cell lung cancer",
+                        "second section": "A section with nothing interesting in it",
+                        "final section": "A section about drugs: paracetamol, naproxin, ibuprofen.",
+                    }
+                },
+            ]
+        }
 
 
 class SingleEntityDocumentConverter:
