@@ -385,10 +385,9 @@ class KazuWebAPI:
     def custom_pipeline_steps(
         self,
         request: Request,
-        token=Depends(oauth2_scheme),
-        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
-        step_group: Optional[str] = Body(default=None),
+        doc_collection: DocumentCollection,
         steps: Optional[List[str]] = None,
+        token=Depends(oauth2_scheme),
     ):
         """Run specific steps over the provided document or documents.
 
@@ -403,7 +402,6 @@ class KazuWebAPI:
             doc_collection=doc_collection,
             request=request,
             step_namespaces=steps,
-            step_group=step_group,
         )
 
     @app.post(f"/{KAZU}/ner_only")
@@ -498,6 +496,31 @@ class KazuWebAPI:
         ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
         return JSONResponse(
             content={"ls_view": ls_view, "ls_tasks": ls_tasks, "doc": result.as_minified_dict()}
+        )
+
+    # Note: this needs to be defined last so that we don't try and
+    # interpret the ls-annotations or batch API calls as step groups.
+    @app.post(f"/{KAZU}/{{step_group}}")
+    def step_group(
+        self,
+        step_group: str,
+        request: Request,
+        token=Depends(oauth2_scheme),
+        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
+    ):
+        """Run the pipeline with a specific step group.
+
+        This will run only a pre-defined subset of steps. Call the step_groups endpoint to
+        find the configured set of step_groups for this API deployment, and the steps they
+        include.
+
+        If you are interested in running a different set of steps, you can use the
+        custom_pipeline_steps endpoint.
+        """
+        return self.base_pipeline_request(
+            doc_collection=doc_collection,
+            request=request,
+            step_group=step_group,
         )
 
 
