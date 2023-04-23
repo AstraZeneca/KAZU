@@ -117,6 +117,13 @@ class FailedDocsFileHandler(FailedDocsHandler):
 
 
 class PipelineValueError(ValueError):
+    """An Exception that gets raised if arguments passed to a Pipeline are inappropriate.
+
+    This is particularly useful to allow handling just these errors - e.g. in Kazu's web API,
+    where we can then highlight that there is a problem with the data passed to the API, rather
+    than an internal error to Kazu.
+    """
+
     pass
 
 
