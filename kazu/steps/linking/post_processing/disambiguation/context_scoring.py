@@ -48,12 +48,6 @@ class TfIdfScorer(metaclass=Singleton):
     """
 
     def __init__(self):
-        """
-
-        :param path: to a directory of files containing serialised
-            :class:`sklearn.feature_extraction.text.TfidfVectorizer`\\ . The individual filenames
-            are used to map the models to the relevant parser
-        """
         self.synonym_db = SynonymDatabase()
         self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = self.build_vectorizers()
 

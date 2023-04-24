@@ -16,8 +16,9 @@ logger = logging.getLogger(__name__)
 kazu_model_pack_dir = os.getenv("KAZU_MODEL_PACK")
 KAZU_DISK_CACHE_NAME = "kazu_disk_cache"
 
+kazu_disk_cache: Cache
 """
-We use the diskcache.Cache concept to cache expensive to produce resources
+We use the :class:`diskcache.Cache` concept to cache expensive to produce resources
 to disk. Methods and functions can be decorated with
 kazu_disk_cache.memoize()
 to use this feature. Note, when used with a class method, the
@@ -29,15 +30,17 @@ sensible.
 
 e.g.
 
-def method_of_class_with_lots_of_args(self):
+.. code-block:: python
 
-    kazu_disk_cache.memoize(name=f"something sensible and gloablly unique")
-    def _method_of_class_with_lots_of_args():
-        ...do stuff and cache
-    return _method_of_class_with_lots_of_args()
+    def method_of_class_with_lots_of_args(self):
+
+        @kazu_disk_cache.memoize(name="something sensible and globally unique")
+        def _method_of_class_with_lots_of_args():
+            ...do stuff and cache
+        return _method_of_class_with_lots_of_args()
 """
 if kazu_model_pack_dir is None:
-    temp_disk_cache = str(Path(tempfile.mkdtemp()).joinpath(KAZU_DISK_CACHE_NAME))
+    temp_disk_cache = tempfile.mkdtemp(suffix=KAZU_DISK_CACHE_NAME)
     logger.warning(
         "KAZU_MODEL_PACK env variable not set. Using %s for caching. "
         "This will not be reused if the process is exited",
