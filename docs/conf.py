@@ -116,6 +116,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "python": ("https://docs.python.org/3", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    "diskcache": ("https://grantjenks.com/docs/diskcache/", None),
     "rdflib": ("https://rdflib.readthedocs.io/en/stable/", None),
 }
 
