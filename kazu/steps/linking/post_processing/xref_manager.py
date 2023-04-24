@@ -124,22 +124,19 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         self.oxo_kazu_name_mapping = oxo_kazu_name_mapping
         super().__init__(source_to_parser_metadata_lookup, path)
 
+    @kazu_disk_cache.memoize(ignore={0})
     def build_xref_cache(self, path: Path) -> XrefDatabase:
-        @kazu_disk_cache.memoize(name=f"{self.__class__.__name__}.build_xref_cache")
-        def _build_xref_cache():
-            oxo_dump_path = path.joinpath("oxo_dump.json")
-            logger.info(f"looking for oxo dump at {oxo_dump_path}")
-            if oxo_dump_path.exists():
-                with open(oxo_dump_path, "r") as f:
-                    oxo_dump = json.load(f)
-            else:
-                logger.info(f"oxo dump not found. Attempting to download from {self.oxo_url}")
-                oxo_dump = self.create_oxo_dump(oxo_dump_path)
-            logger.info(f"loading from oxo dump at {oxo_dump_path}")
-            xref_db = self.parse_oxo_dump(oxo_dump)
-            return xref_db
-
-        return _build_xref_cache()
+        oxo_dump_path = path.joinpath("oxo_dump.json")
+        logger.info(f"looking for oxo dump at {oxo_dump_path}")
+        if oxo_dump_path.exists():
+            with open(oxo_dump_path, "r") as f:
+                oxo_dump = json.load(f)
+        else:
+            logger.info(f"oxo dump not found. Attempting to download from {self.oxo_url}")
+            oxo_dump = self.create_oxo_dump(oxo_dump_path)
+        logger.info(f"loading from oxo dump at {oxo_dump_path}")
+        xref_db = self.parse_oxo_dump(oxo_dump)
+        return xref_db
 
     def _split_and_convert_curie(self, curie: str) -> Tuple[str, str]:
         """

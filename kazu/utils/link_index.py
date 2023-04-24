@@ -41,7 +41,7 @@ class DictionaryIndex:
         self.synonym_db: SynonymDatabase = SynonymDatabase()
         self.namespace = self.__class__.__name__
         self.boolean_scorers = boolean_scorers
-        self.vectorizer, self.tf_idf_matrix = self.build_index_cache()
+        self.vectorizer, self.tf_idf_matrix = self.build_index_cache(parser.name)
         self.synonym_list = list(self.synonym_db.get_all(self.parser_name).values())
 
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
@@ -97,14 +97,15 @@ class DictionaryIndex:
                 else:
                     logger.debug("filtered term %s as failed boolean checks", term)
 
-    def build_index_cache(self) -> Tuple[TfidfVectorizer, numpy.ndarray]:
-        @kazu_disk_cache.memoize(name=f"{self.parser_name}.build_index_cache")
-        def _build_index_cache():
-            logger.info("building TfidfVectorizer for %s", self.parser_name)
-            vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-            tf_idf_matrix = vectorizer.fit_transform(
-                self.synonym_db.get_all(self.parser_name).keys()
-            )
-            return vectorizer, tf_idf_matrix
+    @kazu_disk_cache.memoize(ignore={0})
+    def build_index_cache(self, parser_name: str) -> Tuple[TfidfVectorizer, numpy.ndarray]:
+        """
+        Build the cache for the index
 
-        return _build_index_cache()
+        :param parser_name: required by the disk cache decorator
+        :return:
+        """
+        logger.info("building TfidfVectorizer for %s", self.parser_name)
+        vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
+        tf_idf_matrix = vectorizer.fit_transform(self.synonym_db.get_all(self.parser_name).keys())
+        return vectorizer, tf_idf_matrix

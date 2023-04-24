@@ -51,18 +51,15 @@ class TfIdfScorer(metaclass=Singleton):
         self.synonym_db = SynonymDatabase()
         self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = self.build_vectorizers()
 
+    @kazu_disk_cache.memoize(ignore={0})
     def build_vectorizers(self) -> Dict[str, TfidfVectorizer]:
-        @kazu_disk_cache.memoize(name=f"{self.__class__.__name__}.build_vectorizers")
-        def _build_vectorizers():
-            result: Dict[str, TfidfVectorizer] = {}
-            for parser_name in self.synonym_db.loaded_parsers:
-                synonyms = self.synonym_db.get_all(parser_name).keys()
-                vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
-                vectoriser.fit(synonyms)
-                result[parser_name] = vectoriser
-            return result
-
-        return _build_vectorizers()
+        result: Dict[str, TfidfVectorizer] = {}
+        for parser_name in self.synonym_db.loaded_parsers:
+            synonyms = self.synonym_db.get_all(parser_name).keys()
+            vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
+            vectoriser.fit(synonyms)
+            result[parser_name] = vectoriser
+        return result
 
     def __call__(
         self, strings: List[str], matrix: np.ndarray, parser: str

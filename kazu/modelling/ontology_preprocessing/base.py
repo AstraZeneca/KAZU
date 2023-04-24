@@ -697,43 +697,53 @@ class OntologyParser(ABC):
                 pd.isnull(self.parsed_dataframe[DEFAULT_LABEL]), DEFAULT_LABEL
             ] = self.parsed_dataframe[IDX]
 
-    def export_metadata(self) -> Dict[str, Dict[str, SimpleValue]]:
-        @kazu_disk_cache.memoize(name=f"{self.name}.export_metadata")
-        def _export_metadata():
-            self._parse_df_if_not_already_parsed()
-            assert isinstance(self.parsed_dataframe, pd.DataFrame)
-            metadata_columns = self.parsed_dataframe.columns
-            metadata_columns.drop([MAPPING_TYPE, SYN])
-            metadata_df = self.parsed_dataframe[metadata_columns]
-            metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
-            metadata_df.set_index(inplace=True, drop=True, keys=IDX)
-            assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
-            metadata = metadata_df.to_dict(orient="index")
-            return cast(Dict[str, Dict[str, SimpleValue]], metadata)
+    @kazu_disk_cache.memoize(ignore={0})
+    def export_metadata(self, parser_name: str) -> Dict[str, Dict[str, SimpleValue]]:
+        """
+        Export the metadata from the ontology
 
-        return _export_metadata()
+        :param parser_name: name of this parser. Required for correct operation of cache
+            (Note, we cannot pass self to the disk cache as the constructor consumes too much
+            memory
+        :return: {idx:{metadata_key:metadata_value}}
+        """
+        self._parse_df_if_not_already_parsed()
+        assert isinstance(self.parsed_dataframe, pd.DataFrame)
+        metadata_columns = self.parsed_dataframe.columns
+        metadata_columns.drop([MAPPING_TYPE, SYN])
+        metadata_df = self.parsed_dataframe[metadata_columns]
+        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
+        metadata_df.set_index(inplace=True, drop=True, keys=IDX)
+        assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
+        metadata = metadata_df.to_dict(orient="index")
+        return cast(Dict[str, Dict[str, SimpleValue]], metadata)
 
-    def export_synonym_terms(self) -> Set[SynonymTerm]:
-        @kazu_disk_cache.memoize(name=f"{self.name}.export_synonym_terms")
-        def _export_synonym_terms():
-            self._parse_df_if_not_already_parsed()
-            assert isinstance(self.parsed_dataframe, pd.DataFrame)
-            # ensure correct order
-            syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
-            syn_df = syn_df.dropna(subset=[SYN])
-            syn_df[SYN] = syn_df[SYN].apply(str.strip)
-            syn_df.drop_duplicates(subset=self.all_synonym_column_names)
-            assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-            synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
-            return synonym_terms
+    @kazu_disk_cache.memoize(ignore={0})
+    def export_synonym_terms(self, parser_name: str) -> Set[SynonymTerm]:
+        """
+        Export :class:`.SynonymTerm` from the parser
 
-        return _export_synonym_terms()
+        :param parser_name: name of this parser. Required for correct operation of cache
+            (Note, we cannot pass self to the disk cache as the constructor consumes too much
+            memory
+        :return:
+        """
+        self._parse_df_if_not_already_parsed()
+        assert isinstance(self.parsed_dataframe, pd.DataFrame)
+        # ensure correct order
+        syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
+        syn_df = syn_df.dropna(subset=[SYN])
+        syn_df[SYN] = syn_df[SYN].apply(str.strip)
+        syn_df.drop_duplicates(subset=self.all_synonym_column_names)
+        assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
+        synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
+        return synonym_terms
 
     def populate_metadata_database(self):
         """
         populate the metadata database with this ontology
         """
-        self.metadata_db.add_parser(self.name, self.export_metadata())
+        self.metadata_db.add_parser(self.name, self.export_metadata(self.name))
 
     def generate_synonyms(self) -> Set[SynonymTerm]:
         """
@@ -758,7 +768,7 @@ class OntologyParser(ABC):
         populate the synonym database
         """
 
-        self.synonym_db.add(self.name, self.export_synonym_terms())
+        self.synonym_db.add(self.name, self.export_synonym_terms(self.name))
 
     def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
         """
