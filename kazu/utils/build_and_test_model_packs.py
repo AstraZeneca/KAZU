@@ -111,7 +111,6 @@ class ModelPackBuilder:
         self.apply_merge_configurations()
 
         self.clear_cached_resources_from_model_pack_dir()
-        # set the env param so that hydra conf is correctly configured
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
         from kazu.utils.constants import HYDRA_VERSION_BASE
 
