@@ -2,10 +2,10 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.linking.post_processing.mapping_strategies" href="kazu.steps.linking.post_processing.mapping_strategies.html" /><link rel="prev" title="kazu.steps.linking.post_processing.disambiguation.context_scoring" href="kazu.steps.linking.post_processing.disambiguation.context_scoring.html" />
 
-    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>kazu.steps.linking.post_processing.disambiguation.strategies - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -252,7 +252,6 @@
 <li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.xref_manager.html">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -367,7 +366,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.disambiguation.strategies.</span></span><span class="sig-name descname"><span class="pre">AnnotationLevelDisambiguationStrategy</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/disambiguation/strategies.py#L238-L267"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.disambiguation.strategies.</span></span><span class="sig-name descname"><span class="pre">AnnotationLevelDisambiguationStrategy</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/disambiguation/strategies.py#L238-L269"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.steps.linking.post_processing.disambiguation.strategies.DisambiguationStrategy" title="kazu.steps.linking.post_processing.disambiguation.strategies.DisambiguationStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">DisambiguationStrategy</span></code></a></p>
 <p>certain entities are often mentioned by some colloquial name, even if it’s technically incorrect. In these cases,
 we may have an annotation_score field in the metadata_db, as a proxy of how widely studied the entity is. We
@@ -376,7 +375,7 @@ author is referring to instance x vs instance y’. Naturally, this is a pretty 
 strategy, so should generally only be used as a last resort!</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.disambiguate">
-<span class="sig-name descname"><span class="pre">disambiguate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/disambiguation/strategies.py#L250-L267"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.disambiguate" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">disambiguate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/disambiguation/strategies.py#L252-L269"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.disambiguate" title="Permalink to this definition">#</a></dt>
 <dd><p>subset a set of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquivalentIdSet</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -397,7 +396,7 @@ strategy, so should generally only be used as a last resort!</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/disambiguation/strategies.py#L247-L248"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.prepare" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/disambiguation/strategies.py#L249-L250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.prepare" title="Permalink to this definition">#</a></dt>
 <dd><p>perform any preprocessing required</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -408,6 +407,11 @@ strategy, so should generally only be used as a last resort!</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.metadata_db">
+<span class="sig-name descname"><span class="pre">metadata_db</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;kazu.modelling.database.in_memory_db.MetadataDatabase</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.metadata_db" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -545,7 +549,7 @@ build a document representation matrix of these.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>scorer</strong> (<a class="reference internal" href="kazu.steps.linking.post_processing.disambiguation.context_scoring.html#kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer" title="kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer"><em>TfIdfScorer</em></a>) – handles scoring of contexts</p></li>
 <li><p><strong>context_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – only consider terms above this search threshold</p></li>
-<li><p><strong>relevant_aggregation_strategies</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdAggregationStrategy" title="kazu.data.data.EquivalentIdAggregationStrategy"><em>EquivalentIdAggregationStrategy</em></a><em>] </em><em>| </em><em>None</em>) – Only consider these strategies when selecting synonyms from the
+<li><p><strong>relevant_aggregation_strategies</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdAggregationStrategy" title="kazu.data.data.EquivalentIdAggregationStrategy"><em>EquivalentIdAggregationStrategy</em></a><em>]</em><em>]</em>) – Only consider these strategies when selecting synonyms from the
 synonym database, when building a representation. If none, all strategies will be considered</p></li>
 <li><p><strong>confidence</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.DisambiguationConfidence" title="kazu.data.data.DisambiguationConfidence"><em>DisambiguationConfidence</em></a>) – </p></li>
 </ul>
@@ -696,6 +700,7 @@ we don’t need to call it multiple times per document</p>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy"><code class="docutils literal notranslate"><span class="pre">AnnotationLevelDisambiguationStrategy</span></code></a><ul>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.disambiguate"><code class="docutils literal notranslate"><span class="pre">AnnotationLevelDisambiguationStrategy.disambiguate()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.prepare"><code class="docutils literal notranslate"><span class="pre">AnnotationLevelDisambiguationStrategy.prepare()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy.metadata_db"><code class="docutils literal notranslate"><span class="pre">AnnotationLevelDisambiguationStrategy.metadata_db</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy"><code class="docutils literal notranslate"><span class="pre">DefinedElsewhereInDocumentDisambiguationStrategy</span></code></a><ul>
@@ -731,6 +736,9 @@ we don’t need to call it multiple times per document</p>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

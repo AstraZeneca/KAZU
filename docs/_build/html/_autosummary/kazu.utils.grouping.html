@@ -2,10 +2,10 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.utils.link_index" href="kazu.utils.link_index.html" /><link rel="prev" title="kazu.utils.constants" href="kazu.utils.constants.html" />
 
-    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>kazu.utils.grouping - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -252,7 +252,6 @@
 <li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.xref_manager.html">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -340,19 +339,6 @@
         <article role="main">
           <section id="module-kazu.utils.grouping">
 <span id="kazu-utils-grouping"></span><h1>kazu.utils.grouping<a class="headerlink" href="#module-kazu.utils.grouping" title="Permalink to this heading">#</a></h1>
-<p class="rubric">Module Attributes</p>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.grouping.Item" title="kazu.utils.grouping.Item"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Item</span></code></a></p></td>
-<td><p>The type of an element in the iterable being grouped.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#kazu.utils.grouping.Key" title="kazu.utils.grouping.Key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Key</span></code></a></p></td>
-<td><p>The type of the sort key provided by the key_func.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -363,34 +349,18 @@
 </tbody>
 </table>
 </div>
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.grouping.Item">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.grouping.</span></span><span class="sig-name descname"><span class="pre">Item</span></span><a class="headerlink" href="#kazu.utils.grouping.Item" title="Permalink to this definition">#</a></dt>
-<dd><p>The type of an element in the iterable being grouped.</p>
-<p>alias of TypeVar(‘Item’)</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="kazu.utils.grouping.Key">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.grouping.</span></span><span class="sig-name descname"><span class="pre">Key</span></span><a class="headerlink" href="#kazu.utils.grouping.Key" title="Permalink to this definition">#</a></dt>
-<dd><p>The type of the sort key provided by the key_func.</p>
-<p>Bound to ‘SupportsRichComparison’ from <a class="reference external" href="https://github.com/python/typeshed/tree/main/stdlib/_typeshed">_typeshed</a>
-as the keys must support comparison in order to be sorted using <a class="reference external" href="https://docs.python.org/3/library/functions.html#sorted" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a>.</p>
-<p>alias of TypeVar(‘Key’, bound=<code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsRichComparison</span></code>)</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.utils.grouping.sort_then_group">
-<span class="sig-prename descclassname"><span class="pre">kazu.utils.grouping.</span></span><span class="sig-name descname"><span class="pre">sort_then_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_func</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/grouping.py#L22-L26"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.grouping.sort_then_group" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.grouping.</span></span><span class="sig-name descname"><span class="pre">sort_then_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_func</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/grouping.py#L16-L20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.grouping.sort_then_group" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#kazu.utils.grouping.Item" title="kazu.utils.grouping.Item"><em>Item</em></a><em>]</em>) – </p></li>
-<li><p><strong>key_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference internal" href="#kazu.utils.grouping.Item" title="kazu.utils.grouping.Item"><em>Item</em></a><em>]</em><em>, </em><a class="reference internal" href="#kazu.utils.grouping.Key" title="kazu.utils.grouping.Key"><em>Key</em></a><em>]</em>) – </p></li>
+<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><em>Item</em><em>]</em>) – </p></li>
+<li><p><strong>key_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a><em>[</em><em>[</em><em>Item</em><em>]</em><em>, </em><em>Key</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference internal" href="#kazu.utils.grouping.Key" title="kazu.utils.grouping.Key"><em>Key</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a>[<a class="reference internal" href="#kazu.utils.grouping.Item" title="kazu.utils.grouping.Item"><em>Item</em></a>]]]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<em>Key</em>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a>[<em>Item</em>]]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -453,8 +423,6 @@ as the keys must support comparison in order to be sorted using <a class="refere
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">kazu.utils.grouping</a><ul>
-<li><a class="reference internal" href="#kazu.utils.grouping.Item"><code class="docutils literal notranslate"><span class="pre">Item</span></code></a></li>
-<li><a class="reference internal" href="#kazu.utils.grouping.Key"><code class="docutils literal notranslate"><span class="pre">Key</span></code></a></li>
 <li><a class="reference internal" href="#kazu.utils.grouping.sort_then_group"><code class="docutils literal notranslate"><span class="pre">sort_then_group()</span></code></a></li>
 </ul>
 </li>
@@ -468,6 +436,9 @@ as the keys must support comparison in order to be sorted using <a class="refere
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

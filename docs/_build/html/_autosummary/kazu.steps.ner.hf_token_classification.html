@@ -2,10 +2,10 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.ner.seth" href="kazu.steps.ner.seth.html" /><link rel="prev" title="kazu.steps.ner.entity_post_processing" href="kazu.steps.ner.entity_post_processing.html" />
 
-    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>kazu.steps.ner.hf_token_classification - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -252,7 +252,6 @@
 <li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.xref_manager.html">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -369,11 +368,11 @@ allowed by a model. Resulting token labels are then post processed by
 <li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – batch size for dataloader</p></li>
 <li><p><strong>stride</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
 <li><p><strong>max_sequence_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – passed to HF tokenizers (for splitting long docs)</p></li>
-<li><p><strong>trainer</strong> (<a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.trainer.trainer.Trainer.html#lightning.pytorch.trainer.trainer.Trainer" title="(in PyTorch Lightning v2.0.1)"><em>Trainer</em></a>) – </p></li>
+<li><p><strong>trainer</strong> (<em>Trainer</em>) – </p></li>
 <li><p><strong>detect_subspans</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – attempt to detect nested entities (threshold must be configured)</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> | </em><em>None</em>) – the confidence threshold used to detect nested entities</p></li>
-<li><p><strong>entity_splitter</strong> (<a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><em>NonContiguousEntitySplitter</em></a><em> | </em><em>None</em>) – instance of <a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter</span></code></a> to detect non-contiguous entities</p></li>
-<li><p><strong>strip_re</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – passed to <a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor" title="kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">TokenizedWordProcessor</span></code></a></p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>]</em>) – the confidence threshold used to detect nested entities</p></li>
+<li><p><strong>entity_splitter</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><em>NonContiguousEntitySplitter</em></a><em>]</em>) – instance of <a class="reference internal" href="kazu.steps.ner.entity_post_processing.html#kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter" title="kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter</span></code></a> to detect non-contiguous entities</p></li>
+<li><p><strong>strip_re</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em>) – passed to <a class="reference internal" href="kazu.steps.ner.tokenized_word_processor.html#kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor" title="kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">TokenizedWordProcessor</span></code></a></p></li>
 <li><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
 </ul>
 </dd>
@@ -388,7 +387,7 @@ we need to return different subsets of the frame offsets and frame word_ids</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>batch_encoding</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.BatchEncoding" title="(in transformers vmain)"><em>BatchEncoding</em></a>) – </p></li>
+<li><p><strong>batch_encoding</strong> (<em>BatchEncoding</em>) – </p></li>
 <li><p><strong>number_of_frames</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – number of frames created by the tokenizer for the string</p></li>
 <li><p><strong>frame_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – the index of the query frame, relative to the total number of frames</p></li>
 <li><p><strong>section_frame_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – the index of the section frame, relative to the whole BatchEncoding</p></li>
@@ -448,7 +447,7 @@ sequence length of a transformer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>batch_encoding</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.BatchEncoding" title="(in transformers vmain)"><em>BatchEncoding</em></a>) – </p></li>
+<li><p><strong>batch_encoding</strong> (<em>BatchEncoding</em>) – </p></li>
 <li><p><strong>section_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
@@ -481,7 +480,7 @@ sequence length of a transformer</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>section_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>batch_encoding</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.BatchEncoding" title="(in transformers vmain)"><em>BatchEncoding</em></a>) – </p></li>
+<li><p><strong>batch_encoding</strong> (<em>BatchEncoding</em>) – </p></li>
 <li><p><strong>predictions</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><em>Tensor</em></a>) – </p></li>
 <li><p><strong>tokenizer</strong> – </p></li>
 <li><p><strong>stride</strong> – </p></li>
@@ -578,6 +577,9 @@ sequence length of a transformer</p>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

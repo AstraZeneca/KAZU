@@ -13,7 +13,7 @@ kazu.modelling.ontology\_preprocessing.base
 
    .. autosummary::
    
-      load_curations
+      load_curated_terms
       load_global_actions
    
    

@@ -17,12 +17,7 @@ kazu.utils.link\_index
 
    .. autosummary::
    
-      CDistTensorEmbeddingIndex
       DictionaryIndex
-      EmbeddingIndex
-      Index
-      MatMulTensorEmbeddingIndex
-      TensorEmbeddingIndex
    
    
 

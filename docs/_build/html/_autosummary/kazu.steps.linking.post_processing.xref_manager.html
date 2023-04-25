@@ -2,10 +2,10 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.linking.sapbert" href="kazu.steps.linking.sapbert.html" /><link rel="prev" title="kazu.steps.linking.post_processing.strategy_runner" href="kazu.steps.linking.post_processing.strategy_runner.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.ner" href="kazu.steps.ner.html" /><link rel="prev" title="kazu.steps.linking.post_processing.strategy_runner" href="kazu.steps.linking.post_processing.strategy_runner.html" />
 
-    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>kazu.steps.linking.post_processing.xref_manager - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -252,7 +252,6 @@
 <li class="toctree-l5 current current-page"><a class="current reference internal" href="#">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -355,11 +354,11 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.xref_manager.</span></span><span class="sig-name descname"><span class="pre">CrossReferenceManager</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L27-L145"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.xref_manager.</span></span><span class="sig-name descname"><span class="pre">CrossReferenceManager</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L25-L90"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_to_parser_metadata_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L31-L42"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_to_parser_metadata_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L29-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -377,7 +376,7 @@ MondoOntologyParser, we need to specify which one we want to use to generate the
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.build_xref_cache">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_xref_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L44-L52"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.build_xref_cache" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_xref_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L42-L50"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.build_xref_cache" title="Permalink to this definition">#</a></dt>
 <dd><p>build a XrefDatabase suitable for caching</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -394,7 +393,7 @@ MondoOntologyParser, we need to specify which one we want to use to generate the
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.create_xref_mappings">
-<span class="sig-name descname"><span class="pre">create_xref_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L107-L145"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.create_xref_mappings" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_xref_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L52-L90"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.create_xref_mappings" title="Permalink to this definition">#</a></dt>
 <dd><p>attempt to create additional xref mappings from a source mapping</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -409,57 +408,6 @@ MondoOntologyParser, we need to specify which one we want to use to generate the
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L97-L105"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load" title="Permalink to this definition">#</a></dt>
-<dd><p>load from disk</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cache_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – the path to the cached files. Normally created via .save</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load_or_build_cache">
-<span class="sig-name descname"><span class="pre">load_or_build_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_rebuild_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L54-L79"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load_or_build_cache" title="Permalink to this definition">#</a></dt>
-<dd><p>build the index, or if a cached version is available, load it instead</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p></li>
-<li><p><strong>force_rebuild_cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xref_db</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L81-L95"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.save" title="Permalink to this definition">#</a></dt>
-<dd><p>save to disk. Makes a directory at the path location with all the index assets</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cache_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – a dir to save the index.</p></li>
-<li><p><strong>xref_db</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em><em>]</em><em>]</em>) – data to save</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a Path to where the data was saved</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.xref_db">
 <span class="sig-name descname"><span class="pre">xref_db</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.xref_db" title="Permalink to this definition">#</a></dt>
@@ -469,13 +417,13 @@ MondoOntologyParser, we need to specify which one we want to use to generate the
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.xref_manager.</span></span><span class="sig-name descname"><span class="pre">OxoCrossReferenceManager</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L148-L253"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.steps.linking.post_processing.xref_manager.</span></span><span class="sig-name descname"><span class="pre">OxoCrossReferenceManager</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L93-L199"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager" title="kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrossReferenceManager</span></code></a></p>
 <p>A CrossReferenceManager that uses the EBI OXO service to identify cross-references. Downloads a set of
 cross-references directly from EBI, and caches locally</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_to_parser_metadata_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxo_kazu_name_mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri_prefixes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxo_query</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L158-L180"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_to_parser_metadata_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxo_kazu_name_mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri_prefixes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxo_query</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L103-L125"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -493,7 +441,7 @@ no prefix will be used</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.build_xref_cache">
-<span class="sig-name descname"><span class="pre">build_xref_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L182-L193"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.build_xref_cache" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">build_xref_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L127-L139"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.build_xref_cache" title="Permalink to this definition">#</a></dt>
 <dd><p>build a XrefDatabase suitable for caching</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -510,7 +458,7 @@ no prefix will be used</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.create_oxo_dump">
-<span class="sig-name descname"><span class="pre">create_oxo_dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L224-L253"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.create_oxo_dump" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_oxo_dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L170-L199"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.create_oxo_dump" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p>
@@ -523,7 +471,7 @@ no prefix will be used</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.parse_oxo_dump">
-<span class="sig-name descname"><span class="pre">parse_oxo_dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oxo_dump</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L207-L222"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.parse_oxo_dump" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_oxo_dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oxo_dump</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/linking/post_processing/xref_manager.py#L153-L168"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager.parse_oxo_dump" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>oxo_dump</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>]</em>) – </p>
@@ -558,12 +506,12 @@ no prefix will be used</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="kazu.steps.linking.sapbert.html">
+          <a class="next-page" href="kazu.steps.ner.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">kazu.steps.linking.sapbert</div>
+                <div class="title">kazu.steps.ner</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -613,9 +561,6 @@ no prefix will be used</p></li>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.__init__"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.build_xref_cache"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.build_xref_cache()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.create_xref_mappings"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.create_xref_mappings()</span></code></a></li>
-<li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.load()</span></code></a></li>
-<li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.load_or_build_cache"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.load_or_build_cache()</span></code></a></li>
-<li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.save"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.save()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.steps.linking.post_processing.xref_manager.CrossReferenceManager.xref_db"><code class="docutils literal notranslate"><span class="pre">CrossReferenceManager.xref_db</span></code></a></li>
 </ul>
 </li>
@@ -641,6 +586,9 @@ no prefix will be used</p></li>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

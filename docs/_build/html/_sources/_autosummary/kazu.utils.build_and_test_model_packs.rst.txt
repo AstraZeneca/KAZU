@@ -9,6 +9,12 @@ kazu.utils.build\_and\_test\_model\_packs
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      build_all_model_packs
+   
    
 
    

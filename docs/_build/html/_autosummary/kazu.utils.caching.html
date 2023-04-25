@@ -2,10 +2,10 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.utils.constants" href="kazu.utils.constants.html" /><link rel="prev" title="kazu.utils.build_and_test_model_packs" href="kazu.utils.build_and_test_model_packs.html" />
 
-    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>kazu.utils.caching - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -252,7 +252,6 @@
 <li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.xref_manager.html">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -340,6 +339,16 @@
         <article role="main">
           <section id="module-kazu.utils.caching">
 <span id="kazu-utils-caching"></span><h1>kazu.utils.caching<a class="headerlink" href="#module-kazu.utils.caching" title="Permalink to this heading">#</a></h1>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.utils.caching.kazu_disk_cache" title="kazu.utils.caching.kazu_disk_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kazu_disk_cache</span></code></a></p></td>
+<td><p>We use the <a class="reference external" href="https://grantjenks.com/docs/diskcache/api.html#diskcache.Cache" title="(in DiskCache)"><code class="xref py py-class docutils literal notranslate"><span class="pre">diskcache.Cache</span></code></a> concept to cache expensive to produce resources to disk.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -352,12 +361,12 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.caching.EntityLinkingLookupCache">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EntityLinkingLookupCache</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L9-L39"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">EntityLinkingLookupCache</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L61-L91"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A simple wrapper around LFUCache to reduce calls to expensive processes (e.g. bert)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.caching.EntityLinkingLookupCache.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L14-L15"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lookup_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L66-L67"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>lookup_cache_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
@@ -367,7 +376,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache">
-<span class="sig-name descname"><span class="pre">check_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L23-L39"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entities</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L75-L91"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.check_lookup_cache" title="Permalink to this definition">#</a></dt>
 <dd><p>checks the cache for synonym terms. If relevant terms are found for an entity, update it
 accordingly. If not return as a list of cache misses (e.g. for further processing)</p>
 <dl class="field-list simple">
@@ -385,7 +394,7 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.caching.EntityLinkingLookupCache.update_terms_lookup_cache">
-<span class="sig-name descname"><span class="pre">update_terms_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L17-L21"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.update_terms_lookup_cache" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_terms_lookup_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/caching.py#L69-L73"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.caching.EntityLinkingLookupCache.update_terms_lookup_cache" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -396,6 +405,29 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="kazu.utils.caching.kazu_disk_cache">
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.caching.</span></span><span class="sig-name descname"><span class="pre">kazu_disk_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://grantjenks.com/docs/diskcache/api.html#diskcache.Cache" title="(in DiskCache)"><span class="pre">Cache</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;diskcache.core.Cache</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#kazu.utils.caching.kazu_disk_cache" title="Permalink to this definition">#</a></dt>
+<dd><p>We use the <a class="reference external" href="https://grantjenks.com/docs/diskcache/api.html#diskcache.Cache" title="(in DiskCache)"><code class="xref py py-class docutils literal notranslate"><span class="pre">diskcache.Cache</span></code></a> concept to cache expensive to produce resources
+to disk. Methods and functions can be decorated with
+kazu_disk_cache.memoize()
+to use this feature. Note, when used with a class method, the
+default behaviour of this function is to generate a key based
+on the constructor arguments of the class instance. Since these can
+be large (e.g. OntologyParser), it may be better to define an anonymous
+inner function where the cache key can be manually specified as something
+sensible.</p>
+<p>e.g.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">method_of_class_with_lots_of_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="nd">@kazu_disk_cache</span><span class="o">.</span><span class="n">memoize</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;something sensible and globally unique&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_method_of_class_with_lots_of_args</span><span class="p">():</span>
+        <span class="o">...</span><span class="n">do</span> <span class="n">stuff</span> <span class="ow">and</span> <span class="n">cache</span>
+    <span class="k">return</span> <span class="n">_method_of_class_with_lots_of_args</span><span class="p">()</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
@@ -462,6 +494,7 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
 <li><a class="reference internal" href="#kazu.utils.caching.EntityLinkingLookupCache.update_terms_lookup_cache"><code class="docutils literal notranslate"><span class="pre">EntityLinkingLookupCache.update_terms_lookup_cache()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#kazu.utils.caching.kazu_disk_cache"><code class="docutils literal notranslate"><span class="pre">kazu_disk_cache</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -474,6 +507,9 @@ accordingly. If not return as a list of cache misses (e.g. for further processin
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

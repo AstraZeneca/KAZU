@@ -2,10 +2,10 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.distillation.lightning_plugins" href="kazu.modelling.distillation.lightning_plugins.html" /><link rel="prev" title="kazu.modelling.distillation" href="kazu.modelling.distillation.html" />
 
-    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>kazu.modelling.distillation.dataprocessor - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -252,7 +252,6 @@
 <li class="toctree-l5"><a class="reference internal" href="kazu.steps.linking.post_processing.xref_manager.html">kazu.steps.linking.post_processing.xref_manager</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="kazu.steps.linking.sapbert.html">kazu.steps.linking.sapbert</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.steps.ner.html">kazu.steps.ner</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -378,60 +377,60 @@ limitations under the License.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.NerProcessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.dataprocessor.</span></span><span class="sig-name descname"><span class="pre">NerProcessor</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L64-L130"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.dataprocessor.</span></span><span class="sig-name descname"><span class="pre">NerProcessor</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L70-L135"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor" title="kazu.modelling.distillation.dataprocessor.SeqTagProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeqTagProcessor</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.NerProcessor.get_aug_examples">
-<span class="sig-name descname"><span class="pre">get_aug_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L77-L78"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_aug_examples" title="Permalink to this definition">#</a></dt>
-<dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the aug set.</p>
+<span class="sig-name descname"><span class="pre">get_aug_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L82-L83"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_aug_examples" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the dev set.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.NerProcessor.get_dev_examples">
-<span class="sig-name descname"><span class="pre">get_dev_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L70-L71"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_dev_examples" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_dev_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L76-L77"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_dev_examples" title="Permalink to this definition">#</a></dt>
 <dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the dev set.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.NerProcessor.get_test_examples">
-<span class="sig-name descname"><span class="pre">get_test_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L73-L75"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_test_examples" title="Permalink to this definition">#</a></dt>
-<dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the test set.</p>
+<span class="sig-name descname"><span class="pre">get_test_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L79-L80"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_test_examples" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets a collection of [<cite>InputExample</cite>] for the test set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<em>InputExample</em>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.NerProcessor.get_train_examples">
-<span class="sig-name descname"><span class="pre">get_train_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L65-L68"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_train_examples" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_train_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L71-L74"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.NerProcessor.get_train_examples" title="Permalink to this definition">#</a></dt>
 <dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the train set.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -440,13 +439,13 @@ limitations under the License.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.SeqTagProcessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.dataprocessor.</span></span><span class="sig-name descname"><span class="pre">SeqTagProcessor</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L48-L61"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.DataProcessor" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProcessor</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.dataprocessor.</span></span><span class="sig-name descname"><span class="pre">SeqTagProcessor</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L48-L67"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataProcessor</span></code></p>
 <p>Base class for data converters for sequence tagging data sets.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_aug_examples">
-<span class="sig-name descname"><span class="pre">get_aug_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L59-L61"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_aug_examples" title="Permalink to this definition">#</a></dt>
-<dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the aug set.</p>
+<span class="sig-name descname"><span class="pre">get_aug_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L63-L67"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_aug_examples" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the dev set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
@@ -456,7 +455,7 @@ limitations under the License.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_dev_examples">
-<span class="sig-name descname"><span class="pre">get_dev_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L55-L57"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_dev_examples" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_dev_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L57-L61"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_dev_examples" title="Permalink to this definition">#</a></dt>
 <dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the dev set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -467,7 +466,7 @@ limitations under the License.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_train_examples">
-<span class="sig-name descname"><span class="pre">get_train_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L51-L53"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_train_examples" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_train_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/dataprocessor.py#L51-L55"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.dataprocessor.SeqTagProcessor.get_train_examples" title="Permalink to this definition">#</a></dt>
 <dd><p>Gets a collection of <a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><code class="xref py py-class docutils literal notranslate"><span class="pre">transformers.InputExample</span></code></a> for the train set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -561,6 +560,9 @@ limitations under the License.</p>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
