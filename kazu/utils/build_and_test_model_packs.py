@@ -208,9 +208,7 @@ class ModelPackBuilder:
                 shutil.copy(ontology_path, target_path)
 
     def clear_cached_resources_from_model_pack_dir(self):
-        """
-        Delete any cached data from the input path
-
+        """Delete any cached data from the input path.
 
         :param model_pack_path:
         :return:
