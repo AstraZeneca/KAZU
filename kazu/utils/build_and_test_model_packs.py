@@ -62,8 +62,8 @@ class ModelPackBuilder:
         skip_tests: bool,
         zip_pack: bool,
     ):
-        """
-        A ModelPackBuilder is a helper class to assist in the building of a model pack.
+        """A ModelPackBuilder is a helper class to assist in the building of a model pack.
+
         WARNING! since this class will configure the kazu global cache, executing
         multiple builds within the same python process could potentially lead to the
         pollution of the cache. This is because the KAZU_MODEL_PACK env variable
@@ -72,7 +72,7 @@ class ModelPackBuilder:
         :func:`.build_all_model_packs`\\, which will control this process for you.
 
 
-        :param logging_config_path: passed to logging.config.fileConfig
+        :param logging_config_path: passed to :func:`logging.config.fileConfig`
         :param target_model_pack_path: path to model pack to process
         :param kazu_version: version of kazu used to generate model pack
         :param build_dir: build the pack in this directory
@@ -81,7 +81,7 @@ class ModelPackBuilder:
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
         """
-        if logging_config_path:
+        if logging_config_path is not None:
             fileConfig(logging_config_path)
         self.logger = logging.getLogger(__name__)
         self.zip_pack = zip_pack
@@ -96,18 +96,11 @@ class ModelPackBuilder:
         self.build_config = self.load_build_configuration()
 
     def __repr__(self):
-        """
-        For nice log messages
-
-
-        :return:
-        """
+        """For nice log messages."""
         return f"ModelPackBuilder({self.target_model_pack_path.name})"
 
     def build_model_pack(self) -> Path:
-        """
-        Execute the build process
-
+        """Execute the build process.
 
         :return: path of new pack
         """
@@ -141,8 +134,8 @@ class ModelPackBuilder:
                 if self.build_config.run_acceptance_tests:
                     execute_full_pipeline_acceptance_test(cfg)
             if self.zip_pack:
-
                 self.zip_model_pack()
+
         return self.model_pack_build_path
 
     def load_build_configuration(self) -> BuildConfiguration:
@@ -304,18 +297,16 @@ def build_all_model_packs(
     logging_config_path: Optional[Path],
     max_parallel_build: int,
 ):
-    """
-    Build multiple model packs
-
+    """Build multiple model packs.
 
     :param maybe_base_model_pack_path: Path to the base model pack, if required
     :param maybe_base_configuration_path: Path to the base configuration, if required
     :param model_pack_paths: list of paths to model pack resources
-    :param zip_pack: should the pack be zipped at the end?
+    :param zip_pack: should the packs be zipped at the end?
     :param output_dir: directory to build model packs in
     :param skip_tests: don't run any tests
     :param logging_config_path: passed to logging.config.fileConfig
-    :param max_parallel_build: build this many model packs simultaneously
+    :param max_parallel_build: build at most this many model packs simultaneously
     :return:
     """
     if not output_dir.is_dir():
@@ -415,7 +406,7 @@ how it is called, one or more of the following may be required:
         "--max_parallel_build",
         type=int,
         default=1,
-        help="build this many model packs simultaneously",
+        help="build at most this many model packs simultaneously",
     )
 
     args = parser.parse_args()
