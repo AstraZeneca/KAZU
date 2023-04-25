@@ -135,6 +135,7 @@ module = [
     "pytorch_metric_learning.*",
     "srsly.*",
     "py4j.*",
+    "diskcache.*",
 ]
 ignore_missing_imports = true
 
