@@ -99,8 +99,7 @@ class DictionaryIndex:
 
     @kazu_disk_cache.memoize(ignore={0})
     def build_index_cache(self, parser_name: str) -> Tuple[TfidfVectorizer, numpy.ndarray]:
-        """
-        Build the cache for the index
+        """Build the cache for the index.
 
         :param parser_name: required by the disk cache decorator
         :return:

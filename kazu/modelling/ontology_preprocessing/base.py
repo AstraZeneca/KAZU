@@ -699,8 +699,7 @@ class OntologyParser(ABC):
 
     @kazu_disk_cache.memoize(ignore={0})
     def export_metadata(self, parser_name: str) -> Dict[str, Dict[str, SimpleValue]]:
-        """
-        Export the metadata from the ontology
+        """Export the metadata from the ontology.
 
         :param parser_name: name of this parser. Required for correct operation of cache
             (Note, we cannot pass self to the disk cache as the constructor consumes too much
@@ -720,8 +719,7 @@ class OntologyParser(ABC):
 
     @kazu_disk_cache.memoize(ignore={0})
     def export_synonym_terms(self, parser_name: str) -> Set[SynonymTerm]:
-        """
-        Export :class:`.SynonymTerm` from the parser
+        """Export :class:`.SynonymTerm` from the parser.
 
         :param parser_name: name of this parser. Required for correct operation of cache
             (Note, we cannot pass self to the disk cache as the constructor consumes too much
@@ -740,14 +738,11 @@ class OntologyParser(ABC):
         return synonym_terms
 
     def populate_metadata_database(self):
-        """
-        populate the metadata database with this ontology
-        """
+        """Populate the metadata database with this ontology."""
         self.metadata_db.add_parser(self.name, self.export_metadata(self.name))
 
     def generate_synonyms(self) -> Set[SynonymTerm]:
-        """
-        Generate synonyms based on configured synonym generator.
+        """Generate synonyms based on configured synonym generator.
 
         Note, this method also calls populate_databases(), as the metadata db must be populated
         for appropriate synonym resolution.
@@ -764,15 +759,14 @@ class OntologyParser(ABC):
         return generated_synonym_data
 
     def populate_synonym_database(self):
-        """
-        populate the synonym database
-        """
+        """Populate the synonym database."""
 
         self.synonym_db.add(self.name, self.export_synonym_terms(self.name))
 
     def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
-        """
-        populate the databases with the results of the parser. Also calculates the term norms associated with
+        """Populate the databases with the results of the parser.
+
+        Also calculates the term norms associated with
         any curations (if provided) which can then be used for Dictionary based NER
 
         :param force: normally, this call does nothing if databases already have an entry for this parser.
