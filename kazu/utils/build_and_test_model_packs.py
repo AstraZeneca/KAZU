@@ -281,7 +281,7 @@ def build_all_model_packs(
     output_dir: Path,
     skip_tests: bool,
     logging_config_path: Optional[Path],
-    max_parallel_build: int,
+    max_parallel_build: Optional[int],
 ):
     """Build multiple model packs.
 
@@ -292,7 +292,8 @@ def build_all_model_packs(
     :param output_dir: directory to build model packs in
     :param skip_tests: don't run any tests
     :param logging_config_path: passed to logging.config.fileConfig
-    :param max_parallel_build: build at most this many model packs simultaneously
+    :param max_parallel_build: build at most this many model packs simultaneously.
+        If None, use all available CPUs
     :return:
     """
     if not output_dir.is_dir():
@@ -323,9 +324,12 @@ def build_all_model_packs(
         )
         futures.append(builder.build_model_pack.remote())
 
-    for future in futures:
-        # allow a max 45 mins per model pack build
-        print(f"model pack {ray.get(future, timeout=45.0 * 60.0)} build complete")
+    unfinished = futures
+    while unfinished:
+        # Returns the first ObjectRef that is ready.
+        finished, unfinished = ray.wait(unfinished, num_returns=1, timeout=45.0 * 60.0)
+        result = ray.get(finished[0])
+        print(f"model pack {result} build complete")
 
 
 if __name__ == "__main__":
@@ -391,8 +395,8 @@ how it is called, one or more of the following may be required:
     parser.add_argument(
         "--max_parallel_build",
         type=int,
-        default=1,
-        help="build at most this many model packs simultaneously",
+        required=False,
+        help="build at most this many model packs simultaneously. If None, use all available CPUs",
     )
 
     args = parser.parse_args()
