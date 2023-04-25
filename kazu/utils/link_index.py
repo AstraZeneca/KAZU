@@ -55,11 +55,10 @@ class DictionaryIndex:
             return True
 
     def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
-        """
-        search the index
+        """Search the index with a query string.
 
-        :param top_n: return a maximum of top_n SynonymTermWithMetrics
-        :param query: a string of text
+        :param query: term to search
+        :param top_n: max number of results
         :return:
         """
 

@@ -351,7 +351,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.link_index.DictionaryIndex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/link_index.py#L20-L111"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.link_index.</span></span><span class="sig-name descname"><span class="pre">DictionaryIndex</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/link_index.py#L20-L110"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The dictionary index looks for SynonymTerms via a char ngram search between the normalised version of the
 query string and the term_norm of all SynonymTerms associated with the provided OntologyParser.</p>
@@ -387,7 +387,7 @@ instance, checking that all integers are represented, that any noun modifiers ar
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.link_index.DictionaryIndex.build_index_cache">
-<span class="sig-name descname"><span class="pre">build_index_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/link_index.py#L100-L111"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex.build_index_cache" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">build_index_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/link_index.py#L99-L110"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex.build_index_cache" title="Permalink to this definition">#</a></dt>
 <dd><p>Build the cache for the index</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -404,13 +404,13 @@ instance, checking that all integers are represented, that any noun modifiers ar
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.link_index.DictionaryIndex.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/link_index.py#L57-L98"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex.search" title="Permalink to this definition">#</a></dt>
-<dd><p>search the index</p>
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/link_index.py#L57-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.link_index.DictionaryIndex.search" title="Permalink to this definition">#</a></dt>
+<dd><p>Search the index with a query string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>top_n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – return a maximum of top_n SynonymTermWithMetrics</p></li>
-<li><p><strong>query</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – a string of text</p></li>
+<li><p><strong>query</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – term to search</p></li>
+<li><p><strong>top_n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – max number of results</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
