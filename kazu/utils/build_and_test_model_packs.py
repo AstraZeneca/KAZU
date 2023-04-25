@@ -245,19 +245,6 @@ class ModelPackBuilder:
             ["zip", "-r", model_pack_name, model_pack_name_with_version], cwd=parent_directory
         )
 
-    def reset_singletons(self):
-        """
-        this is required between different instantiations of the pipeline config, as singleton states
-        may conflict
-
-        :return:
-        """
-        self.logger.info("clearing singletons")
-        # local import so the cache is correctly configured with KAZU_MODEL_PACK
-        from kazu.utils.utils import Singleton
-
-        Singleton.clear_all()
-
     @staticmethod
     def build_caches(cfg: DictConfig) -> None:
         """
