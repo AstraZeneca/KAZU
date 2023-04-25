@@ -124,6 +124,7 @@ class ModelPackBuilder:
             )
             ModelPackBuilder.build_caches(cfg)
             if not self.skip_tests:
+                # local import so the cache is correctly configured with KAZU_MODEL_PACK
                 from kazu.modelling.annotation.acceptance_test import (
                     execute_full_pipeline_acceptance_test,
                     check_annotation_consistency,
