@@ -64,12 +64,13 @@ class ModelPackBuilder:
     ):
         """A ModelPackBuilder is a helper class to assist in the building of a model pack.
 
-        WARNING! since this class will configure the kazu global cache, executing
-        multiple builds within the same python process could potentially lead to the
-        pollution of the cache. This is because the KAZU_MODEL_PACK env variable
-        is modified by this object, which should normally not happen. Rather
-        than instantiating this object directly, one should instead use
-        :func:`.build_all_model_packs`\\, which will control this process for you.
+        .. danger::
+           WARNING! since this class will configure the kazu global cache, executing
+           multiple builds within the same python process could potentially lead to the
+           pollution of the cache. This is because the KAZU_MODEL_PACK env variable
+           is modified by this object, which should normally not happen. Rather
+           than instantiating this object directly, one should instead use
+           :func:`.build_all_model_packs`\\, which will control this process for you.
 
 
         :param logging_config_path: passed to :func:`logging.config.fileConfig`
