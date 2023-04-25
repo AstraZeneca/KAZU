@@ -24,20 +24,16 @@ kazu_disk_cache.memoize()
 to use this feature. Note, when used with a class method, the
 default behaviour of this function is to generate a key based
 on the constructor arguments of the class instance. Since these can
-be large (e.g. OntologyParser), it may be better to define an anonymous
-inner function where the cache key can be manually specified as something
-sensible.
+be large (e.g. OntologyParser), we sometimes use the ignore argument
+to override this behaviour
 
 e.g.
 
 .. code-block:: python
 
+    @kazu_disk_cache.memoize(ignore={0})
     def method_of_class_with_lots_of_args(self):
-
-        @kazu_disk_cache.memoize(name="something sensible and globally unique")
-        def _method_of_class_with_lots_of_args():
-            ...do stuff and cache
-        return _method_of_class_with_lots_of_args()
+        ...
 """
 if kazu_model_pack_dir is None:
     kazu_disk_cache_path_str = tempfile.mkdtemp(suffix=KAZU_DISK_CACHE_NAME)
