@@ -297,7 +297,7 @@ def build_all_model_packs(
     """
     if not output_dir.is_dir():
         raise ModelPackBuildError(f"{str(output_dir)} is not a directory")
-    if len(os.listdir(output_dir)) > 0:
+    if len(list(output_dir.iterdir())) > 0:
         raise ModelPackBuildError(f"{str(output_dir)} is not empty")
 
     kazu_version = (
