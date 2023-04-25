@@ -42,7 +42,8 @@ class DictionaryIndex:
         self.namespace = self.__class__.__name__
         self.boolean_scorers = boolean_scorers
         self.vectorizer, self.tf_idf_matrix = self.build_index_cache(parser.name)
-        self.synonym_list = list(self.synonym_db.get_all(self.parser_name).values())
+        self.synonyms_for_parser = self.synonym_db.get_all(self.parser_name)
+        self.synonym_list = list(self.synonyms_for_parser.values())
 
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
 
@@ -63,7 +64,7 @@ class DictionaryIndex:
         """
 
         match_norm = StringNormalizer.normalize(query, entity_class=self.entity_class)
-        exact_match_term = self.synonym_db.get_all(self.parser_name).get(match_norm)
+        exact_match_term = self.synonyms_for_parser.get(match_norm)
         if exact_match_term is not None:
             term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
                 exact_match_term, search_score=100.0, bool_score=True, exact_match=True
@@ -106,5 +107,5 @@ class DictionaryIndex:
         """
         logger.info("building TfidfVectorizer for %s", self.parser_name)
         vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-        tf_idf_matrix = vectorizer.fit_transform(self.synonym_db.get_all(self.parser_name).keys())
+        tf_idf_matrix = vectorizer.fit_transform(self.synonyms_for_parser.keys())
         return vectorizer, tf_idf_matrix
