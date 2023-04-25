@@ -40,24 +40,22 @@ e.g.
         return _method_of_class_with_lots_of_args()
 """
 if kazu_model_pack_dir is None:
-    temp_disk_cache = tempfile.mkdtemp(suffix=KAZU_DISK_CACHE_NAME)
+    kazu_disk_cache_path_str = tempfile.mkdtemp(suffix=KAZU_DISK_CACHE_NAME)
     logger.warning(
         "KAZU_MODEL_PACK env variable not set. Using %s for caching. "
         "This will not be reused if the process is exited",
-        temp_disk_cache,
-    )
-    kazu_disk_cache = Cache(
-        directory=temp_disk_cache, eviction_policy="none", size_limit=sys.maxsize, cull_limit=0
+        kazu_disk_cache_path_str,
     )
 else:
     kazu_disk_cache_path_str = str(Path(kazu_model_pack_dir).joinpath(KAZU_DISK_CACHE_NAME))
     logger.info("using disk cache at %s", kazu_disk_cache_path_str)
-    kazu_disk_cache = Cache(
-        directory=kazu_disk_cache_path_str,
-        eviction_policy="none",
-        size_limit=sys.maxsize,
-        cull_limit=0,
-    )
+
+kazu_disk_cache = Cache(
+    directory=kazu_disk_cache_path_str,
+    eviction_policy="none",
+    size_limit=sys.maxsize,
+    cull_limit=0,
+)
 
 
 class EntityLinkingLookupCache:
