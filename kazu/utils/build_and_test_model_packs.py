@@ -260,7 +260,6 @@ class ModelPackBuilder:
 
         assemble_pipeline.main(
             parsers=parsers,
-            use_curations=True,
             output_dir=explosion_path,
         )
         from kazu.pipeline import load_steps_and_log_memory_usage
