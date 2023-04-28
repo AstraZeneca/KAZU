@@ -1086,6 +1086,7 @@ class OntologyParser(ABC):
         :return: curations with term norms
         """
         cache_key = f"{self.name}.populate_databases"
+
         @kazu_disk_cache.memoize(name=cache_key)
         def _populate_databases():
             self.populate_metadata_database()
