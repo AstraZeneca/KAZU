@@ -14,7 +14,8 @@ from typing import (
     Iterable,
     Set,
     Optional,
-    Union, overload,
+    Union,
+    overload,
 )
 from urllib import parse
 
@@ -43,7 +44,6 @@ from kazu.utils.utils import PathLike
 logger = logging.getLogger(__name__)
 
 
-
 class JsonLinesOntologyParser(OntologyParser):
     """
     A parser for a jsonlines dataset. Assumes one kb entry per line (i.e. json object)
@@ -60,7 +60,7 @@ class JsonLinesOntologyParser(OntologyParser):
         return pd.DataFrame.from_records(self.json_dict_to_parser_records(self.read(self.in_path)))
 
     def json_dict_to_parser_records(
-            self, jsons_gen: Iterable[Dict[str, Any]]
+        self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[Dict[str, Any]]:
         """
         for a given input json (represented as a python dict), yield dictionary record(s) compatible with the expected
@@ -88,7 +88,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         return string.split("_")[0]
 
     def json_dict_to_parser_records(
-            self, jsons_gen: Iterable[Dict[str, Any]]
+        self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[Dict[str, Any]]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
@@ -133,10 +133,10 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     }
 
     def score_and_group_ids(
-            self,
-            ids_and_source: IdsAndSource,
-            is_symbolic: bool,
-            original_syn_set: Set[str],
+        self,
+        ids_and_source: IdsAndSource,
+        is_symbolic: bool,
+        original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """
         since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
@@ -161,7 +161,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         return "ENSEMBL"
 
     def json_dict_to_parser_records(
-            self, jsons_gen: Iterable[Dict[str, Any]]
+        self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[Dict[str, Any]]:
         for json_dict in jsons_gen:
             # due to a bug in OT data, TEC genes have "gene" as a synonym. Sunce they're uninteresting, we just filter
@@ -213,7 +213,7 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
         return "CHEMBL"
 
     def json_dict_to_parser_records(
-            self, jsons_gen: Iterable[Dict[str, Any]]
+        self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[Dict[str, Any]]:
         for json_dict in jsons_gen:
             cross_references = json_dict.get("crossReferences", {})
@@ -256,21 +256,21 @@ class RDFGraphParser(OntologyParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            uri_regex: Union[str, re.Pattern],
-            synonym_predicates: Iterable[RdfRef],
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.7,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
-            label_predicate: RdfRef = rdflib.RDFS.label,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        uri_regex: Union[str, re.Pattern],
+        synonym_predicates: Iterable[RdfRef],
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+        label_predicate: RdfRef = rdflib.RDFS.label,
     ):
         super().__init__(
             in_path=in_path,
@@ -405,21 +405,21 @@ class SKOSXLGraphParser(RDFGraphParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            uri_regex: Union[str, re.Pattern],
-            synonym_predicates: Iterable[RdfRef] = (SKOS_XL_ALT_LABEL_PATH,),
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.7,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
-            label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        uri_regex: Union[str, re.Pattern],
+        synonym_predicates: Iterable[RdfRef] = (SKOS_XL_ALT_LABEL_PATH,),
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+        label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
     ):
         super().__init__(
             in_path=in_path,
@@ -446,17 +446,17 @@ class GeneOntologyParser(OntologyParser):
     instances_in_dbs: Set[str] = set()
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            query: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        query: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -531,16 +531,16 @@ class GeneOntologyParser(OntologyParser):
 
 class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -571,16 +571,16 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
 
 class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -611,16 +611,16 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
 
 class CellularComponentGeneOntologyParser(GeneOntologyParser):
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -657,16 +657,16 @@ class UberonOntologyParser(RDFGraphParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
 
         super().__init__(
@@ -757,16 +757,16 @@ class EnsemblOntologyParser(OntologyParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -882,16 +882,16 @@ class CLOOntologyParser(RDFGraphParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -925,10 +925,10 @@ class CellosaurusOntologyParser(OntologyParser):
         return "CELLOSAURUS"
 
     def score_and_group_ids(
-            self,
-            ids_and_source: IdsAndSource,
-            is_symbolic: bool,
-            original_syn_set: Set[str],
+        self,
+        ids_and_source: IdsAndSource,
+        is_symbolic: bool,
+        original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """
         treat all synonyms as seperate cell lines
@@ -1015,21 +1015,21 @@ class MeddraOntologyParser(OntologyParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
-            exclude_socs: Iterable[str] = (
-                    "Surgical and medical procedures",
-                    "Social circumstances",
-                    "Investigations",
-            ),
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+        exclude_socs: Iterable[str] = (
+            "Surgical and medical procedures",
+            "Social circumstances",
+            "Investigations",
+        ),
     ):
         super().__init__(
             in_path=in_path,
@@ -1131,7 +1131,7 @@ class MeddraOntologyParser(OntologyParser):
                 mapping_type.append("meddra_link")
 
         for i, row in (
-                hier_df[["hlt_code", "hlt_name", "soc_name", "soc_code"]].drop_duplicates().iterrows()
+            hier_df[["hlt_code", "hlt_name", "soc_name", "soc_code"]].drop_duplicates().iterrows()
         ):
             ids.append(row["hlt_code"])
             default_labels.append(row["hlt_name"])
@@ -1140,7 +1140,7 @@ class MeddraOntologyParser(OntologyParser):
             all_syns.append(row["hlt_name"])
             mapping_type.append("meddra_link")
         for i, row in (
-                hier_df[["hlgt_code", "hlgt_name", "soc_name", "soc_code"]].drop_duplicates().iterrows()
+            hier_df[["hlgt_code", "hlgt_name", "soc_name", "soc_code"]].drop_duplicates().iterrows()
         ):
             ids.append(row["hlgt_code"])
             default_labels.append(row["hlgt_name"])
@@ -1169,18 +1169,18 @@ class CLOntologyParser(RDFGraphParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.7,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
 
         super().__init__(
@@ -1216,7 +1216,7 @@ class HGNCGeneFamilyParser(OntologyParser):
         df = pd.read_csv(self.in_path, sep="\t")
         data = []
         for family_id, row in (
-                df.groupby(by="Family ID").agg(lambda col_series: set(col_series.dropna())).iterrows()
+            df.groupby(by="Family ID").agg(lambda col_series: set(col_series.dropna())).iterrows()
         ):
             # in theory, there should only be one family name per ID
             assert len(row["Family name"]) == 1
@@ -1248,17 +1248,17 @@ class TabularOntologyParser(OntologyParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.7,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
-            **kwargs,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+        **kwargs,
     ):
         """
 
@@ -1309,16 +1309,16 @@ class ATCDrugClassificationParser(TabularOntologyParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.70,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1365,18 +1365,18 @@ class StatoParser(RDFGraphParser):
     """
 
     def __init__(
-            self,
-            in_path: str,
-            entity_class: str,
-            name: str,
-            string_scorer: Optional[StringSimilarityScorer] = None,
-            synonym_merge_threshold: float = 0.7,
-            data_origin: str = "unknown",
-            synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-            include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-            curations: Optional[List[Curation]] = None,
-            global_actions: Optional[GlobalParserActions] = None,
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.7,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        curations: Optional[List[Curation]] = None,
+        global_actions: Optional[GlobalParserActions] = None,
     ):
 
         super().__init__(
