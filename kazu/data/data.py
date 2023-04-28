@@ -9,6 +9,8 @@ from enum import Enum, auto
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, DefaultDict
 
+import bson
+from bson import json_util
 from numpy import ndarray, float32, float16
 
 from kazu.utils.string_normalizer import StringNormalizer
@@ -581,6 +583,8 @@ class DocumentJsonUtils:
             return obj.name
         elif isinstance(obj, (datetime, date)):
             return obj.isoformat()
+        elif isinstance(obj, bson.ObjectId):
+            return json_util.default(obj)
         else:
             raise cls.ConversionException(f"Unknown object type: {type(obj)}")
 
@@ -645,7 +649,7 @@ class ParserBehaviour(AutoNameEnum):
     DROP_IDS_FROM_PARSER = auto()
 
 
-@dataclass()
+@dataclass(frozen=True, eq=True)
 class SynonymTermAction:
     """
     A SynonymTermAction is an action that affects the :class:`.SynonymTerm`\\s that a parser
@@ -661,35 +665,41 @@ class SynonymTermAction:
     """
 
     behaviour: SynonymTermBehaviour
-    entity_class: str
-    parser_to_target_id_mappings: Dict[str, Set[str]] = field(default_factory=dict)
-    term_norm: str = field(init=False)
+    associated_id_sets: Optional[AssociatedIdSets] = None
 
     def __post_init__(self):
         if (
-            # map not needed for ignore
             self.behaviour is not SynonymTermBehaviour.IGNORE
-            and len(self.parser_to_target_id_mappings) == 0
-        ):
-            raise ValueError(
-                f"parser_to_target_id_mappings must be specified for behaviour {self.behaviour}"
-            )
-        if self.behaviour is not SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
-            # we only need to know the parser name for DROP_SYNONYM_TERM_FOR_LINKING.
-            # all others need ids
-            for key, values in self.parser_to_target_id_mappings.items():
-                if len(values) == 0:
-                    raise ValueError(f"at least one ID must be specified for key: {key}")
+            and self.behaviour is not SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+            and self.behaviour is not SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
+        ) and (self.associated_id_sets is None or len(self.associated_id_sets) == 0):
+            raise ValueError(f"associated_id_sets must be specified for behaviour {self.behaviour}")
 
     @classmethod
-    def from_json(cls, json_dict: Dict) -> "SynonymTermAction":
-        return cls(
+    def from_dict(cls, json_dict: Dict) -> "SynonymTermAction":
+        if json_dict["associated_id_sets"] is not None:
+            assoc_id_sets = set()
+            for equiv_id_set in json_dict["associated_id_sets"]:
+                new_equiv_id_lst = []
+                for equiv_id_lst in equiv_id_set["ids_and_source"]:
+                    idx = equiv_id_lst[0]
+                    source = equiv_id_lst[1]
+                    new_equiv_id_lst.append(
+                        (
+                            idx,
+                            source,
+                        )
+                    )
+                assoc_id_sets.add(EquivalentIdSet(frozenset(new_equiv_id_lst)))
+
+            frozen_assoc_id_sets = frozenset(assoc_id_sets)
+        else:
+            frozen_assoc_id_sets = None
+        instance = cls(
             behaviour=SynonymTermBehaviour(json_dict["behaviour"]),
-            entity_class=json_dict["entity_class"],
-            parser_to_target_id_mappings={
-                k: set(v) for k, v in json_dict["parser_to_target_id_mappings"].items()
-            },
+            associated_id_sets=frozen_assoc_id_sets,
         )
+        return instance
 
 
 @dataclass(frozen=True)
@@ -767,7 +777,7 @@ class GlobalParserActions:
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class Curation:
     """
     A Curation is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
@@ -786,13 +796,13 @@ class Curation:
         Curation(
             curated_synonym="ALL",
             case_sensitive=True,
-            actions=[
+            actions=tuple([
                 SynonymTermAction(
                     behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
                     parser_to_target_id_mappings={"OPENTARGETS_DISEASE": {"MONDO:0004967"}},
                     entity_class="disease",
                 ),
-            ],
+            ]),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -809,7 +819,7 @@ class Curation:
         Curation(
             curated_synonym="LH",
             case_sensitive=True,
-            actions=[
+            actions=tuple([
                 SynonymTermAction(
                     behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
                     parser_to_target_id_mappings={"OPENTARGETS_TARGET": set()},
@@ -820,7 +830,7 @@ class Curation:
                     parser_to_target_id_mappings={"OPENTARGETS_TARGET": {"ENSG00000104826"}},
                     entity_class="gene",
                 ),
-            ],
+            ]),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -833,7 +843,7 @@ class Curation:
         Curation(
             curated_synonym="some good synonym",
             case_sensitive=True,
-            actions=[
+            actions=tuple([
                 SynonymTermAction(
                     behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
                     parser_to_target_id_mappings={
@@ -841,7 +851,7 @@ class Curation:
                     },
                     entity_class="gene",
                 ),
-            ],
+            ]),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -856,46 +866,60 @@ class Curation:
 
     """
 
-    mention_confidence: MentionConfidence
-    actions: List[SynonymTermAction]
-    case_sensitive: bool
     curated_synonym: str
-    #: MongoDB compatible identifier for this curation
-    _id: Dict[str, str] = field(default_factory=dict)
-    #: parser specific behaviours
-    _parser_name_to_action: DefaultDict[str, List[SynonymTermAction]] = field(
-        default_factory=lambda: defaultdict(list), init=False
-    )
+    mention_confidence: MentionConfidence
+    actions: Tuple[SynonymTermAction, ...]
+    case_sensitive: bool
+    _id: bson.ObjectId = field(default_factory=bson.ObjectId)
+    # the original term that is used as a 'seed' term for this curation.
+    # note, this is used for NER to determine how linking is performed. If you also
+    # want to use this curation as a linking target for non-dictionary based NER processes,
+    # or the term is identical to the one used in the source ontology,
+    # this should be set to None, so that a novel term_norm is calculated
+    source_term: Optional[str] = None
 
     def __post_init__(self):
         # data validation
         if not isinstance(self.curated_synonym, str):
             raise ValueError(f"curated_synonym should be a string, {self}")
-        for action in self.actions:
-            for parser_name in action.parser_to_target_id_mappings.keys():
-                self._parser_name_to_action[parser_name].append(action)
 
-    def parser_behaviour(self, parser_name: str) -> Iterable[SynonymTermAction]:
-        """
-        Generator that yields behaviours for a specific parser, based on the order they are
-        specified in.
+    def source_term_norm(self, entity_class: str):
+        return StringNormalizer.normalize(self.source_term, entity_class)
 
-        :param parser_name:
-        :return:
-        """
-        yield from self._parser_name_to_action.get(parser_name, [])
+    def curated_synonym_norm(self, entity_class: str):
+        return StringNormalizer.normalize(self.curated_synonym, entity_class)
+
+    def term_norm_for_linking(self, entity_class: str):
+        norm_target = self.curated_synonym if self.source_term is None else self.source_term
+        return StringNormalizer.normalize(norm_target, entity_class)
 
     @classmethod
-    def from_json(cls, json_dict: Dict) -> "Curation":
-        # we call str on json_dict["_id"] in case it's a bson ObjectId
-        if not isinstance(json_dict["_id"], dict):
-            _id = {"$oid": str(json_dict["_id"])}
-        else:
-            _id = json_dict["_id"]
+    def from_json(cls, json_str: str) -> "Curation":
+        json_dict = json_util.loads(json_str)
+        return cls.from_dict(json_dict)
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "Curation":
+
         return cls(
             mention_confidence=MentionConfidence(json_dict["mention_confidence"]),
-            actions=[SynonymTermAction.from_json(x) for x in json_dict["actions"]],
+            actions=tuple([SynonymTermAction.from_dict(x) for x in json_dict["actions"]]),
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
-            _id=_id,
+            source_term=json_dict["source_term"],
+            _id=json_dict.get("_id", bson.ObjectId()),
         )
+
+    def to_dict(self, preserve_object_id: bool = True):
+        if preserve_object_id:
+            oid = self._id
+            as_dict = DocumentJsonUtils.obj_to_dict_repr(self)
+            as_dict["_id"] = oid  # type: ignore[index,call-overload]
+        else:
+            as_dict = DocumentJsonUtils.obj_to_dict_repr(self)
+        return as_dict
+
+    def to_json(self) -> str:
+        as_json = self.to_dict(False)
+        assert isinstance(as_json, dict)
+        return json.dumps(as_json)
