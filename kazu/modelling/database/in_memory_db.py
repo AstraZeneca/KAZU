@@ -1,15 +1,11 @@
-import dataclasses
 import logging
 from copy import deepcopy
-from enum import auto
-from typing import Optional, Dict, List, Tuple, Set, Iterable, Literal
+from typing import Optional, Dict, List, Tuple, Set, Iterable
 
 from kazu.data.data import (
     SynonymTerm,
     SimpleValue,
     EquivalentIdAggregationStrategy,
-    AutoNameEnum,
-    EquivalentIdSet,
     AssociatedIdSets,
 )
 from kazu.utils.utils import Singleton

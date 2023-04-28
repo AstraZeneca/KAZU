@@ -363,7 +363,7 @@ class CurationProcessor:
         :param curations: the curations that contain this id
         :return: a list of modified curations
         """
-        affected_curations = set(self._curations_by_id.get(idx))
+        affected_curations = set(self._curations_by_id.get(idx, []))
         if affected_curations is not None:
             for affected_curation in affected_curations:
                 new_actions = []
