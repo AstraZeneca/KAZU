@@ -1293,6 +1293,44 @@ class OntologyParser(ABC):
         metadata = metadata_df.to_dict(orient="index")
         return cast(Dict[str, Dict[str, SimpleValue]], metadata)
 
+    def process_curations(
+        self, terms: Set[SynonymTerm]
+    ) -> Tuple[Optional[List[Curation]], Set[SynonymTerm]]:
+        if self.curations is None and self.synonym_generator is not None:
+            logger.warning(
+                "%s is configured to use synonym generators. This may result in noisy NER performance.",
+                self.name,
+            )
+            (
+                original_curations,
+                generated_curations,
+            ) = self.generate_curations_from_synonym_generators(terms)
+            curations = original_curations + generated_curations
+        elif self.curations is None and self.synonym_generator is None:
+            logger.warning(
+                "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
+                self.name,
+            )
+            curations = []
+            for term in terms:
+                curations.extend(self.synonym_term_to_putative_curation(term))
+        else:
+            assert self.curations is not None
+            logger.info(
+                "%s is configured to use curations. Synonym generation will be ignored",
+                self.name,
+            )
+            curations = self.curations
+
+        curation_processor = CurationProcessor(
+            global_actions=self.global_actions,
+            curations=curations,
+            parser_name=self.name,
+            entity_class=self.entity_class,
+            synonym_terms=terms,
+        )
+        return curation_processor.export_ner_curations_and_final_terms()
+
     @kazu_disk_cache.memoize(ignore={0})
     def export_synonym_terms(self, parser_name: str) -> Set[SynonymTerm]:
         """Export :class:`.SynonymTerm` from the parser.
