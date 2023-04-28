@@ -1,31 +1,24 @@
-import functools
+import dataclasses
 import json
 import logging
-import os
-import re
-import sqlite3
 from abc import ABC
-from functools import cache
-from pathlib import Path
+from collections import defaultdict
+from enum import auto
 from typing import (
     cast,
-    overload,
     List,
     Tuple,
     Dict,
-    Any,
     Iterable,
     Set,
     Optional,
     FrozenSet,
-    Union,
+    DefaultDict,
+    Literal,
 )
-from urllib import parse
 
 import pandas as pd
-import rdflib
 
-from kazu.utils.caching import kazu_disk_cache
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
@@ -37,14 +30,18 @@ from kazu.data.data import (
     SynonymTermAction,
     AssociatedIdSets,
     GlobalParserActions,
+    AutoNameEnum,
+    MentionConfidence,
 )
 from kazu.modelling.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
-    DBModificationResult,
+    NormalisedSynonymStr,
+    Idx,
 )
 from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import PathLike, as_path
 
@@ -64,10 +61,9 @@ class CurationException(Exception):
     pass
 
 
-@functools.cache
-def load_curations(
+def load_curated_terms(
     path: PathLike,
-) -> Optional[List[Curation]]:
+) -> List[Curation]:
     """
     Load :class:`kazu.data.data.Curation`\\ s from a file path.
 
@@ -75,17 +71,17 @@ def load_curations(
     :return:
     """
     curations_path = as_path(path)
-    curations: Optional[List[Curation]] = None
     if curations_path.exists():
         with curations_path.open(mode="r") as jsonlf:
-            curations = [Curation.from_json(json.loads(line)) for line in jsonlf]
+            curations = [Curation.from_json(line) for line in jsonlf]
+    else:
+        raise ValueError(f"curations do not exist at {path}")
     return curations
 
 
-@functools.cache
 def load_global_actions(
     path: PathLike,
-) -> Optional[GlobalParserActions]:
+) -> GlobalParserActions:
     """
     Load an instance of GlobalParserActions  from a file path.
 
@@ -93,10 +89,11 @@ def load_global_actions(
     :return:
     """
     global_actions_path = as_path(path)
-    global_actions = None
     if global_actions_path.exists():
         with global_actions_path.open(mode="r") as jsonlf:
             global_actions = GlobalParserActions.from_json(json.load(jsonlf))
+    else:
+        raise ValueError(f"curations do not exist at {path}")
     return global_actions
 
 
