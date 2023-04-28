@@ -645,6 +645,8 @@ class SynonymTermBehaviour(AutoNameEnum):
     #: removes an EquivalentIdSet from the term. The EquivalentIdSet to remove is selected via being a
     #: superset of the IDs in the associated parser_to_target_id_mappings value
     DROP_ID_SET_FROM_SYNONYM_TERM = auto()
+    #: used if the containing Curation has source_term !=None, in which case all behaviours are inherited
+    INHERIT_FROM_SOURCE_TERM = auto()
 
 
 class ParserBehaviour(AutoNameEnum):
