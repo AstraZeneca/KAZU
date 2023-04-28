@@ -141,9 +141,7 @@ class OntologyMatcher:
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
         """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\ s based on :class:`.Curation`\\ s.
 
-        The :class:`.Curation`\\ s are provided to the :class:`.OntologyParser`\\ s as the ``curations`` parameter
-        when they are created, which are matched to appropriate entries in the :class:`.SynonymDatabase`\\ .
-
+        Curations are produced by the Ontology parser 'populate_databases', method
         :param parsers:
         :return:
         """
@@ -154,18 +152,18 @@ class OntologyMatcher:
         self.set_labels(parser.entity_class for parser in parsers)
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
-
         for parser in parsers:
-            curation_with_term_norms = parser.populate_databases(force=True)
-            if curation_with_term_norms is None:
+            maybe_curation_for_ner = parser.populate_databases(force=True)
+            if maybe_curation_for_ner is None:
                 logger.warning(
                     "tried to create PhraseMatchers from Curations for parser %s, but none have been provided",
                     parser.name,
                 )
                 continue
-            if len(curation_with_term_norms) == 0:
+            curations_for_matcher = maybe_curation_for_ner
+            if len(curations_for_matcher) == 0:
                 logger.warning(
-                    "tried to create PhraseMatchers from Curations for parser %s, but no CurationWithTermNorms were created",
+                    "tried to create PhraseMatchers from Curations for parser %s, but no Curations were produced",
                     parser.name,
                 )
                 continue
@@ -177,16 +175,20 @@ class OntologyMatcher:
                 # type ignore as curated_synonym will not be None, as only
                 # curations with a curated_synonym will be 'matched'.
                 else curation.curated_synonym.lower()  # type: ignore[union-attr]
-                for curation in curation_with_term_norms
+                for curation in curations_for_matcher
             )
 
-            for curation, pattern in zip(curation_with_term_norms, patterns):
+            for curation, pattern in zip(curations_for_matcher, patterns):
                 # a curation can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
-                for action in curation.parser_behaviour(parser_name=parser.name):
-                    if action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING:
-                        match_id = parser.name + self.match_id_sep + action.term_norm
+                term_norm = curation.term_norm_for_linking(parser.entity_class)
+                for action in curation.actions:
+                    if (
+                        action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
+                        or action.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
+                    ):
+                        match_id = parser.name + self.match_id_sep + term_norm
                         if curation.case_sensitive:
                             strict_matcher.add(match_id, [pattern])
                         else:
@@ -198,63 +200,6 @@ class OntologyMatcher:
         self.strict_matcher = strict_matcher if len(strict_matcher) != 0 else None
         self.lowercase_matcher = lowercase_matcher if len(lowercase_matcher) != 0 else None
         return self.strict_matcher, self.lowercase_matcher
-
-    def create_uncurated_lowercase_phrasematcher(
-        self, parsers: List[OntologyParser]
-    ) -> Tuple[PhraseMatcher, None]:
-        """
-        Create a lower case Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_ using just the synonyms in the
-        :class:`.OntologyParser`\\ s and their configured ``synonym_generator``\\ s (see
-        :meth:`.OntologyParser.__init__`\\ ).
-
-        This is intended for use primarily when first adding a parser, to then run over relevant documents and
-        create :class:`.Curation`\\ s based on the result. You could also use it if you have a very simple set
-        of terms to recognise that aren't case-sensitive and you don't intend to do any curation at all.
-
-        :param parsers:
-        :return: The lowercase PhraseMatcher and None - to match the return shape of
-            :meth:`create_phrasematchers_using_curations`\\ .
-        """
-
-        if self.strict_matcher is not None or self.lowercase_matcher is not None:
-            logging.warning("Phrase matchers are being redefined - is this by intention?")
-        self.set_labels(parser.entity_class for parser in parsers)
-        lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
-        for parser in parsers:
-            synonym_terms = parser.generate_synonyms()
-            parser_name = parser.name
-            logging.info(
-                f"generating {sum(len(x.terms) for x in synonym_terms)} patterns for {parser_name}"
-            )
-            synonyms_and_terms = [
-                (term, synonym_term)
-                for synonym_term in synonym_terms
-                for term in synonym_term.terms
-            ]
-            # spacy's typing isn't smart enough to know this will have a 'pipe' attr
-            patterns = self.nlp.tokenizer.pipe(term for (term, _synonym_term) in synonyms_and_terms)  # type: ignore[union-attr]
-
-            for (term, synonym_term), pattern in zip(synonyms_and_terms, patterns):
-                match_id = parser_name + self.match_id_sep + synonym_term.term_norm
-                try:
-                    # if we're adding to the lowercase matcher, we don't need to add
-                    # to the exact case matcher as well, since we'll definitely get
-                    # the hit, so would just be a waste of memory and compute.
-                    lowercase_matcher.add(match_id, [pattern])
-
-                except KeyError as e:
-                    logging.warning(
-                        f"failed to add '{term}'. StringStore is {len(self.nlp.vocab.strings)} ",
-                        e,
-                    )
-
-        self.lowercase_matcher = lowercase_matcher
-
-        if len(lowercase_matcher) == 0:
-            raise RuntimeError(
-                "No rules have been added to the PhraseMatcher. Has the OntologyMatcher been given parsers with synonyms?"
-            )
-        return lowercase_matcher, None
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
