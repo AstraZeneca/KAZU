@@ -1007,27 +1007,50 @@ class OntologyParser(ABC):
         """Populate the metadata database with this ontology."""
         self.metadata_db.add_parser(self.name, self.export_metadata(self.name))
 
-    def generate_synonyms(self) -> Set[SynonymTerm]:
+    def generate_synonyms(
+        self, original_synonym_data: Set[SynonymTerm]
+    ) -> Tuple[Set[SynonymTerm], Set[SynonymTerm]]:
         """Generate synonyms based on configured synonym generator.
 
-        Note, this method also calls populate_databases(), as the metadata db must be populated
-        for appropriate synonym resolution.
+        :param original_synonym_data:
+        :return: first set is original terms, second are generated terms
         """
-        self.populate_databases()
-        synonym_data = set(self.synonym_db.get_all(self.name).values())
         generated_synonym_data = set()
         if self.synonym_generator:
-            generated_synonym_data = self.synonym_generator(synonym_data)
-        generated_synonym_data.update(synonym_data)
+            generated_synonym_data = self.synonym_generator(original_synonym_data)
+            generated_synonym_data.difference_update(original_synonym_data)
         logger.info(
-            f"{len(synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
+            f"{len(original_synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
         )
-        return generated_synonym_data
+        return original_synonym_data, generated_synonym_data
+
+    def generate_curations_from_synonym_generators(
+        self, synonym_terms: Set[SynonymTerm]
+    ) -> Tuple[List[Curation], List[Curation]]:
+        original_terms, generated_terms = self.generate_synonyms(synonym_terms)
+        original_curations = [
+            curation
+            for term in original_terms
+            for curation in self.synonym_term_to_putative_curation(term)
+        ]
+        generated_curations = [
+            curation
+            for term in generated_terms
+            for curation in self.synonym_term_to_putative_curation(term)
+        ]
+
+        return original_curations, generated_curations
+
+    def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[Curation]:
+        """
+        When curations are not provided, this converts SynonymTerm's from the original
+        ontology source and/or generated ones into curations, so they can be used
+        for dictionary based NER
 
     def populate_synonym_database(self):
         """Populate the synonym database."""
 
-        self.synonym_db.add(self.name, self.export_synonym_terms(self.name))
+        self.synonym_db.add(self.name, synonym_terms)
 
     def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
         """Populate the databases with the results of the parser.
@@ -1039,17 +1062,21 @@ class OntologyParser(ABC):
             this can be forced by setting this param to True
         :return: curations with term norms
         """
-
-        if self.name in self.synonym_db.loaded_parsers and not force:
-            logger.debug("will not repopulate databases as already populated for %s", self.name)
-            return None
-        else:
-            logger.info("populating database for %s", self.name)
+        cache_key = f"{self.name}.populate_databases"
+        @kazu_disk_cache.memoize(name=cache_key)
+        def _populate_databases():
             self.populate_metadata_database()
-            self.populate_synonym_database()
-            curations_with_term_norms = self.process_actions()
+            intermediate_synonym_terms = self.export_synonym_terms(self.name)
+            maybe_ner_curations, final_terms = self.process_curations(intermediate_synonym_terms)
             self.parsed_dataframe = None  # clear the reference to save memory
-            return curations_with_term_norms
+            return maybe_ner_curations, final_terms
+
+        if force:
+            kazu_disk_cache.delete(key=cache_key)
+        logger.info("populating database for %s", self.name)
+        maybe_ner_curations, final_terms = _populate_databases()
+        self.populate_synonym_database(final_terms)
+        return maybe_ner_curations
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
