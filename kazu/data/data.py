@@ -801,13 +801,15 @@ class Curation:
         Curation(
             curated_synonym="ALL",
             case_sensitive=True,
-            actions=tuple([
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    parser_to_target_id_mappings={"OPENTARGETS_DISEASE": {"MONDO:0004967"}},
-                    entity_class="disease",
-                ),
-            ]),
+            actions=tuple(
+                [
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                        parser_to_target_id_mappings={"OPENTARGETS_DISEASE": {"MONDO:0004967"}},
+                        entity_class="disease",
+                    ),
+                ]
+            ),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -824,18 +826,22 @@ class Curation:
         Curation(
             curated_synonym="LH",
             case_sensitive=True,
-            actions=tuple([
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
-                    parser_to_target_id_mappings={"OPENTARGETS_TARGET": set()},
-                    entity_class="gene",
-                ),
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    parser_to_target_id_mappings={"OPENTARGETS_TARGET": {"ENSG00000104826"}},
-                    entity_class="gene",
-                ),
-            ]),
+            actions=tuple(
+                [
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+                        parser_to_target_id_mappings={"OPENTARGETS_TARGET": set()},
+                        entity_class="gene",
+                    ),
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                        parser_to_target_id_mappings={
+                            "OPENTARGETS_TARGET": {"ENSG00000104826"}
+                        },
+                        entity_class="gene",
+                    ),
+                ]
+            ),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -848,15 +854,17 @@ class Curation:
         Curation(
             curated_synonym="some good synonym",
             case_sensitive=True,
-            actions=tuple([
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                    parser_to_target_id_mappings={
-                        "OPENTARGETS_TARGET": {"an id from the bad set"}
-                    },
-                    entity_class="gene",
-                ),
-            ]),
+            actions=tuple(
+                [
+                    SynonymTermAction(
+                        behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
+                        parser_to_target_id_mappings={
+                            "OPENTARGETS_TARGET": {"an id from the bad set"}
+                        },
+                        entity_class="gene",
+                    ),
+                ]
+            ),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
