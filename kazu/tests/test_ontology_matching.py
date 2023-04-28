@@ -13,6 +13,7 @@ from kazu.data.data import (
     MentionConfidence,
     SynonymTermAction,
     SynonymTermBehaviour,
+    EquivalentIdSet,
 )
 from kazu.modelling.ontology_matching.assemble_pipeline import (
     main as assemble_pipeline,
@@ -25,8 +26,10 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     CurationException,
-    load_curations,
+    load_curated_terms,
+    kazu_disk_cache,
 )
+from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
 
@@ -140,7 +143,8 @@ PARSER_1_AMBIGUOUS_DATA = {
 
 @pytest.mark.parametrize(
     (
-        "curated_terms",
+        "parser_1_curations",
+        "parser_2_curations",
         "match_len",
         "match_texts",
         "match_ontology_dicts",
@@ -154,23 +158,55 @@ PARSER_1_AMBIGUOUS_DATA = {
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={
-                                FIRST_MOCK_PARSER: {TARGET_IDX},
-                            },
-                            entity_class=ENT_TYPE_1,
-                        ),
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={
-                                FIRST_MOCK_PARSER: {TARGET_IDX},
-                                SECOND_MOCK_PARSER: {TARGET_IDX},
-                            },
-                            entity_class=ENT_TYPE_2,
-                        ),
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
+                    case_sensitive=False,
+                ),
+            ],
+            [
+                Curation(
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    curated_synonym="complexVII disease\u03B1",
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        SECOND_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
             ],
@@ -190,27 +226,57 @@ PARSER_1_AMBIGUOUS_DATA = {
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_1,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
                     case_sensitive=False,
-                ),
+                )
+            ],
+            [
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={SECOND_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_2,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        SECOND_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            ),
+                        ]
+                    ),
                     case_sensitive=True,
-                ),
+                )
             ],
             1,
             {"ComplexVII Disease\u03B1"},
@@ -227,27 +293,55 @@ PARSER_1_AMBIGUOUS_DATA = {
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_1,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
+            ],
+            [
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="others",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={
-                                SECOND_MOCK_PARSER: {"I don't exist"}
-                            },  # should throw exception
-                            entity_class=ENT_TYPE_2,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        "I dont exist",
+                                                        SECOND_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
             ],
@@ -264,25 +358,55 @@ PARSER_1_AMBIGUOUS_DATA = {
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_1,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
+            ],
+            [
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.IGNORE,
-                            parser_to_target_id_mappings={SECOND_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_2,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.IGNORE,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        SECOND_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
             ],
@@ -294,23 +418,38 @@ PARSER_1_AMBIGUOUS_DATA = {
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             False,
-            id="Two curated terms from two parsers One should hit to test drop logic",
+            id="Two curated terms from two parsers One should hit to test ignore logic",
         ),
         pytest.param(
             [
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="This sentence is just to test",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_1,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        SECOND_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
             ],
+            [],
             1,
             {"This sentence is just to test"},
             [
@@ -326,16 +465,31 @@ PARSER_1_AMBIGUOUS_DATA = {
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="amongst-us",
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={FIRST_MOCK_PARSER: {TARGET_IDX}},
-                            entity_class=ENT_TYPE_1,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
             ],
+            [],
             0,
             {},
             [],
@@ -349,18 +503,41 @@ PARSER_1_AMBIGUOUS_DATA = {
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym=CONFUSING_SYNONYM,
-                    actions=[
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                            parser_to_target_id_mappings={
-                                FIRST_MOCK_PARSER: {TARGET_IDX, CONFUSING_IDX}
-                            },
-                            entity_class=ENT_TYPE_1,
-                        )
-                    ],
+                    actions=tuple(
+                        [
+                            SynonymTermAction(
+                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                                associated_id_sets=frozenset(
+                                    [
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        TARGET_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    ),
+                                                ]
+                                            )
+                                        ),
+                                        EquivalentIdSet(
+                                            ids_and_source=frozenset(
+                                                [
+                                                    (
+                                                        CONFUSING_IDX,
+                                                        FIRST_MOCK_PARSER,
+                                                    ),
+                                                ]
+                                            )
+                                        ),
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
                     case_sensitive=False,
                 ),
             ],
+            [],
             0,
             set(),
             [],
@@ -373,7 +550,8 @@ PARSER_1_AMBIGUOUS_DATA = {
 )
 def test_pipeline_build_from_parsers_and_curated_list(
     tmp_path,
-    curated_terms,
+    parser_1_curations,
+    parser_2_curations,
     match_len,
     match_texts,
     match_ontology_dicts,
@@ -382,20 +560,23 @@ def test_pipeline_build_from_parsers_and_curated_list(
     throws_curation_exception,
 ):
     Singleton.clear_all()
-    TEST_CURATIONS_PATH = tmp_path / "curated_terms.jsonl"
-    write_curations(path=TEST_CURATIONS_PATH, terms=curated_terms)
+    kazu_disk_cache.clear()
+    TEST_CURATIONS_PATH_PARSER_1 = tmp_path / "parser1_curated_terms.jsonl"
+    TEST_CURATIONS_PATH_PARSER_2 = tmp_path / "parser2_curated_terms.jsonl"
+    write_curations(path=TEST_CURATIONS_PATH_PARSER_1, terms=parser_1_curations)
+    write_curations(path=TEST_CURATIONS_PATH_PARSER_2, terms=parser_2_curations)
     parser_1 = DummyParser(
-        name="first_mock_parser",
+        name=FIRST_MOCK_PARSER,
         entity_class="ent_type_1",
-        source="test",
-        curations=load_curations(path=TEST_CURATIONS_PATH),
+        source=FIRST_MOCK_PARSER,
+        curations=load_curated_terms(path=TEST_CURATIONS_PATH_PARSER_1),
         data=parser_1_data,
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
         entity_class="ent_type_2",
-        source="test",
-        curations=load_curations(path=TEST_CURATIONS_PATH),
+        source=SECOND_MOCK_PARSER,
+        curations=load_curated_terms(path=TEST_CURATIONS_PATH_PARSER_2),
         data=parser_2_data,
     )
     TEST_SPAN_KEY = "my_hits"
@@ -406,7 +587,6 @@ def test_pipeline_build_from_parsers_and_curated_list(
                 parsers=[parser_1, parser_2],
                 output_dir=TEST_OUTPUT_DIR,
                 span_key=TEST_SPAN_KEY,
-                use_curations=True,
             )
 
     else:
@@ -414,7 +594,6 @@ def test_pipeline_build_from_parsers_and_curated_list(
             parsers=[parser_1, parser_2],
             output_dir=TEST_OUTPUT_DIR,
             span_key=TEST_SPAN_KEY,
-            use_curations=True,
         )
 
         doc = nlp(example_text)
@@ -432,9 +611,11 @@ def test_pipeline_build_from_parsers_and_curated_list(
 
 def test_pipeline_build_from_parsers_alone(tmp_path):
     Singleton.clear_all()
+    kazu_disk_cache.clear()
     parser_1 = DummyParser(
         name="first_mock_parser",
         source="test",
+        synonym_generator=None,
         entity_class="ent_type_1",
         data={
             IDX: [
@@ -451,6 +632,7 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         name="second_mock_parser",
         entity_class="ent_type_2",
         source="test",
+        synonym_generator=CombinatorialSynonymGenerator([]),
         data={
             IDX: [
                 "http://purl.obolibrary.org/obo/MONDO_08",
@@ -490,7 +672,6 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         parsers=[parser_1, parser_2, parser_3],
         output_dir=TEST_OUTPUT_DIR,
         span_key=TEST_SPAN_KEY,
-        use_curations=False,
     )
 
     doc = nlp(example_text)
