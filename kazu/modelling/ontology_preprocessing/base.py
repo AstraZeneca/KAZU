@@ -1047,7 +1047,30 @@ class OntologyParser(ABC):
         ontology source and/or generated ones into curations, so they can be used
         for dictionary based NER
 
-    def populate_synonym_database(self):
+        :param term:
+        :return:
+        """
+        for term_str in term.terms:
+            if term.original_term is None:
+                behaviour = SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
+                associated_id_sets = term.associated_id_sets
+            else:
+                behaviour = SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
+                associated_id_sets = None
+            action = SynonymTermAction(
+                associated_id_sets=associated_id_sets,
+                behaviour=behaviour,
+            )
+            curation = Curation(
+                curated_synonym=term_str,
+                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                case_sensitive=False,
+                actions=tuple([action]),
+                source_term=term.original_term,
+            )
+            yield curation
+
+    def populate_synonym_database(self, synonym_terms: Set[SynonymTerm]):
         """Populate the synonym database."""
 
         self.synonym_db.add(self.name, synonym_terms)
