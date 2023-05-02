@@ -1003,10 +1003,6 @@ class OntologyParser(ABC):
         synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
         return synonym_terms
 
-    def populate_metadata_database(self):
-        """Populate the metadata database with this ontology."""
-        self.metadata_db.add_parser(self.name, self.export_metadata(self.name))
-
     def generate_synonyms(
         self, original_synonym_data: Set[SynonymTerm]
     ) -> Tuple[Set[SynonymTerm], Set[SynonymTerm]]:
@@ -1070,36 +1066,46 @@ class OntologyParser(ABC):
             )
             yield curation
 
-    def populate_synonym_database(self, synonym_terms: Set[SynonymTerm]):
-        """Populate the synonym database."""
-
-        self.synonym_db.add(self.name, synonym_terms)
-
     def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
         """Populate the databases with the results of the parser.
 
         Also calculates the term norms associated with
         any curations (if provided) which can then be used for Dictionary based NER
 
-        :param force: normally, this call does nothing if databases already have an entry for this parser.
-            this can be forced by setting this param to True
-        :return: curations with term norms
+        :param force: do not use the cache for the ontology parser
+
+        :return: curations if required
         """
         cache_key = f"{self.name}.populate_databases"
 
         @kazu_disk_cache.memoize(name=cache_key)
         def _populate_databases():
-            self.populate_metadata_database()
+            logger.info("populating database for %s from source", self.name)
+            metadata = self.export_metadata(self.name)
+            # metadata db needs to be populated before call to export_synonym_terms
+            self.metadata_db.add_parser(self.name, metadata)
             intermediate_synonym_terms = self.export_synonym_terms(self.name)
-            maybe_ner_curations, final_terms = self.process_curations(intermediate_synonym_terms)
+            maybe_ner_curations, final_syn_terms = self.process_curations(
+                intermediate_synonym_terms
+            )
             self.parsed_dataframe = None  # clear the reference to save memory
-            return maybe_ner_curations, final_terms
+
+            self.synonym_db.add(self.name, final_syn_terms)
+            return maybe_ner_curations, metadata, final_syn_terms
 
         if force:
-            kazu_disk_cache.delete(key=cache_key)
-        logger.info("populating database for %s", self.name)
-        maybe_ner_curations, final_terms = _populate_databases()
-        self.populate_synonym_database(final_terms)
+            kazu_disk_cache.delete(self.export_metadata.__cache_key__(self, self.name))
+            kazu_disk_cache.delete(self.export_synonym_terms.__cache_key__(self, self.name))
+            kazu_disk_cache.delete(_populate_databases.__cache_key__())
+
+        maybe_ner_curations, metadata, final_syn_terms = _populate_databases()
+        if self.name not in self.synonym_db.loaded_parsers or not force:
+            # note, if the cache is used, the databases will not have been populated, so we need to
+            # repopulate here
+            logger.info("populating database for %s from cache", self.name)
+            self.metadata_db.add_parser(self.name, metadata)
+            self.synonym_db.add(self.name, final_syn_terms)
+
         return maybe_ner_curations
 
     def parse_to_dataframe(self) -> pd.DataFrame:
