@@ -152,6 +152,7 @@ class OntologyMatcher:
         self.set_labels(parser.entity_class for parser in parsers)
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
+        logger.info("ontology matcher build triggered. Forcing database repopulation.")
         for parser in parsers:
             maybe_curation_for_ner = parser.populate_databases(
                 force=True, return_ner_curations=True
