@@ -1,21 +1,21 @@
 import logging
-import traceback
 from collections import defaultdict
-from typing import List, Tuple, Set, Optional
+from typing import List, Set, Optional
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION, SynonymTermWithMetrics
-from kazu.steps import Step
+from kazu.data.data import Document, SynonymTermWithMetrics
+from kazu.steps.step import Step, document_batch_step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.link_index import DictionaryIndex
-from kazu.utils.utils import find_document_from_entity
 
 logger = logging.getLogger(__name__)
 
 
 class DictionaryEntityLinkingStep(Step):
-    """
-    Uses :class:`kazu.utils.link_index.DictionaryIndex` to match entities to ontologies.
+    """Uses :class:`kazu.utils.link_index.DictionaryIndex` to match entities to ontologies.
+
+    Note, this is not an instance of  :class:`kazu.steps.step.ParserDependentStep`, as
+    this logic would duplicate the work of :class:`kazu.utils.link_index.DictionaryIndex`
     """
 
     def __init__(
@@ -40,7 +40,8 @@ class DictionaryEntityLinkingStep(Step):
         self.skip_ner_namespaces = skip_ner_namespaces if skip_ner_namespaces is not None else set()
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    @document_batch_step
+    def __call__(self, docs: List[Document]):
         """
         logic of entity linker:
 
@@ -51,7 +52,6 @@ class DictionaryEntityLinkingStep(Step):
         :param docs:
         :return:
         """
-        failed_docs: List[Document] = []
         entities = (
             ent
             for doc in docs
@@ -63,31 +63,19 @@ class DictionaryEntityLinkingStep(Step):
         }
         if len(ents_by_match_and_class) > 0:
             for ent_match_and_class, ents_this_match in ents_by_match_and_class.items():
-
                 cache_missed_entities = self.lookup_cache.check_lookup_cache(ents_this_match)
                 if len(cache_missed_entities) == 0:
                     continue
                 else:
-                    try:
-                        indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
-                        if indices_to_search:
-                            terms: List[SynonymTermWithMetrics] = []
-                            for index in indices_to_search:
-                                terms.extend(index.search(ent_match_and_class[0], self.top_n))
+                    indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
+                    if indices_to_search:
+                        terms: List[SynonymTermWithMetrics] = []
+                        for index in indices_to_search:
+                            terms.extend(index.search(ent_match_and_class[0], self.top_n))
 
-                            for ent in ents_this_match:
-                                ent.update_terms(terms)
-
-                            self.lookup_cache.update_terms_lookup_cache(
-                                entity=next(iter(ents_this_match)), terms=terms
-                            )
-
-                    except Exception:
-                        failed_docs_set: Set[Document] = set()
                         for ent in ents_this_match:
-                            doc = find_document_from_entity(docs, ent)
-                            doc.metadata[PROCESSING_EXCEPTION] = traceback.format_exc()
-                            failed_docs_set.add(doc)
-                        failed_docs.extend(failed_docs_set)
+                            ent.update_terms(terms)
 
-        return docs, failed_docs
+                        self.lookup_cache.update_terms_lookup_cache(
+                            entity=next(iter(ents_this_match)), terms=terms
+                        )

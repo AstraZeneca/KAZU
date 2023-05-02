@@ -1,10 +1,13 @@
 from kazu.steps.linking.dictionary import DictionaryEntityLinkingStep, DictionaryIndex
 from kazu.data.data import Entity, Document
 from kazu.tests.utils import DummyParser
+from kazu.modelling.ontology_preprocessing.base import kazu_disk_cache
 
 
 def test_skips_prelinked_entities(tmp_path):
+    kazu_disk_cache.clear()
     parser = DummyParser(str(tmp_path / "dummy_parser"), entity_class="int")
+    parser.populate_databases(force=True)
     index = DictionaryIndex(parser)
     mock_skip_namespace = "mock_skip_namespace"
     mock_noskip_namespace = "mock_noskip_namespace"

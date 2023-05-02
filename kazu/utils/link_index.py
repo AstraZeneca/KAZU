@@ -1,12 +1,16 @@
 import logging
-from typing import Tuple, List, Iterable, Optional
+from typing import Tuple, List, Iterable, Optional, Dict
 
 import numpy
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from kazu.utils.caching import kazu_disk_cache
-from kazu.data.data import SynonymTermWithMetrics
-from kazu.modelling.database.in_memory_db import MetadataDatabase, SynonymDatabase
+from kazu.data.data import SynonymTermWithMetrics, SynonymTerm
+from kazu.modelling.database.in_memory_db import (
+    MetadataDatabase,
+    SynonymDatabase,
+    NormalisedSynonymStr,
+)
 from kazu.modelling.language.string_similarity_scorers import BooleanStringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.base import (
     OntologyParser,
@@ -34,6 +38,7 @@ class DictionaryIndex:
         :param boolean_scorers: precision can be increased by applying boolean checks on the returned result, for
             instance, checking that all integers are represented, that any noun modifiers are present etc
         """
+
         parser.populate_databases(force=False)
         self.entity_class = parser.entity_class
         self.parser_name = parser.name
@@ -41,8 +46,9 @@ class DictionaryIndex:
         self.synonym_db: SynonymDatabase = SynonymDatabase()
         self.namespace = self.__class__.__name__
         self.boolean_scorers = boolean_scorers
-        self.vectorizer, self.tf_idf_matrix = self.build_index_cache(parser.name)
-        self.synonyms_for_parser = self.synonym_db.get_all(self.parser_name)
+        self.vectorizer, self.tf_idf_matrix, self.synonyms_for_parser = self.build_index_cache(
+            parser.name
+        )
         self.synonym_list = list(self.synonyms_for_parser.values())
 
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
@@ -98,13 +104,16 @@ class DictionaryIndex:
                     logger.debug("filtered term %s as failed boolean checks", term)
 
     @kazu_disk_cache.memoize(ignore={0})
-    def build_index_cache(self, parser_name: str) -> Tuple[TfidfVectorizer, numpy.ndarray]:
+    def build_index_cache(
+        self, parser_name: str
+    ) -> Tuple[TfidfVectorizer, numpy.ndarray, Dict[NormalisedSynonymStr, SynonymTerm]]:
         """Build the cache for the index.
 
         :param parser_name: required by the disk cache decorator
         :return:
         """
         logger.info("building TfidfVectorizer for %s", self.parser_name)
+        synonyms_for_parser = self.synonym_db.get_all(self.parser_name)
         vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-        tf_idf_matrix = vectorizer.fit_transform(self.synonyms_for_parser.keys())
-        return vectorizer, tf_idf_matrix
+        tf_idf_matrix = vectorizer.fit_transform(synonyms_for_parser.keys())
+        return vectorizer, tf_idf_matrix, synonyms_for_parser
