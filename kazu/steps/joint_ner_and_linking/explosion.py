@@ -2,6 +2,8 @@ import logging
 from typing import Iterator, List, Tuple, Iterable, Dict, Set, cast
 
 import spacy
+from spacy.tokens import Span
+
 from kazu.data.data import (
     CharSpan,
     Document,
@@ -10,36 +12,49 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
+from kazu.modelling.ontology_matching import assemble_pipeline
 from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.steps import Step, document_batch_step
-from kazu.utils.utils import PathLike
-from spacy.tokens import Span
+from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.steps import document_batch_step
+from kazu.steps.step import ParserDependentStep
+from kazu.utils.utils import PathLike, as_path
 
 logger = logging.getLogger(__name__)
 
 
-class ExplosionStringMatchingStep(Step):
-    """
-    A wrapper for the explosion ontology-based entity matcher and linker.
-    """
+class ExplosionStringMatchingStep(ParserDependentStep):
+    """A wrapper for the explosion ontology-based entity matcher and linker."""
 
     def __init__(
         self,
+        parsers: Iterable[OntologyParser],
         path: PathLike,
         include_sentence_offsets: bool = True,
+        ignore_cache: bool = False,
     ):
         """
+
+
         :param path: path to spacy pipeline including Ontology Matcher.
         :param include_sentence_offsets: whether to add sentence offsets to the metadata.
+        :param ignore_cache: ignore cached version of spacy pipeline (if available) and rebuild
 
         """
+        super().__init__(parsers)
         self.include_sentence_offsets = include_sentence_offsets
-        self.path = path
+        self.path = as_path(path)
 
-        # TODO: config override for when how we map parser names to entity types has changed since the last pipeline build
-        # think about how this affects the OntologyMatcher's lookup of parser names in case they
-        # are not there in the new config.
-        self.spacy_pipeline = spacy.load(path)
+        if self.path.exists() and not ignore_cache:
+            logger.info("loading spacy pipeline from %s", str(path))
+            self.spacy_pipeline = spacy.load(path)
+        else:
+            logger.info(
+                "cached spacy pipeline not detected or ignore_cache=True. Creating it at %s. This may take some time",
+                str(self.path),
+            )
+            self.spacy_pipeline = assemble_pipeline.main(
+                output_dir=self.path, parsers=list(parsers)
+            )
         matcher = cast(OntologyMatcher, self.spacy_pipeline.get_pipe("ontology_matcher"))
         self.span_key = matcher.span_key
 
