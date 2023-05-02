@@ -1,5 +1,5 @@
 cellosaurus_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.CellosaurusOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.CellosaurusOntologyParser
   name: "CELLOSAURUS"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
   data_origin: 'CELLOSAURUS'

@@ -1,6 +1,6 @@
 ot_disease_parser:
   name: "OPENTARGETS_DISEASE"
-  _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsDiseaseOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsDiseaseOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/disease
   data_origin: 'OPENTARGETS-DISEASE'
   string_scorer: ${SapbertStringSimilarityScorer}

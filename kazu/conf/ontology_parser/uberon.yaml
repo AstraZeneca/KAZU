@@ -1,5 +1,5 @@
 uberon_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.UberonOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.UberonOntologyParser
   name: "UBERON"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
   data_origin: 'UBERON'

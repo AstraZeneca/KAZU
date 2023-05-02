@@ -1,5 +1,5 @@
 go_cc_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.CellularComponentGeneOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.CellularComponentGeneOntologyParser
   name: "CC_GENE_ONTOLOGY"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
   data_origin: 'GO-CC'

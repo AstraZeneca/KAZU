@@ -1,5 +1,5 @@
 go_mf_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.MolecularFunctionGeneOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.MolecularFunctionGeneOntologyParser
   name: "MF_GENE_ONTOLOGY"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
   data_origin: 'GO-MF'

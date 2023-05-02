@@ -1,5 +1,5 @@
 chembl_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.ChemblOntologyParser
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_31_sqlite/chembl_31.db
   data_origin: 'chembl_31_sqlite'
   name: "CHEMBL"

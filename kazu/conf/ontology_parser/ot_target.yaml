@@ -1,5 +1,5 @@
 ot_target_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsTargetOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsTargetOntologyParser
   name: "OPENTARGETS_TARGET"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
   data_origin: 'OPENTARGETS-TARGET'

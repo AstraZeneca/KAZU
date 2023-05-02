@@ -1,5 +1,5 @@
 go_bp_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.BiologicalProcessGeneOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.BiologicalProcessGeneOntologyParser
   name: "BP_GENE_ONTOLOGY"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
   data_origin: 'GO-BP'

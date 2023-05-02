@@ -1,5 +1,5 @@
 stato_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.StatoParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.StatoParser
   name: "STATO"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/stato.owl
   data_origin: 'Feb_2023'

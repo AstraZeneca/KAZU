@@ -1,5 +1,5 @@
 ot_molecule_parser:
-  _target_: kazu.modelling.ontology_preprocessing.base.OpenTargetsMoleculeOntologyParser
+  _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsMoleculeOntologyParser
   name: "OPENTARGETS_MOLECULE"
   in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
   data_origin: 'OPENTARGETS-MOLECULE'
