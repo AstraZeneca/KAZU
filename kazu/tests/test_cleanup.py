@@ -1,3 +1,5 @@
+import dataclasses
+
 from kazu.steps.other.cleanup import CleanupStep
 from kazu.data.data import (
     Document,
@@ -97,6 +99,55 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
     assert len(doc.get_entities()) == 3
     action.cleanup(doc)
     assert len(doc.get_entities()) == 2
+
+
+def test_configured_mapping_uri_stripping(kazu_test_config):
+    action = instantiate(kazu_test_config.CleanupActions.StripMappingURIsAction)
+    doc = Document.create_simple_document(doc_text)
+    short_id_egfr_mapping = Mapping(
+        default_label="EGFR",
+        source="ENSEMBL",
+        parser_name="opentargets_target",
+        idx="OPENTARGETS_TARGET",  # short id, should remain the same
+        string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+        disambiguation_confidence=DisambiguationConfidence.HIGHLY_LIKELY,
+        string_match_strategy="test",
+        disambiguation_strategy=None,
+    )
+    long_id_egfr_mapping = Mapping(
+        default_label="EGFR",
+        source="ENSEMBL",
+        parser_name="opentargets_target_but_long_ids",
+        idx="http://identifiers.org/Ensembl:ENSG00000146648",  # should get stripped
+        # note that this ID isn't used in general by kazu, but is used by OXO
+        # for EGFR: https://www.ebi.ac.uk/spot/oxo/terms/ENSG00000146648
+        # we have URIs for entities in a number of KBs, such as MONDO
+        # (generally anything parsed with RDFGraphParser or a subclass)
+        string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+        disambiguation_confidence=DisambiguationConfidence.AMBIGUOUS,
+        string_match_strategy="test",
+        disambiguation_strategy=None,
+    )
+
+    ents = [
+        Entity.load_contiguous_entity(
+            start=135,
+            end=139,
+            match="EGFR",
+            entity_class="gene",
+            namespace="test",
+            mappings={short_id_egfr_mapping, long_id_egfr_mapping},
+        ),
+    ]
+    doc.sections[0].entities.extend(ents)
+
+    assert len(doc.get_entities()) == 1
+    action.cleanup(doc)
+    ent = doc.get_entities()[0]
+    assert ent.mappings == {
+        short_id_egfr_mapping,
+        dataclasses.replace(long_id_egfr_mapping, idx="Ensembl:ENSG00000146648"),
+    }
 
 
 def test_cleanup_step(kazu_test_config):
