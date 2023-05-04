@@ -13,7 +13,7 @@ from hydra.utils import instantiate
 
 doc_text = "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
 "ABC9 is picked up by a different NER step and also not mapped."
-"But EFGR was picked up by explosion step and mapped."
+"But EGFR was picked up by explosion step and mapped."
 
 
 def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config):
@@ -23,12 +23,12 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
         Entity.load_contiguous_entity(
             start=135,
             end=139,
-            match="EFGR",
+            match="EGFR",
             entity_class="gene",
             namespace="test",
             mappings={
                 Mapping(
-                    default_label="EFGR",
+                    default_label="EGFR",
                     source="test",
                     parser_name="test",
                     idx="test",
@@ -38,7 +38,7 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
                     disambiguation_strategy=None,
                 ),
                 Mapping(
-                    default_label="EFGR",
+                    default_label="EGFR",
                     source="test",
                     parser_name="test",
                     idx="test",
@@ -76,12 +76,12 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
         Entity.load_contiguous_entity(
             start=135,
             end=139,
-            match="EFGR",
+            match="EGFR",
             entity_class="gene",
             namespace=explosion_step_namespace,
             mappings={
                 Mapping(
-                    default_label="EFGR",
+                    default_label="EGFR",
                     source="test",
                     parser_name="test",
                     idx="test",
