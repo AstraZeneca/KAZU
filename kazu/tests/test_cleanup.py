@@ -210,7 +210,7 @@ def test_uri_stripping_only_some_parsers():
     }
 
 
-def test_cleanup_step(kazu_test_config):
+def test_cleanup_step():
     class MockCleanupAction1:
         def cleanup(self, doc: Document):
             doc.sections = [section for section in doc.sections if len(section.text) >= 3]
