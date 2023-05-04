@@ -1,4 +1,7 @@
-from typing import List, Protocol, Callable, Iterable
+import dataclasses
+from typing import List, Protocol, Callable, Iterable, Optional
+import urllib
+
 from kazu.data.data import (
     Document,
     Entity,
@@ -64,6 +67,47 @@ class DropUnmappedEntityFilter:
 
     def __call__(self, ent: Entity) -> bool:
         return ent.namespace in self.from_ent_namespaces and len(ent.mappings) == 0
+
+
+class StripMappingURIsAction:
+    """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part of the URI.
+
+    For example, this will turn http://purl.obolibrary.org/obo/MONDO_0004979 into just MONDO_004979.
+
+    If you don't want URI stripping at all, don't use this Action as part of the CleanupStep/in the pipeline.
+    """
+
+    def __init__(self, parsers_to_strip: Optional[Iterable[str]] = None):
+        """
+
+        :param parsers_to_strip: if you only want to strip URIs for some parsers and not others,
+            provide the parsers to strip here. Otherwise, all parsers will have their IDs stripped.
+            This prevents having to keep the full list of parsers in sync here.
+        """
+        self.parsers_to_strip = parsers_to_strip
+
+    @staticmethod
+    def _strip_uri(idx):
+        url = urllib.parse.urlparse(idx)
+        if url.scheme == "":
+            # not a url
+            new_idx = idx
+        else:
+            new_idx = url.path.split("/")[-1]
+        return new_idx
+
+    def cleanup(self, doc: Document):
+        for entity in doc.get_entities():
+            new_mappings = set()
+            for mapping in entity.mappings:
+                if (
+                    self.parsers_to_strip is not None
+                    and mapping.parser_name not in self.parsers_to_strip
+                ):
+                    new_mappings.add(mapping)
+                else:
+                    new_mappings.add(dataclasses.replace(mapping, idx=self._strip_uri(mapping.idx)))
+            entity.mappings = new_mappings
 
 
 class CleanupStep(Step):

@@ -1,6 +1,5 @@
 import abc
 import itertools
-import urllib
 from abc import ABC
 from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
 
@@ -32,7 +31,6 @@ class MappingFactory:
         disambiguation_strategy: Optional[str],
         disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
-        strip_url: bool = True,
     ) -> Iterable[Mapping]:
 
         for id_set in id_sets:
@@ -44,7 +42,6 @@ class MappingFactory:
                 disambiguation_strategy=disambiguation_strategy,
                 disambiguation_confidence=disambiguation_confidence,
                 additional_metadata=additional_metadata,
-                strip_url=strip_url,
             )
 
     @staticmethod
@@ -56,7 +53,6 @@ class MappingFactory:
         disambiguation_strategy: Optional[str],
         disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
-        strip_url: bool = True,
     ) -> Iterable[Mapping]:
         for idx, source in id_set.ids_and_source:
             yield MappingFactory.create_mapping(
@@ -68,7 +64,6 @@ class MappingFactory:
                 disambiguation_strategy=disambiguation_strategy,
                 disambiguation_confidence=disambiguation_confidence,
                 additional_metadata=additional_metadata if additional_metadata is not None else {},
-                strip_url=strip_url,
             )
 
     @staticmethod
@@ -90,7 +85,6 @@ class MappingFactory:
         disambiguation_strategy: Optional[str] = None,
         disambiguation_confidence: Optional[DisambiguationConfidence] = None,
         additional_metadata: Optional[Dict] = None,
-        strip_url: bool = True,
         xref_source_parser_name: Optional[str] = None,
     ) -> Mapping:
         default_label, metadata = MappingFactory._get_default_label_and_metadata_from_parser(
@@ -98,13 +92,9 @@ class MappingFactory:
         )
         if additional_metadata:
             metadata.update(additional_metadata)
-        if strip_url:
-            new_idx = MappingFactory._strip_url(idx)
-        else:
-            new_idx = idx
         return Mapping(
             default_label=default_label,
-            idx=new_idx,
+            idx=idx,
             source=source,
             string_match_strategy=string_match_strategy,
             string_match_confidence=string_match_confidence,
@@ -114,16 +104,6 @@ class MappingFactory:
             metadata=metadata,
             xref_source_parser_name=xref_source_parser_name,
         )
-
-    @staticmethod
-    def _strip_url(idx):
-        url = urllib.parse.urlparse(idx)
-        if url.scheme == "":
-            # not a url
-            new_idx = idx
-        else:
-            new_idx = url.path.split("/")[-1]
-        return new_idx
 
 
 class MappingStrategy(ABC):

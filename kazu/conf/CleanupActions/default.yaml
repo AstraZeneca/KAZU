@@ -14,3 +14,6 @@ MappingFilterCleanupAction:
             - AMBIGUOUS
       string_match_ranks_to_drop:
         _target_: builtins.list
+StripMappingURIsAction:
+  _target_: kazu.steps.other.cleanup.StripMappingURIsAction
+  parsers_to_strip: ~
