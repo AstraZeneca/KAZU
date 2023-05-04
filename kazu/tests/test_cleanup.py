@@ -1,6 +1,6 @@
 import dataclasses
 
-from kazu.steps.other.cleanup import CleanupStep
+from kazu.steps.other.cleanup import CleanupStep, StripMappingURIsAction
 from kazu.data.data import (
     Document,
     Entity,
@@ -147,6 +147,66 @@ def test_configured_mapping_uri_stripping(kazu_test_config):
     assert ent.mappings == {
         short_id_egfr_mapping,
         dataclasses.replace(long_id_egfr_mapping, idx="Ensembl:ENSG00000146648"),
+    }
+
+
+def test_uri_stripping_only_some_parsers():
+    action = StripMappingURIsAction(parsers_to_strip=["mondo", "clo"])
+    doc = Document.create_simple_document("Asthma is in mondo and HSC0054 is a cell line in CLO.")
+    asthma_mapping_mondo = Mapping(
+        default_label="Asthma",
+        source="MONDO",
+        parser_name="mondo",
+        idx="http://purl.obolibrary.org/obo/MONDO_0004979",
+        string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+        disambiguation_confidence=DisambiguationConfidence.HIGHLY_LIKELY,
+        string_match_strategy="test",
+        disambiguation_strategy=None,
+    )
+    asthma_mapping_other_ont = dataclasses.replace(asthma_mapping_mondo, parser_name="not_mondo")
+    hsc0054_mapping_clo = Mapping(
+        default_label="HSC0054",
+        source="CLO",
+        parser_name="clo",
+        idx="http://purl.obolibrary.org/obo/CLO_0051085",
+        string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+        disambiguation_confidence=DisambiguationConfidence.HIGHLY_LIKELY,
+        string_match_strategy="test",
+        disambiguation_strategy=None,
+    )
+    hsc0054_mapping_other_ont = dataclasses.replace(hsc0054_mapping_clo, parser_name="not_clo")
+
+    ents = [
+        Entity.load_contiguous_entity(
+            start=0,
+            end=6,
+            match="Asthma",
+            entity_class="disease",
+            namespace="test",
+            mappings={asthma_mapping_mondo, asthma_mapping_other_ont},
+        ),
+        Entity.load_contiguous_entity(
+            start=23,
+            end=30,
+            match="HSC0054",
+            entity_class="cell_line",
+            namespace="test",
+            mappings={hsc0054_mapping_clo, hsc0054_mapping_other_ont},
+        ),
+    ]
+    doc.sections[0].entities.extend(ents)
+
+    assert len(doc.get_entities()) == 2
+    action.cleanup(doc)
+    asthma_ent = doc.get_entities()[0]
+    assert asthma_ent.mappings == {
+        dataclasses.replace(asthma_mapping_mondo, idx="MONDO_0004979"),
+        asthma_mapping_other_ont,
+    }
+    hsc0054_ent = doc.get_entities()[1]
+    assert hsc0054_ent.mappings == {
+        dataclasses.replace(hsc0054_mapping_clo, idx="CLO_0051085"),
+        hsc0054_mapping_other_ont,
     }
 
 
