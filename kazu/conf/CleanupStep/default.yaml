@@ -1,5 +1,3 @@
 _target_: kazu.steps.other.cleanup.CleanupStep
 cleanup_actions:
-  - ${CleanupActions.MappingFilterCleanupAction}
-  - ${CleanupActions.EntityFilterCleanupAction}
-  - ${CleanupActions.StripMappingURIsAction}
+  ${oc.dict.values:CleanupActions}
