@@ -227,4 +227,11 @@ nitpick_ignore = [
     ("py:class", "starlette.responses.Response"),
     # pydantic uses mkdocs, not Sphinx, and doesn't seem to have full API docs
     ("py:class", "pydantic.main.BaseModel"),
+    # sklearn doesn't like sphinx
+    ("py:class", "sklearn.base.OutlierMixin"),
+    # nor does pymongo
+    ("py:class", "pymongo.collection.Collection"),
+    ("py:class", "bson.objectid.ObjectId"),
+    # nor ray
+    ("py:class", "ray.util.queue.Queue"),
 ]
