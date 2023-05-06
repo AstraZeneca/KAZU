@@ -682,24 +682,17 @@ class SynonymTermAction:
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "SynonymTermAction":
-        if json_dict["associated_id_sets"] is not None:
+        if json_dict["associated_id_sets"] is None:
+            frozen_assoc_id_sets = None
+        else:
             assoc_id_sets = set()
             for equiv_id_set in json_dict["associated_id_sets"]:
-                new_equiv_id_lst = []
-                for equiv_id_lst in equiv_id_set["ids_and_source"]:
-                    idx = equiv_id_lst[0]
-                    source = equiv_id_lst[1]
-                    new_equiv_id_lst.append(
-                        (
-                            idx,
-                            source,
-                        )
-                    )
-                assoc_id_sets.add(EquivalentIdSet(frozenset(new_equiv_id_lst)))
+                ids = frozenset((idx, source) for idx, source in equiv_id_set["ids_and_source"])
+                equiv_id_set = EquivalentIdSet(ids)
+                assoc_id_sets.add(equiv_id_set)
 
             frozen_assoc_id_sets = frozenset(assoc_id_sets)
-        else:
-            frozen_assoc_id_sets = None
+
         instance = cls(
             behaviour=SynonymTermBehaviour(json_dict["behaviour"]),
             associated_id_sets=frozen_assoc_id_sets,
