@@ -93,7 +93,7 @@ def load_global_actions(
         with global_actions_path.open(mode="r") as jsonlf:
             global_actions = GlobalParserActions.from_json(json.load(jsonlf))
     else:
-        raise ValueError(f"curations do not exist at {path}")
+        raise ValueError(f"global actions do not exist at {path}")
     return global_actions
 
 
