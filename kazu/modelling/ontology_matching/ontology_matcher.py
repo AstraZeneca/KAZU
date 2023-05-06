@@ -153,7 +153,9 @@ class OntologyMatcher:
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         for parser in parsers:
-            maybe_curation_for_ner = parser.populate_databases(force=True)
+            maybe_curation_for_ner = parser.populate_databases(
+                force=True, return_ner_curations=True
+            )
             if maybe_curation_for_ner is None:
                 logger.warning(
                     "tried to create PhraseMatchers from Curations for parser %s, but none have been provided",
