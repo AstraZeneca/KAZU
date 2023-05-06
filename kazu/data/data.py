@@ -654,7 +654,7 @@ class ParserBehaviour(AutoNameEnum):
     DROP_IDS_FROM_PARSER = auto()
 
 
-@dataclass(frozen=True, eq=True)
+@dataclass(frozen=True)
 class SynonymTermAction:
     """
     A SynonymTermAction is an action that affects the :class:`.SynonymTerm`\\s that a parser
@@ -698,6 +698,14 @@ class SynonymTermAction:
             associated_id_sets=frozen_assoc_id_sets,
         )
         return instance
+
+    def __eq__(self, other):
+        """
+        eq class needed as we compare equality by hash rather than 'is'
+        :param other:
+        :return:
+        """
+        return hash(self) == hash(other)
 
 
 @dataclass(frozen=True)
@@ -775,7 +783,7 @@ class GlobalParserActions:
         )
 
 
-@dataclass(frozen=True, eq=True)
+@dataclass(frozen=True)
 class Curation:
     """
     A Curation is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
@@ -876,7 +884,7 @@ class Curation:
     mention_confidence: MentionConfidence
     actions: Tuple[SynonymTermAction, ...]
     case_sensitive: bool
-    _id: bson.ObjectId = field(default_factory=bson.ObjectId)
+    _id: bson.ObjectId = field(default_factory=bson.ObjectId, hash=False)
     # the original term that is used as a 'seed' term for this curation.
     # note, this is used for NER to determine how linking is performed. If you also
     # want to use this curation as a linking target for non-dictionary based NER processes,
@@ -929,3 +937,11 @@ class Curation:
         as_json = self.to_dict(False)
         assert isinstance(as_json, dict)
         return json.dumps(as_json)
+
+    def __eq__(self, other):
+        """
+        needed to compare by hash rather than 'is'
+        :param other:
+        :return:
+        """
+        return hash(self) == hash(other)
