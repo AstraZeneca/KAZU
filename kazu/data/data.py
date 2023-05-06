@@ -674,9 +674,9 @@ class SynonymTermAction:
 
     def __post_init__(self):
         if (
-            self.behaviour is not SynonymTermBehaviour.IGNORE
-            and self.behaviour is not SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
-            and self.behaviour is not SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
+            self.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
+            or self.behaviour is SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM
+            or self.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
         ) and (self.associated_id_sets is None or len(self.associated_id_sets) == 0):
             raise ValueError(f"associated_id_sets must be specified for behaviour {self.behaviour}")
 
@@ -896,6 +896,9 @@ class Curation:
         # data validation
         if not isinstance(self.curated_synonym, str):
             raise ValueError(f"curated_synonym should be a string, {self}")
+        behaviours = set(action.behaviour for action in self.actions)
+        if len(behaviours) > 1 and SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM in behaviours:
+            raise ValueError(f"inherited curations may only have one action: {self}")
 
     def source_term_norm(self, entity_class: str):
         return StringNormalizer.normalize(self.source_term, entity_class)
