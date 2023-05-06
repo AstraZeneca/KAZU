@@ -522,12 +522,12 @@ class CurationProcessor:
                 safe.update(potentially_conflicting_curations)
         return safe, conflicts
 
-    def _process_curation(self, curation: Curation) -> Optional[Curation]:
+    def _process_curation_actions(self, curation: Curation) -> Optional[Curation]:
         term_norm = curation.term_norm_for_linking(self.entity_class)
+        behaviours_requiring_database_entry: Set[SynonymTermBehaviour] = set()
         for action in curation.actions:
             if action.behaviour is SynonymTermBehaviour.IGNORE:
                 logger.debug("ignoring unwanted curation: %s for %s", curation, self.parser_name)
-                return None
             elif action.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM:
                 logger.debug(
                     "action inherits linking behaviour from %s for %s",
@@ -535,19 +535,16 @@ class CurationProcessor:
                     self.parser_name,
                 )
                 if term_norm not in self._terms_by_term_norm:
-                    logger.warning(
-                        "curation %s is has no linking target in the synonym database, and will be ignored",
+                    logger.debug(
+                        "curation %s has no linking target in the synonym database, and will be ignored",
                         curation,
                     )
-                    return None
                 else:
-                    return curation
+                    behaviours_requiring_database_entry.add(action.behaviour)
             elif action.behaviour is SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
                 self._drop_synonym_term(term_norm)
-                return None
-
-            assert action.associated_id_sets is not None
-            if action.behaviour is SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
+            elif action.behaviour is SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
+                assert action.associated_id_sets is not None
                 self._drop_id_set_from_synonym_term(
                     action.associated_id_sets,
                     term_norm=term_norm,
@@ -556,15 +553,33 @@ class CurationProcessor:
                 action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
                 or action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
             ):
+                behaviours_requiring_database_entry.add(action.behaviour)
+                assert action.associated_id_sets is not None
                 self._attempt_to_add_database_entry_for_curation(
                     curation_associated_id_set=action.associated_id_sets,
                     curated_synonym=curation.curated_synonym,
                     curation_term_norm=term_norm,
                 )
-                return curation
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
-        return None
+        # if no actions require db entry, it can't be used for ner
+        if len(behaviours_requiring_database_entry) == 0:
+            return None
+        else:
+            # if only action is linking only, don't use for ner
+            if (
+                len(behaviours_requiring_database_entry) == 1
+                and next(iter(behaviours_requiring_database_entry))
+                == SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
+            ):
+                return None
+            # if ner action is required, but db entry doesn't exist, raise error
+            elif self._terms_by_term_norm.get(term_norm) is None:
+                raise CurationException(
+                    f"Curation is invalid: requires database entry but all have been removed by actions: {curation}"
+                )
+            else:
+                return curation
 
     def _process_global_actions(self) -> Set[str]:
         dropped_ids: Set[str] = set()
