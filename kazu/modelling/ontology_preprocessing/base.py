@@ -16,6 +16,7 @@ from typing import (
     FrozenSet,
     DefaultDict,
     Literal,
+    Any,
 )
 
 import pandas as pd
@@ -133,10 +134,10 @@ class CurationModificationResult(AutoNameEnum):
 
 class CurationProcessor:
     """
-    A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced by an :class:`OntologyParser`
+    A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced by an :class:`.OntologyParser`
     with any relevant :class:`.GlobalParserActions` and/or :class:`.Curation` associated with the parser. That is to say,
     this class modifies the raw data produced by a parser with any a posteriori observations about the data (such as bad
-    synonyms, mismapped terms etc. Is also identifies curations that should be used for dictionary based NER.
+    synonyms, mis-mapped terms etc. Is also identifies curations that should be used for dictionary based NER.
     This class should be used before instances of :class:`.SynonymTerm`\\s are loaded into the internal database
     representation
 
@@ -162,8 +163,8 @@ class CurationProcessor:
     ):
         """
 
-        :param parser_name: name of parser to process (typically :attr:`Ontology_parser.name`)
-        :param entity_class: name of parser entity_class to process (typically :attr:`Ontology_parser.entity_class`
+        :param parser_name: name of parser to process
+        :param entity_class: name of parser entity_class to process
         :param global_actions:
         :param curations:
         :param synonym_terms:
@@ -220,7 +221,7 @@ class CurationProcessor:
             )
             > 0
         ):
-            logger.debug(
+            logger.warning(
                 "conflict on term norms \n%s\n%s\nthe latter will be ignored",
                 maybe_existing_term,
                 term,
@@ -239,7 +240,6 @@ class CurationProcessor:
         Remove a synonym term from the database, so that it cannot be
         used as a linking target
 
-        :param name:
         :param synonym:
         :return:
         """
@@ -264,11 +264,9 @@ class CurationProcessor:
 
     def _drop_id_from_all_synonym_terms(self, id_to_drop: Idx) -> Tuple[int, int]:
         """
-        Remove a given id from all :class:`~kazu.data.data.SynonymTerm`\\ s.
-        Drop any :class:`~kazu.data.data.SynonymTerm`\\ s with no remaining ID after removal.
+        Remove a given id from all :class:`.SynonymTerm`\\ s.
+        Drop any :class:`.SynonymTerm`\\ s with no remaining ID after removal.
 
-
-        :param name:
         :param id_to_drop:
         :return: terms modified count, terms dropped count
         """
@@ -294,6 +292,13 @@ class CurationProcessor:
         CurationModificationResult.SYNONYM_TERM_DROPPED,
         CurationModificationResult.NO_ACTION,
     ]:
+        """
+        Remove an id from a given :class:`.SynonymTerm`
+
+        :param id_to_drop:
+        :param term_to_modify:
+        :return:
+        """
         new_assoc_id_frozenset = self._drop_id_from_associated_id_sets(
             id_to_drop, term_to_modify.associated_id_sets
         )
@@ -307,6 +312,13 @@ class CurationProcessor:
     def _drop_id_from_associated_id_sets(
         self, id_to_drop: str, associated_id_sets: AssociatedIdSets
     ) -> AssociatedIdSets:
+        """
+        Remove an id from a :class:`.AssociatedIdSets`
+
+        :param id_to_drop:
+        :param associated_id_sets:
+        :return:
+        """
         new_assoc_id_set = set()
         for equiv_id_set in associated_id_sets:
             updated_ids_and_source = frozenset(
@@ -327,8 +339,6 @@ class CurationProcessor:
         Remove an :class:`~kazu.data.data.EquivalentIdSet` from a :class:`~kazu.data.data.SynonymTerm`\\ ,
         dropping the term altogether if no others remain.
 
-
-        :param name:
         :param synonym:
         :param id_set_to_drop:
         :return:
@@ -347,6 +357,13 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
     ]:
+        """
+        Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets` has changed
+
+        :param new_associated_id_sets:
+        :param synonym_term:
+        :return:
+        """
         result: Literal[
             CurationModificationResult.ID_SET_MODIFIED,
             CurationModificationResult.SYNONYM_TERM_DROPPED,
@@ -377,10 +394,10 @@ class CurationProcessor:
     ) -> Tuple[Optional[List[Curation]], Set[SynonymTerm]]:
         """
         Perform any updates required to the synonym terms as specified in the
-        curations/global actions
+        curations/global actions. The returned :class:`.Curation`\\s can be used for
+        Dictionary based NER, whereas the returned :class:`.SynonymTerm`\\s can
+        be loaded into the internal database for linking.
 
-
-        :param synonym_terms:
         :return:
         """
         self._process_global_actions()
@@ -410,8 +427,7 @@ class CurationProcessor:
         Remove an ID from the curation. If the curation is no longer valid after this action, it will be discarded
 
         :param idx: the id to remove
-        :param curations: the curations that contain this id
-        :return: a list of modified curations
+        :return:
         """
         affected_curations = set(self._curations_by_id.get(idx, []))
         if affected_curations is not None:
@@ -586,10 +602,10 @@ class CurationProcessor:
     def _drop_id_set_from_synonym_term(
         self, equivalent_id_sets_to_drop: AssociatedIdSets, term_norm: NormalisedSynonymStr
     ):
-        """Remove an id set from a :class:`.SynonymTerm`.
+        """Remove all the id sets in equivalent_id_sets_to_drop from a :class:`.SynonymTerm`.
 
-        :param id_set: ids that should be removed from the :class:`.SynonymTerm`
-        :param curated_synonym: passed to :class:`.StringNormalizer` to look up the :class:`.SynonymTerm`
+        :param equivalent_id_sets_to_drop: ids that should be removed from the :class:`.SynonymTerm`
+        :param term_norm: key of term to remove
         :return:
         """
         target_term_to_modify = self._terms_by_term_norm[term_norm]
