@@ -115,6 +115,16 @@ class CurationProcessor:
 
     """
 
+    # curations are applied in the following order
+    curation_apply_order = (
+        SynonymTermBehaviour.IGNORE,
+        SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
+        SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+        SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+    )
+
     def __init__(
         self,
         parser_name: str,
@@ -148,6 +158,19 @@ class CurationProcessor:
                     for equiv_id_set in action.associated_id_sets:
                         for idx in equiv_id_set.ids:
                             self._curations_by_id[idx].add(curation)
+
+    @classmethod
+    def curation_sort_func(cls, x: Curation, y: Curation):
+        """Determines the order curations are processed in"""
+
+        max_x = max(cls.curation_apply_order.index(action.behaviour) for action in x.actions)
+        max_y = max(cls.curation_apply_order.index(action.behaviour) for action in y.actions)
+        if max_x > max_y:
+            return 1
+        elif max_y > max_x:
+            return -1
+        else:
+            return 0
 
     def _update_term_lookups(
         self, term: SynonymTerm, override: bool
