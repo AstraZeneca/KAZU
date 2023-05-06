@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 import json
 import logging
 from abc import ABC
@@ -398,8 +399,8 @@ class CurationProcessor:
             logger.warning(message)
 
         curation_for_ner = []
-        for curation in sorted(safe_curations, key=lambda x: x.source_term is not None):
-            maybe_curation_with_term_norm_actions = self._process_curation(curation)
+        for curation in sorted(safe_curations, key=functools.cmp_to_key(self.curation_sort_func)):
+            maybe_curation_with_term_norm_actions = self._process_curation_actions(curation)
             if maybe_curation_with_term_norm_actions is not None:
                 curation_for_ner.append(maybe_curation_with_term_norm_actions)
         return curation_for_ner
