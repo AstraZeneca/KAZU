@@ -61,6 +61,32 @@ class CurationException(Exception):
     pass
 
 
+def select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count(
+    set_of_associated_id_sets: Set[AssociatedIdSets],
+) -> AssociatedIdSets:
+    """
+    For a set of :class:`.AssociatedIdSet`\\s, select the set with the fewest :class:`.EquivalentIdSet`\\s. If more than one
+    smallest, pick the one with the fewest total IDs
+
+
+    :param set_of_associated_id_sets:
+    :return:
+    """
+
+    by_len_and_equiv_len: DefaultDict[DefaultDict[Set[AssociatedIdSets]]] = defaultdict(  # type: ignore[type-arg]
+        lambda: defaultdict(set)
+    )
+    for assoc_id_set in set_of_associated_id_sets:
+        total_ids_this_assoc_id_set = set()
+        for equiv_id_set in assoc_id_set:
+            total_ids_this_assoc_id_set.update(equiv_id_set.ids)
+
+        by_len_and_equiv_len[len(assoc_id_set)][len(total_ids_this_assoc_id_set)].add(assoc_id_set)
+    smallest_assoc_dict = by_len_and_equiv_len[min(by_len_and_equiv_len.keys())]
+    smallest_set = smallest_assoc_dict[min(smallest_assoc_dict.keys())]
+    return next(iter(smallest_set))
+
+
 def load_curated_terms(
     path: PathLike,
 ) -> List[Curation]:
@@ -605,75 +631,119 @@ class CurationProcessor:
         CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
     ]:
         """
-        Insert a new :class:`~kazu.data.data.SynonymTerm` into the database, or return an existing
+        Create a new :class:`~kazu.data.data.SynonymTerm` for the database, or return an existing
         matching one if already present.
 
+        Notes:
 
-        :param curation_associated_id_set: if a :class:`.SynonymTerm` already exists for the normalised version of curated_synonym, this should be
-            a subset of one of the :class:`.EquivalentIdSet`\\s assocaited with that term. If a :class:`.SynonymTerm` does not
-            exist, the parser will attempt to find an existing instance of :class:`.EquivalentIdSet` that matches the ids in
-            id_set. If no appropriate :class:`.EquivalentIdSet` exists, a new instance of :class:`kazu.data.data.AssociatedIdSets`
-            will be created, containing an instance of :class:`.EquivalentIdSet` for each id in id_set
-        :param curated_synonym: passed to :class:`.StringNormalizer` to see if a suitable :class:`.SynonymTerm` exists
+        Creating new AssociatedIdSets should be avoided wherever possible, as this can lead to
+        inconsistencies in entity linking.
+
+        If a term_norm already exists in self._terms_by_term_norm that matches 'curation_term_norm',
+        this method will check to see if the 'curation_associated_id_set' is a subset of the existing term.
+        If so, no action will be taken. If it is not a subset, an exception will be thrown, as adding it
+        will cause irregularities in the database.
+
+        If the term_norm does not exist, this method will try to find another :class:`.AssociatedIdSets` set
+        that is a superset of 'curation_associated_id_set'. If no appropriate :class:`.AssociatedIdSets` can be
+        found, a new one will be created
+
+
+        :param curation_term_norm:
+        :param curation_associated_id_set:
+        :param curated_synonym:
         :return:
         """
-        log_prefix = f"{self.parser_name} attempting to create synonym term for <{curated_synonym}> term_norm: <{curation_term_norm}> IDs: {curation_associated_id_set}"
-
+        log_prefix = "%(parser_name)s attempting to create synonym term for <%(synonym)s> term_norm: <%(term_norm)s> IDs: %(ids)s}"
+        log_formatting_dict: Dict[str, Any] = {
+            "parser_name": self.parser_name,
+            "synonym": curated_synonym,
+            "term_norm": curation_term_norm,
+            "ids": curation_associated_id_set,
+        }
         # look up the term norm in the db
 
         maybe_existing_synonym_term = self._terms_by_term_norm.get(curation_term_norm)
 
         if maybe_existing_synonym_term is not None:
             if curation_associated_id_set.issubset(maybe_existing_synonym_term.associated_id_sets):
+                log_formatting_dict[
+                    "existing_id_set"
+                ] = maybe_existing_synonym_term.associated_id_sets
                 logger.debug(
-                    f"{log_prefix} but term_norm <{curation_term_norm}> already exists in synonym database."
-                    f"since this SynonymTerm includes all ids in id_set, no action is required. {maybe_existing_synonym_term.associated_id_sets}"
+                    log_prefix
+                    + " but term_norm <%(term_norm)s> already exists in synonym database."
+                    + "since this SynonymTerm includes all ids in id_set, no action is required. %(existing_id_set)s",
+                    log_formatting_dict,
                 )
                 return CurationModificationResult.NO_ACTION
             else:
-                raise CurationException(
-                    f"{log_prefix} but term_norm <{curation_term_norm}> already exists in synonym database, and its\n"
-                    f"associated_id_sets don't contain all the ids in id_set. Creating a new\n"
-                    f"SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
-                    f"This can happen if a synonym appears twice in the underlying ontology,\n"
-                    f"with multiple identifiers attached\n"
-                    f"Possible mitigations:\n"
-                    f"1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
-                    f"2) change the target id set of the curation to match the existing entry\n"
-                    f"\t(i.e. {maybe_existing_synonym_term.associated_id_sets}\n"
-                    f"3) Change the string normalizer function to generate unique term_norms\n"
-                )
+                # check equiv ids on term is a superset
+                all_matched = [False for _ in range(len(curation_associated_id_set))]
+                for i, curation_equiv_id_set in enumerate(curation_associated_id_set):
+                    for term_equiv_id_set in maybe_existing_synonym_term.associated_id_sets:
+                        if curation_equiv_id_set.ids_and_source.issubset(
+                            term_equiv_id_set.ids_and_source
+                        ):
+                            all_matched[i] = True
+                            break
+                    else:
+                        break
+                if all(all_matched):
+                    log_formatting_dict[
+                        "existing_id_set"
+                    ] = maybe_existing_synonym_term.associated_id_sets
+                    logger.debug(
+                        log_prefix
+                        + " but term_norm <%(term_norm)s> already exists in synonym database."
+                        + "the AssociatedIdSet is a superset of the curation AssociatedIdSet. Therefore no action is required. %(existing_id_set)s",
+                        log_formatting_dict,
+                    )
+                    return CurationModificationResult.NO_ACTION
+                else:
+                    formatted_log_prefix = log_prefix % log_formatting_dict
+                    raise CurationException(
+                        f"{formatted_log_prefix} but term_norm <{curation_term_norm}> already exists in synonym database, and its\n"
+                        f"associated_id_sets don't contain all the ids in id_set. Creating a new\n"
+                        f"SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
+                        f"This can happen if a synonym appears twice in the underlying ontology,\n"
+                        f"with multiple identifiers attached\n"
+                        f"Possible mitigations:\n"
+                        f"1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
+                        f"2) change the target id set of the curation to match the existing entry\n"
+                        f"\t(i.e. {maybe_existing_synonym_term.associated_id_sets}\n"
+                        f"3) Change the string normalizer function to generate unique term_norms\n"
+                    )
 
         # see if we've already had to group all the ids in this id_set in some way for a different synonym
         # we need the sort as we want to try to match to the smallest instance of AssociatedIdSets first.
         # This is because this is the least ambiguous - if we don't sort, we're potentially matching to
         # a larger, more ambiguous one than we need, and are potentially creating a disambiguation problem
         # where none exists
-        maybe_reusable_id_set = None
+        set_of_associated_id_sets = set()
         for equiv_id_set in curation_associated_id_set:
             for idx in equiv_id_set.ids:
-
-                maybe_assoc_id_sets_for_this_id = set()
-                for term in self._terms_by_id.get(idx, []):
-                    maybe_assoc_id_sets_for_this_id.add(term.associated_id_sets)
-
-                if len(maybe_assoc_id_sets_for_this_id) == 0:
+                maybe_terms = self._terms_by_id.get(idx)
+                if maybe_terms is None:
+                    formatted_log_prefix = log_prefix % log_formatting_dict
                     raise CurationException(
-                        f"{log_prefix} but could not find {idx} for this parser"
+                        f"{formatted_log_prefix} but could not find {idx} for this parser"
                     )
-                else:
-                    if maybe_reusable_id_set is None:
-                        maybe_reusable_id_set = min(maybe_assoc_id_sets_for_this_id, key=len)
-                    else:
-                        smallest_set_this_iteration = min(maybe_assoc_id_sets_for_this_id, key=len)
-                        if len(smallest_set_this_iteration) < len(maybe_reusable_id_set):
-                            maybe_reusable_id_set = smallest_set_this_iteration
 
-        if maybe_reusable_id_set is not None:
+                for term in maybe_terms:
+                    if curation_associated_id_set.issubset(term.associated_id_sets):
+                        set_of_associated_id_sets.add(term.associated_id_sets)
+
+        if len(set_of_associated_id_sets) > 0:
             logger.debug(
-                f"using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: {curation_associated_id_set}"
+                "using smallest AssociatedIDSet that matches all IDs for new SynonymTerm: %s",
+                curation_associated_id_set,
             )
-            associated_id_set_for_new_synonym_term = maybe_reusable_id_set
+            associated_id_set_for_new_synonym_term = (
+                select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count(
+                    set_of_associated_id_sets
+                )
+            )
         else:
             # something to be careful about here: we assume that if no appropriate AssociatedIdSet can be
             # reused, we need to create a new one. If one cannot be found, we 'assume' that the input
@@ -682,7 +752,8 @@ class CurationProcessor:
             # best avoided by having the curation contain as few IDs as possible, such that the chances
             # that an existing AssociatedIdSet can be reused are higher.
             logger.debug(
-                f"no appropriate AssociatedIdSets exist for the set {curation_associated_id_set}, so a new one will be created"
+                "no appropriate AssociatedIdSets exist for the set %s, so a new one will be created",
+                curation_associated_id_set,
             )
             associated_id_set_for_new_synonym_term = curation_associated_id_set
 
