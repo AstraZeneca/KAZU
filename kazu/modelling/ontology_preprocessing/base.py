@@ -1060,7 +1060,7 @@ class OntologyParser(ABC):
             curation = Curation(
                 curated_synonym=term_str,
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                case_sensitive=False,
+                case_sensitive=StringNormalizer.classify_symbolic(term_str, self.entity_class),
                 actions=tuple([action]),
                 source_term=term.original_term,
             )
