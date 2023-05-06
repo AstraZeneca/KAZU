@@ -1,2 +1,0 @@
-_target_: kazu.modelling.ontology_preprocessing.base.load_curations
-path: ${oc.env:KAZU_MODEL_PACK}/curations/curations.json

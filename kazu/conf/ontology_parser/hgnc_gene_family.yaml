@@ -7,5 +7,7 @@ hgnc_gene_family_parser:
   synonym_generator: ${SynonymGeneration.gene}
   # needs to be gene to pick up mis-recognised gene families by the transformers model
   entity_class: 'gene'
-  curations: ${curations}
+  curations:
+    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
+    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${..name}_curations.json
   global_actions: ${global_actions}
