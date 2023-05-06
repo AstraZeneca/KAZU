@@ -1066,16 +1066,22 @@ class OntologyParser(ABC):
             )
             yield curation
 
-    def populate_databases(self, force: bool = False) -> Optional[List[Curation]]:
+    def populate_databases(
+        self, force: bool = False, return_ner_curations: bool = False
+    ) -> Optional[List[Curation]]:
         """Populate the databases with the results of the parser.
 
         Also calculates the term norms associated with
         any curations (if provided) which can then be used for Dictionary based NER
 
         :param force: do not use the cache for the ontology parser
-
+        :param return_ner_curations: should ner curations be returned?
         :return: curations if required
         """
+        if self.name in self.synonym_db.loaded_parsers and not force and not return_ner_curations:
+            logger.debug("parser %s already loaded.", self.name)
+            return None
+
         cache_key = f"{self.name}.populate_databases"
 
         @kazu_disk_cache.memoize(name=cache_key)
@@ -1099,14 +1105,14 @@ class OntologyParser(ABC):
             kazu_disk_cache.delete(_populate_databases.__cache_key__())
 
         maybe_ner_curations, metadata, final_syn_terms = _populate_databases()
-        if self.name not in self.synonym_db.loaded_parsers or not force:
-            # note, if the cache is used, the databases will not have been populated, so we need to
-            # repopulate here
+        if self.name not in self.synonym_db.loaded_parsers or force:
             logger.info("populating database for %s from cache", self.name)
             self.metadata_db.add_parser(self.name, metadata)
             self.synonym_db.add(self.name, final_syn_terms)
-
-        return maybe_ner_curations
+        if return_ner_curations:
+            return maybe_ner_curations
+        else:
+            return None
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
