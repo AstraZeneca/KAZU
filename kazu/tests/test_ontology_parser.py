@@ -1,12 +1,9 @@
 import json
 import logging
-from contextlib import nullcontext
 from copy import deepcopy
-from typing import Set, Tuple, Union
+from typing import Set, Tuple
 
 import pytest
-from _pytest.python_api import RaisesContext
-
 from kazu.data.data import (
     Curation,
     MentionConfidence,
@@ -27,7 +24,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     load_curated_terms,
-    CurationException,
     load_global_actions,
     kazu_disk_cache,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
 )
@@ -83,8 +79,8 @@ should_drop_synonym_term_to_parser = "should_add_synonym_term_to_parser"
 should_not_add_a_synonym_term_to_db_as_one_already_exists = (
     "should_not_add_a_synonym_term_to_db_as_one_already_exists"
 )
-should_raise_exception_when_attempting_to_add_term = (
-    "should_raise_exception_when_attempting_to_add_term"
+should_fail_to_modify_terms_when_attempting_to_add_term = (
+    "should_fail_to_modify_terms_when_attempting_to_add_term"
 )
 should_remove_an_EquivalentIdSet_from_a_synonym_term = (
     "should_remove_an_EquivalentIdSet_from_a_synonym_term"
@@ -167,7 +163,7 @@ def get_test_parser(
         rule in test_id
         for rule in {
             should_not_add_a_synonym_term_to_db_as_one_already_exists,
-            should_raise_exception_when_attempting_to_add_term,
+            should_fail_to_modify_terms_when_attempting_to_add_term,
             should_drop_curated_term_followed_by_adding_new_one,
         }
     ):
@@ -301,7 +297,7 @@ def get_test_parser(
                 case_sensitive=False,
             ),
             None,
-            id=should_raise_exception_when_attempting_to_add_term,
+            id=should_fail_to_modify_terms_when_attempting_to_add_term,
         ),
         pytest.param(
             Curation(
@@ -440,20 +436,16 @@ def test_declarative_curation_logic(
         # temporary directory set up using the tmp_path fixture inside the test
         parser_1, noop_parser = get_test_parser(test_id, curations_path, global_actions_path)
 
-        expectation: Union[RaisesContext[CurationException], nullcontext]
-        if should_raise_exception_when_attempting_to_add_term in test_id:
-            expectation = pytest.raises(CurationException)
-        else:
-            expectation = nullcontext(True)
-
-        with expectation:
-            parser_1.populate_databases()
-            noop_parser.populate_databases()
+        parser_1.populate_databases()
+        noop_parser.populate_databases()
 
         syn_db = SynonymDatabase()
         if should_add_synonym_term_to_parser in test_id:
             assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME)) + 1
-        elif should_not_add_a_synonym_term_to_db_as_one_already_exists in test_id:
+        elif (
+            should_not_add_a_synonym_term_to_db_as_one_already_exists in test_id
+            or should_fail_to_modify_terms_when_attempting_to_add_term in test_id
+        ):
             assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
         elif should_drop_from_parser_via_general_rule in test_id:
             # +2 as parser one has two entries dropped via global action
