@@ -734,18 +734,22 @@ class CurationProcessor:
                     return CurationModificationResult.NO_ACTION
                 else:
                     formatted_log_prefix = log_prefix % log_formatting_dict
-                    raise CurationException(
-                        f"{formatted_log_prefix} but term_norm <{curation_term_norm}> already exists in synonym database, and its\n"
-                        f"associated_id_sets don't contain all the ids in id_set. Creating a new\n"
-                        f"SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
-                        f"This can happen if a synonym appears twice in the underlying ontology,\n"
-                        f"with multiple identifiers attached\n"
-                        f"Possible mitigations:\n"
-                        f"1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
-                        f"2) change the target id set of the curation to match the existing entry\n"
-                        f"\t(i.e. {maybe_existing_synonym_term.associated_id_sets}\n"
-                        f"3) Change the string normalizer function to generate unique term_norms\n"
+                    logger.error(
+                        "%s but term_norm <%s> already exists in synonym database, and its\n"
+                        "associated_id_sets don't contain all the ids in id_set. Creating a new\n"
+                        "SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
+                        "This can happen if a synonym appears twice in the underlying ontology,\n"
+                        "with multiple identifiers attached\n"
+                        "Possible mitigations:\n"
+                        "1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
+                        "2) change the target id set of the curation to match the existing entry\n"
+                        "\t(i.e. %s\n"
+                        "3) Change the string normalizer function to generate unique term_norms\n",
+                        formatted_log_prefix,
+                        curation_term_norm,
+                        maybe_existing_synonym_term.associated_id_sets,
                     )
+                    return CurationModificationResult.NO_ACTION
 
         # see if we've already had to group all the ids in this id_set in some way for a different synonym
         # we need the sort as we want to try to match to the smallest instance of AssociatedIdSets first.
