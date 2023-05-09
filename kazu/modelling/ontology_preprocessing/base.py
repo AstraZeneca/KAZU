@@ -67,8 +67,8 @@ def select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count(
     set_of_associated_id_sets: Set[AssociatedIdSets],
 ) -> AssociatedIdSets:
     """
-    For a set of :class:`.AssociatedIdSet`\\s, select the set with the fewest :class:`.EquivalentIdSet`\\s. If more than one
-    smallest, pick the one with the fewest total IDs
+    For a set of :class:`kazu.data.data.AssociatedIdSets`\\s, select the set with the fewest :class:`.EquivalentIdSet`\\s.
+    If more than one, smallest, pick the one with the fewest total IDs
 
 
     :param set_of_associated_id_sets:
