@@ -161,6 +161,7 @@ class Mapping:
 NumericMetric = Union[bool, int, float]
 
 AssociatedIdSets = FrozenSet[EquivalentIdSet]
+"""A frozen set of :class:`.EquivalentIdSet`"""
 
 
 @dataclass(frozen=True, eq=True)
