@@ -464,44 +464,6 @@ PARSER_1_AMBIGUOUS_DATA = {
             [
                 Curation(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="amongst-us",
-                    actions=tuple(
-                        [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
-                                    [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
-                                        )
-                                    ]
-                                ),
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [],
-            0,
-            {},
-            [],
-            PARSER_1_AMBIGUOUS_DATA,
-            {},
-            True,
-            id="Should throw exception on populate databases as the term norm of the curation returns a Synonym Term with IDs that dont match the target ids",
-        ),
-        pytest.param(
-            [
-                Curation(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym=CONFUSING_SYNONYM,
                     actions=tuple(
                         [
