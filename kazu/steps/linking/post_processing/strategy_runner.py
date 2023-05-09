@@ -36,9 +36,9 @@ def entity_to_entity_key(
     )
 
 
-class NamespaceStrategyExecution:
+class ConfidenceLevelStrategyExecution:
     """
-    The role of a NamespaceStrategyExecution is to track which entities have had mappings successfully resolved,
+    The role of this class is to track which entities have had mappings successfully resolved,
     and which require the application of further strategies.
 
     This is handled via tracking a dictionary of EntityKey to sets of parser names.
@@ -156,7 +156,7 @@ class NamespaceStrategyExecution:
         self.entity_mapped.clear()
 
 
-NAMESPACE_ERROR_ENDING = "If entities with these namespace(s) appear, attempting to process them would cause an exception. It is likely that this class is mis-configured."
+CONFIDENCE_ERROR_ENDING = "If entities with this confidence(s) appear, attempting to process them would cause an exception. It is likely that this class is mis-configured."
 
 
 class StrategyRunner:
@@ -180,26 +180,26 @@ class StrategyRunner:
        :attr:`.Entity.entity_class`\\ .
     3. divide these entities by whether they are symbolic or not.
     4. identify the maximum number of strategies that 'could' run.
-    5. get the appropriate :class:`NamespaceStrategyExecution` to run against this sub group.
+    5. get the appropriate :class:`ConfidenceLevelStrategyExecution` to run against this sub group.
     6. group the entities from 5. by EntityKey (i.e. a hashable representation of unique information required for
        mapping.
     7. conditionally execute the next strategy out of the maximum possible (from 4), and attach any resulting mappings
-       to the relevant entity group. Note, the :class:`NamespaceStrategyExecution` is responsible for deciding whether
+       to the relevant entity group. Note, the :class:`ConfidenceLevelStrategyExecution` is responsible for deciding whether
        a strategy is executed or not.
     """
 
     def __init__(
         self,
-        symbolic_strategies: Dict[str, NamespaceStrategyExecution],
-        non_symbolic_strategies: Dict[str, NamespaceStrategyExecution],
+        symbolic_strategies: Dict[str, ConfidenceLevelStrategyExecution],
+        non_symbolic_strategies: Dict[str, ConfidenceLevelStrategyExecution],
         cross_ref_managers: Optional[List[CrossReferenceManager]] = None,
     ):
         """
 
 
-        :param symbolic_strategies: mapping of mention confidence to a :class:`NamespaceStrategyExecution` for symbolic
+        :param symbolic_strategies: mapping of mention confidence to a :class:`ConfidenceLevelStrategyExecution` for symbolic
             entities
-        :param non_symbolic_strategies: mapping of mention confidence to a :class:`NamespaceStrategyExecution` for
+        :param non_symbolic_strategies: mapping of mention confidence to a :class:`ConfidenceLevelStrategyExecution` for
             non-symbolic entities
         :param cross_ref_managers: list of managers that will be applied to any created mappings, attempting to create
             xreferences
@@ -255,7 +255,7 @@ class StrategyRunner:
             doc.get_entities(), key_func=lambda ent: ent.mention_confidence
         )
         for mention_confidence, entities in by_confidence:
-            logger.debug("mapping entities for namespace %s", mention_confidence)
+            logger.debug("mapping entities for confidence %s", mention_confidence)
             symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(
                 entities=entities
             )
@@ -275,18 +275,18 @@ class StrategyRunner:
         self,
         ents_needing_mappings: List[Entity],
         document: Document,
-        namespace_strategy_execution: NamespaceStrategyExecution,
+        confidence_strategy_execution: ConfidenceLevelStrategyExecution,
     ):
         """
         This method executes parts 5 - 7 in the class Docstring.
 
         :param ents_needing_mappings: Expects entities to already be sorted based on :func:`entity_to_entity_key`\\ .
         :param document:
-        :param namespace_strategy_execution:
+        :param confidence_strategy_execution:
         :return:
         """
         try:
-            strategy_max_index = namespace_strategy_execution.longest_mapping_strategy_list_size
+            strategy_max_index = confidence_strategy_execution.longest_mapping_strategy_list_size
 
             groups = [
                 list(ents)
@@ -296,7 +296,7 @@ class StrategyRunner:
             for i in range(0, strategy_max_index):
                 for entity_group in groups:
                     reference_entity = next(iter(entity_group))
-                    for mapping in namespace_strategy_execution(
+                    for mapping in confidence_strategy_execution(
                         entity=reference_entity,
                         strategy_index=i,
                         document=document,
@@ -319,4 +319,4 @@ class StrategyRunner:
                         )
         finally:
             # in case exception is thrown - always reset state
-            namespace_strategy_execution.reset()
+            confidence_strategy_execution.reset()

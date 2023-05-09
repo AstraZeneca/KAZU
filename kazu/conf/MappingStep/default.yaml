@@ -6,7 +6,7 @@ strategy_runner:
   symbolic_strategies:
 
     HIGHLY_LIKELY:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
       stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
@@ -79,7 +79,7 @@ strategy_runner:
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
 
     PROBABLE:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
       stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.NoopMappingStrategy
@@ -95,7 +95,7 @@ strategy_runner:
   non_symbolic_strategies:
 
     HIGHLY_LIKELY:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
       stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
@@ -147,7 +147,7 @@ strategy_runner:
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
     PROBABLE:
-      _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
+      _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
       stop_on_success: True
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy

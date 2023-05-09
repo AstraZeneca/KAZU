@@ -16,7 +16,7 @@ from kazu.modelling.ontology_preprocessing.base import IDX, SYN
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 from kazu.steps.linking.post_processing.strategy_runner import (
     StrategyRunner,
-    NamespaceStrategyExecution,
+    ConfidenceLevelStrategyExecution,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     MappingStrategy,
@@ -152,7 +152,7 @@ def build_runner(expected_id_groups: Dict[str, Set[str]]) -> StrategyRunner:
         expected_ids=expected_id_groups["test_default"],
     )
 
-    strategy_execution = NamespaceStrategyExecution(
+    strategy_execution = ConfidenceLevelStrategyExecution(
         ent_class_strategies={
             "test_class": [
                 first_test_strategy,
