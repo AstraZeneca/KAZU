@@ -10,6 +10,7 @@ from kazu.data.data import (
     Section,
     Entity,
     SynonymTermWithMetrics,
+    MentionConfidence,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_matching import assemble_pipeline
@@ -62,7 +63,7 @@ class ExplosionStringMatchingStep(ParserDependentStep):
 
     def extract_entity_data_from_spans(
         self, spans: Iterable[Span]
-    ) -> Iterator[Tuple[int, int, str, Dict[str, Set[Tuple[str, str]]]]]:
+    ) -> Iterator[Tuple[int, int, str, Dict[str, Set[Tuple[str, str, str]]]]]:
         for span in spans:
             yield span.start_char, span.end_char, span.text, span._.ontology_dict_
 
@@ -88,22 +89,21 @@ class ExplosionStringMatchingStep(ParserDependentStep):
                 ontology_data,
             ) in self.extract_entity_data_from_spans(spans):
                 for entity_class, per_parser_term_norm_set in ontology_data.items():
+                    for parser_name, term_norm, confidence in per_parser_term_norm_set:
+                        e = Entity.load_contiguous_entity(
+                            start=start_char,
+                            end=end_char,
+                            match=text,
+                            entity_class=entity_class,
+                            namespace=self.namespace(),
+                            mention_confidence=MentionConfidence(int(confidence)),
+                        )
 
-                    e = Entity.load_contiguous_entity(
-                        start=start_char,
-                        end=end_char,
-                        match=text,
-                        entity_class=entity_class,
-                        namespace=self.namespace(),
-                    )
-                    entities.append(e)
-                    terms = []
-                    for parser_name, term_norm in per_parser_term_norm_set:
                         term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
                             self.synonym_db.get(parser_name, term_norm), exact_match=True
                         )
-                        terms.append(term_with_metrics)
-                    e.update_terms(terms)
+                        e.update_terms((term_with_metrics,))
+                        entities.append(e)
 
             # add sentence offsets
             if self.include_sentence_offsets:
