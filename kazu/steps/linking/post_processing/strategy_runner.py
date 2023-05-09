@@ -8,6 +8,7 @@ from kazu.data.data import (
     Entity,
     SynonymTermWithMetrics,
     Mapping,
+    MentionConfidence,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
 from kazu.steps.linking.post_processing.xref_manager import CrossReferenceManager
@@ -168,13 +169,13 @@ class StrategyRunner:
 
     Beyond the precision of the strategy itself, the variables to consider are:
 
-    1. the NER system (a.k.a namespace), in that different systems vary in terms of precision and recall for detecting
+    1. the confidence of the NER systems in the match, in that different systems vary in terms of precision and recall for detecting
        entity spans.
     2. what SynonymTerms are associated with the entity, and from which parser they originated from.
 
     The __call__ method of this class operates as follows:
 
-    1. group entities by order of NER namespace.
+    1. group entities by order of :class:`.MentionConfidence`\\.
     2. sub-group these entities again by :attr:`.Entity.match` and
        :attr:`.Entity.entity_class`\\ .
     3. divide these entities by whether they are symbolic or not.
@@ -191,58 +192,25 @@ class StrategyRunner:
         self,
         symbolic_strategies: Dict[str, NamespaceStrategyExecution],
         non_symbolic_strategies: Dict[str, NamespaceStrategyExecution],
-        ner_namespace_processing_order: List[str],
         cross_ref_managers: Optional[List[CrossReferenceManager]] = None,
     ):
         """
 
 
-        :param symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for symbolic
+        :param symbolic_strategies: mapping of mention confidence to a :class:`NamespaceStrategyExecution` for symbolic
             entities
-        :param non_symbolic_strategies: mapping of NER namespace to a :class:`NamespaceStrategyExecution` for
+        :param non_symbolic_strategies: mapping of mention confidence to a :class:`NamespaceStrategyExecution` for
             non-symbolic entities
-        :param ner_namespace_processing_order: Entities will be mapped in this namespace order. This is
-            useful if you have a high precision, low recall NER namespace, combined with a low precision high recall
-            namespace, as the mapping info derived from the high precision NER namespace can be used with a high
-            precision strategy for the low precision NER namespace
         :param cross_ref_managers: list of managers that will be applied to any created mappings, attempting to create
             xreferences
         """
-        self.symbolic_strategies = symbolic_strategies
-        self.non_symbolic_strategies = non_symbolic_strategies
+        self.symbolic_strategies = {
+            MentionConfidence.__members__[k]: v for k, v in symbolic_strategies.items()
+        }
+        self.non_symbolic_strategies = {
+            MentionConfidence.__members__[k]: v for k, v in non_symbolic_strategies.items()
+        }
         self.cross_ref_managers = cross_ref_managers
-        self.ner_namespace_processing_order = ner_namespace_processing_order
-
-        if len(self.ner_namespace_processing_order) == 0:
-            # no sort order given: sort alphabetically just to get some consistent (but arbitrary) sort key
-            self.get_namespace_sort_key = lambda ns: ns
-        else:
-            # Check that sets of namespaces are consistent
-            namespaces_with_a_namespace_strategy_execution = set(self.symbolic_strategies).union(
-                self.non_symbolic_strategies
-            )
-            processing_order_namespaces = set(self.ner_namespace_processing_order)
-            assert processing_order_namespaces.issubset(
-                namespaces_with_a_namespace_strategy_execution
-            ), (
-                "There are namespace(s) in the ner_namespace_processing_order that aren't associated"
-                " with any mapping strategies. " + NAMESPACE_ERROR_ENDING
-            )
-            assert namespaces_with_a_namespace_strategy_execution.issubset(
-                processing_order_namespaces
-            ), (
-                "There are namespace(s) associated with a strategy that aren't in the"
-                " ner_namespace_processing_order. " + NAMESPACE_ERROR_ENDING
-            )
-            # Note that the stricter:
-            # assert set(self.ner_namespace_processing_order) == set(self.symbolic_strategies) === set(self.non_symbolic_strategies)
-            # would rule out the case where we know that entities from a certain namespace will always be symbolic or non-symbolic, so
-            # the namespace only needs to be in either self.symbolic_strategies or self.non_symbolic_strategies, but not both.
-
-            self.ner_namespace_to_index = {
-                ns: ind for ind, ns in enumerate(self.ner_namespace_processing_order)
-            }
-            self.get_namespace_sort_key = lambda ns: self.ner_namespace_to_index[ns]
 
     @staticmethod
     def group_entities_by_symbolism(
@@ -276,40 +244,32 @@ class StrategyRunner:
         Run relevant strategies to decide what mappings to create.
 
         Generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
-        information to work with. Therefore, we group entities by configured namespace order, split by symbolism, then
+        information to work with. Therefore, we group entities by confidence, split by symbolism, then
         run :meth:`execute_hit_post_processing_strategies`\\ .
 
         :param doc:
         :return:
         """
-        # do a separate sorted and groupby call (rather than our sort_then_group utility)
-        # so we can do all the sorting we need in one go
-        sorted_entities = sorted(
-            doc.get_entities(),
-            key=lambda ent: (
-                self.get_namespace_sort_key(ent.namespace),
-                *entity_to_entity_key(ent),
-            ),
-        )
-        # add in ent.namespace, so we have it available in the group key.
-        # It won't affect the sorting since the first element of the tuple will be the same
-        # for all ents with the same namespace
-        entities_grouped_by_namespace_order = groupby(
-            sorted_entities,
-            key=lambda ent: (self.get_namespace_sort_key(ent.namespace), ent.namespace),
-        )
 
-        for (_namespace_sort_key, namespace), entities in entities_grouped_by_namespace_order:
-            logger.debug("mapping entities for namespace %s", namespace)
+        by_confidence = sort_then_group(
+            doc.get_entities(), key_func=lambda ent: ent.mention_confidence
+        )
+        for mention_confidence, entities in by_confidence:
+            logger.debug("mapping entities for namespace %s", mention_confidence)
             symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(
                 entities=entities
             )
-            self.execute_hit_post_processing_strategies(
-                non_symbolic_entities, doc, self.non_symbolic_strategies[namespace]
-            )
-            self.execute_hit_post_processing_strategies(
-                symbolic_entities, doc, self.symbolic_strategies[namespace]
-            )
+
+            maybe_non_symbolic_strategies = self.non_symbolic_strategies.get(mention_confidence)
+            if maybe_non_symbolic_strategies is not None:
+                self.execute_hit_post_processing_strategies(
+                    non_symbolic_entities, doc, maybe_non_symbolic_strategies
+                )
+            maybe_symbolic_strategies = self.symbolic_strategies.get(mention_confidence)
+            if maybe_symbolic_strategies is not None:
+                self.execute_hit_post_processing_strategies(
+                    symbolic_entities, doc, maybe_symbolic_strategies
+                )
 
     def execute_hit_post_processing_strategies(
         self,
