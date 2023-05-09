@@ -191,7 +191,13 @@ class OntologyMatcher:
                         action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
                         or action.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
                     ):
-                        match_id = parser.name + self.match_id_sep + term_norm
+                        match_id = (
+                            parser.name
+                            + self.match_id_sep
+                            + term_norm
+                            + self.match_id_sep
+                            + str(curation.mention_confidence.value)
+                        )
                         if curation.case_sensitive:
                             strict_matcher.add(match_id, [pattern])
                         else:
@@ -235,16 +241,11 @@ class OntologyMatcher:
         ):
             data = defaultdict(set)
             for mat in matches_grp:
-                parser_name, term_norm = self.nlp.vocab.strings.as_string(mat[0]).split(
-                    self.match_id_sep, maxsplit=1
+                parser_name, term_norm, confidence = self.nlp.vocab.strings.as_string(mat[0]).split(
+                    self.match_id_sep, maxsplit=2
                 )
                 ent_class = self.parser_name_to_entity_type[parser_name]
-                data[ent_class].add(
-                    (
-                        parser_name,
-                        term_norm,
-                    )
-                )
+                data[ent_class].add((parser_name, term_norm, confidence))
             for ent_class in data:
                 # we use a uuid here so that every span hash is unique
                 new_span = Span(doc, start, end, label=uuid.uuid4().hex)
