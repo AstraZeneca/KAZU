@@ -5,7 +5,7 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime, date
-from enum import Enum, auto
+from enum import Enum, auto, IntEnum
 from math import inf
 from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, DefaultDict
 
@@ -61,9 +61,10 @@ class AutoNameEnum(Enum):
         return name
 
 
-class MentionConfidence(AutoNameEnum):
-    HIGHLY_LIKELY = auto()  # almost certain to be correct
-    POSSIBLE = auto()  # high degree of uncertainty
+class MentionConfidence(IntEnum):
+    HIGHLY_LIKELY = 0  # almost certain to be correct
+    PROBABLE = 1
+    POSSIBLE = 2  # high degree of uncertainty
 
 
 class StringMatchConfidence(AutoNameEnum):
