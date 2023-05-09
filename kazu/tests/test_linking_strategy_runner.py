@@ -9,6 +9,7 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
     EquivalentIdSet,
     DisambiguationConfidence,
+    MentionConfidence,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import IDX, SYN
@@ -110,13 +111,10 @@ class TestDisambiguationStrategy(DisambiguationStrategy):
         return set(id_set for id_set in id_sets if self.expected_id in id_set.ids)
 
 
-def build_runner(
-    expected_id_groups: Dict[str, Set[str]], ner_namespaces: List[str]
-) -> StrategyRunner:
+def build_runner(expected_id_groups: Dict[str, Set[str]]) -> StrategyRunner:
     """
     create a StrategyRunner configured with dummy strategies for testing
     :param expected_id_groups:
-    :param ner_namespaces:
     :return:
     """
     first_test_strategy = TestStrategy(
@@ -153,27 +151,27 @@ def build_runner(
         ent_match="unknown",
         expected_ids=expected_id_groups["test_default"],
     )
+
+    strategy_execution = NamespaceStrategyExecution(
+        ent_class_strategies={
+            "test_class": [
+                first_test_strategy,
+                second_test_strategy,
+                third_test_strategy,
+                fourth_test_strategy,
+                fifth_test_strategy,
+            ]
+        },
+        default_strategies=[default_strategy],
+    )
     symbolic_strategies = {
-        namespace: NamespaceStrategyExecution(
-            ent_class_strategies={
-                "test_class": [
-                    first_test_strategy,
-                    second_test_strategy,
-                    third_test_strategy,
-                    fourth_test_strategy,
-                    fifth_test_strategy,
-                ]
-            },
-            default_strategies=[default_strategy],
-        )
-        for namespace in ner_namespaces
+        MentionConfidence.HIGHLY_LIKELY.name: strategy_execution,
+        MentionConfidence.PROBABLE.name: strategy_execution,
     }
     non_symbolic_strategies = symbolic_strategies
 
     runner = StrategyRunner(
-        symbolic_strategies=symbolic_strategies,
-        non_symbolic_strategies=non_symbolic_strategies,
-        ner_namespace_processing_order=ner_namespaces,
+        symbolic_strategies=symbolic_strategies, non_symbolic_strategies=non_symbolic_strategies
     )
     return runner
 
@@ -195,55 +193,115 @@ def create_test_doc(
 
     #
     e1_group_1 = Entity.load_contiguous_entity(
-        start=0, end=1, match="test_1", entity_class="test_class", namespace="group1"
+        start=0,
+        end=1,
+        match="test_1",
+        entity_class="test_class",
+        namespace="group1",
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
     e1_group_1.update_terms({parser1_hit_1})
     e2_group_1 = Entity.load_contiguous_entity(
-        start=10, end=12, match="test_1", entity_class="test_class", namespace="group1"
+        start=10,
+        end=12,
+        match="test_1",
+        entity_class="test_class",
+        namespace="group1",
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
     e2_group_1.update_terms({parser1_hit_1})
     e1_group_2 = Entity.load_contiguous_entity(
-        start=0, end=1, match="test_2", entity_class="test_class", namespace="group2"
+        start=0,
+        end=1,
+        match="test_2",
+        entity_class="test_class",
+        namespace="group2",
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
     e1_group_2.update_terms({parser2_hit_1})
     e2_group_2 = Entity.load_contiguous_entity(
-        start=15, end=20, match="test_2", entity_class="test_class", namespace="group2"
+        start=15,
+        end=20,
+        match="test_2",
+        entity_class="test_class",
+        namespace="group2",
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
     e2_group_2.update_terms({parser2_hit_1})
 
     e1_group_3 = Entity.load_contiguous_entity(
-        start=0, end=1, match="test_3", entity_class="test_class", namespace="group3"
+        start=0,
+        end=1,
+        match="test_3",
+        entity_class="test_class",
+        namespace="group3",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e1_group_3.update_terms({parser1_hit_1, parser2_hit_1})
     e2_group_3 = Entity.load_contiguous_entity(
-        start=15, end=20, match="test_3", entity_class="test_class", namespace="group3"
+        start=15,
+        end=20,
+        match="test_3",
+        entity_class="test_class",
+        namespace="group3",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e2_group_3.update_terms({parser1_hit_1, parser2_hit_1})
 
     e1_group_4 = Entity.load_contiguous_entity(
-        start=0, end=1, match="test_4", entity_class="test_class", namespace="group4"
+        start=0,
+        end=1,
+        match="test_4",
+        entity_class="test_class",
+        namespace="group4",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e1_group_4.update_terms({parser1_hit_1, parser1_hit_2})
     e2_group_4 = Entity.load_contiguous_entity(
-        start=15, end=20, match="test_4", entity_class="test_class", namespace="group4"
+        start=15,
+        end=20,
+        match="test_4",
+        entity_class="test_class",
+        namespace="group4",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e2_group_4.update_terms({parser1_hit_1, parser1_hit_2})
 
     e1_group_5 = Entity.load_contiguous_entity(
-        start=0, end=1, match="test_5", entity_class="test_class", namespace="group5"
+        start=0,
+        end=1,
+        match="test_5",
+        entity_class="test_class",
+        namespace="group5",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e1_group_5.update_terms({parser2_hit_1, parser2_hit_2})
     e2_group_5 = Entity.load_contiguous_entity(
-        start=15, end=20, match="test_5", entity_class="test_class", namespace="group5"
+        start=15,
+        end=20,
+        match="test_5",
+        entity_class="test_class",
+        namespace="group5",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e2_group_5.update_terms({parser2_hit_1, parser2_hit_2})
 
     e1_group_default = Entity.load_contiguous_entity(
-        start=0, end=1, match="test_default", entity_class="unknown", namespace="group_default"
+        start=0,
+        end=1,
+        match="test_default",
+        entity_class="unknown",
+        namespace="group_default",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e1_group_default.update_terms({parser1_hit_2, parser2_hit_2})
     e2_group_default = Entity.load_contiguous_entity(
-        start=15, end=20, match="test_default", entity_class="unknown", namespace="group_default"
+        start=15,
+        end=20,
+        match="test_default",
+        entity_class="unknown",
+        namespace="group_default",
+        mention_confidence=MentionConfidence.PROBABLE,
     )
     e2_group_default.update_terms({parser1_hit_2, parser2_hit_2})
 
@@ -282,8 +340,7 @@ def build_and_execute_runner(
         parser1, parser2
     )
     doc, test_groups = create_test_doc(parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2)
-    ner_namespaces = [e.namespace for e in doc.get_entities()]
-    runner = build_runner(expected_id_groups, ner_namespaces=ner_namespaces)
+    runner = build_runner(expected_id_groups)
     runner(doc)
     return expected_id_groups, test_groups
 
