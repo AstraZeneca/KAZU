@@ -3,12 +3,9 @@ parsers: ${oc.dict.values:ontology_parser}
 strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
   cross_ref_managers: ~
-  ner_namespace_processing_order:
-    - _target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep.namespace
-    - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
   symbolic_strategies:
 
-    TransformersModelForTokenClassificationNerStep:
+    HIGHLY_LIKELY:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:
@@ -81,7 +78,7 @@ strategy_runner:
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
 
-    ExplosionStringMatchingStep:
+    PROBABLE:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:
@@ -97,7 +94,7 @@ strategy_runner:
 
   non_symbolic_strategies:
 
-    TransformersModelForTokenClassificationNerStep:
+    HIGHLY_LIKELY:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:
@@ -149,7 +146,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-    ExplosionStringMatchingStep:
+    PROBABLE:
       _target_: kazu.steps.linking.post_processing.strategy_runner.NamespaceStrategyExecution
       stop_on_success: True
       default_strategies:
