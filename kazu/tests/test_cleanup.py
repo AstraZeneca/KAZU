@@ -101,8 +101,8 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
     assert len(doc.get_entities()) == 2
 
 
-def test_configured_mapping_uri_stripping(kazu_test_config):
-    action = instantiate(kazu_test_config.CleanupActions.StripMappingURIsAction)
+def test_uri_stripping_all_parsers():
+    action = StripMappingURIsAction()
     doc = Document.create_simple_document(doc_text)
     short_id_egfr_mapping = Mapping(
         default_label="EGFR",
