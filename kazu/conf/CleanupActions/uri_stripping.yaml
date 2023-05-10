@@ -1,0 +1,12 @@
+StripMappingURIsAction:
+  _target_: kazu.steps.other.cleanup.StripMappingURIsAction
+  parsers_to_strip: ~
+# Note: you can enable this in addition to the other CleanupActions
+# in conf/CleanupActions/default.yaml
+# by selecting both configs in the top-level config.yaml file.
+# Replace the line:
+#  - CleanupActions: default
+# with:
+#  - CleanupActions:
+#    - default
+#    - uri_stripping
