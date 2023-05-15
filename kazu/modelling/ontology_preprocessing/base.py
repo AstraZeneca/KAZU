@@ -274,9 +274,11 @@ class CurationProcessor:
         :param id_to_drop:
         :return: counter of :class:`.CurationModificationResult`
         """
+
+        terms_to_modify = self._terms_by_id.get(id_to_drop, set())
         counter = Counter(
             self._drop_id_from_synonym_term(id_to_drop=id_to_drop, term_to_modify=term_to_modify)
-            for term_to_modify in self._terms_by_id.get(id_to_drop, set())
+            for term_to_modify in set(terms_to_modify)
         )
 
         return counter
@@ -428,7 +430,8 @@ class CurationProcessor:
         :return:
         """
         affected_curations = self._curations_by_id.get(idx, set())
-        for affected_curation in affected_curations:
+        # we call set again here as we modify it in situ
+        for affected_curation in set(affected_curations):
             new_actions = []
             for action in affected_curation.actions:
                 if action.associated_id_sets is None:
