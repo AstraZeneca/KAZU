@@ -914,8 +914,8 @@ class Curation:
             _id=json_dict.get("_id", bson.ObjectId()),
         )
 
-    def to_dict(self, preserve_object_id: bool = True):
-        if preserve_object_id:
+    def to_dict(self, preserve_structured_object_id: bool = True):
+        if preserve_structured_object_id:
             oid = self._id
             as_dict = DocumentJsonUtils.obj_to_dict_repr(self)
             as_dict["_id"] = oid  # type: ignore[index,call-overload]
