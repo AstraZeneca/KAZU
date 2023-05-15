@@ -176,7 +176,7 @@ class CurationProcessor:
         self._terms_by_id: DefaultDict[Idx, Set[SynonymTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
-        self.curations: Set[Curation] = set(curations)
+        self.curations = set(curations)
         self._curations_by_id: DefaultDict[Optional[str], Set[Curation]] = defaultdict(set)
         for curation in self.curations:
             for action in curation.actions:
