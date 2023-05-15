@@ -907,7 +907,7 @@ class Curation:
 
         return cls(
             mention_confidence=MentionConfidence(json_dict["mention_confidence"]),
-            actions=tuple([SynonymTermAction.from_dict(x) for x in json_dict["actions"]]),
+            actions=tuple(SynonymTermAction.from_dict(x) for x in json_dict["actions"]),
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
             source_term=json_dict["source_term"],
