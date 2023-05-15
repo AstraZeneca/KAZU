@@ -427,52 +427,49 @@ class CurationProcessor:
         :param idx: the id to remove
         :return:
         """
-        affected_curations = set(self._curations_by_id.get(idx, []))
-        if affected_curations is not None:
-            for affected_curation in affected_curations:
-                new_actions = []
-                for action in affected_curation.actions:
-                    if action.associated_id_sets is None:
-                        new_actions.append(action)
-                    else:
-
-                        updated_assoc_id_set = self._drop_id_from_associated_id_sets(
-                            id_to_drop=idx, associated_id_sets=action.associated_id_sets
-                        )
-                        if len(updated_assoc_id_set) == 0:
-                            logger.warning(
-                                "curation id %s has had all linking target ids removed by a global action, and will be"
-                                " ignored. Parser name: %s",
-                                affected_curation._id,
-                                self.parser_name,
-                            )
-                            continue
-                        if len(updated_assoc_id_set) < len(action.associated_id_sets):
-                            logger.info(
-                                "curation found with ids that have been removed via a global action. These will be filtered"
-                                " from the curation action. Parser name: %s, new ids: %s, curation id: %s",
-                                self.parser_name,
-                                updated_assoc_id_set,
-                                affected_curation._id,
-                            )
-                        new_actions.append(
-                            dataclasses.replace(action, associated_id_sets=updated_assoc_id_set)
-                        )
-                if len(new_actions) > 0:
-                    new_curation = dataclasses.replace(
-                        affected_curation, actions=tuple(new_actions)
-                    )
-                    self.curations.add(new_curation)
-                    self._curations_by_id[idx].add(new_curation)
+        affected_curations = self._curations_by_id.get(idx, set())
+        for affected_curation in affected_curations:
+            new_actions = []
+            for action in affected_curation.actions:
+                if action.associated_id_sets is None:
+                    new_actions.append(action)
                 else:
-                    logger.info(
-                        "curation no longer has any relevant actions, and will be discarded"
-                        " Parser name: %s, curation id: %s",
-                        self.parser_name,
-                        affected_curation._id,
+
+                    updated_assoc_id_set = self._drop_id_from_associated_id_sets(
+                        id_to_drop=idx, associated_id_sets=action.associated_id_sets
                     )
-                self.curations.remove(affected_curation)
-                self._curations_by_id[idx].remove(affected_curation)
+                    if len(updated_assoc_id_set) == 0:
+                        logger.warning(
+                            "curation id %s has had all linking target ids removed by a global action, and will be"
+                            " ignored. Parser name: %s",
+                            affected_curation._id,
+                            self.parser_name,
+                        )
+                        continue
+                    if len(updated_assoc_id_set) < len(action.associated_id_sets):
+                        logger.info(
+                            "curation found with ids that have been removed via a global action. These will be filtered"
+                            " from the curation action. Parser name: %s, new ids: %s, curation id: %s",
+                            self.parser_name,
+                            updated_assoc_id_set,
+                            affected_curation._id,
+                        )
+                    new_actions.append(
+                        dataclasses.replace(action, associated_id_sets=updated_assoc_id_set)
+                    )
+            if len(new_actions) > 0:
+                new_curation = dataclasses.replace(affected_curation, actions=tuple(new_actions))
+                self.curations.add(new_curation)
+                self._curations_by_id[idx].add(new_curation)
+            else:
+                logger.info(
+                    "curation no longer has any relevant actions, and will be discarded"
+                    " Parser name: %s, curation id: %s",
+                    self.parser_name,
+                    affected_curation._id,
+                )
+            self.curations.remove(affected_curation)
+            self._curations_by_id[idx].remove(affected_curation)
 
     def analyse_conflicts_in_curations(
         self, curations: Set[Curation]
