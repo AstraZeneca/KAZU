@@ -344,10 +344,9 @@ class CurationProcessor:
         """
 
         synonym_term = self._terms_by_term_norm[synonym]
-        modifiable_id_sets = set(synonym_term.associated_id_sets)
-        modifiable_id_sets.discard(id_set_to_drop)
+        modified_id_sets = synonym_term.associated_id_sets.difference((id_set_to_drop,))
         result = self._modify_or_drop_synonym_term_after_id_set_change(
-            frozenset(modifiable_id_sets), synonym_term
+            modified_id_sets, synonym_term
         )
         return result
 
