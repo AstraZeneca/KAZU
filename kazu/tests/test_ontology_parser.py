@@ -25,7 +25,8 @@ from kazu.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
     load_curated_terms,
     load_global_actions,
-    kazu_disk_cache,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
+    kazu_disk_cache,
+    CurationProcessor,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.string_normalizer import StringNormalizer
@@ -453,3 +454,7 @@ def test_declarative_curation_logic(
         elif should_remove_an_EquivalentIdSet_from_a_synonym_term in test_id:
             term_norm = StringNormalizer.normalize(TARGET_SYNONYM)
             assert len(syn_db.get(PARSER_1_NAME, term_norm).associated_id_sets) == 1
+
+
+def test_all_synonym_term_behaviours_handled_by_curation_processor():
+    assert set(CurationProcessor.curation_apply_order) == set(SynonymTermBehaviour)
