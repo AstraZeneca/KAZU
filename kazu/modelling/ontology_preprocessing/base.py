@@ -193,12 +193,16 @@ class CurationProcessor:
 
         max_x = max(cls.curation_apply_order.index(action.behaviour) for action in x.actions)
         max_y = max(cls.curation_apply_order.index(action.behaviour) for action in y.actions)
+        syn_string_order = x.curated_synonym > y.curated_synonym
         if max_x > max_y:
             return 1
         elif max_y > max_x:
             return -1
         else:
-            return 0
+            if syn_string_order:
+                return 1
+            else:
+                return -1
 
     def _update_term_lookups(
         self, term: SynonymTerm, override: bool
