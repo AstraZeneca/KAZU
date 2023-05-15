@@ -173,7 +173,7 @@ class CurationProcessor:
         self.entity_class = entity_class
         self.parser_name = parser_name
         self._terms_by_term_norm: Dict[NormalisedSynonymStr, SynonymTerm] = {}
-        self._terms_by_id: DefaultDict[str, Set[SynonymTerm]] = defaultdict(set)
+        self._terms_by_id: DefaultDict[Idx, Set[SynonymTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations: Set[Curation] = set(curations)
