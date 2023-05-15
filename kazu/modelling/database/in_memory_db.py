@@ -90,7 +90,7 @@ class SynonymDatabase(metaclass=Singleton):
         self._associated_id_sets_by_id: Dict[ParserName, Dict[str, Set[AssociatedIdSets]]] = {}
         self.loaded_parsers: Set[ParserName] = set()
 
-    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]):
+    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> None:
         """
         add synonyms to the database.
 
