@@ -1078,14 +1078,18 @@ class OntologyParser(ABC):
                 generated_curations,
             ) = self.generate_curations_from_synonym_generators(terms)
             curations = original_curations + generated_curations
-        elif self.curations is None and self.synonym_generator is None:
+        elif (
+            self.curations is None
+        ):  # implies self.synonym_generator is None as failed the if above
             logger.warning(
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
                 self.name,
             )
-            curations = []
-            for term in terms:
-                curations.extend(self.synonym_term_to_putative_curation(term))
+            curations = [
+                curation
+                for term in terms
+                for curation in self.synonym_term_to_putative_curation(term)
+            ]
         else:
             assert self.curations is not None
             logger.info(
@@ -1168,23 +1172,22 @@ class OntologyParser(ABC):
         """
         for term_str in term.terms:
             if term.original_term is None:
-                behaviour = SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
-                associated_id_sets = term.associated_id_sets
+                action = SynonymTermAction(
+                    associated_id_sets=term.associated_id_sets,
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                )
             else:
-                behaviour = SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
-                associated_id_sets = None
-            action = SynonymTermAction(
-                associated_id_sets=associated_id_sets,
-                behaviour=behaviour,
-            )
-            curation = Curation(
+                action = SynonymTermAction(
+                    associated_id_sets=None,
+                    behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+                )
+            yield Curation(
                 curated_synonym=term_str,
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                 case_sensitive=StringNormalizer.classify_symbolic(term_str, self.entity_class),
-                actions=tuple([action]),
+                actions=(action,),
                 source_term=term.original_term,
             )
-            yield curation
 
     def populate_databases(
         self, force: bool = False, return_ner_curations: bool = False
