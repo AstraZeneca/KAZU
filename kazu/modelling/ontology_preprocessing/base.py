@@ -177,7 +177,7 @@ class CurationProcessor:
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
-        self._curations_by_id: DefaultDict[Optional[str], Set[Curation]] = defaultdict(set)
+        self._curations_by_id: DefaultDict[Optional[Idx], Set[Curation]] = defaultdict(set)
         for curation in self.curations:
             for action in curation.actions:
                 if action.associated_id_sets is None:
@@ -286,7 +286,7 @@ class CurationProcessor:
         return terms_modified, terms_dropped
 
     def _drop_id_from_synonym_term(
-        self, id_to_drop: str, term_to_modify: SynonymTerm
+        self, id_to_drop: Idx, term_to_modify: SynonymTerm
     ) -> Literal[
         CurationModificationResult.ID_SET_MODIFIED,
         CurationModificationResult.SYNONYM_TERM_DROPPED,
@@ -310,7 +310,7 @@ class CurationProcessor:
             )
 
     def _drop_id_from_associated_id_sets(
-        self, id_to_drop: str, associated_id_sets: AssociatedIdSets
+        self, id_to_drop: Idx, associated_id_sets: AssociatedIdSets
     ) -> AssociatedIdSets:
         """
         Remove an id from a :class:`.AssociatedIdSets`
@@ -422,7 +422,7 @@ class CurationProcessor:
                 curation_for_ner.append(maybe_curation_with_term_norm_actions)
         return curation_for_ner
 
-    def _drop_id_from_curation(self, idx: str):
+    def _drop_id_from_curation(self, idx: Idx):
         """
         Remove an ID from the curation. If the curation is no longer valid after this action, it will be discarded
 
