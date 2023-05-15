@@ -507,8 +507,6 @@ class CurationProcessor:
 
         for potentially_conflicting_curations in curations_by_term_norm.values():
             conflicting_id_sets = set()
-            curations_by_assoc_id_set = {}
-
             for curation in potentially_conflicting_curations:
                 for action in curation.actions:
                     if (
@@ -516,7 +514,6 @@ class CurationProcessor:
                         or action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
                     ):
                         conflicting_id_sets.add(action.associated_id_sets)
-                        curations_by_assoc_id_set[action.associated_id_sets] = curation
 
             if len(conflicting_id_sets) > 1:
                 conflicts.append(potentially_conflicting_curations)
