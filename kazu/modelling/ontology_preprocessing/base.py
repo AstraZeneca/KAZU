@@ -505,7 +505,7 @@ class CurationProcessor:
                     curation
                 )
 
-        for term_norm, potentially_conflicting_curations in curations_by_term_norm.items():
+        for potentially_conflicting_curations in curations_by_term_norm.values():
             conflicting_id_sets = set()
             curations_by_assoc_id_set = {}
 
