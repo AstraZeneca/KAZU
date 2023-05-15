@@ -3,7 +3,7 @@ import functools
 import json
 import logging
 from abc import ABC
-from collections import defaultdict
+from collections import defaultdict, Counter
 from enum import auto
 from typing import (
     cast,
@@ -266,28 +266,20 @@ class CurationProcessor:
                 self.parser_name,
             )
 
-    def _drop_id_from_all_synonym_terms(self, id_to_drop: Idx) -> Tuple[int, int]:
+    def _drop_id_from_all_synonym_terms(self, id_to_drop: Idx) -> Counter:
         """
         Remove a given id from all :class:`.SynonymTerm`\\ s.
         Drop any :class:`.SynonymTerm`\\ s with no remaining ID after removal.
 
         :param id_to_drop:
-        :return: terms modified count, terms dropped count
+        :return: counter of :class:`.CurationModificationResult`
         """
-        terms_modified = 0
-        terms_dropped = 0
-        maybe_terms_to_modify = self._terms_by_id.get(id_to_drop)
-        if maybe_terms_to_modify is not None:
-            for term_to_modify in maybe_terms_to_modify:
-                result = self._drop_id_from_synonym_term(
-                    id_to_drop=id_to_drop, term_to_modify=term_to_modify
-                )
+        counter = Counter(
+            self._drop_id_from_synonym_term(id_to_drop=id_to_drop, term_to_modify=term_to_modify)
+            for term_to_modify in self._terms_by_id.get(id_to_drop, set())
+        )
 
-                if result is CurationModificationResult.SYNONYM_TERM_DROPPED:
-                    terms_dropped += 1
-                elif result is CurationModificationResult.ID_SET_MODIFIED:
-                    terms_modified += 1
-        return terms_modified, terms_dropped
+        return counter
 
     def _drop_id_from_synonym_term(
         self, id_to_drop: Idx, term_to_modify: SynonymTerm
@@ -593,15 +585,10 @@ class CurationProcessor:
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
                 ids = action.parser_to_target_id_mappings[self.parser_name]
-                terms_modified, terms_dropped = 0, 0
+                modification_counter: Counter[CurationModificationResult] = Counter()
                 for idx in ids:
-                    (
-                        terms_modified_this_id,
-                        terms_dropped_this_id,
-                    ) = self._drop_id_from_all_synonym_terms(idx)
-                    terms_modified += terms_modified_this_id
-                    terms_dropped += terms_dropped_this_id
-                    if terms_modified_this_id == 0 and terms_dropped_this_id == 0:
+                    modification_counter.update(self._drop_id_from_all_synonym_terms(idx))
+                    if len(modification_counter) == 0:
                         logger.warning("failed to drop %s from %s", idx, self.parser_name)
                     else:
                         dropped_ids.add(idx)
@@ -609,8 +596,10 @@ class CurationProcessor:
                             "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
                             idx,
                             self.parser_name,
-                            terms_modified_this_id,
-                            terms_dropped_this_id,
+                            modification_counter.get(CurationModificationResult.ID_SET_MODIFIED, 0),
+                            modification_counter.get(
+                                CurationModificationResult.SYNONYM_TERM_DROPPED, 0
+                            ),
                         )
                     self._drop_id_from_curation(idx=idx)
 
