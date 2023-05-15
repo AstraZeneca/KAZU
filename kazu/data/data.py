@@ -893,12 +893,6 @@ class Curation:
         if len(behaviours) > 1 and SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM in behaviours:
             raise ValueError(f"inherited curations may only have one action: {self}")
 
-    def source_term_norm(self, entity_class: str):
-        return StringNormalizer.normalize(self.source_term, entity_class)
-
-    def curated_synonym_norm(self, entity_class: str):
-        return StringNormalizer.normalize(self.curated_synonym, entity_class)
-
     def term_norm_for_linking(self, entity_class: str):
         norm_target = self.curated_synonym if self.source_term is None else self.source_term
         return StringNormalizer.normalize(norm_target, entity_class)
