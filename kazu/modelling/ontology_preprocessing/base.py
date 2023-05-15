@@ -276,7 +276,7 @@ class CurationProcessor:
         """
         terms_modified = 0
         terms_dropped = 0
-        maybe_terms_to_modify = self._terms_by_id.pop(id_to_drop)
+        maybe_terms_to_modify = self._terms_by_id.get(id_to_drop)
         if maybe_terms_to_modify is not None:
             for term_to_modify in maybe_terms_to_modify:
                 result = self._drop_id_from_synonym_term(
