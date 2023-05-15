@@ -499,7 +499,7 @@ class CurationProcessor:
                 # inherited curations cannot conflict as they use term norm of source term
                 safe.add(curation)
             else:
-                curations_by_term_norm[curation.curated_synonym_norm(self.entity_class)].add(
+                curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(
                     curation
                 )
 
