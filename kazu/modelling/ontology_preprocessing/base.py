@@ -434,7 +434,6 @@ class CurationProcessor:
                 if action.associated_id_sets is None:
                     new_actions.append(action)
                 else:
-
                     updated_assoc_id_set = self._drop_id_from_associated_id_sets(
                         id_to_drop=idx, associated_id_sets=action.associated_id_sets
                     )
@@ -445,8 +444,7 @@ class CurationProcessor:
                             affected_curation._id,
                             self.parser_name,
                         )
-                        continue
-                    if len(updated_assoc_id_set) < len(action.associated_id_sets):
+                    elif len(updated_assoc_id_set) < len(action.associated_id_sets):
                         logger.info(
                             "curation found with ids that have been removed via a global action. These will be filtered"
                             " from the curation action. Parser name: %s, new ids: %s, curation id: %s",
@@ -454,9 +452,18 @@ class CurationProcessor:
                             updated_assoc_id_set,
                             affected_curation._id,
                         )
-                    new_actions.append(
-                        dataclasses.replace(action, associated_id_sets=updated_assoc_id_set)
-                    )
+                        new_actions.append(
+                            dataclasses.replace(action, associated_id_sets=updated_assoc_id_set)
+                        )
+                    elif len(updated_assoc_id_set) == len(action.associated_id_sets):
+                        # no change to the action
+                        new_actions.append(action)
+                    else:
+                        ## Maybe raise an error?? This imples there are now more ids after trying to drop one...
+                        raise RuntimeError(
+                            "Somehow an ID has been added when we were looking at dropping one."
+                            " This is caused by a misconfigured global action"
+                        )
             if len(new_actions) > 0:
                 new_curation = dataclasses.replace(affected_curation, actions=tuple(new_actions))
                 self.curations.add(new_curation)
