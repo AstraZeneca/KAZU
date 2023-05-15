@@ -317,12 +317,15 @@ class CurationProcessor:
         """
         new_assoc_id_set = set()
         for equiv_id_set in associated_id_sets:
-            updated_ids_and_source = frozenset(
-                id_tup for id_tup in equiv_id_set.ids_and_source if id_tup[0] != id_to_drop
-            )
-            if len(updated_ids_and_source) > 0:
-                updated_equiv_id_set = EquivalentIdSet(updated_ids_and_source)
-                new_assoc_id_set.add(updated_equiv_id_set)
+            if id_to_drop in equiv_id_set.ids:
+                updated_ids_and_source = frozenset(
+                    id_tup for id_tup in equiv_id_set.ids_and_source if id_tup[0] != id_to_drop
+                )
+                if len(updated_ids_and_source) > 0:
+                    updated_equiv_id_set = EquivalentIdSet(updated_ids_and_source)
+                    new_assoc_id_set.add(updated_equiv_id_set)
+            else:
+                new_assoc_id_set.add(equiv_id_set)
         new_assoc_id_frozenset = frozenset(new_assoc_id_set)
         return new_assoc_id_frozenset
 
