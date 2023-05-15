@@ -565,20 +565,14 @@ class CurationProcessor:
         if len(behaviours_requiring_database_entry) == 0:
             return None
         else:
-            # if only action is linking only, don't use for ner
-            if (
-                len(behaviours_requiring_database_entry) == 1
-                and next(iter(behaviours_requiring_database_entry))
-                == SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
-            ):
-                return None
-            # if ner action is required, but db entry doesn't exist, raise error
-            elif self._terms_by_term_norm.get(term_norm) is None:
+            if self._terms_by_term_norm.get(term_norm) is None:
                 raise CurationException(
                     f"Curation is invalid: requires database entry but all have been removed by actions: {curation}"
                 )
-            else:
+            if SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING in behaviours_requiring_database_entry:
                 return curation
+            else:
+                return None
 
     def _process_global_actions(self) -> Set[str]:
         dropped_ids: Set[str] = set()
