@@ -1189,6 +1189,28 @@ class OntologyParser(ABC):
                 source_term=term.original_term,
             )
 
+    @kazu_disk_cache.memoize(ignore={0})
+    def _populate_databases(
+        self, parser_name: str
+    ) -> Tuple[Optional[List[Curation]], Dict[str, Dict[str, SimpleValue]], Set[SynonymTerm]]:
+        """Disk cacheable method that populates all databases.
+
+        :param parser_name: name of this parser. Required for correct operation of cache
+            (Note, we cannot pass self to the disk cache as the constructor consumes too much
+            memory
+        :return:
+        """
+        logger.info("populating database for %s from source", self.name)
+        metadata = self.export_metadata(self.name)
+        # metadata db needs to be populated before call to export_synonym_terms
+        self.metadata_db.add_parser(self.name, metadata)
+        intermediate_synonym_terms = self.export_synonym_terms(self.name)
+        maybe_ner_curations, final_syn_terms = self.process_curations(intermediate_synonym_terms)
+        self.parsed_dataframe = None  # clear the reference to save memory
+
+        self.synonym_db.add(self.name, final_syn_terms)
+        return maybe_ner_curations, metadata, final_syn_terms
+
     def populate_databases(
         self, force: bool = False, return_ner_curations: bool = False
     ) -> Optional[List[Curation]]:
@@ -1205,37 +1227,21 @@ class OntologyParser(ABC):
             logger.debug("parser %s already loaded.", self.name)
             return None
 
-        cache_key = f"{self.name}.populate_databases"
-
-        @kazu_disk_cache.memoize(name=cache_key)
-        def _populate_databases():
-            logger.info("populating database for %s from source", self.name)
-            metadata = self.export_metadata(self.name)
-            # metadata db needs to be populated before call to export_synonym_terms
-            self.metadata_db.add_parser(self.name, metadata)
-            intermediate_synonym_terms = self.export_synonym_terms(self.name)
-            maybe_ner_curations, final_syn_terms = self.process_curations(
-                intermediate_synonym_terms
-            )
-            self.parsed_dataframe = None  # clear the reference to save memory
-
-            self.synonym_db.add(self.name, final_syn_terms)
-            return maybe_ner_curations, metadata, final_syn_terms
+        cache_key = self._populate_databases.__cache_key__(self.name)
 
         if force:
             kazu_disk_cache.delete(self.export_metadata.__cache_key__(self, self.name))
             kazu_disk_cache.delete(self.export_synonym_terms.__cache_key__(self, self.name))
-            kazu_disk_cache.delete(_populate_databases.__cache_key__())
+            kazu_disk_cache.delete(cache_key)
 
-        maybe_ner_curations, metadata, final_syn_terms = _populate_databases()
-        if self.name not in self.synonym_db.loaded_parsers or force:
+        maybe_ner_curations, metadata, final_syn_terms = self._populate_databases(self.name)
+
+        if self.name not in self.synonym_db.loaded_parsers:
             logger.info("populating database for %s from cache", self.name)
             self.metadata_db.add_parser(self.name, metadata)
             self.synonym_db.add(self.name, final_syn_terms)
-        if return_ner_curations:
-            return maybe_ner_curations
-        else:
-            return None
+
+        return maybe_ner_curations if return_ner_curations else None
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
