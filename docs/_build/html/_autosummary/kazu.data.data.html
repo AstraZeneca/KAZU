@@ -504,7 +504,7 @@ PERFORMANCE OF THIS SOFTWARE.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.CuratedTerm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">CuratedTerm</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L775-L926"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">CuratedTerm</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L764-L915"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A CuratedTerm is a means to modify the behaviour of a specific <a class="reference internal" href="#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>.</p>
 <p>This can affect both the behaviour of <a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a>,
@@ -603,7 +603,7 @@ We want it to inherit all the behaviour from the original term</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CuratedTerm.from_dict">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L902-L912"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.from_dict" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L891-L901"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.from_dict" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>) – </p>
@@ -616,7 +616,7 @@ We want it to inherit all the behaviour from the original term</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CuratedTerm.from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L897-L900"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.from_json" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L886-L889"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.from_json" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
@@ -629,7 +629,7 @@ We want it to inherit all the behaviour from the original term</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CuratedTerm.term_norm_for_linking">
-<span class="sig-name descname"><span class="pre">term_norm_for_linking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L893-L895"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.term_norm_for_linking" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">term_norm_for_linking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L882-L884"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.term_norm_for_linking" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>entity_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
@@ -639,7 +639,7 @@ We want it to inherit all the behaviour from the original term</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CuratedTerm.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preserve_structured_object_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L914-L921"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.to_dict" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preserve_structured_object_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L903-L910"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.to_dict" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>preserve_structured_object_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
@@ -649,7 +649,7 @@ We want it to inherit all the behaviour from the original term</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.CuratedTerm.to_json">
-<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L923-L926"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.to_json" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L912-L915"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.CuratedTerm.to_json" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
@@ -1223,7 +1223,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.GlobalParserActions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">GlobalParserActions</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L741-L772"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.GlobalParserActions" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">GlobalParserActions</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L730-L761"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.GlobalParserActions" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Container for all <a class="reference internal" href="#kazu.data.data.ParserAction" title="kazu.data.data.ParserAction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParserAction</span></code></a>s.</p>
 <dl class="py method">
@@ -1241,7 +1241,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.GlobalParserActions.from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L768-L772"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.GlobalParserActions.from_json" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L757-L761"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.GlobalParserActions.from_json" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>) – </p>
@@ -1254,7 +1254,7 @@ liver cancer -&gt; [CharSpan(9,21)]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.GlobalParserActions.parser_behaviour">
-<span class="sig-name descname"><span class="pre">parser_behaviour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L758-L766"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.GlobalParserActions.parser_behaviour" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parser_behaviour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L747-L755"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.GlobalParserActions.parser_behaviour" title="Permalink to this definition">#</a></dt>
 <dd><p>Generator that yields behaviours for a specific parser, based on the order they are
 specified in.</p>
 <dl class="field-list simple">
@@ -1377,7 +1377,7 @@ specified in.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.ParserAction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">ParserAction</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L700-L738"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.ParserAction" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">ParserAction</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L689-L727"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.ParserAction" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A ParserAction changes the behaviour of a <a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a> in
 a global sense.</p>
@@ -1407,7 +1407,7 @@ See <a class="reference internal" href="#kazu.data.data.ParserBehaviour" title="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.ParserAction.from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L722-L729"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.ParserAction.from_json" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L711-L718"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.ParserAction.from_json" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>) – </p>
@@ -1617,13 +1617,10 @@ synonym maps to is determined by the  score_and_group_ids method of the associat
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermAction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">SynonymTermAction</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L655-L697"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermAction" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.data.data.</span></span><span class="sig-name descname"><span class="pre">SynonymTermAction</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L655-L686"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermAction" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A SynonymTermAction is an action that affects the <a class="reference internal" href="#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>s that a parser
 produces.</p>
-<p>Note, the term_norm field is calculated by the <a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a>
-if required, and should not be set manually.</p>
-<p>The parser_to_target_id_mappings field should specify the parser name and a set of affected ID’s if required.</p>
 <p>See <a class="reference internal" href="#kazu.data.data.SynonymTermBehaviour" title="kazu.data.data.SynonymTermBehaviour"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTermBehaviour</span></code></a> for the type of actions that are possible.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermAction.__init__">
@@ -1643,7 +1640,7 @@ if required, and should not be set manually.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermAction.from_dict">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L680-L697"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermAction.from_dict" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py#L669-L686"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.data.data.SynonymTermAction.from_dict" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>) – </p>
@@ -1657,7 +1654,8 @@ if required, and should not be set manually.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermAction.associated_id_sets">
 <span class="sig-name descname"><span class="pre">associated_id_sets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.FrozenSet" title="(in Python v3.11)"><span class="pre">FrozenSet</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><span class="pre">EquivalentIdSet</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#kazu.data.data.SynonymTermAction.associated_id_sets" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>If specified, will override the parser defaults for the associated <a class="reference internal" href="#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>, as long as conflicts do not occur</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.data.data.SynonymTermAction.behaviour">

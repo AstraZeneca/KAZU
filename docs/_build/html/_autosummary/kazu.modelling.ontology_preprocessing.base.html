@@ -355,9 +355,6 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.load_global_actions" title="kazu.modelling.ontology_preprocessing.base.load_global_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_global_actions</span></code></a>(path)</p></td>
 <td><p>Load an instance of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.GlobalParserActions" title="kazu.data.data.GlobalParserActions"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParserActions</span></code></a> from a file path.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count" title="kazu.modelling.ontology_preprocessing.base.select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count</span></code></a>(...)</p></td>
-<td><p>For a set of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.AssociatedIdSets" title="kazu.data.data.AssociatedIdSets"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.AssociatedIdSets</span></code></a>, select the set with the fewest <a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquivalentIdSet</span></code></a>s.</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -389,13 +386,13 @@
 </div>
 <dl class="py exception">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationException">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CurationException</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L62-L63"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationException" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CurationException</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L60-L61"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationException" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationModificationResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CurationModificationResult</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L127-L131"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationModificationResult" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CurationModificationResult</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L100-L104"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationModificationResult" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="kazu.data.data.html#kazu.data.data.AutoNameEnum" title="kazu.data.data.AutoNameEnum"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNameEnum</span></code></a></p>
 <p>An enumeration.</p>
 <dl class="py attribute">
@@ -422,7 +419,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationProcessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CurationProcessor</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L134-L722"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">CurationProcessor</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L107-L644"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A CurationProcessor is responsible for modifying the set of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>s produced
 by an <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.ontology_preprocessing.base.OntologyParser</span></code></a> with any relevant <a class="reference internal" href="kazu.data.data.html#kazu.data.data.GlobalParserActions" title="kazu.data.data.GlobalParserActions"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParserActions</span></code></a> and/or
@@ -434,7 +431,7 @@ curations that should be used for dictionary based NER.</p>
 internal database representation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationProcessor.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L156-L188"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L130-L162"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -450,7 +447,7 @@ internal database representation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationProcessor.analyse_conflicts_in_curations">
-<span class="sig-name descname"><span class="pre">analyse_conflicts_in_curations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curations</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L458-L498"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.analyse_conflicts_in_curations" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">analyse_conflicts_in_curations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curations</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L424-L464"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.analyse_conflicts_in_curations" title="Permalink to this definition">#</a></dt>
 <dd><p>Check to see if a list of curations contain conflicts.</p>
 <p>Conflicts can occur if two or more curations normalise to the same NormalisedSynonymStr,
 but refer to different AssociatedIdSets, and one of their actions is attempting to add
@@ -470,22 +467,19 @@ is appropriate for the normalised term.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationProcessor.curation_sort_func">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">curation_sort_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L190-L205"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.curation_sort_func" title="Permalink to this definition">#</a></dt>
-<dd><p>Determines the order curations are processed in.</p>
+<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationProcessor.curation_sort_key">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">curation_sort_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curated_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L164-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.curation_sort_key" title="Permalink to this definition">#</a></dt>
+<dd><p>Determines the order curations are processed in</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.CuratedTerm" title="kazu.data.data.CuratedTerm"><em>CuratedTerm</em></a>) – </p></li>
-<li><p><strong>y</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.CuratedTerm" title="kazu.data.data.CuratedTerm"><em>CuratedTerm</em></a>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>curated_term</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.CuratedTerm" title="kazu.data.data.CuratedTerm"><em>CuratedTerm</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.CurationProcessor.export_ner_curations_and_final_terms">
-<span class="sig-name descname"><span class="pre">export_ner_curations_and_final_terms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L367-L380"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.export_ner_curations_and_final_terms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">export_ner_curations_and_final_terms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L333-L346"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.export_ner_curations_and_final_terms" title="Permalink to this definition">#</a></dt>
 <dd><p>Perform any updates required to the synonym terms as specified in the curations/global
 actions.</p>
 <p>The returned <a class="reference internal" href="kazu.data.data.html#kazu.data.data.CuratedTerm" title="kazu.data.data.CuratedTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">CuratedTerm</span></code></a>s can be used for Dictionary based NER, whereas the
@@ -509,7 +503,7 @@ returned <a class="reference internal" href="kazu.data.data.html#kazu.data.data.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OntologyParser</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L725-L1191"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">OntologyParser</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L647-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking.
 Implementations should have a class attribute ‘name’ to something suitably representative.
@@ -528,7 +522,7 @@ The result of StringNormalizer.is_symbolic forms the is_symbolic parameter to .s
 implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_scorer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_merge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L752-L797"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_scorer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_merge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synonym_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L674-L719"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -555,13 +549,13 @@ based NER matching</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.export_metadata">
-<span class="sig-name descname"><span class="pre">export_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L974-L992"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_metadata" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">export_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L896-L914"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_metadata" title="Permalink to this definition">#</a></dt>
 <dd><p>Export the metadata from the ontology.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parser_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – name of this parser. Required for correct operation of cache
 (Note, we cannot pass self to the disk cache as the constructor consumes too much
-memory</p>
+memory)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>{idx:{metadata_key:metadata_value}}</p>
@@ -574,13 +568,13 @@ memory</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.export_synonym_terms">
-<span class="sig-name descname"><span class="pre">export_synonym_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1036-L1054"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_synonym_terms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">export_synonym_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L958-L976"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.export_synonym_terms" title="Permalink to this definition">#</a></dt>
 <dd><p>Export <a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a> from the parser.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parser_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – name of this parser. Required for correct operation of cache
 (Note, we cannot pass self to the disk cache as the constructor consumes too much
-memory</p>
+memory)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -593,7 +587,7 @@ memory</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb">
-<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L799-L806"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_kb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L721-L728"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="Permalink to this definition">#</a></dt>
 <dd><p>split an IDX somehow to find the ontology SOURCE reference</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -610,7 +604,7 @@ memory</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_curations_from_synonym_generators">
-<span class="sig-name descname"><span class="pre">generate_curations_from_synonym_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1073-L1088"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_curations_from_synonym_generators" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generate_curations_from_synonym_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L995-L1010"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_curations_from_synonym_generators" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>synonym_terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a><em>]</em>) – </p>
@@ -623,7 +617,7 @@ memory</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms">
-<span class="sig-name descname"><span class="pre">generate_synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_synonym_data</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1056-L1071"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generate_synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_synonym_data</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L978-L993"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate synonyms based on configured synonym generator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -640,7 +634,7 @@ memory</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe">
-<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1173-L1191"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parse_to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1095-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="Permalink to this definition">#</a></dt>
 <dd><p>implementations should override this method, returning a ‘long, thin’ pd.DataFrame of at least the following
 columns:</p>
 <p>[IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]</p>
@@ -660,7 +654,7 @@ given id in the relevant ontology.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases">
-<span class="sig-name descname"><span class="pre">populate_databases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_ner_curations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1141-L1171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">populate_databases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_ner_curations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1063-L1093"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases" title="Permalink to this definition">#</a></dt>
 <dd><p>Populate the databases with the results of the parser.</p>
 <p>Also calculates the term norms associated with
 any curations (if provided) which can then be used for Dictionary based NER</p>
@@ -682,7 +676,7 @@ any curations (if provided) which can then be used for Dictionary based NER</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.process_curations">
-<span class="sig-name descname"><span class="pre">process_curations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L994-L1034"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.process_curations" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">process_curations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L916-L956"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.process_curations" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a><em>]</em>) – </p>
@@ -695,7 +689,7 @@ any curations (if provided) which can then be used for Dictionary based NER</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.resolve_synonyms">
-<span class="sig-name descname"><span class="pre">resolve_synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_df</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L808-L857"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.resolve_synonyms" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">resolve_synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_df</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L730-L779"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.resolve_synonyms" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>synonym_df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.1)"><em>DataFrame</em></a>) – </p>
@@ -708,7 +702,7 @@ any curations (if provided) which can then be used for Dictionary based NER</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids">
-<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids_and_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L859-L963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">score_and_group_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids_and_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbolic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_syn_set</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L781-L885"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.score_and_group_ids" title="Permalink to this definition">#</a></dt>
 <dd><p>for a given data source, one normalised synonym may map to one or more id. In some cases, the ID may be
 duplicate/redundant (e.g. there are many chembl ids for paracetamol). In other cases, the ID may refer to
 distinct concepts (e.g. COX 1 could be ‘ENSG00000095303’ OR ‘ENSG00000198804’).</p>
@@ -748,7 +742,7 @@ DEFAULT_LABEL</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.OntologyParser.synonym_term_to_putative_curation">
-<span class="sig-name descname"><span class="pre">synonym_term_to_putative_curation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1090-L1117"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.synonym_term_to_putative_curation" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">synonym_term_to_putative_curation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L1012-L1039"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.OntologyParser.synonym_term_to_putative_curation" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert a <a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>s to curations to use for dictionary based NER.</p>
 <p>This is used when curations are not provided to the parser.</p>
 <p>Can handle either ‘original’ or ‘generated’ <a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymTerm</span></code></a>s.</p>
@@ -779,7 +773,7 @@ DEFAULT_LABEL</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.load_curated_terms">
-<span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">load_curated_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L91-L106"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.load_curated_terms" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">load_curated_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L64-L79"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.load_curated_terms" title="Permalink to this definition">#</a></dt>
 <dd><p>Load <a class="reference internal" href="kazu.data.data.html#kazu.data.data.CuratedTerm" title="kazu.data.data.CuratedTerm"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.CuratedTerm</span></code></a>s from a file path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -796,7 +790,7 @@ DEFAULT_LABEL</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.load_global_actions">
-<span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">load_global_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L109-L124"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.load_global_actions" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">load_global_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L82-L97"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.load_global_actions" title="Permalink to this definition">#</a></dt>
 <dd><p>Load an instance of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.GlobalParserActions" title="kazu.data.data.GlobalParserActions"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParserActions</span></code></a> from a file path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -807,24 +801,6 @@ DEFAULT_LABEL</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="kazu.data.data.html#kazu.data.data.GlobalParserActions" title="kazu.data.data.GlobalParserActions"><em>GlobalParserActions</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.base.select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count">
-<span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.base.</span></span><span class="sig-name descname"><span class="pre">select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_of_associated_id_sets</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/base.py#L66-L88"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.base.select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count" title="Permalink to this definition">#</a></dt>
-<dd><p>For a set of <a class="reference internal" href="kazu.data.data.html#kazu.data.data.AssociatedIdSets" title="kazu.data.data.AssociatedIdSets"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.data.data.AssociatedIdSets</span></code></a>, select the set with the fewest <a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquivalentIdSet</span></code></a>s.</p>
-<p>If there is a tie for the smallest set, pick the one with the fewest total IDs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>set_of_associated_id_sets</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.FrozenSet" title="(in Python v3.11)"><em>FrozenSet</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><em>EquivalentIdSet</em></a><em>]</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.FrozenSet" title="(in Python v3.11)"><em>FrozenSet</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.EquivalentIdSet" title="kazu.data.data.EquivalentIdSet"><em>EquivalentIdSet</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -898,7 +874,7 @@ DEFAULT_LABEL</p>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor"><code class="docutils literal notranslate"><span class="pre">CurationProcessor</span></code></a><ul>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">CurationProcessor.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.analyse_conflicts_in_curations"><code class="docutils literal notranslate"><span class="pre">CurationProcessor.analyse_conflicts_in_curations()</span></code></a></li>
-<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.curation_sort_func"><code class="docutils literal notranslate"><span class="pre">CurationProcessor.curation_sort_func()</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.curation_sort_key"><code class="docutils literal notranslate"><span class="pre">CurationProcessor.curation_sort_key()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.export_ner_curations_and_final_terms"><code class="docutils literal notranslate"><span class="pre">CurationProcessor.export_ner_curations_and_final_terms()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.CurationProcessor.CURATION_APPLY_ORDER"><code class="docutils literal notranslate"><span class="pre">CurationProcessor.CURATION_APPLY_ORDER</span></code></a></li>
 </ul>
@@ -922,7 +898,6 @@ DEFAULT_LABEL</p>
 </li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.load_curated_terms"><code class="docutils literal notranslate"><span class="pre">load_curated_terms()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.load_global_actions"><code class="docutils literal notranslate"><span class="pre">load_global_actions()</span></code></a></li>
-<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.base.select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count"><code class="docutils literal notranslate"><span class="pre">select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count()</span></code></a></li>
 </ul>
 </li>
 </ul>
