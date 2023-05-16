@@ -544,11 +544,9 @@ class CurationProcessor:
             else:
                 return None
 
-    def _process_global_actions(self) -> Set[str]:
-        dropped_ids: Set[str] = set()
+    def _process_global_actions(self) -> None:
         if self.global_actions is None:
-            return dropped_ids
-
+            return None
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
                 ids = action.parser_to_target_id_mappings[self.parser_name]
@@ -558,7 +556,6 @@ class CurationProcessor:
                     if len(modification_counter) == 0:
                         logger.warning("failed to drop %s from %s", idx, self.parser_name)
                     else:
-                        dropped_ids.add(idx)
                         logger.debug(
                             "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
                             idx,
@@ -572,7 +569,7 @@ class CurationProcessor:
 
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
-        return dropped_ids
+        return None
 
     def _attempt_to_add_database_entry_for_curation(
         self,
