@@ -63,7 +63,7 @@ def main(
     useful for trying to understand which strings are 'noisy', but not recommended for production as raw ontology
     data tends to need some curation before it can be applied.
 
-    If a parser has curations configure, it will be built using the configured instances of :class:`~kazu.data.data.Curation`
+    If a parser has curations configured, it will be built using the configured instances of :class:`~kazu.data.data.Curation`
     associated with the parser. This is generally the recommended behaviour in production, although obviously
     requires a set of high quality curations to be effective
 
