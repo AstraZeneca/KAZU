@@ -775,7 +775,7 @@ class GlobalParserActions:
 @dataclass(frozen=True)
 class CuratedTerm:
     """
-    A Curation is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
+    A CuratedTerm is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
 
     This can affect both the behaviour of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`,
     and dictionary based NER (if using the :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`).
@@ -788,17 +788,14 @@ class CuratedTerm:
 
     .. code-block:: python
 
-        Curation(
+        CuratedTerm(
             curated_synonym="ALL",
             case_sensitive=True,
-            actions=tuple(
-                [
-                    SynonymTermAction(
-                        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                        parser_to_target_id_mappings={"OPENTARGETS_DISEASE": {"MONDO:0004967"}},
-                        entity_class="disease",
-                    ),
-                ]
+            actions=(
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset((EquivalentIdSet(("my_id", "my_source")),)),
+                ),
             ),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
@@ -809,63 +806,67 @@ class CuratedTerm:
     The string 'LH' is incorrectly identified as a synonym of the PLOD1 (ENSG00000083444) gene, whereas more often than not, it's actually an abbreviation of Lutenising Hormone.
     We therefore want to drop this reference, and add a new one to LHB (ENSG00000104826, or Lutenising Hormone Subunit Beta)
 
-    The Curation we therefore want is:
+    The CuratedTerm we therefore want is:
 
     .. code-block:: python
 
-        Curation(
+        CuratedTerm(
             curated_synonym="LH",
             case_sensitive=True,
-            actions=tuple(
-                [
-                    SynonymTermAction(
-                        behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
-                        parser_to_target_id_mappings={"OPENTARGETS_TARGET": set()},
-                        entity_class="gene",
+            actions=(
+                SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING),
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset(
+                        (EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)
                     ),
-                    SynonymTermAction(
-                        behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                        parser_to_target_id_mappings={
-                            "OPENTARGETS_TARGET": {"ENSG00000104826"}
-                        },
-                        entity_class="gene",
-                    ),
-                ]
+                ),
             ),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
     Example 3:
 
-    A :class:`.SynonymTerm` has an unwanted :class:`.EquivalentIdSet` attached to it, but is otherwise good. We want to remove this set
+    A :class:`.SynonymTerm` has an unwanted :class:`.EquivalentIdSet` attached to it, but is otherwise good. We want to
+    remove this set. First, we drop the original term, then add a new one with only the target ids
 
     .. code-block:: python
 
-        Curation(
-            curated_synonym="some good synonym",
+        CuratedTerm(
+            curated_synonym="LH",
             case_sensitive=True,
-            actions=tuple(
-                [
-                    SynonymTermAction(
-                        behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                        parser_to_target_id_mappings={
-                            "OPENTARGETS_TARGET": {"an id from the bad set"}
-                        },
-                        entity_class="gene",
+            actions=(
+                SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING),
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset(
+                        (EquivalentIdSet(("my good id", "my source")),)
                     ),
-                ]
+                ),
+            ),
+            mention_confidence=MentionConfidence.POSSIBLE,
+        )
+
+    Example 4:
+
+    A :class:`.SynonymTerm` has an alternative synonym not referenced in the underlying ontology, and we want to add it.
+    We want it to inherit all the behaviour from the original term
+
+    .. code-block:: python
+
+        CuratedTerm(
+            curated_synonym="breast carcinoma",
+            case_sensitive=True,
+            source_term="breast cancer",
+            actions=(
+                SynonymTermAction(behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM),
             ),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
     Notes:
 
-    The term_norm field is calculated by the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
-    if required, and should not be set manually.
-
     mention_confidence is currently non-functional, and will be expanded upon at a later date
-
-
 
     """
 
