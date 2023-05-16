@@ -1,18 +1,15 @@
 import json
-import logging
 from copy import deepcopy
-from typing import Set, Tuple
+from pathlib import Path
+from typing import Optional, Literal, List
 
-import pytest
 from kazu.data.data import (
-    Curation,
+    CuratedTerm,
     MentionConfidence,
     DocumentJsonUtils,
     ParserAction,
     EquivalentIdSet,
-    EquivalentIdAggregationStrategy,
     ParserBehaviour,
-    AssociatedIdSets,
     GlobalParserActions,
     SynonymTermAction,
     SynonymTermBehaviour,
@@ -25,8 +22,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
     load_curated_terms,
     load_global_actions,
-    kazu_disk_cache,
-    CurationProcessor,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
+    kazu_disk_cache,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.string_normalizer import StringNormalizer
@@ -39,58 +35,6 @@ TARGET_SYNONYM = "hello I'm injected"
 ID_TO_BE_REMOVED = TARGET_SYNONYM.replace(" ", "-")
 DUMMY_PARSER_SOURCE = "test_parser_source"
 
-
-class DummyParserWithAggOverride(DummyParser):
-    def score_and_group_ids(
-        self,
-        id_and_source: Set[Tuple[str, str]],
-        is_symbolic: bool,
-        original_syn_set: Set[str],
-    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        if TARGET_SYNONYM in original_syn_set:
-            return (
-                frozenset(
-                    (
-                        EquivalentIdSet(
-                            ids_and_source=frozenset(
-                                [
-                                    (
-                                        TARGET_SYNONYM,
-                                        self.find_kb(TARGET_SYNONYM),
-                                    )
-                                ]
-                            )
-                        ),
-                        EquivalentIdSet(
-                            ids_and_source=frozenset(
-                                ((ID_TO_BE_REMOVED, self.find_kb(TARGET_SYNONYM)),)
-                            )
-                        ),
-                    )
-                ),
-                EquivalentIdAggregationStrategy.CUSTOM,
-            )
-        else:
-            return super().score_and_group_ids(id_and_source, is_symbolic, original_syn_set)
-
-
-# test ids
-should_add_synonym_term_to_parser = "should_add_synonym_term_to_parser"
-should_drop_synonym_term_to_parser = "should_add_synonym_term_to_parser"
-should_not_add_a_synonym_term_to_db_as_one_already_exists = (
-    "should_not_add_a_synonym_term_to_db_as_one_already_exists"
-)
-should_fail_to_modify_terms_when_attempting_to_add_term = (
-    "should_fail_to_modify_terms_when_attempting_to_add_term"
-)
-should_remove_an_EquivalentIdSet_from_a_synonym_term = (
-    "should_remove_an_EquivalentIdSet_from_a_synonym_term"
-)
-
-should_drop_from_parser_via_general_rule = "should_drop_from_both_parsers_via_general_rule"
-should_drop_curated_term_followed_by_adding_new_one = (
-    "should_drop_curated_term_followed_by_adding_new_one"
-)
 ENTITY_CLASS = "action_test"
 
 
@@ -116,345 +60,295 @@ def parser_data_with_split_equiv_id_set():
     return parser_data
 
 
-def get_test_parser(
-    test_id, curations_path, global_actions_path
-) -> Tuple[DummyParser, DummyParser]:
-
-    if should_add_synonym_term_to_parser in test_id:
-        parser_1 = DummyParser(
-            name=PARSER_1_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
-            global_actions=load_global_actions(global_actions_path)
-            if global_actions_path is not None
-            else None,
-        )
-        noop_parser = DummyParser(
-            name=NOOP_PARSER_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            entity_class=ENTITY_CLASS,
-            curations=[] if curations_path is not None else None,
-            global_actions=GlobalParserActions([]) if global_actions_path is not None else None,
-        )
-    elif should_drop_from_parser_via_general_rule in test_id:
-        parser_1 = DummyParser(
-            name=PARSER_1_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            data=parser_data_with_target_synonym(),
-            entity_class=ENTITY_CLASS,
-            curations=None,
-            global_actions=load_global_actions(global_actions_path),
-        )
-        noop_parser = DummyParser(
-            name=NOOP_PARSER_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            data=parser_data_with_target_synonym(),
-            entity_class=ENTITY_CLASS,
-            curations=None,
-            global_actions=None,
-        )
-    elif any(
-        rule in test_id
-        for rule in {
-            should_not_add_a_synonym_term_to_db_as_one_already_exists,
-            should_fail_to_modify_terms_when_attempting_to_add_term,
-            should_drop_curated_term_followed_by_adding_new_one,
-        }
-    ):
-        parser_1 = DummyParser(
-            name=PARSER_1_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            data=parser_data_with_target_synonym(),
-            entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
-            global_actions=load_global_actions(global_actions_path)
-            if global_actions_path is not None
-            else None,
-        )
-        noop_parser = DummyParser(
-            name=NOOP_PARSER_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            data=parser_data_with_target_synonym(),
-            entity_class=ENTITY_CLASS,
-            curations=[] if curations_path is not None else None,
-            global_actions=load_global_actions(
-                global_actions_path
-            )  # even though this is a no_op parser, we still test the global actions on it
-            if global_actions_path is not None
-            else None,
-        )
-
-    elif should_remove_an_EquivalentIdSet_from_a_synonym_term in test_id:
-        parser_1 = DummyParserWithAggOverride(
-            name=PARSER_1_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            data=parser_data_with_split_equiv_id_set(),
-            entity_class=ENTITY_CLASS,
-            curations=load_curated_terms(path=curations_path)
-            if curations_path is not None
-            else None,
-            global_actions=load_global_actions(global_actions_path)
-            if global_actions_path is not None
-            else None,
-        )
-        noop_parser = DummyParser(
-            name=NOOP_PARSER_NAME,
-            source=DUMMY_PARSER_SOURCE,
-            in_path="",
-            data=parser_data_with_split_equiv_id_set(),
-            entity_class=ENTITY_CLASS,
-            curations=[] if curations_path is not None else None,
-            global_actions=GlobalParserActions([]) if global_actions_path is not None else None,
-        )
-    else:
-        raise RuntimeError("test misconfigured")
-    return parser_1, noop_parser
-
-
-@pytest.mark.parametrize(
-    ("curation", "global_actions"),
-    [
-        pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                actions=tuple(
-                    [
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                            associated_id_sets=frozenset(
-                                [
-                                    EquivalentIdSet(
-                                        ids_and_source=frozenset(
-                                            [
-                                                (
-                                                    "first",
-                                                    DUMMY_PARSER_SOURCE,
-                                                )
-                                            ]
-                                        )
-                                    )
-                                ]
-                            ),
-                        )
-                    ]
-                ),
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
-            ),
-            None,
-            id=should_add_synonym_term_to_parser,
-        ),
-        pytest.param(
-            None,
-            GlobalParserActions(
-                actions=[
-                    ParserAction(
-                        behaviour=ParserBehaviour.DROP_IDS_FROM_PARSER,
-                        parser_to_target_id_mappings={
-                            PARSER_1_NAME: {"first"},
-                        },
-                    )
-                ]
-            ),
-            id=should_drop_from_parser_via_general_rule,
-        ),
-        pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                actions=tuple(
-                    [
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                            associated_id_sets=frozenset(
-                                [
-                                    EquivalentIdSet(
-                                        ids_and_source=frozenset(
-                                            [
-                                                (
-                                                    "first",
-                                                    DUMMY_PARSER_SOURCE,
-                                                )
-                                            ]
-                                        )
-                                    )
-                                ]
-                            ),
-                        )
-                    ]
-                ),
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
-            ),
-            None,
-            id=should_fail_to_modify_terms_when_attempting_to_add_term,
-        ),
-        pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                actions=tuple(
-                    [
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
-                            associated_id_sets=frozenset(
-                                [
-                                    EquivalentIdSet(
-                                        ids_and_source=frozenset(
-                                            [
-                                                (
-                                                    "first",
-                                                    DUMMY_PARSER_SOURCE,
-                                                )
-                                            ]
-                                        )
-                                    )
-                                ]
-                            ),
-                        ),
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                            associated_id_sets=frozenset(
-                                [
-                                    EquivalentIdSet(
-                                        ids_and_source=frozenset(
-                                            [
-                                                (
-                                                    "first",
-                                                    DUMMY_PARSER_SOURCE,
-                                                )
-                                            ]
-                                        )
-                                    )
-                                ]
-                            ),
-                        ),
-                    ]
-                ),
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
-            ),
-            None,
-            id=should_drop_curated_term_followed_by_adding_new_one,
-        ),
-        pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                actions=tuple(
-                    [
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                            associated_id_sets=frozenset(
-                                [
-                                    EquivalentIdSet(
-                                        ids_and_source=frozenset(
-                                            [
-                                                (
-                                                    TARGET_SYNONYM,
-                                                    DUMMY_PARSER_SOURCE,
-                                                )
-                                            ]
-                                        )
-                                    )
-                                ]
-                            ),
-                        ),
-                    ]
-                ),
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
-            ),
-            None,
-            id=should_not_add_a_synonym_term_to_db_as_one_already_exists,
-        ),
-        pytest.param(
-            Curation(
-                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                actions=tuple(
-                    [
-                        SynonymTermAction(
-                            behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                            associated_id_sets=frozenset(
-                                [
-                                    EquivalentIdSet(
-                                        ids_and_source=frozenset(
-                                            [
-                                                (
-                                                    ID_TO_BE_REMOVED,
-                                                    DUMMY_PARSER_SOURCE,
-                                                )
-                                            ]
-                                        )
-                                    )
-                                ]
-                            ),
-                        ),
-                    ]
-                ),
-                curated_synonym=TARGET_SYNONYM,
-                case_sensitive=False,
-            ),
-            None,
-            id=should_remove_an_EquivalentIdSet_from_a_synonym_term,
-        ),
-    ],
-)
-def test_declarative_curation_logic(
-    tmp_path,
-    curation: Curation,
-    global_actions: GlobalParserActions,
-    caplog,
-    request,
-):
-    test_id = request.node.callspec.id
+def setup_databases(
+    base_path: Path,
+    curation: Optional[CuratedTerm] = None,
+    global_actions: Optional[GlobalParserActions] = None,
+    parser_data_includes_target_synonym: bool = False,
+    parser_data_has_split_equiv_id_set: bool = False,
+    noop_parser_curations_style: Literal["empty", "None"] = "empty",
+) -> SynonymDatabase:
     Singleton.clear_all()
     kazu_disk_cache.clear()
-    with caplog.at_level(logging.DEBUG):
+    curations_path = None
+    if curation is not None:
+        curations_path = base_path.joinpath("curations.jsonl")
+        with open(curations_path, "w") as f:
+            f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
 
-        curations_path = None
-        if curation is not None:
-            curations_path = tmp_path.joinpath("curations.jsonl")
-            with open(curations_path, "w") as f:
-                f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
+    global_actions_path = None
+    if global_actions is not None:
+        global_actions_path = base_path.joinpath("global_actions.json")
+        with open(global_actions_path, "w") as f:
+            f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(global_actions)) + "\n")
 
-        global_actions_path = None
-        if global_actions is not None:
-            global_actions_path = tmp_path.joinpath("global_actions.json")
-            with open(global_actions_path, "w") as f:
-                f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(global_actions)) + "\n")
+    if parser_data_includes_target_synonym:
+        assert (
+            parser_data_has_split_equiv_id_set is False
+        ), "can't set both options to modify parser data"
+        parser_data = parser_data_with_target_synonym()
+    elif parser_data_has_split_equiv_id_set:
+        parser_data = parser_data_with_split_equiv_id_set()
+    else:
+        # use the default dummy data
+        parser_data = None
 
-        # we can't parameterise the parsers as they need to load the curations from the
-        # temporary directory set up using the tmp_path fixture inside the test
-        parser_1, noop_parser = get_test_parser(test_id, curations_path, global_actions_path)
+    parser_1 = DummyParser(
+        name=PARSER_1_NAME,
+        source=DUMMY_PARSER_SOURCE,
+        in_path="",
+        data=parser_data,
+        entity_class=ENTITY_CLASS,
+        curations=load_curated_terms(path=curations_path) if curations_path is not None else None,
+        global_actions=load_global_actions(global_actions_path)
+        if global_actions_path is not None
+        else None,
+    )
 
-        parser_1.populate_databases()
-        noop_parser.populate_databases()
+    curations: Optional[List[CuratedTerm]]
+    if noop_parser_curations_style == "empty":
+        curations = []
+    elif noop_parser_curations_style == "None":
+        curations = None
+    else:
+        raise ValueError("Invalid noop_parser_curations_style arg provided")
 
-        syn_db = SynonymDatabase()
-        if should_add_synonym_term_to_parser in test_id:
-            assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME)) + 1
-        elif (
-            should_not_add_a_synonym_term_to_db_as_one_already_exists in test_id
-            or should_fail_to_modify_terms_when_attempting_to_add_term in test_id
-        ):
-            assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
-        elif should_drop_from_parser_via_general_rule in test_id:
-            # +2 as parser one has two entries dropped via global action
-            assert len(syn_db.get_all(PARSER_1_NAME)) + 2 == len(syn_db.get_all(NOOP_PARSER_NAME))
-        elif should_remove_an_EquivalentIdSet_from_a_synonym_term in test_id:
-            term_norm = StringNormalizer.normalize(TARGET_SYNONYM)
-            assert len(syn_db.get(PARSER_1_NAME, term_norm).associated_id_sets) == 1
+    noop_parser = DummyParser(
+        name=NOOP_PARSER_NAME,
+        source=DUMMY_PARSER_SOURCE,
+        in_path="",
+        data=parser_data,
+        entity_class=ENTITY_CLASS,
+        curations=curations,
+        global_actions=None,
+    )
+
+    parser_1.populate_databases()
+    noop_parser.populate_databases()
+
+    return SynonymDatabase()
 
 
-def test_all_synonym_term_behaviours_handled_by_curation_processor():
-    assert set(CurationProcessor.curation_apply_order) == set(SynonymTermBehaviour)
+def test_should_add_synonym_term_to_parser(tmp_path):
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        actions=tuple(
+            [
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            "first",
+                                            DUMMY_PARSER_SOURCE,
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                )
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+
+    syn_db = setup_databases(base_path=tmp_path, curation=curation)
+
+    assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME)) + 1
+
+
+def test_should_drop_from_parser_via_general_rule(tmp_path):
+    global_actions = GlobalParserActions(
+        actions=[
+            ParserAction(
+                behaviour=ParserBehaviour.DROP_IDS_FROM_PARSER,
+                parser_to_target_id_mappings={
+                    PARSER_1_NAME: {"first"},
+                },
+            )
+        ]
+    )
+
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        global_actions=global_actions,
+        parser_data_includes_target_synonym=True,
+        noop_parser_curations_style="None",
+    )
+
+    assert len(syn_db.get_all(PARSER_1_NAME)) + 2 == len(syn_db.get_all(NOOP_PARSER_NAME))
+
+
+def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        actions=tuple(
+            [
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            "first",
+                                            DUMMY_PARSER_SOURCE,
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                )
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        curation=curation,
+        parser_data_includes_target_synonym=True,
+    )
+
+    assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
+
+
+def test_should_drop_curated_term_followed_by_adding_new_one(tmp_path):
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        actions=tuple(
+            [
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            "first",
+                                            DUMMY_PARSER_SOURCE,
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                ),
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            "second",
+                                            DUMMY_PARSER_SOURCE,
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                ),
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        curation=curation,
+        parser_data_includes_target_synonym=True,
+    )
+
+    term_norm_lookup = curation.term_norm_for_linking(entity_class=ENTITY_CLASS)
+    assert len(syn_db.get(PARSER_1_NAME, term_norm_lookup).associated_id_sets) == 1
+    equiv_id_set = next(iter(syn_db.get(PARSER_1_NAME, term_norm_lookup).associated_id_sets))
+    assert "first" not in equiv_id_set.ids
+    assert "second" in equiv_id_set.ids
+
+
+def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        actions=tuple(
+            [
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            TARGET_SYNONYM,
+                                            DUMMY_PARSER_SOURCE,
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                ),
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        curation=curation,
+        parser_data_includes_target_synonym=True,
+    )
+
+    assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
+
+
+def test_should_remove_an_EquivalentIdSet_from_a_synonym_term(tmp_path):
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        actions=tuple(
+            [
+                SynonymTermAction(
+                    behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
+                    associated_id_sets=frozenset(
+                        [
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            ID_TO_BE_REMOVED,
+                                            DUMMY_PARSER_SOURCE,
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                ),
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        curation=curation,
+        parser_data_has_split_equiv_id_set=True,
+    )
+
+    term_norm = StringNormalizer.normalize(TARGET_SYNONYM)
+    assert len(syn_db.get(PARSER_1_NAME, term_norm).associated_id_sets) == 1
