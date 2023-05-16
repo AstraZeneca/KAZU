@@ -1,5 +1,4 @@
 import dataclasses
-import functools
 import json
 import logging
 from abc import ABC
@@ -20,7 +19,6 @@ from typing import (
 )
 
 import pandas as pd
-
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
@@ -127,6 +125,7 @@ class CurationProcessor:
         SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
         SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
     )
+    _behaviour_to_order_index = {behav: i for i, behav in enumerate(CURATION_APPLY_ORDER)}
 
     def __init__(
         self,
@@ -163,21 +162,13 @@ class CurationProcessor:
                             self._curations_by_id[idx].add(curation)
 
     @classmethod
-    def curation_sort_func(cls, x: CuratedTerm, y: CuratedTerm):
-        """Determines the order curations are processed in."""
+    def curation_sort_key(cls, curated_term: CuratedTerm):
+        """Determines the order curations are processed in"""
 
-        max_x = max(cls.CURATION_APPLY_ORDER.index(action.behaviour) for action in x.actions)
-        max_y = max(cls.CURATION_APPLY_ORDER.index(action.behaviour) for action in y.actions)
-        syn_string_order = x.curated_synonym > y.curated_synonym
-        if max_x > max_y:
-            return 1
-        elif max_y > max_x:
-            return -1
-        else:
-            if syn_string_order:
-                return 1
-            else:
-                return -1
+        max_behaviour_index = max(
+            cls._behaviour_to_order_index[action.behaviour] for action in curated_term.actions
+        )
+        return (max_behaviour_index, curated_term.curated_synonym)
 
     def _update_term_lookups(
         self, term: SynonymTerm, override: bool
@@ -366,7 +357,7 @@ class CurationProcessor:
             logger.warning(message)
 
         curation_for_ner = []
-        for curation in sorted(safe_curations, key=functools.cmp_to_key(self.curation_sort_func)):
+        for curation in sorted(safe_curations, key=self.curation_sort_key):
             maybe_curation_with_term_norm_actions = self._process_curation_actions(curation)
             if maybe_curation_with_term_norm_actions is not None:
                 curation_for_ner.append(maybe_curation_with_term_norm_actions)
