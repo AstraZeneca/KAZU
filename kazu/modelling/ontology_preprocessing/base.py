@@ -151,15 +151,7 @@ class CurationProcessor:
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
-        self._curations_by_id: DefaultDict[Optional[Idx], Set[CuratedTerm]] = defaultdict(set)
-        for curation in self.curations:
-            for action in curation.actions:
-                if action.associated_id_sets is None:
-                    self._curations_by_id[None].add(curation)
-                else:
-                    for equiv_id_set in action.associated_id_sets:
-                        for idx in equiv_id_set.ids:
-                            self._curations_by_id[idx].add(curation)
+        self._ids_to_ignore_from_global_actions: Set[Idx] = set()
 
     @classmethod
     def curation_sort_key(cls, curated_term: CuratedTerm):
@@ -363,64 +355,6 @@ class CurationProcessor:
                 curation_for_ner.append(maybe_curation_with_term_norm_actions)
         return curation_for_ner
 
-    def _drop_id_from_curation(self, idx: Idx) -> None:
-        """Remove an ID from the curation. If the curation is no longer valid after this action, it will be discarded.
-
-        :param idx: the id to remove
-        :return:
-        """
-        affected_curations = self._curations_by_id.get(idx, set())
-        # we call set again here as we modify it in situ
-        for affected_curation in set(affected_curations):
-            new_actions = []
-            for action in affected_curation.actions:
-                if action.associated_id_sets is None:
-                    new_actions.append(action)
-                else:
-                    updated_assoc_id_set = self._drop_id_from_associated_id_sets(
-                        id_to_drop=idx, associated_id_sets=action.associated_id_sets
-                    )
-                    if len(updated_assoc_id_set) == 0:
-                        logger.warning(
-                            "curation id %s has had all linking target ids removed by a global action, and will be"
-                            " ignored. Parser name: %s",
-                            affected_curation._id,
-                            self.parser_name,
-                        )
-                    elif len(updated_assoc_id_set) < len(action.associated_id_sets):
-                        logger.info(
-                            "curation found with ids that have been removed via a global action. These will be filtered"
-                            " from the curation action. Parser name: %s, new ids: %s, curation id: %s",
-                            self.parser_name,
-                            updated_assoc_id_set,
-                            affected_curation._id,
-                        )
-                        new_actions.append(
-                            dataclasses.replace(action, associated_id_sets=updated_assoc_id_set)
-                        )
-                    elif len(updated_assoc_id_set) == len(action.associated_id_sets):
-                        # no change to the action
-                        new_actions.append(action)
-                    else:
-                        ## Maybe raise an error?? This imples there are now more ids after trying to drop one...
-                        raise RuntimeError(
-                            "Somehow an ID has been added when we were looking at dropping one."
-                            " This is caused by a misconfigured global action"
-                        )
-            if len(new_actions) > 0:
-                new_curation = dataclasses.replace(affected_curation, actions=tuple(new_actions))
-                self.curations.add(new_curation)
-                self._curations_by_id[idx].add(new_curation)
-            else:
-                logger.info(
-                    "curation no longer has any relevant actions, and will be discarded"
-                    " Parser name: %s, curation id: %s",
-                    self.parser_name,
-                    affected_curation._id,
-                )
-            self.curations.remove(affected_curation)
-            self._curations_by_id[idx].remove(affected_curation)
-
     def analyse_conflicts_in_curations(
         self, curations: Set[CuratedTerm]
     ) -> Tuple[Set[CuratedTerm], List[Set[CuratedTerm]]]:
@@ -497,13 +431,18 @@ class CurationProcessor:
                 )
                 term_for_this_action = self._terms_by_term_norm.get(term_norm)
                 if term_for_this_action is None:
-                    raise CurationException(
-                        f"CuratedTerm is invalid: requires database entry but all have been removed by actions: {curation}"
+                    logger.warning(
+                        "CuratedTerm %s is invalid: requires database entry but all have been removed by actions.",
+                        curation,
                     )
-                new_action = dataclasses.replace(
-                    action, associated_id_sets=term_for_this_action.associated_id_sets
-                )
-                suitable_for_ner = True
+                    # since this action is invalid, we need a continue here so that the action isn't added to the
+                    # list of viable actions
+                    continue
+                else:
+                    new_action = dataclasses.replace(
+                        action, associated_id_sets=term_for_this_action.associated_id_sets
+                    )
+                    suitable_for_ner = True
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
             new_actions.append(new_action)
@@ -534,7 +473,7 @@ class CurationProcessor:
                                 CurationModificationResult.SYNONYM_TERM_DROPPED, 0
                             ),
                         )
-                    self._drop_id_from_curation(idx=idx)
+                    self._ids_to_ignore_from_global_actions.add(idx)
 
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
@@ -592,10 +531,22 @@ class CurationProcessor:
             )
             return CurationModificationResult.NO_ACTION
 
-        elif (
-            maybe_existing_synonym_term is not None
-        ):  # curation_associated_id_set is implicitly not None
-            assert curation_associated_id_set is not None
+        # curation_associated_id_set is implicitly not None
+        assert curation_associated_id_set is not None
+        # modify the curation_associated_id_set with any globally dropped ids
+        for idx in self._ids_to_ignore_from_global_actions:
+            curation_associated_id_set = self._drop_id_from_associated_id_sets(
+                idx, curation_associated_id_set
+            )
+        if len(curation_associated_id_set) == 0:
+            logger.debug(
+                "all ids removed by global action for %s,  Parser name: %s",
+                curated_synonym,
+                self.parser_name,
+            )
+            return CurationModificationResult.NO_ACTION
+
+        if maybe_existing_synonym_term is not None:
             log_formatting_dict["existing_id_set"] = maybe_existing_synonym_term.associated_id_sets
 
             if (
@@ -631,6 +582,12 @@ class CurationProcessor:
                 return CurationModificationResult.NO_ACTION
         else:  # no term exists, so one will be made
             assert curation_associated_id_set is not None
+            for equiv_id_set in curation_associated_id_set:
+                for idx in equiv_id_set.ids:
+                    if idx not in self._terms_by_id:
+                        raise CurationException(
+                            f"Attempted to add term containing {idx} but this id does not" f"exist"
+                        )
             is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
             new_term = SynonymTerm(
                 term_norm=curation_term_norm,
@@ -1022,12 +979,10 @@ class OntologyParser(ABC):
         for term_str in term.terms:
             if term.original_term is None:
                 action = SynonymTermAction(
-                    associated_id_sets=term.associated_id_sets,
                     behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
                 )
             else:
                 action = SynonymTermAction(
-                    associated_id_sets=None,
                     behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
                 )
             yield CuratedTerm(
