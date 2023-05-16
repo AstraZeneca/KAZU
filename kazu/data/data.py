@@ -658,24 +658,13 @@ class SynonymTermAction:
     A SynonymTermAction is an action that affects the :class:`.SynonymTerm`\\s that a parser
     produces.
 
-    Note, the term_norm field is calculated by the :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`
-    if required, and should not be set manually.
-
-    The parser_to_target_id_mappings field should specify the parser name and a set of affected ID's if required.
-
     See :class:`.SynonymTermBehaviour` for the type of actions that are possible.
 
     """
 
     behaviour: SynonymTermBehaviour
+    #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
-
-    def __post_init__(self):
-        if (
-            self.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
-            or self.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
-        ) and (self.associated_id_sets is None or len(self.associated_id_sets) == 0):
-            raise ValueError(f"associated_id_sets must be specified for behaviour {self.behaviour}")
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "SynonymTermAction":
