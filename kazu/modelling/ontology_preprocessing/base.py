@@ -397,7 +397,7 @@ class CurationProcessor:
                 curation_for_ner.append(maybe_curation_with_term_norm_actions)
         return curation_for_ner
 
-    def _drop_id_from_curation(self, idx: Idx):
+    def _drop_id_from_curation(self, idx: Idx) -> None:
         """Remove an ID from the curation. If the curation is no longer valid after this action, it will be discarded.
 
         :param idx: the id to remove
@@ -618,9 +618,7 @@ class CurationProcessor:
         maybe_existing_synonym_term = self._terms_by_term_norm.get(curation_term_norm)
 
         if maybe_existing_synonym_term is not None:
-            log_formatting_dict[
-                "existing_id_set"
-            ] = maybe_existing_synonym_term.associated_id_sets
+            log_formatting_dict["existing_id_set"] = maybe_existing_synonym_term.associated_id_sets
             if curation_associated_id_set.issubset(maybe_existing_synonym_term.associated_id_sets):
                 logger.debug(
                     log_prefix
@@ -656,16 +654,16 @@ class CurationProcessor:
                     logger.error(
                         log_prefix
                         + " but term_norm <%(term_norm)s> already exists in synonym database, and its\n"
-                          "associated_id_sets don't contain all the ids in id_set. Creating a new\n"
-                          "SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
-                          "This can happen if a synonym appears twice in the underlying ontology,\n"
-                          "with multiple identifiers attached\n"
-                          "Possible mitigations:\n"
-                          "1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
-                          "2) change the target id set of the curation to match the existing entry\n"
-                          "\t(i.e. %(existing_id_set)s\n"
-                          "3) Change the string normalizer function to generate unique term_norms\n",
-                        log_formatting_dict
+                        "associated_id_sets don't contain all the ids in id_set. Creating a new\n"
+                        "SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
+                        "This can happen if a synonym appears twice in the underlying ontology,\n"
+                        "with multiple identifiers attached\n"
+                        "Possible mitigations:\n"
+                        "1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
+                        "2) change the target id set of the curation to match the existing entry\n"
+                        "\t(i.e. %(existing_id_set)s\n"
+                        "3) Change the string normalizer function to generate unique term_norms\n",
+                        log_formatting_dict,
                     )
                     return CurationModificationResult.NO_ACTION
 
