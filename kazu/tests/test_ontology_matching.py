@@ -8,7 +8,7 @@ from spacy.lang.en import English
 from spacy.lang.en.punctuation import TOKENIZER_INFIXES
 
 from kazu.data.data import (
-    Curation,
+    CuratedTerm,
     DocumentJsonUtils,
     MentionConfidence,
     SynonymTermAction,
@@ -59,7 +59,7 @@ example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
-def write_curations(path: Path, terms: List[Curation]):
+def write_curations(path: Path, terms: List[CuratedTerm]):
     with open(path, "w") as f:
         for curation in terms:
             f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
@@ -155,7 +155,7 @@ PARSER_1_AMBIGUOUS_DATA = {
     [
         pytest.param(
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -183,7 +183,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 ),
             ],
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -223,7 +223,7 @@ PARSER_1_AMBIGUOUS_DATA = {
         ),
         pytest.param(
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -251,7 +251,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 )
             ],
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -290,7 +290,7 @@ PARSER_1_AMBIGUOUS_DATA = {
         ),
         pytest.param(
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -318,7 +318,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 ),
             ],
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="others",
                     actions=tuple(
@@ -355,7 +355,7 @@ PARSER_1_AMBIGUOUS_DATA = {
         ),
         pytest.param(
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -383,7 +383,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 ),
             ],
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
                     actions=tuple(
@@ -422,7 +422,7 @@ PARSER_1_AMBIGUOUS_DATA = {
         ),
         pytest.param(
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="This sentence is just to test",
                     actions=tuple(
@@ -462,7 +462,7 @@ PARSER_1_AMBIGUOUS_DATA = {
         ),
         pytest.param(
             [
-                Curation(
+                CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym=CONFUSING_SYNONYM,
                     actions=tuple(

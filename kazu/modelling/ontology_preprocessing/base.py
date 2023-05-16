@@ -26,7 +26,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTerm,
     SimpleValue,
-    Curation,
+    CuratedTerm,
     ParserBehaviour,
     SynonymTermBehaviour,
     SynonymTermAction,
@@ -90,17 +90,17 @@ def select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count(
 
 def load_curated_terms(
     path: PathLike,
-) -> List[Curation]:
+) -> List[CuratedTerm]:
     """
-    Load :class:`kazu.data.data.Curation`\\ s from a file path.
+    Load :class:`kazu.data.data.CuratedTerm`\\ s from a file path.
 
-    :param path: path to json lines file that map to :class:`kazu.data.data.Curation`
+    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
     """
     curations_path = as_path(path)
     if curations_path.exists():
         with curations_path.open(mode="r") as jsonlf:
-            curations = [Curation.from_json(line) for line in jsonlf]
+            curations = [CuratedTerm.from_json(line) for line in jsonlf]
     else:
         raise ValueError(f"curations do not exist at {path}")
     return curations
@@ -133,8 +133,8 @@ class CurationModificationResult(AutoNameEnum):
 
 class CurationProcessor:
     """A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced
-    by an :class:`.OntologyParser` with any relevant :class:`.GlobalParserActions` and/or
-    :class:`.Curation` associated with the parser.
+    by an :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` with any relevant :class:`.GlobalParserActions` and/or
+    :class:`.CuratedTerm` associated with the parser.
 
     That is to say, this class modifies the raw data produced by a parser with any a posteriori
     observations about the data (such as bad synonyms, mis-mapped terms etc). Is also identifies
@@ -159,13 +159,13 @@ class CurationProcessor:
         parser_name: str,
         entity_class: str,
         global_actions: Optional[GlobalParserActions],
-        curations: List[Curation],
+        curations: List[CuratedTerm],
         synonym_terms: Set[SynonymTerm],
     ):
         """
 
         :param parser_name: name of parser to process
-        :param entity_class: name of parser entity_class to process
+        :param entity_class: name of parser entity_class to process (typically as passed to :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`\\ )
         :param global_actions:
         :param curations:
         :param synonym_terms:
@@ -178,7 +178,7 @@ class CurationProcessor:
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
-        self._curations_by_id: DefaultDict[Optional[Idx], Set[Curation]] = defaultdict(set)
+        self._curations_by_id: DefaultDict[Optional[Idx], Set[CuratedTerm]] = defaultdict(set)
         for curation in self.curations:
             for action in curation.actions:
                 if action.associated_id_sets is None:
@@ -189,7 +189,7 @@ class CurationProcessor:
                             self._curations_by_id[idx].add(curation)
 
     @classmethod
-    def curation_sort_func(cls, x: Curation, y: Curation):
+    def curation_sort_func(cls, x: CuratedTerm, y: CuratedTerm):
         """Determines the order curations are processed in."""
 
         max_x = max(cls.CURATION_APPLY_ORDER.index(action.behaviour) for action in x.actions)
@@ -387,11 +387,11 @@ class CurationProcessor:
 
     def export_ner_curations_and_final_terms(
         self,
-    ) -> Tuple[Optional[List[Curation]], Set[SynonymTerm]]:
+    ) -> Tuple[Optional[List[CuratedTerm]], Set[SynonymTerm]]:
         """Perform any updates required to the synonym terms as specified in the curations/global
         actions.
 
-        The returned :class:`.Curation`\\s can be used for Dictionary based NER, whereas the
+        The returned :class:`.CuratedTerm`\\s can be used for Dictionary based NER, whereas the
         returned :class:`.SynonymTerm`\\s can be loaded into the internal database for linking.
 
         :return:
@@ -400,7 +400,7 @@ class CurationProcessor:
         curations_for_ner = self._process_curations()
         return curations_for_ner, set(self._terms_by_term_norm.values())
 
-    def _process_curations(self) -> List[Curation]:
+    def _process_curations(self) -> List[CuratedTerm]:
         safe_curations, conflicts = self.analyse_conflicts_in_curations(self.curations)
         for conflict_lst in conflicts:
             message = (
@@ -477,8 +477,8 @@ class CurationProcessor:
             self._curations_by_id[idx].remove(affected_curation)
 
     def analyse_conflicts_in_curations(
-        self, curations: Set[Curation]
-    ) -> Tuple[Set[Curation], List[Set[Curation]]]:
+        self, curations: Set[CuratedTerm]
+    ) -> Tuple[Set[CuratedTerm], List[Set[CuratedTerm]]]:
         """Check to see if a list of curations contain conflicts.
 
         Conflicts can occur if two or more curations normalise to the same NormalisedSynonymStr,
@@ -518,7 +518,7 @@ class CurationProcessor:
                 safe.update(potentially_conflicting_curations)
         return safe, conflicts
 
-    def _process_curation_actions(self, curation: Curation) -> Optional[Curation]:
+    def _process_curation_actions(self, curation: CuratedTerm) -> Optional[CuratedTerm]:
         term_norm = curation.term_norm_for_linking(self.entity_class)
         behaviours_requiring_database_entry: Set[SynonymTermBehaviour] = set()
         for action in curation.actions:
@@ -564,7 +564,7 @@ class CurationProcessor:
         else:
             if self._terms_by_term_norm.get(term_norm) is None:
                 raise CurationException(
-                    f"Curation is invalid: requires database entry but all have been removed by actions: {curation}"
+                    f"CuratedTerm is invalid: requires database entry but all have been removed by actions: {curation}"
                 )
             if SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING in behaviours_requiring_database_entry:
                 return curation
@@ -715,7 +715,7 @@ class CurationProcessor:
                     logger.debug(
                         log_prefix
                         + " but term_norm <%(term_norm)s> already exists in synonym database."
-                        + "the AssociatedIdSet is a superset of the curation AssociatedIdSet. Therefore no action is required. %(existing_id_set)s",
+                        + "the AssociatedIdSet is a superset of the CuratedTerm AssociatedIdSet. Therefore no action is required. %(existing_id_set)s",
                         log_formatting_dict,
                     )
                     return CurationModificationResult.NO_ACTION
@@ -729,7 +729,7 @@ class CurationProcessor:
                         "with multiple identifiers attached\n"
                         "Possible mitigations:\n"
                         "1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
-                        "2) change the target id set of the curation to match the existing entry\n"
+                        "2) change the target id set of the CuratedTerm to match the existing entry\n"
                         "\t(i.e. %s\n"
                         "3) Change the string normalizer function to generate unique term_norms\n",
                         formatted_log_prefix,
@@ -829,7 +829,7 @@ class OntologyParser(ABC):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         """
@@ -1064,7 +1064,7 @@ class OntologyParser(ABC):
 
     def process_curations(
         self, terms: Set[SynonymTerm]
-    ) -> Tuple[Optional[List[Curation]], Set[SynonymTerm]]:
+    ) -> Tuple[Optional[List[CuratedTerm]], Set[SynonymTerm]]:
         if self.curations is None and self.synonym_generator is not None:
             logger.warning(
                 "%s is configured to use synonym generators. This may result in noisy NER performance.",
@@ -1143,7 +1143,7 @@ class OntologyParser(ABC):
 
     def generate_curations_from_synonym_generators(
         self, synonym_terms: Set[SynonymTerm]
-    ) -> Tuple[List[Curation], List[Curation]]:
+    ) -> Tuple[List[CuratedTerm], List[CuratedTerm]]:
         original_terms, generated_terms = self.generate_synonyms(synonym_terms)
         original_curations = [
             curation
@@ -1158,7 +1158,7 @@ class OntologyParser(ABC):
 
         return original_curations, generated_curations
 
-    def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[Curation]:
+    def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[CuratedTerm]:
         """Convert a :class:`.SynonymTerm`\\ s to curations to use for dictionary based NER.
 
         This is used when curations are not provided to the parser.
@@ -1179,7 +1179,7 @@ class OntologyParser(ABC):
                     associated_id_sets=None,
                     behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
                 )
-            yield Curation(
+            yield CuratedTerm(
                 curated_synonym=term_str,
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                 case_sensitive=StringNormalizer.classify_symbolic(term_str, self.entity_class),
@@ -1190,7 +1190,7 @@ class OntologyParser(ABC):
     @kazu_disk_cache.memoize(ignore={0})
     def _populate_databases(
         self, parser_name: str
-    ) -> Tuple[Optional[List[Curation]], Dict[str, Dict[str, SimpleValue]], Set[SynonymTerm]]:
+    ) -> Tuple[Optional[List[CuratedTerm]], Dict[str, Dict[str, SimpleValue]], Set[SynonymTerm]]:
         """Disk cacheable method that populates all databases.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -1211,7 +1211,7 @@ class OntologyParser(ABC):
 
     def populate_databases(
         self, force: bool = False, return_ner_curations: bool = False
-    ) -> Optional[List[Curation]]:
+    ) -> Optional[List[CuratedTerm]]:
         """Populate the databases with the results of the parser.
 
         Also calculates the term norms associated with

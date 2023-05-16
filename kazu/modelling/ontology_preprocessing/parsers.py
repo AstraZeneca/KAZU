@@ -25,7 +25,7 @@ import rdflib
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
-    Curation,
+    CuratedTerm,
     AssociatedIdSets,
     GlobalParserActions,
 )
@@ -268,7 +268,7 @@ class RDFGraphParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
         label_predicate: RdfRef = rdflib.RDFS.label,
     ):
@@ -417,7 +417,7 @@ class SKOSXLGraphParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
         label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
     ):
@@ -455,7 +455,7 @@ class GeneOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -474,7 +474,7 @@ class GeneOntologyParser(OntologyParser):
 
     def populate_databases(
         self, force: bool = False, return_ner_curations: bool = False
-    ) -> Optional[List[Curation]]:
+    ) -> Optional[List[CuratedTerm]]:
         curations_with_term_norms = super().populate_databases(
             force=force, return_ner_curations=return_ner_curations
         )
@@ -543,7 +543,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -583,7 +583,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -623,7 +623,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -669,7 +669,7 @@ class UberonOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
 
@@ -769,7 +769,7 @@ class EnsemblOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -894,7 +894,7 @@ class CLOOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -1027,7 +1027,7 @@ class MeddraOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
         exclude_socs: Iterable[str] = (
             "Surgical and medical procedures",
@@ -1183,7 +1183,7 @@ class CLOntologyParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
 
@@ -1260,7 +1260,7 @@ class TabularOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
         **kwargs,
     ):
@@ -1321,7 +1321,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -1379,7 +1379,7 @@ class StatoParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        curations: Optional[List[Curation]] = None,
+        curations: Optional[List[CuratedTerm]] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
 

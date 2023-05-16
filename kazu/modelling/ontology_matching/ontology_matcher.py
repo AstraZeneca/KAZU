@@ -139,7 +139,7 @@ class OntologyMatcher:
     def create_phrasematchers_using_curations(
         self, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
-        """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\ s based on :class:`.Curation`\\ s.
+        """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\ s based on :class:`.CuratedTerm`\\ s.
 
         Curations are produced by :py:meth:`.OntologyParser.populate_databases`\\ method
         :param parsers:

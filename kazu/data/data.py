@@ -777,7 +777,7 @@ class GlobalParserActions:
 
 
 @dataclass(frozen=True)
-class Curation:
+class CuratedTerm:
     """
     A Curation is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
 
@@ -898,12 +898,12 @@ class Curation:
         return StringNormalizer.normalize(norm_target, entity_class)
 
     @classmethod
-    def from_json(cls, json_str: str) -> "Curation":
+    def from_json(cls, json_str: str) -> "CuratedTerm":
         json_dict = json_util.loads(json_str)
         return cls.from_dict(json_dict)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "Curation":
+    def from_dict(cls, json_dict: Dict) -> "CuratedTerm":
 
         return cls(
             mention_confidence=MentionConfidence(json_dict["mention_confidence"]),
