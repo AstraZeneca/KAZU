@@ -66,16 +66,15 @@ class CurationException(Exception):
 def select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count(
     set_of_associated_id_sets: Set[AssociatedIdSets],
 ) -> AssociatedIdSets:
-    """
-    For a set of :class:`kazu.data.data.AssociatedIdSets`\\s, select the set with the fewest :class:`.EquivalentIdSet`\\s.
-    If more than one, smallest, pick the one with the fewest total IDs
+    """For a set of :class:`kazu.data.data.AssociatedIdSets`\\, select the set with the fewest :class:`.EquivalentIdSet`\\s.
 
+    If there is a tie for the smallest set, pick the one with the fewest total IDs.
 
     :param set_of_associated_id_sets:
     :return:
     """
 
-    by_len_and_equiv_len: DefaultDict[DefaultDict[Set[AssociatedIdSets]]] = defaultdict(  # type: ignore[type-arg]
+    by_len_and_equiv_len: DefaultDict[int, DefaultDict[int, Set[AssociatedIdSets]]] = defaultdict(
         lambda: defaultdict(set)
     )
     for assoc_id_set in set_of_associated_id_sets:
@@ -111,9 +110,9 @@ def load_global_actions(
     path: PathLike,
 ) -> GlobalParserActions:
     """
-    Load an instance of GlobalParserActions  from a file path.
+    Load an instance of :class:`.GlobalParserActions` from a file path.
 
-    :param path: path to a json serialised GlobalParserActions`
+    :param path: path to a json serialised GlobalParserActions
     :return:
     """
     global_actions_path = as_path(path)
@@ -133,18 +132,20 @@ class CurationModificationResult(AutoNameEnum):
 
 
 class CurationProcessor:
-    """
-    A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced by an :class:`.OntologyParser`
-    with any relevant :class:`.GlobalParserActions` and/or :class:`.Curation` associated with the parser. That is to say,
-    this class modifies the raw data produced by a parser with any a posteriori observations about the data (such as bad
-    synonyms, mis-mapped terms etc. Is also identifies curations that should be used for dictionary based NER.
-    This class should be used before instances of :class:`.SynonymTerm`\\s are loaded into the internal database
-    representation
+    """A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced
+    by an :class:`.OntologyParser` with any relevant :class:`.GlobalParserActions` and/or
+    :class:`.Curation` associated with the parser.
 
+    That is to say, this class modifies the raw data produced by a parser with any a posteriori
+    observations about the data (such as bad synonyms, mis-mapped terms etc). Is also identifies
+    curations that should be used for dictionary based NER.
+
+    This class should be used before instances of :class:`.SynonymTerm`\\s are loaded into the
+    internal database representation.
     """
 
     # curations are applied in the following order
-    curation_apply_order = (
+    CURATION_APPLY_ORDER = (
         SynonymTermBehaviour.IGNORE,
         SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
         SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
@@ -189,10 +190,10 @@ class CurationProcessor:
 
     @classmethod
     def curation_sort_func(cls, x: Curation, y: Curation):
-        """Determines the order curations are processed in"""
+        """Determines the order curations are processed in."""
 
-        max_x = max(cls.curation_apply_order.index(action.behaviour) for action in x.actions)
-        max_y = max(cls.curation_apply_order.index(action.behaviour) for action in y.actions)
+        max_x = max(cls.CURATION_APPLY_ORDER.index(action.behaviour) for action in x.actions)
+        max_y = max(cls.CURATION_APPLY_ORDER.index(action.behaviour) for action in y.actions)
         syn_string_order = x.curated_synonym > y.curated_synonym
         if max_x > max_y:
             return 1
@@ -239,10 +240,8 @@ class CurationProcessor:
         else:
             return CurationModificationResult.NO_ACTION
 
-    def _drop_synonym_term(self, synonym: NormalisedSynonymStr):
-        """
-        Remove a synonym term from the database, so that it cannot be
-        used as a linking target
+    def _drop_synonym_term(self, synonym: NormalisedSynonymStr) -> None:
+        """Remove a synonym term from the database, so that it cannot be used as a linking target.
 
         :param synonym:
         :return:
@@ -267,8 +266,8 @@ class CurationProcessor:
             )
 
     def _drop_id_from_all_synonym_terms(self, id_to_drop: Idx) -> Counter:
-        """
-        Remove a given id from all :class:`.SynonymTerm`\\ s.
+        """Remove a given id from all :class:`.SynonymTerm`\\ s.
+
         Drop any :class:`.SynonymTerm`\\ s with no remaining ID after removal.
 
         :param id_to_drop:
@@ -290,8 +289,7 @@ class CurationProcessor:
         CurationModificationResult.SYNONYM_TERM_DROPPED,
         CurationModificationResult.NO_ACTION,
     ]:
-        """
-        Remove an id from a given :class:`.SynonymTerm`
+        """Remove an id from a given :class:`.SynonymTerm`\\ .
 
         :param id_to_drop:
         :param term_to_modify:
@@ -310,8 +308,7 @@ class CurationProcessor:
     def _drop_id_from_associated_id_sets(
         self, id_to_drop: Idx, associated_id_sets: AssociatedIdSets
     ) -> AssociatedIdSets:
-        """
-        Remove an id from a :class:`.AssociatedIdSets`
+        """Remove an id from a :class:`.AssociatedIdSets`\\ .
 
         :param id_to_drop:
         :param associated_id_sets:
@@ -336,9 +333,8 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
     ]:
-        """
-        Remove an :class:`~kazu.data.data.EquivalentIdSet` from a :class:`~kazu.data.data.SynonymTerm`\\ ,
-        dropping the term altogether if no others remain.
+        """Remove an :class:`~kazu.data.data.EquivalentIdSet` from a
+        :class:`~kazu.data.data.SynonymTerm`\\ , dropping the term altogether if no others remain.
 
         :param synonym:
         :param id_set_to_drop:
@@ -357,8 +353,8 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
     ]:
-        """
-        Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets` has changed
+        """Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets` has
+        changed.
 
         :param new_associated_id_sets:
         :param synonym_term:
@@ -372,8 +368,8 @@ class CurationProcessor:
             if new_associated_id_sets == synonym_term.associated_id_sets:
                 raise ValueError(
                     "function called inappropriately where the id sets haven't changed. This"
-                    "has failed as it will otherwise modify the value of aggregated_by, when"
-                    "nothing has changed"
+                    " has failed as it will otherwise modify the value of aggregated_by, when"
+                    " nothing has changed"
                 )
             new_term = dataclasses.replace(
                 synonym_term,
@@ -392,11 +388,11 @@ class CurationProcessor:
     def export_ner_curations_and_final_terms(
         self,
     ) -> Tuple[Optional[List[Curation]], Set[SynonymTerm]]:
-        """
-        Perform any updates required to the synonym terms as specified in the
-        curations/global actions. The returned :class:`.Curation`\\s can be used for
-        Dictionary based NER, whereas the returned :class:`.SynonymTerm`\\s can
-        be loaded into the internal database for linking.
+        """Perform any updates required to the synonym terms as specified in the curations/global
+        actions.
+
+        The returned :class:`.Curation`\\s can be used for Dictionary based NER, whereas the
+        returned :class:`.SynonymTerm`\\s can be loaded into the internal database for linking.
 
         :return:
         """
@@ -423,8 +419,7 @@ class CurationProcessor:
         return curation_for_ner
 
     def _drop_id_from_curation(self, idx: Idx):
-        """
-        Remove an ID from the curation. If the curation is no longer valid after this action, it will be discarded
+        """Remove an ID from the curation. If the curation is no longer valid after this action, it will be discarded.
 
         :param idx: the id to remove
         :return:
@@ -484,13 +479,12 @@ class CurationProcessor:
     def analyse_conflicts_in_curations(
         self, curations: Set[Curation]
     ) -> Tuple[Set[Curation], List[Set[Curation]]]:
-        """
-        Check to see if a list of curations contain conflicts.
+        """Check to see if a list of curations contain conflicts.
 
         Conflicts can occur if two or more curations normalise to the same NormalisedSynonymStr,
         but refer to different AssociatedIdSets, and one of their actions is attempting to add
         a SynonymTerm to the database. This would create an ambiguity over which AssociatedIdSets
-        is appropriate for the normalised term
+        is appropriate for the normalised term.
 
         :param curations:
         :return: safe curations set, list of conflicting curations sets
@@ -1165,10 +1159,11 @@ class OntologyParser(ABC):
         return original_curations, generated_curations
 
     def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[Curation]:
-        """
-        When curations are not provided, this converts SynonymTerm's from the original
-        ontology source and/or generated ones into curations, so they can be used
-        for dictionary based NER
+        """Convert a :class:`.SynonymTerm`\\ s to curations to use for dictionary based NER.
+
+        This is used when curations are not provided to the parser.
+
+        Can handle either 'original' or 'generated' :class:`.SynonymTerm`\\ s.
 
         :param term:
         :return:
