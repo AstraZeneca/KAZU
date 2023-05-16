@@ -313,3 +313,24 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
     )
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
+
+
+def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        actions=tuple(
+            [
+                SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY),
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        curation=curation,
+        parser_data_includes_target_synonym=True,
+    )
+
+    assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
