@@ -878,11 +878,11 @@ class Curation:
     actions: Tuple[SynonymTermAction, ...]
     case_sensitive: bool
     _id: bson.ObjectId = field(default_factory=bson.ObjectId, compare=False)
-    # the original term that is used as a 'seed' term for this curation.
-    # note, this is used for NER to determine how linking is performed. If you also
-    # want to use this curation as a linking target for non-dictionary based NER processes,
-    # or the term is identical to the one used in the source ontology,
-    # this should be set to None, so that a novel term_norm is calculated
+    #: The original term that is used as a 'seed' term for this curation.
+    #: note, this is used for NER to determine how linking is performed. If you also
+    #: want to use this curation as a linking target for non-dictionary based NER processes,
+    #: or the term is identical to the one used in the source ontology,
+    #: this should be set to None, so that a novel term_norm is calculated
     source_term: Optional[str] = None
 
     def __post_init__(self):
