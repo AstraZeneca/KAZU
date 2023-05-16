@@ -908,7 +908,7 @@ class OntologyParser(ABC):
 
         :param parser_name: name of this parser. Required for correct operation of cache
             (Note, we cannot pass self to the disk cache as the constructor consumes too much
-            memory
+            memory)
         :return: {idx:{metadata_key:metadata_value}}
         """
         self._parse_df_if_not_already_parsed()
@@ -970,7 +970,7 @@ class OntologyParser(ABC):
 
         :param parser_name: name of this parser. Required for correct operation of cache
             (Note, we cannot pass self to the disk cache as the constructor consumes too much
-            memory
+            memory)
         :return:
         """
         self._parse_df_if_not_already_parsed()
@@ -1055,7 +1055,7 @@ class OntologyParser(ABC):
 
         :param parser_name: name of this parser. Required for correct operation of cache
             (Note, we cannot pass self to the disk cache as the constructor consumes too much
-            memory
+            memory)
         :return:
         """
         logger.info("populating database for %s from source", self.name)
