@@ -25,7 +25,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     kazu_disk_cache,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
 )
 from kazu.tests.utils import DummyParser
-from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import Singleton
 
 PARSER_1_NAME = "I am the target for actions"
@@ -314,41 +313,3 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
     )
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
-
-
-def test_should_remove_an_EquivalentIdSet_from_a_synonym_term(tmp_path):
-    curation = CuratedTerm(
-        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        actions=tuple(
-            [
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            ID_TO_BE_REMOVED,
-                                            DUMMY_PARSER_SOURCE,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                ),
-            ]
-        ),
-        curated_synonym=TARGET_SYNONYM,
-        case_sensitive=False,
-    )
-
-    syn_db = setup_databases(
-        base_path=tmp_path,
-        curation=curation,
-        parser_data_has_split_equiv_id_set=True,
-    )
-
-    term_norm = StringNormalizer.normalize(TARGET_SYNONYM)
-    assert len(syn_db.get(PARSER_1_NAME, term_norm).associated_id_sets) == 1

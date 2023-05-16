@@ -643,9 +643,6 @@ class SynonymTermBehaviour(AutoNameEnum):
     #: do not use this term as a linking target. Normally, you would use this for a term you want to remove
     #: from the underlying ontology (e.g. a 'bad' synonym). If the term does not exist, has no effect
     DROP_SYNONYM_TERM_FOR_LINKING = auto()
-    #: removes an EquivalentIdSet from the term. The EquivalentIdSet to remove is selected via being a
-    #: superset of the IDs in the associated parser_to_target_id_mappings value
-    DROP_ID_SET_FROM_SYNONYM_TERM = auto()
     #: used if the containing Curation has source_term !=None, in which case all behaviours are inherited
     INHERIT_FROM_SOURCE_TERM = auto()
 
@@ -676,7 +673,6 @@ class SynonymTermAction:
     def __post_init__(self):
         if (
             self.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
-            or self.behaviour is SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM
             or self.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
         ) and (self.associated_id_sets is None or len(self.associated_id_sets) == 0):
             raise ValueError(f"associated_id_sets must be specified for behaviour {self.behaviour}")

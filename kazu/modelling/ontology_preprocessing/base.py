@@ -149,7 +149,6 @@ class CurationProcessor:
         SynonymTermBehaviour.IGNORE,
         SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
         SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-        SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM,
         SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
         SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
     )
@@ -327,26 +326,6 @@ class CurationProcessor:
                 new_assoc_id_set.add(equiv_id_set)
         new_assoc_id_frozenset = frozenset(new_assoc_id_set)
         return new_assoc_id_frozenset
-
-    def _drop_equivalent_id_set_from_synonym_term(
-        self, synonym: NormalisedSynonymStr, id_set_to_drop: EquivalentIdSet
-    ) -> Literal[
-        CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
-    ]:
-        """Remove an :class:`~kazu.data.data.EquivalentIdSet` from a
-        :class:`~kazu.data.data.SynonymTerm`\\ , dropping the term altogether if no others remain.
-
-        :param synonym:
-        :param id_set_to_drop:
-        :return:
-        """
-
-        synonym_term = self._terms_by_term_norm[synonym]
-        modified_id_sets = synonym_term.associated_id_sets.difference((id_set_to_drop,))
-        result = self._modify_or_drop_synonym_term_after_id_set_change(
-            modified_id_sets, synonym_term
-        )
-        return result
 
     def _modify_or_drop_synonym_term_after_id_set_change(
         self, new_associated_id_sets: AssociatedIdSets, synonym_term: SynonymTerm
@@ -539,12 +518,6 @@ class CurationProcessor:
                     behaviours_requiring_database_entry.add(action.behaviour)
             elif action.behaviour is SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
                 self._drop_synonym_term(term_norm)
-            elif action.behaviour is SynonymTermBehaviour.DROP_ID_SET_FROM_SYNONYM_TERM:
-                assert action.associated_id_sets is not None
-                self._drop_id_set_from_synonym_term(
-                    action.associated_id_sets,
-                    term_norm=term_norm,
-                )
             elif (
                 action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
                 or action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
@@ -601,46 +574,6 @@ class CurationProcessor:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
         return dropped_ids
 
-    def _drop_id_set_from_synonym_term(
-        self, equivalent_id_sets_to_drop: AssociatedIdSets, term_norm: NormalisedSynonymStr
-    ):
-        """Remove all the id sets in equivalent_id_sets_to_drop from a :class:`.SynonymTerm`.
-
-        :param equivalent_id_sets_to_drop: ids that should be removed from the :class:`.SynonymTerm`
-        :param term_norm: key of term to remove
-        :return:
-        """
-        target_term_to_modify = self._terms_by_term_norm[term_norm]
-        for equiv_id_set_to_drop in equivalent_id_sets_to_drop:
-            if equiv_id_set_to_drop in target_term_to_modify.associated_id_sets:
-                drop_equivalent_id_set_from_synonym_term_result = (
-                    self._drop_equivalent_id_set_from_synonym_term(term_norm, equiv_id_set_to_drop)
-                )
-                if (
-                    drop_equivalent_id_set_from_synonym_term_result
-                    is CurationModificationResult.ID_SET_MODIFIED
-                ):
-                    logger.debug(
-                        "dropped an EquivalentIdSet containing an id from %s for key %s for %s",
-                        equivalent_id_sets_to_drop,
-                        term_norm,
-                        self.parser_name,
-                    )
-                else:
-                    logger.debug(
-                        "dropped a SynonymTerm containing an id from %s for key %s for %s",
-                        equivalent_id_sets_to_drop,
-                        term_norm,
-                        self.parser_name,
-                    )
-            else:
-                logger.warning(
-                    "%s was asked to remove ids %s from a SynonymTerm (key: <%s>), but the ids were not found on this term",
-                    self.parser_name,
-                    equiv_id_set_to_drop,
-                    term_norm,
-                )
-
     def _attempt_to_add_database_entry_for_curation(
         self,
         curation_term_norm: NormalisedSynonymStr,
@@ -680,8 +613,8 @@ class CurationProcessor:
             "term_norm": curation_term_norm,
             "ids": curation_associated_id_set,
         }
-        # look up the term norm in the db
 
+        # look up the term norm in the db
         maybe_existing_synonym_term = self._terms_by_term_norm.get(curation_term_norm)
 
         if maybe_existing_synonym_term is not None:
