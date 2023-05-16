@@ -269,6 +269,10 @@ class KazuAbbreviationDetector:
         ) = self._build_matcher_and_identify_source_entities(
             section_and_long_to_short_candidates, section_to_ents_by_char_index
         )
+        if len(global_matcher) == 0:
+            # we haven't found any abbreviations to detect,
+            # so the next step can't have any effect, so skip it.
+            return
         self._find_abbreviations_and_override_entities(
             global_matcher,
             long_form_string_to_source_ents,
