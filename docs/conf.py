@@ -172,7 +172,7 @@ def linkcode_resolve(domain, info):
 
 # raise failed links as warning, except for the ignored ones below
 nitpicky = True
-autodoc_type_aliases = {"AgentAssignment": "AgentAssignment"}
+
 
 # for custom cross_reference_override extension
 cross_reference_override_mapping = {
