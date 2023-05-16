@@ -256,7 +256,7 @@ class KazuAbbreviationDetector:
         self.matcher = Matcher(nlp.vocab)
         self.matcher.add("parenthesis", [[{"ORTH": "("}, {"OP": "+"}, {"ORTH": ")"}]])
 
-    def __call__(self, document: Document):
+    def __call__(self, document: Document) -> None:
         (
             section_and_long_to_short_candidates,
             section_to_ents_by_char_index,
