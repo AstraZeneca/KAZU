@@ -28,5 +28,6 @@ kazu.modelling.ontology\_preprocessing
    :recursive:
 
    kazu.modelling.ontology_preprocessing.base
+   kazu.modelling.ontology_preprocessing.parsers
    kazu.modelling.ontology_preprocessing.synonym_generation
 

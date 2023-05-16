@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.linking" href="kazu.modelling.linking.html" /><link rel="prev" title="kazu.modelling.language.language_phenomena" href="kazu.modelling.language.language_phenomena.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
         <title>kazu.modelling.language.string_similarity_scorers - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -216,6 +216,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.parsers.html">kazu.modelling.ontology_preprocessing.parsers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
@@ -296,6 +297,11 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Site Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module Index</a></li>
+</ul>
 
 </div>
 </div>
@@ -372,8 +378,25 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.language.string_similarity_scorers.</span></span><span class="sig-name descname"><span class="pre">BooleanStringSimilarityScorer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L24-L26"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringSimilarityScorer</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L25-L26"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../../../miniforge3/envs/kazu_39/lib/python3.9/typing.py#L1087-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../../../../../Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/typing.py#L1077-L1079"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -383,6 +406,23 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.language.string_similarity_scorers.</span></span><span class="sig-name descname"><span class="pre">EntityNounModifierStringSimilarityScorer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L71-L84"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanStringSimilarityScorer</span></code></a></p>
 <p>checks all modifier phrases in reference_term are represented in term_norm</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L79-L84"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noun_modifier_phrases</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L76-L77"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer.__init__" title="Permalink to this definition">#</a></dt>
@@ -400,6 +440,23 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.language.string_similarity_scorers.</span></span><span class="sig-name descname"><span class="pre">EntitySubtypeStringSimilarityScorer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L43-L68"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanStringSimilarityScorer</span></code></a></p>
 <p>checks all TYPE x mentions in match norm are represented in term norm</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer.__call__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L53-L68"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer.numeric_class_phrases">
 <span class="sig-name descname"><span class="pre">numeric_class_phrases</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile('TYPE</span> <span class="pre">(?:I|[0-9]+)')</span></em><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer.numeric_class_phrases" title="Permalink to this definition">#</a></dt>
@@ -412,6 +469,23 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.language.string_similarity_scorers.</span></span><span class="sig-name descname"><span class="pre">NumberMatchStringSimilarityScorer</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L29-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanStringSimilarityScorer</span></code></a></p>
 <p>checks all numbers in reference_term are represented in term_norm</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer.__call__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L36-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer.number_finder">
 <span class="sig-name descname"><span class="pre">number_finder</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile('[0-9]+')</span></em><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer.number_finder" title="Permalink to this definition">#</a></dt>
@@ -425,6 +499,23 @@
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer" title="kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringSimilarityScorer</span></code></a></p>
 <p>uses rapid fuzz to calculate string similarity. Note, if the token count &gt;4 and reference_term has
 more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.RapidFuzzStringSimilarityScorer.__call__">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L93-L98"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.RapidFuzzStringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -433,13 +524,30 @@ more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>note this is an implementation of the StringSimilarityScorer Protocol, but as a Singleton we can’t inherit it</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L117-L146"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sapbert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L106-L115"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sapbert</strong> (<a class="reference internal" href="kazu.modelling.linking.sapbert.train.html#kazu.modelling.linking.sapbert.train.PLSapbertModel" title="kazu.modelling.linking.sapbert.train.PLSapbertModel"><em>PLSapbertModel</em></a>) – model to use</p></li>
-<li><p><strong>trainer</strong> (<em>Trainer</em>) – trainer to use</p></li>
+<li><p><strong>trainer</strong> (<a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.trainer.trainer.Trainer.html#lightning.pytorch.trainer.trainer.Trainer" title="(in PyTorch Lightning v2.0.2)"><em>Trainer</em></a>) – trainer to use</p></li>
 <li><p><strong>cache_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – cache size, to prevent repeated calls to sapbert for the same string</p></li>
 </ul>
 </dd>
@@ -454,8 +562,25 @@ more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>calculates a NumericMetric based on a string match or a normalised string match and a normalised term</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_term</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/language/string_similarity_scorers.py#L20-L21"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>query_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../../../miniforge3/envs/kazu_39/lib/python3.9/typing.py#L1087-L1113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/../../../../../Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/typing.py#L1077-L1079"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -519,27 +644,36 @@ more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used</p>
             <ul>
 <li><a class="reference internal" href="#">kazu.modelling.language.string_similarity_scorers</a><ul>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">BooleanStringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">BooleanStringSimilarityScorer.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.BooleanStringSimilarityScorer.__init__"><code class="docutils literal notranslate"><span class="pre">BooleanStringSimilarityScorer.__init__()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">EntityNounModifierStringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">EntityNounModifierStringSimilarityScorer.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer.__init__"><code class="docutils literal notranslate"><span class="pre">EntityNounModifierStringSimilarityScorer.__init__()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">EntitySubtypeStringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">EntitySubtypeStringSimilarityScorer.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer.numeric_class_phrases"><code class="docutils literal notranslate"><span class="pre">EntitySubtypeStringSimilarityScorer.numeric_class_phrases</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">NumberMatchStringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">NumberMatchStringSimilarityScorer.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer.number_finder"><code class="docutils literal notranslate"><span class="pre">NumberMatchStringSimilarityScorer.number_finder</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.RapidFuzzStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">RapidFuzzStringSimilarityScorer</span></code></a></li>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.RapidFuzzStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">RapidFuzzStringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.RapidFuzzStringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">RapidFuzzStringSimilarityScorer.__call__()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">SapbertStringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">SapbertStringSimilarityScorer.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.SapbertStringSimilarityScorer.__init__"><code class="docutils literal notranslate"><span class="pre">SapbertStringSimilarityScorer.__init__()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer"><code class="docutils literal notranslate"><span class="pre">StringSimilarityScorer</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__call__"><code class="docutils literal notranslate"><span class="pre">StringSimilarityScorer.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.language.string_similarity_scorers.StringSimilarityScorer.__init__"><code class="docutils literal notranslate"><span class="pre">StringSimilarityScorer.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -555,9 +689,6 @@ more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used</p>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

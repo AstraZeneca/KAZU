@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.modelling.distillation.tiny_transformers" href="kazu.modelling.distillation.tiny_transformers.html" /><link rel="prev" title="kazu.modelling.distillation.metrics" href="kazu.modelling.distillation.metrics.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
         <title>kazu.modelling.distillation.models - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -216,6 +216,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.parsers.html">kazu.modelling.ontology_preprocessing.parsers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
@@ -295,6 +296,11 @@
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Site Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module Index</a></li>
 </ul>
 
 </div>
@@ -398,8 +404,8 @@ prevent repeated processing</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tokenizer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><em>PreTrainedTokenizer</em><em>, </em><em>PreTrainedTokenizerFast</em><em>]</em>) – typically created from AutoTokenizer.from_pretrained</p></li>
-<li><p><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><em>InputExample</em><em>]</em>) – a list of InputExample, typically created from a
+<li><p><strong>tokenizer</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.PreTrainedTokenizer" title="(in transformers vmain)"><em>PreTrainedTokenizer</em></a><em> | </em><a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast" title="(in transformers vmain)"><em>PreTrainedTokenizerFast</em></a>) – typically created from AutoTokenizer.from_pretrained</p></li>
+<li><p><strong>examples</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a><em>]</em>) – a list of InputExample, typically created from a
 <a class="reference internal" href="kazu.modelling.distillation.dataprocessor.html#kazu.modelling.distillation.dataprocessor.NerProcessor" title="kazu.modelling.distillation.dataprocessor.NerProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">kazu.modelling.distillation.dataprocessor.NerProcessor</span></code></a></p></li>
 <li><p><strong>label_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – str to int mapping of labels</p></li>
 <li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The maximum number of tokens per instance that the model can handle.
@@ -414,7 +420,7 @@ Inputs longer than max_length value will be truncated.</p></li>
 <span class="sig-name descname"><span class="pre">convert_single_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ex_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">example</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/models.py#L123-L185"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.models.NerDataset.convert_single_example" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>example</strong> (<em>InputExample</em>) – </p>
+<dd class="field-odd"><p><strong>example</strong> (<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>]</p>
@@ -443,11 +449,11 @@ Inputs longer than max_length value will be truncated.</p></li>
 <li><p><strong>accumulate_grad_batches</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>max_epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>label_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>, </em><em>ListConfig</em><em>]</em>) – </p></li>
+<li><p><strong>label_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em> | </em><em>ListConfig</em>) – </p></li>
 <li><p><strong>student_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>teacher_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>num_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
@@ -464,7 +470,7 @@ Inputs longer than max_length value will be truncated.</p></li>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<em>InputExample</em>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -475,7 +481,7 @@ Inputs longer than max_length value will be truncated.</p></li>
 <dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#train-dataloader" title="(in PyTorch Lightning v2.0.2)"><span class="xref std std-ref">LightningModule.train_dataloader</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -486,7 +492,7 @@ Inputs longer than max_length value will be truncated.</p></li>
 <dd><p>Implementation of <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#val-dataloader" title="(in PyTorch Lightning v2.0.2)"><span class="xref std std-ref">LightningModule.val_dataloader</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><em>Sequence</em></a>[<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader" title="(in PyTorch v2.0)"><em>DataLoader</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -512,11 +518,11 @@ Inputs longer than max_length value will be truncated.</p></li>
 <li><p><strong>accumulate_grad_batches</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>max_epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>label_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>, </em><em>ListConfig</em><em>]</em>) – </p></li>
+<li><p><strong>label_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em> | </em><em>ListConfig</em>) – </p></li>
 <li><p><strong>student_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>teacher_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>num_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
@@ -584,11 +590,11 @@ Inputs longer than max_length value will be truncated.</p></li>
 <li><p><strong>accumulate_grad_batches</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>max_epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
-<li><p><strong>label_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>, </em><em>ListConfig</em><em>]</em>) – </p></li>
+<li><p><strong>label_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em> | </em><em>ListConfig</em>) – </p></li>
 <li><p><strong>student_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>teacher_model_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>num_workers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
-<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
@@ -619,7 +625,7 @@ Inputs longer than max_length value will be truncated.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.models.TaskSpecificDistillation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.distillation.models.</span></span><span class="sig-name descname"><span class="pre">TaskSpecificDistillation</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/models.py#L188-L289"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.models.TaskSpecificDistillation" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.core.LightningModule.html#lightning.pytorch.core.LightningModule" title="(in PyTorch Lightning v2.0.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.distillation.models.TaskSpecificDistillation.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warmup_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_decay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accumulate_grad_batches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/distillation/models.py#L189-L234"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.distillation.models.TaskSpecificDistillation.__init__" title="Permalink to this definition">#</a></dt>
@@ -660,7 +666,7 @@ Inputs longer than max_length value will be truncated.</p></li>
 <dd class="field-odd"><p></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<em>InputExample</em>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://huggingface.co/docs/transformers/main/en/main_classes/processors#transformers.InputExample" title="(in transformers vmain)"><em>InputExample</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -772,9 +778,6 @@ Inputs longer than max_length value will be truncated.</p></li>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

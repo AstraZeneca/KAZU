@@ -5,6 +5,12 @@ kazu.data.data
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      AssociatedIdSets
+   
    
 
    
@@ -19,7 +25,7 @@ kazu.data.data
    
       AutoNameEnum
       CharSpan
-      Curation
+      CuratedTerm
       DisambiguationConfidence
       Document
       DocumentJsonUtils

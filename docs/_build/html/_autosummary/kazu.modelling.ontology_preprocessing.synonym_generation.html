@@ -3,12 +3,12 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.pipeline" href="kazu.pipeline.html" /><link rel="prev" title="kazu.modelling.ontology_preprocessing.base" href="kazu.modelling.ontology_preprocessing.base.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.pipeline" href="kazu.pipeline.html" /><link rel="prev" title="kazu.modelling.ontology_preprocessing.parsers" href="kazu.modelling.ontology_preprocessing.parsers.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
         <title>kazu.modelling.ontology_preprocessing.synonym_generation - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -216,6 +216,7 @@
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.parsers.html">kazu.modelling.ontology_preprocessing.parsers</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
@@ -296,6 +297,11 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Site Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module Index</a></li>
+</ul>
 
 </div>
 </div>
@@ -372,11 +378,29 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">CombinatorialSynonymGenerator</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L58-L85"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">CombinatorialSynonymGenerator</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L63-L88"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonyms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L67-L88"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>For every permutation of modifiers, generate a list of syns, then aggregate at the end</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>synonyms</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a><em>]</em>) – Set[SynonymTerm] to generate from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set[SynonymTerm] of generated synonyms. Note, the field values of the generated synonyms will
+be the same as the seed synonym, apart from SynonymTerm.terms, which contains the generated synonyms</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_generators</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L59-L60"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_generators</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L64-L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>synonym_generators</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><em>SynonymGenerator</em></a><em>]</em>) – </p>
@@ -388,7 +412,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">GreekSymbolSubstitution</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L174-L195"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">GreekSymbolSubstitution</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L167-L188"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.GreekSymbolSubstitution.ALL_SUBS">
@@ -419,11 +443,11 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SeparatorExpansion</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L90-L141"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SeparatorExpansion</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L93-L139"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spacy_pipeline</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L91-L95"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spacy_pipeline</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L94-L98"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>spacy_pipeline</strong> (<em>Language</em>) – </p>
@@ -433,13 +457,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L97-L141"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L100-L139"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SeparatorExpansion.call" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -448,28 +472,28 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SpellingVariationReplacement</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L297-L320"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SpellingVariationReplacement</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L280-L298"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a></p>
 <p>Generate additional synonyms using a mapping of (known) synonyms to a list of variations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L300-L305"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L283-L288"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L307-L320"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L290-L298"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SpellingVariationReplacement.call" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -478,18 +502,18 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">StopWordRemover</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L144-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">StopWordRemover</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L142-L164"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a></p>
 <p>remove stopwords from a string</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover.call">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L151-L171"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover.call" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L149-L164"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover.call" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -503,16 +527,16 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">StringReplacement</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L198-L255"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">StringReplacement</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L191-L243"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replacement_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digit_aware_replacement_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_greek</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L199-L207"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replacement_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digit_aware_replacement_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_greek</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L192-L200"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>digit_aware_replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>digit_aware_replacement_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
 <li><p><strong>include_greek</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
 </ul>
 </dd>
@@ -521,13 +545,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L209-L255"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L202-L243"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement.call" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -536,18 +560,18 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SuffixReplacement</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L258-L294"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SuffixReplacement</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L246-L277"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a></p>
 <p>Interchange all suffixes within a provided set to produce new synonyms.</p>
 <p>Note, this is expected to be noisy, and for most of the generated synonyms not to be valid
 words. This class is present as a generation step for high recall, with curation of synonyms
-expected later (see <a class="reference internal" href="../curating_for_explosion.html#curating-for-explosion"><span class="std std-ref">Curating a knowledge base for NER and Linking</span></a>).</p>
+expected later (see <a class="reference internal" href="../curating_a_knowledgebase.html#curating-for-explosion"><span class="std std-ref">Curating a knowledge base for NER and Linking</span></a>).</p>
 <p>In particular, note that this also doesn’t check for the longest matching suffix - e.g. for a
 synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new synonyms ‘anaemic’ and
 ‘amaemiic’ will both be generated.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffixes</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L270-L271"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffixes</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L258-L259"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.__init__" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>suffixes</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.11)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p>
@@ -557,13 +581,13 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.call">
-<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L273-L294"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.call" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L261-L277"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SuffixReplacement.call" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -572,17 +596,31 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SynonymGenerator</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L20-L55"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.modelling.ontology_preprocessing.synonym_generation.</span></span><span class="sig-name descname"><span class="pre">SynonymGenerator</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L20-L60"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.call">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L21-L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.call" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_terms</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L25-L60"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Call self as a function.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>synonym</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>) – </p>
+<dd class="field-odd"><p><strong>synonym_terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a><em>[</em><a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.SynonymTerm" title="kazu.data.data.SynonymTerm"><em>SynonymTerm</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.call">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synonym_str</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_preprocessing/synonym_generation.py#L21-L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.call" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>synonym_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><em>Set</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -605,14 +643,14 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="kazu.modelling.ontology_preprocessing.base.html">
+          <a class="prev-page" href="kazu.modelling.ontology_preprocessing.parsers.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">kazu.modelling.ontology_preprocessing.base</div>
+                <div class="title">kazu.modelling.ontology_preprocessing.parsers</div>
                 
               </div>
             </a>
@@ -648,6 +686,7 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
             <ul>
 <li><a class="reference internal" href="#">kazu.modelling.ontology_preprocessing.synonym_generation</a><ul>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator"><code class="docutils literal notranslate"><span class="pre">CombinatorialSynonymGenerator</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__call__"><code class="docutils literal notranslate"><span class="pre">CombinatorialSynonymGenerator.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator.__init__"><code class="docutils literal notranslate"><span class="pre">CombinatorialSynonymGenerator.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -685,6 +724,7 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
 </ul>
 </li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator"><code class="docutils literal notranslate"><span class="pre">SynonymGenerator</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.__call__"><code class="docutils literal notranslate"><span class="pre">SynonymGenerator.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.modelling.ontology_preprocessing.synonym_generation.SynonymGenerator.call"><code class="docutils literal notranslate"><span class="pre">SynonymGenerator.call()</span></code></a></li>
 </ul>
 </li>
@@ -700,9 +740,6 @@ synonym ‘anaemia’ and the suffixes ‘ia’, ‘a’ and ‘ic’, the new s
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

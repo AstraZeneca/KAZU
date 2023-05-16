@@ -3,12 +3,12 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Curating a knowledge base for NER and Linking" href="curating_for_explosion.html" /><link rel="prev" title="Visualising results in Label Studio" href="label_studio_integration.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Curating a knowledge base for NER and Linking" href="curating_a_knowledgebase.html" /><link rel="prev" title="Visualising results in Label Studio" href="label_studio_integration.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
         <title>The OntologyParser - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -216,6 +216,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.parsers.html">kazu.modelling.ontology_preprocessing.parsers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
@@ -295,6 +296,11 @@
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Site Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
 </ul>
 
 </div>
@@ -409,7 +415,7 @@ In this case, you can override this behaviour with <a class="reference internal"
 <section id="writing-a-custom-parser">
 <h2>Writing a Custom Parser<a class="headerlink" href="#writing-a-custom-parser" title="Permalink to this heading">#</a></h2>
 <p>Say you want to make a parser for a new datasource, (perhaps for NER or as a new linking target). To do this, you need to write an <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser" title="kazu.modelling.ontology_preprocessing.base.OntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">OntologyParser</span></code></a>.
-Fortunately, this is generally quite easy to do. Let’s take the example of the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser" title="kazu.modelling.ontology_preprocessing.base.ChemblOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemblOntologyParser</span></code></a>.</p>
+Fortunately, this is generally quite easy to do. Let’s take the example of the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.parsers.html#kazu.modelling.ontology_preprocessing.parsers.ChemblOntologyParser" title="kazu.modelling.ontology_preprocessing.parsers.ChemblOntologyParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemblOntologyParser</span></code></a>.</p>
 <p>There are two methods you need to override: <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.parse_to_dataframe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OntologyParser.parse_to_dataframe()</span></code></a> and <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OntologyParser.find_kb()</span></code></a>. Let’s look at the first of these:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sqlite3</span>
 
@@ -425,20 +431,24 @@ Fortunately, this is generally quite easy to do. Let’s take the example of the
 
 
 <span class="k">def</span> <span class="nf">parse_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    the objective of this method is to create a long, thin pandas dataframe of terms and associated metadata.</span>
-<span class="sd">    We need at the very least, to extract an id and a default label. Normally, we&#39;d also be looking to extract any</span>
-<span class="sd">    synonyms and the type of mapping as well</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The objective of this method is to create a long, thin pandas dataframe of terms and</span>
+<span class="sd">    associated metadata.</span>
+
+<span class="sd">    We need at the very least, to extract an id and a default label. Normally, we&#39;d also be</span>
+<span class="sd">    looking to extract any synonyms and the type of mapping as well.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># fortunately, Chembl comes as an sqlite DB, which lends itself very well to this tabular structure</span>
+    <span class="c1"># fortunately, Chembl comes as an sqlite DB,</span>
+    <span class="c1"># which lends itself very well to this tabular structure</span>
     <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_path</span><span class="p">)</span>
     <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-<span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, synonyms AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, syn_type AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
+<span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, synonyms AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">,</span>
+<span class="s2">            syn_type AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
 <span class="s2">        FROM molecule_dictionary AS md</span>
 <span class="s2">                 JOIN molecule_synonyms ms ON md.molregno = ms.molregno</span>
 <span class="s2">        UNION ALL</span>
-<span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, &quot;pref_name&quot; AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
+<span class="s2">        SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">,</span>
+<span class="s2">            &#39;pref_name&#39; AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
 <span class="s2">        FROM molecule_dictionary</span>
 <span class="s2">    &quot;&quot;&quot;</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
@@ -452,29 +462,30 @@ Fortunately, this is generally quite easy to do. Let’s take the example of the
 </div>
 <p>Secondly, we need to write the <a class="reference internal" href="_autosummary/kazu.modelling.ontology_preprocessing.base.html#kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb" title="kazu.modelling.ontology_preprocessing.base.OntologyParser.find_kb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OntologyParser.find_kb()</span></code></a> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_kb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    in our case, this is very simple, as everything in the Chembl DB has a chembl based identifier</span>
-<span class="sd">    Other ontologies may use composite identifiers, i.e. MONDO could contain native MONDO_xxxxx identifiers</span>
-<span class="sd">    or HP_xxxxxxx identifiers. In this scenario, we&#39;d need to parse the &#39;string&#39; parameter of this method</span>
-<span class="sd">    to extract the relevant KB identifier</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;In our case, this is simple, as everything in the Chembl DB has a chembl identifier.</span>
+
+<span class="sd">    Other ontologies may use composite identifiers, e.g. MONDO contains native MONDO_xxxxx</span>
+<span class="sd">    identifiers as well as HP_xxxxxxx identifiers. In this scenario, we&#39;d need to parse the</span>
+<span class="sd">    &#39;string&#39; parameter of this method to extract the relevant KB identifier.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;CHEMBL&quot;</span>
 </pre></div>
 </div>
 <p>The full class looks like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChemblOntologyParser</span><span class="p">(</span><span class="n">OntologyParser</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="nf">find_kb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;CHEMBL&quot;</span>
 
     <span class="k">def</span> <span class="nf">parse_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_path</span><span class="p">)</span>
         <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-<span class="s2">            SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, synonyms AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, syn_type AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
+<span class="s2">            SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, synonyms AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">,</span>
+<span class="s2">                syn_type AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
 <span class="s2">            FROM molecule_dictionary AS md</span>
 <span class="s2">                     JOIN molecule_synonyms ms ON md.molregno = ms.molregno</span>
 <span class="s2">            UNION ALL</span>
-<span class="s2">            SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">, &quot;pref_name&quot; AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
+<span class="s2">            SELECT chembl_id AS </span><span class="si">{</span><span class="n">IDX</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">DEFAULT_LABEL</span><span class="si">}</span><span class="s2">, pref_name AS </span><span class="si">{</span><span class="n">SYN</span><span class="si">}</span><span class="s2">,</span>
+<span class="s2">                &#39;pref_name&#39; AS </span><span class="si">{</span><span class="n">MAPPING_TYPE</span><span class="si">}</span>
 <span class="s2">            FROM molecule_dictionary</span>
 <span class="s2">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
@@ -487,13 +498,16 @@ Fortunately, this is generally quite easy to do. Let’s take the example of the
 </pre></div>
 </div>
 <p>Finally, when we want to use our new parser, we need to give it information about what entity class it is associated with:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># we need a string scorer to resolve similar terms. Here, we use a trivial example for brevity</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># We need a string scorer to resolve similar terms.</span>
+<span class="c1"># Here, we use a trivial example for brevity.</span>
 <span class="n">string_scorer</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">string_1</span><span class="p">,</span> <span class="n">string_2</span><span class="p">:</span> <span class="mf">0.75</span>
 <span class="n">parser</span> <span class="o">=</span> <span class="n">ChemblOntologyParser</span><span class="p">(</span>
-    <span class="n">in_path</span><span class="o">=</span><span class="s1">&#39;path to chembl DB goes here&#39;</span><span class="p">,</span>
-    <span class="n">entity_class</span><span class="o">=</span><span class="s1">&#39;drug&#39;</span> <span class="c1"># if used in entity linking, entities with class &#39;drug&#39; will be associated with this parser.</span>
-    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CHEMBL&#39;</span> <span class="c1"># a globally unique name for the parser</span>
-    <span class="n">string_scorer</span> <span class="o">=</span> <span class="n">string_scorer</span>
+    <span class="n">in_path</span><span class="o">=</span><span class="s2">&quot;path to chembl DB goes here&quot;</span><span class="p">,</span>
+    <span class="c1"># if used in entity linking, entities with class &#39;drug&#39;</span>
+    <span class="c1"># will be associated with this parser</span>
+    <span class="n">entity_class</span><span class="o">=</span><span class="s2">&quot;drug&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CHEMBL&quot;</span><span class="p">,</span>  <span class="c1"># a globally unique name for the parser</span>
+    <span class="n">string_scorer</span><span class="o">=</span><span class="n">string_scorer</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -508,7 +522,7 @@ refer to the API documentation.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="curating_for_explosion.html">
+          <a class="next-page" href="curating_a_knowledgebase.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
@@ -572,9 +586,6 @@ refer to the API documentation.</p>
     </aside>
   </div>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>

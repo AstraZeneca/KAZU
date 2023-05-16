@@ -57,7 +57,9 @@ Processing your first document
     cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("conf")
 
 
-    @hydra.main(version_base=HYDRA_VERSION_BASE, config_path=str(cdir), config_name="config")
+    @hydra.main(
+        version_base=HYDRA_VERSION_BASE, config_path=str(cdir), config_name="config"
+    )
     def kazu_test(cfg):
         pipeline: Pipeline = instantiate(cfg.Pipeline)
         text = "EGFR mutations are often implicated in lung cancer"
@@ -82,10 +84,8 @@ Processing your first document
 
     from hydra import initialize_config_dir, compose
 
-    with initialize_config_dir(
-            version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)
-        ):
-            cfg = compose(config_name="config")
+    with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)):
+        cfg = compose(config_name="config")
 
     kazu_test(cfg)
 

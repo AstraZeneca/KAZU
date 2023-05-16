@@ -15,6 +15,7 @@ kazu.modelling.ontology\_preprocessing.base
    
       load_curated_terms
       load_global_actions
+      select_smallest_associated_id_set_by_equiv_id_set_size_and_id_count
    
    
 
@@ -24,28 +25,9 @@ kazu.modelling.ontology\_preprocessing.base
 
    .. autosummary::
    
-      ATCDrugClassificationParser
-      BiologicalProcessGeneOntologyParser
-      CLOOntologyParser
-      CLOntologyParser
-      CellosaurusOntologyParser
-      CellularComponentGeneOntologyParser
-      ChemblOntologyParser
-      EnsemblOntologyParser
-      GeneOntologyParser
-      HGNCGeneFamilyParser
-      JsonLinesOntologyParser
-      MeddraOntologyParser
-      MolecularFunctionGeneOntologyParser
-      MondoOntologyParser
+      CurationModificationResult
+      CurationProcessor
       OntologyParser
-      OpenTargetsDiseaseOntologyParser
-      OpenTargetsMoleculeOntologyParser
-      OpenTargetsTargetOntologyParser
-      RDFGraphParser
-      StatoParser
-      TabularOntologyParser
-      UberonOntologyParser
    
    
 

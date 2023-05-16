@@ -17,7 +17,6 @@ kazu.modelling.database.in\_memory\_db
 
    .. autosummary::
    
-      DBModificationResult
       MetadataDatabase
       SynonymDatabase
    

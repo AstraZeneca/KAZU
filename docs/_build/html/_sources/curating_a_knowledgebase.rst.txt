@@ -25,15 +25,15 @@ In Kazu, we take the following approach:
 2. Build a pipeline from this list, execute this pipeline over a large corpora of target data, and explore the results to get a sense of
    which terms are 'noisy'. We recommend loading json serialised versions of :class:`kazu.data.data.Document` into a MongoDB instance for this,
    as this makes it very easy to navigate the data.
-3. These hits can now be curated, by forming instance of :class:`kazu.data.data.Curation`. This class is a container for
+3. These hits can now be curated, by forming instance of :class:`kazu.data.data.CuratedTerm`. This class is a container for
    :class:`kazu.data.data.SynonymTermAction`, which offers a range of :class:`kazu.data.data.SynonymTermBehaviour`\s,
    such as 'use this string NER and linking', or 'remove this string as a linking target. See the API documentation
-   of :class:`kazu.data.data.Curation` for examples and details.
+   of :class:`kazu.data.data.CuratedTerm` for examples and details.
 4. You can also create an instance of :class:`kazu.data.data.GlobalParserActions` to modify the behaviour of a
    :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in a 'global' sense, Again, see the API documentation for this.
 
 We provide some curations for common ontologies in the default model pack, within the 'curations' subdirectory, which are then
 passed to the constructor of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`. When
 :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases` is called, these curation triggers are activated.
-Note that this method also returns a 'cleaned' list of :class:`kazu.data.data.Curation`, which can then be used for dictionary based NER
+Note that this method also returns a 'cleaned' list of :class:`kazu.data.data.CuratedTerm`, which can then be used for dictionary based NER
 (as is used for :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`\ ).

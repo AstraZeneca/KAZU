@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.steps.ner.tokenized_word_processor" href="kazu.steps.ner.tokenized_word_processor.html" /><link rel="prev" title="kazu.steps.ner.seth" href="kazu.steps.ner.seth.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
         <title>kazu.steps.ner.spacy_ner - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -216,6 +216,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.parsers.html">kazu.modelling.ontology_preprocessing.parsers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
@@ -296,6 +297,11 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Site Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module Index</a></li>
+</ul>
 
 </div>
 </div>
@@ -355,6 +361,32 @@
 <dd><p>Bases: <a class="reference internal" href="kazu.steps.step.html#kazu.steps.step.Step" title="kazu.steps.step.Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Step</span></code></a></p>
 <p>A simple spacy NER implementation. Runs a spacy pipeline over document sections, expecting the
 resulting spacy doc to have a populated doc.ents field.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kazu.steps.ner.spacy_ner.SpacyNerStep.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/ner/spacy_ner.py#L24-L44"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.spacy_ner.SpacyNerStep.__call__" title="Permalink to this definition">#</a></dt>
+<dd><p>Process documents and respond with processed and failed documents.</p>
+<p>Note that many steps will be decorated by <a class="reference internal" href="kazu.steps.step.html#kazu.steps.step.document_iterating_step" title="kazu.steps.step.document_iterating_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_iterating_step()</span></code></a>
+or <a class="reference internal" href="kazu.steps.step.html#kazu.steps.step.document_batch_step" title="kazu.steps.step.document_batch_step"><code class="xref py py-func docutils literal notranslate"><span class="pre">document_batch_step()</span></code></a> which will modify the ‘original’
+<code class="docutils literal notranslate"><span class="pre">__call__</span></code> function signature to match the expected signature for a step, as the
+decorators handle the exception/failed documents logic for you.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>docs</strong> – </p></li>
+<li><p><strong>self</strong> (<a class="reference internal" href="kazu.steps.step.html#kazu.steps.step.Self" title="kazu.steps.step.Self"><em>Self</em></a>) – </p></li>
+<li><p><strong>doc</strong> (<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The first element is all the provided docs (now modified by the processing), the
+second is the docs that failed to (fully) process correctly.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference internal" href="kazu.data.data.html#kazu.data.data.Document" title="kazu.data.data.Document"><em>Document</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.steps.ner.spacy_ner.SpacyNerStep.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spacy_pipeline</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/steps/ner/spacy_ner.py#L15-L22"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.steps.ner.spacy_ner.SpacyNerStep.__init__" title="Permalink to this definition">#</a></dt>
@@ -431,6 +463,7 @@ install it from this path.</p></li>
             <ul>
 <li><a class="reference internal" href="#">kazu.steps.ner.spacy_ner</a><ul>
 <li><a class="reference internal" href="#kazu.steps.ner.spacy_ner.SpacyNerStep"><code class="docutils literal notranslate"><span class="pre">SpacyNerStep</span></code></a><ul>
+<li><a class="reference internal" href="#kazu.steps.ner.spacy_ner.SpacyNerStep.__call__"><code class="docutils literal notranslate"><span class="pre">SpacyNerStep.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#kazu.steps.ner.spacy_ner.SpacyNerStep.__init__"><code class="docutils literal notranslate"><span class="pre">SpacyNerStep.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -446,9 +479,6 @@ install it from this path.</p></li>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>

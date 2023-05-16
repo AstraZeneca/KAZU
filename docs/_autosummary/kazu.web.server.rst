@@ -15,6 +15,7 @@ kazu.web.server
    
       get_id_log_prefix_if_available
       get_request_id
+      log_request_to_path_with_prefix
       openapi_no_auth
       start
       stop
@@ -27,8 +28,10 @@ kazu.web.server
 
    .. autosummary::
    
+      DocumentCollection
       SectionedWebDocument
       SimpleWebDocument
+      SingleEntityDocumentConverter
    
    
 

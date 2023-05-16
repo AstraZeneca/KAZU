@@ -34,6 +34,12 @@ kazu.pipeline.pipeline
 
    
    
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      PipelineValueError
+   
    
 
 

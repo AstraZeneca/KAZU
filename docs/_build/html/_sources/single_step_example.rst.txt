@@ -1,10 +1,14 @@
 .. testcode::
 
     from kazu.data.data import Document, Entity
-    from kazu.steps.document_post_processing.abbreviation_finder import AbbreviationFinderStep
+    from kazu.steps.document_post_processing.abbreviation_finder import (
+        AbbreviationFinderStep,
+    )
 
     # creates a document with a single section
-    doc = Document.create_simple_document("Epidermal Growth Factor Receptor (EGFR) is a gene.")
+    doc = Document.create_simple_document(
+        "Epidermal Growth Factor Receptor (EGFR) is a gene."
+    )
     # create an Entity for the span "Epidermal Growth Factor Receptor"
     entity = Entity.load_contiguous_entity(
         # start and end are the character indices for the entity

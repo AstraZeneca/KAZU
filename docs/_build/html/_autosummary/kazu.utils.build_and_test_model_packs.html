@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="kazu.utils.caching" href="kazu.utils.caching.html" /><link rel="prev" title="kazu.utils.abbreviation_detector" href="kazu.utils.abbreviation_detector.html" />
 
-    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
         <title>kazu.utils.build_and_test_model_packs - Kazu documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -143,7 +143,7 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand centered" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/kazu_logo.png" alt="Logo"/>
@@ -164,7 +164,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../datamodel.html">Kazu Data Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../label_studio_integration.html">Visualising results in Label Studio</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ontology_parser.html">The OntologyParser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../curating_for_explosion.html">Curating a knowledge base for NER and Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../curating_a_knowledgebase.html">Curating a knowledge base for NER and Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scaling_kazu.html">Scaling with Ray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kazu_webservice.html">Kazu as a WebService</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -216,6 +216,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.html">kazu.modelling.ontology_preprocessing</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.base.html">kazu.modelling.ontology_preprocessing.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.parsers.html">kazu.modelling.ontology_preprocessing.parsers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="kazu.modelling.ontology_preprocessing.synonym_generation.html">kazu.modelling.ontology_preprocessing.synonym_generation</a></li>
 </ul>
 </li>
@@ -295,6 +296,11 @@
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Site Index</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module Index</a></li>
 </ul>
 
 </div>
@@ -454,7 +460,7 @@ it’s not available to set when instantiating the class.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">ModelPackBuilder</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L53-L268"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">ModelPackBuilder</span></span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L53-L267"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.__init__">
@@ -472,12 +478,12 @@ than instantiating this object directly, one should instead use
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>logging_config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – passed to <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#logging.config.fileConfig" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">logging.config.fileConfig()</span></code></a></p></li>
+<li><p><strong>logging_config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em> | </em><em>None</em>) – passed to <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#logging.config.fileConfig" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">logging.config.fileConfig()</span></code></a></p></li>
 <li><p><strong>target_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – path to model pack to process</p></li>
 <li><p><strong>kazu_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – version of kazu used to generate model pack</p></li>
 <li><p><strong>build_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – build the pack in this directory</p></li>
-<li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – if this pack requires the base model pack, specify path</p></li>
-<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – if this pack requires the base configuration, specify path</p></li>
+<li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em> | </em><em>None</em>) – if this pack requires the base model pack, specify path</p></li>
+<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em> | </em><em>None</em>) – if this pack requires the base configuration, specify path</p></li>
 <li><p><strong>skip_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – don’t run any tests</p></li>
 <li><p><strong>zip_pack</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – zip the pack at the end (requires the ‘zip’ CLI tool)</p></li>
 </ul>
@@ -492,7 +498,7 @@ than instantiating this object directly, one should instead use
 
 <dl class="py method">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_caches">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_caches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L248-L268"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_caches" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_caches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L248-L267"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.ModelPackBuilder.build_caches" title="Permalink to this definition">#</a></dt>
 <dd><p>execute all processed required to build model pack caches</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -580,19 +586,19 @@ also moves it to parent dir</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kazu.utils.build_and_test_model_packs.build_all_model_packs">
-<span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">build_all_model_packs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_pack_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logging_config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_parallel_build</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L276-L332"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.build_all_model_packs" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kazu.utils.build_and_test_model_packs.</span></span><span class="sig-name descname"><span class="pre">build_all_model_packs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maybe_base_model_pack_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maybe_base_configuration_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_pack_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logging_config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_parallel_build</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AstraZeneca/KAZU/blob/main/kazu/utils/build_and_test_model_packs.py#L275-L331"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kazu.utils.build_and_test_model_packs.build_all_model_packs" title="Permalink to this definition">#</a></dt>
 <dd><p>Build multiple model packs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – Path to the base model pack, if required</p></li>
-<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – Path to the base configuration, if required</p></li>
+<li><p><strong>maybe_base_model_pack_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em> | </em><em>None</em>) – Path to the base model pack, if required</p></li>
+<li><p><strong>maybe_base_configuration_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em> | </em><em>None</em>) – Path to the base configuration, if required</p></li>
 <li><p><strong>model_pack_paths</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – list of paths to model pack resources</p></li>
 <li><p><strong>zip_pack</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – should the packs be zipped at the end?</p></li>
 <li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a>) – directory to build model packs in</p></li>
 <li><p><strong>skip_tests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – don’t run any tests</p></li>
-<li><p><strong>logging_config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – passed to logging.config.fileConfig</p></li>
-<li><p><strong>max_parallel_build</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – build at most this many model packs simultaneously.
+<li><p><strong>logging_config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em> | </em><em>None</em>) – passed to logging.config.fileConfig</p></li>
+<li><p><strong>max_parallel_build</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – build at most this many model packs simultaneously.
 If None, use all available CPUs</p></li>
 </ul>
 </dd>
@@ -696,9 +702,6 @@ If None, use all available CPUs</p></li>
     </aside>
   </div>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
