@@ -40,15 +40,14 @@ class DictionaryIndex:
         """
 
         parser.populate_databases(force=False)
+        self.synonym_db: SynonymDatabase = SynonymDatabase()
+        self.synonyms_for_parser = self.synonym_db.get_all(parser.name)
         self.entity_class = parser.entity_class
         self.parser_name = parser.name
         self.metadata_db: MetadataDatabase = MetadataDatabase()
-        self.synonym_db: SynonymDatabase = SynonymDatabase()
         self.namespace = self.__class__.__name__
         self.boolean_scorers = boolean_scorers
-        self.vectorizer, self.tf_idf_matrix, self.synonyms_for_parser = self.build_index_cache(
-            parser.name
-        )
+        self.vectorizer, self.tf_idf_matrix = self.build_index_cache()
         self.synonym_list = list(self.synonyms_for_parser.values())
 
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
@@ -103,17 +102,18 @@ class DictionaryIndex:
                 else:
                     logger.debug("filtered term %s as failed boolean checks", term)
 
-    @kazu_disk_cache.memoize(ignore={0})
-    def build_index_cache(
-        self, parser_name: str
-    ) -> Tuple[TfidfVectorizer, numpy.ndarray, Dict[NormalisedSynonymStr, SynonymTerm]]:
-        """Build the cache for the index.
-
-        :param parser_name: required by the disk cache decorator
-        :return:
-        """
+    @kazu_disk_cache.memoize(ignore={0, 1})
+    def _build_index_cache(
+        self, synonyms_for_parser: Dict[NormalisedSynonymStr, SynonymTerm], _cache_key: int
+    ) -> Tuple[TfidfVectorizer, numpy.ndarray]:
         logger.info("building TfidfVectorizer for %s", self.parser_name)
-        synonyms_for_parser = self.synonym_db.get_all(self.parser_name)
         vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
         tf_idf_matrix = vectorizer.fit_transform(synonyms_for_parser.keys())
-        return vectorizer, tf_idf_matrix, synonyms_for_parser
+        return vectorizer, tf_idf_matrix
+
+    def build_index_cache(self) -> Tuple[TfidfVectorizer, numpy.ndarray]:
+        """Build the cache for the index."""
+
+        return self._build_index_cache(
+            self.synonyms_for_parser, hash(self.synonyms_for_parser.values())
+        )
