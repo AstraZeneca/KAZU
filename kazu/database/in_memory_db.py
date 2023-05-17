@@ -141,34 +141,6 @@ class SynonymDatabase(metaclass=Singleton):
                 )
         return result
 
-    def get_syns_sharing_id(
-        self,
-        name: ParserName,
-        synonym: NormalisedSynonymStr,
-        strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
-    ) -> Set[NormalisedSynonymStr]:
-        """Get all other syns for a synonym in a kb.
-
-        :param name: parser name
-        :param synonym: synonym
-        :param strategy_filters: Optional set of EquivalentIdAggregationStrategy. If provided, only syns aggregated
-            via these strategies will be returned. If None (the default), all syns will be returned
-        :return:
-        """
-        result: Set[str] = set()
-        synonym_term = self.get(name, synonym)
-        if strategy_filters is not None and synonym_term.aggregated_by not in strategy_filters:
-            return result
-        for equiv_id_set in synonym_term.associated_id_sets:
-            for idx in equiv_id_set.ids:
-                syns = self.get_syns_for_id(
-                    name,
-                    idx,
-                    strategy_filters,
-                )
-                result.update(syns)
-        return result
-
     def get_all(self, name: ParserName) -> Dict[NormalisedSynonymStr, SynonymTerm]:
         """Get all synonyms associated with an ontology.
 
