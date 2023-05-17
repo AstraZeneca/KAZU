@@ -3,7 +3,7 @@ from kazu.utils.string_normalizer import StringNormalizer
 
 def check_case(original, expected, entity_class):
     result = StringNormalizer.normalize(original_string=original, entity_class=entity_class)
-    assert result == expected, f"got {result}, wanted {expected}"
+    assert result == expected
 
 
 def test_normalizer():
