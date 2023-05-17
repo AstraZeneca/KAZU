@@ -1,3 +1,4 @@
 _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep
 path: ${oc.env:KAZU_MODEL_PACK}/spacy_pipeline
 include_sentence_offsets: False
+parsers: ${oc.dict.values:ontology_parser}
