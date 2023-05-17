@@ -77,7 +77,7 @@ class MergeOverlappingEntsStep(Step):
         :return:
         """
         to_keep = []
-        for location, ents_set in ents.items():
+        for ents_set in ents.values():
             if len(ents_set) > 1:
                 to_keep_this_location, to_drop = self.select_preferred_entity(ents_set)
                 to_keep.append(to_keep_this_location)
