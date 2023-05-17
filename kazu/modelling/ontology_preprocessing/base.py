@@ -594,7 +594,7 @@ class CurationProcessor:
                 for idx in equiv_id_set.ids:
                     if idx not in self._terms_by_id:
                         raise CurationException(
-                            f"Attempted to add term containing {idx} but this id does not" f"exist"
+                            f"Attempted to add term containing {idx} but this id does not exist"
                         )
             is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
             new_term = SynonymTerm(
