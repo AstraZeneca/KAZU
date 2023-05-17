@@ -462,20 +462,21 @@ class CurationProcessor:
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
                 ids = action.parser_to_target_id_mappings[self.parser_name]
-                modification_counter: Counter[CurationModificationResult] = Counter()
                 for idx in ids:
-                    modification_counter.update(self._drop_id_from_all_synonym_terms(idx))
-                    if len(modification_counter) == 0:
+                    counter_this_idx = self._drop_id_from_all_synonym_terms(idx)
+                    if (
+                        counter_this_idx[CurationModificationResult.ID_SET_MODIFIED]
+                        + counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED]
+                        == 0
+                    ):
                         logger.warning("failed to drop %s from %s", idx, self.parser_name)
                     else:
                         logger.debug(
                             "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
                             idx,
                             self.parser_name,
-                            modification_counter.get(CurationModificationResult.ID_SET_MODIFIED, 0),
-                            modification_counter.get(
-                                CurationModificationResult.SYNONYM_TERM_DROPPED, 0
-                            ),
+                            counter_this_idx[CurationModificationResult.ID_SET_MODIFIED],
+                            counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED],
                         )
                     self._ids_to_ignore_from_global_actions.add(idx)
 
