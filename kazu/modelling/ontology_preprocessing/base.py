@@ -499,11 +499,14 @@ class CurationProcessor:
         Notes:
 
         If a term_norm already exists in self._terms_by_term_norm that matches 'curation_term_norm',
-        this method will check to see if the 'curation_associated_id_set' is a subset of the existing term.
-        If so, no action will be taken. If it is not a subset, an exception will be thrown, as adding it
+        this method will check to see if the 'curation_associated_id_set' matches the existing terms
+        :class:`.AssociatedIdSets`\\.
+
+        If so, no action will be taken. If not, a warning will be logged as adding it
         will cause irregularities in the database.
 
         If the term_norm does not exist, this method will create a new :class:`~kazu.data.data.SynonymTerm`
+        with the provided :class:`.AssociatedIdSets`\\.
 
         :param curation_term_norm:
         :param curation_associated_id_set:
