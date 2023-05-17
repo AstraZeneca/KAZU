@@ -38,7 +38,7 @@ class ParserDependentStep(Step):
 
     Steps that need information from parsers should subclass this class, in order
     for the internal databases to be correctly populated. Generally, these will be
-    steps that have anything to do with Entity Linking
+    steps that have anything to do with Entity Linking.
     """
 
     def __init__(self, parsers: Iterable[OntologyParser]):
