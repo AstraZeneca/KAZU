@@ -89,7 +89,7 @@ class TinyBertForSequenceTagging(BertPreTrainedModel):  # type: ignore[misc]
 
         tmp = []
         if is_student:
-            for s_id, sequence_layer in enumerate(sequence_output):
+            for sequence_layer in sequence_output:
                 tmp.append(self.fit_dense(sequence_layer))
             sequence_output = tmp
         return logits, att_output, sequence_output
