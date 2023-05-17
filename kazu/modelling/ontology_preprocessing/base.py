@@ -125,7 +125,7 @@ class CurationProcessor:
         SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
         SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
     )
-    _behaviour_to_order_index = {behav: i for i, behav in enumerate(CURATION_APPLY_ORDER)}
+    _BEHAVIOUR_TO_ORDER_INDEX = {behav: i for i, behav in enumerate(CURATION_APPLY_ORDER)}
 
     def __init__(
         self,
@@ -155,10 +155,10 @@ class CurationProcessor:
 
     @classmethod
     def curation_sort_key(cls, curated_term: CuratedTerm):
-        """Determines the order curations are processed in"""
+        """Determines the order curations are processed in."""
 
         max_behaviour_index = max(
-            cls._behaviour_to_order_index[action.behaviour] for action in curated_term.actions
+            cls._BEHAVIOUR_TO_ORDER_INDEX[action.behaviour] for action in curated_term.actions
         )
         return (max_behaviour_index, curated_term.curated_synonym)
 
