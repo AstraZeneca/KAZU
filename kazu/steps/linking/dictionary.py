@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class DictionaryEntityLinkingStep(Step):
     """Uses :class:`kazu.utils.link_index.DictionaryIndex` to match entities to ontologies.
 
-    Note, this is not an instance of  :class:`kazu.steps.step.ParserDependentStep`, as
+    Note, this is not an instance of :class:`kazu.steps.step.ParserDependentStep`, as
     this logic would duplicate the work of :class:`kazu.utils.link_index.DictionaryIndex`
     """
 
