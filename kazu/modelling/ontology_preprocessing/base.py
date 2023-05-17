@@ -420,10 +420,13 @@ class CurationProcessor:
                     suitable_for_ner = True
             elif action.behaviour is SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
                 self._drop_synonym_term(term_norm)
-            elif (
-                action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
-                or action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
-            ):
+            elif action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY:
+                self._attempt_to_add_database_entry_for_curation(
+                    curation_associated_id_set=action.associated_id_sets,
+                    curated_synonym=curation.curated_synonym,
+                    curation_term_norm=term_norm,
+                )
+            elif action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING:
                 self._attempt_to_add_database_entry_for_curation(
                     curation_associated_id_set=action.associated_id_sets,
                     curated_synonym=curation.curated_synonym,
@@ -432,7 +435,8 @@ class CurationProcessor:
                 term_for_this_action = self._terms_by_term_norm.get(term_norm)
                 if term_for_this_action is None:
                     logger.warning(
-                        "CuratedTerm %s is invalid: requires database entry but all have been removed by actions.",
+                        "CuratedTerm %s is invalid for NER: "
+                        "requires database entry but all have been removed by actions.",
                         curation,
                     )
                     # since this action is invalid, we need a continue here so that the action isn't added to the
