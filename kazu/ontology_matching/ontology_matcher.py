@@ -28,7 +28,6 @@ ANATOMY = "anatomy"
 DISEASE = "disease"
 CELL_LINE = "cell_line"
 CELL_TYPE = "cell_type"
-ENTITY = "entity"
 
 SPAN_KEY = "RAW_HITS"
 MATCH_ID_SEP = ":::"

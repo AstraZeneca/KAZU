@@ -49,7 +49,6 @@ DEFAULT_LABEL = "default_label"
 IDX = "idx"
 SYN = "syn"
 MAPPING_TYPE = "mapping_type"
-SOURCE = "source"
 DATA_ORIGIN = "data_origin"
 IdsAndSource = Set[Tuple[str, str]]
 
