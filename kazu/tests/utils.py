@@ -25,8 +25,6 @@ from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymG
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
-TINY_CHEMBL_KB_PATH = TEST_ASSETS_PATH.joinpath("sapbert").joinpath("tiny_chembl.parquet")
-
 FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS = TEST_ASSETS_PATH.joinpath("full_pipeline")
 
 BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
