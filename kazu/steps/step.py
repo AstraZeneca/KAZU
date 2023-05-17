@@ -1,8 +1,9 @@
 from functools import wraps
 import traceback
-from typing import Any, Callable, List, Protocol, Tuple, TypeVar
+from typing import Any, Callable, List, Protocol, Tuple, TypeVar, Iterable
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
+from kazu.modelling.ontology_preprocessing.base import OntologyParser
 
 
 class Step(Protocol):
@@ -30,6 +31,23 @@ class Step(Protocol):
             second is the docs that failed to (fully) process correctly.
         """
         raise NotImplementedError()
+
+
+class ParserDependentStep(Step):
+    """A step that depends on ontology parsers in any form.
+
+    Steps that need information from parsers should subclass this class, in order
+    for the internal databases to be correctly populated. Generally, these will be
+    steps that have anything to do with Entity Linking
+    """
+
+    def __init__(self, parsers: Iterable[OntologyParser]):
+        """
+
+        :param parsers: parsers that this step requires
+        """
+        for parser in parsers:
+            parser.populate_databases(force=False)
 
 
 Self = TypeVar("Self")
