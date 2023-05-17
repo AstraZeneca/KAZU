@@ -127,8 +127,6 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     """
 
-    CONTEXT_SCORE = "context_score"
-
     def __init__(
         self,
         confidence: DisambiguationConfidence,
