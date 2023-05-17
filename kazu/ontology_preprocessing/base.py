@@ -870,9 +870,7 @@ class OntologyParser(ABC):
                 )
                 for idx in ids
             )
-            associated_id_sets, agg_strategy = self.score_and_group_ids(
-                ids_and_source, is_symbolic, syn_set
-            )
+            associated_id_sets, agg_strategy = self.score_and_group_ids(ids_and_source, is_symbolic)
 
             synonym_term = SynonymTerm(
                 term_norm=syn_norm,
@@ -892,7 +890,6 @@ class OntologyParser(ABC):
         self,
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
-        original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """For a given data source, one normalised synonym may map to one or
         more id. In some cases, the ID may be duplicate/redundant (e.g. there

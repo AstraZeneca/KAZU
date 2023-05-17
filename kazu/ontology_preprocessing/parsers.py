@@ -139,7 +139,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         self,
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
-        original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """since non symbolic gene symbols are also frequently ambiguous, we
         override this method accordingly to disable all synonym resolution, and
@@ -913,7 +912,6 @@ class CellosaurusOntologyParser(OntologyParser):
         self,
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
-        original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """Treat all synonyms as seperate cell lines.
 
