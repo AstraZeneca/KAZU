@@ -88,22 +88,27 @@ class ExplosionStringMatchingStep(ParserDependentStep):
                 text,
                 ontology_data,
             ) in self.extract_entity_data_from_spans(spans):
-                for entity_class, per_parser_term_norm_set in ontology_data.items():
-                    for parser_name, term_norm, confidence in per_parser_term_norm_set:
-                        e = Entity.load_contiguous_entity(
-                            start=start_char,
-                            end=end_char,
-                            match=text,
-                            entity_class=entity_class,
-                            namespace=self.namespace(),
-                            mention_confidence=MentionConfidence(int(confidence)),
-                        )
 
+                for entity_class, per_parser_term_norm_set in ontology_data.items():
+                    confidences = set()
+                    e = Entity.load_contiguous_entity(
+                        start=start_char,
+                        end=end_char,
+                        match=text,
+                        entity_class=entity_class,
+                        namespace=self.namespace(),
+                    )
+                    terms = []
+                    for parser_name, term_norm, confidence in per_parser_term_norm_set:
+                        mention_confidence = MentionConfidence(int(confidence))
+                        confidences.add(mention_confidence)
                         term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
                             self.synonym_db.get(parser_name, term_norm), exact_match=True
                         )
-                        e.update_terms((term_with_metrics,))
-                        entities.append(e)
+                        terms.append(term_with_metrics)
+                    e.update_terms(terms)
+                    e.mention_confidence = max(confidences)
+                    entities.append(e)
 
             # add sentence offsets
             if self.include_sentence_offsets:
