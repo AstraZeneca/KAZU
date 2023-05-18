@@ -1035,7 +1035,7 @@ class OntologyParser(ABC):
             logger.debug("parser %s already loaded.", self.name)
             return None
 
-        cache_key = self._populate_databases.__cache_key__(self.name)
+        cache_key = self._populate_databases.__cache_key__(self, self.name)
 
         if force:
             kazu_disk_cache.delete(self.export_metadata.__cache_key__(self, self.name))
