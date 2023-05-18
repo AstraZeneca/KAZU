@@ -296,3 +296,14 @@ class SpellingVariationReplacement(SynonymGenerator):
             return new_terms
         else:
             return None
+
+
+class BigramHyphenation:
+    def call(self, synonym_str: str) -> Optional[Set[str]]:
+        if len(synonym_str.split(" ")) != 2:
+            return None
+        else:
+            new_terms = set()
+            for str in {"‑", "‐", "‒", "–"}:
+                new_terms.add(synonym_str.replace(" ", str))
+        return new_terms
