@@ -399,10 +399,8 @@ class CurationProcessor:
 
     def _process_curation_actions(self, curation: CuratedTerm) -> Optional[CuratedTerm]:
         term_norm = curation.term_norm_for_linking(self.entity_class)
-        new_actions = []
         suitable_for_ner = False
         for action in curation.actions:
-            new_action = action
             if action.behaviour is SynonymTermBehaviour.IGNORE:
                 logger.debug("ignoring unwanted curation: %s for %s", curation, self.parser_name)
             elif action.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM:
@@ -443,16 +441,12 @@ class CurationProcessor:
                     # list of viable actions
                     continue
                 else:
-                    new_action = dataclasses.replace(
-                        action, associated_id_sets=term_for_this_action.associated_id_sets
-                    )
                     suitable_for_ner = True
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
-            new_actions.append(new_action)
         # if no actions require db entry, it can't be used for ner
         if suitable_for_ner:
-            return dataclasses.replace(curation, actions=tuple(new_actions))
+            return curation
         else:
             return None
 
