@@ -5,9 +5,6 @@ from typing import List, Tuple, Dict, Optional
 import pandas as pd
 import pytest
 from kazu.data.data import (
-    Document,
-    Entity,
-    CharSpan,
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     SynonymTermWithMetrics,
@@ -24,8 +21,6 @@ from kazu.ontology_preprocessing.base import (
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
-
-FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS = TEST_ASSETS_PATH.joinpath("full_pipeline")
 
 BERT_TEST_MODEL_PATH = TEST_ASSETS_PATH.joinpath("bert_test_model")
 
@@ -53,23 +48,6 @@ requires_label_studio = pytest.mark.skipif(
 )
 
 
-def full_pipeline_test_cases() -> Tuple[List[Document], List[pd.DataFrame]]:
-    docs = []
-    dfs = []
-    for test_text_path in FULL_PIPELINE_ACCEPTANCE_TESTS_DOCS.glob("*.txt"):
-        with test_text_path.open(mode="r") as f:
-            text = f.read()
-            # .read leaves a final newline if there is one at the end of the file
-            # as is standard in a unix file
-            assert text[-1] == "\n"
-        doc = Document.create_simple_document(text[:-1])
-        test_results_path = test_text_path.with_suffix(".csv")
-        df = pd.read_csv(test_results_path)
-        docs.append(doc)
-        dfs.append(df)
-    return docs, dfs
-
-
 def ner_long_document_test_cases() -> List[Tuple[str, int, str]]:
     """
     should return list of tuples: 0 = the text, 1 = the number of times an entity class is expected to be found,
@@ -79,41 +57,6 @@ def ner_long_document_test_cases() -> List[Tuple[str, int, str]]:
         ("EGFR is a gene, that is also mentioned in this very long document. " * 300, 300, "gene")
     ]
     return texts
-
-
-def entity_linking_easy_cases() -> Tuple[List[Document], List[str], List[str]]:
-    docs, iris, sources = [], [], []
-
-    doc = Document.create_simple_document("Baclofen is a muscle relaxant")
-    doc.sections[0].entities = [
-        Entity(
-            namespace="test",
-            match="Baclofen",
-            entity_class="drug",
-            spans=frozenset([CharSpan(start=0, end=8)]),
-        )
-    ]
-    docs.append(doc)
-    iris.append("CHEMBL701")
-    sources.append("CHEMBL")
-
-    doc = Document.create_simple_document("Helium is a gas.")
-    doc.sections[0].entities = [
-        Entity(
-            namespace="test",
-            match="Helium",
-            entity_class="drug",
-            spans=frozenset([CharSpan(start=0, end=6)]),
-        )
-    ]
-    iris.append("CHEMBL1796997")
-    sources.append("CHEMBL")
-    docs.append(doc)
-    return docs, iris, sources
-
-
-def get_TransformersModelForTokenClassificationNerStep_model_path():
-    return getenv("TransformersModelForTokenClassificationPath")
 
 
 class DummyParser(OntologyParser):
