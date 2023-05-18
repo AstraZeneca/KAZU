@@ -78,9 +78,6 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     number_split_pattern = re.compile(r"(\d+)")
 
-    symbol_number_split = re.compile(r"(\d+)$")
-    trailing_lowercase_s_split = re.compile(r"(.*)(s)$")
-
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
         """checks for ratio of upper to lower case characters, and numeric to
