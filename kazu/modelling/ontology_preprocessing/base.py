@@ -338,16 +338,7 @@ class CurationProcessor:
         return curations_for_ner, set(self._terms_by_term_norm.values())
 
     def _process_curations(self) -> List[CuratedTerm]:
-        safe_curations, conflicts = self.analyse_conflicts_in_curations(self.curations)
-        for conflict_lst in conflicts:
-            message = (
-                "\n\nconflicting curations detected\n\n"
-                + "\n".join(curation.to_json() for curation in conflict_lst)
-                + "\n"
-            )
-
-            logger.warning(message)
-
+        safe_curations = self.analyse_conflicts_in_curations(self.curations)
         curation_for_ner = []
         for curation in sorted(safe_curations, key=self.curation_sort_key):
             maybe_curation_with_term_norm_actions = self._process_curation_actions(curation)
@@ -355,9 +346,7 @@ class CurationProcessor:
                 curation_for_ner.append(maybe_curation_with_term_norm_actions)
         return curation_for_ner
 
-    def analyse_conflicts_in_curations(
-        self, curations: Set[CuratedTerm]
-    ) -> Tuple[Set[CuratedTerm], List[Set[CuratedTerm]]]:
+    def analyse_conflicts_in_curations(self, curations: Set[CuratedTerm]) -> Set[CuratedTerm]:
         """Check to see if a list of curations contain conflicts.
 
         Conflicts can occur if two or more curations normalise to the same NormalisedSynonymStr,
@@ -365,13 +354,17 @@ class CurationProcessor:
         a SynonymTerm to the database. This would create an ambiguity over which AssociatedIdSets
         is appropriate for the normalised term.
 
+        In addition, conflicts can occur if multiple values for case sensitivity and the
+        string to match on are produced for the same term_norm. Note that these conflicts aren't
+        filtered as they don't cause database inconsistencies. However, they may cause somewhat
+        erratic signals of the Entity.mention_confidence if conflicts do occur. We tolerate this
+        as we expect this situation to be rare.
+
         :param curations:
-        :return: safe curations set, list of conflicting curations sets
+        :return: safe curations set
         """
         curations_by_term_norm = defaultdict(set)
-        conflicts = []
         safe = set()
-
         for curation in curations:
             if curation.source_term is not None:
                 # inherited curations cannot conflict as they use term norm of source term
@@ -383,19 +376,52 @@ class CurationProcessor:
 
         for potentially_conflicting_curations in curations_by_term_norm.values():
             conflicting_id_sets = set()
+            conflicting_match_tuples = set()
             for curation in potentially_conflicting_curations:
                 for action in curation.actions:
                     if (
                         action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
                         or action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
                     ):
-                        conflicting_id_sets.add(action.associated_id_sets)
+                        if action.associated_id_sets is None:
+                            associated_id_sets = self._terms_by_term_norm[
+                                curation.term_norm_for_linking(self.entity_class)
+                            ].associated_id_sets
+                        else:
+                            associated_id_sets = action.associated_id_sets
+                        conflicting_id_sets.add(associated_id_sets)
+                conflicting_match_tuples.add(
+                    (
+                        curation.curated_synonym
+                        if curation.case_sensitive
+                        else curation.curated_synonym.lower(),
+                        curation.case_sensitive,
+                        curation.mention_confidence,
+                    )
+                )
 
+            if len(conflicting_match_tuples) > 1:
+                message = (
+                    "\n\nconflicting curations by match logic detected\n\n"
+                    + "\n".join(
+                        curation.to_json() for curation in potentially_conflicting_curations
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
             if len(conflicting_id_sets) > 1:
-                conflicts.append(potentially_conflicting_curations)
+                message = (
+                    "\n\nconflicting curations by ambiguous link id detected\n\n"
+                    + "\n".join(
+                        curation.to_json() for curation in potentially_conflicting_curations
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
             else:
                 safe.update(potentially_conflicting_curations)
-        return safe, conflicts
+
+        return safe
 
     def _process_curation_actions(self, curation: CuratedTerm) -> Optional[CuratedTerm]:
         term_norm = curation.term_norm_for_linking(self.entity_class)
