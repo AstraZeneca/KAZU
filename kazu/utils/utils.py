@@ -25,22 +25,6 @@ def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     raise RuntimeError(f"Error! Entity {entity}is not attached to a document")
 
 
-def documents_to_document_section_text_map(docs: List[Document]) -> Dict[Tuple[int, int], str]:
-    """Convert documents into a dict of <dochash + sectionhash>: text.
-
-    :param docs:
-    :return:
-    """
-    return {
-        (
-            hash(doc),
-            hash(section),
-        ): section.text
-        for doc in docs
-        for section in doc.sections
-    }
-
-
 def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
     """Return a map of documents, indexed by order of sections.
 
@@ -54,15 +38,6 @@ def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
             result[i] = section
             i += 1
     return result
-
-
-def filter_entities_with_ontology_mappings(entities: List[Entity]) -> List[Entity]:
-    """Finds entities that have no kb mappings.
-
-    :param entities:
-    :return:
-    """
-    return [x for x in entities if len(x.mappings) == 0]
 
 
 def documents_to_document_section_batch_encodings_map(
