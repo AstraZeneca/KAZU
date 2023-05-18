@@ -276,10 +276,22 @@ class StrategyRunner:
                 self.execute_hit_post_processing_strategies(
                     non_symbolic_entities, doc, maybe_non_symbolic_strategies
                 )
+            else:
+                logger.warning(
+                    "No %s configured for %s ",
+                    ConfidenceLevelStrategyExecution.__class__.__name__,
+                    mention_confidence,
+                )
             maybe_symbolic_strategies = self.symbolic_strategies.get(mention_confidence)
             if maybe_symbolic_strategies is not None:
                 self.execute_hit_post_processing_strategies(
                     symbolic_entities, doc, maybe_symbolic_strategies
+                )
+            else:
+                logger.warning(
+                    "No %s configured for %s ",
+                    ConfidenceLevelStrategyExecution.__class__.__name__,
+                    mention_confidence,
                 )
 
     def execute_hit_post_processing_strategies(
