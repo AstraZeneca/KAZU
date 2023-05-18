@@ -249,10 +249,23 @@ class StrategyRunner:
         :return:
         """
 
-        by_confidence = sort_then_group(
-            doc.get_entities(), key_func=lambda ent: ent.mention_confidence
+        # do a separate sorted and groupby call (rather than our sort_then_group utility)
+        # so we can do all the sorting we need in one go
+        sorted_entities = sorted(
+            doc.get_entities(),
+            key=lambda ent: (
+                ent.mention_confidence,
+                *entity_to_entity_key(ent),
+            ),
         )
-        for mention_confidence, entities in by_confidence:
+        # add in ent.mention_confidence, so we have it available in the group key.
+        # It won't affect the sorting since the first element of the tuple will be the same
+        # for all ents with the same mention_confidence
+        entities_grouped_by_confidence = groupby(
+            sorted_entities, key=lambda ent: ent.mention_confidence
+        )
+
+        for mention_confidence, entities in entities_grouped_by_confidence:
             logger.debug("mapping entities for confidence %s", mention_confidence)
             symbolic_entities, non_symbolic_entities = self.group_entities_by_symbolism(
                 entities=entities
