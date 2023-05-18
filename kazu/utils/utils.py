@@ -105,31 +105,9 @@ def get_match_entity_class_hash(ent: Entity) -> int:
 
 PathLike = Union[str, Path]
 
-SinglePathLikeOrIterable = Union[PathLike, Iterable[PathLike]]
-
 
 def as_path(p: PathLike) -> Path:
     return p if isinstance(p, Path) else Path(p)
-
-
-def get_cache_dir(path: PathLike, prefix: str = "", create_if_not_exist: bool = True) -> Path:
-    path = as_path(path)
-    new_path = path.with_name(f"cached_{prefix}_{path.name}")
-    if create_if_not_exist:
-        if new_path.exists():
-            logger.info(f"{new_path} already exists. Will not make it")
-        else:
-            new_path.mkdir()
-
-    return new_path
-
-
-def get_cache_path(path: PathLike, cache_id: str) -> Path:
-    path = as_path(path)
-    original_filename = path.name
-    cache_dir = get_cache_dir(path, create_if_not_exist=False)
-    new_path = cache_dir.joinpath(f"cached_{cache_id}_{original_filename}")
-    return new_path
 
 
 class EntityClassFilter:
