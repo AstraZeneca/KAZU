@@ -246,10 +246,10 @@ class OntologyMatcher:
                 )
                 ent_class = self.parser_name_to_entity_type[parser_name]
                 data[ent_class].add((parser_name, term_norm, confidence))
-            for ent_class in data:
+            for ent_class, ent_class_data in data.items():
                 # we use a uuid here so that every span hash is unique
                 new_span = Span(doc, start, end, label=uuid.uuid4().hex)
-                new_span._.set("ontology_dict_", {ent_class: data[ent_class]})
+                new_span._.set("ontology_dict_", {ent_class: ent_class_data})
                 spans.append(new_span)
         final_spans = self.filter_by_contexts(doc, spans)
         span_group = SpanGroup(doc, name=self.span_key, spans=final_spans)
