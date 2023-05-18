@@ -204,11 +204,9 @@ class StrategyRunner:
         :param cross_ref_managers: list of managers that will be applied to any created mappings, attempting to create
             xreferences
         """
-        self.symbolic_strategies = {
-            MentionConfidence.__members__[k]: v for k, v in symbolic_strategies.items()
-        }
+        self.symbolic_strategies = {MentionConfidence[k]: v for k, v in symbolic_strategies.items()}
         self.non_symbolic_strategies = {
-            MentionConfidence.__members__[k]: v for k, v in non_symbolic_strategies.items()
+            MentionConfidence[k]: v for k, v in non_symbolic_strategies.items()
         }
         self.cross_ref_managers = cross_ref_managers
 
