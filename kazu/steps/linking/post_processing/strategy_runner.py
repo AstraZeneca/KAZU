@@ -242,7 +242,7 @@ class StrategyRunner:
         Run relevant strategies to decide what mappings to create.
 
         Generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
-        information to work with. Therefore, we group entities by confidence, split by symbolism, then
+        information to work with. Therefore, we group entities by mention confidence, split by symbolism, then
         run :meth:`execute_hit_post_processing_strategies`\\ .
 
         :param doc:
