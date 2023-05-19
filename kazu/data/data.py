@@ -598,16 +598,19 @@ class DocumentJsonUtils:
         elif isinstance(obj, cls.listlike_types):
             return [cls.obj_to_dict_repr(elem) for elem in obj]
         elif isinstance(obj, ndarray):
-            return obj.tolist()
+            l: List = obj.tolist()
+            return l
         elif dataclasses.is_dataclass(obj):
             return cls.obj_to_dict_repr(obj.__dict__)
         elif isinstance(obj, dict):
             processed_dict_pairs = (cls._preprocess_dict_pair(pair) for pair in obj.items())
             return {k: cls.obj_to_dict_repr(v) for k, v in processed_dict_pairs}
         elif isinstance(obj, (datetime, date)):
-            return obj.isoformat()
+            s: str = obj.isoformat()
+            return s
         elif isinstance(obj, bson.ObjectId):
-            return json_util.default(obj)
+            d: Dict[str, str] = json_util.default(obj)
+            return d
         else:
             raise cls.ConversionException(f"Unknown object type: {type(obj)}")
 
