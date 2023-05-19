@@ -354,7 +354,7 @@ class TokenizedWordProcessor:
         logger.debug(
             "detect_subspans is %s. Using %s, confidence threshold: %s",
             self.detect_subspans,
-            SmartSpanFinder.__class__.__name__,
+            SmartSpanFinder.__name__,
             self.confidence_threshold,
         )
         if isinstance(self.confidence_threshold, float):
@@ -365,14 +365,14 @@ class TokenizedWordProcessor:
             )
         else:
             raise ValueError(
-                f"tried to instantiate {SmartSpanFinder.__class__.__name__} but confidence threshold is not a float"
+                f"tried to instantiate {SmartSpanFinder.__name__} but confidence threshold is not a float"
             )
 
     def _make_simple_span_finder(self, text: str) -> SimpleSpanFinder:
         logger.debug(
             "detect_subspans is %s. Using %s",
             self.detect_subspans,
-            SimpleSpanFinder.__class__.__name__,
+            SimpleSpanFinder.__name__,
         )
         return SimpleSpanFinder(text=text, id2label=self.id2label)
 
