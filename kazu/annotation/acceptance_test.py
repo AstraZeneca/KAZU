@@ -4,7 +4,7 @@ import json
 import os
 from collections import defaultdict, Counter
 from pathlib import Path
-from typing import List, Iterable, Dict, Set, Tuple, DefaultDict, Any
+from typing import cast, List, Iterable, Dict, Set, Tuple, DefaultDict, Any
 
 import hydra
 from hydra.utils import instantiate
@@ -19,9 +19,12 @@ class AcceptanceTestFailure(Exception):
     pass
 
 
-def acceptance_criteria() -> Dict[str, Dict[str, Dict[str, float]]]:
+AcceptanceCriteria = Dict[str, Dict[str, Dict[str, float]]]
+
+
+def acceptance_criteria() -> AcceptanceCriteria:
     with open(Path(os.environ["KAZU_MODEL_PACK"]).joinpath("acceptance_criteria.json")) as f:
-        data = json.load(f)
+        data = cast(AcceptanceCriteria, json.load(f))
     return data
 
 
