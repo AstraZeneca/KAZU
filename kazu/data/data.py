@@ -7,7 +7,20 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto, IntEnum
 from math import inf
-from typing import List, Any, Dict, Optional, Tuple, FrozenSet, Set, Iterable, Union, DefaultDict
+from typing import (
+    List,
+    Any,
+    Dict,
+    Optional,
+    Tuple,
+    FrozenSet,
+    Set,
+    Iterable,
+    Union,
+    DefaultDict,
+    overload,
+    TypeVar,
+)
 
 import bson
 from bson import json_util
@@ -535,6 +548,9 @@ class Document:
         return length
 
 
+T = TypeVar("T")
+
+
 class DocumentJsonUtils:
     class ConversionException(Exception):
         pass
@@ -608,8 +624,23 @@ class DocumentJsonUtils:
         else:
             return k, v
 
+    @overload
     @staticmethod
-    def remove_empty_elements(d: Any):
+    def remove_empty_elements(d: Dict) -> Dict:
+        pass
+
+    @overload
+    @staticmethod
+    def remove_empty_elements(d: List) -> List:
+        pass
+
+    @overload
+    @staticmethod
+    def remove_empty_elements(d: T) -> T:
+        pass
+
+    @staticmethod
+    def remove_empty_elements(d):
         """recursively remove empty lists, empty dicts, or None elements from a dictionary"""
         if not isinstance(d, (dict, list)):
             return d
