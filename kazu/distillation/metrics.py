@@ -41,5 +41,5 @@ def numeric_label_f1_score(preds: List[List[int]], golds: List[List[int]], label
                 g_labels.append(label_list[gold_label])
         pred_clean_labels_list.append(p_labels)
         gold_clean_labels_list.append(g_labels)
-
-    return f1_score(gold_clean_labels_list, pred_clean_labels_list)
+    f1: float = f1_score(gold_clean_labels_list, pred_clean_labels_list)
+    return f1
