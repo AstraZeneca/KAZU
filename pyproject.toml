@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
 dependencies = [
-  "spacy>=3.2.0",
+  "spacy>=3.2.2",
   "torch>=2.0.0",
   "transformers>=4.0.0",
   "rdflib>=6.0.0",

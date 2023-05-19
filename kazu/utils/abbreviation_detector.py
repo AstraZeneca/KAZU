@@ -72,7 +72,7 @@ Association for Computational Linguistics.
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import cast, Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
+from typing import Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
 
 from spacy.language import Language
 from spacy.matcher import Matcher
@@ -289,9 +289,6 @@ class KazuAbbreviationDetector:
     ):
         for section, spacy_doc in section_to_spacy_doc.items():
             global_matches = global_matcher(spacy_doc)
-            # necessary because the spacy typing says this could be a List[Span],
-            # but this is only the case if as_spans=True is passed
-            global_matches = cast(List[Tuple[int, int, int]], global_matches)
             for spacy_match_int, start, end in global_matches:
                 # span of the detected abbreviation
                 abbrv_span: Span = spacy_doc[start:end]
@@ -435,9 +432,6 @@ class KazuAbbreviationDetector:
         for section in document.sections:
             spacy_doc = self.nlp(section.text)
             matches = self.matcher(spacy_doc)
-            # necessary because the spacy typing says this could be a List[Span],
-            # but this is only the case if as_spans=True is passed
-            matches = cast(List[Tuple[int, int, int]], matches)
             matches_no_brackets = [(x[0], x[1] + 1, x[2] - 1) for x in matches]
 
             long_to_short_candidates.extend(filter_matches(section, matches_no_brackets, spacy_doc))

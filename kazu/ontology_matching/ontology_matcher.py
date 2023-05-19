@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, Set, cast
+from typing import Any, List, Dict, Union, Iterable, Tuple, Optional
 
 import spacy
 import srsly
@@ -261,17 +261,16 @@ class OntologyMatcher:
         # initial step in building a curation-based phrasematcher
 
         if self.strict_matcher is not None and self.lowercase_matcher is not None:
-            matcher_res = set(self.strict_matcher(doc)).union(set(self.lowercase_matcher(doc)))
+            matches = set(self.strict_matcher(doc)).union(set(self.lowercase_matcher(doc)))
         elif self.strict_matcher is not None:
-            matcher_res = set(self.strict_matcher(doc))
+            matches = set(self.strict_matcher(doc))
         elif self.lowercase_matcher is not None:
-            matcher_res = set(self.lowercase_matcher(doc))
+            matches = set(self.lowercase_matcher(doc))
         else:
             # this isn't possible since if both of them were None,
             # the if clause at the start of this function would raise an error
             raise AssertionError()
 
-        matches = cast(Set[Tuple[int, int, int]], matcher_res)
         spans = []
         for (start, end), matches_grp in sort_then_group(
             matches,
