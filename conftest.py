@@ -122,11 +122,6 @@ def make_label_studio_manager():
     return _make_label_studio_manager
 
 
-@pytest.fixture(scope="session")
-def label_studio_manager(make_label_studio_manager) -> LabelStudioManager:
-    return make_label_studio_manager()
-
-
 @pytest.fixture(scope="function")
 def ray_server(override_kazu_test_config):
     cfg = override_kazu_test_config(
