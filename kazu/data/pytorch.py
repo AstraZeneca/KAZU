@@ -4,7 +4,7 @@ from torch.utils.data import IterableDataset
 from transformers import BatchEncoding
 
 
-class HFDataset(IterableDataset):
+class HFDataset(IterableDataset[Dict[str, Any]]):
     def __getitem__(self, index: int) -> Dict[str, Any]:
         return {
             "input_ids": self.encodings.data["input_ids"][index],
