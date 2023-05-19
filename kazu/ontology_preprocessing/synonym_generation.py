@@ -91,7 +91,7 @@ class CombinatorialSynonymGenerator:
 # TODO: this isn't used currently - do we want to try and refine it
 # or just kill it off altogether?
 class SeparatorExpansion(SynonymGenerator):
-    def __init__(self, spacy_pipeline: spacy.Language):
+    def __init__(self, spacy_pipeline: spacy.language.Language):
         self.all_stopwords = spacy_pipeline.Defaults.stop_words
         self.end_expression_brackets = r"(.*)\((.*)\)$"
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"

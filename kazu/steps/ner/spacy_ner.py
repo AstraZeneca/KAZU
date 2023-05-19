@@ -12,7 +12,7 @@ class SpacyNerStep(Step):
     resulting spacy doc to have a populated doc.ents field.
     """
 
-    def __init__(self, spacy_pipeline: spacy.Language):
+    def __init__(self, spacy_pipeline: spacy.language.Language):
         """
 
         :param model_name: name of spacy pipeline to load.

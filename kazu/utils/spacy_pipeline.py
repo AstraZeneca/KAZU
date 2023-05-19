@@ -6,5 +6,5 @@ from kazu.utils.utils import PathLike
 
 
 @cache
-def cached_spacy_pipeline_load(path: PathLike) -> spacy.Language:
+def cached_spacy_pipeline_load(path: PathLike) -> spacy.language.Language:
     return spacy.load(path)

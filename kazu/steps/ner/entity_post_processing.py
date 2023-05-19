@@ -27,7 +27,7 @@ def _copy_ent_with_new_spans(
 
 
 class SplitOnConjunctionPattern:
-    def __init__(self, spacy_pipeline: spacy.Language):
+    def __init__(self, spacy_pipeline: spacy.language.Language):
         """
         analyse
 

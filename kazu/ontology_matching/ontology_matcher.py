@@ -10,7 +10,7 @@ from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, Set, cast
 import spacy
 import srsly
 from kazu.database.in_memory_db import SynonymDatabase
-from spacy import Language
+from spacy.language import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
