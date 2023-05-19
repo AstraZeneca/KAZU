@@ -5,8 +5,12 @@ from transformers import BatchEncoding
 
 
 class HFDataset(IterableDataset):
-    def __getitem__(self, index):
-        pass  # type: ignore[empty-body]
+    def __getitem__(self, index: int) -> Dict[str, Any]:
+        return {
+            "input_ids": self.encodings.data["input_ids"][index],
+            "attention_mask": self.encodings.data["attention_mask"][index],
+            "token_type_ids": self.encodings.data["token_type_ids"][index],
+        }
 
     def __init__(self, encodings: BatchEncoding):
         """
