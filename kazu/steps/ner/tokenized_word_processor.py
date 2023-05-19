@@ -350,7 +350,7 @@ class TokenizedWordProcessor:
             {k: re.compile(v) for k, v in strip_re.items()} if strip_re is not None else None
         )
 
-    def _make_smart_span_finder(self, text: str):
+    def _make_smart_span_finder(self, text: str) -> SmartSpanFinder:
         logger.debug(
             "detect_subspans is %s. Using %s, confidence threshold: %s",
             self.detect_subspans,
@@ -368,7 +368,7 @@ class TokenizedWordProcessor:
                 f"tried to instantiate {SmartSpanFinder.__class__.__name__} but confidence threshold is not a float"
             )
 
-    def _make_simple_span_finder(self, text: str):
+    def _make_simple_span_finder(self, text: str) -> SimpleSpanFinder:
         logger.debug(
             "detect_subspans is %s. Using %s",
             self.detect_subspans,
