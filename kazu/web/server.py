@@ -315,7 +315,7 @@ class KazuWebAPI:
         if not cfg.Middlewares.auth_required:
             # override the openapi doc generating method
             # to remove authentication buttons.
-            app.openapi = openapi_no_auth  # type: ignore[assignment]
+            app.openapi = openapi_no_auth  # type: ignore[method-assign]
             # we need the 'type: ignore' as otherwise mypy gives an error:
             # mypy doesn't like assigning to a method - it isn't able
             # to infer whether typing is consistent if you do this.
