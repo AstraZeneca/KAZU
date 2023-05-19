@@ -384,7 +384,9 @@ class Entity:
         self.mappings.add(mapping)
 
     @classmethod
-    def from_spans(cls, spans: List[Tuple[int, int]], text: str, join_str: str = "", **kwargs):
+    def from_spans(
+        cls, spans: List[Tuple[int, int]], text: str, join_str: str = "", **kwargs
+    ) -> "Entity":
         """
         create an instance of Entity from a list of character indices. A text string of underlying doc is
         also required to produce a representative match
