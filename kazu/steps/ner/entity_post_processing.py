@@ -4,6 +4,7 @@ from typing import List, Callable, Tuple, Dict, Optional, Set
 from kazu.data.data import Entity, CharSpan
 
 import spacy
+from spacy.tokens import Doc
 
 
 def _copy_ent_with_new_spans(
@@ -12,7 +13,7 @@ def _copy_ent_with_new_spans(
     text: str,
     join_str: str,
     rule_name: Optional[str] = None,
-):
+) -> Entity:
     attrb_dict = deepcopy(entity).__dict__
     attrb_dict.pop("spans")
     attrb_dict.pop("match_norm")
@@ -41,8 +42,8 @@ class SplitOnConjunctionPattern:
         else:
             return []
 
-    def run_conjunction_rules(self, doc, entity, text):
-        ents = []
+    def run_conjunction_rules(self, doc: Doc, entity: Entity, text: str) -> List[Entity]:
+        ents: List[Entity] = []
         noun_chunks = list(doc.noun_chunks)
         if len(noun_chunks) > 0:
             anchor_chunk = noun_chunks[-1]
