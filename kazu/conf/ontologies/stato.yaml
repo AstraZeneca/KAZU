@@ -2,6 +2,7 @@ indices:
   stato_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.stato_parser}
+    # we can just reuse the anatomy scorer here, rather than defining a new type
     boolean_scorers: ${StringScorers.anatomy}
 parsers:
   stato_parser:
