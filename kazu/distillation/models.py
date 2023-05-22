@@ -107,9 +107,9 @@ class NerDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.call_count = 0
-        self.cache: LRUCache = LRUCache(5000)
+        self.cache: LRUCache[int, Dict[str, List]] = LRUCache(5000)
 
-    def __getitem__(self, index) -> Dict[str, List]:
+    def __getitem__(self, index: int) -> Dict[str, List]:
         if index not in self.cache:
             self.cache[index] = self.convert_single_example(
                 ex_index=index, example=self.examples[index]
@@ -120,7 +120,7 @@ class NerDataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def convert_single_example(self, ex_index, example: InputExample) -> Dict[str, List]:
+    def convert_single_example(self, ex_index: int, example: InputExample) -> Dict[str, List]:
         textlist = example.text_a.split()
         labellist = example.label.split()
         tokens: List[str] = []
