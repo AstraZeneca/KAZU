@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
-from typing import Dict, Tuple, Set, List, Iterable
+from typing import Any, Dict, Tuple, Set, List, Iterable
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
@@ -255,9 +255,14 @@ class LSToKazuConversion:
         )
 
     @staticmethod
-    def convert_tasks_to_docs(tasks: List[Dict]) -> List[Document]:
+    def _get_first_part_of_doc_id(task: Dict[str, Any]) -> str:
+        id_: str = task["data"]["id"]
+        return id_.split("_")[0]
+
+    @classmethod
+    def convert_tasks_to_docs(cls, tasks: List[Dict]) -> List[Document]:
         # group by first part of doc ID to get sections of multi part docs
-        by_doc_id = sort_then_group(tasks, key_func=lambda x: x["data"]["id"].split("_")[0])
+        by_doc_id = sort_then_group(tasks, key_func=cls._get_first_part_of_doc_id)
         docs = []
         for doc_id, tasks_iter in by_doc_id:
             doc = Document(idx=doc_id)
@@ -391,7 +396,11 @@ class LabelStudioAnnotationView:
         header = dom.createElement("Header")
         header.setAttribute("value", "Select span after creation to go next")
         header_view.appendChild(header)
-        return dom.toxml()
+        # this is a string when encoding is None.
+        # see:
+        # https://docs.python.org/3.11/library/xml.dom.minidom.html?highlight=minidom#xml.dom.minidom.Node.toxml
+        dom_xml: str = dom.toxml()
+        return dom_xml
 
     @staticmethod
     def with_default_colours() -> "LabelStudioAnnotationView":
@@ -438,7 +447,8 @@ class LabelStudioManager:
             if len(project_ids) == 0:
                 raise ValueError(f"no project with name: {self.project_name} found in Label Studio")
             elif len(project_ids) == 1:
-                return project_ids[0]["id"]
+                id_: int = project_ids[0]["id"]
+                return id_
             else:
                 raise ValueError(
                     f"more than one project with name: {self.project_name} found in Label Studio"
