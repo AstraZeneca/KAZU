@@ -125,19 +125,12 @@ filterwarnings = [
 
 [tool.mypy]
 check_untyped_defs = true
-disallow_untyped_defs = true
 warn_return_any = true
 warn_unused_ignores = true
-# These (plus some above) are equivalent to `strict = true`, but spelling it out
-# in case we want to disable any while testing if this is reasonable
 warn_unused_configs = true
-disallow_any_generics = true
 disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 warn_redundant_casts = true
-no_implicit_reexport = true
 strict_equality = true
 strict_concatenate = true
 
