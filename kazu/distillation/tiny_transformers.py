@@ -3,7 +3,9 @@ from torch import nn
 from transformers import BertModel, BertPreTrainedModel
 
 
-class TinyBertForSequenceTagging(BertPreTrainedModel):
+# ignore required because transformers doesn't distribute type information
+# so to mypy, this is subclassing 'Any'.
+class TinyBertForSequenceTagging(BertPreTrainedModel):  # type: ignore[misc]
     """PyTorch BERT model for sequence tagging.
 
     Based off `TinyBERT from Huawei Noah's Ark Lab <https://github.com/huawei-noah/Pretrained-Language-Model/tree/master/TinyBERT>`_

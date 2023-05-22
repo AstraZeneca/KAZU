@@ -45,7 +45,9 @@ from kazu.utils.utils import PathLike
 logger = logging.getLogger(__name__)
 
 
-class SeqTagProcessor(DataProcessor):
+# type ignore is necessary because transformers doesn't distribute type hints,
+# so DataProcessor is seen as 'Any'.
+class SeqTagProcessor(DataProcessor):  # type: ignore[misc]
     """Base class for data converters for sequence tagging data sets."""
 
     def get_train_examples(self, data_dir) -> List[InputExample]:

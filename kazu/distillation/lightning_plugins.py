@@ -8,7 +8,9 @@ from pytorch_lightning.plugins import CheckpointIO
 from transformers import AutoTokenizer
 
 
-class StudentModelCheckpointIO(CheckpointIO):
+# lightning doesn't distribute type information, so to mypy
+# this is subclassing 'Any'.
+class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
     """
     A plugin for saving student model (without saving teacher model)
     """
