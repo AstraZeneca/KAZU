@@ -4,7 +4,18 @@ import sys
 import tempfile
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable, List
+from typing import (
+    Any,
+    Iterable,
+    List,
+    Callable,
+    TypeVar,
+    Protocol,
+    Optional,
+    Set,
+    Union,
+    Tuple,
+)
 
 from cachetools import LFUCache
 from diskcache import Cache
@@ -16,7 +27,37 @@ logger = logging.getLogger(__name__)
 kazu_model_pack_dir = os.getenv("KAZU_MODEL_PACK")
 KAZU_DISK_CACHE_NAME = "kazu_disk_cache"
 
-kazu_disk_cache: Cache
+
+_Ret = TypeVar("_Ret", covariant=True)
+
+
+class Memoization(Protocol[_Ret]):
+    def __cache_key__(self, *args: Any, **kwargs: Any) -> Tuple[Any, ...]:
+        raise NotImplementedError
+
+    def __call__(self, *args: Any, **kwargs: Any) -> _Ret:
+        raise NotImplementedError
+
+
+class CacheProtocol(Protocol):
+    def memoize(
+        self,
+        name: Optional[str] = None,
+        typed: bool = False,
+        expire: Optional[float] = None,
+        tag: Optional[str] = None,
+        ignore: Set[Union[str, int]] = set(),
+    ) -> Callable[[Callable[..., _Ret]], Memoization[_Ret]]:
+        raise NotImplementedError
+
+    def clear(self) -> int:
+        raise NotImplementedError
+
+    def delete(self, key: Any):
+        raise NotImplementedError
+
+
+kazu_disk_cache: CacheProtocol
 """
 We use the :class:`diskcache.Cache` concept to cache expensive to produce resources
 to disk. Methods and functions can be decorated with
