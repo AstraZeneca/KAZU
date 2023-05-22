@@ -11,7 +11,8 @@ from kazu.steps import (
 
 @pytest.fixture
 def merge_step(kazu_test_config) -> MergeOverlappingEntsStep:
-    return instantiate(kazu_test_config.MergeOverlappingEntsStep)
+    merge_step: MergeOverlappingEntsStep = instantiate(kazu_test_config.MergeOverlappingEntsStep)
+    return merge_step
 
 
 EXPLOSION_NAMESPACE = ExplosionStringMatchingStep.namespace()
