@@ -101,9 +101,13 @@ class EntityLinkingLookupCache:
     """
 
     def __init__(self, lookup_cache_size: int = 5000):
-        self.terms_lookup_cache: LFUCache = LFUCache(lookup_cache_size)
+        self.terms_lookup_cache: LFUCache[int, Set[SynonymTermWithMetrics]] = LFUCache(
+            lookup_cache_size
+        )
 
-    def update_terms_lookup_cache(self, entity: Entity, terms: Iterable[SynonymTermWithMetrics]):
+    def update_terms_lookup_cache(
+        self, entity: Entity, terms: Iterable[SynonymTermWithMetrics]
+    ) -> None:
         hash_val = get_match_entity_class_hash(entity)
         cache_hit = self.terms_lookup_cache.get(hash_val)
         if cache_hit is None:
