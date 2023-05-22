@@ -1,4 +1,0 @@
-cellosaurus_index:
-  _target_: kazu.utils.link_index.DictionaryIndex
-  parser: ${ontology_parser.cellosaurus_parser}
-  boolean_scorers: ${StringScorers.cell_type}
