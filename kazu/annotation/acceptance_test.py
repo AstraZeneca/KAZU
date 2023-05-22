@@ -285,7 +285,7 @@ def check_annotation_consistency(cfg):
     manager = instantiate(cfg.LabelStudioManager)
     docs = manager.export_from_ls()
     all_ents: List[Entity] = []
-    ent_to_task_lookup: Dict[Entity, int] = {}  # used for reporting task id that may have issues
+    ent_to_task_lookup: Dict[Entity, str] = {}  # used for reporting task id that may have issues
     for doc in docs:
         for section in doc.sections:
             ents: List[Entity] = section.metadata["gold_entities"]
@@ -294,7 +294,7 @@ def check_annotation_consistency(cfg):
                 {ent: str(section.metadata["label_studio_task_id"]) for ent in ents}
             )
 
-    messages: DefaultDict[int, Set[str]] = defaultdict(set)
+    messages: DefaultDict[str, Set[str]] = defaultdict(set)
     # update the messages dict with any apparent issues
     for match_str, ents_iter in sort_then_group(all_ents, lambda x: x.match):
         ents = list(ents_iter)
@@ -308,10 +308,10 @@ def check_annotation_consistency(cfg):
 
 
 def check_ent_match_abnormalities(
-    ent_to_task_lookup: Dict[Entity, int],
+    ent_to_task_lookup: Dict[Entity, str],
     ents: List[Entity],
     match_str: str,
-    messages: Dict[int, Set[str]],
+    messages: Dict[str, Set[str]],
 ):
     """
     checks to see if any gold standard spans look a bit weird
@@ -332,10 +332,10 @@ def check_ent_match_abnormalities(
 
 
 def check_ent_class_consistency(
-    ent_to_task_lookup: Dict[Entity, int],
+    ent_to_task_lookup: Dict[Entity, str],
     ents: List[Entity],
     match_str: str,
-    messages: Dict[int, Set[str]],
+    messages: Dict[str, Set[str]],
 ):
     """
     checks to see if any match strings have different entity_class information
@@ -361,10 +361,10 @@ def check_ent_class_consistency(
 
 
 def check_ent_mapping_consistency(
-    ent_to_task_lookup: Dict[Entity, int],
+    ent_to_task_lookup: Dict[Entity, str],
     ents: List[Entity],
     match_str: str,
-    messages: Dict[int, Set[str]],
+    messages: Dict[str, Set[str]],
 ):
     """
     checks to see if any entity string matches have inconsistent mapping information
