@@ -253,7 +253,7 @@ class ModelPackBuilder:
         :param cfg:
         :return:
         """
-        parsers = instantiate(cfg.ontology_parser).values()
+        parsers = instantiate(cfg.ontologies.parsers).values()
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
         from kazu.modelling.ontology_matching import assemble_pipeline
