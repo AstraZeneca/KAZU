@@ -90,10 +90,14 @@ def get_request_id(request: HTTPConnection) -> Union[str, None]:
     :param request: Starlette HTTPConnection object
     :returns: ID string
     """
-    key, req_id = request.headers.__dict__["_list"][-1]
-    if key.decode("latin-1").lower() != "x-request-id":
+    possible_request_id = request.headers.getlist("x-request-id")
+    num_request_id_headers = len(possible_request_id)
+    if num_request_id_headers == 0:
         return None
-    return req_id.decode("latin-1")
+
+    # we only expect a single request id header
+    assert num_request_id_headers == 1
+    return possible_request_id[0]
 
 
 def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
