@@ -115,11 +115,9 @@ def score_sections(
     result = defaultdict(list)
     for doc in docs:
         for section in doc.sections:
+            gold_ents: List[Entity] = section.metadata["gold_entities"]
             gold_ents_by_class = {
-                k: list(v)
-                for k, v in sort_then_group(
-                    section.metadata["gold_entities"], key_func=lambda x: x.entity_class
-                )
+                k: list(v) for k, v in sort_then_group(gold_ents, key_func=lambda x: x.entity_class)
             }
             for entity_class, test_ents in sort_then_group(
                 section.entities, key_func=lambda x: x.entity_class
@@ -286,11 +284,11 @@ def check_annotation_consistency(cfg):
 
     manager = instantiate(cfg.LabelStudioManager)
     docs = manager.export_from_ls()
-    all_ents = []
+    all_ents: List[Entity] = []
     ent_to_task_lookup: Dict[Entity, int] = {}  # used for reporting task id that may have issues
     for doc in docs:
         for section in doc.sections:
-            ents = section.metadata["gold_entities"]
+            ents: List[Entity] = section.metadata["gold_entities"]
             all_ents.extend(ents)
             ent_to_task_lookup.update(
                 {ent: str(section.metadata["label_studio_task_id"]) for ent in ents}
