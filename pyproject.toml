@@ -124,15 +124,13 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-check_untyped_defs = true
-warn_return_any = true
-warn_unused_ignores = true
-warn_unused_configs = true
-disallow_subclassing_any = true
-disallow_untyped_decorators = true
-warn_redundant_casts = true
-strict_equality = true
-strict_concatenate = true
+strict = true
+# these are too noisy for us with our existing codebase
+disallow_untyped_defs = false
+disallow_any_generics = false
+disallow_untyped_calls = false
+disallow_incomplete_defs = false
+no_implicit_reexport = false
 
 [[tool.mypy.overrides]]
 module = [
