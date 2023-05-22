@@ -1,21 +1,6 @@
 defaults:
   - ray: local
-  - ontology_parser:
-      - cellosaurus
-      - chembl
-      - cl
-      - clo
-      - go_bp
-      - go_mf
-      - go_cc
-      - hgnc_gene_family
-      - mondo
-      - ot_disease
-      - ot_molecule
-      - ot_target
-      - stato
-      - uberon
-  - indices:
+  - ontologies:
       - cellosaurus
       - chembl
       - cl
