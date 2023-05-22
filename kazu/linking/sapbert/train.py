@@ -394,7 +394,7 @@ class PLSapbertModel(LightningModule):
         query_embed = torch.cat([query_embed1, query_embed2], dim=0)
         labels = torch.cat([labels, labels], dim=0)
         hard_pairs = self.miner(query_embed, labels)
-        return self.loss(query_embed, labels, hard_pairs)
+        return self.loss(query_embed, labels, hard_pairs)  # type: ignore [no-any-return] # no clear type info for the loss
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         """Implementation of :external+pytorch_lightning:ref:`LightningModule.train_dataloader </common/lightning_module.rst#train-dataloader>`\\ ."""
@@ -445,7 +445,7 @@ class PLSapbertModel(LightningModule):
 
     def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
         """Implementation of :external+pytorch_lightning:ref:`LightningModule.validation_step </common/lightning_module.rst#validation-step>`\\ ."""
-        return self(batch)
+        return self(batch)  # type: ignore [no-any-return] # no type info from Pytorch Lightning
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
         """Implementation of :external+pytorch_lightning:ref:`LightningModule.predict_step </common/lightning_module.rst#predict-step>`\\ ."""
