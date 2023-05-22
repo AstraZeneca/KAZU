@@ -1,0 +1,16 @@
+indices:
+  go_bp_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.go_bp_parser}
+    boolean_scorers: ${StringScorers.go}
+parsers:
+  go_bp_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.BiologicalProcessGeneOntologyParser
+    name: BP_GENE_ONTOLOGY
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+    data_origin: GO-BP
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.default}
+    entity_class: go_bp
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}

@@ -1,0 +1,14 @@
+indices:
+  cellosaurus_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.cellosaurus_parser}
+    boolean_scorers: ${StringScorers.cell_type}
+parsers:
+  cellosaurus_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.CellosaurusOntologyParser
+    name: CELLOSAURUS
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
+    data_origin: CELLOSAURUS
+    string_scorer: ${SapbertStringSimilarityScorer}
+    entity_class: cell_line
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json

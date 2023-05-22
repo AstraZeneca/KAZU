@@ -1,0 +1,16 @@
+indices:
+  go_cc_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.go_cc_parser}
+    boolean_scorers: ${StringScorers.go}
+parsers:
+  go_cc_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.CellularComponentGeneOntologyParser
+    name: CC_GENE_ONTOLOGY
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
+    data_origin: GO-CC
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.default}
+    entity_class: go_cc
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}

@@ -1,0 +1,16 @@
+indices:
+  stato_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.stato_parser}
+    boolean_scorers: ${StringScorers.anatomy}
+parsers:
+  stato_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.StatoParser
+    name: STATO
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/stato.owl
+    data_origin: Feb_2023
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.default}
+    entity_class: measurement
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}

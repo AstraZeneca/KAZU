@@ -1,0 +1,16 @@
+indices:
+  ot_molecule_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.ot_molecule_parser}
+    boolean_scorers: ${StringScorers.drug}
+parsers:
+  ot_molecule_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsMoleculeOntologyParser
+    name: OPENTARGETS_MOLECULE
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
+    data_origin: OPENTARGETS-MOLECULE
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.chemical}
+    entity_class: drug
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}

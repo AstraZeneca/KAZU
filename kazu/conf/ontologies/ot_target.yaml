@@ -1,0 +1,16 @@
+indices:
+  ot_target_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.ot_target_parser}
+    boolean_scorers: ${StringScorers.gene}
+parsers:
+  ot_target_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsTargetOntologyParser
+    name: OPENTARGETS_TARGET
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
+    data_origin: OPENTARGETS-TARGET
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.gene}
+    entity_class: gene
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}

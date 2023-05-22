@@ -1,0 +1,16 @@
+indices:
+  hgnc_gene_family_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.hgnc_gene_family_parser}
+    boolean_scorers: ${StringScorers.gene}
+parsers:
+  hgnc_gene_family_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.HGNCGeneFamilyParser
+    name: HGNC_GENE_FAMILY
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/gene_family.tsv
+    data_origin: HGNC Mart 13.01.23
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.gene}
+    entity_class: gene
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}

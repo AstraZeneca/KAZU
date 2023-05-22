@@ -1,0 +1,16 @@
+indices:
+  cl_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.cl_parser}
+    boolean_scorers: ${StringScorers.cell_line}
+parsers:
+  cl_parser:
+    _target_: kazu.modelling.ontology_preprocessing.parsers.CLOntologyParser
+    name: CL
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cl.owl
+    data_origin: CL
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.default}
+    entity_class: cell_type
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}
