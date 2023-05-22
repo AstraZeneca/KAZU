@@ -1281,7 +1281,7 @@ class TabularOntologyParser(OntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
         )
-        self._raw_dataframe = pd.read_csv(self.in_path, **kwargs)
+        self._raw_dataframe: pd.DataFrame = pd.read_csv(self.in_path, **kwargs)
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
