@@ -5,7 +5,7 @@ import regex
 from functools import lru_cache
 from typing import Optional, Dict, Protocol, Type, Tuple
 
-from kazu.modelling.language.language_phenomena import GREEK_SUBS
+from kazu.modelling.language.language_phenomena import GREEK_SUBS, DASHES
 
 
 class EntityClassNormalizer(Protocol):
@@ -541,8 +541,6 @@ class GildaUtils:
 
     """
 
-    dashes = [chr(0x2212), chr(0x002D)] + [chr(c) for c in range(0x2010, 0x2016)]
-
     @staticmethod
     def depluralize(word: str) -> Tuple[str, str]:
         """
@@ -597,6 +595,6 @@ class GildaUtils:
             ASCII dash (-) is used.
         :return: The string in which dashes have been replaced.
         """
-        for d in cls.dashes:
+        for d in DASHES:
             s = s.replace(d, rep)
         return s

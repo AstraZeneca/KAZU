@@ -9,7 +9,7 @@ from copy import deepcopy
 from typing import List, Dict, Optional, Iterable, Set
 
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
-from kazu.modelling.language.language_phenomena import GREEK_SUBS
+from kazu.modelling.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.utils import PathLike
 
 import spacy
@@ -298,12 +298,18 @@ class SpellingVariationReplacement(SynonymGenerator):
             return None
 
 
-class BigramHyphenation:
+class NgramHyphenation(SynonymGenerator):
+    """Generate hyphenated variants of ngrams."""
+
+    def __init__(self, ngram: int = 2):
+        self.ngram = ngram
+
     def call(self, synonym_str: str) -> Optional[Set[str]]:
-        if len(synonym_str.split(" ")) != 2:
+        parts = synonym_str.split()
+        if len(parts) != self.ngram:
             return None
         else:
             new_terms = set()
-            for str in {"‑", "‐", "‒", "–"}:
-                new_terms.add(synonym_str.replace(" ", str))
+            for hyphen in DASHES:
+                new_terms.add(hyphen.join(parts))
         return new_terms
