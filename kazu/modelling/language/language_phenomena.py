@@ -52,3 +52,6 @@ GREEK_SUBS = {
     "\u03C8": "psi",
     "\u03C9": "omega",
 }
+
+DASHES = {chr(0x2212), chr(0x002D)}
+DASHES.update(chr(c) for c in range(0x2010, 0x2016))
