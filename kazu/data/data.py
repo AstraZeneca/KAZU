@@ -893,7 +893,7 @@ class CuratedTerm:
     def from_dict(cls, json_dict: Dict) -> "CuratedTerm":
 
         return cls(
-            mention_confidence=MentionConfidence(json_dict["mention_confidence"]),
+            mention_confidence=MentionConfidence[json_dict["mention_confidence"]],
             actions=tuple(SynonymTermAction.from_dict(x) for x in json_dict["actions"]),
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
