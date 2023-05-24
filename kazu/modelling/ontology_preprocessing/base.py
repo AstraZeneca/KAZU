@@ -987,12 +987,12 @@ class OntologyParser(ABC):
                 action = SynonymTermAction(
                     behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
                 )
-            case_sen = StringNormalizer.classify_symbolic(term_str, self.entity_class)
-            conf = MentionConfidence.HIGHLY_LIKELY if not case_sen else MentionConfidence.POSSIBLE
+            is_symbolic = StringNormalizer.classify_symbolic(term_str, self.entity_class)
+            conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.HIGHLY_LIKELY
             yield CuratedTerm(
                 curated_synonym=term_str,
                 mention_confidence=conf,
-                case_sensitive=case_sen,
+                case_sensitive=is_symbolic,
                 actions=(action,),
                 source_term=term.original_term,
             )
