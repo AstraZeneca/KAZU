@@ -258,9 +258,6 @@ class StrategyRunner:
                 *entity_to_entity_key(ent),
             ),
         )
-        # add in ent.mention_confidence, so we have it available in the group key.
-        # It won't affect the sorting since the first element of the tuple will be the same
-        # for all ents with the same mention_confidence
         entities_grouped_by_confidence = groupby(
             sorted_entities, key=lambda ent: ent.mention_confidence
         )
@@ -279,7 +276,7 @@ class StrategyRunner:
             else:
                 logger.warning(
                     "No %s configured for %s ",
-                    ConfidenceLevelStrategyExecution.__class__.__name__,
+                    ConfidenceLevelStrategyExecution.__name__,
                     mention_confidence,
                 )
             maybe_symbolic_strategies = self.symbolic_strategies.get(mention_confidence)
@@ -290,7 +287,7 @@ class StrategyRunner:
             else:
                 logger.warning(
                     "No %s configured for %s ",
-                    ConfidenceLevelStrategyExecution.__class__.__name__,
+                    ConfidenceLevelStrategyExecution.__name__,
                     mention_confidence,
                 )
 
