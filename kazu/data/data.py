@@ -571,7 +571,9 @@ class DocumentJsonUtils:
 
     @classmethod
     def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
-        if isinstance(obj, cls.atomic_types):
+        if isinstance(obj, Enum):
+            return obj.name
+        elif isinstance(obj, cls.atomic_types):
             return obj
         elif isinstance(obj, (float16, float32)):  # type: ignore[misc]
             return obj.item()
@@ -584,8 +586,6 @@ class DocumentJsonUtils:
         elif isinstance(obj, dict):
             processed_dict_pairs = (cls._preprocess_dict_pair(pair) for pair in obj.items())
             return {k: cls.obj_to_dict_repr(v) for k, v in processed_dict_pairs}
-        elif isinstance(obj, Enum):
-            return obj.name
         elif isinstance(obj, (datetime, date)):
             return obj.isoformat()
         elif isinstance(obj, bson.ObjectId):
