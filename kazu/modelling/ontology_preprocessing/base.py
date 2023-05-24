@@ -364,6 +364,10 @@ class CurationProcessor:
         :return: safe curations set
         """
         curations_by_term_norm = defaultdict(set)
+        curations_by_case_sensitive_synonym = defaultdict(set)
+        curations_by_case_insensitive_synonym = defaultdict(set)
+        confidences_by_case_sensitive_synonym = defaultdict(set)
+        confidences_by_case_insensitive_synonym = defaultdict(set)
         safe = set()
         for curation in curations:
             if curation.source_term is not None:
@@ -373,10 +377,73 @@ class CurationProcessor:
                 curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(
                     curation
                 )
+            if curation.case_sensitive:
+                curations_by_case_sensitive_synonym[curation.curated_synonym].add(curation)
+                confidences_by_case_sensitive_synonym[curation.curated_synonym].add(
+                    curation.mention_confidence
+                )
+            else:
+                curations_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
+                    curation
+                )
+                confidences_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
+                    curation.mention_confidence
+                )
+
+        for (
+            curated_synonym,
+            potentially_conflicting_cs_confidences,
+        ) in confidences_by_case_sensitive_synonym.items():
+            if len(set(potentially_conflicting_cs_confidences)) > 1:
+                message = (
+                    "\n\nmultiple case sensitive curations specified with conflicting confidence values \n\n"
+                    + "\n".join(
+                        curation.to_json()
+                        for curation in curations_by_case_sensitive_synonym[curated_synonym]
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
+
+            potentially_conflicting_case_insensitive_confidences = (
+                confidences_by_case_insensitive_synonym.get(curated_synonym.lower(), set())
+            )
+            if any(
+                case_cs_conf > case_insens_conf
+                for case_insens_conf in potentially_conflicting_case_insensitive_confidences
+                for case_cs_conf in potentially_conflicting_cs_confidences
+            ):
+                message = (
+                    "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values \n\n"
+                    + "\n".join(
+                        curation.to_json()
+                        for curation in curations_by_case_sensitive_synonym[curated_synonym].union(
+                            curations_by_case_insensitive_synonym[curated_synonym.lower()]
+                        )
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
+
+        for (
+            curated_synonym_lower_case,
+            potentially_conflicting_case_insensitive_confidences,
+        ) in confidences_by_case_insensitive_synonym.items():
+            if len(potentially_conflicting_case_insensitive_confidences) > 1:
+                message = (
+                    "\n\nmultiple case insensitive curations specified with conflicting confidence values \n\n"
+                    + "\n".join(
+                        curation.to_json()
+                        for curation in curations_by_case_insensitive_synonym[
+                            curated_synonym_lower_case
+                        ]
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
 
         for potentially_conflicting_curations in curations_by_term_norm.values():
             conflicting_id_sets = set()
-            conflicting_match_tuples = set()
             for curation in potentially_conflicting_curations:
                 for action in curation.actions:
                     if (
@@ -390,25 +457,7 @@ class CurationProcessor:
                         else:
                             associated_id_sets = action.associated_id_sets
                         conflicting_id_sets.add(associated_id_sets)
-                conflicting_match_tuples.add(
-                    (
-                        curation.curated_synonym
-                        if curation.case_sensitive
-                        else curation.curated_synonym.lower(),
-                        curation.case_sensitive,
-                        curation.mention_confidence,
-                    )
-                )
 
-            if len(conflicting_match_tuples) > 1:
-                message = (
-                    "\n\nconflicting curations by match logic detected\n\n"
-                    + "\n".join(
-                        curation.to_json() for curation in potentially_conflicting_curations
-                    )
-                    + "\n"
-                )
-                logger.warning(message)
             if len(conflicting_id_sets) > 1:
                 message = (
                     "\n\nconflicting curations by ambiguous link id detected\n\n"
