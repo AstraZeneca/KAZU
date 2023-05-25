@@ -186,22 +186,21 @@ class OntologyMatcher:
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
                 term_norm = curation.term_norm_for_linking(parser.entity_class)
-                for action in curation.actions:
-                    if (
-                        action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
-                        or action.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
-                    ):
-                        match_id = (
-                            parser.name
-                            + self.match_id_sep
-                            + term_norm
-                            + self.match_id_sep
-                            + str(curation.mention_confidence.value)
-                        )
-                        if curation.case_sensitive:
-                            strict_matcher.add(match_id, [pattern])
-                        else:
-                            lowercase_matcher.add(match_id, [pattern])
+                if (
+                    curation.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
+                    or curation.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
+                ):
+                    match_id = (
+                        parser.name
+                        + self.match_id_sep
+                        + term_norm
+                        + self.match_id_sep
+                        + str(curation.mention_confidence.value)
+                    )
+                    if curation.case_sensitive:
+                        strict_matcher.add(match_id, [pattern])
+                    else:
+                        lowercase_matcher.add(match_id, [pattern])
 
         # only set the phrasematcher if we have any rules for them
         # this lets us skip running a phrasematcher if it has no rules when we come

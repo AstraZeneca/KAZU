@@ -27,7 +27,6 @@ from kazu.data.data import (
     CuratedTerm,
     ParserBehaviour,
     SynonymTermBehaviour,
-    SynonymTermAction,
     AssociatedIdSets,
     GlobalParserActions,
     AutoNameEnum,

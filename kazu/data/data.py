@@ -654,40 +654,6 @@ class ParserBehaviour(AutoNameEnum):
 
 
 @dataclass(frozen=True)
-class SynonymTermAction:
-    """
-    A SynonymTermAction is an action that affects the :class:`.SynonymTerm`\\s that a parser
-    produces.
-
-    See :class:`.SynonymTermBehaviour` for the type of actions that are possible.
-
-    """
-
-    behaviour: SynonymTermBehaviour
-    #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
-    associated_id_sets: Optional[AssociatedIdSets] = None
-
-    @classmethod
-    def from_dict(cls, json_dict: Dict) -> "SynonymTermAction":
-        if json_dict["associated_id_sets"] is None:
-            frozen_assoc_id_sets = None
-        else:
-            assoc_id_sets = set()
-            for equiv_id_set in json_dict["associated_id_sets"]:
-                ids = frozenset((idx, source) for idx, source in equiv_id_set["ids_and_source"])
-                equiv_id_set = EquivalentIdSet(ids)
-                assoc_id_sets.add(equiv_id_set)
-
-            frozen_assoc_id_sets = frozenset(assoc_id_sets)
-
-        instance = cls(
-            behaviour=SynonymTermBehaviour(json_dict["behaviour"]),
-            associated_id_sets=frozen_assoc_id_sets,
-        )
-        return instance
-
-
-@dataclass(frozen=True)
 class ParserAction:
     """
     A ParserAction changes the behaviour of a :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in
@@ -862,8 +828,10 @@ class CuratedTerm:
 
     curated_synonym: str
     mention_confidence: MentionConfidence
-    actions: Tuple[SynonymTermAction, ...]
+    behaviour: SynonymTermBehaviour
     case_sensitive: bool
+    #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
+    associated_id_sets: Optional[AssociatedIdSets] = None
     _id: bson.ObjectId = field(default_factory=bson.ObjectId, compare=False)
     #: The original term that is used as a 'seed' term for this curation.
     #: note, this is used for NER to determine how linking is performed. If you also
@@ -876,8 +844,7 @@ class CuratedTerm:
         # data validation
         if not isinstance(self.curated_synonym, str):
             raise ValueError(f"curated_synonym should be a string, {self}")
-        behaviours = set(action.behaviour for action in self.actions)
-        if len(behaviours) > 1 and SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM in behaviours:
+        if self.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM:
             raise ValueError(f"inherited curations may only have one action: {self}")
 
     def term_norm_for_linking(self, entity_class: str):
@@ -891,10 +858,21 @@ class CuratedTerm:
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "CuratedTerm":
+        if json_dict["associated_id_sets"] is None:
+            frozen_assoc_id_sets = None
+        else:
+            assoc_id_sets = set()
+            for equiv_id_set in json_dict["associated_id_sets"]:
+                ids = frozenset((idx, source) for idx, source in equiv_id_set["ids_and_source"])
+                equiv_id_set = EquivalentIdSet(ids)
+                assoc_id_sets.add(equiv_id_set)
+
+            frozen_assoc_id_sets = frozenset(assoc_id_sets)
 
         return cls(
             mention_confidence=MentionConfidence[json_dict["mention_confidence"]],
-            actions=tuple(SynonymTermAction.from_dict(x) for x in json_dict["actions"]),
+            behaviour=SynonymTermBehaviour(json_dict["behaviour"]),
+            associated_id_sets=frozen_assoc_id_sets,
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
             source_term=json_dict["source_term"],

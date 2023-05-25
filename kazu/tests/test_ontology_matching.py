@@ -4,14 +4,10 @@ from typing import List, Dict, Any
 
 import pytest
 import spacy
-from spacy.lang.en import English
-from spacy.lang.en.punctuation import TOKENIZER_INFIXES
-
 from kazu.data.data import (
     CuratedTerm,
     DocumentJsonUtils,
     MentionConfidence,
-    SynonymTermAction,
     SynonymTermBehaviour,
     EquivalentIdSet,
 )
@@ -32,6 +28,8 @@ from kazu.modelling.ontology_preprocessing.base import (
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
+from spacy.lang.en import English
+from spacy.lang.en.punctuation import TOKENIZER_INFIXES
 
 
 def test_constructor():
@@ -158,25 +156,19 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            FIRST_MOCK_PARSER,
                                         )
                                     ]
-                                ),
-                            ),
+                                )
+                            )
                         ]
                     ),
                     case_sensitive=False,
@@ -186,25 +178,19 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        SECOND_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            SECOND_MOCK_PARSER,
                                         )
                                     ]
-                                ),
-                            ),
+                                )
+                            )
                         ]
                     ),
                     case_sensitive=False,
@@ -226,25 +212,19 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            FIRST_MOCK_PARSER,
                                         )
                                     ]
-                                ),
-                            ),
+                                )
+                            )
                         ]
                     ),
                     case_sensitive=False,
@@ -254,25 +234,19 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        SECOND_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            SECOND_MOCK_PARSER,
                                         )
                                     ]
-                                ),
-                            ),
+                                )
+                            )
                         ]
                     ),
                     case_sensitive=True,
@@ -293,24 +267,18 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            FIRST_MOCK_PARSER,
                                         )
                                     ]
-                                ),
+                                )
                             )
                         ]
                     ),
@@ -321,24 +289,18 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="others",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        "I dont exist",
-                                                        SECOND_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            "I dont exist",
+                                            SECOND_MOCK_PARSER,
                                         )
                                     ]
-                                ),
+                                )
                             )
                         ]
                     ),
@@ -358,24 +320,18 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            FIRST_MOCK_PARSER,
                                         )
                                     ]
-                                ),
+                                )
                             )
                         ]
                     ),
@@ -386,24 +342,18 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.IGNORE,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.IGNORE,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        SECOND_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            SECOND_MOCK_PARSER,
                                         )
                                     ]
-                                ),
+                                )
                             )
                         ]
                     ),
@@ -425,24 +375,18 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="This sentence is just to test",
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        SECOND_MOCK_PARSER,
-                                                    )
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            SECOND_MOCK_PARSER,
                                         )
                                     ]
-                                ),
+                                )
                             )
                         ]
                     ),
@@ -465,35 +409,29 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym=CONFUSING_SYNONYM,
-                    actions=tuple(
+                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    associated_id_sets=frozenset(
                         [
-                            SynonymTermAction(
-                                behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                                associated_id_sets=frozenset(
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
                                     [
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        TARGET_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    ),
-                                                ]
-                                            )
-                                        ),
-                                        EquivalentIdSet(
-                                            ids_and_source=frozenset(
-                                                [
-                                                    (
-                                                        CONFUSING_IDX,
-                                                        FIRST_MOCK_PARSER,
-                                                    ),
-                                                ]
-                                            )
+                                        (
+                                            TARGET_IDX,
+                                            FIRST_MOCK_PARSER,
                                         ),
                                     ]
-                                ),
-                            )
+                                )
+                            ),
+                            EquivalentIdSet(
+                                ids_and_source=frozenset(
+                                    [
+                                        (
+                                            CONFUSING_IDX,
+                                            FIRST_MOCK_PARSER,
+                                        ),
+                                    ]
+                                )
+                            ),
                         ]
                     ),
                     case_sensitive=False,

@@ -11,7 +11,6 @@ from kazu.data.data import (
     EquivalentIdSet,
     ParserBehaviour,
     GlobalParserActions,
-    SynonymTermAction,
     SynonymTermBehaviour,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
@@ -131,24 +130,18 @@ def setup_databases(
 def test_should_add_synonym_term_to_parser(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        actions=tuple(
+        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        associated_id_sets=frozenset(
             [
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
                         [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            "first",
-                                            DUMMY_PARSER_SOURCE,
-                                        )
-                                    ]
-                                )
+                            (
+                                "first",
+                                DUMMY_PARSER_SOURCE,
                             )
                         ]
-                    ),
+                    )
                 )
             ]
         ),
@@ -186,24 +179,18 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
 def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        actions=tuple(
+        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        associated_id_sets=frozenset(
             [
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
                         [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            "first",
-                                            DUMMY_PARSER_SOURCE,
-                                        )
-                                    ]
-                                )
+                            (
+                                "first",
+                                DUMMY_PARSER_SOURCE,
                             )
                         ]
-                    ),
+                    )
                 )
             ]
         ),
@@ -223,42 +210,19 @@ def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
 def test_should_drop_curated_term_followed_by_adding_new_one(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        actions=tuple(
+        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        associated_id_sets=frozenset(
             [
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
-                    associated_id_sets=frozenset(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
                         [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            "first",
-                                            DUMMY_PARSER_SOURCE,
-                                        )
-                                    ]
-                                )
+                            (
+                                "second",
+                                DUMMY_PARSER_SOURCE,
                             )
                         ]
-                    ),
-                ),
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            "second",
-                                            DUMMY_PARSER_SOURCE,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                ),
+                    )
+                )
             ]
         ),
         curated_synonym=TARGET_SYNONYM,
@@ -281,25 +245,19 @@ def test_should_drop_curated_term_followed_by_adding_new_one(tmp_path):
 def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        actions=tuple(
+        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        associated_id_sets=frozenset(
             [
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
                         [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_SYNONYM,
-                                            DUMMY_PARSER_SOURCE,
-                                        )
-                                    ]
-                                )
+                            (
+                                TARGET_SYNONYM,
+                                DUMMY_PARSER_SOURCE,
                             )
                         ]
-                    ),
-                ),
+                    )
+                )
             ]
         ),
         curated_synonym=TARGET_SYNONYM,
@@ -318,11 +276,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        actions=tuple(
-            [
-                SynonymTermAction(behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY),
-            ]
-        ),
+        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
         curated_synonym=TARGET_SYNONYM,
         case_sensitive=False,
     )
