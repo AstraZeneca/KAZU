@@ -394,7 +394,7 @@ class CurationProcessor:
             curated_synonym,
             potentially_conflicting_cs_confidences,
         ) in confidences_by_case_sensitive_synonym.items():
-            if len(set(potentially_conflicting_cs_confidences)) > 1:
+            if len(potentially_conflicting_cs_confidences) > 1:
                 message = (
                     "\n\nmultiple case sensitive curations specified with conflicting confidence values \n\n"
                     + "\n".join(
