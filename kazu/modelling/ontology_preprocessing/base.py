@@ -377,18 +377,18 @@ class CurationProcessor:
                 curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(
                     curation
                 )
-            if curation.case_sensitive:
-                curations_by_case_sensitive_synonym[curation.curated_synonym].add(curation)
-                confidences_by_case_sensitive_synonym[curation.curated_synonym].add(
-                    curation.mention_confidence
-                )
-            else:
-                curations_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
-                    curation
-                )
-                confidences_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
-                    curation.mention_confidence
-                )
+                if curation.case_sensitive:
+                    curations_by_case_sensitive_synonym[curation.curated_synonym].add(curation)
+                    confidences_by_case_sensitive_synonym[curation.curated_synonym].add(
+                        curation.mention_confidence
+                    )
+                else:
+                    curations_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
+                        curation
+                    )
+                    confidences_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
+                        curation.mention_confidence
+                    )
 
         for (
             curated_synonym,
