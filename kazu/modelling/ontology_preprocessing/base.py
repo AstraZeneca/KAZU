@@ -424,7 +424,7 @@ class CurationProcessor:
                 potentially_conflicting_cs_confidences
             ) > min(potentially_conflicting_case_insensitive_confidences):
                 message = (
-                    "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values \n\n"
+                    "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values\n\n"
                     + "\n".join(
                         curation.to_json()
                         for curation in potentially_conflicting_cs_curations.union(
