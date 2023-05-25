@@ -402,7 +402,7 @@ class CurationProcessor:
         ) in curations_and_confs_by_case_sensitive_synonym.items():
             if len(potentially_conflicting_cs_confidences) > 1:
                 message = (
-                    "\n\nmultiple case sensitive curations specified with conflicting confidence values \n\n"
+                    "\n\nmultiple case sensitive curations specified with conflicting confidence values\n\n"
                     + "\n".join(
                         curation.to_json() for curation in potentially_conflicting_cs_curations
                     )
