@@ -26,7 +26,7 @@ from kazu.data.data import (
     SimpleValue,
     CuratedTerm,
     ParserBehaviour,
-    SynonymTermBehaviour,
+    CuratedTermBehaviour,
     AssociatedIdSets,
     GlobalParserActions,
     AutoNameEnum,
@@ -118,11 +118,11 @@ class CurationProcessor:
 
     # curations are applied in the following order
     CURATION_APPLY_ORDER = (
-        SynonymTermBehaviour.IGNORE,
-        SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-        SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-        SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
-        SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+        CuratedTermBehaviour.IGNORE,
+        CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+        CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
     )
     _BEHAVIOUR_TO_ORDER_INDEX = {behav: i for i, behav in enumerate(CURATION_APPLY_ORDER)}
 
@@ -147,19 +147,19 @@ class CurationProcessor:
         self.parser_name = parser_name
         self._terms_by_term_norm: Dict[NormalisedSynonymStr, SynonymTerm] = {}
         self._terms_by_id: DefaultDict[Idx, Set[SynonymTerm]] = defaultdict(set)
+        # used by inherited actions to decide behaviour
+        self._curations_by_syn: DefaultDict[str, Set[CuratedTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
-        self._ids_to_ignore_from_global_actions: Set[Idx] = set()
 
     @classmethod
     def curation_sort_key(cls, curated_term: CuratedTerm):
         """Determines the order curations are processed in."""
-
-        max_behaviour_index = max(
-            cls._BEHAVIOUR_TO_ORDER_INDEX[action.behaviour] for action in curated_term.actions
+        return (
+            cls._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
+            curated_term.curated_synonym,
         )
-        return (max_behaviour_index, curated_term.curated_synonym)
 
     def _update_term_lookups(
         self, term: SynonymTerm, override: bool
@@ -338,26 +338,40 @@ class CurationProcessor:
 
     def _process_curations(self) -> List[CuratedTerm]:
         safe_curations = self.analyse_conflicts_in_curations(self.curations)
-        curation_for_ner = []
+        curation_for_ner = set()
         for curation in sorted(safe_curations, key=self.curation_sort_key):
-            maybe_curation_with_term_norm_actions = self._process_curation_actions(curation)
+            maybe_curation_with_term_norm_actions = self._process_curation_action(curation)
             if maybe_curation_with_term_norm_actions is not None:
-                curation_for_ner.append(maybe_curation_with_term_norm_actions)
-        return curation_for_ner
+                curation_for_ner.add(maybe_curation_with_term_norm_actions)
+
+        # check curations are still represented in DB after all processed
+        for curation in set(curation_for_ner):
+            if curation.term_norm_for_linking(self.entity_class) not in self._terms_by_term_norm:
+                logger.warning(
+                    "curation %s has been declared suitable for NER, but it's term "
+                    "norm reference has been removed by another curation",
+                    curation,
+                )
+                curation_for_ner.remove(curation)
+        return sorted(curation_for_ner, key=self.curation_sort_key)
 
     def analyse_conflicts_in_curations(self, curations: Set[CuratedTerm]) -> Set[CuratedTerm]:
         """Check to see if a list of curations contain conflicts.
 
-        Conflicts can occur if two or more curations normalise to the same NormalisedSynonymStr,
-        but refer to different AssociatedIdSets, and one of their actions is attempting to add
-        a SynonymTerm to the database. This would create an ambiguity over which AssociatedIdSets
-        is appropriate for the normalised term.
+        Conflicts can occur for the following reasons:
 
-        In addition, conflicts can occur if multiple values for case sensitivity and the
-        string to match on are produced for the same term_norm. Note that these conflicts aren't
-        filtered as they don't cause database inconsistencies. However, they may cause somewhat
-        erratic signals of the Entity.mention_confidence if conflicts do occur. We tolerate this
-        as we expect this situation to be rare.
+        1) If two or more curations normalise to the same NormalisedSynonymStr,
+        but have different behaviours
+
+        2) If two or more curations normalise to the same NormalisedSynonymStr,
+        but have different associated ID sets specified, such that one would
+        override the other
+
+        3) If two or more curations have the same uncased value for curated_synonym
+         and have multiple values for case sensitivity and incompatible values for
+         mention_confidence. I.E. A case-insensitive curation cannot have a higher
+         mention confidence value than a case-sensitive one
+
 
         :param curations:
         :return: safe curations set
@@ -369,11 +383,13 @@ class CurationProcessor:
         curations_and_confs_by_case_insensitive_synonym: DefaultDict[
             str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
         ] = defaultdict(lambda: (set(), set()))
-        safe = set()
+        inherited_curations_by_term_norm: DefaultDict[str, Set[CuratedTerm]] = defaultdict(set)
+
         for curation in curations:
             if curation.source_term is not None:
-                # inherited curations cannot conflict as they use term norm of source term
-                safe.add(curation)
+                inherited_curations_by_term_norm[
+                    curation.term_norm_for_linking(self.entity_class)
+                ].add(curation)
             else:
                 curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(
                     curation
@@ -392,6 +408,92 @@ class CurationProcessor:
                     curations_and_confs_by_case_insensitive_synonym[
                         curation.curated_synonym.lower()
                     ][1].add(curation.mention_confidence)
+
+        safe_by_case, conflicting_by_case = self._analyse_conflicts_in_case_sensitivity(
+            curations_and_confs_by_case_insensitive_synonym,
+            curations_and_confs_by_case_sensitive_synonym,
+        )
+        safe_by_term_norm, conflicting_by_term_norm = self._analyse_conflicts_in_term_normalisation(
+            curations_by_term_norm
+        )
+
+        for conflicting_term_norm in set(
+            curation.term_norm_for_linking(self.entity_class)
+            for curation in conflicting_by_case.union(conflicting_by_term_norm)
+        ):
+            if conflicting_term_norm in inherited_curations_by_term_norm:
+                inherited_curations_by_term_norm.pop(conflicting_term_norm)
+
+        safe_by_case.update(safe_by_term_norm)
+        for inherited_curations in inherited_curations_by_term_norm.values():
+            safe_by_case.update(inherited_curations)
+
+        return safe_by_case
+
+    def _analyse_conflicts_in_term_normalisation(
+        self, curations_by_term_norm: DefaultDict[str, Set[CuratedTerm]]
+    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
+        all_curations, conflicting = set(), set()
+        for potentially_conflicting_curations in curations_by_term_norm.values():
+            all_curations.update(potentially_conflicting_curations)
+            overridden_conflicting_id_sets = set()
+            conflicting_behaviours = set()
+            for curation in potentially_conflicting_curations:
+                # if behaviour is ignore, it can't conflict
+                if curation.behaviour is not CuratedTermBehaviour.IGNORE:
+                    conflicting_behaviours.add(curation.behaviour)
+                if (
+                    curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
+                    or curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY
+                ):
+                    if curation.associated_id_sets is not None:
+                        overridden_conflicting_id_sets.add(curation.associated_id_sets)
+                    else:
+                        maybe_term = self._terms_by_term_norm.get(
+                            curation.term_norm_for_linking(self.entity_class)
+                        )
+                        if maybe_term is None:
+                            # term does not exist in DB and has no ID's attached, so it must be wrong?
+                            logger.warning(
+                                "no ids found for curation, even though they were expected %s",
+                                curation,
+                            )
+                            conflicting.add(curation)
+
+            if len(conflicting_behaviours) > 1:
+                conflicting.update(potentially_conflicting_curations)
+                message = (
+                    "\n\nconflicting curations by behaviours detected\n\n"
+                    + "\n".join(
+                        curation.to_json() for curation in potentially_conflicting_curations
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
+
+            if len(overridden_conflicting_id_sets) > 1:
+                conflicting.update(potentially_conflicting_curations)
+                message = (
+                    "\n\nmultiple overrides for same term norm detected\n\n"
+                    + "\n".join(
+                        curation.to_json() for curation in potentially_conflicting_curations
+                    )
+                    + "\n"
+                )
+                logger.warning(message)
+        return all_curations.difference(conflicting), conflicting
+
+    def _analyse_conflicts_in_case_sensitivity(
+        self,
+        curations_and_confs_by_case_insensitive_synonym: DefaultDict[
+            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
+        ],
+        curations_and_confs_by_case_sensitive_synonym: DefaultDict[
+            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
+        ],
+    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
+        conflicting = set()
+        all_curations = set()
         for (
             curated_synonym,
             (
@@ -399,7 +501,9 @@ class CurationProcessor:
                 potentially_conflicting_cs_confidences,
             ),
         ) in curations_and_confs_by_case_sensitive_synonym.items():
+            all_curations.update(potentially_conflicting_cs_curations)
             if len(potentially_conflicting_cs_confidences) > 1:
+                conflicting.update(potentially_conflicting_cs_curations)
                 message = (
                     "\n\nmultiple case sensitive curations specified with conflicting confidence values\n\n"
                     + "\n".join(
@@ -422,6 +526,8 @@ class CurationProcessor:
             if len(potentially_conflicting_case_insensitive_confidences) > 0 and min(
                 potentially_conflicting_cs_confidences
             ) < max(potentially_conflicting_case_insensitive_confidences):
+                conflicting.update(potentially_conflicting_cs_curations)
+                conflicting.update(potentially_conflicting_case_insensitive_curations)
                 message = (
                     "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values\n\n"
                     + "\n".join(
@@ -433,7 +539,6 @@ class CurationProcessor:
                     + "\n"
                 )
                 logger.warning(message)
-
         for (
             curated_synonym_lower_case,
             (
@@ -441,7 +546,9 @@ class CurationProcessor:
                 potentially_conflicting_case_insensitive_confidences,
             ),
         ) in curations_and_confs_by_case_insensitive_synonym.items():
+            all_curations.update(potentially_conflicting_case_insensitive_curations)
             if len(potentially_conflicting_case_insensitive_confidences) > 1:
+                conflicting.update(potentially_conflicting_case_insensitive_curations)
                 message = (
                     "\n\nmultiple case insensitive curations specified with conflicting confidence values \n\n"
                     + "\n".join(
@@ -452,83 +559,71 @@ class CurationProcessor:
                 )
                 logger.warning(message)
 
-        for potentially_conflicting_curations in curations_by_term_norm.values():
-            conflicting_id_sets = set()
-            for curation in potentially_conflicting_curations:
-                for action in curation.actions:
-                    if (
-                        action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
-                        or action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY
-                    ):
-                        if action.associated_id_sets is None:
-                            associated_id_sets = self._terms_by_term_norm[
-                                curation.term_norm_for_linking(self.entity_class)
-                            ].associated_id_sets
-                        else:
-                            associated_id_sets = action.associated_id_sets
-                        conflicting_id_sets.add(associated_id_sets)
+        return all_curations.difference(conflicting), conflicting
 
-            if len(conflicting_id_sets) > 1:
-                message = (
-                    "\n\nconflicting curations by ambiguous link id detected\n\n"
-                    + "\n".join(
-                        curation.to_json() for curation in potentially_conflicting_curations
-                    )
-                    + "\n"
-                )
-                logger.warning(message)
-            else:
-                safe.update(potentially_conflicting_curations)
-
-        return safe
-
-    def _process_curation_actions(self, curation: CuratedTerm) -> Optional[CuratedTerm]:
+    def _process_curation_action(self, curation: CuratedTerm) -> Optional[CuratedTerm]:
+        if curation.source_term is None:
+            self._curations_by_syn[curation.curated_synonym].add(curation)
         term_norm = curation.term_norm_for_linking(self.entity_class)
         suitable_for_ner = False
-        for action in curation.actions:
-            if action.behaviour is SynonymTermBehaviour.IGNORE:
-                logger.debug("ignoring unwanted curation: %s for %s", curation, self.parser_name)
-            elif action.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM:
-                logger.debug(
-                    "action inherits linking behaviour from %s for %s",
+        if curation.behaviour is CuratedTermBehaviour.IGNORE:
+            logger.debug("ignoring unwanted curation: %s for %s", curation, self.parser_name)
+        elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
+            logger.debug(
+                "action inherits linking behaviour from %s for %s",
+                curation.source_term,
+                self.parser_name,
+            )
+            assert curation.source_term is not None
+            source_curations = self._curations_by_syn.get(curation.source_term)
+            if source_curations is None:
+                logger.warning(
+                    "no source curations found for %s for %s",
                     curation.source_term,
                     self.parser_name,
                 )
+            elif len(source_curations) > 1:
+                logger.warning(
+                    "multiple source curations found for %s for %s",
+                    curation.source_term,
+                    self.parser_name,
+                )
+            elif (
+                next(iter(source_curations)).behaviour
+                is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
+            ):
                 if term_norm not in self._terms_by_term_norm:
-                    logger.debug(
+                    logger.warning(
                         "curation %s has no linking target in the synonym database, and will be ignored",
                         curation,
                     )
                 else:
                     suitable_for_ner = True
-            elif action.behaviour is SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
-                self._drop_synonym_term(term_norm)
-            elif action.behaviour is SynonymTermBehaviour.ADD_FOR_LINKING_ONLY:
-                self._attempt_to_add_database_entry_for_curation(
-                    curation_associated_id_set=action.associated_id_sets,
-                    curated_synonym=curation.curated_synonym,
-                    curation_term_norm=term_norm,
+        elif curation.behaviour is CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
+            self._drop_synonym_term(term_norm)
+        elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
+            self._attempt_to_add_database_entry_for_curation(
+                curation_associated_id_set=curation.associated_id_sets,
+                curated_synonym=curation.curated_synonym,
+                curation_term_norm=term_norm,
+            )
+        elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
+            self._attempt_to_add_database_entry_for_curation(
+                curation_associated_id_set=curation.associated_id_sets,
+                curated_synonym=curation.curated_synonym,
+                curation_term_norm=term_norm,
+            )
+            term_for_this_action = self._terms_by_term_norm.get(term_norm)
+            if term_for_this_action is None:
+                logger.warning(
+                    "CuratedTerm %s is invalid for NER: "
+                    "requires database entry but all have been removed by actions.",
+                    curation,
                 )
-            elif action.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING:
-                self._attempt_to_add_database_entry_for_curation(
-                    curation_associated_id_set=action.associated_id_sets,
-                    curated_synonym=curation.curated_synonym,
-                    curation_term_norm=term_norm,
-                )
-                term_for_this_action = self._terms_by_term_norm.get(term_norm)
-                if term_for_this_action is None:
-                    logger.warning(
-                        "CuratedTerm %s is invalid for NER: "
-                        "requires database entry but all have been removed by actions.",
-                        curation,
-                    )
-                    # since this action is invalid, we need a continue here so that the action isn't added to the
-                    # list of viable actions
-                    continue
-                else:
-                    suitable_for_ner = True
             else:
-                raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
+                suitable_for_ner = True
+        else:
+            raise ValueError(f"unknown behaviour for parser {self.parser_name}, {curation}")
         # if no actions require db entry, it can't be used for ner
         if suitable_for_ner:
             return curation
@@ -538,6 +633,17 @@ class CurationProcessor:
     def _process_global_actions(self) -> None:
         if self.global_actions is None:
             return None
+
+        if self.curations is not None:
+            override_curations_by_id = defaultdict(set)
+            curations = self.curations if self.curations is not None else []
+            for curation in curations:
+                if curation.associated_id_sets is not None:
+                    for equiv_id_set in curation.associated_id_sets:
+                        for idx in equiv_id_set.ids:
+                            override_curations_by_id[idx].add(curation)
+        else:
+            override_curations_by_id = None
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
                 ids = action.parser_to_target_id_mappings[self.parser_name]
@@ -557,7 +663,44 @@ class CurationProcessor:
                             counter_this_idx[CurationModificationResult.ID_SET_MODIFIED],
                             counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED],
                         )
-                    self._ids_to_ignore_from_global_actions.add(idx)
+
+                        if override_curations_by_id is not None:
+                            for override_curation_to_modify in set(
+                                override_curations_by_id.get(idx, set())
+                            ):
+                                assert override_curation_to_modify.associated_id_sets is not None
+                                new_associated_id_sets = self._drop_id_from_associated_id_sets(
+                                    idx, override_curation_to_modify.associated_id_sets
+                                )
+                                if len(new_associated_id_sets) == 0:
+
+                                    self.curations.remove(override_curation_to_modify)
+                                    override_curations_by_id[idx].remove(
+                                        override_curation_to_modify
+                                    )
+                                    logger.debug(
+                                        "removed curation %s because of global action",
+                                        override_curation_to_modify,
+                                    )
+                                elif (
+                                    new_associated_id_sets
+                                    != override_curation_to_modify.associated_id_sets
+                                ):
+                                    self.curations.remove(override_curation_to_modify)
+                                    override_curations_by_id[idx].remove(
+                                        override_curation_to_modify
+                                    )
+                                    mod_curation = dataclasses.replace(
+                                        override_curation_to_modify,
+                                        associated_id_sets=new_associated_id_sets,
+                                    )
+                                    self.curations.add(mod_curation)
+                                    override_curations_by_id[idx].add(mod_curation)
+                                    logger.debug(
+                                        "modified curation %s to %s because of global action",
+                                        override_curation_to_modify,
+                                        mod_curation,
+                                    )
 
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
@@ -620,11 +763,6 @@ class CurationProcessor:
 
         # curation_associated_id_set is implicitly not None
         assert curation_associated_id_set is not None
-        # modify the curation_associated_id_set with any globally dropped ids
-        for idx in self._ids_to_ignore_from_global_actions:
-            curation_associated_id_set = self._drop_id_from_associated_id_sets(
-                idx, curation_associated_id_set
-            )
         if len(curation_associated_id_set) == 0:
             logger.debug(
                 "all ids removed by global action for %s,  Parser name: %s",
@@ -652,40 +790,31 @@ class CurationProcessor:
                 )
                 return CurationModificationResult.NO_ACTION
             else:
-                logger.error(
+                logger.debug(
                     log_prefix
-                    + " but term_norm <%(term_norm)s> already exists in synonym database, and its\n"
-                    "associated_id_sets don't match the ids in id_set. Creating a new\n"
-                    "SynonymTerm would override an existing entry, resulting in inconsistencies.\n"
-                    "This can happen if a synonym appears twice in the underlying ontology,\n"
-                    "with multiple identifiers attached\n"
-                    "Possible mitigations:\n"
-                    "1) use a SynonymTermAction to drop the existing SynonymTerm from the database first.\n"
-                    "2) change the target id set of the curation to match the existing entry\n"
-                    "\t(i.e. %(existing_id_set)s\n"
-                    "3) Change the string normalizer function to generate unique term_norms\n",
+                    + " . Will remove existing term_norm <%(term_norm)s> as an ID set override has been specified",
                     log_formatting_dict,
                 )
-                return CurationModificationResult.NO_ACTION
-        else:  # no term exists, so one will be made
-            assert curation_associated_id_set is not None
-            for equiv_id_set in curation_associated_id_set:
-                for idx in equiv_id_set.ids:
-                    if idx not in self._terms_by_id:
-                        raise CurationException(
-                            f"Attempted to add term containing {idx} but this id does not exist"
-                        )
-            is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
-            new_term = SynonymTerm(
-                term_norm=curation_term_norm,
-                terms=frozenset((curated_synonym,)),
-                is_symbolic=is_symbolic,
-                mapping_types=frozenset(("kazu_curated",)),
-                associated_id_sets=curation_associated_id_set,
-                parser_name=self.parser_name,
-                aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
-            )
-            return self._update_term_lookups(new_term, False)
+
+        # no term exists, or we want to override so one will be made
+        assert curation_associated_id_set is not None
+        for equiv_id_set in curation_associated_id_set:
+            for idx in equiv_id_set.ids:
+                if idx not in self._terms_by_id:
+                    raise CurationException(
+                        f"Attempted to add term containing {idx} but this id does not exist"
+                    )
+        is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
+        new_term = SynonymTerm(
+            term_norm=curation_term_norm,
+            terms=frozenset((curated_synonym,)),
+            is_symbolic=is_symbolic,
+            mapping_types=frozenset(("kazu_curated",)),
+            associated_id_sets=curation_associated_id_set,
+            parser_name=self.parser_name,
+            aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+        )
+        return self._update_term_lookups(new_term, True)
 
 
 class OntologyParser(ABC):
@@ -1065,20 +1194,16 @@ class OntologyParser(ABC):
         """
         for term_str in term.terms:
             if term.original_term is None:
-                action = SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                )
+                behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
             else:
-                action = SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
-                )
+                behaviour = CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
             is_symbolic = StringNormalizer.classify_symbolic(term_str, self.entity_class)
             conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
             yield CuratedTerm(
                 curated_synonym=term_str,
                 mention_confidence=conf,
                 case_sensitive=is_symbolic,
-                actions=(action,),
+                behaviour=behaviour,
                 source_term=term.original_term,
             )
 
