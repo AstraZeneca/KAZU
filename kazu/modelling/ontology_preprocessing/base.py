@@ -422,7 +422,7 @@ class CurationProcessor:
             )
             if len(potentially_conflicting_case_insensitive_confidences) > 0 and min(
                 potentially_conflicting_cs_confidences
-            ) > min(potentially_conflicting_case_insensitive_confidences):
+            ) < max(potentially_conflicting_case_insensitive_confidences):
                 message = (
                     "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values\n\n"
                     + "\n".join(

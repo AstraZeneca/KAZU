@@ -251,10 +251,12 @@ class StrategyRunner:
 
         # do a separate sorted and groupby call (rather than our sort_then_group utility)
         # so we can do all the sorting we need in one go
+        # we inverse the sign of mention_confidence so that we process high confidence
+        # hits first
         sorted_entities = sorted(
             doc.get_entities(),
             key=lambda ent: (
-                ent.mention_confidence,
+                -ent.mention_confidence,
                 *entity_to_entity_key(ent),
             ),
         )

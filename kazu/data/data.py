@@ -62,9 +62,9 @@ class AutoNameEnum(Enum):
 
 
 class MentionConfidence(IntEnum):
-    HIGHLY_LIKELY = 0  # almost certain to be correct
-    PROBABLE = 1
-    POSSIBLE = 2  # high degree of uncertainty
+    HIGHLY_LIKELY = 100  # almost certain to be correct
+    PROBABLE = 50
+    POSSIBLE = 10  # high degree of uncertainty
 
 
 class StringMatchConfidence(AutoNameEnum):
