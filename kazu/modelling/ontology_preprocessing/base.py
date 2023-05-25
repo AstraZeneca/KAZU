@@ -364,10 +364,12 @@ class CurationProcessor:
         :return: safe curations set
         """
         curations_by_term_norm = defaultdict(set)
-        curations_by_case_sensitive_synonym = defaultdict(set)
-        curations_by_case_insensitive_synonym = defaultdict(set)
-        confidences_by_case_sensitive_synonym = defaultdict(set)
-        confidences_by_case_insensitive_synonym = defaultdict(set)
+        curations_and_confs_by_case_sensitive_synonym: DefaultDict[
+            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
+        ] = defaultdict(lambda: (set(), set()))
+        curations_and_confs_by_case_insensitive_synonym: DefaultDict[
+            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
+        ] = defaultdict(lambda: (set(), set()))
         safe = set()
         for curation in curations:
             if curation.source_term is not None:
@@ -378,47 +380,55 @@ class CurationProcessor:
                     curation
                 )
                 if curation.case_sensitive:
-                    curations_by_case_sensitive_synonym[curation.curated_synonym].add(curation)
-                    confidences_by_case_sensitive_synonym[curation.curated_synonym].add(
+                    curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][0].add(
+                        curation
+                    )
+                    curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][1].add(
                         curation.mention_confidence
                     )
                 else:
-                    curations_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
-                        curation
-                    )
-                    confidences_by_case_insensitive_synonym[curation.curated_synonym.lower()].add(
-                        curation.mention_confidence
-                    )
-
+                    curations_and_confs_by_case_insensitive_synonym[
+                        curation.curated_synonym.lower()
+                    ][0].add(curation)
+                    curations_and_confs_by_case_insensitive_synonym[
+                        curation.curated_synonym.lower()
+                    ][1].add(curation.mention_confidence)
         for (
             curated_synonym,
-            potentially_conflicting_cs_confidences,
-        ) in confidences_by_case_sensitive_synonym.items():
+            (
+                potentially_conflicting_cs_curations,
+                potentially_conflicting_cs_confidences,
+            ),
+        ) in curations_and_confs_by_case_sensitive_synonym.items():
             if len(potentially_conflicting_cs_confidences) > 1:
                 message = (
                     "\n\nmultiple case sensitive curations specified with conflicting confidence values \n\n"
                     + "\n".join(
-                        curation.to_json()
-                        for curation in curations_by_case_sensitive_synonym[curated_synonym]
+                        curation.to_json() for curation in potentially_conflicting_cs_curations
                     )
                     + "\n"
                 )
                 logger.warning(message)
 
-            potentially_conflicting_case_insensitive_confidences = (
-                confidences_by_case_insensitive_synonym.get(curated_synonym.lower(), set())
+            (
+                potentially_conflicting_case_insensitive_curations,
+                potentially_conflicting_case_insensitive_confidences,
+            ) = curations_and_confs_by_case_insensitive_synonym.get(
+                curated_synonym.lower(),
+                (
+                    set(),
+                    set(),
+                ),
             )
-            if any(
-                case_cs_conf > case_insens_conf
-                for case_insens_conf in potentially_conflicting_case_insensitive_confidences
-                for case_cs_conf in potentially_conflicting_cs_confidences
-            ):
+            if len(potentially_conflicting_case_insensitive_confidences) > 0 and min(
+                potentially_conflicting_cs_confidences
+            ) > min(potentially_conflicting_case_insensitive_confidences):
                 message = (
                     "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values \n\n"
                     + "\n".join(
                         curation.to_json()
-                        for curation in curations_by_case_sensitive_synonym[curated_synonym].union(
-                            curations_by_case_insensitive_synonym[curated_synonym.lower()]
+                        for curation in potentially_conflicting_cs_curations.union(
+                            potentially_conflicting_case_insensitive_curations
                         )
                     )
                     + "\n"
@@ -427,16 +437,17 @@ class CurationProcessor:
 
         for (
             curated_synonym_lower_case,
-            potentially_conflicting_case_insensitive_confidences,
-        ) in confidences_by_case_insensitive_synonym.items():
+            (
+                potentially_conflicting_case_insensitive_curations,
+                potentially_conflicting_case_insensitive_confidences,
+            ),
+        ) in curations_and_confs_by_case_insensitive_synonym.items():
             if len(potentially_conflicting_case_insensitive_confidences) > 1:
                 message = (
                     "\n\nmultiple case insensitive curations specified with conflicting confidence values \n\n"
                     + "\n".join(
                         curation.to_json()
-                        for curation in curations_by_case_insensitive_synonym[
-                            curated_synonym_lower_case
-                        ]
+                        for curation in potentially_conflicting_case_insensitive_curations
                     )
                     + "\n"
                 )
