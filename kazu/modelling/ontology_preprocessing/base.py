@@ -1063,7 +1063,7 @@ class OntologyParser(ABC):
                     behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
                 )
             is_symbolic = StringNormalizer.classify_symbolic(term_str, self.entity_class)
-            conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.HIGHLY_LIKELY
+            conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
             yield CuratedTerm(
                 curated_synonym=term_str,
                 mention_confidence=conf,
