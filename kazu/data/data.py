@@ -804,8 +804,6 @@ class CuratedTerm:
         # data validation
         if not isinstance(self.curated_synonym, str):
             raise ValueError(f"curated_synonym should be a string, {self}")
-        if self.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM:
-            raise ValueError(f"inherited curations may only have one action: {self}")
 
     def term_norm_for_linking(self, entity_class: str):
         norm_target = self.curated_synonym if self.source_term is None else self.source_term
