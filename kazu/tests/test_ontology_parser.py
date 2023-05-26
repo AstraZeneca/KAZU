@@ -176,6 +176,58 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) + 2 == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
+def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
+    global_actions = GlobalParserActions(
+        actions=[
+            ParserAction(
+                behaviour=ParserBehaviour.DROP_IDS_FROM_PARSER,
+                parser_to_target_id_mappings={
+                    PARSER_1_NAME: {"first"},
+                },
+            )
+        ]
+    )
+    curation = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        associated_id_sets=frozenset(
+            [
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        [
+                            (
+                                "first",
+                                DUMMY_PARSER_SOURCE,
+                            )
+                        ]
+                    )
+                ),
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        [
+                            (
+                                "second",
+                                DUMMY_PARSER_SOURCE,
+                            )
+                        ]
+                    )
+                ),
+            ]
+        ),
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+    )
+    syn_db = setup_databases(
+        base_path=tmp_path,
+        curation=curation,
+        global_actions=global_actions,
+        parser_data_includes_target_synonym=False,
+        noop_parser_curations_style="None",
+    )
+
+    assert len(syn_db.get_all(PARSER_1_NAME)) + 1 == len(syn_db.get_all(NOOP_PARSER_NAME))
+
+
 def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
