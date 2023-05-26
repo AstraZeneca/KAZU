@@ -14,7 +14,7 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
-from kazu.data.data import SynonymTermBehaviour
+from kazu.data.data import CuratedTermBehaviour
 from kazu.modelling.ontology_preprocessing.base import (
     OntologyParser,
 )
@@ -187,8 +187,8 @@ class OntologyMatcher:
                 # Also, a curation may exist in multiple SynonymTerm.terms
                 term_norm = curation.term_norm_for_linking(parser.entity_class)
                 if (
-                    curation.behaviour is SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING
-                    or curation.behaviour is SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM
+                    curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
+                    or curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
                 ):
                     match_id = (
                         parser.name
