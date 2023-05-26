@@ -155,9 +155,14 @@ class CurationProcessor:
 
     @classmethod
     def curation_sort_key(cls, curated_term: CuratedTerm):
-        """Determines the order curations are processed in."""
+        """Determines the order curations are processed in.
+
+        We use associated_id_sets as a key, so that any overrides will be
+        processed after any original behaviours
+        """
         return (
             cls._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
+            curated_term.associated_id_sets is not None,
             curated_term.curated_synonym,
         )
 
