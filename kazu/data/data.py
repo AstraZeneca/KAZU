@@ -747,12 +747,8 @@ class CuratedTerm:
         CuratedTerm(
             curated_synonym="ALL",
             case_sensitive=True,
-            actions=(
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset((EquivalentIdSet(("my_id", "my_source")),)),
-                ),
-            ),
+            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+            associated_id_sets=frozenset((EquivalentIdSet(("my_id", "my_source")),)),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -760,7 +756,7 @@ class CuratedTerm:
     Example 2:
 
     The string 'LH' is incorrectly identified as a synonym of the PLOD1 (ENSG00000083444) gene, whereas more often than not, it's actually an abbreviation of Lutenising Hormone.
-    We therefore want to drop this reference, and add a new one to LHB (ENSG00000104826, or Lutenising Hormone Subunit Beta)
+    We therefore want to override the associated_id_sets to LHB (ENSG00000104826, or Lutenising Hormone Subunit Beta)
 
     The CuratedTerm we therefore want is:
 
@@ -769,41 +765,12 @@ class CuratedTerm:
         CuratedTerm(
             curated_synonym="LH",
             case_sensitive=True,
-            actions=(
-                SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING),
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset(
-                        (EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)
-                    ),
-                ),
-            ),
+            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+            associated_id_sets=frozenset((EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
     Example 3:
-
-    A :class:`.SynonymTerm` has an unwanted :class:`.EquivalentIdSet` attached to it, but is otherwise good. We want to
-    remove this set. First, we drop the original term, then add a new one with only the target ids
-
-    .. code-block:: python
-
-        CuratedTerm(
-            curated_synonym="LH",
-            case_sensitive=True,
-            actions=(
-                SynonymTermAction(behaviour=SynonymTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING),
-                SynonymTermAction(
-                    behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-                    associated_id_sets=frozenset(
-                        (EquivalentIdSet(("my good id", "my source")),)
-                    ),
-                ),
-            ),
-            mention_confidence=MentionConfidence.POSSIBLE,
-        )
-
-    Example 4:
 
     A :class:`.SynonymTerm` has an alternative synonym not referenced in the underlying ontology, and we want to add it.
     We want it to inherit all the behaviour from the original term
@@ -814,16 +781,9 @@ class CuratedTerm:
             curated_synonym="breast carcinoma",
             case_sensitive=True,
             source_term="breast cancer",
-            actions=(
-                SynonymTermAction(behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM),
-            ),
+            behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
             mention_confidence=MentionConfidence.POSSIBLE,
         )
-
-    Notes:
-
-    mention_confidence is currently non-functional, and will be expanded upon at a later date
-
     """
 
     curated_synonym: str
