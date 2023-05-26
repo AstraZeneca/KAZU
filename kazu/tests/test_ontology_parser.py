@@ -11,7 +11,7 @@ from kazu.data.data import (
     EquivalentIdSet,
     ParserBehaviour,
     GlobalParserActions,
-    SynonymTermBehaviour,
+    CuratedTermBehaviour,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
 from kazu.modelling.ontology_preprocessing.base import (
@@ -130,7 +130,7 @@ def setup_databases(
 def test_should_add_synonym_term_to_parser(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -179,7 +179,7 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
 def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -210,7 +210,7 @@ def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
 def test_should_drop_curated_term_followed_by_adding_new_one(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -245,7 +245,7 @@ def test_should_drop_curated_term_followed_by_adding_new_one(tmp_path):
 def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -276,7 +276,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-        behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         curated_synonym=TARGET_SYNONYM,
         case_sensitive=False,
     )

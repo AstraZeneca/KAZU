@@ -8,7 +8,7 @@ from kazu.data.data import (
     CuratedTerm,
     DocumentJsonUtils,
     MentionConfidence,
-    SynonymTermBehaviour,
+    CuratedTermBehaviour,
     EquivalentIdSet,
 )
 from kazu.modelling.ontology_matching.assemble_pipeline import (
@@ -156,7 +156,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -178,7 +178,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -212,7 +212,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -234,7 +234,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -267,7 +267,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -289,7 +289,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="others",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -320,7 +320,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -342,7 +342,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="complexVII disease\u03B1",
-                    behaviour=SynonymTermBehaviour.IGNORE,
+                    behaviour=CuratedTermBehaviour.IGNORE,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -375,7 +375,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym="This sentence is just to test",
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
@@ -409,7 +409,7 @@ PARSER_1_AMBIGUOUS_DATA = {
                 CuratedTerm(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     curated_synonym=CONFUSING_SYNONYM,
-                    behaviour=SynonymTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
                     associated_id_sets=frozenset(
                         [
                             EquivalentIdSet(
