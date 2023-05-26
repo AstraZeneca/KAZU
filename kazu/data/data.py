@@ -632,7 +632,7 @@ class DocumentJsonUtils:
 SimpleValue = Union[NumericMetric, str]
 
 
-class SynonymTermBehaviour(AutoNameEnum):
+class CuratedTermBehaviour(AutoNameEnum):
     #: do nothing. Useful if you want to catalogue a term as "I've looked at this but don't want to use it for NER"
     IGNORE = auto()
     #: use the term for both dictionary based NER and as a linking target.
@@ -828,7 +828,7 @@ class CuratedTerm:
 
     curated_synonym: str
     mention_confidence: MentionConfidence
-    behaviour: SynonymTermBehaviour
+    behaviour: CuratedTermBehaviour
     case_sensitive: bool
     #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
@@ -871,7 +871,7 @@ class CuratedTerm:
 
         return cls(
             mention_confidence=MentionConfidence[json_dict["mention_confidence"]],
-            behaviour=SynonymTermBehaviour(json_dict["behaviour"]),
+            behaviour=CuratedTermBehaviour(json_dict["behaviour"]),
             associated_id_sets=frozen_assoc_id_sets,
             case_sensitive=json_dict["case_sensitive"],
             curated_synonym=json_dict["curated_synonym"],
