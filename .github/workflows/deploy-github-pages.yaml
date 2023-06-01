@@ -1,0 +1,71 @@
+name: Deploy GitHub Pages
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # Build job
+  build:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9" ]
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+
+    - name: create venv and install dependencies
+      run: |
+        rm -r /tmp/kazu-env || true
+        
+        PIP_CACHE_DIR=$(pip cache dir)
+        echo "pip cache dir is "${PIP_CACHE_DIR}
+        python -m venv /tmp/kazu-env
+        . /tmp/kazu-env/bin/activate
+        python -m pip install --upgrade pip
+        pip install -e ."[dev]"  --cache-dir $PIP_CACHE_DIR
+
+    - name: make sphinx docs
+      # note: we don't make the 'doctest' target, because
+      # we don't have the model pack here. This will have
+      # been done already in the integration tests.
+      run: |
+        . /tmp/kazu-env/bin/activate
+        make -C docs html
+    - name: upload pages artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: ./docs/_build/html
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: self-hosted
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
