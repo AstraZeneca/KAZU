@@ -117,6 +117,11 @@ exclude = '''
 )
 '''
 
+[tool.docformatter]
+black = true
+recursive = true
+in-place = true
+
 [tool.pytest.ini_options]
 testpaths = "kazu/tests"
 filterwarnings = [
