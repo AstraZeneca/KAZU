@@ -8,8 +8,8 @@ from kazu.steps import Step, document_iterating_step
 
 
 class StanzaStep(Step):
-    """
-    Currently just provides sentence-segmentation using a tokenizer trained on the genia treebank.
+    """Currently just provides sentence-segmentation using a tokenizer trained
+    on the genia treebank.
 
     Stanza paper:
 
@@ -74,7 +74,6 @@ class StanzaStep(Step):
     .. raw:: html
 
         </details>
-
     """
 
     def __init__(self, stanza_pipeline: stanza.Pipeline):

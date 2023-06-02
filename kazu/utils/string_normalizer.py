@@ -9,14 +9,12 @@ from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 
 
 class EntityClassNormalizer(Protocol):
-    """
-    protocol describing methods a normalizer should implement
-    """
+    """Protocol describing methods a normalizer should implement."""
 
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
-        """
-        method to determine whether a string is a symbol (e.g. "AD") or a noun phrase (e.g. "Alzheimers Disease")
+        """method to determine whether a string is a symbol (e.g. "AD") or a
+        noun phrase (e.g. "Alzheimers Disease")
 
         :param original_string:
         :return:
@@ -25,8 +23,7 @@ class EntityClassNormalizer(Protocol):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """
-        method for normalising a symbol
+        """Method for normalising a symbol.
 
         :param original_string:
         :return:
@@ -35,8 +32,7 @@ class EntityClassNormalizer(Protocol):
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
-        """
-        method for normalising a noun phrase
+        """Method for normalising a noun phrase.
 
         :param original_string:
         :return:
@@ -45,8 +41,9 @@ class EntityClassNormalizer(Protocol):
 
 
 class DefaultStringNormalizer(EntityClassNormalizer):
-    """
-    normalize a biomedical string for search. Suitable for most use cases
+    """normalize a biomedical string for search.
+
+    Suitable for most use cases
     """
 
     allowed_additional_chars = {" ", "(", ")", "+", "-", "‐"}
@@ -86,8 +83,8 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
-        """
-        checks for ratio of upper to lower case characters, and numeric to alpha characters.
+        """checks for ratio of upper to lower case characters, and numeric to
+        alpha characters.
 
         :param original_string:
         :return:
@@ -142,8 +139,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def depluralize(string):
-        """
-        apply some depluralisation rules
+        """Apply some depluralisation rules.
 
         :param string:
         :return:
@@ -166,10 +162,10 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def handle_lower_case_prefixes(string):
-        """
-        preserve case only if first char of contiguous subsequence is lower case, and is alphanum, and upper
-        case detected in rest of part. Currently unused as it causes problems with normalisation of e.g. erbB2, which
-        is a commonly used form of the symbol
+        """Preserve case only if first char of contiguous subsequence is lower
+        case, and is alphanum, and upper case detected in rest of part.
+        Currently unused as it causes problems with normalisation of e.g.
+        erbB2, which is a commonly used form of the symbol.
 
         :param debug:
         :param string:
@@ -194,8 +190,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def remove_non_alphanum(string):
-        """
-        removes all non alphanumeric characters
+        """Removes all non alphanumeric characters.
 
         :param string:
         :return:
@@ -208,8 +203,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def replace_greek(string):
-        """
-        replaces greek characters with string representation
+        """Replaces greek characters with string representation.
 
         :param string:
         :return:
@@ -221,8 +215,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def split_on_numbers(string):
-        """
-        splits a string on numbers, for consistency
+        """Splits a string on numbers, for consistency.
 
         :param string:
         :return:
@@ -233,8 +226,8 @@ class DefaultStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def replace_substrings(original_string):
-        """
-        replaces a range of other strings that might be confusing to a classifier, such as roman numerals
+        """Replaces a range of other strings that might be confusing to a
+        classifier, such as roman numerals.
 
         :param original_string:
         :return:
@@ -260,8 +253,7 @@ class DiseaseStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """
-        revert to DefaultStringNormalizer.normalize_symbol
+        """Revert to DefaultStringNormalizer.normalize_symbol.
 
         :param original_string:
         :return:
@@ -286,8 +278,7 @@ class AnatomyStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """
-        revert to DefaultStringNormalizer.normalize_noun_phrase (note, since
+        """revert to DefaultStringNormalizer.normalize_noun_phrase (note, since
         all anatomy is non-symbolic, this is theoretically superfluous, but we
         include it anyway)
 
@@ -311,11 +302,12 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def is_symbol_like(original_string: str) -> bool:
-        """
-        a symbol classifier that is designed to improve recall on natural text, especially gene symbols
-        looks at the ratio of upper case to lower case chars, and the ratio of integer to alpha chars. If the ratio of
-        upper case or integers is higher, assume it's a symbol. Also if the first char is lower case, and any
-        subsequent characters are upper case, it's probably a symbol (e.g. erbB2)
+        """a symbol classifier that is designed to improve recall on natural
+        text, especially gene symbols looks at the ratio of upper case to lower
+        case chars, and the ratio of integer to alpha chars. If the ratio of
+        upper case or integers is higher, assume it's a symbol. Also if the
+        first char is lower case, and any subsequent characters are upper case,
+        it's probably a symbol (e.g. erbB2)
 
         :param original_string:
         :return:
@@ -334,9 +326,10 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def gene_token_classifier(original_string):
-        """
-        slightly modified version of DefaultStringNormalizer.is_symbol_like, designed to work on single tokens. Checks
-        if the casing of the symbol changes from lower to upper (if so, is likely to be symbolic, e.g. erbB2)
+        """slightly modified version of DefaultStringNormalizer.is_symbol_like,
+        designed to work on single tokens. Checks if the casing of the symbol
+        changes from lower to upper (if so, is likely to be symbolic, e.g.
+        erbB2)
 
         :param original_string:
         :return:
@@ -364,10 +357,10 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def remove_trailing_s_if_otherwise_capitalised(string: str) -> str:
-        """
-        frustratingly, some gene symbols are pluralised like ERBBs. we can't just remove trailing s as this breaks
-        genuine symbols like 'MDH-s' and 'GASP10ps'. So, we only strip the trailing 's' if the char before is upper
-        case
+        """Frustratingly, some gene symbols are pluralised like ERBBs. we can't
+        just remove trailing s as this breaks genuine symbols like 'MDH-s' and
+        'GASP10ps'. So, we only strip the trailing 's' if the char before is
+        upper case.
 
         :param string:
         :return:
@@ -379,9 +372,8 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """
-        contrary to other entity classes, gene symbols require special handling because of their highly unusual
-        nature
+        """Contrary to other entity classes, gene symbols require special
+        handling because of their highly unusual nature.
 
         :param original_string:
         :return:
@@ -396,8 +388,8 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
-        """
-        revert to DefaultStringNormalizer.normalize_noun_phrase for non symbolic genes
+        """Revert to DefaultStringNormalizer.normalize_noun_phrase for non
+        symbolic genes.
 
         :param original_string:
         :return:
@@ -413,8 +405,7 @@ class CompanyStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """
-        just upper case.
+        """just upper case.
 
         :param original_string:
         :return:
@@ -432,9 +423,8 @@ class CompanyStringNormalizer(EntityClassNormalizer):
 
 
 class StringNormalizer:
-    """
-    call custom entity class normalizers, or a default normalizer if none is available
-    """
+    """Call custom entity class normalizers, or a default normalizer if none is
+    available."""
 
     normalizers: Dict[Optional[str], Type[EntityClassNormalizer]] = {
         "gene": GeneStringNormalizer,
@@ -463,7 +453,8 @@ class StringNormalizer:
 
 
 class GildaUtils:
-    """Functions derived from `gilda <https://github.com/indralab/gilda>`_ used by (some of) the :py:class:`~StringNormalizer`\\ s.
+    """Functions derived from `gilda <https://github.com/indralab/gilda>`_ used
+    by (some of) the :py:class:`~StringNormalizer`\\ s.
 
     Original Credit:
 
@@ -538,13 +529,12 @@ class GildaUtils:
     .. raw:: html
 
         </details>
-
     """
 
     @staticmethod
     def depluralize(word: str) -> Tuple[str, str]:
-        """
-        Return the depluralized version of the word, along with a status flag.
+        """Return the depluralized version of the word, along with a status
+        flag.
 
         :param word: The word which is to be depluralized.
         :return: The first element is the original word, if it is detected to be non-plural, or the
@@ -588,7 +578,8 @@ class GildaUtils:
 
     @classmethod
     def replace_dashes(cls, s: str, rep: str = "-") -> str:
-        """Replace all types of dashes in a given string with a given replacement.
+        """Replace all types of dashes in a given string with a given
+        replacement.
 
         :param s: The string in which all types of dashes should be replaced.
         :param rep: The string with which dashes should be replaced. By default, the plain

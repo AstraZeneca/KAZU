@@ -45,9 +45,11 @@ logger = logging.getLogger(__name__)
 
 
 class JsonLinesOntologyParser(OntologyParser):
-    """
-    A parser for a jsonlines dataset. Assumes one kb entry per line (i.e. json object)
-    implemetations should implement json_dict_to_parser_dict (see method notes for details
+    """A parser for a jsonlines dataset.
+
+    Assumes one kb entry per line (i.e. json object) implemetations
+    should implement json_dict_to_parser_dict (see method notes for
+    details
     """
 
     def read(self, path: str) -> Iterable[Dict[str, Any]]:
@@ -62,8 +64,9 @@ class JsonLinesOntologyParser(OntologyParser):
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[Dict[str, Any]]
     ) -> Iterable[Dict[str, Any]]:
-        """
-        for a given input json (represented as a python dict), yield dictionary record(s) compatible with the expected
+        """For a given input json (represented as a python dict), yield
+        dictionary record(s) compatible with the expected.
+
         structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
         IDX. All other keys are used as mapping metadata
 
@@ -138,10 +141,10 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        """
-        since non symbolic gene symbols are also frequently ambiguous, we override this method accordingly to disable
-        all synonym resolution, and rely on disambiguation to decide on 'true' mappings. Answers on a postcard if anyone
-        has a better idea on how to do this!
+        """since non symbolic gene symbols are also frequently ambiguous, we
+        override this method accordingly to disable all synonym resolution, and
+        rely on disambiguation to decide on 'true' mappings. Answers on a
+        postcard if anyone has a better idea on how to do this!
 
         :param id_and_source:
         :param is_symbolic:
@@ -251,9 +254,7 @@ PredicateAndValue = Tuple[RdfRef, rdflib.term.Node]
 
 
 class RDFGraphParser(OntologyParser):
-    """
-    Parser for Owl files.
-    """
+    """Parser for Owl files."""
 
     def __init__(
         self,
@@ -374,8 +375,7 @@ class RDFGraphParser(OntologyParser):
         return df
 
     def is_valid_iri(self, text: str) -> bool:
-        """
-        Check if input string is a valid IRI for the ontology being parsed.
+        """Check if input string is a valid IRI for the ontology being parsed.
 
         Uses `self._uri_regex` to define valid IRIs
         """
@@ -394,10 +394,11 @@ SKOS_XL_ALT_LABEL_PATH: rdflib.paths.Path = rdflib.URIRef(
 class SKOSXLGraphParser(RDFGraphParser):
     """Parse SKOS-XL RDF Files.
 
-    Note that this just sets a default label predicate and synonym predicate to SKOS-XL
-    appropriate paths, and then passes to the parent RDFGraphParser class. This class is just a convenience
-    to make specifying a SKOS-XL parser easier, this functionality is still available via RDFGraphParser
-    directly.
+    Note that this just sets a default label predicate and synonym
+    predicate to SKOS-XL appropriate paths, and then passes to the
+    parent RDFGraphParser class. This class is just a convenience to
+    make specifying a SKOS-XL parser easier, this functionality is still
+    available via RDFGraphParser directly.
     """
 
     def __init__(
@@ -648,11 +649,8 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
 
 
 class UberonOntologyParser(RDFGraphParser):
-    """
-    input should be an UBERON owl file
-    e.g.
-    https://www.ebi.ac.uk/ols/ontologies/uberon
-    """
+    """Input should be an UBERON owl file e.g.
+    https://www.ebi.ac.uk/ols/ontologies/uberon."""
 
     def __init__(
         self,
@@ -689,11 +687,8 @@ class UberonOntologyParser(RDFGraphParser):
 
 class MondoOntologyParser(OntologyParser):
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/(MONDO|HP)_[0-9]+$")
-    """
-    input should be a MONDO json file
-    e.g.
-    https://www.ebi.ac.uk/ols/ontologies/mondo
-    """
+    """Input should be a MONDO json file e.g.
+    https://www.ebi.ac.uk/ols/ontologies/mondo."""
 
     def find_kb(self, string: str) -> str:
         path = parse.urlparse(string).path
@@ -747,9 +742,8 @@ class MondoOntologyParser(OntologyParser):
 
 
 class EnsemblOntologyParser(OntologyParser):
-    """
-    input is a json from HGNC
-    e.g. http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json
+    """Input is a json from HGNC e.g. http://ftp.ebi.ac.uk/pub/databases/genena
+    mes/hgnc/json/hgnc_complete_set.json.
 
     :return:
     """
@@ -846,10 +840,8 @@ class EnsemblOntologyParser(OntologyParser):
 
 
 class ChemblOntologyParser(OntologyParser):
-    """
-    input is a sqllite dump from Chembl, e.g.
-    https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz
-    """
+    """Input is a sqllite dump from Chembl, e.g. https://ftp.ebi.ac.uk/pub/data
+    bases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz."""
 
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
@@ -874,10 +866,7 @@ class ChemblOntologyParser(OntologyParser):
 
 
 class CLOOntologyParser(RDFGraphParser):
-    """
-    input is a CLO Owl file
-    https://www.ebi.ac.uk/ols/ontologies/clo
-    """
+    """Input is a CLO Owl file https://www.ebi.ac.uk/ols/ontologies/clo."""
 
     def __init__(
         self,
@@ -912,10 +901,8 @@ class CLOOntologyParser(RDFGraphParser):
 
 
 class CellosaurusOntologyParser(OntologyParser):
-    """
-    input is an obo file from cellosaurus, e.g.
-    https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo
-    """
+    """Input is an obo file from cellosaurus, e.g.
+    https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo."""
 
     cell_line_re = re.compile("cell line", re.IGNORECASE)
 
@@ -928,8 +915,7 @@ class CellosaurusOntologyParser(OntologyParser):
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        """
-        treat all synonyms as seperate cell lines
+        """Treat all synonyms as seperate cell lines.
 
         :param ids:
         :param id_to_source:
@@ -1007,9 +993,10 @@ class CellosaurusOntologyParser(OntologyParser):
 
 
 class MeddraOntologyParser(OntologyParser):
-    """
-    input is an unzipped directory to a Meddra release (Note, requires licence). This
-    should contain the files 'mdhier.asc' and 'llt.asc'.
+    """input is an unzipped directory to a Meddra release (Note, requires
+    licence).
+
+    This should contain the files 'mdhier.asc' and 'llt.asc'.
     """
 
     def __init__(
@@ -1160,11 +1147,8 @@ class MeddraOntologyParser(OntologyParser):
 
 
 class CLOntologyParser(RDFGraphParser):
-    """
-    input should be an CL owl file
-    e.g.
-    https://www.ebi.ac.uk/ols/ontologies/cl
-    """
+    """Input should be an CL owl file e.g.
+    https://www.ebi.ac.uk/ols/ontologies/cl."""
 
     def __init__(
         self,
@@ -1241,9 +1225,7 @@ class HGNCGeneFamilyParser(OntologyParser):
 
 
 class TabularOntologyParser(OntologyParser):
-    """
-    For already tabulated data.
-    """
+    """For already tabulated data."""
 
     def __init__(
         self,
@@ -1284,8 +1266,7 @@ class TabularOntologyParser(OntologyParser):
         self._raw_dataframe: pd.DataFrame = pd.read_csv(self.in_path, **kwargs)
 
     def parse_to_dataframe(self) -> pd.DataFrame:
-        """
-        Assume input file is already in correct format.
+        """Assume input file is already in correct format.
 
         Inherit and override this method if different behaviour is required.
 
@@ -1298,12 +1279,11 @@ class TabularOntologyParser(OntologyParser):
 
 
 class ATCDrugClassificationParser(TabularOntologyParser):
-    """
-    Parser for the ATC Drug classification dataset.
+    """Parser for the ATC Drug classification dataset.
 
     This requires a licence from WHO, available at
-    https://www.who.int/tools/atc-ddd-toolkit/atc-classification .
-
+    https://www.who.int/tools/atc-ddd-toolkit/atc-classification
+    .
     """
 
     def __init__(
@@ -1355,8 +1335,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
 
 
 class StatoParser(RDFGraphParser):
-    """
-    Parse stato: input should be an owl file.
+    """Parse stato: input should be an owl file.
 
     Available at e.g.
     https://www.ebi.ac.uk/ols/ontologies/stato .

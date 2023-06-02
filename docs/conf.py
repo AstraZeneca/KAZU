@@ -127,9 +127,7 @@ intersphinx_mapping = {
 # this function is modified from the corresponding one in pandas, which in turn is modified from numpy
 # both licenses are included in the docs folder, as PANDAS_LICENSE.txt and NUMPY_LICENSE.txt
 def linkcode_resolve(domain, info):
-    """
-    Determine the URL corresponding to Python object
-    """
+    """Determine the URL corresponding to Python object."""
     if domain != "py":
         return None
 

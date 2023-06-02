@@ -105,8 +105,7 @@ class SectionScorer:
 def score_sections(
     docs: List[Document],
 ) -> Dict[str, List[SectionScorer]]:
-    """
-    score a list of documents by Section
+    """Score a list of documents by Section.
 
     :param docs:
     :return: dict of entity class to one scorer per section
@@ -313,8 +312,7 @@ def check_ent_match_abnormalities(
     match_str: str,
     messages: Dict[str, Set[str]],
 ) -> None:
-    """
-    checks to see if any gold standard spans look a bit weird
+    """Checks to see if any gold standard spans look a bit weird.
 
     :param ent_to_task_lookup:
     :param ents:
@@ -337,8 +335,8 @@ def check_ent_class_consistency(
     match_str: str,
     messages: Dict[str, Set[str]],
 ) -> None:
-    """
-    checks to see if any match strings have different entity_class information
+    """Checks to see if any match strings have different entity_class
+    information.
 
     :param ent_to_task_lookup:
     :param ents:
@@ -366,8 +364,8 @@ def check_ent_mapping_consistency(
     match_str: str,
     messages: Dict[str, Set[str]],
 ) -> None:
-    """
-    checks to see if any entity string matches have inconsistent mapping information
+    """Checks to see if any entity string matches have inconsistent mapping
+    information.
 
     :param ent_to_task_lookup:
     :param ents:

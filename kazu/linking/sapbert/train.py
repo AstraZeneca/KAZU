@@ -36,9 +36,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SapbertDataCollatorWithPadding:
-    """
-    data collator to be used with HFSapbertPairwiseDataset
-    """
+    """Data collator to be used with HFSapbertPairwiseDataset."""
 
     tokenizer: PreTrainedTokenizerBase
     padding: Union[bool, str, PaddingStrategy] = True
@@ -67,8 +65,8 @@ class SapbertDataCollatorWithPadding:
 
 
 def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
-    """
-    get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST
+    """Get a standard HF DataCollatorWithPadding, with
+    padding=PaddingStrategy.LONGEST.
 
     :param tokenizer:
     :return:
@@ -78,9 +76,10 @@ def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPa
 
 
 class HFSapbertInferenceDataset(Dataset):
-    """
-    A dataset to be used for inferencing. In addition to standard BERT  encodings, this
-    uses an 'indices' encoding that can be used to track the vector index of an embedding.
+    """A dataset to be used for inferencing.
+
+    In addition to standard BERT  encodings, this uses an 'indices'
+    encoding that can be used to track the vector index of an embedding.
     This is needed in a multi GPU environment
     """
 
@@ -94,8 +93,8 @@ class HFSapbertInferenceDataset(Dataset):
         return query_toks1
 
     def __init__(self, encodings: BatchEncoding):
-        """
-        simple implementation of IterableDataset, producing HF tokenizer input_id
+        """Simple implementation of IterableDataset, producing HF tokenizer
+        input_id.
 
         :param encodings:
         """
@@ -107,9 +106,7 @@ class HFSapbertInferenceDataset(Dataset):
 
 
 class HFSapbertPairwiseDataset(Dataset):
-    """
-    Dataset used for training SapBert.
-    """
+    """Dataset used for training SapBert."""
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
         query_toks1 = {
@@ -161,9 +158,9 @@ def get_embedding_dataloader_from_strings(
     num_workers: int,
     max_length: int = 50,
 ) -> DataLoader:
-    """
-    get a dataloader with dataset HFSapbertInferenceDataset and DataCollatorWithPadding. This should be used to
-    generate embeddings for strings of interest
+    """Get a dataloader with dataset HFSapbertInferenceDataset and
+    DataCollatorWithPadding. This should be used to generate embeddings for
+    strings of interest.
 
     :param texts: strings to use in the dataset
     :param tokenizer:
@@ -189,21 +186,18 @@ def get_embedding_dataloader_from_strings(
 
 
 class SapbertEvaluationDataset(NamedTuple):
-    """
-    to evaluate a given embedding model, we need a query datasource (i.e. things that need to be linked)]
-    and an ontology datasource (i.e. things that we need to generate an embedding space for, that can be queried
-    against)
-    each should have three columns: default_label (text), iri (ontology id) and source (ontology name)
-    """
+    """to evaluate a given embedding model, we need a query datasource (i.e.
+    things that need to be linked)] and an ontology datasource (i.e. things
+    that we need to generate an embedding space for, that can be queried
+    against) each should have three columns: default_label (text), iri
+    (ontology id) and source (ontology name)"""
 
     query_source: pd.DataFrame
     ontology_source: pd.DataFrame
 
 
 class Candidate(NamedTuple):
-    """
-    a knowledgebase entry
-    """
+    """A knowledgebase entry."""
 
     default_label: str
     iri: str
@@ -219,12 +213,13 @@ class GoldStandardExample(NamedTuple):
 
 
 class SapbertEvaluationDataManager:
-    """
-    manages the loading/parsing of multiple evaluation datasets. Each dataset should have two sources, a query source
-    and an ontology source. these are then converted into data loaders, while maintaining a reference to the
-    embedding metadata that should be used for evaluation
+    """Manages the loading/parsing of multiple evaluation datasets. Each
+    dataset should have two sources, a query source and an ontology source.
+    these are then converted into data loaders, while maintaining a reference
+    to the embedding metadata that should be used for evaluation.
 
-    self.dataset is Dict[dataset_name,SapbertEvaluationDataset] after construction
+    self.dataset is Dict[dataset_name,SapbertEvaluationDataset] after
+    construction
     """
 
     def __init__(self, sources: Dict[str, List[str]], debug: bool = False):
@@ -244,8 +239,7 @@ class SapbertEvaluationDataManager:
 
 
 class PLSapbertModel(LightningModule):
-    """
-    Pytorch lightning production implementation of SapBert.
+    """Pytorch lightning production implementation of SapBert.
 
     Original source:
 
@@ -311,7 +305,6 @@ class PLSapbertModel(LightningModule):
     .. raw:: html
 
         </details>
-
     """
 
     def __init__(
@@ -354,7 +347,9 @@ class PLSapbertModel(LightningModule):
             self.ontology_embeddings = None
 
     def configure_optimizers(self):
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.configure_optimizers </common/lightning_module.rst#configure-optimizers>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.configure_optimizers
+        </common/lightning_module.rst#configure-optimizers>`\\ ."""
         assert self.sapbert_training_params is not None
         optimizer = optim.AdamW(
             [
@@ -366,8 +361,7 @@ class PLSapbertModel(LightningModule):
         return optimizer
 
     def forward(self, batch):
-        """
-        for inference
+        """For inference.
 
         :param batch: standard bert input, with an additional 'indices' for representing the location of the embedding
         :return:
@@ -382,7 +376,9 @@ class PLSapbertModel(LightningModule):
         }
 
     def training_step(self, batch: Any, batch_idx: int, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.training_step </common/lightning_module.rst#training-step>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.training_step
+        </common/lightning_module.rst#training-step>`\\ ."""
         query_toks1, query_toks2 = batch
         # labels should be identical, so we only need one
         labels = query_toks1.pop("labels")
@@ -397,7 +393,9 @@ class PLSapbertModel(LightningModule):
         return self.loss(query_embed, labels, hard_pairs)  # type: ignore [no-any-return] # no clear type info for the loss
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.train_dataloader </common/lightning_module.rst#train-dataloader>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.train_dataloader
+        </common/lightning_module.rst#train-dataloader>`\\ ."""
         assert self.sapbert_training_params is not None
         training_df = pd.read_parquet(self.sapbert_training_params.train_file)
         labels = training_df["id"].astype("category").cat.codes.to_numpy()
@@ -421,7 +419,9 @@ class PLSapbertModel(LightningModule):
         return train_loader
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.val_dataloader </common/lightning_module.rst#val-dataloader>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.val_dataloader
+        </common/lightning_module.rst#val-dataloader>`\\ ."""
         dataloaders = []
         assert self.sapbert_evaluation_manager is not None
         assert self.sapbert_training_params is not None
@@ -446,16 +446,19 @@ class PLSapbertModel(LightningModule):
     def validation_step(
         self, batch: Any, batch_idx: int, dataset_idx: int
     ) -> Optional[STEP_OUTPUT]:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.validation_step </common/lightning_module.rst#validation-step>`\\ ."""
-        return self(batch)  # type: ignore [no-any-return] # no type info from Pytorch Lightning
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.validation_step
+        </common/lightning_module.rst#validation-step>`\\ ."""
+        return self(batch)
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.predict_step </common/lightning_module.rst#predict-step>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.predict_step
+        </common/lightning_module.rst#predict-step>`\\ ."""
         return self(batch)
 
     def get_embeddings(self, output: List[Dict[int, torch.Tensor]]) -> torch.Tensor:
-        """
-        get a tensor of embeddings in original order
+        """Get a tensor of embeddings in original order.
 
         :param output: int is the original index of the input (i.e. what comes out of self.forward)
         :return:
@@ -508,8 +511,8 @@ class PLSapbertModel(LightningModule):
         return candidates_filtered
 
     def evaluate_topk_acc(self, queries: List[GoldStandardExample]) -> Dict[str, float]:
-        """
-        get a dictionary of accuracy results at different levels of k (nearest neighbours)
+        """get a dictionary of accuracy results at different levels of k
+        (nearest neighbours)
 
         :param queries:
         :return:
@@ -529,8 +532,7 @@ class PLSapbertModel(LightningModule):
     def get_embeddings_for_strings(
         self, texts: List[str], trainer: Optional[Trainer] = None, batch_size: Optional[int] = None
     ) -> torch.Tensor:
-        """
-        For a list of strings, generate embeddings.
+        """For a list of strings, generate embeddings.
 
         This is a convenience function for users, as we need to carry out these steps several times
         in the codebase.
@@ -550,8 +552,8 @@ class PLSapbertModel(LightningModule):
         return results
 
     def get_embeddings_from_dataloader(self, loader: DataLoader, trainer: Trainer) -> torch.Tensor:
-        """
-        get the cls token output from all data in a dataloader as a 2d tensor
+        """Get the cls token output from all data in a dataloader as a 2d
+        tensor.
 
         :param loader:
         :param trainer: the PL Trainer to use

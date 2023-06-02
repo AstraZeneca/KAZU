@@ -1,4 +1,5 @@
-"""Modified from 'CustomHeaderMiddleware' in the `Starlette Middleware docs <https://www.starlette.io/middleware/#basehttpmiddleware>`_.
+"""Modified from 'CustomHeaderMiddleware' in the `Starlette Middleware docs
+<https://www.starlette.io/middleware/#basehttpmiddleware>`_.
 
 Licensed under BSD 3-Clause along with the rest of Starlette.
 
@@ -54,10 +55,12 @@ logger = logging.getLogger("ray")
 
 
 class AddRequestIdMiddleware(BaseHTTPMiddleware):
-    """A middleware that puts a request-id from the request's header onto the response.
+    """A middleware that puts a request-id from the request's header onto the
+    response.
 
-    This was written to be used in conjunction with :class:`.JWTAuthenticationBackend`, which adds
-    a request id header to the request as part of authentication.
+    This was written to be used in conjunction with
+    :class:`.JWTAuthenticationBackend`, which adds a request id header
+    to the request as part of authentication.
     """
 
     def __init__(self, app):

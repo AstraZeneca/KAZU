@@ -28,8 +28,7 @@ def _copy_ent_with_new_spans(
 
 class SplitOnConjunctionPattern:
     def __init__(self, spacy_pipeline: spacy.language.Language):
-        """
-        analyse
+        """Analyse.
 
         :param pattern:
         """
@@ -93,8 +92,7 @@ class SplitOnConjunctionPattern:
 
 
 class SplitOnNumericalListPatternWithPrefix:
-    """
-    split a string of numerically incrementing parts:
+    """split a string of numerically incrementing parts:
 
     .. testsetup::
 
@@ -112,13 +110,10 @@ class SplitOnNumericalListPatternWithPrefix:
     .. testoutput::
 
         [BRCA1:gene:test:0:5, BRCA2:gene:test:0:7, BRCA3:gene:test:0:9]
-
-
     """
 
     def __init__(self, pattern: str = "/"):
-        """
-        pattern to split the string on (typically "/")
+        """pattern to split the string on (typically "/")
 
         :param pattern:
         """
@@ -171,9 +166,8 @@ class SplitOnNumericalListPatternWithPrefix:
 
 
 class NonContiguousEntitySplitter:
-    """
-    Some simple rules to split non-contiguous entities into component entities
-    """
+    """Some simple rules to split non-contiguous entities into component
+    entities."""
 
     def __init__(self, entity_conditions: Dict[str, List[Callable[[Entity, str], List[Entity]]]]):
 

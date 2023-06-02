@@ -63,8 +63,7 @@ class CurationException(Exception):
 def load_curated_terms(
     path: PathLike,
 ) -> List[CuratedTerm]:
-    """
-    Load :class:`kazu.data.data.CuratedTerm`\\ s from a file path.
+    """Load :class:`kazu.data.data.CuratedTerm`\\ s from a file path.
 
     :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
     :return:
@@ -81,8 +80,7 @@ def load_curated_terms(
 def load_global_actions(
     path: PathLike,
 ) -> GlobalParserActions:
-    """
-    Load an instance of :class:`.GlobalParserActions` from a file path.
+    """Load an instance of :class:`.GlobalParserActions` from a file path.
 
     :param path: path to a json serialised GlobalParserActions
     :return:
@@ -157,8 +155,8 @@ class CurationProcessor:
     def curation_sort_key(cls, curated_term: CuratedTerm) -> Tuple[int, bool, str]:
         """Determines the order curations are processed in.
 
-        We use associated_id_sets as a key, so that any overrides will be
-        processed after any original behaviours
+        We use associated_id_sets as a key, so that any overrides will
+        be processed after any original behaviours
         """
         return (
             cls._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
@@ -202,7 +200,8 @@ class CurationProcessor:
             return CurationModificationResult.NO_ACTION
 
     def _drop_synonym_term(self, synonym: NormalisedSynonymStr) -> None:
-        """Remove a synonym term from the database, so that it cannot be used as a linking target.
+        """Remove a synonym term from the database, so that it cannot be used
+        as a linking target.
 
         :param synonym:
         :return:
@@ -294,8 +293,8 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
     ]:
-        """Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets` has
-        changed.
+        """Modifies or drops a :class:`.SynonymTerm` after a
+        :class:`.AssociatedIdSets` has changed.
 
         :param new_associated_id_sets:
         :param synonym_term:
@@ -329,8 +328,8 @@ class CurationProcessor:
     def export_curations_and_final_terms(
         self,
     ) -> Tuple[List[CuratedTerm], Set[SynonymTerm]]:
-        """Perform any updates required to the synonym terms as specified in the curations/global
-        actions.
+        """Perform any updates required to the synonym terms as specified in
+        the curations/global actions.
 
         The returned :class:`.CuratedTerm`\\s can be used for Dictionary based NER, whereas the
         returned :class:`.SynonymTerm`\\s can be loaded into the internal database for linking.
@@ -641,9 +640,8 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
     ]:
-        """
-        Create a new :class:`~kazu.data.data.SynonymTerm` for the database, or return an existing
-        matching one if already present.
+        """Create a new :class:`~kazu.data.data.SynonymTerm` for the database,
+        or return an existing matching one if already present.
 
         Notes:
 
@@ -752,25 +750,31 @@ class CurationProcessor:
 
 
 class OntologyParser(ABC):
-    """
-    Parse an ontology (or similar) into a set of outputs suitable for NLP entity linking.
-    Implementations should have a class attribute 'name' to something suitably representative.
-    The key method is parse_to_dataframe, which should convert an input source to a dataframe suitable
-    for further processing.
+    """Parse an ontology (or similar) into a set of outputs suitable for NLP
+    entity linking. Implementations should have a class attribute 'name' to
+    something suitably representative. The key method is parse_to_dataframe,
+    which should convert an input source to a dataframe suitable for further
+    processing.
 
-    The other important method is find_kb. This should parse an ID string (if required) and return the underlying
-    source. This is important for composite resources that contain identifiers from different seed sources
+    The other important method is find_kb. This should parse an ID
+    string (if required) and return the underlying source. This is
+    important for composite resources that contain identifiers from
+    different seed sources
 
-    Generally speaking, when parsing a data source, synonyms that are symbolic (as determined by
-    the StringNormalizer) that refer to more than one id are more likely to be ambiguous. Therefore,
-    we assume they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303' OR
-    'ENSG00000198804', and thus they will yield multiple instances of EquivalentIdSet. Non symbolic
-    synonyms (i.e. noun phrases) are far less likely to refer to distinct entities, so we might
-    want to merge the associated ID's non-symbolic ambiguous synonyms into a single EquivalentIdSet.
-    The result of StringNormalizer.is_symbolic forms the is_symbolic parameter to .score_and_group_ids.
+    Generally speaking, when parsing a data source, synonyms that are
+    symbolic (as determined by the StringNormalizer) that refer to more
+    than one id are more likely to be ambiguous. Therefore, we assume
+    they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303'
+    OR 'ENSG00000198804', and thus they will yield multiple instances of
+    EquivalentIdSet. Non symbolic synonyms (i.e. noun phrases) are far
+    less likely to refer to distinct entities, so we might want to merge
+    the associated ID's non-symbolic ambiguous synonyms into a single
+    EquivalentIdSet. The result of StringNormalizer.is_symbolic forms
+    the is_symbolic parameter to .score_and_group_ids.
 
-    If the underlying knowledgebase contains more than one entity type, muliple parsers should be
-    implemented, subsetting accordingly (e.g. MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC).
+    If the underlying knowledgebase contains more than one entity type,
+    muliple parsers should be implemented, subsetting accordingly (e.g.
+    MEDDRA_DISEASE, MEDDRA_DIAGNOSTIC).
     """
 
     # the synonym table should have these (and only these columns)
@@ -827,8 +831,7 @@ class OntologyParser(ABC):
 
     @abstractmethod
     def find_kb(self, string: str) -> str:
-        """
-        split an IDX somehow to find the ontology SOURCE reference
+        """Split an IDX somehow to find the ontology SOURCE reference.
 
         :param string: the IDX string to process
         :return:
@@ -892,11 +895,11 @@ class OntologyParser(ABC):
         is_symbolic: bool,
         original_syn_set: Set[str],
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        """
-        for a given data source, one normalised synonym may map to one or more id. In some cases, the ID may be
-        duplicate/redundant (e.g. there are many chembl ids for paracetamol). In other cases, the ID may refer to
-        distinct concepts (e.g. COX 1 could be 'ENSG00000095303' OR 'ENSG00000198804').
-
+        """For a given data source, one normalised synonym may map to one or
+        more id. In some cases, the ID may be duplicate/redundant (e.g. there
+        are many chembl ids for paracetamol). In other cases, the ID may refer
+        to distinct concepts (e.g. COX 1 could be 'ENSG00000095303' OR
+        'ENSG00000198804').
 
         Since synonyms from data sources are confused in such a manner, we need to decide some way to cluster them into
         a single SynonymTerm concept, which in turn is a container for one or more EquivalentIdSet (depending on
@@ -1006,8 +1009,8 @@ class OntologyParser(ABC):
         """Export the metadata from the ontology.
 
         :param parser_name: name of this parser. Required for correct operation of cache
-            (Note, we cannot pass self to the disk cache as the constructor consumes too much
-            memory)
+            (Note, we cannot pass self to the disk cache as the constructor consumes too
+            much memory)
         :return: {idx:{metadata_key:metadata_value}}
         """
         self._parse_df_if_not_already_parsed()
@@ -1117,7 +1120,8 @@ class OntologyParser(ABC):
         return original_curations, generated_curations
 
     def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[CuratedTerm]:
-        """Convert a :class:`.SynonymTerm`\\ s to curations to use for dictionary based NER.
+        """Convert a :class:`.SynonymTerm`\\ s to curations to use for
+        dictionary based NER.
 
         This is used when curations are not provided to the parser.
 
@@ -1148,8 +1152,8 @@ class OntologyParser(ABC):
         """Disk cacheable method that populates all databases.
 
         :param parser_name: name of this parser. Required for correct operation of cache
-            (Note, we cannot pass self to the disk cache as the constructor consumes too much
-            memory)
+            (Note, we cannot pass self to the disk cache as the constructor consumes too
+            much memory)
         :return:
         """
         logger.info("populating database for %s from source", self.name)
@@ -1168,8 +1172,8 @@ class OntologyParser(ABC):
     ) -> Optional[List[CuratedTerm]]:
         """Populate the databases with the results of the parser.
 
-        Also calculates the term norms associated with
-        any curations (if provided) which can then be used for Dictionary based NER
+        Also calculates the term norms associated with any curations (if provided) which
+        can then be used for Dictionary based NER
 
         :param force: do not use the cache for the ontology parser
         :param return_curations: should processed curations be returned?

@@ -72,7 +72,8 @@ def _ontology_dict_getter(span: Span) -> _MatcherOntologyData:
 class OntologyMatcher:
     """String matching to synonyms.
 
-    Core strict matching is done by Spacy's `PhraseMatcher <https://spacy.io/api/phrasematcher>`_.
+    Core strict matching is done by Spacy's
+    `PhraseMatcher <https://spacy.io/api/phrasematcher>`_.
     """
 
     def __init__(
@@ -150,7 +151,8 @@ class OntologyMatcher:
     def filter_curations_for_ner(
         self, curations: Iterable[CuratedTerm], parser: OntologyParser
     ) -> Iterable[CuratedTerm]:
-        """check curations are still represented in DB before they can be used for NER."""
+        """Check curations are still represented in DB before they can be used
+        for NER."""
         original_terms = defaultdict(set)
         inherited_terms = defaultdict(set)
         syn_db = SynonymDatabase()
@@ -188,7 +190,8 @@ class OntologyMatcher:
     def create_phrasematchers_using_curations(
         self, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
-        """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\ s based on :class:`.CuratedTerm`\\ s.
+        """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\
+        s based on :class:`.CuratedTerm`\\ s.
 
         Curations are produced by :py:meth:`.OntologyParser.populate_databases`\\ method
         :param parsers:
@@ -306,7 +309,8 @@ class OntologyMatcher:
         return doc
 
     def filter_by_contexts(self, doc: Doc, spans: List[Span]) -> List[Span]:
-        """These filters work best when there is sentence segmentation available."""
+        """These filters work best when there is sentence segmentation
+        available."""
         doc_has_sents = doc.has_annotation("SENT_START")
         # set custom attributes for the token matchers
         for label in self.labels:
@@ -348,8 +352,8 @@ class OntologyMatcher:
             token._.set(ent_class, value)
 
     def span_in_TP_context(self, doc: Union[Doc, Span], ent_class: str) -> bool:
-        """When an entity type has a TP matcher defined, it should match for this
-        span to be regarded as a true hit."""
+        """When an entity type has a TP matcher defined, it should match for
+        this span to be regarded as a true hit."""
         assert self.tp_matchers is not None
         tp_matcher = self.tp_matchers.get(ent_class, None)
         if tp_matcher:
@@ -360,8 +364,8 @@ class OntologyMatcher:
         return True
 
     def span_in_FP_context(self, doc: Union[Doc, Span], ent_class: str) -> bool:
-        """When an entity type has a FP matcher defined, spans that match
-        are regarded as FPs."""
+        """When an entity type has a FP matcher defined, spans that match are
+        regarded as FPs."""
         assert self.fp_matchers is not None
         fp_matcher = self.fp_matchers.get(ent_class, None)
         if fp_matcher:
@@ -372,8 +376,9 @@ class OntologyMatcher:
         return False
 
     def span_in_TP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str) -> bool:
-        """When an entity type has a TP co-occ dict defined, a hit defined in the dict
-        is only regarded as a true hit when it matches at least one of its co-occ terms."""
+        """When an entity type has a TP co-occ dict defined, a hit defined in
+        the dict is only regarded as a true hit when it matches at least one of
+        its co-occ terms."""
         assert self.tp_coocc_dict is not None
         tp_dict = self.tp_coocc_dict.get(ent_class, None)
         if tp_dict and tp_dict.get(span.text):
@@ -384,8 +389,9 @@ class OntologyMatcher:
         return True
 
     def span_in_FP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str) -> bool:
-        """When an entity type has a FP co-occ dic defined, a hit defined in the dict
-        is regarded as a false positive when it matches at least one of its co-occ terms."""
+        """When an entity type has a FP co-occ dic defined, a hit defined in
+        the dict is regarded as a false positive when it matches at least one
+        of its co-occ terms."""
         assert self.fp_coocc_dict is not None
         fp_dict = self.fp_coocc_dict.get(ent_class, None)
         if fp_dict and fp_dict.get(span.text):
@@ -408,7 +414,8 @@ class OntologyMatcher:
         return tp_matchers, fp_matchers
 
     def _create_cell_tp_tokenmatcher(self, ent_class: str) -> Matcher:
-        """Define patterns where a Cell line or type appears and it's likely a true positive"""
+        """Define patterns where a Cell line or type appears and it's likely a
+        true positive."""
         matcher = Matcher(self.nlp.vocab)
         pattern_1: List[Dict[str, Any]] = [
             {"_": {ent_class: True}},
@@ -428,7 +435,8 @@ class OntologyMatcher:
         return matcher
 
     def _create_anatomy_fp_tokenmatcher(self) -> Matcher:
-        """Define patterns where an atanomy entity appears and it's likely a false positive"""
+        """Define patterns where an atanomy entity appears and it's likely a
+        false positive."""
         matcher = Matcher(self.nlp.vocab)
         patterns: List[List[Dict[str, Any]]] = []
         if DRUG in self.labels:
@@ -463,13 +471,13 @@ class OntologyMatcher:
     _ivf_fertility_treatment_cooccurrence = ["ICSI", "cycle", "treatment"]
 
     def _create_gene_fp_dict(self):
-        """Define cooccurrence links that determine likely FP gene hits"""
+        """Define cooccurrence links that determine likely FP gene hits."""
         gene_dict = {}
         gene_dict["IVF"] = self._ivf_fertility_treatment_cooccurrence
         return gene_dict
 
     def _create_disease_fp_dict(self):
-        """Define cooccurrence links that determine likely FP disease hits"""
+        """Define cooccurrence links that determine likely FP disease hits."""
         disease_dict = {}
         disease_dict["MFS"] = ["endpoint"]
         disease_dict["IVF"] = self._ivf_fertility_treatment_cooccurrence
@@ -500,7 +508,10 @@ class OntologyMatcher:
     def from_disk(
         self, path: Union[str, Path], *, exclude: Iterable[str] = SimpleFrozenList()
     ) -> "OntologyMatcher":
-        """Load the pipe from disk. Modifies the object in place and returns it."""
+        """Load the pipe from disk.
+
+        Modifies the object in place and returns it.
+        """
 
         def unpickle_matcher(p, strict):
             with p.open("rb") as infile:

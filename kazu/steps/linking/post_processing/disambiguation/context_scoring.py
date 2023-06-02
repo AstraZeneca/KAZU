@@ -22,8 +22,7 @@ def create_word_and_char_ngrams(
         3,
     ),
 ) -> List[str]:
-    """
-    function to create char and word ngrams
+    """Function to create char and word ngrams.
 
     :param s: string to process
     :param words: create n words
@@ -64,8 +63,8 @@ class TfIdfScorer(metaclass=Singleton):
     def __call__(
         self, strings: List[str], matrix: np.ndarray, parser: str
     ) -> Iterable[Tuple[str, float]]:
-        """
-        Transform a list of strings with a parser-specific vectorizer and score against a matrix.
+        """Transform a list of strings with a parser-specific vectorizer and
+        score against a matrix.
 
         :param strings:
         :param matrix:

@@ -1,5 +1,4 @@
-"""
-Original Credit:
+"""Original Credit:
 
 | https://github.com/allenai/scispacy
 | https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
@@ -66,7 +65,6 @@ Association for Computational Linguistics.
 .. raw:: html
 
     </details>
-
 """
 
 import logging
@@ -90,8 +88,8 @@ SectionToCharacterIndexedEntities = DefaultDict[Section, DefaultDict[Tuple[int, 
 def find_abbreviation(
     long_form_candidate: Span, short_form_candidate: Span
 ) -> Tuple[Span, Optional[Span]]:
-    """
-    from https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+    """From
+    https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py.
 
     Implements the abbreviation detection algorithm in "A simple algorithm
     for identifying abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
@@ -156,8 +154,8 @@ def find_abbreviation(
 def filter_matches(
     section: Section, matcher_output: List[Tuple[int, int, int]], doc: Doc
 ) -> List[Tuple[Section, Span, Span]]:
-    """
-    from https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+    """From
+    https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py.
 
     :param section:
     :param matcher_output:
@@ -198,8 +196,8 @@ def filter_matches(
 
 
 def short_form_filter(span: Span) -> bool:
-    """
-    from https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+    """From
+    https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py.
 
     :param span:
     :return:
@@ -220,21 +218,24 @@ def short_form_filter(span: Span) -> bool:
 
 
 class KazuAbbreviationDetector:
-    """
-    Modified version of https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py
+    """Modified version of
+    https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py.
 
     see top of file for original implementation credit
 
-    Detects abbreviations using the algorithm in "A simple algorithm for identifying
-    abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
+    Detects abbreviations using the algorithm in "A simple algorithm for
+    identifying abbreviation definitions in biomedical text.", (Schwartz
+    & Hearst, 2003).
 
-    If an abbreviation is detected, a new instance of :class:`.Entity` is generated, copying information from the
-    originating long span. If the original long span was not an entity, the abbreviation entity is removed. In the latter
-    case, you can force the class to not delete entities by providing a list of strings to exclude_abbrvs.
-    For instance, this might be wise for abbreviations that are very common and therefore not defined (e.g. 'NSCLC').
-    Note, however, that the abbreviation detection is always preferred, so if a long form entity is detected, that
-    will always be chosen
-
+    If an abbreviation is detected, a new instance of :class:`.Entity`
+    is generated, copying information from the originating long span. If
+    the original long span was not an entity, the abbreviation entity is
+    removed. In the latter case, you can force the class to not delete
+    entities by providing a list of strings to exclude_abbrvs. For
+    instance, this might be wise for abbreviations that are very common
+    and therefore not defined (e.g. 'NSCLC'). Note, however, that the
+    abbreviation detection is always preferred, so if a long form entity
+    is detected, that will always be chosen
     """
 
     def __init__(
@@ -318,8 +319,8 @@ class KazuAbbreviationDetector:
         spacy_match_int: int,
         section: Section,
     ) -> None:
-        """
-        create new entities from the long form (if possible), and add to the section
+        """Create new entities from the long form (if possible), and add to the
+        section.
 
         :param abbrv_span:
         :param global_matcher:
@@ -342,8 +343,8 @@ class KazuAbbreviationDetector:
         section: Section,
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
     ) -> None:
-        """
-        remove any existing ents at the location, unless they're in the exclude list
+        """Remove any existing ents at the location, unless they're in the
+        exclude list.
 
         :param abbrv_char_index_key:
         :param section:

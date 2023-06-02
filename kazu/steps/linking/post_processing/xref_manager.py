@@ -57,8 +57,7 @@ class CrossReferenceManager(ABC):
 
     @abstractmethod
     def build_xref_cache(self, path: Path) -> XrefDatabase:
-        """
-        build a XrefDatabase suitable for caching
+        """Build a XrefDatabase suitable for caching.
 
         :param path:
         :return:
@@ -66,8 +65,7 @@ class CrossReferenceManager(ABC):
         pass
 
     def create_xref_mappings(self, mapping: Mapping) -> Iterable[Mapping]:
-        """
-        attempt to create additional xref mappings from a source mapping
+        """Attempt to create additional xref mappings from a source mapping.
 
         :param mapping:
         :return:
@@ -108,10 +106,11 @@ class CrossReferenceManager(ABC):
 
 
 class OxoCrossReferenceManager(CrossReferenceManager):
-    """
-    A CrossReferenceManager that uses the EBI OXO service to identify cross-references. Downloads a set of
-    cross-references directly from EBI, and caches locally
+    """A CrossReferenceManager that uses the EBI OXO service to identify cross-
+    references.
 
+    Downloads a set of cross-references directly from EBI, and caches
+    locally
     """
 
     oxo_url = "https://www.ebi.ac.uk/spot/oxo/api/search"

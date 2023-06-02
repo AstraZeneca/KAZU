@@ -24,13 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 class DisambiguationStrategy(ABC):
-    """
-    The job of a DisambiguationStrategy is to filter a Set of :class:`.EquivalentIdSet` into a
-    (hopefully) smaller set.
+    """The job of a DisambiguationStrategy is to filter a Set of
+    :class:`.EquivalentIdSet` into a (hopefully) smaller set.
 
-    A :meth:`prepare` method is available, which can be cached in the event of any duplicated
-    preprocessing work that may be required (see :class:`.StrategyRunner` for the complexities of
-    how MappingStrategy and DisambiguationStrategy are coordinated).
+    A :meth:`prepare` method is available, which can be cached in the
+    event of any duplicated preprocessing work that may be required (see
+    :class:`.StrategyRunner` for the complexities of how MappingStrategy
+    and DisambiguationStrategy are coordinated).
     """
 
     def __init__(self, confidence: DisambiguationConfidence):
@@ -43,8 +43,7 @@ class DisambiguationStrategy(ABC):
 
     @abstractmethod
     def prepare(self, document: Document) -> None:
-        """
-        perform any preprocessing required
+        """Perform any preprocessing required.
 
         :param document:
         :return:
@@ -55,8 +54,7 @@ class DisambiguationStrategy(ABC):
     def disambiguate(
         self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
     ) -> Set[EquivalentIdSet]:
-        """
-        subset a set of :class:`.EquivalentIdSet`\\ .
+        """subset a set of :class:`.EquivalentIdSet`\\ .
 
         :param id_sets:
         :param document:
@@ -84,8 +82,8 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
         self.mapped_ids: Set[Tuple[str, str, str]] = set()
 
     def prepare(self, document: Document) -> None:
-        """
-        note, this method can't be cached, as the state of the document may change between executions
+        """Note, this method can't be cached, as the state of the document may
+        change between executions.
 
         :param document:
         :return:
@@ -157,9 +155,9 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document) -> None:
-        """
-        build document representations by parser names here, and store in a dict. This method is cached so
-        we don't need to call it multiple times per document
+        """Build document representations by parser names here, and store in a
+        dict. This method is cached so we don't need to call it multiple times
+        per document.
 
         :param document:
         :return:
@@ -178,9 +176,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     def cacheable_build_document_representation(
         scorer: TfIdfScorer, doc: Document, parsers: FrozenSet[str]
     ) -> Dict[str, np.ndarray]:
-        """
-        static cached method, so we don't need to recalculate document representation between different instances
-        of this class.
+        """static cached method, so we don't need to recalculate document
+        representation between different instances of this class.
 
         :param scorer:
         :param doc:
@@ -236,12 +233,16 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
-    """
-    certain entities are often mentioned by some colloquial name, even if it's technically incorrect. In these cases,
-    we may have an annotation_score field in the metadata_db, as a proxy of how widely studied the entity is. We
-    use this annotation score as a proxy for 'given a random mention of the entity, how likely is it that the
-    author is referring to instance x vs instance y'. Naturally, this is a pretty unsophisticated disambiguation
-    strategy, so should generally only be used as a last resort!
+    """certain entities are often mentioned by some colloquial name, even if
+    it's technically incorrect.
+
+    In these cases, we may have an annotation_score field in the
+    metadata_db, as a proxy of how widely studied the entity is. We use
+    this annotation score as a proxy for 'given a random mention of the
+    entity, how likely is it that the author is referring to instance x
+    vs instance y'. Naturally, this is a pretty unsophisticated
+    disambiguation strategy, so should generally only be used as a last
+    resort!
     """
 
     def prepare(self, document: Document) -> None:

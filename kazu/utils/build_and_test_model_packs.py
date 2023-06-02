@@ -17,9 +17,8 @@ from omegaconf import DictConfig
 
 @dataclass
 class BuildConfiguration:
-    """Dataclass that controls how a base model pack and config should be merged with a
-    target model pack.
-    """
+    """Dataclass that controls how a base model pack and config should be
+    merged with a target model pack."""
 
     #: should this model pack use the base config as a starting point?
     requires_base_config: bool
@@ -63,7 +62,8 @@ class ModelPackBuilder:
         skip_tests: bool,
         zip_pack: bool,
     ):
-        """A ModelPackBuilder is a helper class to assist in the building of a model pack.
+        """A ModelPackBuilder is a helper class to assist in the building of a
+        model pack.
 
         .. danger::
            WARNING! since this class will configure the kazu global cache, executing
@@ -162,9 +162,10 @@ class ModelPackBuilder:
         return self.model_pack_build_path
 
     def load_build_configuration(self) -> BuildConfiguration:
-        """
-        try to load a merge configuration from the model pack root. The merge configuration should be
-        a json file called base_model_merge_config.json. None is returned if no model pack is found
+        """Try to load a merge configuration from the model pack root. The
+        merge configuration should be a json file called
+        base_model_merge_config.json. None is returned if no model pack is
+        found.
 
         :param model_pack_path:
         :return:
@@ -245,9 +246,8 @@ class ModelPackBuilder:
             shutil.rmtree(maybe_spacy_pipeline)
 
     def zip_model_pack(self):
-        """
-        call the zip subprocess to compress model pack (requires zip on CLI)
-        also moves it to parent dir
+        """Call the zip subprocess to compress model pack (requires zip on CLI)
+        also moves it to parent dir.
 
         :param model_pack_name:
         :param build_dir:
@@ -269,8 +269,7 @@ class ModelPackBuilder:
 
     @staticmethod
     def build_caches(cfg: DictConfig) -> None:
-        """
-        execute all processed required to build model pack caches
+        """Execute all processed required to build model pack caches.
 
         :param cfg:
         :return:

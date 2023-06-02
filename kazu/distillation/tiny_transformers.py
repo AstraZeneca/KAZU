@@ -64,12 +64,14 @@ class TinyBertForSequenceTagging(BertPreTrainedModel):  # type: ignore[misc]
     ):
         """Defines the computation performed when the model is called.
 
-        Note that users should call the :class:`TinyBertForSequenceTagging` instance itself, rather
-        than this method directly, because calling the instance runs registered 'hooks' on the instance.
+        Note that users should call the
+        :class:`TinyBertForSequenceTagging` instance itself, rather than
+        this method directly, because calling the instance runs
+        registered 'hooks' on the instance.
 
-        This works as this class inherits (through its base class) from :class:`torch.nn.Module`\\ , which
-        defines __call__ to call the forward method, as well as registered hooks.
-
+        This works as this class inherits (through its base class) from
+        :class:`torch.nn.Module`\\ , which defines __call__ to call the
+        forward method, as well as registered hooks.
         """
 
         output = self.bert(

@@ -65,8 +65,8 @@ class CombinatorialSynonymGenerator:
         self.synonym_generators: Set[SynonymGenerator] = set(synonym_generators)
 
     def __call__(self, synonyms: Set[SynonymTerm]) -> Set[SynonymTerm]:
-        """
-        For every permutation of modifiers, generate a list of syns, then aggregate at the end
+        """For every permutation of modifiers, generate a list of syns, then
+        aggregate at the end.
 
         :param synonyms: Set[SynonymTerm] to generate from
         :return: Set[SynonymTerm] of generated synonyms. Note, the field values of the generated synonyms will
@@ -140,9 +140,7 @@ class SeparatorExpansion(SynonymGenerator):
 
 
 class StopWordRemover(SynonymGenerator):
-    """
-    remove stopwords from a string
-    """
+    """Remove stopwords from a string."""
 
     all_stopwords = {"of", "and", "in", "to", "with", "caused", "involved", "by", "the"}
 
@@ -297,7 +295,8 @@ class SuffixReplacement(SynonymGenerator):
 
 
 class SpellingVariationReplacement(SynonymGenerator):
-    """Generate additional synonyms using a mapping of (known) synonyms to a list of variations."""
+    """Generate additional synonyms using a mapping of (known) synonyms to a
+    list of variations."""
 
     def __init__(self, input_path: PathLike):
         with open(input_path, mode="r", encoding="utf-8") as inf:

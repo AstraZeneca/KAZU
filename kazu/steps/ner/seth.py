@@ -11,8 +11,8 @@ SETH_METADATA_KEY = "seth"
 
 
 class SethStep(Step):
-    """
-    A Step that calls SETH (SNP Extraction Tool for Human Variations) over py4j.
+    """A Step that calls SETH (SNP Extraction Tool for Human Variations) over
+    py4j.
 
     Paper:
 
@@ -43,7 +43,6 @@ class SethStep(Step):
     .. raw:: html
 
         </details>
-
     """
 
     def __init__(

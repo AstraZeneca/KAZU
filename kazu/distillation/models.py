@@ -1,5 +1,6 @@
-"""Influenced by Huawei Noah's Ark Lab `TinyBERT <https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT>`_,
-but heavily modified structurally to fit in our PyTorch Lightning training setup.
+"""Influenced by Huawei Noah's Ark Lab `TinyBERT <https://github.com/huawei-
+noah/Pretrained-Language-Model/blob/master/TinyBERT>`_, but heavily modified
+structurally to fit in our PyTorch Lightning training setup.
 
 `This section of the TinyBERT code <https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT/task_distill.py#L789-L1081>`_
 in particular is relevant.
@@ -81,9 +82,10 @@ SCHEDULES: Dict[Optional[str], Callable] = {
 
 
 class NerDataset(Dataset):
-    """
-    A dataset used for Ner. designed for on the fly tokenisation to speed up multi processing. Uses caching to
-    prevent repeated processing
+    """A dataset used for Ner.
+
+    designed for on the fly tokenisation to speed up multi processing.
+    Uses caching to prevent repeated processing
     """
 
     def __init__(
@@ -197,8 +199,7 @@ class TaskSpecificDistillation(pl.LightningModule):
         max_epochs: int,
         schedule: Optional[str] = None,
     ):
-        """
-        Base class for distillation on PyTorch Lightning platform.
+        """Base class for distillation on PyTorch Lightning platform.
 
         :param temperature:
         :param warmup_steps:
@@ -234,8 +235,7 @@ class TaskSpecificDistillation(pl.LightningModule):
         )
 
     def get_training_examples(self) -> List[InputExample]:
-        """
-        subclasses should implement this
+        """Subclasses should implement this.
 
         :return:
         """
@@ -266,9 +266,7 @@ class TaskSpecificDistillation(pl.LightningModule):
     def configure_optimizers(
         self,
     ):
-        """
-        Configure optimizer and learning rate scheduler.
-        """
+        """Configure optimizer and learning rate scheduler."""
         optimizer_grouped_parameters = self.get_optimizer_grouped_parameters(
             student_model=self.student_model
         )
@@ -308,8 +306,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         schedule: Optional[str] = None,
         metric: str = "Default",
     ):
-        """
-        Base class for sequence tagging (task-specific) distillation steps
+        """Base class for sequence tagging (task-specific) distillation steps.
 
         :param temperature:
         :param warmup_steps:
@@ -361,7 +358,9 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         )
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.train_dataloader </common/lightning_module.rst#train-dataloader>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.train_dataloader
+        </common/lightning_module.rst#train-dataloader>`\\ ."""
         dataset = NerDataset(
             tokenizer=self.tokenizer,
             examples=self.training_examples,
@@ -383,7 +382,9 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         return self.processor.get_train_examples(self.data_dir)
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.val_dataloader </common/lightning_module.rst#val-dataloader>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.val_dataloader
+        </common/lightning_module.rst#val-dataloader>`\\ ."""
         examples = self.processor.get_dev_examples(self.data_dir)
         dataset = NerDataset(
             tokenizer=self.tokenizer,
@@ -422,8 +423,8 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         schedule: Optional[str] = None,
         metric: str = "Default",
     ):
-        """
-        A class for sequence tagging (task-specific) final-layer distillation step
+        """A class for sequence tagging (task-specific) final-layer
+        distillation step.
 
         :param temperature:
         :param warmup_steps:
@@ -467,7 +468,9 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         return (-targets_prob * student_likelihood).mean()
 
     def training_step(self, batch, batch_idx):
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.training_step </common/lightning_module.rst#training-step>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.training_step
+        </common/lightning_module.rst#training-step>`\\ ."""
         student_logits, student_atts, student_reps = self.student_model(
             input_ids=batch["input_ids"],
             token_type_ids=batch["token_type_ids"],
@@ -499,7 +502,9 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.validation_step </common/lightning_module.rst#validation-step>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.validation_step
+        </common/lightning_module.rst#validation-step>`\\ ."""
         logits, _, _ = self.student_model(
             input_ids=batch["input_ids"],
             token_type_ids=batch["token_type_ids"],
@@ -523,7 +528,8 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         }
 
     def validation_epoch_end(self, val_step_outputs):
-        """Implementation of :meth:`LightningModule.validation_epoch_end <pytorch_lightning.core.LightningModule.validation_epoch_end>`\\ ."""
+        """Implementation of :meth:`LightningModule.validation_epoch_end
+        <pytorch_lightning.core.LightningModule.validation_epoch_end>`\\ ."""
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
         self.log(
             "validation_loss",
@@ -576,8 +582,8 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         schedule: Optional[str] = None,
         metric: str = "Default",
     ):
-        """
-        A class for sequence tagging (task-specific) intermediate-layer (Transformer, Embedding) distillation step
+        """A class for sequence tagging (task-specific) intermediate-layer
+        (Transformer, Embedding) distillation step.
 
         :param temperature:
         :param warmup_steps:
@@ -616,9 +622,8 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.save_hyperparameters()
 
     def _run_step(self, batch: Any) -> Tuple[torch.Tensor, torch.Tensor]:
-        """
-        function for the training/validation step.
-        Computes attention based distillation loss and hidden states based distillation loss.
+        """function for the training/validation step. Computes attention based
+        distillation loss and hidden states based distillation loss.
 
         :param batch: The output of DataLoader.
         :return: A tuple of tensors. (rep_loss, att_loss)
@@ -674,7 +679,9 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         return rep_loss, att_loss
 
     def training_step(self, batch, batch_idx):
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.training_step </common/lightning_module.rst#training-step>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.training_step
+        </common/lightning_module.rst#training-step>`\\ ."""
         rep_loss, att_loss = self._run_step(batch)
         loss = rep_loss + att_loss
 
@@ -692,7 +699,9 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         return loss
 
     def validation_step(self, batch, batch_idx):
-        """Implementation of :external+pytorch_lightning:ref:`LightningModule.validation_step </common/lightning_module.rst#validation-step>`\\ ."""
+        """Implementation of
+        :external+pytorch_lightning:ref:`LightningModule.validation_step
+        </common/lightning_module.rst#validation-step>`\\ ."""
         rep_loss, att_loss = self._run_step(batch)
         loss = rep_loss + att_loss
         return {
@@ -702,7 +711,8 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         }
 
     def validation_epoch_end(self, val_step_outputs):
-        """Implementation of :meth:`LightningModule.validation_epoch_end <pytorch_lightning.core.LightningModule.validation_epoch_end>`\\ ."""
+        """Implementation of :meth:`LightningModule.validation_epoch_end
+        <pytorch_lightning.core.LightningModule.validation_epoch_end>`\\ ."""
 
         epoch_loss_mean = np.mean([x["loss"] for x in val_step_outputs])
         self.log(

@@ -44,9 +44,7 @@ def populate_databases() -> Tuple[DummyParser, DummyParser]:
 
 
 class TestStrategy(MappingStrategy):
-    """
-    Implementation of MappingStrategy for testing.
-    """
+    """Implementation of MappingStrategy for testing."""
 
     def __init__(
         self,
@@ -90,9 +88,7 @@ class TestStrategy(MappingStrategy):
 
 
 class TestDoNothingDisambiguationStrategy(DisambiguationStrategy):
-    """
-    Implementation of DisambiguationStrategy for testing.
-    """
+    """Implementation of DisambiguationStrategy for testing."""
 
     def prepare(self, document: Document):
         pass

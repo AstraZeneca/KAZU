@@ -25,11 +25,11 @@ _TAX_NAME = "taxonomy"
 
 
 class KazuToLabelStudioConverter:
-    """
-    converts a Kazu :class:`.Document` into Label Studio tasks.
+    """converts a Kazu :class:`.Document` into Label Studio tasks.
 
-    Since LS is region based, we need to create a new region for every CharSpan (even overlapping ones),
-    and add entity information (class, mappings etc) to the region.
+    Since LS is region based, we need to create a new region for every
+    CharSpan (even overlapping ones), and add entity information (class,
+    mappings etc) to the region.
     """
 
     @classmethod

@@ -21,8 +21,9 @@ Metadata = Dict[str, SimpleValue]
 
 
 class MetadataDatabase(metaclass=Singleton):
-    """
-    Singleton of Ontology metadata database. Purpose: metadata needs to be looked up in different linking processes,
+    """Singleton of Ontology metadata database.
+
+    Purpose: metadata needs to be looked up in different linking processes,
     and this singleton allows us to load it once/reduce memory usage
     """
 
@@ -32,9 +33,9 @@ class MetadataDatabase(metaclass=Singleton):
         self.loaded_parsers: Set[str] = set()
 
     def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]) -> None:
-        """
-        add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
-        override any existing entries with associated with the keys in the metadata dict
+        """Add metadata to the ontology. Note, metadata is assumed to be
+        static, and global. Calling this function will override any existing
+        entries with associated with the keys in the metadata dict.
 
         :param name: name of ontology to add to
         :param metadata: dict in format {idx:metadata}
@@ -49,8 +50,7 @@ class MetadataDatabase(metaclass=Singleton):
         self._keys_lst[name] = list(self._database[name].keys())
 
     def get_by_idx(self, name: ParserName, idx: Idx) -> Metadata:
-        """
-        get the metadata associated with an ontology and id
+        """Get the metadata associated with an ontology and id.
 
         :param name: name of ontology to query
         :param idx: idx to query
@@ -68,8 +68,7 @@ class MetadataDatabase(metaclass=Singleton):
         )
 
     def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
-        """
-        get all metadata associated with an ontology
+        """Get all metadata associated with an ontology.
 
         :param name: name of ontology
         :return:
@@ -78,9 +77,7 @@ class MetadataDatabase(metaclass=Singleton):
 
 
 class SynonymDatabase(metaclass=Singleton):
-    """
-    Singleton of a database of synonyms.
-    """
+    """Singleton of a database of synonyms."""
 
     def __init__(self):
         self._syns_database_by_syn: Dict[ParserName, Dict[NormalisedSynonymStr, SynonymTerm]] = {}
@@ -91,8 +88,7 @@ class SynonymDatabase(metaclass=Singleton):
         self.loaded_parsers: Set[ParserName] = set()
 
     def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> None:
-        """
-        add synonyms to the database.
+        """add synonyms to the database.
 
         :param name: name of ontology to add to
         :param synonyms: iterable of SynonymTerms to add
@@ -117,8 +113,8 @@ class SynonymDatabase(metaclass=Singleton):
                     )
 
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
-        """
-        get a set of EquivalentIdSets associated with an ontology and synonym string
+        """Get a set of EquivalentIdSets associated with an ontology and
+        synonym string.
 
         :param name: name of ontology to query
         :param synonym: idx to query
@@ -151,8 +147,7 @@ class SynonymDatabase(metaclass=Singleton):
         synonym: NormalisedSynonymStr,
         strategy_filters: Optional[Set[EquivalentIdAggregationStrategy]] = None,
     ) -> Set[NormalisedSynonymStr]:
-        """
-        get all other syns for a synonym in a kb
+        """Get all other syns for a synonym in a kb.
 
         :param name: parser name
         :param synonym: synonym
@@ -175,8 +170,7 @@ class SynonymDatabase(metaclass=Singleton):
         return result
 
     def get_all(self, name: ParserName) -> Dict[NormalisedSynonymStr, SynonymTerm]:
-        """
-        get all synonyms associated with an ontology
+        """Get all synonyms associated with an ontology.
 
         :param name: name of ontology
         :return:

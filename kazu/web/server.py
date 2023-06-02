@@ -52,11 +52,13 @@ app = FastAPI(
 
 
 def openapi_no_auth() -> Dict[str, Any]:
-    """Remove the bits of the openapi schema that put auth buttons on the Swagger UI.
+    """Remove the bits of the openapi schema that put auth buttons on the
+    Swagger UI.
 
-    When we don't configure any Authentication middleware, we otherwise still get the
-    buttons, even though they aren't necessary to fill in and don't do anything, which
-    may be confusing to users."""
+    When we don't configure any Authentication middleware, we otherwise
+    still get the buttons, even though they aren't necessary to fill in
+    and don't do anything, which may be confusing to users.
+    """
     if not app.openapi_schema:
         base_schema = get_openapi(
             title=app.title,
@@ -86,7 +88,8 @@ oauth2_scheme = HTTPBearer(auto_error=False)
 
 
 def get_request_id(request: HTTPConnection) -> Union[str, None]:
-    """Utility function for extracting custom header from HTTPConnection Object.
+    """Utility function for extracting custom header from HTTPConnection
+    Object.
 
     :param request: Starlette HTTPConnection object
     :returns: ID string
@@ -117,7 +120,8 @@ def get_id_log_prefix_if_available(request: HTTPConnection) -> str:
 def log_request_to_path_with_prefix(
     request: HTTPConnection, log_prefix: Optional[str] = None
 ) -> None:
-    """Utility function to log the log prefix plus the endpoint the request was sent to.
+    """Utility function to log the log prefix plus the endpoint the request was
+    sent to.
 
     :param request: Starlette HTTPConnection object
     :param log_prefix: the prefix to log. Provided in case the log prefix has already been
@@ -271,10 +275,13 @@ linking_only_examples = {
 
 
 class SingleEntityDocumentConverter:
-    """Add an entity for the whole of every section in every document you provide.
+    """Add an entity for the whole of every section in every document you
+    provide.
 
-    Essentially a subclass of :class:`DocumentCollection`, but pydantic makes this a pain to do with inheritance,
-    so use composition instead of inheritance here."""
+    Essentially a subclass of :class:`DocumentCollection`, but pydantic
+    makes this a pain to do with inheritance, so use composition instead
+    of inheritance here.
+    """
 
     def __init__(self, entity_free_doc_collection: DocumentCollection, entity_class: str) -> None:
         self.entity_class = entity_class
@@ -305,9 +312,7 @@ class SingleEntityDocumentConverter:
 @serve.deployment(route_prefix="/api")
 @serve.ingress(app)
 class KazuWebAPI:
-    """
-    Web app to serve results
-    """
+    """Web app to serve results."""
 
     deploy: Callable
 
@@ -341,7 +346,8 @@ class KazuWebAPI:
 
     @app.get("/step_groups")
     def step_groups(self, request: Request) -> JSONResponse:
-        """Get the step groups configured in the deployed pipeline, (including showing the steps in each group)."""
+        """Get the step groups configured in the deployed pipeline, (including
+        showing the steps in each group)."""
         log_request_to_path_with_prefix(request)
         if self.pipeline.step_groups is None:
             return JSONResponse(content=None)
@@ -381,7 +387,8 @@ class KazuWebAPI:
     ) -> JSONResponse:
         """Run NER and Linking over the input document or documents.
 
-        This is the default behaviour of the kazu library."""
+        This is the default behaviour of the kazu library.
+        """
         return self.base_pipeline_request(
             doc_collection=doc_collection, request=request, step_namespaces=None
         )
@@ -396,13 +403,16 @@ class KazuWebAPI:
     ) -> JSONResponse:
         """Run specific steps over the provided document or documents.
 
-        This is advanced functionality not expected to be needed by most ordinary users.
+        This is advanced functionality not expected to be needed by most
+        ordinary users.
 
-        The steps must be contained in the current pipeline (call the steps api to see what is
-        available). The order the steps run in is the order provided in the API, not the order
-        specified in the pipeline. Note that this means you can customize the order steps run in
-        (although doing so effectively requires a good understanding of the steps and their
-        behaviour)."""
+        The steps must be contained in the current pipeline (call the
+        steps api to see what is available). The order the steps run in
+        is the order provided in the API, not the order specified in the
+        pipeline. Note that this means you can customize the order steps
+        run in (although doing so effectively requires a good
+        understanding of the steps and their behaviour).
+        """
         return self.base_pipeline_request(
             doc_collection=doc_collection,
             request=request,
@@ -418,8 +428,9 @@ class KazuWebAPI:
     ) -> JSONResponse:
         """Call only steps that do Named Entity Recognition (NER).
 
-        Note that this functionality is already available via the custom_steps endpoint,
-        this just provides a convenient and visible/discoverable endpoint for users.
+        Note that this functionality is already available via the
+        custom_steps endpoint, this just provides a convenient and
+        visible/discoverable endpoint for users.
         """
         return self.base_pipeline_request(
             doc_collection=doc_collection, request=request, step_group="ner_only"
@@ -433,16 +444,20 @@ class KazuWebAPI:
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=linking_only_examples),
     ) -> JSONResponse:
-        """Call only steps that do Entity Linking (EL). Also known as 'entity normalization'.
+        """Call only steps that do Entity Linking (EL). Also known as 'entity
+        normalization'.
 
-        This API assumes that the whole of each section in each document is an entity mention. It
-        will also try to link all entities to a single type of entity, specified in the
-        entity_class query parameter. You can of course call the API multiple times with different
-        entity_class values with the relevant documents for each entity_class.
+        This API assumes that the whole of each section in each document
+        is an entity mention. It will also try to link all entities to a
+        single type of entity, specified in the entity_class query
+        parameter. You can of course call the API multiple times with
+        different entity_class values with the relevant documents for
+        each entity_class.
 
-        If you don't know what the entity type of the entities is, you can just call the
-        ner_and_linking endpoint instead. It may however give you back entities that don't span the
-        whole section.
+        If you don't know what the entity type of the entities is, you
+        can just call the ner_and_linking endpoint instead. It may
+        however give you back entities that don't span the whole
+        section.
         """
         linking_doc_collection = SingleEntityDocumentConverter(
             doc_collection, entity_class=entity_class
@@ -463,8 +478,10 @@ class KazuWebAPI:
 
         This endpoint will be removed in future.
 
-        Behaves the same as ner_and_linking, but now we have the ner_only and
-        linking_only endpoints, the naming here had the potential to be confusing."""
+        Behaves the same as ner_and_linking, but now we have the
+        ner_only and linking_only endpoints, the naming here had the
+        potential to be confusing.
+        """
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu endpoint")
         logger.info(id_log_prefix + "Document: %s", doc)
@@ -484,11 +501,14 @@ class KazuWebAPI:
 
         This endpoint will be removed in future.
 
-        Behaves the same as ner_and_linking, but now we have the ner_only and
-        linking_only endpoints, the naming here had the potential to be confusing.
+        Behaves the same as ner_and_linking, but now we have the
+        ner_only and linking_only endpoints, the naming here had the
+        potential to be confusing.
 
-        In addition, we refactored ner_and_linking so that we no longer need separate
-        'batch' and single document endpoints, now ner_and_linking handles both."""
+        In addition, we refactored ner_and_linking so that we no longer
+        need separate 'batch' and single document endpoints, now
+        ner_and_linking handles both.
+        """
 
         id_log_prefix = get_id_log_prefix_if_available(request)
         logger.info(id_log_prefix + "Request to kazu/batch endpoint")
@@ -498,11 +518,14 @@ class KazuWebAPI:
 
     @app.post(f"/{KAZU}/ls-annotations")
     def ls_annotations(self, doc: WebDocument, request: Request) -> JSONResponse:
-        """Provide LabelStudio annotations from the kazu results on the given document.
+        """Provide LabelStudio annotations from the kazu results on the given
+        document.
 
-        This is not expected to be called by ordinary users. This endpoint was added in order
-        to support the Kazu frontend, which makes uses of LabelStudio's frontend code, so
-        relies on this endpoint."""
+        This is not expected to be called by ordinary users. This
+        endpoint was added in order to support the Kazu frontend, which
+        makes uses of LabelStudio's frontend code, so relies on this
+        endpoint.
+        """
 
         id_log_prefix = get_id_log_prefix_if_available(request)
         log_request_to_path_with_prefix(request, log_prefix=id_log_prefix)
@@ -525,12 +548,12 @@ class KazuWebAPI:
     ) -> JSONResponse:
         """Run the pipeline with a specific step group.
 
-        This will run only a pre-defined subset of steps. Call the step_groups endpoint to
-        find the configured set of step_groups for this API deployment, and the steps they
-        include.
+        This will run only a pre-defined subset of steps. Call the
+        step_groups endpoint to find the configured set of step_groups
+        for this API deployment, and the steps they include.
 
-        If you are interested in running a different set of steps, you can use the
-        custom_pipeline_steps endpoint.
+        If you are interested in running a different set of steps, you
+        can use the custom_pipeline_steps endpoint.
         """
         return self.base_pipeline_request(
             doc_collection=doc_collection,
@@ -559,8 +582,7 @@ class KazuWebUI:
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
-    """
-    deploy the web app to Ray Serve
+    """Deploy the web app to Ray Serve.
 
     :param cfg: DictConfig from Hydra
     :return: None

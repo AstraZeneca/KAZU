@@ -37,11 +37,12 @@ def entity_to_entity_key(
 
 
 class ConfidenceLevelStrategyExecution:
-    """
-    The role of this class is to track which entities have had mappings successfully resolved,
-    and which require the application of further strategies.
+    """The role of this class is to track which entities have had mappings
+    successfully resolved, and which require the application of further
+    strategies.
 
-    This is handled via tracking a dictionary of EntityKey to sets of parser names.
+    This is handled via tracking a dictionary of EntityKey to sets of
+    parser names.
 
     See further details in the __call__ docstring.
     """
@@ -88,9 +89,7 @@ class ConfidenceLevelStrategyExecution:
     def __call__(
         self, entity: Entity, strategy_index: int, document: Document
     ) -> Iterable[Mapping]:
-        """
-
-        Conditionally execute a mapping strategy over an entity.
+        """Conditionally execute a mapping strategy over an entity.
 
         :param entity: entity to process
         :param strategy_index: index of strategy to run that is configured for this entity class
@@ -147,10 +146,10 @@ class ConfidenceLevelStrategyExecution:
                         yield mapping
 
     def reset(self):
-        """
-        clear state, ready for another execution.
+        """clear state, ready for another execution.
 
-        Should be called when the underlying :class:`.Document` has changed.
+        Should be called when the underlying :class:`.Document` has
+        changed.
         """
         self.unresolved_parsers.clear()
         self.entity_mapped.clear()
@@ -160,12 +159,13 @@ CONFIDENCE_ERROR_ENDING = "If entities with this confidence(s) appear, attemptin
 
 
 class StrategyRunner:
-    """
-    This is a complex class, designed to co-ordinate the running of various strategies over a document, with the end
-    result producing mappings (grounding) for entities. Strategies that produce mappings may depend on the changing
-    state of the Document, depending on whether other strategies are successful or not, hence why their precise
-    co-ordination is crucial. Specifically we want the strategies that have higher precision to run before lower
-    precision ones.
+    """This is a complex class, designed to co-ordinate the running of various
+    strategies over a document, with the end result producing mappings
+    (grounding) for entities. Strategies that produce mappings may depend on
+    the changing state of the Document, depending on whether other strategies
+    are successful or not, hence why their precise co-ordination is crucial.
+    Specifically we want the strategies that have higher precision to run
+    before lower precision ones.
 
     Beyond the precision of the strategy itself, the variables to consider are:
 
@@ -214,8 +214,8 @@ class StrategyRunner:
     def group_entities_by_symbolism(
         entities: Iterable[Entity],
     ) -> Tuple[List[Entity], List[Entity]]:
-        """
-        groups entities into symbolic and non-symbolic forms, so they can be processed separately.
+        """groups entities into symbolic and non-symbolic forms, so they can be
+        processed separately.
 
         :param entities:
         :return:
@@ -237,9 +237,7 @@ class StrategyRunner:
         return symbolic, non_symbolic
 
     def __call__(self, doc: Document) -> None:
-        """
-
-        Run relevant strategies to decide what mappings to create.
+        """Run relevant strategies to decide what mappings to create.
 
         Generally speaking, noun phrases should be easier to normalise than symbolic mentions, as there is more
         information to work with. Therefore, we group entities by mention confidence, split by symbolism, then

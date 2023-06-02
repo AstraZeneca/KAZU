@@ -87,9 +87,12 @@ class DropUnmappedEntityFilter:
 
 
 class StripMappingURIsAction:
-    """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part of the URI.
+    """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part
+    of the URI.
 
-    For example, this will turn http://purl.obolibrary.org/obo/MONDO_0004979 into just MONDO_004979.
+    For example, this will turn
+    http://purl.obolibrary.org/obo/MONDO_0004979
+    into just MONDO_004979.
 
     If you don't want URI stripping at all, don't use this Action as part of the CleanupStep/in the pipeline.
     """

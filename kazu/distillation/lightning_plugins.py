@@ -11,10 +11,7 @@ from transformers import AutoTokenizer
 # lightning doesn't distribute type information, so to mypy
 # this is subclassing 'Any'.
 class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
-    """
-    A plugin for saving student model (without saving teacher model)
-    """
-
+    """A plugin for saving student model (without saving teacher model)"""
     def __init__(self, model_name_or_path: str):
         super().__init__()
         self.model_name_or_path = model_name_or_path
@@ -25,8 +22,7 @@ class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
         path: Union[str, Path],
         storage_options: Optional[Any] = None,
     ) -> None:
-        """
-        Save distilled (student) model. Loading currently not implemented
+        """Save distilled (student) model. Loading currently not implemented.
 
         :param checkpoint: contents to save. Including `state_dict`, `optimizer_states` and `callbacks`.
         :param path:
@@ -64,7 +60,8 @@ class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
         """Not currently implemented.
 
         See :external+pytorch_lightning:meth:`CheckpointIO.load_checkpoint <lightning.pytorch.plugins.io.CheckpointIO.load_checkpoint>`
-        for details of the abstract method."""
+        for details of the abstract method.
+        """
         raise NotImplementedError
 
     def remove_checkpoint(

@@ -14,7 +14,8 @@ Item = TypeVar("Item")
 Key = TypeVar("Key", bound="SupportsRichComparison")
 """The type of the sort key provided by the key_func.
 
-Bound to 'SupportsRichComparison' from `_typeshed <https://github.com/python/typeshed/tree/main/stdlib/_typeshed>`_
+Bound to 'SupportsRichComparison' from
+`_typeshed <https://github.com/python/typeshed/tree/main/stdlib/_typeshed>`_
 as the keys must support comparison in order to be sorted using :func:`sorted`\\ .
 """
 

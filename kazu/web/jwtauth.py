@@ -99,7 +99,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
 
     @classmethod
     def get_token_from_header(cls, authorization: str, prefix: str) -> str:
-        """Parses the Authorization header and returns only the token"""
+        """Parses the Authorization header and returns only the token."""
         try:
             scheme, token = authorization.split()
         except ValueError:

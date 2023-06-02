@@ -9,9 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class MergeOverlappingEntsStep(Step):
-    """
-    This step merges overlapping and nested entities. The final result should not allow any overlapped entities
-    see algorithm description below
+    """This step merges overlapping and nested entities.
+
+    The final result should not allow any overlapped entities see
+    algorithm description below
     """
 
     def __init__(
@@ -19,9 +20,7 @@ class MergeOverlappingEntsStep(Step):
         ent_class_preferred_order: List[str],
         ignore_non_contiguous: bool = True,
     ):
-        """
-
-        The algorithm for selecting an entity span is as follows:
+        """The algorithm for selecting an entity span is as follows:
 
         1. group entities by location
 
@@ -72,8 +71,7 @@ class MergeOverlappingEntsStep(Step):
         return preferred_ents[0], preferred_ents[1:]
 
     def filter_ents_across_class(self, ents: Dict[Tuple[int, int], Set[Entity]]) -> List[Entity]:
-        """
-        choose the best entities per location
+        """Choose the best entities per location.
 
         :param ents:
         :return:

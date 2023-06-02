@@ -18,9 +18,7 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import Disambi
 
 
 class MappingFactory:
-    """
-    factory class to produce mappings
-    """
+    """Factory class to produce mappings."""
 
     @staticmethod
     def create_mapping_from_id_sets(
@@ -107,8 +105,8 @@ class MappingFactory:
 
 
 class MappingStrategy(ABC):
-    """
-    A MappingStrategy is responsible for actualising instances of :class:`.Mapping`\\ .
+    """A MappingStrategy is responsible for actualising instances of
+    :class:`.Mapping`\\ .
 
     This is performed in two steps:
 
@@ -149,11 +147,10 @@ class MappingStrategy(ABC):
         self.disambiguation_strategies = disambiguation_strategies
 
     def prepare(self, document: Document) -> None:
-        """
-        perform any setup that needs to run once per document.
+        """Perform any setup that needs to run once per document.
 
-        Care should be taken if trying to cache this step, as the Document state is liable to
-        change between executions.
+        Care should be taken if trying to cache this step, as the Document state is
+        liable to change between executions.
 
         :param document:
         :return:
@@ -190,10 +187,11 @@ class MappingStrategy(ABC):
     def disambiguate_if_required(
         self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
     ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
-        """
-        applies disambiguation strategies if configured, and either len(filtered_terms) > 1 or any
-        of the filtered_terms are ambiguous. If ids are still ambiguous after all strategies have run,
-        the disambiguation confidence will be :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
+        """applies disambiguation strategies if configured, and either
+        len(filtered_terms) > 1 or any of the filtered_terms are ambiguous. If
+        ids are still ambiguous after all strategies have run, the
+        disambiguation confidence will be
+        :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
 
         :param filtered_terms: terms to disambiguate
         :param document: originating Document
@@ -265,9 +263,7 @@ class MappingStrategy(ABC):
 
 
 class ExactMatchMappingStrategy(MappingStrategy):
-    """
-    returns any exact matches
-    """
+    """Returns any exact matches."""
 
     @staticmethod
     def filter_terms(
@@ -281,10 +277,11 @@ class ExactMatchMappingStrategy(MappingStrategy):
 
 
 class SymbolMatchMappingStrategy(MappingStrategy):
-    """
-    split both query and reference terms by whitespace. select the term with the most splits as the 'query'. Check
-    all of these tokens (and no more) are within the other term. Useful for symbol matching
-    e.g. "MAP K8" (longest) vs "MAPK8" (shortest)
+    """split both query and reference terms by whitespace.
+
+    select the term with the most splits as the 'query'. Check all of
+    these tokens (and no more) are within the other term. Useful for
+    symbol matching e.g. "MAP K8" (longest) vs "MAPK8" (shortest)
     """
 
     @staticmethod
@@ -320,9 +317,9 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 
 class TermNormIsSubStringMappingStrategy(MappingStrategy):
-    """
-    for a set of :class:`.SynonymTermWithMetrics`, see if any of their .term_norm
-    are string matches of the match_norm tokens based on whitespace tokenisation.
+    """for a set of :class:`.SynonymTermWithMetrics`, see if any of their
+    .term_norm are string matches of the match_norm tokens based on whitespace
+    tokenisation.
 
     If exactly one :class:`.SynonymTermWithMetrics` matches, prefer it.
 

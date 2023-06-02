@@ -13,9 +13,8 @@ from kazu.utils.utils import Singleton
 
 
 class StringSimilarityScorer(Protocol):
-    """
-    calculates a NumericMetric based on a string match or a normalised string match and a normalised term
-    """
+    """Calculates a NumericMetric based on a string match or a normalised
+    string match and a normalised term."""
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
         raise NotImplementedError
@@ -27,9 +26,7 @@ class BooleanStringSimilarityScorer(StringSimilarityScorer, Protocol):
 
 
 class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """
-    checks all numbers in reference_term are represented in term_norm
-    """
+    """Checks all numbers in reference_term are represented in term_norm."""
 
     number_finder = re.compile("[0-9]+")
 
@@ -41,9 +38,8 @@ class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """
-    checks all TYPE x mentions in match norm are represented in term norm
-    """
+    """Checks all TYPE x mentions in match norm are represented in term
+    norm."""
 
     # need to handle I explicitly
     # other roman numerals get normalized to integers,
@@ -69,9 +65,8 @@ class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """
-    checks all modifier phrases in reference_term are represented in term_norm
-    """
+    """Checks all modifier phrases in reference_term are represented in
+    term_norm."""
 
     def __init__(self, noun_modifier_phrases: List[str]):
         self.noun_modifier_phrases = noun_modifier_phrases
@@ -85,9 +80,10 @@ class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
-    """
-    uses rapid fuzz to calculate string similarity. Note, if the token count >4 and reference_term has
-    more than 10 chars, token_sort_ratio is used. Otherwise, WRatio is used
+    """uses rapid fuzz to calculate string similarity.
+
+    Note, if the token count >4 and reference_term has more than 10
+    chars, token_sort_ratio is used. Otherwise, WRatio is used
     """
 
     @staticmethod
@@ -99,9 +95,8 @@ class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
 
 
 class SapbertStringSimilarityScorer(metaclass=Singleton):
-    """
-    note this is an implementation of the StringSimilarityScorer Protocol, but as a Singleton we can't inherit it
-    """
+    """Note this is an implementation of the StringSimilarityScorer Protocol,
+    but as a Singleton we can't inherit it."""
 
     def __init__(self, sapbert: PLSapbertModel, trainer: Trainer, cache_size: int = 1000):
         """

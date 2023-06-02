@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 def load_steps_and_log_memory_usage(cfg: DictConfig) -> List[Step]:
-    """
-    Loads steps based on the pipeline config, and log the memory increase after loading each step.
+    """Loads steps based on the pipeline config, and log the memory increase
+    after loading each step.
 
     Note that you can instantiate the pipeline directly from the config in a way that gives the
     same results, but this is useful for monitoring/debugging high memory usage.
@@ -117,7 +117,8 @@ class FailedDocsFileHandler(FailedDocsHandler):
 
 
 class PipelineValueError(ValueError):
-    """An Exception that gets raised if arguments passed to a Pipeline are inappropriate.
+    """An Exception that gets raised if arguments passed to a Pipeline are
+    inappropriate.
 
     This is particularly useful to allow handling just these errors - e.g. in Kazu's web API,
     where we can then highlight that there is a problem with the data passed to the API, rather

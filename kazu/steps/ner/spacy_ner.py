@@ -7,8 +7,9 @@ import spacy
 
 
 class SpacyNerStep(Step):
-    """
-    A simple spacy NER implementation. Runs a spacy pipeline over document sections, expecting the
+    """A simple spacy NER implementation.
+
+    Runs a spacy pipeline over document sections, expecting the
     resulting spacy doc to have a populated doc.ents field.
     """
 
