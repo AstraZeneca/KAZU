@@ -319,8 +319,7 @@ class LabelStudioAnnotationView:
         return doc
 
     def build_labels(self, dom: XMLDocument, element: Element) -> None:
-        """
-        .. (sphinx comment) as above for why we have explicit type links here.
+        """.. (sphinx comment) as above for why we have explicit type links.
 
         :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
         :type element: :external+python:ref:`xml.dom.minidom.Element <dom-element-objects>`
@@ -338,8 +337,7 @@ class LabelStudioAnnotationView:
 
     @staticmethod
     def build_taxonomy(dom: XMLDocument, element: Element, tasks: List[Dict], name: str) -> None:
-        """
-        .. (sphinx comment) as above for why we have explicit type links here.
+        """.. (sphinx comment) as above for why we have explicit type links.
 
         :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
         :type element: :external+python:ref:`xml.dom.minidom.Element <dom-element-objects>`
