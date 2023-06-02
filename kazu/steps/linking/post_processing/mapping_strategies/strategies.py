@@ -277,11 +277,11 @@ class ExactMatchMappingStrategy(MappingStrategy):
 
 
 class SymbolMatchMappingStrategy(MappingStrategy):
-    """split both query and reference terms by whitespace.
+    """Split both query and reference terms by whitespace.
 
-    select the term with the most splits as the 'query'. Check all of
+    Select the term with the most splits as the 'query'. Check all of
     these tokens (and no more) are within the other term. Useful for
-    symbol matching e.g. "MAP K8" (longest) vs "MAPK8" (shortest)
+    symbol matching e.g. "MAP K8" (longest) vs "MAPK8" (shortest).
     """
 
     @staticmethod

@@ -1,5 +1,4 @@
-"""
-original source
+"""Original source:
 
 https://raw.githubusercontent.com/amitripshtos/starlette-jwt/master/starlette_jwt/middleware.py
 

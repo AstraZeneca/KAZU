@@ -184,13 +184,13 @@ AssociatedIdSets = FrozenSet[EquivalentIdSet]
 
 @dataclass(frozen=True, eq=True)
 class SynonymTerm:
-    """a SynonymTerm is a container for a single normalised synonym, and is
+    """A SynonymTerm is a container for a single normalised synonym, and is
     produced by an OntologyParser implementation.
 
     It may be composed of multiple terms that normalise to the same
     unique string (e.g. "breast cancer" and "Breast Cancer"). The number
     of associated_id_sets that this synonym maps to is determined by the
-    score_and_group_ids method of the associated OntologyParser
+    score_and_group_ids method of the associated OntologyParser.
     """
 
     #: unnormalised synonym strings
@@ -219,7 +219,7 @@ class SynonymTermWithMetrics(SynonymTerm):
     """Similar to SynonymTerm, but also allows metrics to be scored.
 
     As these metrics are not used in the hash function, care should be
-    taken when hashing of this object is required
+    taken when hashing of this object is required.
     """
 
     search_score: Optional[float] = field(compare=False, default=None)
@@ -257,11 +257,11 @@ class SynonymTermWithMetrics(SynonymTerm):
 @dataclass
 class Entity:
     """A :class:`kazu.data.data.Entity` is a container for information about a
-    single entity detected within a :class:`kazu.data.data.Section`
+    single entity detected within a :class:`kazu.data.data.Section`\\ .
 
     Within an :class:`kazu.data.data.Entity`, the most important fields are :attr:`.Entity.match` (the actual string detected),
     :attr:`.Entity.syn_term_to_synonym_terms`, a dict of :class:`kazu.data.data.SynonymTermWithMetrics` (candidates for knowledgebase hits)
-    and :attr:`.Entity.mappings`, the final product of linked references to the underlying entity
+    and :attr:`.Entity.mappings`, the final product of linked references to the underlying entity.
     """
 
     #: exact text representation
