@@ -345,9 +345,9 @@ class CurationProcessor:
         safe_curations = self.analyse_conflicts_in_curations(self.curations)
         curation_for_ner = set()
         for curation in sorted(safe_curations, key=self.curation_sort_key):
-            maybe_curation_with_term_norm_actions = self._process_curation_action(curation)
-            if maybe_curation_with_term_norm_actions is not None:
-                curation_for_ner.add(maybe_curation_with_term_norm_actions)
+            maybe_curation = self._process_curation_action(curation)
+            if maybe_curation is not None:
+                curation_for_ner.add(maybe_curation)
 
         # check curations are still represented in DB after all processed
         for curation in set(curation_for_ner):
