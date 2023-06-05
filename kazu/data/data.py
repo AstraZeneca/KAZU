@@ -660,7 +660,7 @@ class ParserAction:
     a global sense.
 
     A ParserAction overrides any default behaviour of the parser, and also any conflicts that may occur with
-    :class:`.SynonymTermAction`\\s.
+    :class:`.CuratedTerm`\\s.
 
     These actions are useful for eliminating unwanted behaviour. For example, the root of the Mondo
     ontology is http://purl.obolibrary.org/obo/HP_0000001, which has a default label of 'All'. Since this is
@@ -735,7 +735,6 @@ class CuratedTerm:
 
     This can affect both the behaviour of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`,
     and dictionary based NER (if using the :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`).
-    This is controlled by the list of :class:`.SynonymTermAction`\\s attached.
 
     Example 1:
 
