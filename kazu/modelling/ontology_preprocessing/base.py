@@ -640,13 +640,11 @@ class CurationProcessor:
             return None
 
         override_curations_by_id = defaultdict(set)
-        if self.curations is not None:
-            curations = self.curations if self.curations is not None else []
-            for curation in curations:
-                if curation.associated_id_sets is not None:
-                    for equiv_id_set in curation.associated_id_sets:
-                        for idx in equiv_id_set.ids:
-                            override_curations_by_id[idx].add(curation)
+        for curation in self.curations:
+            if curation.associated_id_sets is not None:
+                for equiv_id_set in curation.associated_id_sets:
+                    for idx in equiv_id_set.ids:
+                        override_curations_by_id[idx].add(curation)
 
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
