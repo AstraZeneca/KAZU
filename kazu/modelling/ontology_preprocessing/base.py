@@ -147,7 +147,7 @@ class CurationProcessor:
         self.parser_name = parser_name
         self._terms_by_term_norm: Dict[NormalisedSynonymStr, SynonymTerm] = {}
         self._terms_by_id: DefaultDict[Idx, Set[SynonymTerm]] = defaultdict(set)
-        # used by inherited actions to decide behaviour
+        # used by inherited curations to decide behaviour
         self._curations_by_syn: DefaultDict[str, Set[CuratedTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
