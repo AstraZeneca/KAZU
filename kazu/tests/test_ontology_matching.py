@@ -199,8 +199,24 @@ PARSER_1_AMBIGUOUS_DATA = {
             2,
             {"ComplexVII Disease\u03B1"},
             [
-                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM, "100")}},
-                {ENT_TYPE_2: {(SECOND_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM, "100")}},
+                {
+                    ENT_TYPE_1: {
+                        (
+                            FIRST_MOCK_PARSER,
+                            COMPLEX_7_DISEASE_ALPHA_NORM,
+                            str(MentionConfidence.HIGHLY_LIKELY.value),
+                        )
+                    }
+                },
+                {
+                    ENT_TYPE_2: {
+                        (
+                            SECOND_MOCK_PARSER,
+                            COMPLEX_7_DISEASE_ALPHA_NORM,
+                            str(MentionConfidence.HIGHLY_LIKELY.value),
+                        )
+                    }
+                },
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
@@ -255,7 +271,15 @@ PARSER_1_AMBIGUOUS_DATA = {
             1,
             {"ComplexVII Disease\u03B1"},
             [
-                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM, "100")}},
+                {
+                    ENT_TYPE_1: {
+                        (
+                            FIRST_MOCK_PARSER,
+                            COMPLEX_7_DISEASE_ALPHA_NORM,
+                            str(MentionConfidence.HIGHLY_LIKELY.value),
+                        )
+                    }
+                },
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
@@ -363,7 +387,15 @@ PARSER_1_AMBIGUOUS_DATA = {
             1,
             {"ComplexVII Disease\u03B1"},
             [
-                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, COMPLEX_7_DISEASE_ALPHA_NORM, "100")}},
+                {
+                    ENT_TYPE_1: {
+                        (
+                            FIRST_MOCK_PARSER,
+                            COMPLEX_7_DISEASE_ALPHA_NORM,
+                            str(MentionConfidence.HIGHLY_LIKELY.value),
+                        )
+                    }
+                },
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
@@ -397,7 +429,15 @@ PARSER_1_AMBIGUOUS_DATA = {
             1,
             {"This sentence is just to test"},
             [
-                {ENT_TYPE_1: {(FIRST_MOCK_PARSER, "THIS SENTENCE IS JUST TO TEST", "100")}},
+                {
+                    ENT_TYPE_1: {
+                        (
+                            FIRST_MOCK_PARSER,
+                            "THIS SENTENCE IS JUST TO TEST",
+                            str(MentionConfidence.HIGHLY_LIKELY.value),
+                        )
+                    }
+                },
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
@@ -587,13 +627,33 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         "amongst",
     }
     match_ontology_dicts = [
-        {"ent_type_1": {("first_mock_parser", "Q42_SYN", "10")}},
-        {"ent_type_1": {("first_mock_parser", "Q42_SYN", "10")}},
-        {"ent_type_2": {("second_mock_parser", "Q8_SYN", "10")}},
-        {"ent_type_3": {("third_mock_parser", "SYNONYMTERM", "10")}},
-        {"ent_type_3": {("third_mock_parser", "COMPLEX 7 DISEASE ALPHA", "50")}},
-        {"ent_type_3": {("third_mock_parser", "COMPLEX 7 DISEASE ALPHA", "50")}},
-        {"ent_type_3": {("third_mock_parser", "AMONGST", "50")}},
+        {"ent_type_1": {("first_mock_parser", "Q42_SYN", str(MentionConfidence.POSSIBLE.value))}},
+        {"ent_type_1": {("first_mock_parser", "Q42_SYN", str(MentionConfidence.POSSIBLE.value))}},
+        {"ent_type_2": {("second_mock_parser", "Q8_SYN", str(MentionConfidence.POSSIBLE.value))}},
+        {
+            "ent_type_3": {
+                ("third_mock_parser", "SYNONYMTERM", str(MentionConfidence.POSSIBLE.value))
+            }
+        },
+        {
+            "ent_type_3": {
+                (
+                    "third_mock_parser",
+                    "COMPLEX 7 DISEASE ALPHA",
+                    str(MentionConfidence.PROBABLE.value),
+                )
+            }
+        },
+        {
+            "ent_type_3": {
+                (
+                    "third_mock_parser",
+                    "COMPLEX 7 DISEASE ALPHA",
+                    str(MentionConfidence.PROBABLE.value),
+                )
+            }
+        },
+        {"ent_type_3": {("third_mock_parser", "AMONGST", str(MentionConfidence.PROBABLE.value))}},
     ]
 
     assert_matches(matches, match_len, match_texts, match_ontology_dicts)
