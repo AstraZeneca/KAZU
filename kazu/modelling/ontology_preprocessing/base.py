@@ -622,7 +622,7 @@ class CurationProcessor:
             if term_for_this_curation is None:
                 logger.warning(
                     "CuratedTerm %s is invalid for NER: "
-                    "requires database entry but all have been removed by actions.",
+                    "requires database entry but all have been removed by curations.",
                     curation,
                 )
             else:
