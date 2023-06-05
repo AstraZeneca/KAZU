@@ -629,7 +629,7 @@ class CurationProcessor:
                 suitable_for_ner = True
         else:
             raise ValueError(f"unknown behaviour for parser {self.parser_name}, {curation}")
-        # if no actions require db entry, it can't be used for ner
+
         if suitable_for_ner:
             return curation
         else:
