@@ -575,7 +575,7 @@ class CurationProcessor:
             logger.debug("ignoring unwanted curation: %s for %s", curation, self.parser_name)
         elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
             logger.debug(
-                "action inherits linking behaviour from %s for %s",
+                "curation inherits linking behaviour from %s for %s",
                 curation.source_term,
                 self.parser_name,
             )
