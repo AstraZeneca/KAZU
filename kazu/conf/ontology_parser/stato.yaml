@@ -6,7 +6,5 @@ stato_parser:
   string_scorer: ${SapbertStringSimilarityScorer}
   synonym_generator: ${SynonymGeneration.default}
   entity_class: 'measurement'
-  curations:
-    _target_: kazu.modelling.ontology_preprocessing.base.load_curated_terms
-    path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${..name}_curations.json
+  curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${..name}_curations.json
   global_actions: ${global_actions}
