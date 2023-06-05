@@ -618,8 +618,8 @@ class CurationProcessor:
                 curated_synonym=curation.curated_synonym,
                 curation_term_norm=term_norm,
             )
-            term_for_this_action = self._terms_by_term_norm.get(term_norm)
-            if term_for_this_action is None:
+            term_for_this_curation = self._terms_by_term_norm.get(term_norm)
+            if term_for_this_curation is None:
                 logger.warning(
                     "CuratedTerm %s is invalid for NER: "
                     "requires database entry but all have been removed by actions.",
