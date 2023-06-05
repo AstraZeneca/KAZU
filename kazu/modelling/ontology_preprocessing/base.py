@@ -882,7 +882,7 @@ class OntologyParser(ABC):
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
-        self.curations = curations_path
+        self.curations_path = curations_path
         self.global_actions = global_actions
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
@@ -1086,7 +1086,7 @@ class OntologyParser(ABC):
     def process_curations(
         self, terms: Set[SynonymTerm]
     ) -> Tuple[Optional[List[CuratedTerm]], Set[SynonymTerm]]:
-        if self.curations is None and self.synonym_generator is not None:
+        if self.curations_path is None and self.synonym_generator is not None:
             logger.warning(
                 "%s is configured to use synonym generators. This may result in noisy NER performance.",
                 self.name,
@@ -1097,7 +1097,7 @@ class OntologyParser(ABC):
             ) = self.generate_curations_from_synonym_generators(terms)
             curations = original_curations + generated_curations
         elif (
-            self.curations is None
+            self.curations_path is None
         ):  # implies self.synonym_generator is None as failed the if above
             logger.warning(
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
@@ -1109,12 +1109,12 @@ class OntologyParser(ABC):
                 for curation in self.synonym_term_to_putative_curation(term)
             ]
         else:
-            assert self.curations is not None
+            assert self.curations_path is not None
             logger.info(
                 "%s is configured to use curations. Synonym generation will be ignored",
                 self.name,
             )
-            curations = load_curated_terms(self.curations)
+            curations = load_curated_terms(self.curations_path)
 
         curation_processor = CurationProcessor(
             global_actions=self.global_actions,
