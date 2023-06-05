@@ -639,16 +639,15 @@ class CurationProcessor:
         if self.global_actions is None:
             return None
 
+        override_curations_by_id = defaultdict(set)
         if self.curations is not None:
-            override_curations_by_id = defaultdict(set)
             curations = self.curations if self.curations is not None else []
             for curation in curations:
                 if curation.associated_id_sets is not None:
                     for equiv_id_set in curation.associated_id_sets:
                         for idx in equiv_id_set.ids:
                             override_curations_by_id[idx].add(curation)
-        else:
-            override_curations_by_id = None
+
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
                 ids = action.parser_to_target_id_mappings[self.parser_name]
@@ -669,43 +668,38 @@ class CurationProcessor:
                             counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED],
                         )
 
-                        if override_curations_by_id is not None:
-                            for override_curation_to_modify in set(
-                                override_curations_by_id.get(idx, set())
-                            ):
-                                assert override_curation_to_modify.associated_id_sets is not None
-                                new_associated_id_sets = self._drop_id_from_associated_id_sets(
-                                    idx, override_curation_to_modify.associated_id_sets
-                                )
-                                if len(new_associated_id_sets) == 0:
+                        for override_curation_to_modify in set(
+                            override_curations_by_id.get(idx, set())
+                        ):
+                            assert override_curation_to_modify.associated_id_sets is not None
+                            new_associated_id_sets = self._drop_id_from_associated_id_sets(
+                                idx, override_curation_to_modify.associated_id_sets
+                            )
+                            if len(new_associated_id_sets) == 0:
 
-                                    self.curations.remove(override_curation_to_modify)
-                                    override_curations_by_id[idx].remove(
-                                        override_curation_to_modify
-                                    )
-                                    logger.debug(
-                                        "removed curation %s because of global action",
-                                        override_curation_to_modify,
-                                    )
-                                elif (
-                                    new_associated_id_sets
-                                    != override_curation_to_modify.associated_id_sets
-                                ):
-                                    self.curations.remove(override_curation_to_modify)
-                                    override_curations_by_id[idx].remove(
-                                        override_curation_to_modify
-                                    )
-                                    mod_curation = dataclasses.replace(
-                                        override_curation_to_modify,
-                                        associated_id_sets=new_associated_id_sets,
-                                    )
-                                    self.curations.add(mod_curation)
-                                    override_curations_by_id[idx].add(mod_curation)
-                                    logger.debug(
-                                        "modified curation %s to %s because of global action",
-                                        override_curation_to_modify,
-                                        mod_curation,
-                                    )
+                                self.curations.remove(override_curation_to_modify)
+                                override_curations_by_id[idx].remove(override_curation_to_modify)
+                                logger.debug(
+                                    "removed curation %s because of global action",
+                                    override_curation_to_modify,
+                                )
+                            elif (
+                                new_associated_id_sets
+                                != override_curation_to_modify.associated_id_sets
+                            ):
+                                self.curations.remove(override_curation_to_modify)
+                                override_curations_by_id[idx].remove(override_curation_to_modify)
+                                mod_curation = dataclasses.replace(
+                                    override_curation_to_modify,
+                                    associated_id_sets=new_associated_id_sets,
+                                )
+                                self.curations.add(mod_curation)
+                                override_curations_by_id[idx].add(mod_curation)
+                                logger.debug(
+                                    "modified curation %s to %s because of global action",
+                                    override_curation_to_modify,
+                                    mod_curation,
+                                )
 
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
