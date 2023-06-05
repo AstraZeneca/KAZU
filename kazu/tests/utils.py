@@ -1,5 +1,5 @@
-from pathlib import Path
 from os import getenv
+from pathlib import Path
 from typing import List, Tuple, Dict, Optional
 
 import pandas as pd
@@ -11,9 +11,9 @@ from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     SynonymTermWithMetrics,
-    CuratedTerm,
     GlobalParserActions,
 )
+from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
@@ -21,7 +21,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     MAPPING_TYPE,
     OntologyParser,
 )
-from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
@@ -138,7 +137,7 @@ class DummyParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         source: str = "test_parser",
         data: Optional[Dict[str, List[str]]] = None,
-        curations: Optional[List[CuratedTerm]] = None,
+        curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         super().__init__(
@@ -149,7 +148,7 @@ class DummyParser(OntologyParser):
             synonym_merge_threshold,
             data_origin,
             synonym_generator,
-            curations=curations,
+            curations_path=curations_path,
             global_actions=global_actions,
         )
         self.source = source

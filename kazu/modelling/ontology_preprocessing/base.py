@@ -852,7 +852,7 @@ class OntologyParser(ABC):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        curations: Optional[List[CuratedTerm]] = None,
+        curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
         """
@@ -870,7 +870,7 @@ class OntologyParser(ABC):
             from the parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
-        :param curations: Curations to apply to the parser
+        :param curations_path: path to jsonl file of curations to apply to the parser
         """
 
         self.in_path = in_path
@@ -884,7 +884,7 @@ class OntologyParser(ABC):
         self.synonym_merge_threshold = synonym_merge_threshold
         self.data_origin = data_origin
         self.synonym_generator = synonym_generator
-        self.curations = curations
+        self.curations = curations_path
         self.global_actions = global_actions
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
@@ -1116,7 +1116,7 @@ class OntologyParser(ABC):
                 "%s is configured to use curations. Synonym generation will be ignored",
                 self.name,
             )
-            curations = self.curations
+            curations = load_curated_terms(self.curations)
 
         curation_processor = CurationProcessor(
             global_actions=self.global_actions,

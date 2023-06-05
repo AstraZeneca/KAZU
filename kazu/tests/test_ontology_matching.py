@@ -22,7 +22,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     CurationException,
-    load_curated_terms,
     kazu_disk_cache,
 )
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
@@ -509,14 +508,14 @@ def test_pipeline_build_from_parsers_and_curated_list(
         name=FIRST_MOCK_PARSER,
         entity_class="ent_type_1",
         source=FIRST_MOCK_PARSER,
-        curations=load_curated_terms(path=TEST_CURATIONS_PATH_PARSER_1),
+        curations_path=str(TEST_CURATIONS_PATH_PARSER_1),
         data=parser_1_data,
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
         entity_class="ent_type_2",
         source=SECOND_MOCK_PARSER,
-        curations=load_curated_terms(path=TEST_CURATIONS_PATH_PARSER_2),
+        curations_path=str(TEST_CURATIONS_PATH_PARSER_2),
         data=parser_2_data,
     )
     TEST_SPAN_KEY = "my_hits"

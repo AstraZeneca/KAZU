@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Literal, List
+from typing import Optional, Literal
 
 from kazu.data.data import (
     CuratedTerm,
@@ -19,7 +19,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     DEFAULT_LABEL,
     SYN,
     MAPPING_TYPE,
-    load_curated_terms,
     load_global_actions,
     kazu_disk_cache,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
 )
@@ -97,17 +96,18 @@ def setup_databases(
         in_path="",
         data=parser_data,
         entity_class=ENTITY_CLASS,
-        curations=load_curated_terms(path=curations_path) if curations_path is not None else None,
+        curations_path=str(curations_path) if curations_path is not None else None,
         global_actions=load_global_actions(global_actions_path)
         if global_actions_path is not None
         else None,
     )
-
-    curations: Optional[List[CuratedTerm]]
+    noop_curations_path_str: Optional[str]
     if noop_parser_curations_style == "empty":
-        curations = []
+        noop_curations_path = base_path.joinpath("curations_noop.jsonl")
+        noop_curations_path.touch()
+        noop_curations_path_str = str(noop_curations_path)
     elif noop_parser_curations_style == "None":
-        curations = None
+        noop_curations_path_str = None
     else:
         raise ValueError("Invalid noop_parser_curations_style arg provided")
 
@@ -117,7 +117,7 @@ def setup_databases(
         in_path="",
         data=parser_data,
         entity_class=ENTITY_CLASS,
-        curations=curations,
+        curations_path=noop_curations_path_str,
         global_actions=None,
     )
 
