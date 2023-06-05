@@ -366,16 +366,16 @@ class CurationProcessor:
         Conflicts can occur for the following reasons:
 
         1) If two or more curations normalise to the same NormalisedSynonymStr,
-        but have different behaviours
+           but have different behaviours.
 
         2) If two or more curations normalise to the same NormalisedSynonymStr,
-        but have different associated ID sets specified, such that one would
-        override the other
+           but have different associated ID sets specified, such that one would
+           override the other.
 
         3) If two or more curations have the same uncased value for curated_synonym
-         and have multiple values for case sensitivity and incompatible values for
-         mention_confidence. I.E. A case-insensitive curation cannot have a higher
-         mention confidence value than a case-sensitive one
+           and have multiple values for case sensitivity and incompatible values for
+           mention_confidence. I.E. A case-insensitive curation cannot have a higher
+           mention confidence value than a case-sensitive one.
 
 
         :param curations:
