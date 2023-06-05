@@ -747,8 +747,8 @@ class CuratedTerm:
         CuratedTerm(
             curated_synonym="ALL",
             case_sensitive=True,
-            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
-            associated_id_sets=frozenset((EquivalentIdSet(("my_id", "my_source")),)),
+            behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+            associated_id_sets=None,
             mention_confidence=MentionConfidence.POSSIBLE,
         )
 
@@ -765,7 +765,7 @@ class CuratedTerm:
         CuratedTerm(
             curated_synonym="LH",
             case_sensitive=True,
-            behaviour=SynonymTermBehaviour.ADD_FOR_LINKING_ONLY,
+            behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
             associated_id_sets=frozenset((EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)),
             mention_confidence=MentionConfidence.POSSIBLE,
         )
@@ -781,7 +781,7 @@ class CuratedTerm:
             curated_synonym="breast carcinoma",
             case_sensitive=True,
             source_term="breast cancer",
-            behaviour=SynonymTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+            behaviour=CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
             mention_confidence=MentionConfidence.POSSIBLE,
         )
     """
