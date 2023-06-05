@@ -353,7 +353,7 @@ class CurationProcessor:
         for curation in set(curation_for_ner):
             if curation.term_norm_for_linking(self.entity_class) not in self._terms_by_term_norm:
                 logger.warning(
-                    "curation %s has been declared suitable for NER, but it's term "
+                    "curation %s has been declared suitable for NER, but its term "
                     "norm reference has been removed by another curation",
                     curation,
                 )
