@@ -473,11 +473,9 @@ class GeneOntologyParser(OntologyParser):
         self.query = query
 
     def populate_databases(
-        self, force: bool = False, return_ner_curations: bool = False
+        self, force: bool = False, return_curations: bool = False
     ) -> Optional[List[CuratedTerm]]:
-        curations = super().populate_databases(
-            force=force, return_ner_curations=return_ner_curations
-        )
+        curations = super().populate_databases(force=force, return_curations=return_curations)
         self.instances_in_dbs.add(self.name)
 
         if self.instances_in_dbs >= self.instances:
