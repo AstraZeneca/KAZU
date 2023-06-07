@@ -9,12 +9,13 @@ from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, Set, cast
 
 import spacy
 import srsly
+from kazu.modelling.database.in_memory_db import SynonymDatabase
 from spacy import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
 
-from kazu.data.data import CuratedTermBehaviour
+from kazu.data.data import CuratedTermBehaviour, CuratedTerm
 from kazu.modelling.ontology_preprocessing.base import (
     OntologyParser,
 )
@@ -137,6 +138,41 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
+    def filter_curations_for_ner(
+        self, curations: Iterable[CuratedTerm], parser: OntologyParser
+    ) -> Iterable[CuratedTerm]:
+        original_terms = defaultdict(set)
+        inherited_terms = defaultdict(set)
+        ner_behaviours = {
+            CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+            CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        }
+        syn_db = SynonymDatabase()
+        for curation in curations:
+            if curation.behaviour in ner_behaviours:
+                if curation.source_term is None:
+                    original_terms[curation.curated_synonym].add(curation)
+                else:
+                    inherited_terms[curation.source_term].add(curation)
+
+        for curated_synonym, curation_set in original_terms.items():
+            if len(curation_set) > 1:
+                # note, this shouldn't happen, as it should be handled by the curation validation logic.
+                # however, just in case this logic changes, we'll leave this here
+                logger.warning(
+                    "multiple curations detected for %s, %s", curated_synonym, curation_set
+                )
+                term_norm = next(iter(curation_set)).term_norm_for_linking(parser.entity_class)
+                if term_norm not in syn_db.get_all(parser.name):
+                    logger.warning(
+                        "dictionary based NER needs an database entry for %s, %s, but none exists",
+                        term_norm,
+                        parser.name,
+                    )
+                    continue
+            yield from curation_set
+            yield from inherited_terms.get(curated_synonym, set())
+
     def create_phrasematchers_using_curations(
         self, parsers: List[OntologyParser]
     ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
@@ -146,7 +182,6 @@ class OntologyMatcher:
         :param parsers:
         :return:
         """
-
         if self.strict_matcher is not None or self.lowercase_matcher is not None:
             logging.warning("Phrase matchers are being redefined - is this by intention?")
 
@@ -155,22 +190,22 @@ class OntologyMatcher:
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         logger.info("ontology matcher build triggered. Forcing database repopulation.")
         for parser in parsers:
-            maybe_curation_for_ner = parser.populate_databases(
-                force=True, return_ner_curations=True
-            )
-            if maybe_curation_for_ner is None:
+            parser_curations = parser.populate_databases(force=True, return_curations=True)
+            if parser_curations is None:
                 logger.warning(
                     "tried to create PhraseMatchers from Curations for parser %s, but none have been provided",
                     parser.name,
                 )
                 continue
-            curations_for_matcher = maybe_curation_for_ner
-            if len(curations_for_matcher) == 0:
+            if len(parser_curations) == 0:
                 logger.warning(
                     "tried to create PhraseMatchers from Curations for parser %s, but no Curations were produced",
                     parser.name,
                 )
                 continue
+
+            # check curations are still represented in DB after all processed
+            curations_for_ner = set(self.filter_curations_for_ner(parser_curations, parser))
 
             # spacy's typing isn't smart enough to know this will have a 'pipe' attr
             patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
@@ -179,10 +214,10 @@ class OntologyMatcher:
                 # type ignore as curated_synonym will not be None, as only
                 # curations with a curated_synonym will be 'matched'.
                 else curation.curated_synonym.lower()  # type: ignore[union-attr]
-                for curation in curations_for_matcher
+                for curation in curations_for_ner
             )
 
-            for curation, pattern in zip(curations_for_matcher, patterns):
+            for curation, pattern in zip(curations_for_ner, patterns):
                 # a curation can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms

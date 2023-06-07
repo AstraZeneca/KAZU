@@ -326,9 +326,9 @@ class CurationProcessor:
             result = CurationModificationResult.SYNONYM_TERM_DROPPED
         return result
 
-    def export_ner_curations_and_final_terms(
+    def export_curations_and_final_terms(
         self,
-    ) -> Tuple[Optional[List[CuratedTerm]], Set[SynonymTerm]]:
+    ) -> Tuple[List[CuratedTerm], Set[SynonymTerm]]:
         """Perform any updates required to the synonym terms as specified in the curations/global
         actions.
 
@@ -338,29 +338,15 @@ class CurationProcessor:
         :return:
         """
         self._process_global_actions()
-        curations_for_ner = self._process_curations()
-        return curations_for_ner, set(self._terms_by_term_norm.values())
+        return list(self._process_curations()), set(self._terms_by_term_norm.values())
 
-    def _process_curations(self) -> List[CuratedTerm]:
-        safe_curations = self.analyse_conflicts_in_curations(self.curations)
-        curation_for_ner = set()
+    def _process_curations(self) -> Iterable[CuratedTerm]:
+        safe_curations = self.fix_conflicts_in_curations(self.curations)
         for curation in sorted(safe_curations, key=self.curation_sort_key):
-            maybe_curation = self._process_curation_action(curation)
-            if maybe_curation is not None:
-                curation_for_ner.add(maybe_curation)
+            curation = self._process_curation_action(curation)
+            yield curation
 
-        # check curations are still represented in DB after all processed
-        for curation in set(curation_for_ner):
-            if curation.term_norm_for_linking(self.entity_class) not in self._terms_by_term_norm:
-                logger.warning(
-                    "curation %s has been declared suitable for NER, but its term "
-                    "norm reference has been removed by another curation",
-                    curation,
-                )
-                curation_for_ner.remove(curation)
-        return sorted(curation_for_ner, key=self.curation_sort_key)
-
-    def analyse_conflicts_in_curations(self, curations: Set[CuratedTerm]) -> Set[CuratedTerm]:
+    def fix_conflicts_in_curations(self, curations: Set[CuratedTerm]) -> Set[CuratedTerm]:
         """Check to see if a list of curations contain conflicts.
 
         Conflicts can occur for the following reasons:
@@ -388,105 +374,96 @@ class CurationProcessor:
         curations_and_confs_by_case_insensitive_synonym: DefaultDict[
             str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
         ] = defaultdict(lambda: (set(), set()))
-        inherited_curations_by_term_norm: DefaultDict[str, Set[CuratedTerm]] = defaultdict(set)
+        curations_and_confs_by_any_case_synonym: DefaultDict[str, Set[CuratedTerm]] = defaultdict(
+            set
+        )
+        curation_modification_map: Dict[CuratedTerm, CuratedTerm] = {}
 
         for curation in curations:
-            if curation.source_term is not None:
-                inherited_curations_by_term_norm[
-                    curation.term_norm_for_linking(self.entity_class)
-                ].add(curation)
-            else:
-                curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(
+            curation_modification_map[curation] = curation
+            curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(curation)
+            curations_and_confs_by_any_case_synonym[curation.curated_synonym].add(curation)
+            if curation.case_sensitive:
+                curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][0].add(
                     curation
                 )
-                if curation.case_sensitive:
-                    curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][0].add(
-                        curation
-                    )
-                    curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][1].add(
-                        curation.mention_confidence
-                    )
-                else:
-                    curations_and_confs_by_case_insensitive_synonym[
-                        curation.curated_synonym.lower()
-                    ][0].add(curation)
-                    curations_and_confs_by_case_insensitive_synonym[
-                        curation.curated_synonym.lower()
-                    ][1].add(curation.mention_confidence)
+                curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][1].add(
+                    curation.mention_confidence
+                )
+            else:
+                curations_and_confs_by_case_insensitive_synonym[curation.curated_synonym.lower()][
+                    0
+                ].add(curation)
+                curations_and_confs_by_case_insensitive_synonym[curation.curated_synonym.lower()][
+                    1
+                ].add(curation.mention_confidence)
 
-        safe_by_case, conflicting_by_case = self._analyse_conflicts_in_case_sensitivity(
+        self._analyse_conflicts_in_unique_synonym(
+            curations_and_confs_by_any_case_synonym.values(), curation_modification_map
+        )
+
+        self._analyse_conflicts_in_case_sensitivity(
             curations_and_confs_by_case_insensitive_synonym,
             curations_and_confs_by_case_sensitive_synonym,
-        )
-        safe_by_term_norm, conflicting_by_term_norm = self._analyse_conflicts_in_term_normalisation(
-            curations_by_term_norm
+            curation_modification_map,
         )
 
-        for conflicting_term_norm in set(
-            curation.term_norm_for_linking(self.entity_class)
-            for curation in conflicting_by_case.union(conflicting_by_term_norm)
-        ):
-            if conflicting_term_norm in inherited_curations_by_term_norm:
-                inherited_curations_by_term_norm.pop(conflicting_term_norm)
+        self._analyse_conflicts_in_term_normalisation(
+            curations_by_term_norm, curation_modification_map
+        )
 
-        safe_by_case.update(safe_by_term_norm)
-        for inherited_curations in inherited_curations_by_term_norm.values():
-            safe_by_case.update(inherited_curations)
-
-        return safe_by_case
+        return set(curation_modification_map.values())
 
     def _analyse_conflicts_in_term_normalisation(
-        self, curations_by_term_norm: DefaultDict[str, Set[CuratedTerm]]
-    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
-        all_curations, conflicting = set(), set()
+        self,
+        curations_by_term_norm: DefaultDict[str, Set[CuratedTerm]],
+        curation_modification_map: Dict[CuratedTerm, CuratedTerm],
+    ):
         for potentially_conflicting_curations in curations_by_term_norm.values():
-            all_curations.update(potentially_conflicting_curations)
             overridden_conflicting_id_sets = set()
             conflicting_behaviours = set()
-            for curation in potentially_conflicting_curations:
-                # if behaviour is ignore, it can't conflict
-                if curation.behaviour is not CuratedTermBehaviour.IGNORE:
-                    conflicting_behaviours.add(curation.behaviour)
+            for original_curation in potentially_conflicting_curations:
+                curation_mod = curation_modification_map[original_curation]
+                # if behaviour is ignore or inherit, it can't conflict
+                if curation_mod.behaviour not in {
+                    CuratedTermBehaviour.IGNORE,
+                    CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+                }:
+                    conflicting_behaviours.add(curation_mod.behaviour)
                 if (
-                    curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
-                    or curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY
+                    curation_mod.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
+                    or curation_mod.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY
                 ):
-                    if curation.associated_id_sets is not None:
-                        overridden_conflicting_id_sets.add(curation.associated_id_sets)
-                    else:
-                        maybe_term = self._terms_by_term_norm.get(
-                            curation.term_norm_for_linking(self.entity_class)
-                        )
-                        if maybe_term is None:
-                            # term does not exist in DB and has no ID's attached, so it must be wrong?
-                            logger.warning(
-                                "no ids found for curation, even though they were expected %s",
-                                curation,
-                            )
-                            conflicting.add(curation)
+                    if curation_mod.associated_id_sets is not None:
+                        overridden_conflicting_id_sets.add(curation_mod.associated_id_sets)
 
+            should_ignore = False
             if len(conflicting_behaviours) > 1:
-                conflicting.update(potentially_conflicting_curations)
-                message = (
-                    "\n\nconflicting curations by behaviours detected\n\n"
+                logger.warning(
+                    "\n\nconflicting curations by behaviours detected. All behaviours will be set to ignore\n\n"
                     + "\n".join(
-                        curation.to_json() for curation in potentially_conflicting_curations
+                        curation_modification_map[curation].to_json()
+                        for curation in potentially_conflicting_curations
                     )
                     + "\n"
                 )
-                logger.warning(message)
+                should_ignore = True
 
             if len(overridden_conflicting_id_sets) > 1:
-                conflicting.update(potentially_conflicting_curations)
-                message = (
-                    "\n\nmultiple overrides for same term norm detected\n\n"
+                logger.warning(
+                    "\n\nmultiple overrides for same term norm detected. Curations will be ignored\n\n"
                     + "\n".join(
-                        curation.to_json() for curation in potentially_conflicting_curations
+                        curation_modification_map[curation].to_json()
+                        for curation in potentially_conflicting_curations
                     )
                     + "\n"
                 )
-                logger.warning(message)
-        return all_curations.difference(conflicting), conflicting
+                should_ignore = True
+            if should_ignore:
+                for curation in potentially_conflicting_curations:
+                    curation_modification_map[curation] = dataclasses.replace(
+                        curation, behaviour=CuratedTermBehaviour.IGNORE
+                    )
 
     def _analyse_conflicts_in_case_sensitivity(
         self,
@@ -496,9 +473,8 @@ class CurationProcessor:
         curations_and_confs_by_case_sensitive_synonym: DefaultDict[
             str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
         ],
-    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
-        conflicting = set()
-        all_curations = set()
+        curation_modification_map: Dict[CuratedTerm, CuratedTerm],
+    ):
         for (
             curated_synonym,
             (
@@ -506,17 +482,26 @@ class CurationProcessor:
                 potentially_conflicting_cs_confidences,
             ),
         ) in curations_and_confs_by_case_sensitive_synonym.items():
-            all_curations.update(potentially_conflicting_cs_curations)
+            working_confidences = potentially_conflicting_cs_confidences
             if len(potentially_conflicting_cs_confidences) > 1:
-                conflicting.update(potentially_conflicting_cs_curations)
+                most_conservative = min(potentially_conflicting_cs_confidences)
                 message = (
-                    "\n\nmultiple case sensitive curations specified with conflicting confidence values\n\n"
+                    "\n\nmultiple case sensitive curations specified with conflicting confidence values. "
+                    "All affected will adopt the conservative confidence value\n\n"
                     + "\n".join(
-                        curation.to_json() for curation in potentially_conflicting_cs_curations
+                        curation_modification_map[curation].to_json()
+                        for curation in potentially_conflicting_cs_curations
                     )
                     + "\n"
                 )
+
                 logger.warning(message)
+                for curation in potentially_conflicting_cs_curations:
+                    curation_modification_map[curation] = dataclasses.replace(
+                        curation, mention_confidence=most_conservative
+                    )
+
+                working_confidences = {most_conservative}
 
             (
                 potentially_conflicting_case_insensitive_curations,
@@ -528,22 +513,35 @@ class CurationProcessor:
                     set(),
                 ),
             )
+
             if len(potentially_conflicting_case_insensitive_confidences) > 0 and min(
-                potentially_conflicting_cs_confidences
+                working_confidences
             ) < max(potentially_conflicting_case_insensitive_confidences):
-                conflicting.update(potentially_conflicting_cs_curations)
-                conflicting.update(potentially_conflicting_case_insensitive_curations)
-                message = (
-                    "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values\n\n"
+                most_conservative = min(
+                    [
+                        min(working_confidences),
+                        min(potentially_conflicting_case_insensitive_confidences),
+                    ]
+                )
+                logger.warning(
+                    "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values."
+                    "All affected will adopt the conservative confidence value\n\n"
+                    "\n\n"
                     + "\n".join(
-                        curation.to_json()
+                        curation_modification_map[curation].to_json()
                         for curation in potentially_conflicting_cs_curations.union(
                             potentially_conflicting_case_insensitive_curations
                         )
                     )
                     + "\n"
                 )
-                logger.warning(message)
+                for curation in potentially_conflicting_cs_curations.union(
+                    potentially_conflicting_case_insensitive_curations
+                ):
+                    curation_modification_map[curation] = dataclasses.replace(
+                        curation, mention_confidence=most_conservative
+                    )
+
         for (
             curated_synonym_lower_case,
             (
@@ -551,59 +549,51 @@ class CurationProcessor:
                 potentially_conflicting_case_insensitive_confidences,
             ),
         ) in curations_and_confs_by_case_insensitive_synonym.items():
-            all_curations.update(potentially_conflicting_case_insensitive_curations)
             if len(potentially_conflicting_case_insensitive_confidences) > 1:
-                conflicting.update(potentially_conflicting_case_insensitive_curations)
-                message = (
+                most_conservative = min(potentially_conflicting_case_insensitive_confidences)
+                logger.warning(
                     "\n\nmultiple case insensitive curations specified with conflicting confidence values \n\n"
+                    "All affected will adopt the conservative confidence value\n\n"
                     + "\n".join(
-                        curation.to_json()
+                        curation_modification_map[curation].to_json()
                         for curation in potentially_conflicting_case_insensitive_curations
                     )
                     + "\n"
                 )
-                logger.warning(message)
+                for curation in potentially_conflicting_case_insensitive_curations:
+                    curation_modification_map[curation] = dataclasses.replace(
+                        curation, mention_confidence=most_conservative
+                    )
 
-        return all_curations.difference(conflicting), conflicting
+    def _process_curation_action(self, curation: CuratedTerm) -> CuratedTerm:
 
-    def _process_curation_action(self, curation: CuratedTerm) -> Optional[CuratedTerm]:
         if curation.source_term is None:
             self._curations_by_syn[curation.curated_synonym].add(curation)
         term_norm = curation.term_norm_for_linking(self.entity_class)
-        suitable_for_ner = False
         if curation.behaviour is CuratedTermBehaviour.IGNORE:
-            logger.debug("ignoring unwanted curation: %s for %s", curation, self.parser_name)
+            logger.debug("curation ignored: %s for %s", curation, self.parser_name)
         elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
+            assert curation.source_term is not None
             logger.debug(
                 "curation inherits linking behaviour from %s for %s",
                 curation.source_term,
                 self.parser_name,
             )
-            assert curation.source_term is not None
             source_curations = self._curations_by_syn.get(curation.source_term)
             if source_curations is None:
                 logger.warning(
-                    "no source curations found for %s for %s",
+                    "no source curation found for %s for %s. The curation will be ignored",
                     curation.source_term,
                     self.parser_name,
                 )
+                return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
             elif len(source_curations) > 1:
                 logger.warning(
-                    "multiple source curations found for %s for %s",
+                    "multiple source curations found for %s for %s. The curation will be ignored",
                     curation.source_term,
                     self.parser_name,
                 )
-            elif (
-                next(iter(source_curations)).behaviour
-                is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
-            ):
-                if term_norm not in self._terms_by_term_norm:
-                    logger.warning(
-                        "curation %s has no linking target in the synonym database, and will be ignored",
-                        curation,
-                    )
-                else:
-                    suitable_for_ner = True
+                return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
         elif curation.behaviour is CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
             self._drop_synonym_term(term_norm)
         elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
@@ -612,6 +602,7 @@ class CurationProcessor:
                 curated_synonym=curation.curated_synonym,
                 curation_term_norm=term_norm,
             )
+
         elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
             self._attempt_to_add_database_entry_for_curation(
                 curation_associated_id_set=curation.associated_id_sets,
@@ -621,19 +612,14 @@ class CurationProcessor:
             term_for_this_curation = self._terms_by_term_norm.get(term_norm)
             if term_for_this_curation is None:
                 logger.warning(
-                    "CuratedTerm %s is invalid for NER: "
-                    "requires database entry but all have been removed by curations.",
+                    "CuratedTerm %s is invalid: "
+                    "requires database entry but all have been removed by other curations.",
                     curation,
                 )
-            else:
-                suitable_for_ner = True
+                return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
         else:
             raise ValueError(f"unknown behaviour for parser {self.parser_name}, {curation}")
-
-        if suitable_for_ner:
-            return curation
-        else:
-            return None
+        return curation
 
     def _process_global_actions(self) -> None:
         if self.global_actions is None:
@@ -812,6 +798,37 @@ class CurationProcessor:
             aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
         )
         return self._update_term_lookups(new_term, True)
+
+    def _analyse_conflicts_in_unique_synonym(
+        self,
+        potential_conflicts: Iterable[Set[CuratedTerm]],
+        curation_modification_map: Dict[CuratedTerm, CuratedTerm],
+    ):
+        for potential_conflict in potential_conflicts:
+            if len(potential_conflict) > 1:
+                characteristics = set()
+                for curation in potential_conflict:
+                    characteristics.add(
+                        (
+                            curation.behaviour,
+                            curation.associated_id_sets,
+                            curation.mention_confidence,
+                            curation.case_sensitive,
+                        )
+                    )
+                    if len(characteristics) > 1:
+                        logger.warning(
+                            "\n\nmultiple characteristics specified for same value of curated_synonym. "
+                            "All behaviours will be set to ignore\n\n"
+                            + "\n".join(curation.to_json() for curation in potential_conflict)
+                            + "\n"
+                        )
+
+                        for _curation in potential_conflict:
+                            curation_modification_map[_curation] = dataclasses.replace(
+                                _curation, behaviour=CuratedTermBehaviour.IGNORE
+                            )
+                        break
 
 
 class OntologyParser(ABC):
@@ -1123,7 +1140,7 @@ class OntologyParser(ABC):
             entity_class=self.entity_class,
             synonym_terms=terms,
         )
-        return curation_processor.export_ner_curations_and_final_terms()
+        return curation_processor.export_curations_and_final_terms()
 
     @kazu_disk_cache.memoize(ignore={0})
     def export_synonym_terms(self, parser_name: str) -> Set[SynonymTerm]:
@@ -1227,7 +1244,7 @@ class OntologyParser(ABC):
         return maybe_ner_curations, metadata, final_syn_terms
 
     def populate_databases(
-        self, force: bool = False, return_ner_curations: bool = False
+        self, force: bool = False, return_curations: bool = False
     ) -> Optional[List[CuratedTerm]]:
         """Populate the databases with the results of the parser.
 
@@ -1235,10 +1252,10 @@ class OntologyParser(ABC):
         any curations (if provided) which can then be used for Dictionary based NER
 
         :param force: do not use the cache for the ontology parser
-        :param return_ner_curations: should ner curations be returned?
+        :param return_curations: should processed curations be returned?
         :return: curations if required
         """
-        if self.name in self.synonym_db.loaded_parsers and not force and not return_ner_curations:
+        if self.name in self.synonym_db.loaded_parsers and not force and not return_curations:
             logger.debug("parser %s already loaded.", self.name)
             return None
 
@@ -1249,14 +1266,14 @@ class OntologyParser(ABC):
             kazu_disk_cache.delete(self.export_synonym_terms.__cache_key__(self, self.name))
             kazu_disk_cache.delete(cache_key)
 
-        maybe_ner_curations, metadata, final_syn_terms = self._populate_databases(self.name)
+        maybe_curations, metadata, final_syn_terms = self._populate_databases(self.name)
 
         if self.name not in self.synonym_db.loaded_parsers:
             logger.info("populating database for %s from cache", self.name)
             self.metadata_db.add_parser(self.name, metadata)
             self.synonym_db.add(self.name, final_syn_terms)
 
-        return maybe_ner_curations if return_ner_curations else None
+        return maybe_curations if return_curations else None
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         """
