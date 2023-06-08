@@ -781,23 +781,30 @@ class CurationProcessor:
 
         # no term exists, or we want to override so one will be made
         assert curation_associated_id_set is not None
-        for equiv_id_set in curation_associated_id_set:
+        for equiv_id_set in set(curation_associated_id_set):
             for idx in equiv_id_set.ids:
                 if idx not in self._terms_by_id:
-                    raise CurationException(
-                        f"Attempted to add term containing {idx} but this id does not exist"
+                    curation_associated_id_set = self._drop_id_from_associated_id_sets(
+                        id_to_drop=idx, associated_id_sets=curation_associated_id_set
                     )
-        is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
-        new_term = SynonymTerm(
-            term_norm=curation_term_norm,
-            terms=frozenset((curated_synonym,)),
-            is_symbolic=is_symbolic,
-            mapping_types=frozenset(("kazu_curated",)),
-            associated_id_sets=curation_associated_id_set,
-            parser_name=self.parser_name,
-            aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
-        )
-        return self._update_term_lookups(new_term, True)
+                    logger.warning(
+                        "Attempted to add term containing %s but this id does not exist in the parser and will be ignored",
+                        idx,
+                    )
+        if len(curation_associated_id_set) > 0:
+            is_symbolic = StringNormalizer.classify_symbolic(curated_synonym, self.entity_class)
+            new_term = SynonymTerm(
+                term_norm=curation_term_norm,
+                terms=frozenset((curated_synonym,)),
+                is_symbolic=is_symbolic,
+                mapping_types=frozenset(("kazu_curated",)),
+                associated_id_sets=curation_associated_id_set,
+                parser_name=self.parser_name,
+                aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
+            )
+            return self._update_term_lookups(new_term, True)
+        else:
+            return CurationModificationResult.NO_ACTION
 
     def _analyse_conflicts_in_unique_synonym(
         self,
