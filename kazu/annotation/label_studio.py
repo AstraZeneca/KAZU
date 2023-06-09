@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
-from typing import Any, Dict, Tuple, Set, List, Iterable
+from typing import Any, Dict, Tuple, Set, List, Iterable, Optional
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
@@ -57,7 +57,7 @@ class KazuToLabelStudioConverter:
         result_values: List[Dict] = []
         for ent in entities:
             ent_hash = hash(ent)
-            prev_region_id = None
+            prev_region_id: Optional[str] = None
             if len(ent.spans) > 2:
                 logger.warning(
                     """Currently we can't handle entities with 3 spans.

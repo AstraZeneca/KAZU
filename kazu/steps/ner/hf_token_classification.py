@@ -182,13 +182,13 @@ class TransformersModelForTokenClassificationNerStep(Step):
 
         assert batch_encoding.encodings is not None
         frame_offsets = batch_encoding.encodings[section_frame_index].offsets[start_index:end_index]
-        frame_word_ids = batch_encoding.encodings[section_frame_index].word_ids[
-            start_index:end_index
-        ]
+        frame_word_ids: List[Optional[int]] = batch_encoding.encodings[
+            section_frame_index
+        ].word_ids[start_index:end_index]
         frame_token_ids = batch_encoding.encodings[section_frame_index].ids[start_index:end_index]
         frame_tokens = batch_encoding.encodings[section_frame_index].tokens[start_index:end_index]
         predictions = predictions[section_frame_index][start_index:end_index]
-        prev_word_id = None
+        prev_word_id: Optional[int] = None
         all_words = []
 
         word_id_index_start, offset_start, offset_end = 0, 0, 0
