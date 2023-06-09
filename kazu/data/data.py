@@ -493,8 +493,8 @@ class Document:
         """Custom encoder needed to handle serialisation issues with our data
         model.
 
-        :param: drop_unmapped_ents: drop any entities that have no mappings
-        :param: drop_terms: drop the synonym term dict field
+        :param drop_unmapped_ents: drop any entities that have no mappings
+        :param drop_terms: drop the synonym term dict field
         :param kwargs: additional kwargs passed to json.dumps
         :return:
         """
