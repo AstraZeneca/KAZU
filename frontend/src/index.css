@@ -1,4 +1,4 @@
-@import "https://unpkg.com/@heartexlabs/label-studio@latest/build/static/css/main.css";
+@import "labelstudio.css";
 
 html {
     margin: 0;
