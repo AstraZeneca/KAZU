@@ -29,4 +29,4 @@ docker run -e KAZU_API_URL=<URL of running Kazu HTTP API> <built image ID>
 # Attributions
 
 - `src/labelstudio.css` is copied from [https://unpkg.com/@heartexlabs/label-studio@1.4.0/build/static/css/main.css](https://unpkg.com/@heartexlabs/label-studio@1.4.0/build/static/css/main.css)
-and redistributed here under the [Apache 2.0 license](apache-license.txt).
+and redistributed here under the [Apache 2.0 license](apache-license.txt). © 2015-present, Alipay, Inc.
