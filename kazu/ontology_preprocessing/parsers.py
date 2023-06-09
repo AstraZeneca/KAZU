@@ -146,7 +146,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         rely on disambiguation to decide on 'true' mappings. Answers on a
         postcard if anyone has a better idea on how to do this!
 
-        :param id_and_source:
+        :param ids_and_source:
         :param is_symbolic:
         :param original_syn_set:
         :return:
@@ -917,7 +917,7 @@ class CellosaurusOntologyParser(OntologyParser):
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """Treat all synonyms as seperate cell lines.
 
-        :param id_to_source:
+        :param ids_and_source:
         :param is_symbolic:
         :param original_syn_set:
         :return:

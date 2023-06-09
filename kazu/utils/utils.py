@@ -15,7 +15,7 @@ def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     """For a given entity and a list of docs, find the doc the entity belongs
     to.
 
-    :param list_map:
+    :param docs:
     :param entity:
     :return:
     """
