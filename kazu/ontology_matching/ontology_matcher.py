@@ -35,6 +35,8 @@ MATCH_ID_SEP = ":::"
 
 logger = logging.getLogger(__name__)
 
+_CoocDict = Dict[str, Dict[str, List[str]]]
+
 
 @dataclass
 class OntologyMatcherConfig:
@@ -96,8 +98,10 @@ class OntologyMatcher:
         # These will be defined when calling initialize
         self.strict_matcher: Optional[PhraseMatcher] = None
         self.lowercase_matcher: Optional[PhraseMatcher] = None
-        self.tp_matchers, self.fp_matchers = None, None
-        self.tp_coocc_dict, self.fp_coocc_dict = None, None
+        self.tp_matchers: Optional[Dict[str, Matcher]] = None
+        self.fp_matchers: Optional[Dict[str, Matcher]] = None
+        self.tp_coocc_dict: Optional[_CoocDict] = None
+        self.fp_coocc_dict: Optional[_CoocDict] = None
 
     @property
     def nr_strict_rules(self) -> int:
@@ -443,8 +447,8 @@ class OntologyMatcher:
         return matcher
 
     def _create_coocc_dicts(self):
-        tp_coocc_dict: Dict[str, Dict[str, List[str]]] = {}
-        fp_coocc_dict: Dict[str, Dict[str, List[str]]] = {}
+        tp_coocc_dict: _CoocDict = {}
+        fp_coocc_dict: _CoocDict = {}
         if GENE in self.labels:
             fp_coocc_dict[GENE] = self._create_gene_fp_dict()
         if DISEASE in self.labels:
