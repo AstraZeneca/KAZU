@@ -75,6 +75,9 @@ def documents_to_document_section_batch_encodings_map(
     section> for the resulting encoding.
 
     :param docs:
+    :param tokenizer:
+    :param stride:
+    :param max_length:
     :return:
     """
     id_section_map = documents_to_id_section_map(docs)

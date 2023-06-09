@@ -128,6 +128,7 @@ class SpanFinder(ABC):
 
         :param bio_and_class_labels:
         :param word:
+        :param subspan:
         :return:
         """
         for bio, clazz in bio_and_class_labels:
@@ -199,6 +200,7 @@ class SimpleSpanFinder(SpanFinder):
         2. The previous character to the word is in the set of self.span_breaking_chars
 
         :param word:
+        :param bio_and_class_labels:
         :return:
         """
         classes_set = set(x[1] for x in bio_and_class_labels)
@@ -280,6 +282,7 @@ class SmartSpanFinder(SpanFinder):
         2. There are any entity class assignments in any of the tokens in the TokenizedWord under consideration.
 
         :param word:
+        :param bio_and_class_labels:
         :return:
         """
         classes_set = set(x[1] for x in bio_and_class_labels)

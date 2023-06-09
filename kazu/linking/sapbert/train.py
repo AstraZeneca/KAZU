@@ -166,6 +166,7 @@ def get_embedding_dataloader_from_strings(
     :param tokenizer:
     :param batch_size:
     :param num_workers:
+    :param max_length:
     :return:
     """
     indices = [i for i in range(len(texts))]
