@@ -125,6 +125,7 @@ filterwarnings = [
 
 [tool.mypy]
 strict = true
+warn_unreachable = true
 # these are too noisy for us with our existing codebase
 disallow_untyped_defs = false
 disallow_any_generics = false
