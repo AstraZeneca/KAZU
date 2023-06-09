@@ -917,7 +917,6 @@ class CellosaurusOntologyParser(OntologyParser):
     ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """Treat all synonyms as seperate cell lines.
 
-        :param ids:
         :param id_to_source:
         :param is_symbolic:
         :param original_syn_set:

@@ -167,7 +167,6 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         Currently unused as it causes problems with normalisation of e.g.
         erbB2, which is a commonly used form of the symbol.
 
-        :param debug:
         :param string:
         :return:
         """

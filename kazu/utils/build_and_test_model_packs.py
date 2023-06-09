@@ -167,7 +167,6 @@ class ModelPackBuilder:
         base_model_merge_config.json. None is returned if no model pack is
         found.
 
-        :param model_pack_path:
         :return:
         """
         config_path = self.target_model_pack_path.joinpath("build_config.json")
@@ -233,7 +232,6 @@ class ModelPackBuilder:
     def clear_cached_resources_from_model_pack_dir(self):
         """Delete any cached data from the input path.
 
-        :param model_pack_path:
         :return:
         """
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
@@ -249,8 +247,6 @@ class ModelPackBuilder:
         """Call the zip subprocess to compress model pack (requires zip on CLI)
         also moves it to parent dir.
 
-        :param model_pack_name:
-        :param build_dir:
         :return:
         """
         model_pack_name = f"{self.model_pack_build_path.name}-v{self.kazu_version}.zip"

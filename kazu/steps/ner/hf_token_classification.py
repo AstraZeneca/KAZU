@@ -249,8 +249,6 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param section_index:
         :param batch_encoding:
         :param predictions:
-        :param tokenizer:
-        :param stride:
         :return:
         """
         words = []
