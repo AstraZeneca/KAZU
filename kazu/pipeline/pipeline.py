@@ -191,6 +191,9 @@ class Pipeline:
                         self.step_groups[group_name].append(step)
 
     def prefilter_docs(self, docs: List[Document]) -> List[Document]:
+        if self.skip_doc_len is None:
+            # we don't filter out any docs due to length
+            return docs
         docs_to_process = []
         for doc in docs:
             doc_size = calc_doc_size(doc)
