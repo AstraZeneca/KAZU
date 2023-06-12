@@ -20,6 +20,7 @@ from typing import (
     DefaultDict,
     overload,
     TypeVar,
+    cast,
 )
 
 import bson
@@ -872,13 +873,10 @@ class CuratedTerm:
             _id=json_dict.get("_id", bson.ObjectId()),
         )
 
-    def to_dict(self, preserve_structured_object_id: bool = True):
+    def to_dict(self, preserve_structured_object_id: bool = True) -> Dict[str, Any]:
+        as_dict = cast(Dict[str, Any], DocumentJsonUtils.obj_to_dict_repr(self))
         if preserve_structured_object_id:
-            oid = self._id
-            as_dict = DocumentJsonUtils.obj_to_dict_repr(self)
-            as_dict["_id"] = oid  # type: ignore[index,call-overload]
-        else:
-            as_dict = DocumentJsonUtils.obj_to_dict_repr(self)
+            as_dict["_id"] = self._id
         return as_dict
 
     def to_json(self) -> str:
