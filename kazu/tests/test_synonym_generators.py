@@ -3,6 +3,7 @@ from sys import maxunicode
 from typing import Set, Union
 
 from hydra.utils import instantiate
+from omegaconf import DictConfig
 import pytest
 
 from kazu.ontology_preprocessing.synonym_generation import (
@@ -55,7 +56,7 @@ def check_generator_result(
 
 
 @pytest.fixture(scope="session")
-def separator_expansion_generator(kazu_test_config) -> SeparatorExpansion:
+def separator_expansion_generator(kazu_test_config: DictConfig) -> SeparatorExpansion:
     spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
     return SeparatorExpansion(spacy_pipeline)
 

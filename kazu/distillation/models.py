@@ -37,7 +37,7 @@ limitations under the License.
 """
 
 import logging
-from typing import List, Dict, Union, Tuple, Optional, Callable
+from typing import List, Dict, Union, Tuple, Optional, Callable, Any, cast
 
 import numpy as np
 import pytorch_lightning as pl
@@ -195,7 +195,7 @@ class TaskSpecificDistillation(pl.LightningModule):
         batch_size: int,
         accumulate_grad_batches: int,
         max_epochs: int,
-        schedule=None,
+        schedule: Optional[str] = None,
     ):
         """
         Base class for distillation on PyTorch Lightning platform.
@@ -344,8 +344,9 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         )
 
         self.num_workers = num_workers
+        self.label_list: List[str]
         if isinstance(label_list, ListConfig):
-            self.label_list = OmegaConf.to_container(label_list)
+            self.label_list = cast(List[str], OmegaConf.to_container(label_list))
         else:
             self.label_list = label_list
         self.num_labels = len(label_list)
@@ -614,7 +615,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.loss = MSELoss()
         self.save_hyperparameters()
 
-    def _run_step(self, batch) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _run_step(self, batch: Any) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         function for the training/validation step.
         Computes attention based distillation loss and hidden states based distillation loss.

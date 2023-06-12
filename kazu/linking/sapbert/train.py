@@ -84,7 +84,7 @@ class HFSapbertInferenceDataset(Dataset):
     This is needed in a multi GPU environment
     """
 
-    def __getitem__(self, index) -> Dict[str, Any]:
+    def __getitem__(self, index: int) -> Dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings.data["input_ids"][index],
             "token_type_ids": self.encodings.data["token_type_ids"][index],
@@ -111,7 +111,7 @@ class HFSapbertPairwiseDataset(Dataset):
     Dataset used for training SapBert.
     """
 
-    def __getitem__(self, index) -> Dict[str, Any]:
+    def __getitem__(self, index: int) -> Dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings_1.data["input_ids"][index],
             "token_type_ids": self.encodings_1.data["token_type_ids"][index],
@@ -227,7 +227,7 @@ class SapbertEvaluationDataManager:
     self.dataset is Dict[dataset_name,SapbertEvaluationDataset] after construction
     """
 
-    def __init__(self, sources: Dict[str, List[str]], debug=False):
+    def __init__(self, sources: Dict[str, List[str]], debug: bool = False):
         self.datasets: Dict[str, SapbertEvaluationDataset] = {}
         for source_name, (
             query_source_path,
@@ -381,7 +381,7 @@ class PLSapbertModel(LightningModule):
             for batch_index, index in enumerate(indices)
         }
 
-    def training_step(self, batch, batch_idx, *args, **kwargs) -> STEP_OUTPUT:
+    def training_step(self, batch: Any, batch_idx: int, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
         """Implementation of :external+pytorch_lightning:ref:`LightningModule.training_step </common/lightning_module.rst#training-step>`\\ ."""
         query_toks1, query_toks2 = batch
         # labels should be identical, so we only need one
@@ -443,7 +443,9 @@ class PLSapbertModel(LightningModule):
 
         return dataloaders
 
-    def validation_step(self, batch, batch_idx, dataset_idx) -> Optional[STEP_OUTPUT]:
+    def validation_step(
+        self, batch: Any, batch_idx: int, dataset_idx: int
+    ) -> Optional[STEP_OUTPUT]:
         """Implementation of :external+pytorch_lightning:ref:`LightningModule.validation_step </common/lightning_module.rst#validation-step>`\\ ."""
         return self(batch)  # type: ignore [no-any-return] # no type info from Pytorch Lightning
 

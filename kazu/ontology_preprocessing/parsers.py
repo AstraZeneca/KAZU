@@ -1256,7 +1256,7 @@ class TabularOntologyParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
 

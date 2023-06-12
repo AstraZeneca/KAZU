@@ -17,7 +17,9 @@ def accuracy(preds, labels):
     return (preds == labels).mean()
 
 
-def numeric_label_f1_score(preds: List[List[int]], golds: List[List[int]], label_list) -> float:
+def numeric_label_f1_score(
+    preds: List[List[int]], golds: List[List[int]], label_list: List[str]
+) -> float:
     """
     Function to calculate F1 score using seqeval and numerical format labels.
 

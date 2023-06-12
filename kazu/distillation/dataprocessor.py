@@ -50,15 +50,15 @@ logger = logging.getLogger(__name__)
 class SeqTagProcessor(DataProcessor):  # type: ignore[misc]
     """Base class for data converters for sequence tagging data sets."""
 
-    def get_train_examples(self, data_dir) -> List[InputExample]:
+    def get_train_examples(self, data_dir: str) -> List[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the train set."""
         raise NotImplementedError
 
-    def get_dev_examples(self, data_dir) -> List[InputExample]:
+    def get_dev_examples(self, data_dir: str) -> List[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the dev set."""
         raise NotImplementedError
 
-    def get_aug_examples(self, data_dir) -> List[InputExample]:
+    def get_aug_examples(self, data_dir: str) -> List[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the aug set."""
         raise NotImplementedError
 

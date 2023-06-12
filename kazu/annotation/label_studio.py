@@ -2,7 +2,8 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
-from typing import Any, Dict, Tuple, Set, List, Iterable, Optional
+from typing import Any, Dict, Tuple, Set, List, Iterable, Optional, Union
+from typing import Mapping as TypingMapping  # due to name conflict with kazu.data.data.Mapping
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
@@ -421,7 +422,14 @@ class LabelStudioAnnotationView:
 
 
 class LabelStudioManager:
-    def __init__(self, project_name: str, headers, url: str = "http://localhost:8080"):
+    def __init__(
+        self,
+        project_name: str,
+        # headers could actually be Mapping[Union[str, bytes], Union[str, bytes]]
+        # but typing-requests doesn't allow this.
+        headers: Optional[TypingMapping[str, Union[str, bytes]]],
+        url: str = "http://localhost:8080",
+    ):
         self.project_name = project_name
         self.headers = headers
         self.url = url

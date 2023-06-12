@@ -398,7 +398,7 @@ class Entity:
 
     @classmethod
     def from_spans(
-        cls, spans: List[Tuple[int, int]], text: str, join_str: str = "", **kwargs
+        cls, spans: List[Tuple[int, int]], text: str, join_str: str = "", **kwargs: Any
     ) -> "Entity":
         """
         create an instance of Entity from a list of character indices. A text string of underlying doc is
@@ -418,7 +418,7 @@ class Entity:
         return cls(spans=frozenset(char_spans), match=join_str.join(text_pieces), **kwargs)
 
     @classmethod
-    def load_contiguous_entity(cls, start: int, end: int, **kwargs) -> "Entity":
+    def load_contiguous_entity(cls, start: int, end: int, **kwargs: Any) -> "Entity":
         single_span = frozenset([CharSpan(start=start, end=end)])
         return cls(spans=single_span, **kwargs)
 
@@ -493,7 +493,7 @@ class Document:
         self,
         drop_unmapped_ents: bool = False,
         drop_terms: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         custom encoder needed to handle serialisation issues with our data model
@@ -563,7 +563,7 @@ class DocumentJsonUtils:
         doc_json_dict: Dict[str, Any],
         drop_unmapped_ents: bool = False,
         drop_terms: bool = False,
-        in_place=True,
+        in_place: bool = True,
     ) -> Dict:
         doc_json_dict = doc_json_dict if in_place else deepcopy(doc_json_dict)
 
@@ -661,7 +661,7 @@ class DocumentJsonUtils:
             }
 
     @staticmethod
-    def empty(x) -> bool:
+    def empty(x: Any) -> bool:
         return x is None or x == {} or x == []
 
 

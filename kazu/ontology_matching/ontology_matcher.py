@@ -275,7 +275,7 @@ class OntologyMatcher:
             # the if clause at the start of this function would raise an error
             raise AssertionError()
 
-        spans = []
+        spans: List[Span] = []
         for (start, end), matches_grp in sort_then_group(
             matches,
             key_func=lambda x: (
@@ -300,14 +300,14 @@ class OntologyMatcher:
         doc.spans[self.span_key] = span_group
         return doc
 
-    def filter_by_contexts(self, doc, spans):
+    def filter_by_contexts(self, doc: Doc, spans: List[Span]) -> List[Span]:
         """These filters work best when there is sentence segmentation available."""
         doc_has_sents = doc.has_annotation("SENT_START")
         # set custom attributes for the token matchers
         for label in self.labels:
             Token.set_extension(label, default=False, force=True)
         # compile the filtered spans by going through each label and each span
-        filtered_spans = []
+        filtered_spans: List[Span] = []
         for label in self.labels:
             # Set all token attributes for other labels (to use in the matcher rules)
             for s in spans:
@@ -319,7 +319,7 @@ class OntologyMatcher:
                 for ent_class in span._.ontology_dict_:
                     if ent_class == label:
                         self._set_token_attr(ent_class=ent_class, span=span, value=True)
-                        context = doc
+                        context: Union[Doc, Span] = doc
                         if doc_has_sents:
                             context = span.sent
                         if (
@@ -342,7 +342,7 @@ class OntologyMatcher:
         for token in span:
             token._.set(ent_class, value)
 
-    def span_in_TP_context(self, doc, ent_class: str):
+    def span_in_TP_context(self, doc: Union[Doc, Span], ent_class: str):
         """When an entity type has a TP matcher defined, it should match for this
         span to be regarded as a true hit."""
         assert self.tp_matchers is not None
@@ -354,7 +354,7 @@ class OntologyMatcher:
             return False
         return True
 
-    def span_in_FP_context(self, doc, ent_class: str):
+    def span_in_FP_context(self, doc: Union[Doc, Span], ent_class: str):
         """When an entity type has a FP matcher defined, spans that match
         are regarded as FPs."""
         assert self.fp_matchers is not None
@@ -366,7 +366,7 @@ class OntologyMatcher:
             return False
         return False
 
-    def span_in_TP_coocc(self, doc, span: Span, ent_class: str):
+    def span_in_TP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str):
         """When an entity type has a TP co-occ dict defined, a hit defined in the dict
         is only regarded as a true hit when it matches at least one of its co-occ terms."""
         assert self.tp_coocc_dict is not None
@@ -378,7 +378,7 @@ class OntologyMatcher:
             return False
         return True
 
-    def span_in_FP_coocc(self, doc, span: Span, ent_class: str):
+    def span_in_FP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str):
         """When an entity type has a FP co-occ dic defined, a hit defined in the dict
         is regarded as a false positive when it matches at least one of its co-occ terms."""
         assert self.fp_coocc_dict is not None

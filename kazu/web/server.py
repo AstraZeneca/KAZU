@@ -9,6 +9,7 @@ from fastapi import Depends, FastAPI, HTTPException, Body
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
+from fastapi.security.http import HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from hydra.utils import instantiate, call
 from omegaconf import DictConfig
@@ -375,7 +376,7 @@ class KazuWebAPI:
     def ner_and_linking(
         self,
         request: Request,
-        token=Depends(oauth2_scheme),
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
     ):
         """Run NER and Linking over the input document or documents.
@@ -391,7 +392,7 @@ class KazuWebAPI:
         request: Request,
         doc_collection: DocumentCollection,
         steps: Optional[List[str]] = None,
-        token=Depends(oauth2_scheme),
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
     ):
         """Run specific steps over the provided document or documents.
 
@@ -412,7 +413,7 @@ class KazuWebAPI:
     def ner_only(
         self,
         request: Request,
-        token=Depends(oauth2_scheme),
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
     ):
         """Call only steps that do Named Entity Recognition (NER).
@@ -429,7 +430,7 @@ class KazuWebAPI:
         self,
         entity_class: str,
         request: Request,
-        token=Depends(oauth2_scheme),
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=linking_only_examples),
     ):
         """Call only steps that do Entity Linking (EL). Also known as 'entity normalization'.
@@ -452,7 +453,12 @@ class KazuWebAPI:
 
     # To be removed, after we check how often it gets called after being 'hidden'
     @app.post(f"/{KAZU}", deprecated=True)
-    def ner(self, doc: WebDocument, request: Request, token=Depends(oauth2_scheme)):
+    def ner(
+        self,
+        doc: WebDocument,
+        request: Request,
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
+    ):
         """Deprecated endpoint: use ner_and_linking.
 
         This endpoint will be removed in future.
@@ -468,7 +474,12 @@ class KazuWebAPI:
 
     # To be removed, after we check how often it gets called after being 'hidden'
     @app.post(f"/{KAZU}/batch", deprecated=True)
-    def batch_ner(self, docs: List[WebDocument], request: Request, token=Depends(oauth2_scheme)):
+    def batch_ner(
+        self,
+        docs: List[WebDocument],
+        request: Request,
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
+    ):
         """Deprecated endpoint: use ner_and_linking.
 
         This endpoint will be removed in future.
@@ -509,7 +520,7 @@ class KazuWebAPI:
         self,
         step_group: str,
         request: Request,
-        token=Depends(oauth2_scheme),
+        token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
     ):
         """Run the pipeline with a specific step group.

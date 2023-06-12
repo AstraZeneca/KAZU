@@ -391,7 +391,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
         confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
         disambiguation_essential: bool = False,
-        search_threshold=80.0,
+        search_threshold: float = 80.0,
         symbolic_only: bool = False,
         differential: float = 2.0,
     ):

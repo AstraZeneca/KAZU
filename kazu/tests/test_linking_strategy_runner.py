@@ -341,7 +341,7 @@ def create_test_doc(
 
 
 def build_and_execute_runner(
-    populate_databases,
+    populate_databases: Tuple[DummyParser, DummyParser],
 ) -> Tuple[Dict[str, Set[str]], Dict[str, List[Entity]]]:
     parser1, parser2 = populate_databases
     expected_id_groups = extract_expected_ids_from_parsers(parser1, parser2)
@@ -354,7 +354,9 @@ def build_and_execute_runner(
     return expected_id_groups, test_groups
 
 
-def extract_expected_ids_from_parsers(parser1, parser2) -> Dict[str, Set[str]]:
+def extract_expected_ids_from_parsers(
+    parser1: DummyParser, parser2: DummyParser
+) -> Dict[str, Set[str]]:
     expected_idx_1 = parser1.data[IDX][0]
     assert expected_idx_1 == "first"
     expected_idx_2 = parser2.data[IDX][2]

@@ -1,4 +1,5 @@
 import pytest
+from omegaconf import DictConfig
 from hydra.utils import instantiate
 
 from kazu.data.data import Entity, CharSpan, Document, Mapping, StringMatchConfidence
@@ -10,7 +11,7 @@ from kazu.steps import (
 
 
 @pytest.fixture
-def merge_step(kazu_test_config) -> MergeOverlappingEntsStep:
+def merge_step(kazu_test_config: DictConfig) -> MergeOverlappingEntsStep:
     merge_step: MergeOverlappingEntsStep = instantiate(kazu_test_config.MergeOverlappingEntsStep)
     return merge_step
 
