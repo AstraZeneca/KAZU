@@ -41,7 +41,7 @@ class DictionaryEntityLinkingStep(Step):
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
 
     @document_batch_step
-    def __call__(self, docs: List[Document]):
+    def __call__(self, docs: List[Document]) -> None:
         """
         logic of entity linker:
 

@@ -334,13 +334,13 @@ class KazuWebAPI:
         return "Welcome to KAZU."
 
     @app.get("/steps")
-    def steps(self, request: Request):
+    def steps(self, request: Request) -> JSONResponse:
         """Get a list of the steps in the the deployed pipeline."""
         log_request_to_path_with_prefix(request)
         return JSONResponse(content=list(self.pipeline._namespace_to_step))
 
     @app.get("/step_groups")
-    def step_groups(self, request: Request):
+    def step_groups(self, request: Request) -> JSONResponse:
         """Get the step groups configured in the deployed pipeline, (including showing the steps in each group)."""
         log_request_to_path_with_prefix(request)
         if self.pipeline.step_groups is None:
@@ -358,7 +358,7 @@ class KazuWebAPI:
         request: Request,
         step_namespaces: Optional[List[str]] = None,
         step_group: Optional[str] = None,
-    ):
+    ) -> JSONResponse:
         id_log_prefix = get_id_log_prefix_if_available(request)
         log_request_to_path_with_prefix(request, log_prefix=id_log_prefix)
         logger.info(id_log_prefix + "Documents sent: %s", len(doc_collection))
@@ -378,7 +378,7 @@ class KazuWebAPI:
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
-    ):
+    ) -> JSONResponse:
         """Run NER and Linking over the input document or documents.
 
         This is the default behaviour of the kazu library."""
@@ -393,7 +393,7 @@ class KazuWebAPI:
         doc_collection: DocumentCollection,
         steps: Optional[List[str]] = None,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-    ):
+    ) -> JSONResponse:
         """Run specific steps over the provided document or documents.
 
         This is advanced functionality not expected to be needed by most ordinary users.
@@ -415,7 +415,7 @@ class KazuWebAPI:
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
-    ):
+    ) -> JSONResponse:
         """Call only steps that do Named Entity Recognition (NER).
 
         Note that this functionality is already available via the custom_steps endpoint,
@@ -432,7 +432,7 @@ class KazuWebAPI:
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=linking_only_examples),
-    ):
+    ) -> JSONResponse:
         """Call only steps that do Entity Linking (EL). Also known as 'entity normalization'.
 
         This API assumes that the whole of each section in each document is an entity mention. It
@@ -458,7 +458,7 @@ class KazuWebAPI:
         doc: WebDocument,
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-    ):
+    ) -> JSONResponse:
         """Deprecated endpoint: use ner_and_linking.
 
         This endpoint will be removed in future.
@@ -479,7 +479,7 @@ class KazuWebAPI:
         docs: List[WebDocument],
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-    ):
+    ) -> JSONResponse:
         """Deprecated endpoint: use ner_and_linking.
 
         This endpoint will be removed in future.
@@ -497,7 +497,7 @@ class KazuWebAPI:
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
     @app.post(f"/{KAZU}/ls-annotations")
-    def ls_annotations(self, doc: WebDocument, request: Request):
+    def ls_annotations(self, doc: WebDocument, request: Request) -> JSONResponse:
         """Provide LabelStudio annotations from the kazu results on the given document.
 
         This is not expected to be called by ordinary users. This endpoint was added in order
@@ -522,7 +522,7 @@ class KazuWebAPI:
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(examples=document_collection_examples),
-    ):
+    ) -> JSONResponse:
         """Run the pipeline with a specific step group.
 
         This will run only a pre-defined subset of steps. Call the step_groups endpoint to
@@ -553,7 +553,7 @@ class KazuWebUI:
         )
 
     @app.get("/")
-    def root(self):
+    def root(self) -> RedirectResponse:
         return RedirectResponse("/index.html")
 
 

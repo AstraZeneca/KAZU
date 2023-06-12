@@ -108,7 +108,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                         "dbXRefs": dbXRefs,
                     }
 
-    def look_for_mondo(self, ot_id: str, db_xrefs: List[str]):
+    def look_for_mondo(self, ot_id: str, db_xrefs: List[str]) -> str:
         if "MONDO" in ot_id:
             return ot_id
         for x in db_xrefs:
@@ -695,7 +695,7 @@ class MondoOntologyParser(OntologyParser):
     https://www.ebi.ac.uk/ols/ontologies/mondo
     """
 
-    def find_kb(self, string: str):
+    def find_kb(self, string: str) -> str:
         path = parse.urlparse(string).path
         # just the final bit, e.g. MONDO_0000123
         path_end = path.split("/")[-1]
@@ -810,11 +810,11 @@ class EnsemblOntologyParser(OntologyParser):
         docs = data["response"]["docs"]
         for doc in docs:
 
-            def get_with_default_list(key: str):
+            def get_with_default_list(key: str) -> List[str]:
                 found = doc.get(key, [])
                 if not isinstance(found, list):
                     found = [found]
-                return found
+                return cast(List[str], found)
 
             ensembl_gene_id = doc.get("ensembl_gene_id", None)
             name = doc.get("name", None)
@@ -948,7 +948,7 @@ class CellosaurusOntologyParser(OntologyParser):
             EquivalentIdAggregationStrategy.CUSTOM,
         )
 
-    def _remove_cell_line_text(self, text: str):
+    def _remove_cell_line_text(self, text: str) -> str:
         return self.cell_line_re.sub("", text).strip()
 
     def parse_to_dataframe(self) -> pd.DataFrame:

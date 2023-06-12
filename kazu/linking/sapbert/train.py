@@ -160,7 +160,7 @@ def get_embedding_dataloader_from_strings(
     batch_size: int,
     num_workers: int,
     max_length: int = 50,
-):
+) -> DataLoader:
     """
     get a dataloader with dataset HFSapbertInferenceDataset and DataCollatorWithPadding. This should be used to
     generate embeddings for strings of interest

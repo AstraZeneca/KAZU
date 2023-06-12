@@ -4,6 +4,7 @@ from typing import List, Tuple, Set
 import jwt
 import pytest
 from hydra import compose, initialize_config_dir
+from omegaconf import DictConfig
 
 from kazu.data.data import Document, SynonymTermWithMetrics
 from kazu.annotation.label_studio import (
@@ -26,10 +27,10 @@ from kazu.steps.linking.post_processing.disambiguation.context_scoring import Tf
 
 @pytest.fixture(scope="session")
 def override_kazu_test_config():
-    def _override_kazu_test_config(overrides: List[str]):
+    def _override_kazu_test_config(overrides: List[str]) -> DictConfig:
         """Return an optionally overriden copy of the kazu test config.
 
-        :return: DictConfig
+        :return:
         """
 
         # needs a str, can't take a Path

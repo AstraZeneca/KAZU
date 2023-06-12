@@ -149,5 +149,5 @@ class JWTAuthenticationBackend(AuthenticationBackend):
         )
 
 
-def on_auth_error(request: Request, exc: Exception):
+def on_auth_error(request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse({"error": str(exc)}, status_code=401)

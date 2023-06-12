@@ -308,7 +308,7 @@ def build_all_model_packs(
     skip_tests: bool,
     logging_config_path: Optional[Path],
     max_parallel_build: Optional[int],
-):
+) -> None:
     """Build multiple model packs.
 
     :param maybe_base_model_pack_path: Path to the base model pack, if required

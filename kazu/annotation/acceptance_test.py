@@ -232,7 +232,7 @@ def aggregate_linking_results(
 def check_results_meet_threshold(
     results: Dict[str, AggregatedAccuracyResult],
     thresholds: Dict[str, Dict[str, float]],
-):
+) -> None:
 
     for key, threshold in thresholds.items():
         aggregated_result = results[key]
@@ -265,7 +265,7 @@ def analyse_full_pipeline(
     pipeline: Pipeline,
     docs: List[Document],
     acceptance_criteria: Dict[str, Dict[str, Dict[str, float]]],
-):
+) -> None:
     pipeline(docs)
     ner_dict = score_sections(docs)
     ner_results = aggregate_ner_results(ner_dict)
@@ -312,7 +312,7 @@ def check_ent_match_abnormalities(
     ents: List[Entity],
     match_str: str,
     messages: Dict[str, Set[str]],
-):
+) -> None:
     """
     checks to see if any gold standard spans look a bit weird
 
@@ -336,7 +336,7 @@ def check_ent_class_consistency(
     ents: List[Entity],
     match_str: str,
     messages: Dict[str, Set[str]],
-):
+) -> None:
     """
     checks to see if any match strings have different entity_class information
 
@@ -365,7 +365,7 @@ def check_ent_mapping_consistency(
     ents: List[Entity],
     match_str: str,
     messages: Dict[str, Set[str]],
-):
+) -> None:
     """
     checks to see if any entity string matches have inconsistent mapping information
 

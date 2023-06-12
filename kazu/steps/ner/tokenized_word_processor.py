@@ -87,7 +87,7 @@ class SpanFinder(ABC):
     @abstractmethod
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
-    ):
+    ) -> bool:
         """
         based upon some logic, determine whether a span should continue or not
 
@@ -99,7 +99,7 @@ class SpanFinder(ABC):
 
     def _update_active_spans(
         self, bio_and_class_labels: Set[Tuple[str, Optional[str]]], word: TokenizedWord
-    ):
+    ) -> None:
         """
         updates any active spans. If a B label is detected in an active span, make a copy and add to closed spans,
         as it's likely the start of another entity of the same class (but we still want to keep the original span open)
@@ -123,7 +123,7 @@ class SpanFinder(ABC):
         bio_and_class_labels: Set[Tuple[str, Optional[str]]],
         word: TokenizedWord,
         subspan: Optional[bool],
-    ):
+    ) -> None:
         """
         start a new TokWordSpan if a B label is detected
 
@@ -146,7 +146,7 @@ class SpanFinder(ABC):
         self.active_spans = []
 
     @abstractmethod
-    def process_next_word(self, word: TokenizedWord):
+    def process_next_word(self, word: TokenizedWord) -> None:
         """
         process the next word in the sequence, according to some logic
 
@@ -155,7 +155,7 @@ class SpanFinder(ABC):
         """
         pass
 
-    def __call__(self, words: List[TokenizedWord]):
+    def __call__(self, words: List[TokenizedWord]) -> None:
         for word in words:
             self.process_next_word(word)
         self.close_spans()
@@ -195,7 +195,7 @@ class SimpleSpanFinder(SpanFinder):
 
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
-    ):
+    ) -> bool:
         """
         A potential entity span will end if any of the following conditions are met:
 
@@ -211,7 +211,7 @@ class SimpleSpanFinder(SpanFinder):
         else:
             return True
 
-    def process_next_word(self, word: TokenizedWord):
+    def process_next_word(self, word: TokenizedWord) -> None:
         """
         process the next word in the sequence, updating span information accordingly
 
@@ -276,7 +276,7 @@ class SmartSpanFinder(SpanFinder):
 
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
-    ):
+    ) -> bool:
         """
         A potential entity span must continue if any of the following conditions are met:
 
@@ -296,7 +296,7 @@ class SmartSpanFinder(SpanFinder):
         else:
             return False
 
-    def process_next_word(self, word: TokenizedWord):
+    def process_next_word(self, word: TokenizedWord) -> None:
         """
         process the next word in the sequence, updating span information accordingly
 

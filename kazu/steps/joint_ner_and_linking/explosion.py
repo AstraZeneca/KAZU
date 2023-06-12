@@ -1,5 +1,5 @@
 import logging
-from typing import Iterator, List, Tuple, Iterable, Dict, Set, cast
+from typing import Iterator, List, Tuple, Iterable, cast
 
 import spacy
 from spacy.tokens import Span
@@ -14,7 +14,7 @@ from kazu.data.data import (
 )
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.ontology_matching import assemble_pipeline
-from kazu.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.ontology_matching.ontology_matcher import OntologyMatcher, _MatcherOntologyData
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_batch_step
 from kazu.steps.step import ParserDependentStep
@@ -63,7 +63,7 @@ class ExplosionStringMatchingStep(ParserDependentStep):
 
     def extract_entity_data_from_spans(
         self, spans: Iterable[Span]
-    ) -> Iterator[Tuple[int, int, str, Dict[str, Set[Tuple[str, str, str]]]]]:
+    ) -> Iterator[Tuple[int, int, str, _MatcherOntologyData]]:
         for span in spans:
             yield span.start_char, span.end_char, span.text, span._.ontology_dict_
 

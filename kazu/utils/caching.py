@@ -53,7 +53,7 @@ class CacheProtocol(Protocol):
     def clear(self) -> int:
         raise NotImplementedError
 
-    def delete(self, key: Any):
+    def delete(self, key: Any) -> bool:
         raise NotImplementedError
 
 

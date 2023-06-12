@@ -148,7 +148,7 @@ class MappingStrategy(ABC):
             )
         self.disambiguation_strategies = disambiguation_strategies
 
-    def prepare(self, document: Document):
+    def prepare(self, document: Document) -> None:
         """
         perform any setup that needs to run once per document.
 

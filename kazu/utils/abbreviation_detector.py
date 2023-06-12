@@ -286,7 +286,7 @@ class KazuAbbreviationDetector:
         long_form_string_to_source_ents: Dict[str, Set[Entity]],
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
         section_to_spacy_doc: SectionToSpacyDoc,
-    ):
+    ) -> None:
         for section, spacy_doc in section_to_spacy_doc.items():
             global_matches = global_matcher(spacy_doc)
             for spacy_match_int, start, end in global_matches:
@@ -317,7 +317,7 @@ class KazuAbbreviationDetector:
         long_form_string_to_source_ents: Dict[str, Set[Entity]],
         spacy_match_int: int,
         section: Section,
-    ):
+    ) -> None:
         """
         create new entities from the long form (if possible), and add to the section
 
@@ -341,7 +341,7 @@ class KazuAbbreviationDetector:
         abbrv_char_index_key: Tuple[int, int],
         section: Section,
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
-    ):
+    ) -> None:
         """
         remove any existing ents at the location, unless they're in the exclude list
 

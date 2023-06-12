@@ -31,7 +31,7 @@ class MetadataDatabase(metaclass=Singleton):
         self._keys_lst: Dict[ParserName, List[Idx]] = {}
         self.loaded_parsers: Set[str] = set()
 
-    def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]):
+    def add_parser(self, name: ParserName, metadata: Dict[Idx, Metadata]) -> None:
         """
         add metadata to the ontology. Note, metadata is assumed to be static, and global. Calling this function will
         override any existing entries with associated with the keys in the metadata dict

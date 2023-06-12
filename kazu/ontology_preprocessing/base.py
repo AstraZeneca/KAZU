@@ -154,7 +154,7 @@ class CurationProcessor:
         self.curations = set(curations)
 
     @classmethod
-    def curation_sort_key(cls, curated_term: CuratedTerm):
+    def curation_sort_key(cls, curated_term: CuratedTerm) -> Tuple[int, bool, str]:
         """Determines the order curations are processed in.
 
         We use associated_id_sets as a key, so that any overrides will be

@@ -42,7 +42,7 @@ class DisambiguationStrategy(ABC):
         self.confidence = confidence
 
     @abstractmethod
-    def prepare(self, document: Document):
+    def prepare(self, document: Document) -> None:
         """
         perform any preprocessing required
 
@@ -83,7 +83,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
         super().__init__(confidence)
         self.mapped_ids: Set[Tuple[str, str, str]] = set()
 
-    def prepare(self, document: Document):
+    def prepare(self, document: Document) -> None:
         """
         note, this method can't be cached, as the state of the document may change between executions
 
@@ -156,7 +156,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
 
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
-    def prepare(self, document: Document):
+    def prepare(self, document: Document) -> None:
         """
         build document representations by parser names here, and store in a dict. This method is cached so
         we don't need to call it multiple times per document
@@ -244,7 +244,7 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
     strategy, so should generally only be used as a last resort!
     """
 
-    def prepare(self, document: Document):
+    def prepare(self, document: Document) -> None:
         pass
 
     def disambiguate(

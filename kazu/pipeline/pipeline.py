@@ -42,11 +42,11 @@ def load_steps_and_log_memory_usage(cfg: DictConfig) -> List[Step]:
     return steps
 
 
-def calc_doc_size(doc: Document):
+def calc_doc_size(doc: Document) -> int:
     return sum(len(section.text) for section in doc.sections)
 
 
-def batch_metrics(docs: List[Document]):
+def batch_metrics(docs: List[Document]) -> Dict[str, float]:
     lengths = []
     ent_count = []
     for doc in docs:
@@ -63,7 +63,7 @@ def batch_metrics(docs: List[Document]):
 class FailedDocsHandler(Protocol):
     """Handle failed docs."""
 
-    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+    def __call__(self, step_docs_map: Dict[str, List[Document]]) -> None:
         """
         :param step_docs_map: a dict of step namespace and the docs that failed for it
         :return:
@@ -74,7 +74,7 @@ class FailedDocsHandler(Protocol):
 class FailedDocsLogHandler(FailedDocsHandler):
     """Log failed docs as warnings."""
 
-    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+    def __call__(self, step_docs_map: Dict[str, List[Document]]) -> None:
         for step_namespace, docs in step_docs_map.items():
             for doc in docs:
                 error_message = doc.metadata.get(PROCESSING_EXCEPTION, None)
@@ -94,7 +94,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
     def __init__(self, log_dir: PathLike):
         self.log_dir = as_path(log_dir)
 
-    def __call__(self, step_docs_map: Dict[str, List[Document]]):
+    def __call__(self, step_docs_map: Dict[str, List[Document]]) -> None:
         for step_namespace, docs in step_docs_map.items():
             step_logging_dir = self.log_dir.joinpath(step_namespace)
             step_logging_dir.mkdir(parents=True, exist_ok=True)
@@ -190,7 +190,7 @@ class Pipeline:
                     if step_name in group:
                         self.step_groups[group_name].append(step)
 
-    def prefilter_docs(self, docs: List[Document]):
+    def prefilter_docs(self, docs: List[Document]) -> List[Document]:
         docs_to_process = []
         for doc in docs:
             doc_size = calc_doc_size(doc)
@@ -282,7 +282,7 @@ class Pipeline:
 
         return docs
 
-    def profile(self, step_times: Dict, batch_time: float, batch_metrics_dict: Dict):
+    def profile(self, step_times: Dict, batch_time: float, batch_metrics_dict: Dict) -> None:
         if self.summary_writer is not None:
             self.summary_writer.add_scalars(
                 main_tag="batch_metrics",
@@ -310,11 +310,11 @@ class Pipeline:
                 )
             self.call_count += 1
 
-    def update_failed_docs(self, step: Step, failed_docs: List[Document]):
+    def update_failed_docs(self, step: Step, failed_docs: List[Document]) -> None:
         if self.failure_handlers is not None:
             self.failed_docs[step.namespace()] = failed_docs
 
-    def reset(self):
+    def reset(self) -> None:
         if self.failure_handlers is not None:
             for handler in self.failure_handlers:
                 handler(self.failed_docs)

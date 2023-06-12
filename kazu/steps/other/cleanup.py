@@ -17,7 +17,7 @@ MappingFilterFn = Callable[[Mapping], bool]
 
 
 class CleanupAction(Protocol):
-    def cleanup(self, doc: Document):
+    def cleanup(self, doc: Document) -> None:
         raise NotImplementedError
 
 
@@ -25,7 +25,7 @@ class MappingFilterCleanupAction:
     def __init__(self, filter_fns: List[MappingFilterFn]):
         self.filter_fns = filter_fns
 
-    def cleanup(self, doc: Document):
+    def cleanup(self, doc: Document) -> None:
         for entity in doc.get_entities():
             entity.mappings = {
                 mapping
@@ -38,7 +38,7 @@ class EntityFilterCleanupAction:
     def __init__(self, filter_fns: List[EntityFilterFn]):
         self.filter_fns = filter_fns
 
-    def cleanup(self, doc: Document):
+    def cleanup(self, doc: Document) -> None:
         for section in doc.sections:
             section.entities = [
                 entity for entity in section.entities if not any(f(entity) for f in self.filter_fns)
@@ -113,7 +113,7 @@ class StripMappingURIsAction:
             new_idx = url.path.split("/")[-1]
         return new_idx
 
-    def cleanup(self, doc: Document):
+    def cleanup(self, doc: Document) -> None:
         for entity in doc.get_entities():
             new_mappings = set()
             for mapping in entity.mappings:

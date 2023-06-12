@@ -233,7 +233,7 @@ class SynonymTermWithMetrics(SynonymTerm):
         embed_score: Optional[float] = None,
         bool_score: Optional[float] = None,
         exact_match: Optional[bool] = None,
-    ):
+    ) -> "SynonymTermWithMetrics":
 
         return SynonymTermWithMetrics(
             search_score=search_score,
@@ -281,7 +281,7 @@ class Entity:
         default_factory=dict
     )
 
-    def update_terms(self, terms: Iterable[SynonymTermWithMetrics]):
+    def update_terms(self, terms: Iterable[SynonymTermWithMetrics]) -> None:
         for term in terms:
             existing_term: Optional[SynonymTermWithMetrics] = self.syn_term_to_synonym_terms.get(
                 term
@@ -387,7 +387,7 @@ class Entity:
         # TODO: update this to make use of non-contiguous entities
         return f"{hash(self)}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
 
-    def add_mapping(self, mapping: Mapping):
+    def add_mapping(self, mapping: Mapping) -> None:
         """
         deprecated
 
@@ -447,7 +447,7 @@ class Section:
             return ()
 
     @sentence_spans.setter
-    def sentence_spans(self, sent_spans: Iterable[CharSpan]):
+    def sentence_spans(self, sent_spans: Iterable[CharSpan]) -> None:
         """
         Setter for sentence_spans. sentence_spans are stored in the order provided by the iterable
         sent_spans param, which may not necessarily be in sorted order.
@@ -494,7 +494,7 @@ class Document:
         drop_unmapped_ents: bool = False,
         drop_terms: bool = False,
         **kwargs: Any,
-    ):
+    ) -> str:
         """
         custom encoder needed to handle serialisation issues with our data model
 
@@ -840,7 +840,7 @@ class CuratedTerm:
         if not isinstance(self.curated_synonym, str):
             raise ValueError(f"curated_synonym should be a string, {self}")
 
-    def term_norm_for_linking(self, entity_class: str):
+    def term_norm_for_linking(self, entity_class: str) -> str:
         norm_target = self.curated_synonym if self.source_term is None else self.source_term
         return StringNormalizer.normalize(norm_target, entity_class)
 

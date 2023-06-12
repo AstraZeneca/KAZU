@@ -236,7 +236,7 @@ class StrategyRunner:
                 non_symbolic.extend(ent_iter)
         return symbolic, non_symbolic
 
-    def __call__(self, doc: Document):
+    def __call__(self, doc: Document) -> None:
         """
 
         Run relevant strategies to decide what mappings to create.
@@ -298,7 +298,7 @@ class StrategyRunner:
         ents_needing_mappings: List[Entity],
         document: Document,
         confidence_strategy_execution: ConfidenceLevelStrategyExecution,
-    ):
+    ) -> None:
         """
         This method executes parts 5 - 7 in the class Docstring.
 

@@ -24,13 +24,18 @@ However, because the problem only materializes for kazu for intersphinx referenc
 to the two inspirations above, the implementation is not related.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
+from docutils.nodes import Element, TextElement
+from sphinx.addnodes import pending_xref
 from sphinx.application import Sphinx
+from sphinx.environment import BuildEnvironment
 from sphinx.ext.intersphinx import resolve_reference_detect_inventory
 
 
-def override_cross_reference(app: Sphinx, env, node, contnode):
+def override_cross_reference(
+    app: Sphinx, env: BuildEnvironment, node: pending_xref, contnode: TextElement
+) -> Optional[Element]:
     """Override type hints that aren't registered in the object inventory in the place Sphinx expects.
 
     This function works by plugging in to the 'missing-reference' hook that Sphinx provided, which fires when a
@@ -44,6 +49,9 @@ def override_cross_reference(app: Sphinx, env, node, contnode):
     if xref_override is not None:
         node["reftarget"] = xref_override
         return resolve_reference_detect_inventory(env, node, contnode)
+    else:
+        # no override, don't try to resolve
+        return None
 
 
 def setup(app: Sphinx) -> Dict[str, Any]:

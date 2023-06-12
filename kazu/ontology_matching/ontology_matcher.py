@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import Any, List, Dict, Union, Iterable, Tuple, Optional
+from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, Set, cast
 
 import spacy
 import srsly
@@ -36,6 +36,7 @@ MATCH_ID_SEP = ":::"
 logger = logging.getLogger(__name__)
 
 _CoocDict = Dict[str, Dict[str, List[str]]]
+_MatcherDict = Dict[str, Matcher]
 
 
 @dataclass
@@ -46,15 +47,19 @@ class OntologyMatcherConfig:
     parser_name_to_entity_type: Dict[str, str]
 
 
-def _ontology_dict_setter(span: Span, value: Dict):
+# the strings in the tuple are: parser_name, term_norm, confidence value
+_MatcherOntologyData = Dict[str, Set[Tuple[str, str, str]]]
+
+
+def _ontology_dict_setter(span: Span, value: Dict) -> None:
     # spacy's typing on the property says this has to be a Dict[str, Any]
     # but the __init__ typing says it can be a Dict[Any, Any]
     span.doc.user_data[span] = value  # type: ignore[index]
 
 
-def _ontology_dict_getter(span: Span):
+def _ontology_dict_getter(span: Span) -> _MatcherOntologyData:
     # as above with types
-    return span.doc.user_data.get(span, {})  # type: ignore[call-overload]
+    return cast(_MatcherOntologyData, span.doc.user_data.get(span, {}))  # type: ignore[call-overload]
 
 
 @Language.factory(
@@ -98,8 +103,8 @@ class OntologyMatcher:
         # These will be defined when calling initialize
         self.strict_matcher: Optional[PhraseMatcher] = None
         self.lowercase_matcher: Optional[PhraseMatcher] = None
-        self.tp_matchers: Optional[Dict[str, Matcher]] = None
-        self.fp_matchers: Optional[Dict[str, Matcher]] = None
+        self.tp_matchers: Optional[_MatcherDict] = None
+        self.fp_matchers: Optional[_MatcherDict] = None
         self.tp_coocc_dict: Optional[_CoocDict] = None
         self.fp_coocc_dict: Optional[_CoocDict] = None
 
@@ -134,7 +139,7 @@ class OntologyMatcher:
     def parser_name_to_entity_type(self) -> Dict[str, str]:
         return self.cfg.parser_name_to_entity_type
 
-    def set_labels(self, labels: Iterable[str]):
+    def set_labels(self, labels: Iterable[str]) -> None:
         self.cfg.labels = list(labels)
         self.set_context_matchers()
 
@@ -338,11 +343,11 @@ class OntologyMatcher:
                         self._set_token_attr(ent_class, s, False)
         return filtered_spans
 
-    def _set_token_attr(self, ent_class: str, span: Span, value: bool):
+    def _set_token_attr(self, ent_class: str, span: Span, value: bool) -> None:
         for token in span:
             token._.set(ent_class, value)
 
-    def span_in_TP_context(self, doc: Union[Doc, Span], ent_class: str):
+    def span_in_TP_context(self, doc: Union[Doc, Span], ent_class: str) -> bool:
         """When an entity type has a TP matcher defined, it should match for this
         span to be regarded as a true hit."""
         assert self.tp_matchers is not None
@@ -354,7 +359,7 @@ class OntologyMatcher:
             return False
         return True
 
-    def span_in_FP_context(self, doc: Union[Doc, Span], ent_class: str):
+    def span_in_FP_context(self, doc: Union[Doc, Span], ent_class: str) -> bool:
         """When an entity type has a FP matcher defined, spans that match
         are regarded as FPs."""
         assert self.fp_matchers is not None
@@ -366,7 +371,7 @@ class OntologyMatcher:
             return False
         return False
 
-    def span_in_TP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str):
+    def span_in_TP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str) -> bool:
         """When an entity type has a TP co-occ dict defined, a hit defined in the dict
         is only regarded as a true hit when it matches at least one of its co-occ terms."""
         assert self.tp_coocc_dict is not None
@@ -378,7 +383,7 @@ class OntologyMatcher:
             return False
         return True
 
-    def span_in_FP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str):
+    def span_in_FP_coocc(self, doc: Union[Doc, Span], span: Span, ent_class: str) -> bool:
         """When an entity type has a FP co-occ dic defined, a hit defined in the dict
         is regarded as a false positive when it matches at least one of its co-occ terms."""
         assert self.fp_coocc_dict is not None
@@ -390,9 +395,9 @@ class OntologyMatcher:
             return False
         return False
 
-    def _create_token_matchers(self):
-        tp_matchers = {}
-        fp_matchers = {}
+    def _create_token_matchers(self) -> Tuple[_MatcherDict, _MatcherDict]:
+        tp_matchers: _MatcherDict = {}
+        fp_matchers: _MatcherDict = {}
         if CELL_LINE in self.labels:
             tp_matchers[CELL_LINE] = self._create_cell_tp_tokenmatcher(CELL_LINE)
         if CELL_TYPE in self.labels:
@@ -402,7 +407,7 @@ class OntologyMatcher:
             fp_matchers[ANATOMY] = self._create_anatomy_fp_tokenmatcher()
         return tp_matchers, fp_matchers
 
-    def _create_cell_tp_tokenmatcher(self, ent_class: str):
+    def _create_cell_tp_tokenmatcher(self, ent_class: str) -> Matcher:
         """Define patterns where a Cell line or type appears and it's likely a true positive"""
         matcher = Matcher(self.nlp.vocab)
         pattern_1: List[Dict[str, Any]] = [
@@ -422,7 +427,7 @@ class OntologyMatcher:
         matcher.add("Cell_context", [pattern_1, pattern_2, pattern_3])
         return matcher
 
-    def _create_anatomy_fp_tokenmatcher(self):
+    def _create_anatomy_fp_tokenmatcher(self) -> Matcher:
         """Define patterns where an atanomy entity appears and it's likely a false positive"""
         matcher = Matcher(self.nlp.vocab)
         patterns: List[List[Dict[str, Any]]] = []

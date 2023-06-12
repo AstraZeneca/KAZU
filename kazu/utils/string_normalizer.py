@@ -363,7 +363,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
             return False
 
     @staticmethod
-    def remove_trailing_s_if_otherwise_capitalised(string: str):
+    def remove_trailing_s_if_otherwise_capitalised(string: str) -> str:
         """
         frustratingly, some gene symbols are pluralised like ERBBs. we can't just remove trailing s as this breaks
         genuine symbols like 'MDH-s' and 'GASP10ps'. So, we only strip the trailing 's' if the char before is upper

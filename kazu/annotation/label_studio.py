@@ -89,7 +89,9 @@ class KazuToLabelStudioConverter:
         return result_values
 
     @staticmethod
-    def _create_non_contig_entity_links(from_id: str, to_id: str):
+    def _create_non_contig_entity_links(
+        from_id: str, to_id: str
+    ) -> Dict[str, Union[str, List[str]]]:
         return {
             "from_id": from_id,
             "to_id": to_id,
@@ -99,7 +101,9 @@ class KazuToLabelStudioConverter:
         }
 
     @staticmethod
-    def _create_mapping_region(ent: Entity, region_id: str, span: CharSpan, match: str):
+    def _create_mapping_region(
+        ent: Entity, region_id: str, span: CharSpan, match: str
+    ) -> Dict[str, Any]:
 
         return {
             "id": region_id,
@@ -123,7 +127,9 @@ class KazuToLabelStudioConverter:
         }
 
     @staticmethod
-    def _create_ner_region(ent: Entity, region_id: str, span: CharSpan, match: str):
+    def _create_ner_region(
+        ent: Entity, region_id: str, span: CharSpan, match: str
+    ) -> Dict[str, Any]:
         return {
             "id": region_id,
             "from_name": "ner",
@@ -312,7 +318,7 @@ class LabelStudioAnnotationView:
             raise RuntimeError("failed to create document")
         return doc
 
-    def build_labels(self, dom: XMLDocument, element: Element):
+    def build_labels(self, dom: XMLDocument, element: Element) -> None:
         """
         .. (sphinx comment) as above for why we have explicit type links here.
 
@@ -331,7 +337,7 @@ class LabelStudioAnnotationView:
         element.appendChild(labels)
 
     @staticmethod
-    def build_taxonomy(dom: XMLDocument, element: Element, tasks: List[Dict], name: str):
+    def build_taxonomy(dom: XMLDocument, element: Element, tasks: List[Dict], name: str) -> None:
         """
         .. (sphinx comment) as above for why we have explicit type links here.
 
@@ -475,7 +481,7 @@ class LabelStudioManager:
         if "project_id" in self.__dict__:
             del self.project_id
 
-    def create_linking_project(self):
+    def create_linking_project(self) -> None:
         payload = {"title": self.project_name}
 
         try:
@@ -486,7 +492,7 @@ class LabelStudioManager:
             logger.error(f"failed to create project {self.project_name}")
             raise e
 
-    def update_view(self, view: LabelStudioAnnotationView, docs: List[Document]):
+    def update_view(self, view: LabelStudioAnnotationView, docs: List[Document]) -> None:
         tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         payload = {"label_config": view.create_main_view(tasks)}
 
@@ -500,7 +506,7 @@ class LabelStudioManager:
             logger.error(f"failed to update view for project {self.project_name}")
             raise e
 
-    def update_tasks(self, docs: List[Document]):
+    def update_tasks(self, docs: List[Document]) -> None:
         tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         try:
             resp = requests.post(
@@ -514,7 +520,7 @@ class LabelStudioManager:
             logger.error(f"failed to update tasks for project {self.project_name}")
             raise e
 
-    def get_all_tasks(self):
+    def get_all_tasks(self) -> List[Dict[str, Any]]:
         tasks = requests.get(
             f"{self.url}/api/tasks?page_size=1000000&project={self.project_id}",
             headers=self.headers,
@@ -522,7 +528,7 @@ class LabelStudioManager:
         ids = [task["id"] for task in tasks["tasks"]]
         return self.get_tasks(ids)
 
-    def get_tasks(self, ids: List[int]):
+    def get_tasks(self, ids: List[int]) -> List[Dict[str, Any]]:
         task_data = []
         for idx in ids:
             task_data.append(
