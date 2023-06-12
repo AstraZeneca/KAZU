@@ -131,7 +131,6 @@ warn_unreachable = true
 disallow_untyped_defs = false
 disallow_any_generics = false
 disallow_untyped_calls = false
-disallow_incomplete_defs = false
 no_implicit_reexport = false
 
 [[tool.mypy.overrides]]
@@ -147,6 +146,14 @@ module = [
     "diskcache.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "kazu.tests.*"
+]
+# in particular, return types for pytest test
+# functions are always None, we don't want to have to annotate that
+disallow_incomplete_defs = false
 
 [tool.towncrier]
 package = "kazu"
