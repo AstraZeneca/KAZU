@@ -259,7 +259,7 @@ def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_should_drop_curated_term_followed_by_adding_new_one(tmp_path):
+def test_should_override_id_set(tmp_path):
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
         behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
