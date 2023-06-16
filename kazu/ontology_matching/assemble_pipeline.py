@@ -1,6 +1,10 @@
+from copy import deepcopy
+from string import ascii_lowercase
 from typing import List
 
 import spacy
+from spacy.lang.en import English, EnglishDefaults
+from spacy.lang.en.tokenizer_exceptions import TOKENIZER_EXCEPTIONS
 from spacy.lang.char_classes import (
     LIST_ELLIPSES,
     LIST_ICONS,
@@ -38,13 +42,31 @@ SPACY_DEFAULT_INFIXES = (
 # https://github.com/explosion/spaCy/pull/5770#issuecomment-659389160
 DEFAULT_INFIXES_MINUS_HYPHENS = SPACY_DEFAULT_INFIXES[:-2] + SPACY_DEFAULT_INFIXES[-1:]
 
+# There are exceptions saying not to tokenize things like 'a.' and 'b.' - presumably
+# to handle lists elements with letters like this. That isn't relevant for how we're
+# using spacy to do NER + linking, and it breaks some cases for us - when an entity
+# like 'Haemophilia A' is at the end of a sentence, so we get a token like 'A.', which
+# then doesn't get split, so we don't recognise it, unless we remove these exceptions.
+TOKENIZER_EXCEPTIONS_MINUS_SINGLE_LETTER = deepcopy(TOKENIZER_EXCEPTIONS)
+for letter in ascii_lowercase:
+    TOKENIZER_EXCEPTIONS_MINUS_SINGLE_LETTER.pop(letter + ".")
 
-def custom_tokenizer(nlp):
-    custom_infixes = [r"\(", "/"]
 
-    infixes = custom_infixes + DEFAULT_INFIXES_MINUS_HYPHENS
-    infix_re = spacy.util.compile_infix_regex(infixes)
-    nlp.tokenizer.infix_finditer = infix_re.finditer
+class KazuCustomEnglishDefaults(EnglishDefaults):
+    tokenizer_exceptions = TOKENIZER_EXCEPTIONS_MINUS_SINGLE_LETTER
+    infixes = [r"\(", "/"] + DEFAULT_INFIXES_MINUS_HYPHENS
+    # related to the above, '.' isn't picked up as a suffix when preceded by a
+    # single uppercase character
+    suffixes = EnglishDefaults.suffixes + [
+        r"(?<=\b[{au}])\.".format(au=ALPHA_UPPER)
+    ]  # type:ignore[operator] # because mypy doesn't know that EnglishDefaults.suffixes is
+    # always a List[str]
+
+
+@spacy.registry.languages("kazu_custom_en")
+class KazuCustomEnglish(English):
+    lang = "kazu_custom_en"
+    Defaults = KazuCustomEnglishDefaults
 
 
 def main(
@@ -73,8 +95,8 @@ def main(
         `span attribute <https://spacy.io/api/doc#spans>`_ to store and access recognised NER
         spans.
     """
-    nlp = spacy.blank("en")
-    custom_tokenizer(nlp)
+    nlp = spacy.blank("kazu_custom_en")
+
     nlp.add_pipe("sentencizer")
     config = {
         "span_key": span_key,
