@@ -1,7 +1,6 @@
 from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.modelling.annotation.label_studio import (
     LabelStudioManager,
-    KazuToLabelStudioConverter,
     LabelStudioAnnotationView,
 )
 from kazu.tests.utils import requires_label_studio
@@ -61,9 +60,9 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
 
     manager: LabelStudioManager = make_label_studio_manager(project_name="kazu_integration_test")
     manager.delete_project_if_exists()
-    tasks = KazuToLabelStudioConverter.convert_docs_to_tasks([doc_1])
+    manager.create_linking_project()
     view = LabelStudioAnnotationView.with_default_colours()
-    manager.create_linking_project(tasks, view)
+    manager.update_view(view=view, docs=[doc_1])
 
     docs = manager.export_from_ls()
     assert len(docs) == 1
