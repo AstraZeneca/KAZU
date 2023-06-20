@@ -189,6 +189,8 @@ class GreekSymbolSubstitution:
 
 
 class StringReplacement(SynonymGenerator):
+    greek_variant_prefix_suffix = DASHES.union(set(" "))
+
     def __init__(
         self,
         replacement_dict: Optional[Dict[str, List[str]]] = None,
@@ -216,31 +218,48 @@ class StringReplacement(SynonymGenerator):
                         results.add(new_str)
 
         if self.include_greek:
-            # only strip text once initially - the greek character replacement
-            # will not introduce leading or trailing whitespace unlike the other
-            # replacements above
-            stripped_text = synonym_str.strip()
-            strings_to_substitute = {stripped_text}
-            for to_replace, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
-                # if it's in the original text it should be in all previous substitutions, no
-                # need to check all of them
-                if to_replace in synonym_str:
-                    # necessary so we don't modify strings_to_substitute while looping over it,
-                    # which throws an error
-                    outputs_this_step = set()
-                    for string_to_subsitute in strings_to_substitute:
-                        for replacement in replacement_set:
-                            single_unique_letter_substituted = string_to_subsitute.replace(
-                                to_replace, replacement
-                            )
-                            outputs_this_step.add(single_unique_letter_substituted)
-                            results.add(single_unique_letter_substituted)
-                    strings_to_substitute.update(outputs_this_step)
+            self._generate_greek_subs(results, synonym_str)
 
         if len(results) > 0:
             return results
         else:
             return None
+
+    def _generate_greek_subs(self, results, synonym_str):
+        # only strip text once initially - the greek character replacement
+        # will not introduce leading or trailing whitespace unlike the other
+        # replacements above
+        stripped_text = synonym_str.strip()
+        strings_to_substitute = {stripped_text}
+        for candidate, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
+            # if it's in the original text it should be in all previous substitutions, no
+            # need to check all of them
+            for fix in self.greek_variant_prefix_suffix:
+                prefix = False
+                suffix = False
+                # necessary so we don't modify strings_to_substitute while looping over it,
+                # which throws an error
+                outputs_this_step = set()
+                if f"{fix}{candidate}" in synonym_str:
+                    suffix = True
+                if f"{candidate}{fix}" in synonym_str:
+                    prefix = True
+
+                for string_to_subsitute in strings_to_substitute:
+                    for replacement in replacement_set:
+                        if prefix:
+                            single_unique_letter_substituted = string_to_subsitute.replace(
+                                f"{candidate}{fix}", f"{replacement}{fix}"
+                            )
+                            outputs_this_step.add(single_unique_letter_substituted)
+                            results.add(single_unique_letter_substituted)
+                        if suffix:
+                            single_unique_letter_substituted = string_to_subsitute.replace(
+                                f"{fix}{candidate}", f"{fix}{replacement}"
+                            )
+                            outputs_this_step.add(single_unique_letter_substituted)
+                            results.add(single_unique_letter_substituted)
+                strings_to_substitute.update(outputs_this_step)
 
 
 class SuffixReplacement(SynonymGenerator):
