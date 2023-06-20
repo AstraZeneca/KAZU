@@ -17,7 +17,6 @@ class MergeOverlappingEntsStep(Step):
     def __init__(
         self,
         ent_class_preferred_order: List[str],
-        ent_namespace_preferred_order: List[str],
         ignore_non_contiguous: bool = True,
     ):
         """
@@ -38,7 +37,8 @@ class MergeOverlappingEntsStep(Step):
            1. prefer entities with mappings
            2. prefer longest spans
            3. prefer entities as configured by ent_class_preferred_order (see param description below)
-           4. If the proscribed entity class order is also equal, the preferred entity is selected on the basis of
+           4. prefer entities by level of confidence of entity mention
+           5. If all above are equal, the preferred entity is selected on the basis of
               the entity class name (reverse alphabetically ordered). Warning: This last sort criteria is arbitrary
 
 
@@ -52,9 +52,6 @@ class MergeOverlappingEntsStep(Step):
         self.ent_class_preferred_order = {
             namespace: i for i, namespace in enumerate(reversed(ent_class_preferred_order))
         }
-        self.ent_namespace_preferred_order = {
-            namespace: i for i, namespace in enumerate(reversed(ent_namespace_preferred_order))
-        }
 
     def select_preferred_entity(self, ents: Set[Entity]) -> Tuple[Entity, List[Entity]]:
         """
@@ -67,7 +64,7 @@ class MergeOverlappingEntsStep(Step):
                 len(x.mappings) > 0,
                 (x.end - x.start),
                 self.ent_class_preferred_order.get(x.entity_class, 0),
-                self.ent_namespace_preferred_order.get(x.namespace, 0),
+                x.mention_confidence.value,
                 x.entity_class,
             ),
             reverse=True,
