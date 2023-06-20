@@ -358,212 +358,177 @@ class CurationProcessor:
            but have different associated ID sets specified, such that one would
            override the other.
 
-        3) If two or more curations have the same uncased value for curated_synonym
-           and have multiple values for case sensitivity and incompatible values for
-           mention_confidence. I.E. A case-insensitive curation cannot have a higher
+        3) If two or more curations have conflicting values for case sensitivity and
+           mention_confidence. E.g. A case-insensitive curation cannot have a higher
            mention confidence value than a case-sensitive one.
 
 
         :param curations:
         :return: safe curations set
         """
+
         curations_by_term_norm = defaultdict(set)
-        curations_and_confs_by_case_sensitive_synonym: DefaultDict[
-            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
-        ] = defaultdict(lambda: (set(), set()))
-        curations_and_confs_by_case_insensitive_synonym: DefaultDict[
-            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
-        ] = defaultdict(lambda: (set(), set()))
-        curations_and_confs_by_any_case_synonym: DefaultDict[str, Set[CuratedTerm]] = defaultdict(
-            set
-        )
-        curation_modification_map: Dict[CuratedTerm, CuratedTerm] = {}
-
+        curations_by_syn_lower = defaultdict(set)
         for curation in curations:
-            curation_modification_map[curation] = curation
             curations_by_term_norm[curation.term_norm_for_linking(self.entity_class)].add(curation)
-            curations_and_confs_by_any_case_synonym[curation.curated_synonym].add(curation)
-            if curation.case_sensitive:
-                curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][0].add(
-                    curation
-                )
-                curations_and_confs_by_case_sensitive_synonym[curation.curated_synonym][1].add(
-                    curation.mention_confidence
-                )
-            else:
-                curations_and_confs_by_case_insensitive_synonym[curation.curated_synonym.lower()][
-                    0
-                ].add(curation)
-                curations_and_confs_by_case_insensitive_synonym[curation.curated_synonym.lower()][
-                    1
-                ].add(curation.mention_confidence)
+            curations_by_syn_lower[curation.curated_synonym.lower()].add(curation)
 
-        self._analyse_conflicts_in_unique_synonym(
-            curations_and_confs_by_any_case_synonym.values(), curation_modification_map
-        )
+        all_remove = set()
+        for potential_conflict_set in curations_by_term_norm.values():
+            if len(potential_conflict_set) > 1:
+                to_add, to_remove = self.resolve_behaviour_conflicts(potential_conflict_set)
+                all_remove.update(to_remove)
+                curations.update(to_add)
 
-        self._analyse_conflicts_in_case_sensitivity(
-            curations_and_confs_by_case_insensitive_synonym,
-            curations_and_confs_by_case_sensitive_synonym,
-            curation_modification_map,
-        )
+        for potential_conflict_set in curations_by_syn_lower.values():
+            potential_conflict_set.difference_update(all_remove)
+            if len(potential_conflict_set) > 1:
+                to_add, to_remove = self.resolve_case_conflicts(potential_conflict_set)
+                all_remove.update(to_remove)
+                curations.update(to_add)
 
-        self._analyse_conflicts_in_term_normalisation(
-            curations_by_term_norm, curation_modification_map
-        )
+        curations.difference_update(all_remove)
+        return curations
 
-        return set(curation_modification_map.values())
+    def resolve_behaviour_conflicts(
+        self, curations: Set[CuratedTerm]
+    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
 
-    def _analyse_conflicts_in_term_normalisation(
-        self,
-        curations_by_term_norm: DefaultDict[str, Set[CuratedTerm]],
-        curation_modification_map: Dict[CuratedTerm, CuratedTerm],
-    ):
-        for potentially_conflicting_curations in curations_by_term_norm.values():
-            overridden_conflicting_id_sets = set()
-            conflicting_behaviours = set()
-            for original_curation in potentially_conflicting_curations:
-                curation_mod = curation_modification_map[original_curation]
-                # if behaviour is ignore or inherit, it can't conflict
-                if curation_mod.behaviour not in {
-                    CuratedTermBehaviour.IGNORE,
-                    CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+        curations_by_syn_lower = defaultdict(set)
+        potentially_conflicting_behaviours = set()
+        potentially_conflicting_id_sets = set()
+        source_curations = set()
+        inherited_curations = set()
+        for curation in curations:
+            if curation.source_term is None:
+                source_curations.add(curation)
+                if curation.behaviour in {
+                    CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                    CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+                    CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
                 }:
-                    conflicting_behaviours.add(curation_mod.behaviour)
-                if (
-                    curation_mod.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
-                    or curation_mod.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY
-                ):
-                    if curation_mod.associated_id_sets is not None:
-                        overridden_conflicting_id_sets.add(curation_mod.associated_id_sets)
+                    potentially_conflicting_behaviours.add(curation.behaviour)
+                if curation.associated_id_sets is not None:
+                    potentially_conflicting_id_sets.add(curation.associated_id_sets)
+            else:
+                inherited_curations.add(curation)
+            curations_by_syn_lower[curation.curated_synonym.lower()].add(curation)
 
-            should_ignore = False
-            if len(conflicting_behaviours) > 1:
-                logger.warning(
-                    "\n\nconflicting curations by behaviours detected. All behaviours will be set to ignore\n\n"
-                    + "\n".join(
-                        curation_modification_map[curation].to_json()
-                        for curation in potentially_conflicting_curations
-                    )
-                    + "\n"
-                )
-                should_ignore = True
-
-            if len(overridden_conflicting_id_sets) > 1:
-                logger.warning(
-                    "\n\nmultiple overrides for same term norm detected. Curations will be ignored\n\n"
-                    + "\n".join(
-                        curation_modification_map[curation].to_json()
-                        for curation in potentially_conflicting_curations
-                    )
-                    + "\n"
-                )
-                should_ignore = True
-            if should_ignore:
-                for curation in potentially_conflicting_curations:
-                    curation_modification_map[curation] = dataclasses.replace(
-                        curation, behaviour=CuratedTermBehaviour.IGNORE
-                    )
-
-    def _analyse_conflicts_in_case_sensitivity(
-        self,
-        curations_and_confs_by_case_insensitive_synonym: DefaultDict[
-            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
-        ],
-        curations_and_confs_by_case_sensitive_synonym: DefaultDict[
-            str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]
-        ],
-        curation_modification_map: Dict[CuratedTerm, CuratedTerm],
-    ):
-        for (
-            curated_synonym,
-            (
-                potentially_conflicting_cs_curations,
-                potentially_conflicting_cs_confidences,
-            ),
-        ) in curations_and_confs_by_case_sensitive_synonym.items():
-            working_confidences = potentially_conflicting_cs_confidences
-            if len(potentially_conflicting_cs_confidences) > 1:
-                most_conservative = min(potentially_conflicting_cs_confidences)
-                message = (
-                    "\n\nmultiple case sensitive curations specified with conflicting confidence values. "
-                    "All affected will adopt the conservative confidence value\n\n"
-                    + "\n".join(
-                        curation_modification_map[curation].to_json()
-                        for curation in potentially_conflicting_cs_curations
-                    )
-                    + "\n"
-                )
-
-                logger.warning(message)
-                for curation in potentially_conflicting_cs_curations:
-                    curation_modification_map[curation] = dataclasses.replace(
-                        curation, mention_confidence=most_conservative
-                    )
-
-                working_confidences = {most_conservative}
-
-            (
-                potentially_conflicting_case_insensitive_curations,
-                potentially_conflicting_case_insensitive_confidences,
-            ) = curations_and_confs_by_case_insensitive_synonym.get(
-                curated_synonym.lower(),
-                (
-                    set(),
-                    set(),
-                ),
+        if len(potentially_conflicting_behaviours) > 1:
+            resolved_behaviour = (
+                CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+                if CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+                in potentially_conflicting_behaviours
+                else CuratedTermBehaviour.IGNORE
             )
-
-            if len(potentially_conflicting_case_insensitive_confidences) > 0 and min(
-                working_confidences
-            ) < max(potentially_conflicting_case_insensitive_confidences):
-                most_conservative = min(
-                    [
-                        min(working_confidences),
-                        min(potentially_conflicting_case_insensitive_confidences),
-                    ]
-                )
+            logger.warning(
+                "conflicting behaviours detected. The following source curations will be %s\n%s",
+                resolved_behaviour.name,
+                "\n\n".join(curation.to_json() for curation in source_curations) + "\n\n",
+            )
+            if len(inherited_curations) > 0:
                 logger.warning(
-                    "\n\nmultiple case sensitive and case insensitive curations specified with conflicting confidence values."
-                    "All affected will adopt the conservative confidence value\n\n"
-                    "\n\n"
-                    + "\n".join(
-                        curation_modification_map[curation].to_json()
-                        for curation in potentially_conflicting_cs_curations.union(
-                            potentially_conflicting_case_insensitive_curations
-                        )
-                    )
-                    + "\n"
+                    "conflicting behaviours detected. The following inherited curations will be %s\n%s",
+                    CuratedTermBehaviour.IGNORE.name,
+                    "\n\n".join(curation.to_json() for curation in inherited_curations) + "\n\n",
                 )
-                for curation in potentially_conflicting_cs_curations.union(
-                    potentially_conflicting_case_insensitive_curations
-                ):
-                    curation_modification_map[curation] = dataclasses.replace(
-                        curation, mention_confidence=most_conservative
+            return (
+                set(
+                    dataclasses.replace(curation, behaviour=resolved_behaviour)
+                    for curation in source_curations
+                ).union(
+                    set(
+                        dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
+                        for curation in inherited_curations
                     )
-
-        for (
-            curated_synonym_lower_case,
-            (
-                potentially_conflicting_case_insensitive_curations,
-                potentially_conflicting_case_insensitive_confidences,
-            ),
-        ) in curations_and_confs_by_case_insensitive_synonym.items():
-            if len(potentially_conflicting_case_insensitive_confidences) > 1:
-                most_conservative = min(potentially_conflicting_case_insensitive_confidences)
+                ),
+                curations,
+            )
+        if len(potentially_conflicting_id_sets) > 1:
+            logger.warning(
+                "conflicting id sets detected. The following source curations will be %s\n%s",
+                CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING.name,
+                "\n\n".join(curation.to_json() for curation in source_curations) + "\n\n",
+            )
+            if len(inherited_curations) > 0:
                 logger.warning(
-                    "\n\nmultiple case insensitive curations specified with conflicting confidence values \n\n"
-                    "All affected will adopt the conservative confidence value\n\n"
-                    + "\n".join(
-                        curation_modification_map[curation].to_json()
-                        for curation in potentially_conflicting_case_insensitive_curations
-                    )
-                    + "\n"
+                    "conflicting id sets detected. The following inherited curations will be %s\n%s",
+                    CuratedTermBehaviour.IGNORE.name,
+                    "\n\n".join(curation.to_json() for curation in inherited_curations) + "\n\n",
                 )
-                for curation in potentially_conflicting_case_insensitive_curations:
-                    curation_modification_map[curation] = dataclasses.replace(
-                        curation, mention_confidence=most_conservative
+
+            return (
+                set(
+                    dataclasses.replace(
+                        curation, behaviour=CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
                     )
+                    for curation in source_curations
+                ).union(
+                    set(
+                        dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
+                        for curation in inherited_curations
+                    )
+                ),
+                curations,
+            )
+        return set(), set()
+
+    def resolve_case_conflicts(
+        self, curations: Set[CuratedTerm]
+    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
+
+        to_add: Set[CuratedTerm] = set()
+        to_remove: Set[CuratedTerm] = set()
+        cs_conf = set()
+        ci_conf = set()
+        cs_lookup: DefaultDict[str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]] = defaultdict(
+            lambda: (set(), set())
+        )
+        for curation in curations:
+            if curation.behaviour in {
+                CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+                CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+            }:
+                if curation.case_sensitive:
+                    cs_conf.add(curation.mention_confidence)
+                    cs_lookup[curation.curated_synonym][0].add(curation)
+                    cs_lookup[curation.curated_synonym][1].add(curation.mention_confidence)
+                else:
+                    ci_conf.add(curation.mention_confidence)
+
+        if len(ci_conf.union(cs_conf)) == 1:
+            logger.debug("curations OK \n %s", curations)
+        elif len(ci_conf) > 1 or (
+            len(ci_conf) > 0 and len(cs_conf) > 0 and min(ci_conf) < min(cs_conf)
+        ):
+            # set all to CI min
+            target_conf = min(ci_conf)
+            logger.warning(
+                "conflict detected in case sensitivity/confidence combination for the following curations. Affected curations will adopt the conservative confidence value %s,%s",
+                target_conf.name,
+                "\n".join(curation.to_json() for curation in curations) + "\n\n",
+            )
+            to_add.update(
+                dataclasses.replace(curation, mention_confidence=target_conf)
+                for curation in curations
+            )
+            to_remove.update(curations)
+        elif len(cs_conf) > 1:
+            for (curations_cs, cs_confs_by_exact_match) in cs_lookup.values():
+                if len(cs_confs_by_exact_match) > 1:
+                    target_conf = min(cs_confs_by_exact_match)
+                    logger.warning(
+                        "conflict detected in case sensitivity/confidence combination for the following curations. Affected curations will adopt the conservative confidence value %s,%s",
+                        target_conf.name,
+                        "\n".join(curation.to_json() for curation in curations_cs) + "\n\n",
+                    )
+                    to_add.update(
+                        dataclasses.replace(curation, mention_confidence=target_conf)
+                        for curation in curations_cs
+                    )
+                    to_remove.update(curations_cs)
+
+        return to_add, to_remove
 
     def _process_curation_action(self, curation: CuratedTerm) -> CuratedTerm:
 
@@ -573,7 +538,7 @@ class CurationProcessor:
         if curation.behaviour is CuratedTermBehaviour.IGNORE:
             logger.debug("curation ignored: %s for %s", curation, self.parser_name)
         elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
-            assert curation.source_term is not None
+            assert curation.source_term is not None, curation
             logger.debug(
                 "curation inherits linking behaviour from %s for %s",
                 curation.source_term,
@@ -805,37 +770,6 @@ class CurationProcessor:
             return self._update_term_lookups(new_term, True)
         else:
             return CurationModificationResult.NO_ACTION
-
-    def _analyse_conflicts_in_unique_synonym(
-        self,
-        potential_conflicts: Iterable[Set[CuratedTerm]],
-        curation_modification_map: Dict[CuratedTerm, CuratedTerm],
-    ):
-        for potential_conflict in potential_conflicts:
-            if len(potential_conflict) > 1:
-                characteristics = set()
-                for curation in potential_conflict:
-                    characteristics.add(
-                        (
-                            curation.behaviour,
-                            curation.associated_id_sets,
-                            curation.mention_confidence,
-                            curation.case_sensitive,
-                        )
-                    )
-                    if len(characteristics) > 1:
-                        logger.warning(
-                            "\n\nmultiple characteristics specified for same value of curated_synonym. "
-                            "All behaviours will be set to ignore\n\n"
-                            + "\n".join(curation.to_json() for curation in potential_conflict)
-                            + "\n"
-                        )
-
-                        for _curation in potential_conflict:
-                            curation_modification_map[_curation] = dataclasses.replace(
-                                _curation, behaviour=CuratedTermBehaviour.IGNORE
-                            )
-                        break
 
 
 class OntologyParser(ABC):
