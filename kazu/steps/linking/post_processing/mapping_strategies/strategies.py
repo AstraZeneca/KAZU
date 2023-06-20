@@ -496,6 +496,34 @@ class NoopMappingStrategy(MappingStrategy):
     a No-op strategy in case you want to pass all terms straight through for disambiguation
     """
 
+    def disambiguate_if_required(
+        self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
+    ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
+        """NoopMappingStrategy passes all terms through to disambiguation strategies, if configured
+
+        Also overrides disambiguate_if_required - this strategy is designed to be used with dictionary hits
+        (i.e. exact string matching). This override is required as the superclass will class any
+        single term hit as DISAMBIGUATION_NOT_REQUIRED, whereas we often want to use other disambiguation
+        strategies with dictionary hits (such as with acronyms)
+
+        :param filtered_terms:
+        :param document:
+        :param parser_name:
+        :return:
+        """
+        all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
+        if self.disambiguation_strategies is None:
+            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
+        else:
+            for strategy in self.disambiguation_strategies:
+                filtered_id_sets = strategy(
+                    id_sets=all_id_sets, document=document, parser_name=parser_name
+                )
+                if len(filtered_id_sets) == 1:
+                    return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
+
+            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
+
     def filter_terms(
         self,
         ent_match: str,
