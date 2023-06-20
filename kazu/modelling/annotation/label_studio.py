@@ -7,8 +7,6 @@ from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
 import requests
-from requests import HTTPError
-
 from kazu.data.data import (
     Document,
     Section,
@@ -18,6 +16,7 @@ from kazu.data.data import (
     CharSpan,
 )
 from kazu.utils.grouping import sort_then_group
+from requests import HTTPError
 
 logger = logging.getLogger(__name__)
 
@@ -455,12 +454,11 @@ class LabelStudioManager:
         except (requests.exceptions.HTTPError, ValueError) as e:
             logger.warning(f"failed to delete project {self.project_name}. Maybe it doesn't exist?")
             logger.exception(e)
+        if "project_id" in self.__dict__:
+            del self.__dict__["project_id"]
 
-    def create_linking_project(self, tasks, view: LabelStudioAnnotationView):
-        payload = {
-            "title": self.project_name,
-            "label_config": view.create_main_view(tasks),
-        }
+    def create_linking_project(self):
+        payload = {"title": self.project_name}
 
         try:
             resp = requests.post(f"{self.url}/api/projects", json=payload, headers=self.headers)
@@ -470,16 +468,18 @@ class LabelStudioManager:
             logger.error(f"failed to create project {self.project_name}")
             raise e
 
+    def update_view(self, view: LabelStudioAnnotationView, docs: List[Document]):
+        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
+        payload = {"label_config": view.create_main_view(tasks)}
+
         try:
-            resp = requests.post(
-                f"{self.url}/api/projects/{self.project_id}/import",
-                json=tasks,
-                headers=self.headers,
+            resp = requests.patch(
+                f"{self.url}/api/projects/{self.project_id}", json=payload, headers=self.headers
             )
-            if resp.status_code != 201:
+            if resp.status_code not in {200, 201}:
                 resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.error(f"failed to load data for project {self.project_name}")
+            logger.error(f"failed to update view for project {self.project_name}")
             raise e
 
     def import_to_ls(self, docs: List[Document]):
@@ -487,6 +487,20 @@ class LabelStudioManager:
         return requests.post(
             f"{self.url}/api/projects/{self.project_id}/import", json=tasks, headers=self.headers
         )
+
+    def update_tasks(self, docs: List[Document]):
+        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
+        try:
+            resp = requests.post(
+                f"{self.url}/api/projects/{self.project_id}/import",
+                json=tasks,
+                headers=self.headers,
+            )
+            if resp.status_code not in {200, 201}:
+                resp.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"failed to update tasks for project {self.project_name}")
+            raise e
 
     def get_all_tasks(self):
         tasks = requests.get(
