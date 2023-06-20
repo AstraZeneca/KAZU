@@ -115,5 +115,5 @@ class DictionaryIndex:
         """Build the cache for the index."""
 
         return self._build_index_cache(
-            self.synonyms_for_parser, hash(self.synonyms_for_parser.values())
+            self.synonyms_for_parser, hash(frozenset(self.synonyms_for_parser.values()))
         )
