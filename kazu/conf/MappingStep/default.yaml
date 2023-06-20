@@ -82,12 +82,11 @@ strategy_runner:
       _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
       stop_on_success: True
       default_strategies:
-        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.NoopMappingStrategy
+        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+          disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: ${confidence.string_matching_highly_likely}
-          disambiguation_strategies:
-            - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
-              confidence: ${confidence.disambiguation_highly_likely}
       ent_class_strategies:
+        # we don't expect any value from the disambiguation strategies for these ontologies, so save the effort
         _target_: builtins.dict
 
     POSSIBLE:
@@ -166,30 +165,7 @@ strategy_runner:
           confidence: ${confidence.string_matching_highly_likely}
       ent_class_strategies:
         # we don't expect any value from the disambiguation strategies for these ontologies, so save the effort
-        anatomy:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies: ~
-            confidence: ${confidence.string_matching_highly_likely}
-        go_bp:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies: ~
-            confidence: ${confidence.string_matching_highly_likely}
-        go_cc:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies: ~
-            confidence: ${confidence.string_matching_highly_likely}
-        go_mf:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies: ~
-            confidence: ${confidence.string_matching_highly_likely}
-        cell_line:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies: ~
-            confidence: ${confidence.string_matching_highly_likely}
-        cell_type:
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
-            disambiguation_strategies: ~
-            confidence: ${confidence.string_matching_highly_likely}
+        _target_: builtins.dict
 
     POSSIBLE:
       _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
