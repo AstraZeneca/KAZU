@@ -8,6 +8,7 @@ from kazu.data.data import (
     Mapping,
     StringMatchConfidence,
     DisambiguationConfidence,
+    MentionConfidence,
 )
 from kazu.steps import Step, document_iterating_step
 
@@ -62,11 +63,23 @@ class DropMappingsByConfidenceMappingFilter:
 
 
 class DropUnmappedEntityFilter:
-    def __init__(self, from_ent_namespaces: Iterable[str]):
+    def __init__(
+        self,
+        from_ent_namespaces: Iterable[str],
+        min_confidence_level: Optional[MentionConfidence] = MentionConfidence.PROBABLE,
+    ):
+        self.min_confidence_level = min_confidence_level
         self.from_ent_namespaces = set(from_ent_namespaces)
 
     def __call__(self, ent: Entity) -> bool:
-        return ent.namespace in self.from_ent_namespaces and len(ent.mappings) == 0
+        if self.min_confidence_level is None:
+            return ent.namespace in self.from_ent_namespaces and len(ent.mappings) == 0
+        else:
+            return (
+                ent.namespace in self.from_ent_namespaces
+                and len(ent.mappings) == 0
+                and ent.mention_confidence < self.min_confidence_level
+            )
 
 
 class StripMappingURIsAction:
