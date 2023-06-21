@@ -26,6 +26,7 @@ DRUG = "drug"
 ANATOMY = "anatomy"
 DISEASE = "disease"
 CELL_LINE = "cell_line"
+CELL_TYPE = "cell_type"
 ENTITY = "entity"
 
 SPAN_KEY = "RAW_HITS"
@@ -349,28 +350,30 @@ class OntologyMatcher:
         tp_matchers = {}
         fp_matchers = {}
         if CELL_LINE in self.labels:
-            tp_matchers[CELL_LINE] = self._create_cellline_tp_tokenmatcher()
+            tp_matchers[CELL_LINE] = self._create_cell_tp_tokenmatcher(CELL_LINE)
+        if CELL_TYPE in self.labels:
+            tp_matchers[CELL_TYPE] = self._create_cell_tp_tokenmatcher(CELL_TYPE)
 
         if ANATOMY in self.labels:
             fp_matchers[ANATOMY] = self._create_anatomy_fp_tokenmatcher()
         return tp_matchers, fp_matchers
 
-    def _create_cellline_tp_tokenmatcher(self):
-        """Define patterns where a Cell line appears and it's likely a true positive"""
+    def _create_cell_tp_tokenmatcher(self, ent_class: str):
+        """Define patterns where a Cell line or type appears and it's likely a true positive"""
         matcher = Matcher(self.nlp.vocab)
         pattern_1: List[Dict[str, Any]] = [
-            {"_": {CELL_LINE: True}},
+            {"_": {ent_class: True}},
             {"LOWER": {"IN": ["cell", "cells"]}},
         ]
         pattern_2: List[Dict[str, Any]] = [
             {"LOWER": "cell"},
             {"LOWER": "line"},
-            {"_": {CELL_LINE: True}},
+            {"_": {ent_class: True}},
         ]
         pattern_3: List[Dict[str, Any]] = [
             {"LOWER": "cell"},
             {"LOWER": "type"},
-            {"_": {CELL_LINE: True}},
+            {"_": {ent_class: True}},
         ]
         matcher.add("Cell_line_context", [pattern_1, pattern_2, pattern_3])
         return matcher
