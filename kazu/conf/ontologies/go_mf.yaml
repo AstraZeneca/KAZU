@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.modelling.ontology_preprocessing.parsers.MolecularFunctionGeneOntologyParser
     name: MF_GENE_ONTOLOGY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: GO-MF
+    data_origin: 'GO-MF-2023-05-10'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: go_mf

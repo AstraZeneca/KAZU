@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsTargetOntologyParser
     name: OPENTARGETS_TARGET
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/targets
-    data_origin: OPENTARGETS-TARGET
+    data_origin: 'OPENTARGETS-TARGET-23.02'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.gene}
     entity_class: gene

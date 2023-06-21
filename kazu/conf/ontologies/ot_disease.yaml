@@ -8,7 +8,7 @@ parsers:
     name: OPENTARGETS_DISEASE
     _target_: kazu.modelling.ontology_preprocessing.parsers.OpenTargetsDiseaseOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/disease
-    data_origin: OPENTARGETS-DISEASE
+    data_origin: 'OPENTARGETS-DISEASE-23.02'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: disease

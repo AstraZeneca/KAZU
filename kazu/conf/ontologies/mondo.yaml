@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.modelling.ontology_preprocessing.parsers.MondoOntologyParser
     name: MONDO
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
-    data_origin: MONDO-2022-07-29
+    data_origin: 'MONDO-v2023-05-01'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: disease

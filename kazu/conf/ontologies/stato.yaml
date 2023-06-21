@@ -9,7 +9,7 @@ parsers:
     _target_: kazu.modelling.ontology_preprocessing.parsers.StatoParser
     name: STATO
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/stato.owl
-    data_origin: Feb_2023
+    data_origin: 'RC1.4'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: measurement
