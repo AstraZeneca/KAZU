@@ -207,25 +207,18 @@ class OntologyMatcher:
             # check curations are still represented in DB after all processed
             curations_for_ner = set(self.filter_curations_for_ner(parser_curations, parser))
 
-            # spacy's typing isn't smart enough to know this will have a 'pipe' attr
-            patterns = self.nlp.tokenizer.pipe(  # type: ignore[union-attr]
-                curation.curated_synonym if curation.case_sensitive
-                # we need it lowercased for the case-insensitive matcher.
-                # type ignore as curated_synonym will not be None, as only
-                # curations with a curated_synonym will be 'matched'.
-                else curation.curated_synonym.lower()  # type: ignore[union-attr]
-                for curation in curations_for_ner
-            )
-
-            for curation, pattern in zip(curations_for_ner, patterns):
-                # a curation can have different term_norms for different parsers,
-                # since the string normalizer's output depends on the entity class.
-                # Also, a curation may exist in multiple SynonymTerm.terms
-                term_norm = curation.term_norm_for_linking(parser.entity_class)
+            # deduplicating match id's and patterns saves memory in the spacy pipeline
+            match_ids_and_strings_cs = set()
+            match_ids_and_strings_ci = set()
+            for curation in curations_for_ner:
                 if (
                     curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
                     or curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
                 ):
+                    # a curation can have different term_norms for different parsers,
+                    # since the string normalizer's output depends on the entity class.
+                    # Also, a curation may exist in multiple SynonymTerm.terms
+                    term_norm = curation.term_norm_for_linking(parser.entity_class)
                     match_id = (
                         parser.name
                         + self.match_id_sep
@@ -234,9 +227,24 @@ class OntologyMatcher:
                         + str(curation.mention_confidence.value)
                     )
                     if curation.case_sensitive:
-                        strict_matcher.add(match_id, [pattern])
+                        match_ids_and_strings_cs.add(
+                            (
+                                match_id,
+                                curation.curated_synonym,
+                            )
+                        )
                     else:
-                        lowercase_matcher.add(match_id, [pattern])
+                        match_ids_and_strings_ci.add(
+                            (
+                                match_id,
+                                curation.curated_synonym.lower(),
+                            )
+                        )
+
+            for match_id, match_str in match_ids_and_strings_cs:
+                strict_matcher.add(match_id, [self.nlp.tokenizer(match_str)])
+            for match_id, match_str in match_ids_and_strings_ci:
+                lowercase_matcher.add(match_id, [self.nlp.tokenizer(match_str)])
 
         # only set the phrasematcher if we have any rules for them
         # this lets us skip running a phrasematcher if it has no rules when we come
