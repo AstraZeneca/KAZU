@@ -73,6 +73,7 @@ class CrossReferenceManager(ABC):
                     idx=target_idx,
                     string_match_strategy=self.__class__.__name__,
                     disambiguation_strategy=mapping.disambiguation_strategy,
+                    disambiguation_confidence=mapping.disambiguation_confidence,
                     string_match_confidence=mapping.string_match_confidence,
                     additional_metadata=mapping.metadata,
                 )
