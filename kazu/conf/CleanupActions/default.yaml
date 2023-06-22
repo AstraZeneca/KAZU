@@ -1,9 +1,3 @@
-EntityFilterCleanupAction:
-  _target_: kazu.steps.other.cleanup.EntityFilterCleanupAction
-  filter_fns:
-    - _target_: kazu.steps.other.cleanup.DropUnmappedEntityFilter
-      from_ent_namespaces:
-        - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
 MappingFilterCleanupAction:
   _target_: kazu.steps.other.cleanup.MappingFilterCleanupAction
   filter_fns:
@@ -14,3 +8,9 @@ MappingFilterCleanupAction:
             - AMBIGUOUS
       string_match_ranks_to_drop:
         _target_: builtins.list
+EntityFilterCleanupAction:
+  _target_: kazu.steps.other.cleanup.EntityFilterCleanupAction
+  filter_fns:
+    - _target_: kazu.steps.other.cleanup.DropUnmappedEntityFilter
+      from_ent_namespaces:
+        - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
