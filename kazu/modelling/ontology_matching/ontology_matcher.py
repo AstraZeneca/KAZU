@@ -375,7 +375,7 @@ class OntologyMatcher:
             {"LOWER": "type"},
             {"_": {ent_class: True}},
         ]
-        matcher.add("Cell_line_context", [pattern_1, pattern_2, pattern_3])
+        matcher.add("Cell_context", [pattern_1, pattern_2, pattern_3])
         return matcher
 
     def _create_anatomy_fp_tokenmatcher(self):
