@@ -86,7 +86,6 @@ strategy_runner:
           disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: ${confidence.string_matching_highly_likely}
       ent_class_strategies:
-        # we don't expect any value from the disambiguation strategies for these ontologies, so save the effort
         _target_: builtins.dict
 
     POSSIBLE:
@@ -164,7 +163,6 @@ strategy_runner:
           disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: ${confidence.string_matching_highly_likely}
       ent_class_strategies:
-        # we don't expect any value from the disambiguation strategies for these ontologies, so save the effort
         _target_: builtins.dict
 
     POSSIBLE:
