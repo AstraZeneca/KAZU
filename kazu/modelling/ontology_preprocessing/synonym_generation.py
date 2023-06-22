@@ -189,7 +189,7 @@ class GreekSymbolSubstitution:
 
 
 class StringReplacement(SynonymGenerator):
-    greek_variant_prefix_suffix = DASHES.union(set(" "))
+    GREEK_VARIANT_PREFIX_SUFFIX = DASHES.union(set(" "))
 
     def __init__(
         self,
@@ -234,7 +234,7 @@ class StringReplacement(SynonymGenerator):
         for candidate, replacement_set in GreekSymbolSubstitution.ALL_SUBS.items():
             # if it's in the original text it should be in all previous substitutions, no
             # need to check all of them
-            for fix in self.greek_variant_prefix_suffix:
+            for fix in self.GREEK_VARIANT_PREFIX_SUFFIX:
                 prefix = False
                 suffix = False
                 # necessary so we don't modify strings_to_substitute while looping over it,
@@ -245,16 +245,16 @@ class StringReplacement(SynonymGenerator):
                 if f"{candidate}{fix}" in synonym_str:
                     prefix = True
 
-                for string_to_subsitute in strings_to_substitute:
+                for string_to_substitute in strings_to_substitute:
                     for replacement in replacement_set:
                         if prefix:
-                            single_unique_letter_substituted = string_to_subsitute.replace(
+                            single_unique_letter_substituted = string_to_substitute.replace(
                                 f"{candidate}{fix}", f"{replacement}{fix}"
                             )
                             outputs_this_step.add(single_unique_letter_substituted)
                             results.add(single_unique_letter_substituted)
                         if suffix:
-                            single_unique_letter_substituted = string_to_subsitute.replace(
+                            single_unique_letter_substituted = string_to_substitute.replace(
                                 f"{fix}{candidate}", f"{fix}{replacement}"
                             )
                             outputs_this_step.add(single_unique_letter_substituted)
