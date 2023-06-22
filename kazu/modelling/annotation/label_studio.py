@@ -455,7 +455,7 @@ class LabelStudioManager:
             logger.warning(f"failed to delete project {self.project_name}. Maybe it doesn't exist?")
             logger.exception(e)
         if "project_id" in self.__dict__:
-            del self.__dict__["project_id"]
+            del self.project_id
 
     def create_linking_project(self):
         payload = {"title": self.project_name}
