@@ -65,11 +65,13 @@ class DropMappingsByConfidenceMappingFilter:
 class DropUnmappedEntityFilter:
     def __init__(
         self,
-        from_ent_namespaces: Iterable[str],
+        from_ent_namespaces: Optional[Iterable[str]],
         min_confidence_level: Optional[MentionConfidence] = MentionConfidence.PROBABLE,
     ):
         self.min_confidence_level = min_confidence_level
-        self.from_ent_namespaces = set(from_ent_namespaces)
+        self.from_ent_namespaces = (
+            set() if from_ent_namespaces is None else set(from_ent_namespaces)
+        )
 
     def __call__(self, ent: Entity) -> bool:
         if self.min_confidence_level is None:
