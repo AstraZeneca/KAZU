@@ -78,7 +78,7 @@ from spacy.language import Language
 from spacy.matcher import Matcher
 from spacy.tokens import Span, Doc
 
-from kazu.data.data import Document, Entity, Section
+from kazu.data.data import Document, Entity, Section, MentionConfidence
 
 logger = logging.getLogger(__name__)
 
@@ -366,6 +366,7 @@ class KazuAbbreviationDetector:
         new_ent_data.pop("match_norm")
         new_ent_data.pop("match")
         new_ent_data.pop("namespace")
+        new_ent_data.pop("mention_confidence")
         new_ent = Entity.from_spans(
             text=section.get_text(),
             spans=[
@@ -375,6 +376,7 @@ class KazuAbbreviationDetector:
                 )
             ],
             namespace=self.namespace,
+            mention_confidence=MentionConfidence.HIGHLY_LIKELY,
             join_str="",
             **new_ent_data,
         )
