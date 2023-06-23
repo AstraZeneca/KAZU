@@ -5,9 +5,9 @@ steps:
   - ${DictionaryEntityLinkingStep}
   - ${EntityClassDisambiguationStep}
   - ${MappingStep}
-  - ${MergeOverlappingEntsStep}
   - ${AbbreviationFinderStep}
   - ${CleanupStep}
+  - ${MergeOverlappingEntsStep}
 step_groups:
   ner_only:
     - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
