@@ -19,11 +19,10 @@ from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     ExactMatchMappingStrategy,
     SymbolMatchMappingStrategy,
     TermNormIsSubStringMappingStrategy,
-    NoopMappingStrategy,
     StrongMatchMappingStrategy,
     StrongMatchWithEmbeddingConfirmationStringMatchingStrategy,
 )
-from kazu.tests.utils import DummyParser, requires_model_pack
+from kazu.tests.utils import DummyParser, requires_model_pack, NoopMappingStrategy
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 

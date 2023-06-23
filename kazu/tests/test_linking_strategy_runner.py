@@ -18,11 +18,8 @@ from kazu.steps.linking.post_processing.strategy_runner import (
     StrategyRunner,
     ConfidenceLevelStrategyExecution,
 )
-from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
-    MappingStrategy,
-    NoopMappingStrategy,
-)
-from kazu.tests.utils import DummyParser
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
+from kazu.tests.utils import DummyParser, NoopMappingStrategy
 
 
 @pytest.fixture(scope="session")

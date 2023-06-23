@@ -1,6 +1,6 @@
 from os import getenv
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, FrozenSet, Set
 
 import pandas as pd
 import pytest
@@ -22,6 +22,7 @@ from kazu.modelling.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -198,3 +199,15 @@ def make_dummy_synonym_term(
         is_symbolic=True,
         mapping_types=frozenset(),
     )
+
+
+class NoopMappingStrategy(MappingStrategy):
+    def filter_terms(
+        self,
+        ent_match: str,
+        ent_match_norm: str,
+        document: Document,
+        terms: FrozenSet[SynonymTermWithMetrics],
+        parser_name: str,
+    ) -> Set[SynonymTermWithMetrics]:
+        return set(terms)

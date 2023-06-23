@@ -127,6 +127,7 @@ class MappingStrategy(ABC):
         self,
         confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_essential: bool = False,
     ):
         """
 
@@ -134,9 +135,15 @@ class MappingStrategy(ABC):
             for human users, and has no bearing on the actual algorithm.
         :param disambiguation_strategies: after :meth:`filter_terms` is called, these strategies are triggered if either
             multiple instances of :class:`.SynonymTermWithMetrics` remain, and/or any of them are ambiguous.
+        :param disambiguation_essential: disambiguation strategies MUST deliver a result, in order for this strategy to pass
         """
 
+        self.strict = disambiguation_essential
         self.confidence = confidence
+        if disambiguation_essential and (
+            disambiguation_strategies is None or len(disambiguation_strategies) == 0
+        ):
+            raise ValueError("disambiguation strategies must be provided, as strict=True")
         self.disambiguation_strategies = disambiguation_strategies
 
     def prepare(self, document: Document):
@@ -194,20 +201,25 @@ class MappingStrategy(ABC):
 
         all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
 
-        if len(all_id_sets) == 1:
+        if not self.strict and len(all_id_sets) == 1:
             # there's a single id set that isn't ambiguous, no need to disambiguate
             return all_id_sets, self.DISAMBIGUATION_NOT_REQUIRED, None
-        elif self.disambiguation_strategies is None:
+        elif not self.strict and (
+            self.disambiguation_strategies is None or len(self.disambiguation_strategies) == 0
+        ):
             return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
         else:
+            assert self.disambiguation_strategies is not None
             for strategy in self.disambiguation_strategies:
                 filtered_id_sets = strategy(
                     id_sets=all_id_sets, document=document, parser_name=parser_name
                 )
                 if len(filtered_id_sets) == 1:
                     return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
-
-            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
+            if self.strict:
+                return set(), None, DisambiguationConfidence.AMBIGUOUS
+            else:
+                return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
 
     def __call__(
         self,
@@ -319,17 +331,21 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
         self,
         confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_essential: bool = False,
         min_term_norm_len_to_consider: int = 3,
     ):
         """
 
         :param confidence:
         :param disambiguation_strategies:
+        :param disambiguation_essential:
         :param min_term_norm_len_to_consider: only consider instances of
             :class:`.SynonymTermWithMetrics` where the length of :attr:`~.SynonymTerm.term_norm` is
             equal to or greater than this value.
         """
-        super().__init__(confidence, disambiguation_strategies)
+        super().__init__(
+            confidence, disambiguation_strategies, disambiguation_essential=disambiguation_essential
+        )
         self.min_term_norm_len_to_consider = min_term_norm_len_to_consider
 
     def filter_terms(
@@ -372,6 +388,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
         self,
         confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_essential: bool = False,
         search_threshold=80.0,
         symbolic_only: bool = False,
         differential: float = 2.0,
@@ -380,11 +397,14 @@ class StrongMatchMappingStrategy(MappingStrategy):
 
         :param confidence:
         :param disambiguation_strategies:
+        :param disambiguation_essential:
         :param search_threshold: only consider synonym terms above this search threshold
         :param symbolic_only: only consider terms that are symbolic
         :param differential: only consider terms with search scores equal or greater to the best match minus this value
         """
-        super().__init__(confidence, disambiguation_strategies)
+        super().__init__(
+            confidence, disambiguation_strategies, disambiguation_essential=disambiguation_essential
+        )
         self.differential = differential
         self.symbolic_only = symbolic_only
         self.search_threshold = search_threshold
@@ -434,6 +454,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         confidence: StringMatchConfidence,
         complex_string_scorer: StringSimilarityScorer,
         disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_essential: bool = False,
         search_threshold: float = 80.0,
         embedding_threshold: float = 0.60,
         symbolic_only: bool = False,
@@ -443,6 +464,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         :param confidence:
         :param complex_string_scorer: only consider synonym terms passing this string scorer call
         :param disambiguation_strategies:
+        :param disambiguation_essential:
         :param search_threshold: only consider synonym terms above this search threshold
         :param embedding_threshold: the Entity.match and one of the SynonymTermWithMetrics.terms must be
             above this threshold (according to the complex_string_scorer) for the term to be valid
@@ -455,6 +477,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
             differential=differential,
             symbolic_only=symbolic_only,
             disambiguation_strategies=disambiguation_strategies,
+            disambiguation_essential=disambiguation_essential,
         )
         self.embedding_threshold = embedding_threshold
         self.complex_string_scorer = complex_string_scorer
@@ -489,47 +512,3 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
                 ):
                     selected_terms.add(term)
         return selected_terms
-
-
-class NoopMappingStrategy(MappingStrategy):
-    """
-    a No-op strategy in case you want to pass all terms straight through for disambiguation
-    """
-
-    def disambiguate_if_required(
-        self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
-    ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
-        """NoopMappingStrategy passes all terms through to disambiguation strategies, if configured
-
-        Also overrides disambiguate_if_required - this strategy is designed to be used with dictionary hits
-        (i.e. exact string matching). This override is required as the superclass will class any
-        single term hit as DISAMBIGUATION_NOT_REQUIRED, whereas we often want to use other disambiguation
-        strategies with dictionary hits (such as with acronyms)
-
-        :param filtered_terms:
-        :param document:
-        :param parser_name:
-        :return:
-        """
-        all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
-        if self.disambiguation_strategies is None:
-            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
-        else:
-            for strategy in self.disambiguation_strategies:
-                filtered_id_sets = strategy(
-                    id_sets=all_id_sets, document=document, parser_name=parser_name
-                )
-                if len(filtered_id_sets) == 1:
-                    return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
-
-            return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
-
-    def filter_terms(
-        self,
-        ent_match: str,
-        ent_match_norm: str,
-        document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
-        parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
-        return set(terms)
