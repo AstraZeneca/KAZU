@@ -360,7 +360,7 @@ class CurationProcessor:
 
         3) If two or more curations have conflicting values for case sensitivity and
            mention_confidence. E.g. A case-insensitive curation cannot have a higher
-           mention confidence value than a case-sensitive one.
+           mention confidence value than a case-sensitive one for the same synonym.
 
 
         :param curations:
