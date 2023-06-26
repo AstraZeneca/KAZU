@@ -493,7 +493,7 @@ class CurationProcessor:
             )
             to_remove.update(curations)
         elif len(cs_conf) > 1:
-            for (curations_cs, cs_confs_by_exact_match) in cs_lookup.values():
+            for curations_cs, cs_confs_by_exact_match in cs_lookup.values():
                 if len(cs_confs_by_exact_match) > 1:
                     target_conf = min(cs_confs_by_exact_match)
                     logger.warning(
