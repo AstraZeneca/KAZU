@@ -144,18 +144,15 @@ class OntologyMatcher:
         """check curations are still represented in DB before they can be used for NER."""
         original_terms = defaultdict(set)
         inherited_terms = defaultdict(set)
-        ner_behaviours = {
-            CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
-            CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-        }
         syn_db = SynonymDatabase()
         for curation in curations:
-            if curation.behaviour in ner_behaviours:
-                if curation.source_term is None:
-                    original_terms[curation.curated_synonym].add(curation)
-                else:
-                    inherited_terms[curation.source_term].add(curation)
-
+            if curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
+                original_terms[curation.curated_synonym].add(curation)
+            elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
+                inherited_terms[curation.source_term].add(curation)
+            else:
+                # not an ner behaviour, so move on to the next curation in the loop
+                continue
         for curated_synonym, curation_set in original_terms.items():
             if len(curation_set) > 1:
                 # note, this shouldn't happen, as it should be handled by the curation validation logic.
