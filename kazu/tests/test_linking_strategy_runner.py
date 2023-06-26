@@ -19,7 +19,19 @@ from kazu.steps.linking.post_processing.strategy_runner import (
     ConfidenceLevelStrategyExecution,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingStrategy
-from kazu.tests.utils import DummyParser, NoopMappingStrategy
+from kazu.tests.utils import DummyParser
+
+
+class NoopMappingStrategy(MappingStrategy):
+    def filter_terms(
+        self,
+        ent_match: str,
+        ent_match_norm: str,
+        document: Document,
+        terms: FrozenSet[SynonymTermWithMetrics],
+        parser_name: str,
+    ) -> Set[SynonymTermWithMetrics]:
+        return set(terms)
 
 
 @pytest.fixture(scope="session")

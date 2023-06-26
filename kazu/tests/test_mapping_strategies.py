@@ -22,7 +22,7 @@ from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     StrongMatchMappingStrategy,
     StrongMatchWithEmbeddingConfirmationStringMatchingStrategy,
 )
-from kazu.tests.utils import DummyParser, requires_model_pack, NoopMappingStrategy
+from kazu.tests.utils import DummyParser, requires_model_pack
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 
@@ -171,43 +171,6 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     )
 
     check_correct_terms_selected({target_term}, mappings)
-
-
-def test_NoopMappingStrategy(set_up_p27_test_case):
-    terms, parser = set_up_p27_test_case
-    text1 = "p27 gene is also known as CDKN1B"
-    ent_match = "p27"
-    ent_match_norm = StringNormalizer.normalize(ent_match)
-    doc = Document.create_simple_document(text1)
-    p27_ent = Entity.load_contiguous_entity(
-        start=0,
-        end=len(ent_match),
-        match=ent_match,
-        entity_class="test",
-        namespace="test",
-    )
-    p27_ent.update_terms(terms)
-    cdkn1b_ent = Entity.load_contiguous_entity(
-        start=len(text1) - len("CDKN1B"),
-        end=len(text1),
-        match="CDKN1B",
-        entity_class="test",
-        namespace="test",
-    )
-    doc.sections[0].entities.append(cdkn1b_ent)
-
-    strategy = NoopMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
-    strategy.prepare(doc)
-    mappings = list(
-        strategy(
-            ent_match=ent_match,
-            ent_match_norm=ent_match_norm,
-            document=doc,
-            terms=frozenset(terms),
-        )
-    )
-
-    check_correct_terms_selected(terms, mappings)
 
 
 @pytest.mark.parametrize("search_threshold,differential", [(100.0, 0.0), (85.0, 15.0)])
