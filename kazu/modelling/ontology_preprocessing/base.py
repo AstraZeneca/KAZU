@@ -443,29 +443,12 @@ class CurationProcessor:
                 curations,
             )
         if len(potentially_conflicting_id_sets) > 1:
-            logger.warning(
-                "conflicting id sets detected. The following source curations will be %s\n%s",
-                CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING.name,
-                "\n\n".join(curation.to_json() for curation in source_curations) + "\n\n",
-            )
-            if len(inherited_curations) > 0:
-                logger.warning(
-                    "conflicting id sets detected. The following inherited curations will be %s\n%s",
-                    CuratedTermBehaviour.IGNORE.name,
-                    "\n\n".join(curation.to_json() for curation in inherited_curations) + "\n\n",
-                )
-
-            return (
-                set(
-                    dataclasses.replace(
-                        curation, behaviour=CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
-                    )
-                    for curation in source_curations
-                ).union(
-                    dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
-                    for curation in inherited_curations
-                ),
-                curations,
+            raise CurationException(
+                "conflicting id sets detected in curations. Please fix the below curations\n%s",
+                "\n\n".join(curation.to_json() for curation in source_curations)
+                + "\n\n"
+                + "\n\n".join(curation.to_json() for curation in inherited_curations)
+                + "\n\n",
             )
         return set(), set()
 
