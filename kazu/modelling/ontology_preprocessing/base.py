@@ -437,10 +437,8 @@ class CurationProcessor:
                     dataclasses.replace(curation, behaviour=resolved_behaviour)
                     for curation in source_curations
                 ).union(
-                    set(
-                        dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
-                        for curation in inherited_curations
-                    )
+                    dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
+                    for curation in inherited_curations
                 ),
                 curations,
             )
@@ -464,10 +462,8 @@ class CurationProcessor:
                     )
                     for curation in source_curations
                 ).union(
-                    set(
-                        dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
-                        for curation in inherited_curations
-                    )
+                    dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
+                    for curation in inherited_curations
                 ),
                 curations,
             )
