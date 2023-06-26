@@ -211,35 +211,31 @@ class OntologyMatcher:
             match_ids_and_strings_cs = set()
             match_ids_and_strings_ci = set()
             for curation in curations_for_ner:
-                if (
-                    curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
-                    or curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
-                ):
-                    # a curation can have different term_norms for different parsers,
-                    # since the string normalizer's output depends on the entity class.
-                    # Also, a curation may exist in multiple SynonymTerm.terms
-                    term_norm = curation.term_norm_for_linking(parser.entity_class)
-                    match_id = (
-                        parser.name
-                        + self.match_id_sep
-                        + term_norm
-                        + self.match_id_sep
-                        + str(curation.mention_confidence.value)
+                # a curation can have different term_norms for different parsers,
+                # since the string normalizer's output depends on the entity class.
+                # Also, a curation may exist in multiple SynonymTerm.terms
+                term_norm = curation.term_norm_for_linking(parser.entity_class)
+                match_id = (
+                    parser.name
+                    + self.match_id_sep
+                    + term_norm
+                    + self.match_id_sep
+                    + str(curation.mention_confidence.value)
+                )
+                if curation.case_sensitive:
+                    match_ids_and_strings_cs.add(
+                        (
+                            match_id,
+                            curation.curated_synonym,
+                        )
                     )
-                    if curation.case_sensitive:
-                        match_ids_and_strings_cs.add(
-                            (
-                                match_id,
-                                curation.curated_synonym,
-                            )
+                else:
+                    match_ids_and_strings_ci.add(
+                        (
+                            match_id,
+                            curation.curated_synonym.lower(),
                         )
-                    else:
-                        match_ids_and_strings_ci.add(
-                            (
-                                match_id,
-                                curation.curated_synonym.lower(),
-                            )
-                        )
+                    )
 
             for match_id, match_str in match_ids_and_strings_cs:
                 strict_matcher.add(match_id, [self.nlp.tokenizer(match_str)])
