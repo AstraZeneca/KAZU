@@ -138,12 +138,14 @@ class MappingStrategy(ABC):
         :param disambiguation_essential: disambiguation strategies MUST deliver a result, in order for this strategy to pass
         """
 
-        self.strict = disambiguation_essential
+        self.disambiguation_essential = disambiguation_essential
         self.confidence = confidence
         if disambiguation_essential and (
             disambiguation_strategies is None or len(disambiguation_strategies) == 0
         ):
-            raise ValueError("disambiguation strategies must be provided, as strict=True")
+            raise ValueError(
+                "disambiguation strategies must be provided, as disambiguation_essential=True"
+            )
         self.disambiguation_strategies = disambiguation_strategies
 
     def prepare(self, document: Document):
@@ -201,10 +203,10 @@ class MappingStrategy(ABC):
 
         all_id_sets = set(id_set for term in filtered_terms for id_set in term.associated_id_sets)
 
-        if not self.strict and len(all_id_sets) == 1:
+        if not self.disambiguation_essential and len(all_id_sets) == 1:
             # there's a single id set that isn't ambiguous, no need to disambiguate
             return all_id_sets, self.DISAMBIGUATION_NOT_REQUIRED, None
-        elif not self.strict and (
+        elif not self.disambiguation_essential and (
             self.disambiguation_strategies is None or len(self.disambiguation_strategies) == 0
         ):
             return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
@@ -216,7 +218,7 @@ class MappingStrategy(ABC):
                 )
                 if len(filtered_id_sets) == 1:
                     return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
-            if self.strict:
+            if self.disambiguation_essential:
                 return set(), None, DisambiguationConfidence.AMBIGUOUS
             else:
                 return all_id_sets, None, DisambiguationConfidence.AMBIGUOUS
