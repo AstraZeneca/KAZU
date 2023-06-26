@@ -141,6 +141,7 @@ class OntologyMatcher:
     def filter_curations_for_ner(
         self, curations: Iterable[CuratedTerm], parser: OntologyParser
     ) -> Iterable[CuratedTerm]:
+        """check curations are still represented in DB before they can be used for NER."""
         original_terms = defaultdict(set)
         inherited_terms = defaultdict(set)
         ner_behaviours = {
@@ -204,7 +205,6 @@ class OntologyMatcher:
                 )
                 continue
 
-            # check curations are still represented in DB after all processed
             curations_for_ner = set(self.filter_curations_for_ner(parser_curations, parser))
 
             # deduplicating match id's and patterns saves memory in the spacy pipeline
