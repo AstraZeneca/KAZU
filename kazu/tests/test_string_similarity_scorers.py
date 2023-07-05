@@ -28,7 +28,7 @@ from kazu.utils.string_normalizer import StringNormalizer
                 "protein phosphatase 1 regulatory inhibitor subunit 14C",
             ],
             ["protein phosphatase 1 regulatory inhibitor subunit 14D"],
-            marks=pytest.mark.xfail,
+            marks=pytest.mark.xfail(reason="inappropriate string normalisation"),
         ),
         (NumberMatchStringSimilarityScorer(), "MAP1LC3A gene", ["MAP1LC3A"], ["MAP2LC3A"]),
         (
