@@ -578,7 +578,7 @@ class DocumentJsonUtils:
         elif isinstance(obj, (float16, float32)):  # type: ignore[misc]
             return obj.item()
         elif isinstance(obj, cls.listlike_types):
-            return [cls.obj_to_dict_repr(elem) for elem in obj]
+            return [cls.obj_to_dict_repr(elem) for elem in sorted(obj)]
         elif isinstance(obj, ndarray):
             return obj.tolist()
         elif dataclasses.is_dataclass(obj):
