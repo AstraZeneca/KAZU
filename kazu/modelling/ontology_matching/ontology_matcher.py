@@ -170,11 +170,11 @@ class OntologyMatcher:
                     continue
             yield from curation_set
             yield from inherited_terms.pop(curated_synonym, set())
-            if len(inherited_terms) > 0:
-                logger.warning(
-                    "The following inherited curations were unmatched to a source term, and will be ignored for NER: %s",
-                    inherited_terms.values(),
-                )
+        if len(inherited_terms) > 0:
+            logger.warning(
+                "The following inherited curations were unmatched to a source term, and will be ignored for NER: %s",
+                inherited_terms.values(),
+            )
 
     def create_phrasematchers_using_curations(
         self, parsers: List[OntologyParser]
