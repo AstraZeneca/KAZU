@@ -20,6 +20,11 @@
     "web-vitals": "^2.1.4",
     "@craco/craco": "^7.0.0"
   },
+  "overrides": {
+    "word-wrap": "npm:@aashutoshrathi/word-wrap@1.2.6",
+    "css-select": "5.1.0",
+    "d3-color": "3.1.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
