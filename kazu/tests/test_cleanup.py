@@ -6,6 +6,7 @@ from kazu.data.data import (
     Entity,
     Section,
     Mapping,
+    MentionConfidence,
     StringMatchConfidence,
     DisambiguationConfidence,
 )
@@ -70,10 +71,20 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
     doc = Document.create_simple_document(doc_text)
     ents = [
         Entity.load_contiguous_entity(
-            start=0, end=4, match="XYZ1", entity_class="gene", namespace=explosion_step_namespace
+            start=0,
+            end=4,
+            match="XYZ1",
+            entity_class="gene",
+            namespace=explosion_step_namespace,
+            mention_confidence=MentionConfidence.POSSIBLE,
         ),
         Entity.load_contiguous_entity(
-            start=69, end=73, match="ABC9", entity_class="gene", namespace=mock_other_ner_namespace
+            start=69,
+            end=73,
+            match="ABC9",
+            entity_class="gene",
+            namespace=mock_other_ner_namespace,
+            mention_confidence=MentionConfidence.POSSIBLE,
         ),
         Entity.load_contiguous_entity(
             start=135,
@@ -81,6 +92,7 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
             match="EGFR",
             entity_class="gene",
             namespace=explosion_step_namespace,
+            mention_confidence=MentionConfidence.POSSIBLE,
             mappings={
                 Mapping(
                     default_label="EGFR",
