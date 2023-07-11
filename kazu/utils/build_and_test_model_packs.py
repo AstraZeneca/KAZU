@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from logging.config import fileConfig
 from pathlib import Path
 from typing import List, Optional
+
 import ray
 from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
@@ -308,8 +309,10 @@ def build_all_model_packs(
     )
     runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
     ray.init(num_cpus=max_parallel_build, runtime_env=runtime_env)
+    max_parallel_build = (
+        max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
+    )
     futures = []
-
     for model_pack_path in model_pack_paths:
         builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
             logging_config_path=logging_config_path,
@@ -322,13 +325,19 @@ def build_all_model_packs(
             skip_tests=skip_tests,
         )
         futures.append(builder.build_model_pack.remote())
+        if len(futures) >= max_parallel_build:
+            while len(futures) >= max_parallel_build:
+                futures = wait_for_model_pack_completion(futures)
+    while len(futures) != 0:
+        futures = wait_for_model_pack_completion(futures)
 
-    unfinished = futures
-    while unfinished:
-        # Returns the first ObjectRef that is ready.
-        finished, unfinished = ray.wait(unfinished, num_returns=1, timeout=45.0 * 60.0)
-        result = ray.get(finished[0])
-        print(f"model pack {result} build complete")
+
+def wait_for_model_pack_completion(futures) -> List:
+    # Returns the first ObjectRef that is ready.
+    finished, futures = ray.wait(futures, num_returns=1, timeout=45.0 * 60.0)
+    result = ray.get(finished[0])
+    print(f"model pack {result} build complete")
+    return futures
 
 
 if __name__ == "__main__":
