@@ -70,7 +70,7 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
     action = instantiate(kazu_test_config.CleanupActions.EntityFilterCleanupAction)
     doc = Document.create_simple_document(doc_text)
     ents = [
-        Entity.load_contiguous_entity(
+        Entity.load_contiguous_entity(  # will get filtered out, no mappings and only POSSIBLE
             start=0,
             end=4,
             match="XYZ1",
@@ -78,7 +78,7 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
             namespace=explosion_step_namespace,
             mention_confidence=MentionConfidence.POSSIBLE,
         ),
-        Entity.load_contiguous_entity(
+        Entity.load_contiguous_entity(  # will not get filtered out as it's higher confidence
             start=0,
             end=4,
             match="XYZ1",
@@ -86,7 +86,7 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
             namespace=explosion_step_namespace,
             mention_confidence=MentionConfidence.PROBABLE,
         ),
-        Entity.load_contiguous_entity(
+        Entity.load_contiguous_entity(  # not filtered out - doesn't match the namespaces we're filtering
             start=69,
             end=73,
             match="ABC9",
@@ -94,7 +94,7 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
             namespace=mock_other_ner_namespace,
             mention_confidence=MentionConfidence.POSSIBLE,
         ),
-        Entity.load_contiguous_entity(
+        Entity.load_contiguous_entity(  # not filtered out - has a mapping
             start=135,
             end=139,
             match="EGFR",
