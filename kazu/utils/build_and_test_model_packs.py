@@ -325,9 +325,9 @@ def build_all_model_packs(
             skip_tests=skip_tests,
         )
         futures.append(builder.build_model_pack.remote())
-        if len(futures) >= max_parallel_build:
-            while len(futures) >= max_parallel_build:
-                futures = wait_for_model_pack_completion(futures)
+        while len(futures) >= max_parallel_build:
+            futures = wait_for_model_pack_completion(futures)
+
     while len(futures) != 0:
         futures = wait_for_model_pack_completion(futures)
 
