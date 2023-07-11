@@ -79,6 +79,14 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
             mention_confidence=MentionConfidence.POSSIBLE,
         ),
         Entity.load_contiguous_entity(
+            start=0,
+            end=4,
+            match="XYZ1",
+            entity_class="gene",
+            namespace=explosion_step_namespace,
+            mention_confidence=MentionConfidence.PROBABLE,
+        ),
+        Entity.load_contiguous_entity(
             start=69,
             end=73,
             match="ABC9",
@@ -108,9 +116,9 @@ def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_co
     ]
 
     doc.sections[0].entities.extend(ents)
-    assert len(doc.get_entities()) == 3
+    assert len(doc.get_entities()) == 4
     action.cleanup(doc)
-    assert len(doc.get_entities()) == 2
+    assert len(doc.get_entities()) == 3
 
 
 def test_uri_stripping_all_parsers(override_kazu_test_config):
