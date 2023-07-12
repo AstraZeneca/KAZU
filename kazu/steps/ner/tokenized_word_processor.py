@@ -1,5 +1,6 @@
 import logging
 import re
+from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Optional, Set
@@ -37,7 +38,7 @@ class TokWordSpan:
     tok_words: List[TokenizedWord] = field(default_factory=list)  # words associated with this span
 
 
-class SpanFinder:
+class SpanFinder(ABC):
     """
     Since Bert like models use wordpiece tokenisers to handle the OOV problem, we need to reconstitute this info
     back into document character indices to represent actual NEs.
@@ -64,6 +65,7 @@ class SpanFinder:
         self.closed_spans: List[TokWordSpan] = []
         self.id2label = id2label
 
+    @abstractmethod
     def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
         """
         return a set of Tuple[<BIO label>,Optional[<class label>]] for a TokenizedWord. Optional[<class label>] is None
@@ -72,9 +74,9 @@ class SpanFinder:
         :param word:
         :return:
         """
+        pass
 
-        raise NotImplementedError
-
+    @abstractmethod
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
     ):
@@ -85,7 +87,7 @@ class SpanFinder:
         :param bio_and_class_labels:
         :return:
         """
-        raise NotImplementedError
+        pass
 
     def _update_active_spans(
         self, bio_and_class_labels: Set[Tuple[str, Optional[str]]], word: TokenizedWord
@@ -135,6 +137,7 @@ class SpanFinder:
                 self.closed_spans.append(active_span)
         self.active_spans = []
 
+    @abstractmethod
     def process_next_word(self, word: TokenizedWord):
         """
         process the next word in the sequence, according to some logic
@@ -142,7 +145,7 @@ class SpanFinder:
         :param word:
         :return:
         """
-        raise NotImplementedError
+        pass
 
     def __call__(self, words: List[TokenizedWord]):
         for word in words:
