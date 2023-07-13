@@ -53,7 +53,7 @@ For most use cases we've encountered, the default configuration should suffice. 
 
 4) Disambiguate the entity class of exactly overlappings entities within a document using :py:class:`~kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep`
 
-5) Decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`~kazu.steps.linking.mapping_step.MappingStep`
+5) Decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`~kazu.steps.linking.post_processing.mapping_step.MappingStep`
 
 6) Merge overlapping entities (where appropriate). This uses :py:class:`~kazu.steps.other.merge_overlapping_ents.MergeOverlappingEntsStep`
 

@@ -14,4 +14,4 @@ step_groups:
     - _target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep.namespace
   linking_only:
     - _target_: kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.namespace
-    - _target_: kazu.steps.linking.mapping_step.MappingStep.namespace
+    - _target_: kazu.steps.linking.post_processing.mapping_step.MappingStep.namespace

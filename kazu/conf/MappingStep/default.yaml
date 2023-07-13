@@ -1,4 +1,4 @@
-_target_: kazu.steps.linking.mapping_step.MappingStep
+_target_: kazu.steps.linking.post_processing.mapping_step.MappingStep
 parsers: ${oc.dict.values:ontologies.parsers}
 strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
