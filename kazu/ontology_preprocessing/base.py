@@ -1094,7 +1094,6 @@ class OntologyParser(ABC):
         generated_synonym_data = set()
         if self.synonym_generator:
             generated_synonym_data = self.synonym_generator(original_synonym_data)
-            generated_synonym_data.difference_update(original_synonym_data)
         logger.info(
             f"{len(original_synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
         )
