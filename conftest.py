@@ -164,7 +164,7 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
     def do_nothing(*args, **kwargs):
         return
 
-    # list of memorized functions
+    # list of memoize functions
     funcs = [
         OntologyParser._populate_databases,
         OntologyParser.export_metadata,
@@ -176,7 +176,7 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
     for func, original_func in original_funcs.items():
         # set the __cache_key__ to do nothing
         original_func.__cache_key__ = do_nothing
-        # set the memorized function to the original function
+        # set the memoized function to the original function
         monkeypatch.setattr(OntologyParser, func.__name__, original_func)
     # also prevent the original cache from deleting anything
     monkeypatch.setattr(kazu_disk_cache, "delete", do_nothing)
