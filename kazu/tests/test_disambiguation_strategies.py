@@ -148,7 +148,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     )
 
 
-def test_TfIdfContextStrategy(set_up_p27_test_case):
+def test_TfIdfContextStrategy(set_up_p27_test_case, mock_build_vectoriser_cache):
     # we need to clear out the scorer singleton.
     # TODO: find a better way to handle this
     # we can't call Singleton.clear_all() because we need the modifications made

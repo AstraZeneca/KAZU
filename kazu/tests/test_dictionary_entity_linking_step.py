@@ -1,11 +1,9 @@
 from kazu.steps.linking.dictionary import DictionaryEntityLinkingStep, DictionaryIndex
 from kazu.data.data import Entity, Document
 from kazu.tests.utils import DummyParser
-from kazu.modelling.ontology_preprocessing.base import kazu_disk_cache
 
 
-def test_skips_prelinked_entities(tmp_path):
-    kazu_disk_cache.clear()
+def test_skips_prelinked_entities(tmp_path, mock_kazu_disk_cache_on_parsers):
     parser = DummyParser(str(tmp_path / "dummy_parser"), entity_class="int")
     parser.populate_databases(force=True)
     index = DictionaryIndex(parser)

@@ -3,6 +3,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Optional, Literal
 
+import pytest
 from kazu.data.data import (
     CuratedTerm,
     MentionConfidence,
@@ -20,7 +21,6 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     load_global_actions,
-    kazu_disk_cache,  # We MUST import disk cache from here in the tests, or it gets reinitialised!
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
@@ -33,6 +33,8 @@ ID_TO_BE_REMOVED = TARGET_SYNONYM.replace(" ", "-")
 DUMMY_PARSER_SOURCE = "test_parser_source"
 
 ENTITY_CLASS = "action_test"
+
+pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
 
 def parser_data_with_target_synonym():
@@ -66,7 +68,6 @@ def setup_databases(
     noop_parser_curations_style: Literal["empty", "None"] = "empty",
 ) -> SynonymDatabase:
     Singleton.clear_all()
-    kazu_disk_cache.clear()
     curations_path = None
     if curation is not None:
         curations_path = base_path.joinpath("curations.jsonl")

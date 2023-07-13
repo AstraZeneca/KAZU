@@ -22,13 +22,14 @@ from kazu.modelling.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     CurationException,
-    kazu_disk_cache,
 )
 from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
 from spacy.lang.en import English
 from spacy.lang.en.punctuation import TOKENIZER_INFIXES
+
+pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
 
 def test_constructor():
@@ -499,7 +500,6 @@ def test_pipeline_build_from_parsers_and_curated_list(
     throws_curation_exception,
 ):
     Singleton.clear_all()
-    kazu_disk_cache.clear()
     TEST_CURATIONS_PATH_PARSER_1 = tmp_path / "parser1_curated_terms.jsonl"
     TEST_CURATIONS_PATH_PARSER_2 = tmp_path / "parser2_curated_terms.jsonl"
     write_curations(path=TEST_CURATIONS_PATH_PARSER_1, terms=parser_1_curations)
@@ -550,7 +550,6 @@ def test_pipeline_build_from_parsers_and_curated_list(
 
 def test_pipeline_build_from_parsers_alone(tmp_path):
     Singleton.clear_all()
-    kazu_disk_cache.clear()
     parser_1 = DummyParser(
         name="first_mock_parser",
         source="test",
