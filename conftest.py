@@ -10,10 +10,18 @@ from kazu.modelling.annotation.label_studio import (
     LabelStudioManager,
 )
 from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
+from kazu.modelling.ontology_preprocessing.base import (
+    IDX,
+    DEFAULT_LABEL,
+    SYN,
+    MAPPING_TYPE,
+    OntologyParser,
+)
 from kazu.tests.utils import CONFIG_DIR, DummyParser
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.server import start, stop
+from kazu.utils.caching import kazu_disk_cache
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
 
 
 @pytest.fixture(scope="session")
@@ -140,3 +148,46 @@ def ray_server_with_jwt_auth(override_kazu_test_config):
         "Authorization": f'Bearer {jwt.encode({"username": "user"}, os.environ["KAZU_JWT_KEY"], algorithm="HS256")}'
     }
     stop()
+
+
+@pytest.fixture(scope="function")
+def mock_kazu_disk_cache_on_parsers(monkeypatch):
+    """Disables the caching functions on OntologyParsers during testing.
+
+    Since we employ diskcache in a slightly unusual way, we need to use some
+    python tricks to turn the caching on/off during tests.
+
+    :param monkeypatch:
+    :return:
+    """
+
+    def do_nothing(*args, **kwargs):
+        return
+
+    # list of memorized functions
+    funcs = [
+        OntologyParser._populate_databases,
+        OntologyParser.export_metadata,
+        OntologyParser.export_synonym_terms,
+    ]
+    # ...mapped to the underlying function
+    original_funcs = {func: func.__wrapped__ for func in funcs}
+
+    for func, original_func in original_funcs.items():
+        # set the __cache_key__ to do nothing
+        original_func.__cache_key__ = do_nothing
+        # set the memorized function to the original function
+        monkeypatch.setattr(OntologyParser, func.__name__, original_func)
+    # also prevent the original cache from deleting anything
+    monkeypatch.setattr(kazu_disk_cache, "delete", do_nothing)
+    # run the calling test
+    yield
+    # delete the "do_nothing" function for __cache_key__ at the end of the test
+    for original_func in original_funcs.values():
+        del original_func.__cache_key__
+    # What can possibly go wrong?
+
+
+@pytest.fixture(scope="function")
+def mock_build_vectoriser_cache(monkeypatch):
+    monkeypatch.setattr(TfIdfScorer, "build_vectorizers", TfIdfScorer.build_vectorizers.__wrapped__)
