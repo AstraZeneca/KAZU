@@ -557,7 +557,7 @@ class CurationProcessor:
             if term_for_this_curation is None:
                 logger.warning(
                     "CuratedTerm %s is invalid: "
-                    "requires database entry but all have been removed by other curations.",
+                    "requires an identifier but none was found. It may have been removed by another curation, or not exist in the underlying data sourcee.",
                     curation,
                 )
                 return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
