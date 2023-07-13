@@ -11,9 +11,9 @@ from kazu.data.data import (
     StringMatchConfidence,
     DisambiguationConfidence,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase, Metadata
-from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
-from kazu.modelling.ontology_preprocessing.base import DEFAULT_LABEL
+from kazu.database.in_memory_db import MetadataDatabase, Metadata
+from kazu.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.steps.linking.post_processing.disambiguation.strategies import DisambiguationStrategy
 
 

@@ -126,7 +126,7 @@ class ModelPackBuilder:
             ModelPackBuilder.build_caches(cfg)
             if not self.skip_tests:
                 # local import so the cache is correctly configured with KAZU_MODEL_PACK
-                from kazu.modelling.annotation.acceptance_test import (
+                from kazu.annotation.acceptance_test import (
                     execute_full_pipeline_acceptance_test,
                     check_annotation_consistency,
                 )
@@ -257,7 +257,7 @@ class ModelPackBuilder:
         parsers = instantiate(cfg.ontologies.parsers).values()
         explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
-        from kazu.modelling.ontology_matching import assemble_pipeline
+        from kazu.ontology_matching import assemble_pipeline
 
         assemble_pipeline.main(
             parsers=parsers,

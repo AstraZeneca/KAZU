@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Callable, List, Protocol, Tuple, TypeVar, Iterable
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
-from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.ontology_preprocessing.base import OntologyParser
 
 
 class Step(Protocol):

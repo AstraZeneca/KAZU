@@ -11,19 +11,19 @@ from kazu.data.data import (
     CuratedTermBehaviour,
     EquivalentIdSet,
 )
-from kazu.modelling.ontology_matching.assemble_pipeline import (
+from kazu.ontology_matching.assemble_pipeline import (
     main as assemble_pipeline,
     SPACY_DEFAULT_INFIXES,
 )
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.modelling.ontology_preprocessing.base import (
+from kazu.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
     SYN,
     MAPPING_TYPE,
     CurationException,
 )
-from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
 from spacy.lang.en import English

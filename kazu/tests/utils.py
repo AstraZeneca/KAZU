@@ -13,15 +13,15 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
     GlobalParserActions,
 )
-from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
-from kazu.modelling.ontology_preprocessing.base import (
+from kazu.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
     SYN,
     MAPPING_TYPE,
     OntologyParser,
 )
-from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 

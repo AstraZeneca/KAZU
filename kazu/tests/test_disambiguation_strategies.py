@@ -10,7 +10,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     EquivalentIdSet,
 )
-from kazu.modelling.database.in_memory_db import MetadataDatabase
+from kazu.database.in_memory_db import MetadataDatabase
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
 from kazu.steps.linking.post_processing.disambiguation.strategies import (
     DisambiguationStrategy,

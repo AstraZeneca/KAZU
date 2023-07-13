@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from kazu.utils.caching import kazu_disk_cache
-from kazu.modelling.database.in_memory_db import SynonymDatabase
+from kazu.database.in_memory_db import SynonymDatabase
 from kazu.utils.utils import create_char_ngrams, create_word_ngrams, Singleton
 
 logger = logging.getLogger(__name__)

@@ -11,8 +11,8 @@ from spacy.lang.char_classes import (
     HYPHENS,
 )
 
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
-from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.ontology_matching.ontology_matcher import OntologyMatcher, SPAN_KEY
+from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.utils.utils import PathLike
 
 
@@ -51,14 +51,14 @@ def main(
     output_dir: PathLike, parsers: List[OntologyParser], span_key: str = SPAN_KEY
 ) -> spacy.language.Language:
     """Generates, serializes and returns a Spacy pipeline with an
-    :class:`~kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher`.
+    :class:`~kazu.ontology_matching.ontology_matcher.OntologyMatcher`.
 
     Generates an English Spacy pipeline with a tokenizer, a sentencizer with default
     config, and an OntologyMatcher based on the input parameters. The pipeline is
     written to disk, and also returned to the caller.
 
     If a parser has no curations configured, the
-    :class:`~kazu.modelling.ontology_matching.ontology_matcher.OntologyMatcher` is built directly
+    :class:`~kazu.ontology_matching.ontology_matcher.OntologyMatcher` is built directly
     from the configured synonyms from the parsers (with any associated generated synonyms). This is
     useful for trying to understand which strings are 'noisy', but not recommended for production as raw ontology
     data tends to need some curation before it can be applied.

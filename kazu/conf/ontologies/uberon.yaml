@@ -5,7 +5,7 @@ indices:
     boolean_scorers: ${StringScorers.anatomy}
 parsers:
   uberon_parser:
-    _target_: kazu.modelling.ontology_preprocessing.parsers.UberonOntologyParser
+    _target_: kazu.ontology_preprocessing.parsers.UberonOntologyParser
     name: UBERON
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
     data_origin: 'UBERON-2022-09-30'

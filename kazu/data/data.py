@@ -656,7 +656,7 @@ class ParserBehaviour(AutoNameEnum):
 @dataclass(frozen=True)
 class ParserAction:
     """
-    A ParserAction changes the behaviour of a :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in
+    A ParserAction changes the behaviour of a :class:`kazu.ontology_preprocessing.base.OntologyParser` in
     a global sense.
 
     A ParserAction overrides any default behaviour of the parser, and also any conflicts that may occur with
@@ -733,7 +733,7 @@ class CuratedTerm:
     """
     A CuratedTerm is a means to modify the behaviour of a specific :class:`.SynonymTerm`.
 
-    This can affect both the behaviour of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`,
+    This can affect both the behaviour of :class:`kazu.ontology_preprocessing.base.OntologyParser`,
     and dictionary based NER (if using the :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`).
 
     Example 1:

@@ -1,9 +1,9 @@
 default:
-  _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  _target_: kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
   synonym_generators:
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StopWordRemover
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.NgramHyphenation
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
+    - _target_: kazu.ontology_preprocessing.synonym_generation.StopWordRemover
+    - _target_: kazu.ontology_preprocessing.synonym_generation.NgramHyphenation
+    - _target_: kazu.ontology_preprocessing.synonym_generation.StringReplacement
       replacement_dict:
         "-":
           - " "
@@ -16,10 +16,10 @@ default:
           - "-"
       include_greek: true
 gene:
-  _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  _target_: kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
   synonym_generators:
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.NgramHyphenation
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
+    - _target_: kazu.ontology_preprocessing.synonym_generation.NgramHyphenation
+    - _target_: kazu.ontology_preprocessing.synonym_generation.StringReplacement
       replacement_dict:
         "-":
           - " "
@@ -32,7 +32,7 @@ gene:
           - "-"
       include_greek: true
 chemical:
-  _target_: kazu.modelling.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  _target_: kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
   synonym_generators:
-    - _target_: kazu.modelling.ontology_preprocessing.synonym_generation.StringReplacement
+    - _target_: kazu.ontology_preprocessing.synonym_generation.StringReplacement
       include_greek: true

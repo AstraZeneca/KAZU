@@ -12,9 +12,9 @@ from kazu.data.data import (
     Entity,
     SynonymTermWithMetrics,
 )
-from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.language.string_similarity_scorers import SapbertStringSimilarityScorer
-from kazu.modelling.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
+from kazu.database.in_memory_db import SynonymDatabase
+from kazu.language.string_similarity_scorers import SapbertStringSimilarityScorer
+from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     ExactMatchMappingStrategy,
     SymbolMatchMappingStrategy,

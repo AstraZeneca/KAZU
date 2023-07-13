@@ -62,9 +62,9 @@ from transformers import (
 )
 from transformers.utils import check_min_version
 
-from kazu.modelling.distillation.dataprocessor import NerProcessor
-from kazu.modelling.distillation.metrics import numeric_label_f1_score, IGNORE_IDX
-from kazu.modelling.distillation.tiny_transformers import TinyBertForSequenceTagging
+from kazu.distillation.dataprocessor import NerProcessor
+from kazu.distillation.metrics import numeric_label_f1_score, IGNORE_IDX
+from kazu.distillation.tiny_transformers import TinyBertForSequenceTagging
 
 check_min_version("4.0.0")  # at least 4.0.0... for optimerzers
 
@@ -97,7 +97,7 @@ class NerDataset(Dataset):
 
         :param tokenizer: typically created from AutoTokenizer.from_pretrained
         :param examples: a list of InputExample, typically created from a
-            :class:`kazu.modelling.distillation.dataprocessor.NerProcessor`
+            :class:`kazu.distillation.dataprocessor.NerProcessor`
         :param label_map: str to int mapping of labels
         :param max_length: The maximum number of tokens per instance that the model can handle.
             Inputs longer than max_length value will be truncated.

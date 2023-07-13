@@ -5,7 +5,7 @@ indices:
     boolean_scorers: ${StringScorers.disease}
 parsers:
   mondo_parser:
-    _target_: kazu.modelling.ontology_preprocessing.parsers.MondoOntologyParser
+    _target_: kazu.ontology_preprocessing.parsers.MondoOntologyParser
     name: MONDO
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/mondo.json
     data_origin: 'MONDO-v2023-05-01'

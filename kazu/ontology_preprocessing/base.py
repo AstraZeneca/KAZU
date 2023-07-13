@@ -32,14 +32,14 @@ from kazu.data.data import (
     AutoNameEnum,
     MentionConfidence,
 )
-from kazu.modelling.database.in_memory_db import (
+from kazu.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
     NormalisedSynonymStr,
     Idx,
 )
-from kazu.modelling.language.string_similarity_scorers import StringSimilarityScorer
-from kazu.modelling.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import PathLike, as_path
@@ -105,7 +105,7 @@ class CurationModificationResult(AutoNameEnum):
 
 class CurationProcessor:
     """A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced
-    by an :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` with any relevant :class:`.GlobalParserActions` and/or
+    by an :class:`kazu.ontology_preprocessing.base.OntologyParser` with any relevant :class:`.GlobalParserActions` and/or
     :class:`.CuratedTerm` associated with the parser.
 
     That is to say, this class modifies the raw data produced by a parser with any a posteriori
@@ -137,7 +137,7 @@ class CurationProcessor:
         """
 
         :param parser_name: name of parser to process
-        :param entity_class: name of parser entity_class to process (typically as passed to :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`\\ )
+        :param entity_class: name of parser entity_class to process (typically as passed to :class:`kazu.ontology_preprocessing.base.OntologyParser`\\ )
         :param global_actions:
         :param curations:
         :param synonym_terms:
@@ -1212,7 +1212,7 @@ class OntologyParser(ABC):
 
         Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.
 
-        Any 'extra' columns will be added to the :class:`~kazu.modelling.database.in_memory_db.MetadataDatabase` as metadata fields for the
+        Any 'extra' columns will be added to the :class:`~kazu.database.in_memory_db.MetadataDatabase` as metadata fields for the
         given id in the relevant ontology.
         """
         pass

@@ -6,11 +6,11 @@ import pytest
 from hydra import compose, initialize_config_dir
 
 from kazu.data.data import Document, SynonymTermWithMetrics
-from kazu.modelling.annotation.label_studio import (
+from kazu.annotation.label_studio import (
     LabelStudioManager,
 )
-from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.ontology_preprocessing.base import (
+from kazu.database.in_memory_db import SynonymDatabase
+from kazu.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
     SYN,

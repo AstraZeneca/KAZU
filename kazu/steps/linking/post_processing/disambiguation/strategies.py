@@ -13,7 +13,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     DisambiguationConfidence,
 )
-from kazu.modelling.database.in_memory_db import (
+from kazu.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
     NormalisedSynonymStr,

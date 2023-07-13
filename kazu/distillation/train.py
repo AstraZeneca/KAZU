@@ -7,7 +7,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
 
-from kazu.modelling.distillation.models import (
+from kazu.distillation.models import (
     SequenceTaggingDistillationForFinalLayer,
     SequenceTaggingDistillationForIntermediateLayer,
 )

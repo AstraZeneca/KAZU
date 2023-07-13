@@ -88,7 +88,7 @@ There are two methods you need to override: :meth:`.OntologyParser.parse_to_data
 
     import pandas as pd
 
-    from kazu.modelling.ontology_preprocessing.base import (
+    from kazu.ontology_preprocessing.base import (
         OntologyParser,
         DEFAULT_LABEL,
         IDX,

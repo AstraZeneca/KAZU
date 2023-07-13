@@ -8,7 +8,7 @@ from rapidfuzz import fuzz
 from torch import Tensor, cosine_similarity
 
 from kazu.data.data import NumericMetric
-from kazu.modelling.linking.sapbert.train import PLSapbertModel
+from kazu.linking.sapbert.train import PLSapbertModel
 from kazu.utils.utils import Singleton
 
 

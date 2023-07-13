@@ -5,7 +5,7 @@ indices:
     boolean_scorers: ${StringScorers.gene}
 parsers:
   hgnc_gene_family_parser:
-    _target_: kazu.modelling.ontology_preprocessing.parsers.HGNCGeneFamilyParser
+    _target_: kazu.ontology_preprocessing.parsers.HGNCGeneFamilyParser
     name: HGNC_GENE_FAMILY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/gene_family.tsv
     data_origin: 'HGNC Mart 25.05.23'

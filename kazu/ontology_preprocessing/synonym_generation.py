@@ -9,7 +9,7 @@ from copy import deepcopy
 from typing import List, Dict, Optional, Iterable, Set
 
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
-from kazu.modelling.language.language_phenomena import GREEK_SUBS, DASHES
+from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.utils import PathLike
 
 import spacy

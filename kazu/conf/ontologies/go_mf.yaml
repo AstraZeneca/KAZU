@@ -5,7 +5,7 @@ indices:
     boolean_scorers: ${StringScorers.go}
 parsers:
   go_mf_parser:
-    _target_: kazu.modelling.ontology_preprocessing.parsers.MolecularFunctionGeneOntologyParser
+    _target_: kazu.ontology_preprocessing.parsers.MolecularFunctionGeneOntologyParser
     name: MF_GENE_ONTOLOGY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
     data_origin: 'GO-MF-2023-05-10'

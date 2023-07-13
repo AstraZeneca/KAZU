@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
-from kazu.modelling.language.string_similarity_scorers import (
+from kazu.language.string_similarity_scorers import (
     EntitySubtypeStringSimilarityScorer,
     NumberMatchStringSimilarityScorer,
     EntityNounModifierStringSimilarityScorer,

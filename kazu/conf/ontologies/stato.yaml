@@ -6,7 +6,7 @@ indices:
     boolean_scorers: ${StringScorers.anatomy}
 parsers:
   stato_parser:
-    _target_: kazu.modelling.ontology_preprocessing.parsers.StatoParser
+    _target_: kazu.ontology_preprocessing.parsers.StatoParser
     name: STATO
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/stato.owl
     data_origin: 'RC1.4'

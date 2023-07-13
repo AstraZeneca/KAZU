@@ -1,22 +1,22 @@
 gene:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-  - _target_: kazu.modelling.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.EntityNounModifierStringSimilarityScorer
     noun_modifier_phrases:
       - LIKE
       - SUBUNIT
       - PSEUDOGENE
       - RECEPTOR
-  - _target_: kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
 drug:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
 disease:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-  - _target_: kazu.modelling.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
 anatomy:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
 cell_line:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
 cell_type:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
 go:
-  - _target_: kazu.modelling.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
+  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer

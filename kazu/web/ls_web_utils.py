@@ -1,7 +1,7 @@
 from typing import Tuple, Dict, List, Any
 
 from kazu.data.data import Document
-from kazu.modelling.annotation.label_studio import (
+from kazu.annotation.label_studio import (
     LabelStudioAnnotationView,
     KazuToLabelStudioConverter,
 )

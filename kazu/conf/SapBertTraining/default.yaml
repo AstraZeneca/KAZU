@@ -1,8 +1,8 @@
 model:
-  _target_: kazu.modelling.linking.sapbert.train.PLSapbertModel
+  _target_: kazu.linking.sapbert.train.PLSapbertModel
   model_name_or_path: ${oc.env:KAZU_MODEL_PACK}/sapbert/SapBERT-from-PubMedBERT-fulltext
   sapbert_training_params:
-    _target_: kazu.modelling.linking.sapbert.train.SapbertTrainingParams
+    _target_: kazu.linking.sapbert.train.SapbertTrainingParams
     topk: 5
     lr: 2e-5
     weight_decay: 0.01
@@ -12,7 +12,7 @@ model:
     train_batch_size: 256
     num_workers: 0
   sapbert_evaluation_manager:
-    _target_: kazu.modelling.linking.sapbert.train.SapbertEvaluationDataManager
+    _target_: kazu.linking.sapbert.train.SapbertEvaluationDataManager
     debug: true
     sources:
       bc5cdr-disease:

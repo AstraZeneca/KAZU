@@ -19,8 +19,8 @@ apply some pragmaticism in order to produce a set of precise labels we want to u
 In Kazu, we take the following approach:
 
 1. Generate synonym candidates from the raw ontology to build a putative list of terms we might want to use. Synonyms are generated
-   via the ``synonym_generator`` parameter of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`, which can
-   then be retrieved via the method :meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.generate_synonyms`\. The
+   via the ``synonym_generator`` parameter of :class:`kazu.ontology_preprocessing.base.OntologyParser`, which can
+   then be retrieved via the method :meth:`kazu.ontology_preprocessing.base.OntologyParser.generate_synonyms`\. The
    generated strings can be retrieved from :attr:`kazu.data.data.SynonymTerm.terms`\.
 2. Build a pipeline from this list, execute this pipeline over a large corpora of target data, and explore the results to get a sense of
    which terms are 'noisy'. We recommend loading json serialised versions of :class:`kazu.data.data.Document` into a MongoDB instance for this,
@@ -30,10 +30,10 @@ In Kazu, we take the following approach:
    such as 'use this string NER and linking', or 'remove this string as a linking target. See the API documentation
    of :class:`kazu.data.data.CuratedTerm` for examples and details.
 4. You can also create an instance of :class:`kazu.data.data.GlobalParserActions` to modify the behaviour of a
-   :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser` in a 'global' sense, Again, see the API documentation for this.
+   :class:`kazu.ontology_preprocessing.base.OntologyParser` in a 'global' sense, Again, see the API documentation for this.
 
 We provide some curations for common ontologies in the default model pack, within the 'curations' subdirectory, which are then
-passed to the constructor of :class:`kazu.modelling.ontology_preprocessing.base.OntologyParser`. When
-:meth:`kazu.modelling.ontology_preprocessing.base.OntologyParser.populate_databases` is called, these curation triggers are activated.
+passed to the constructor of :class:`kazu.ontology_preprocessing.base.OntologyParser`. When
+:meth:`kazu.ontology_preprocessing.base.OntologyParser.populate_databases` is called, these curation triggers are activated.
 Note that this method also returns a 'cleaned' list of :class:`kazu.data.data.CuratedTerm`, which can then be used for dictionary based NER
 (as is used for :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`\ ).

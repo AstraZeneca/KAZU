@@ -5,7 +5,7 @@ indices:
     boolean_scorers: ${StringScorers.cell_line}
 parsers:
   clo_parser:
-    _target_: kazu.modelling.ontology_preprocessing.parsers.CLOOntologyParser
+    _target_: kazu.ontology_preprocessing.parsers.CLOOntologyParser
     name: CLO
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/clo.owl
     data_origin: 'CLO-2022-03-20'

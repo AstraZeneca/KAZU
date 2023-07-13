@@ -12,10 +12,10 @@ from kazu.data.data import (
     SynonymTermWithMetrics,
     MentionConfidence,
 )
-from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.ontology_matching import assemble_pipeline
-from kazu.modelling.ontology_matching.ontology_matcher import OntologyMatcher
-from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.database.in_memory_db import SynonymDatabase
+from kazu.ontology_matching import assemble_pipeline
+from kazu.ontology_matching.ontology_matcher import OntologyMatcher
+from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_batch_step
 from kazu.steps.step import ParserDependentStep
 from kazu.utils.utils import PathLike, as_path

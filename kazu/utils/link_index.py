@@ -6,13 +6,13 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from kazu.utils.caching import kazu_disk_cache
 from kazu.data.data import SynonymTermWithMetrics, SynonymTerm
-from kazu.modelling.database.in_memory_db import (
+from kazu.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
     NormalisedSynonymStr,
 )
-from kazu.modelling.language.string_similarity_scorers import BooleanStringSimilarityScorer
-from kazu.modelling.ontology_preprocessing.base import (
+from kazu.language.string_similarity_scorers import BooleanStringSimilarityScorer
+from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.utils.string_normalizer import StringNormalizer

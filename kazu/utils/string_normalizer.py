@@ -5,7 +5,7 @@ import regex
 from functools import lru_cache
 from typing import Optional, Dict, Protocol, Type, Tuple
 
-from kazu.modelling.language.language_phenomena import GREEK_SUBS, DASHES
+from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 
 
 class EntityClassNormalizer(Protocol):

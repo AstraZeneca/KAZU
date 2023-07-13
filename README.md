@@ -92,7 +92,7 @@ if __name__ == "__main__":
 Licensed under [Apache 2.0](https://github.com/AstraZeneca/KAZU/blob/main/LICENSE).
 
 Kazu includes elements under compatible licenses (full licenses are in relevant files or as indicated):
-- Some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](https://github.com/AstraZeneca/KAZU/blob/main/kazu/modelling/ontology_matching/README.md).
+- Some elements are a modification of code licensed under MIT by Explosion.AI - see the README [here](https://github.com/AstraZeneca/KAZU/blob/main/kazu/ontology_matching/README.md).
 - The doc build process (conf.py's linkcode_resolve function) uses code modified from pandas, in turn modified from numpy. See [PANDAS_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/PANDAS_LICENSE.txt) and [NUMPY_LICENSE.txt](https://github.com/AstraZeneca/KAZU/blob/main/docs/NUMPY_LICENSE.txt)
 - Elements of the model distillation code are inspired by or modified from Huawei Noah's Ark Lab [TinyBERT](https://github.com/huawei-noah/Pretrained-Language-Model/blob/master/TinyBERT) and DMIS-Lab's [BioBERT](https://github.com/dmis-lab/biobert/tree/master).
   See the details in dataprocessor.py, models.py and tiny_transformer.py.

@@ -2,7 +2,7 @@ import logging
 from typing import Iterable
 
 from kazu.data.data import Document
-from kazu.modelling.ontology_preprocessing.base import OntologyParser
+from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
 from kazu.steps.linking.post_processing.strategy_runner import StrategyRunner
 from kazu.steps.step import ParserDependentStep

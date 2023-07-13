@@ -14,8 +14,8 @@ from kazu.data.data import (
     GlobalParserActions,
     CuratedTermBehaviour,
 )
-from kazu.modelling.database.in_memory_db import SynonymDatabase
-from kazu.modelling.ontology_preprocessing.base import (
+from kazu.database.in_memory_db import SynonymDatabase
+from kazu.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
     SYN,

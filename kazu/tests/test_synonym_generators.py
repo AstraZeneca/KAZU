@@ -5,7 +5,7 @@ from typing import Set, Union
 from hydra.utils import instantiate
 import pytest
 
-from kazu.modelling.ontology_preprocessing.synonym_generation import (
+from kazu.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
     SynonymGenerator,
     StopWordRemover,
@@ -14,7 +14,7 @@ from kazu.modelling.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
 )
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
-from kazu.modelling.language.language_phenomena import GREEK_SUBS
+from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
