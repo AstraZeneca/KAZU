@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 
 import pytest
 from kazu.data.data import (
@@ -62,7 +62,7 @@ def parser_data_with_split_equiv_id_set():
 
 def setup_databases(
     base_path: Path,
-    curation: Optional[CuratedTerm] = None,
+    curations: Optional[List[CuratedTerm]] = None,
     global_actions: Optional[GlobalParserActions] = None,
     parser_data_includes_target_synonym: bool = False,
     parser_data_has_split_equiv_id_set: bool = False,
@@ -70,10 +70,11 @@ def setup_databases(
 ) -> SynonymDatabase:
     Singleton.clear_all()
     curations_path = None
-    if curation is not None:
+    if curations is not None:
         curations_path = base_path.joinpath("curations.jsonl")
         with open(curations_path, "w") as f:
-            f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
+            for curated_term in curations:
+                f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curated_term)) + "\n")
 
     global_actions_path = None
     if global_actions is not None:
@@ -151,7 +152,7 @@ def test_should_add_synonym_term_to_parser(tmp_path):
         case_sensitive=False,
     )
 
-    syn_db = setup_databases(base_path=tmp_path, curation=curation)
+    syn_db = setup_databases(base_path=tmp_path, curations=[curation])
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME)) + 1
 
@@ -221,7 +222,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
     )
     syn_db = setup_databases(
         base_path=tmp_path,
-        curation=curation,
+        curations=[curation],
         global_actions=global_actions,
         parser_data_includes_target_synonym=False,
         noop_parser_curations_style="None",
@@ -259,7 +260,7 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curation=curation,
+        curations=[curation],
         parser_data_includes_target_synonym=True,
     )
 
@@ -294,7 +295,7 @@ def test_should_override_id_set(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curation=curation,
+        curations=[curation],
         parser_data_includes_target_synonym=True,
     )
 
@@ -329,7 +330,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curation=curation,
+        curations=[curation],
         parser_data_includes_target_synonym=True,
     )
 
@@ -346,7 +347,7 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curation=curation,
+        curations=[curation],
         parser_data_includes_target_synonym=True,
     )
 
