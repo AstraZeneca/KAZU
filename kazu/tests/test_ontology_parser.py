@@ -23,6 +23,7 @@ from kazu.ontology_preprocessing.base import (
     load_global_actions,
 )
 from kazu.tests.utils import DummyParser
+from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import Singleton
 
 PARSER_1_NAME = "I am the target for actions"
@@ -229,7 +230,9 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) + 1 == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
+
+def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
+    override_id = "I do not exist"
     curation = CuratedTerm(
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
         behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
@@ -239,7 +242,7 @@ def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
                     ids_and_source=frozenset(
                         [
                             (
-                                "first",
+                                override_id,
                                 DUMMY_PARSER_SOURCE,
                             )
                         ]
@@ -258,6 +261,10 @@ def test_should_fail_to_modify_terms_when_attempting_to_add_term(tmp_path):
     )
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
+    affected_term = syn_db.get(PARSER_1_NAME, StringNormalizer.normalize(TARGET_SYNONYM))
+    assert len(affected_term.associated_id_sets) == 1
+    modified_equivalent_ids = next(iter(affected_term.associated_id_sets)).ids
+    assert override_id not in modified_equivalent_ids
 
 
 def test_should_override_id_set(tmp_path):
