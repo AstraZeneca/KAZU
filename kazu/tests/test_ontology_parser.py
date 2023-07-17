@@ -21,6 +21,7 @@ from kazu.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
     load_global_actions,
+    CurationException,
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.string_normalizer import StringNormalizer
@@ -352,3 +353,52 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
     )
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
+
+
+def test_conflicting_overrides_in_associated_id_sets(tmp_path):
+    curation1 = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+        associated_id_sets=frozenset(
+            [
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        [
+                            (
+                                "first",
+                                DUMMY_PARSER_SOURCE,
+                            )
+                        ]
+                    )
+                )
+            ]
+        ),
+    )
+    curation2 = CuratedTerm(
+        mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        curated_synonym=TARGET_SYNONYM,
+        case_sensitive=False,
+        associated_id_sets=frozenset(
+            [
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        [
+                            (
+                                "second",
+                                DUMMY_PARSER_SOURCE,
+                            )
+                        ]
+                    )
+                )
+            ]
+        ),
+    )
+    with pytest.raises(CurationException):
+        setup_databases(
+            base_path=tmp_path,
+            curations=[curation1, curation2],
+            parser_data_includes_target_synonym=True,
+        )
