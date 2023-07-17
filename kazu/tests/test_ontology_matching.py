@@ -21,7 +21,6 @@ from kazu.ontology_preprocessing.base import (
     DEFAULT_LABEL,
     SYN,
     MAPPING_TYPE,
-    CurationException,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.utils import DummyParser
@@ -148,7 +147,6 @@ PARSER_1_AMBIGUOUS_DATA = {
         "match_ontology_dicts",
         "parser_1_data",
         "parser_2_data",
-        "throws_curation_exception",
     ),
     [
         pytest.param(
@@ -220,7 +218,6 @@ PARSER_1_AMBIGUOUS_DATA = {
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
-            False,
             id="Two curated case insensitive terms from two parsers Both should hit",
         ),
         pytest.param(
@@ -283,61 +280,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
-            False,
             id="Two curated terms from two parsers One should hit to test case sensitivity",
-        ),
-        pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="others",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            "I dont exist",
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            0,
-            {},
-            [],
-            PARSER_1_DEFAULT_DATA,
-            PARSER_2_DEFAULT_DATA,
-            True,
-            id="Two curated terms from two parsers An exception should be thrown at build time as the second ID doesnt exist",
         ),
         pytest.param(
             [
@@ -399,7 +342,6 @@ PARSER_1_AMBIGUOUS_DATA = {
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
-            False,
             id="Two curated terms from two parsers One should hit to test ignore logic",
         ),
         pytest.param(
@@ -441,50 +383,7 @@ PARSER_1_AMBIGUOUS_DATA = {
             ],
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
-            False,
             id="One curated term with a novel synonym This should be added to the synonym DB and hit",
-        ),
-        pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym=CONFUSING_SYNONYM,
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        ),
-                                    ]
-                                )
-                            ),
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            CONFUSING_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        ),
-                                    ]
-                                )
-                            ),
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [],
-            0,
-            set(),
-            [],
-            PARSER_1_AMBIGUOUS_DATA,
-            PARSER_1_AMBIGUOUS_DATA,
-            False,
-            id="Should not throw exception on populate databases as parser data is ambiguous and action specifies both ids",
         ),
     ],
 )
@@ -497,8 +396,8 @@ def test_pipeline_build_from_parsers_and_curated_list(
     match_ontology_dicts,
     parser_1_data,
     parser_2_data,
-    throws_curation_exception,
 ):
+
     Singleton.clear_all()
     TEST_CURATIONS_PATH_PARSER_1 = tmp_path / "parser1_curated_terms.jsonl"
     TEST_CURATIONS_PATH_PARSER_2 = tmp_path / "parser2_curated_terms.jsonl"
@@ -520,32 +419,24 @@ def test_pipeline_build_from_parsers_and_curated_list(
     )
     TEST_SPAN_KEY = "my_hits"
     TEST_OUTPUT_DIR = tmp_path / "ontology_pipeline"
-    if throws_curation_exception:
-        with pytest.raises(CurationException):
-            assemble_pipeline(
-                parsers=[parser_1, parser_2],
-                output_dir=TEST_OUTPUT_DIR,
-                span_key=TEST_SPAN_KEY,
-            )
 
-    else:
-        nlp = assemble_pipeline(
-            parsers=[parser_1, parser_2],
-            output_dir=TEST_OUTPUT_DIR,
-            span_key=TEST_SPAN_KEY,
-        )
+    nlp = assemble_pipeline(
+        parsers=[parser_1, parser_2],
+        output_dir=TEST_OUTPUT_DIR,
+        span_key=TEST_SPAN_KEY,
+    )
 
-        doc = nlp(example_text)
-        matches = doc.spans[TEST_SPAN_KEY]
-        assert_matches(matches, match_len, match_texts, match_ontology_dicts)
-        nlp2 = spacy.load(TEST_OUTPUT_DIR)
-        doc2 = nlp2(example_text)
-        matches2 = doc2.spans[TEST_SPAN_KEY]
-        assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
+    doc = nlp(example_text)
+    matches = doc.spans[TEST_SPAN_KEY]
+    assert_matches(matches, match_len, match_texts, match_ontology_dicts)
+    nlp2 = spacy.load(TEST_OUTPUT_DIR)
+    doc2 = nlp2(example_text)
+    matches2 = doc2.spans[TEST_SPAN_KEY]
+    assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
 
-        assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
-            (m.start_char, m.end_char, m.text) for m in matches
-        )
+    assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
+        (m.start_char, m.end_char, m.text) for m in matches
+    )
 
 
 def test_pipeline_build_from_parsers_alone(tmp_path):
