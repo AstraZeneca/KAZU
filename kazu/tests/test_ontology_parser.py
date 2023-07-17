@@ -181,6 +181,8 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
 
 
 def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
+    # note, this test is similar to test_should_drop_from_parser_via_general_rule,
+    # although it tests that a CuratedTerm is also affected by a general rule
     global_actions = GlobalParserActions(
         actions=[
             ParserAction(
