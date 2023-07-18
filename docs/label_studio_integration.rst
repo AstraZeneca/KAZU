@@ -21,9 +21,6 @@ Our recommended workflow is as follows:
             LabelStudioAnnotationView,
         )
 
-        # convert to LS Tasks
-        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
-
         # create the view
         view = LabelStudioAnnotationView(
             ner_labels={
