@@ -17,7 +17,6 @@ Our recommended workflow is as follows:
 
         from kazu.annotation.label_studio import (
             LabelStudioManager,
-            KazuToLabelStudioConverter,
             LabelStudioAnnotationView,
         )
 
@@ -54,11 +53,7 @@ Our recommended workflow is as follows:
    
    .. code-block:: python
 
-        from kazu.annotation.label_studio import (
-            LabelStudioManager,
-            KazuToLabelStudioConverter,
-            LabelStudioAnnotationView,
-        )
+        from kazu.annotation.label_studio import LabelStudioManager
         from kazu.data.data import Document
 
         label_studio_url_and_port = "http://localhost:8080"
