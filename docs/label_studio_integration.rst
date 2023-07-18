@@ -50,7 +50,7 @@ Our recommended workflow is as follows:
             project_name="test", headers=headers, url=label_studio_url_and_port
         )
         manager.create_linking_project()
-        ls_manager.update_tasks(docs)
+        manager.update_tasks(docs)
         manager.update_view(view=view, docs=[docs])
 
 3) view/correct annotations in label studio. Once you're finished, you can export back to Kazu Documents as follows:
