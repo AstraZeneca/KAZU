@@ -51,7 +51,7 @@ Our recommended workflow is as follows:
         )
         manager.create_linking_project()
         manager.update_tasks(docs)
-        manager.update_view(view=view, docs=[docs])
+        manager.update_view(view=view, docs=docs)
 
 3) view/correct annotations in label studio. Once you're finished, you can export back to Kazu Documents as follows:
    
