@@ -482,12 +482,6 @@ class LabelStudioManager:
             logger.error(f"failed to update view for project {self.project_name}")
             raise e
 
-    def import_to_ls(self, docs: List[Document]):
-        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
-        return requests.post(
-            f"{self.url}/api/projects/{self.project_id}/import", json=tasks, headers=self.headers
-        )
-
     def update_tasks(self, docs: List[Document]):
         tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         try:
