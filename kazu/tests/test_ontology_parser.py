@@ -233,7 +233,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
 
     assert len(syn_db.get_all(PARSER_1_NAME)) + 1 == len(syn_db.get_all(NOOP_PARSER_NAME))
 
-    assert len(syn_db.get_syns_for_id("first")) == 0
+    assert len(syn_db.get_syns_for_id(PARSER_1_NAME, "first")) == 0
 
 
 def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
