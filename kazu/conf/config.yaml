@@ -1,6 +1,9 @@
 defaults:
   - ray: local
   - ontologies:
+      - ot_target
+      - ot_disease
+      - ot_molecule
       - cellosaurus
       - chembl
       - cl
@@ -10,9 +13,6 @@ defaults:
       - go_cc
       - hgnc_gene_family
       - mondo
-      - ot_disease
-      - ot_molecule
-      - ot_target
       - stato
       - uberon
   - PLSapbertModel: default
