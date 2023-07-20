@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Optional, Dict, List, Tuple, Set, Iterable
+from typing import Optional, Dict, List, Set, Iterable
 
 from kazu.data.data import (
     SynonymTerm,
@@ -57,15 +57,6 @@ class MetadataDatabase(metaclass=Singleton):
         :return:
         """
         return deepcopy(self._database[name][idx])
-
-    def get_by_index(self, name: ParserName, i: int) -> Tuple[Idx, Metadata]:
-        idx = self._keys_lst[name][i]
-        return deepcopy(
-            (
-                idx,
-                self._database[name][idx],
-            )
-        )
 
     def get_all(self, name: ParserName) -> Dict[Idx, Metadata]:
         """Get all metadata associated with an ontology.
