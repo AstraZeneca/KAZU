@@ -155,9 +155,6 @@ class ConfidenceLevelStrategyExecution:
         self.entity_mapped.clear()
 
 
-CONFIDENCE_ERROR_ENDING = "If entities with this confidence(s) appear, attempting to process them would cause an exception. It is likely that this class is mis-configured."
-
-
 class StrategyRunner:
     """This is a complex class, designed to co-ordinate the running of various
     strategies over a document, with the end result producing mappings
