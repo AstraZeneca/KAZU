@@ -343,7 +343,7 @@ def build_all_model_packs(
     max_parallel_build = (
         max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
     )
-    futures = []
+    futures: List[ray.ObjectRef] = []
     for model_pack_path in model_pack_paths:
         builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
             logging_config_path=logging_config_path,
@@ -363,7 +363,7 @@ def build_all_model_packs(
         futures = wait_for_model_pack_completion(futures)
 
 
-def wait_for_model_pack_completion(futures) -> List:
+def wait_for_model_pack_completion(futures: List[ray.ObjectRef]) -> List[ray.ObjectRef]:
     # Returns the first ObjectRef that is ready.
     finished, futures = ray.wait(futures, num_returns=1, timeout=180.0 * 60.0)
     result = ray.get(finished[0])

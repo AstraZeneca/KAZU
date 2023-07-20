@@ -23,7 +23,7 @@ ToSourceAndIDXMap = Dict[SourceIdx, List[TargetSourceAndIdx]]
 XrefDatabase = Dict[SourceOntology, ToSourceAndIDXMap]
 
 
-def request_with_retry(url: str, headers: Dict, json_data: Dict):
+def request_with_retry(url: str, headers: Dict, json_data: Dict) -> requests.Response:
     s = requests.Session()
 
     retries = Retry(

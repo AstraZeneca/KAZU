@@ -167,13 +167,15 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
         OntologyParser.export_synonym_terms,
     ]
     # ...mapped to the underlying function
-    original_funcs = {func: func.__wrapped__ for func in funcs}
+    # type ignore needed because it would be a pain to try and tell mypy that
+    # these are all 'wrapped' decorated functions so they have this attribute.
+    original_funcs = {func: func.__wrapped__ for func in funcs}  # type: ignore[attr-defined]
 
     for func, original_func in original_funcs.items():
         # set the __cache_key__ to do nothing
         original_func.__cache_key__ = do_nothing
         # set the memoized function to the original function
-        monkeypatch.setattr(OntologyParser, func.__name__, original_func)
+        monkeypatch.setattr(OntologyParser, func.__name__, original_func)  # type: ignore[attr-defined] # doesn't know it will have __name__
     # also prevent the original cache from deleting anything
     monkeypatch.setattr(kazu_disk_cache, "delete", do_nothing)
     # run the calling test
@@ -186,4 +188,5 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
 
 @pytest.fixture(scope="function")
 def mock_build_vectoriser_cache(monkeypatch):
-    monkeypatch.setattr(TfIdfScorer, "build_vectorizers", TfIdfScorer.build_vectorizers.__wrapped__)
+    # type ignore as above - mypy doesn't know this function is 'wrapped'
+    monkeypatch.setattr(TfIdfScorer, "build_vectorizers", TfIdfScorer.build_vectorizers.__wrapped__)  # type: ignore[attr-defined]
