@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, Set, Tuple, DefaultDict, Dict, List
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
 
 from kazu.utils.caching import kazu_disk_cache
 from kazu.data.data import Mapping
@@ -20,6 +21,21 @@ SourceIdx = str
 TargetSourceAndIdx = Tuple[str, str]
 ToSourceAndIDXMap = Dict[SourceIdx, List[TargetSourceAndIdx]]
 XrefDatabase = Dict[SourceOntology, ToSourceAndIDXMap]
+
+
+def request_with_retry(url: str, headers: Dict, json_data: Dict):
+    s = requests.Session()
+
+    retries = Retry(
+        total=25,
+        backoff_factor=0.1,
+        status_forcelist=[500, 502, 503, 504],
+        allowed_methods=["POST"],
+    )
+
+    s.mount("https://", HTTPAdapter(max_retries=retries))
+
+    return s.post(url=url, headers=headers, json=json_data)
 
 
 class CrossReferenceManager(ABC):
@@ -177,21 +193,23 @@ class OxoCrossReferenceManager(CrossReferenceManager):
                 "mappingTarget": mapping_target,
                 "distance": "1",
             }
-            response = requests.post(f"{self.oxo_url}", headers=self.headers, json=data)
+            response = request_with_retry(
+                url=f"{self.oxo_url}", headers=self.headers, json_data=data
+            )
             response_data = response.json()
             link_info = response_data["_links"]
             last = link_info["last"]["href"]
             current = link_info["first"]["href"]
 
             while current != last:
-                response = requests.post(current, headers=self.headers, json=data)
+                response = request_with_retry(url=current, headers=self.headers, json_data=data)
                 response_data = response.json()
                 link_info = response_data["_links"]
                 next = link_info["next"]["href"]
                 current = next
                 results.append(response_data)
             else:
-                response = requests.post(last, headers=self.headers, json=data)
+                response = request_with_retry(url=last, headers=self.headers, json_data=data)
                 results.append(response.json())
 
         with open(path, "w") as f:
