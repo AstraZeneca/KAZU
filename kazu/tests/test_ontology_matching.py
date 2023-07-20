@@ -112,31 +112,6 @@ PARSER_2_DEFAULT_DATA = {
     MAPPING_TYPE: ["test", "test", "test", "test"],
 }
 
-PARSER_1_AMBIGUOUS_DATA = {
-    IDX: [
-        CONFUSING_IDX,
-        TARGET_IDX,
-        TARGET_IDX,
-        "http://my.fake.ontology_amongst_id_123",
-        "http://my.fake.ontology_amongst_id_124",
-    ],
-    DEFAULT_LABEL: [
-        "SynonymTerm",
-        "Complex Disease Alpha VII",
-        "Complex Disease Alpha VII",
-        "Amongst",
-        "Amongst Us",
-    ],
-    SYN: [
-        CONFUSING_SYNONYM,
-        CONFUSING_SYNONYM,
-        "complexVII disease\u03B1",
-        "amongst",
-        "amongst us",
-    ],
-    MAPPING_TYPE: ["test", "test", "test", "test", "test"],
-}
-
 
 @pytest.mark.parametrize(
     (
