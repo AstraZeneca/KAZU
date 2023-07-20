@@ -22,7 +22,7 @@ def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     for doc in docs:
         if entity in doc.get_entities():
             return doc
-    raise RuntimeError(f"Error! Entity {entity}is not attached to a document")
+    raise RuntimeError(f"Error! Entity {entity} is not attached to a document")
 
 
 def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
