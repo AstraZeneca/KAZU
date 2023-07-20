@@ -334,7 +334,7 @@ def build_all_model_packs(
 
 def wait_for_model_pack_completion(futures) -> List:
     # Returns the first ObjectRef that is ready.
-    finished, futures = ray.wait(futures, num_returns=1, timeout=45.0 * 60.0)
+    finished, futures = ray.wait(futures, num_returns=1, timeout=180.0 * 60.0)
     result = ray.get(finished[0])
     print(f"model pack {result} build complete")
     return futures
