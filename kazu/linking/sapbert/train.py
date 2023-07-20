@@ -345,7 +345,6 @@ class PLSapbertModel(LightningModule):
                 margin=sapbert_training_params.miner_margin,
                 type_of_triplets=sapbert_training_params.type_of_triplets,
             )
-            self.ontology_embeddings = None
 
     def configure_optimizers(self):
         """Implementation of
