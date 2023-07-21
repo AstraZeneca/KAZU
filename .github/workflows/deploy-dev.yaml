@@ -97,7 +97,7 @@ jobs:
           echo "KAZU_VERSION=${TEMP_KAZU_VERSION#v}" >> $GITHUB_ENV
 
       - name: deploy to dev
-        uses: az-ai/az-action-k8s-deploy-rest-api@0.6.2
+        uses: az-ai/az-action-k8s-deploy-rest-api@0.10.0
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
           project_name: kazu
