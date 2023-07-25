@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
 # Documentation
 
-[Find our docs here](https://astrazeneca.github.io/KAZU/_build/html/index.html)
+[Find our docs here](https://astrazeneca.github.io/KAZU/index.html)
 
 ## License
 

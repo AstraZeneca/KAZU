@@ -38,7 +38,7 @@ dependencies = [
 ]
 
 [project.urls]
-documentation = "https://astrazeneca.github.io/KAZU/_build/html/index.html"
+documentation = "https://astrazeneca.github.io/KAZU/index.html"
 repository = "https://github.com/AstraZeneca/KAZU"
 
 [project.optional-dependencies]
