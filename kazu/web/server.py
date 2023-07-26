@@ -285,10 +285,10 @@ class SingleEntityDocumentConverter:
                         # I think though that we intend to get away from this with the 'mention_confidence' attribute
                         # on Entity and Curation
                         namespace="TransformersModelForTokenClassificationNerStep",
-                        match=section.get_text(),
+                        match=section.text,
                         entity_class=self.entity_class,
                         start=0,
-                        end=len(section.get_text()),
+                        end=len(section.text),
                     )
                 ]
         return documents

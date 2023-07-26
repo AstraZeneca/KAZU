@@ -36,7 +36,7 @@ def documents_to_document_section_text_map(docs: List[Document]) -> Dict[Tuple[i
         (
             hash(doc),
             hash(section),
-        ): section.get_text()
+        ): section.text
         for doc in docs
         for section in doc.sections
     }
@@ -81,7 +81,7 @@ def documents_to_document_section_batch_encodings_map(
     :return:
     """
     id_section_map = documents_to_id_section_map(docs)
-    strings = [section.get_text() for section in id_section_map.values()]
+    strings = [section.text for section in id_section_map.values()]
 
     batch_encodings = tokenizer(
         strings,

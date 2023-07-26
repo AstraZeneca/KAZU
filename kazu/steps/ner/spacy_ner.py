@@ -24,13 +24,13 @@ class SpacyNerStep(Step):
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
-            spacy_doc = self.nlp(section.get_text())
+            spacy_doc = self.nlp(section.text)
             for ent in spacy_doc.ents:
                 section.entities.append(
                     Entity.load_contiguous_entity(
                         start=ent.start_char,
                         end=ent.end_char,
-                        match=section.get_text()[ent.start_char : ent.end_char],
+                        match=section.text[ent.start_char : ent.end_char],
                         entity_class=ent.label_.lower(),
                         namespace=self.namespace(),
                     )

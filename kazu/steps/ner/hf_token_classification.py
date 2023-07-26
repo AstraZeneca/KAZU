@@ -102,12 +102,12 @@ class TransformersModelForTokenClassificationNerStep(Step):
                 predictions=activations,
             )
             entities = self.tokenized_word_processor(
-                words, text=section.get_text(), namespace=self.namespace()
+                words, text=section.text, namespace=self.namespace()
             )
             section.entities.extend(entities)
             if self.entity_splitter:
                 for ent in entities:
-                    section.entities.extend(self.entity_splitter(ent, section.get_text()))
+                    section.entities.extend(self.entity_splitter(ent, section.text))
 
     def get_activations(self, loader: DataLoader) -> Tensor:
         """

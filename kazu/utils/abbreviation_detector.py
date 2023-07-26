@@ -372,7 +372,7 @@ class KazuAbbreviationDetector:
         new_ent_data.pop("namespace")
         new_ent_data.pop("mention_confidence")
         new_ent = Entity.from_spans(
-            text=section.get_text(),
+            text=section.text,
             spans=[
                 (
                     abbrv_span.start_char,
@@ -433,7 +433,7 @@ class KazuAbbreviationDetector:
             lambda: defaultdict(set)
         )
         for section in document.sections:
-            spacy_doc = self.nlp(section.get_text())
+            spacy_doc = self.nlp(section.text)
             matches = self.matcher(spacy_doc)
             # necessary because the spacy typing says this could be a List[Span],
             # but this is only the case if as_spans=True is passed

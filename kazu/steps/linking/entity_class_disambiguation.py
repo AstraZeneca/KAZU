@@ -122,7 +122,7 @@ class EntityClassDisambiguationStep(Step):
     def sentence_context_for_entity(entity: Entity, section: Section, window: int = 3) -> str:
         sent_spans = list(section.sentence_spans)
         if len(sent_spans) == 0:
-            return section.get_text()
+            return section.text
         else:
             idx = next(
                 idx
@@ -134,9 +134,7 @@ class EntityClassDisambiguationStep(Step):
             context_start_idx = max(0, idx - int(window / 2))
             context_end_idx = min(len(sent_spans), idx + int(window / 2)) + 1
             sentence_context_spans = sent_spans[context_start_idx:context_end_idx]
-            return section.get_text()[
-                sentence_context_spans[0].start : sentence_context_spans[-1].end
-            ]
+            return section.text[sentence_context_spans[0].start : sentence_context_spans[-1].end]
 
     def spangrouped_ent_section_pairs(self, doc: Document) -> Iterable[List[EntSectionPair]]:
         spans_to_ents_and_sections: DefaultDict[

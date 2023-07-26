@@ -87,7 +87,7 @@ class StanzaStep(Step):
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
-            stanza_doc = self.stanza_pipeline(section.get_text())
+            stanza_doc = self.stanza_pipeline(section.text)
             sentences: List[Sentence] = stanza_doc.sentences
             char_spans = (
                 CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char) for sent in sentences

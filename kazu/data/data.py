@@ -400,10 +400,6 @@ class Entity:
 class Section:
     text: str  # the text to be processed
     name: str  # the name of the section (e.g. abstract, body, header, footer etc)
-
-    preprocessed_text: Optional[
-        str
-    ] = None  # not required. a string representing text that has been preprocessed by e.g. abbreviation expansion
     offset_map: Dict[CharSpan, CharSpan] = field(
         default_factory=dict, hash=False, init=False
     )  # not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
@@ -441,17 +437,7 @@ class Section:
             raise AttributeError("Immutable sentence_spans is already set")
 
     def __str__(self):
-        return f"name: {self.name}, text: {self.get_text()[:100]}"
-
-    def get_text(self) -> str:
-        """
-        rather than accessing text or preprocessed_text directly, this method provides a convenient wrapper to get
-        preprocessed_text if available, or text if not.
-        """
-        if self.preprocessed_text is None:
-            return self.text
-        else:
-            return self.preprocessed_text
+        return f"name: {self.name}, text: {self.text[:100]}"
 
 
 @dataclass(unsafe_hash=True)
@@ -529,7 +515,7 @@ class Document:
     def __len__(self):
         length = 0
         for section in self.sections:
-            length += len(section.get_text())
+            length += len(section.text)
         return length
 
 

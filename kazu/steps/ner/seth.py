@@ -77,7 +77,7 @@ class SethStep(Step):
             return
 
         for section in doc.sections:
-            mutation_lst = self.seth.findMutations(section.get_text())
+            mutation_lst = self.seth.findMutations(section.text)
             entities = []
             for java_mutation_dict in mutation_lst:
                 python_dict = dict(java_mutation_dict)
@@ -89,7 +89,7 @@ class SethStep(Step):
                                 python_dict.pop("end"),
                             )
                         ],
-                        text=section.get_text(),
+                        text=section.text,
                         entity_class=self.entity_class,
                         namespace=self.namespace(),
                         metadata={SETH_METADATA_KEY: python_dict},

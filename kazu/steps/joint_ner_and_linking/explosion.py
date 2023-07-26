@@ -69,9 +69,7 @@ class ExplosionStringMatchingStep(ParserDependentStep):
 
     @document_batch_step
     def __call__(self, docs: List[Document]) -> None:
-        texts_and_sections = (
-            (section.get_text(), section) for doc in docs for section in doc.sections
-        )
+        texts_and_sections = ((section.text, section) for doc in docs for section in doc.sections)
 
         # TODO: multiprocessing within the pipe command?
         spacy_result: Iterator[Tuple[spacy.tokens.Doc, Section]] = self.spacy_pipeline.pipe(
