@@ -308,7 +308,12 @@ def build_all_model_packs(
         .strip()
     )
     runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
-    ray.init(num_cpus=max_parallel_build, runtime_env=runtime_env)
+    ray.init(
+        num_cpus=max_parallel_build,
+        runtime_env=runtime_env,
+        configure_logging=False,
+        log_to_driver=True,
+    )
     max_parallel_build = (
         max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
     )
