@@ -18,13 +18,18 @@ class TokenizedWord:
     A convenient container for a word, which may be split into multiple tokens by e.g. WordPiece tokenisation
     """
 
-    token_ids: List[int]  # token id
-    tokens: List[str]  # token string representations
-    token_confidences: Tensor  # tensor of token logit softmax
-    token_offsets: List[Tuple[int, int]]  # character indices of tokens
-    word_char_start: int  # char start index of word
-    word_char_end: int  # char end index of word
-    word_id: int  # word id
+    token_ids: List[int]
+    #: token string representations
+    tokens: List[str]
+    #: tensor of token logit softmax
+    token_confidences: Tensor
+    #: character indices of tokens
+    token_offsets: List[Tuple[int, int]]
+    #: char start index of word
+    word_char_start: int
+    #: char end index of word
+    word_char_end: int
+    word_id: int
 
 
 @dataclass
@@ -33,9 +38,12 @@ class TokWordSpan:
     dataclass for a span (i.e. a List[TokenizedWord] representing an NE)
     """
 
-    clazz: str  # entity_class
-    subspan: Optional[bool] = None  # is this a subspan? only relevant if using SmartSpanFinder
-    tok_words: List[TokenizedWord] = field(default_factory=list)  # words associated with this span
+    #: entity_class
+    clazz: str
+    #: is this a subspan? only relevant if using SmartSpanFinder
+    subspan: Optional[bool] = None
+    #: words associated with this span
+    tok_words: List[TokenizedWord] = field(default_factory=list)
 
 
 class SpanFinder(ABC):
