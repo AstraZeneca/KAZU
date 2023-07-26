@@ -18,6 +18,7 @@ dependencies {
     implementation 'org.scala-lang:scala-library:2.12.15'
     implementation 'net.sf.py4j:py4j:0.10.9.5'
     implementation 'com.github.rockt:SETH:1.4.0'
+    implementation 'uk.ac.cam.ch.opsin:opsin-core:2.7.0'
 //    testing
     testImplementation 'org.scalatest:scalatest_2.12:3.2.12'
     testImplementation 'org.scalactic:scalactic_2.12:3.2.15'

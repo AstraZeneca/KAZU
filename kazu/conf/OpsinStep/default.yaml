@@ -1,0 +1,8 @@
+_target_: kazu.steps.ner.opsin.OpsinStep
+entity_class: drug
+opsin_fatjar_path: ${oc.env:KAZU_MODEL_PACK}/kazu-jvm/kazu-jvm-1.0-fatjar.jar
+java_home: ${oc.env:JAVA_HOME}
+condition:
+  _target_: kazu.utils.utils.EntityClassFilter
+  required_entity_classes:
+    - drug

@@ -1,6 +1,6 @@
 # Kazu-JVM - Biomedical NLP
 
-Some valuable BioNLP algorithms are implemented in JVM languages (e.g. SETH). In order to make these
+Some valuable BioNLP algorithms are implemented in JVM languages (e.g. SETH, Opsin). In order to make these
 accessible to python, we use Py4J to call them from a Kazu Step instance.
 
 # Compiling the JVM

@@ -25,6 +25,7 @@ defaults:
   - SapBertTraining: default
   - Pipeline: default
   - DistillationTraining: default
+  - OpsinStep: default
   - SethStep: default
   - SynonymGeneration: default
   - ExplosionStringMatchingStep: default

@@ -39,6 +39,7 @@ dependencies = [
   "regex>=2020.1.7",
   "psutil>=5.3.0",
   "cachetools>=5.2.0",
+  "rdkit>=2023.3.1",
   "diskcache>=5.4.0"
 ]
 
