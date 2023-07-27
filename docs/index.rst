@@ -21,6 +21,7 @@ Welcome to Kazu's documentation!
    Curating a knowledge base for NER and Linking <curating_a_knowledgebase>
    Scaling with Ray <scaling_kazu>
    Kazu as a WebService <kazu_webservice>
+   Using Kazu as a library <kazu_as_a_library>
    Changelog <changelog>
 
 |
