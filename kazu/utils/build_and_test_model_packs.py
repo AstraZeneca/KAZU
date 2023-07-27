@@ -114,6 +114,7 @@ class ModelPackBuilder:
         self.clear_cached_resources_from_model_pack_dir()
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
         from kazu.utils.constants import HYDRA_VERSION_BASE
+        from kazu.steps.other.cleanup import StripMappingURIsAction
 
         with initialize_config_dir(
             version_base=HYDRA_VERSION_BASE,
@@ -125,6 +126,25 @@ class ModelPackBuilder:
             )
             ModelPackBuilder.build_caches(cfg)
             if not self.skip_tests:
+                # our annotations expect URI stripping, so if cleanup actions
+                # are specified, ensure this is configured.
+                # Note, this may cause unexpected behaviour if CleanupActions
+                # is configured with anything other than 'default'?
+                if "CleanupActions" in cfg:
+                    if StripMappingURIsAction.__name__ not in cfg.CleanupActions:
+                        self.logger.warning(
+                            "%s will be overridden for acceptance tests.",
+                            StripMappingURIsAction.__name__,
+                        )
+                        cfg = compose(
+                            config_name="config",
+                            overrides=[
+                                "hydra/job_logging=none",
+                                "hydra/hydra_logging=none",
+                                "CleanupActions=[default,uri_stripping]",
+                            ],
+                        )
+
                 # local import so the cache is correctly configured with KAZU_MODEL_PACK
                 from kazu.annotation.acceptance_test import (
                     execute_full_pipeline_acceptance_test,
