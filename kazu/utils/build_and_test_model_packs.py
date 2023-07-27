@@ -155,6 +155,7 @@ class ModelPackBuilder:
                     check_annotation_consistency(cfg)
                 if self.build_config.run_acceptance_tests:
                     execute_full_pipeline_acceptance_test(cfg)
+            self.report_tested_dependencies()
             if self.zip_pack:
                 self.zip_model_pack()
 
@@ -286,6 +287,11 @@ class ModelPackBuilder:
         from kazu.pipeline import load_steps_and_log_memory_usage
 
         load_steps_and_log_memory_usage(cfg)
+
+    def report_tested_dependencies(self):
+        dependencies = subprocess.check_output("pip freeze", shell=True).decode("utf-8")
+        with self.model_pack_build_path.joinpath("tested_dependencies.txt").open(mode="w") as f:
+            f.write(dependencies)
 
 
 @ray.remote(num_cpus=1)
