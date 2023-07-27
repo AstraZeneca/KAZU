@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.0.1 - 2023-07-27
+
+
+### Features
+
+- added more informative logging to build_and_test_model_packs.py #680
+
+
+### Bugfixes
+
+- capped pytorch to v <2.0.0 #679
+- URIs are now stripped in acceptance testing if called from build_and_test_model_packs.py #684
+
+
+### Deprecations and Removals
+
+- remove Section.get_text and preprocessed_text #683
+
+
+### Misc
+
+-  #681, #685
+
+
 ## 1.0.0 - 2023-07-21
 
 
