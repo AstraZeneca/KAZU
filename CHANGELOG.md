@@ -12,23 +12,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Features
 
-- added more informative logging to build_and_test_model_packs.py #680
+- added more informative logging to build_and_test_model_packs.py 
 
 
 ### Bugfixes
 
-- capped pytorch to v <2.0.0 #679
-- URIs are now stripped in acceptance testing if called from build_and_test_model_packs.py #684
+- fixed CI bug installing cuda pytorch which we don't want 
+- URIs are now stripped in acceptance testing if called from build_and_test_model_packs.py
 
 
 ### Deprecations and Removals
 
-- remove Section.get_text and preprocessed_text #683
+- remove Section.get_text and preprocessed_text
 
 
 ### Misc
 
--  #681, #685
+- added sphinx docs to data classes
+- dependencies that work are now stored in the model pack
 
 
 ## 1.0.0 - 2023-07-21
