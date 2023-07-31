@@ -20,7 +20,7 @@ def test_serialisation():
     json_str = x.json(drop_terms=True)
     # ensure this is valid json
     json_doc = json.loads(json_str)
-    assert type(json_doc["sections"][0]["sentence_spans"]) == list
+    assert type(json_doc["sections"][0]["sentence_spans"]) is list
 
 
 def test_overlap_logic():
