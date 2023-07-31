@@ -7,31 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
-## 1.0.1 - 2023-07-27
-
-
-### Features
-
-- added more informative logging to build_and_test_model_packs.py 
-
-
-### Bugfixes
-
-- fixed CI bug installing cuda pytorch which we don't want 
-- URIs are now stripped in acceptance testing if called from build_and_test_model_packs.py
-
-
-### Deprecations and Removals
-
-- remove Section.get_text and preprocessed_text
-
-
-### Misc
-
-- added sphinx docs to data classes
-- dependencies that work are now stored in the model pack
-
-
 ## 1.0.0 - 2023-07-21
 
 
