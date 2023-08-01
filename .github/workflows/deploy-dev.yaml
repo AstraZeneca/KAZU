@@ -115,6 +115,9 @@ jobs:
           requests_memory: "12Gi"
           project_label: nlp
           env_label: test
+          organisation: ${{secrets.ORG}}
+          rechargeref: ${{secrets.RECHARGE_REF}}
+          application_name: nlp-kazu
           env_secrets: |
             KAZU_JWT_KEY=${{secrets.JWT_TOKEN}}
             CORS_ORIGIN_REGEX=https://kazu-ui.${{vars.AZ_URL}}
