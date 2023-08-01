@@ -111,8 +111,8 @@ jobs:
           docker_email: "None"
           external_port: 80
           internal_port: 8080
-          limits_memory: "8Gi"
-          requests_memory: "8Gi"
+          limits_memory: "14Gi"
+          requests_memory: "12Gi"
           project_label: nlp
           env_label: test
           env_secrets: |
