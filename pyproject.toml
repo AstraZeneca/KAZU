@@ -45,7 +45,7 @@ repository = "https://github.com/AstraZeneca/KAZU"
 webserver = [
   "fastapi<0.99.0",  # newer than this breaks our 'examples' in the Swagger page
   "pydantic<2.0",
-  "ray[serve]>=1.10.0",
+  "ray[serve]>=1.10.0,<2.5",
   "PyJWT>=2.0.0",
   ]
 typed = [
