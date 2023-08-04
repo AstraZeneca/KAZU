@@ -32,7 +32,7 @@ jobs:
          GH_TOKEN: ${{ github.token }}
 
       - name: Build
-        uses: az-ai/az-action-registry@v4.0.1
+        uses: az-ai/az-action-registry@v4.1.1
         with:
           registry: ${{vars.REGISTRY}}
           username: ${{secrets.HARBOR_USERNAME}}
@@ -48,7 +48,7 @@ jobs:
             DEPLOYMENT=temporary
           build-context: .
           dockerfile-name: deploy/temporary/Dockerfile
-          tag: temp-${{github.sha}}
+          tags: temp-${{inputs.git-ref}}
           use-proxies: 'true'
           needs-sudo: 'true'
 
@@ -63,12 +63,12 @@ jobs:
     needs: build
     steps:
       - name: deploy to dev
-        uses: az-ai/az-action-k8s-deploy-rest-api@0.6.2
+        uses: az-ai/az-action-k8s-deploy-rest-api@0.10.0
         with:
           kube_config: ${{secrets.KUBE_CONFIG}}
           project_name: temporary-kazu
           ingress_name: temporary-kazu
-          image:  ${{vars.REGISTRY}}/nlp/kazu/temp-kazu-dev:temp-${{github.sha}}
+          image:  ${{vars.REGISTRY}}/nlp/kazu/temp-kazu-dev:temp-${{inputs.git-ref}}
           docker_registry: ${{vars.REGISTRY}}
           docker_username: ${{secrets.HARBOR_USERNAME}}
           docker_password: ${{secrets.HARBOR_PASSWORD}}
@@ -88,6 +88,10 @@ jobs:
           enable_autoscaling: "yes"
           max_replicas: 2
           target_cpu_utilisation: 80
+          wait: 300
+          organisation: ${{secrets.ORG}}
+          rechargeref: ${{secrets.RECHARGE_REF}}
+          application_name: nlp-kazu
   
   time-to-live:
     name: Apply time to live to Deployment 
