@@ -83,6 +83,8 @@ jobs:
           --logging_config_path $KAZU_LOGGING_CONF \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH
 
+          export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
+
           cd /tmp
           pytest $GITHUB_WORKSPACE/kazu/tests
 
