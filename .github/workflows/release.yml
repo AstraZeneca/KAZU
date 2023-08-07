@@ -8,12 +8,8 @@ on:
         required: true
         default: /home/github/runner/.kazu_data/kazu_model_pack_public
       version:
-        description: The version to create (semantic versioning)
+        description: The version to create (semantic versioning, passed to hatch version)
         required: true
-        options:
-        - major
-        - minor
-        - patch
 
 jobs:
   release_new_version:
