@@ -125,6 +125,7 @@ jobs:
           enable_autoscaling: "yes"
           max_replicas: 2
           target_cpu_utilisation: 80
+          wait: 300
           run_tests: 'true'
           test_arguments: |
             run
