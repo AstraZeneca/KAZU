@@ -93,9 +93,6 @@ jobs:
           max_replicas: 2
           target_cpu_utilisation: 80
           wait: 300
-          organisation: ${{secrets.ORG}}
-          rechargeref: ${{secrets.RECHARGE_REF}}
-          application_name: nlp-kazu
 
   time-to-live:
     name: Apply time to live to Deployment 
