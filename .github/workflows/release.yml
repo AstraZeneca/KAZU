@@ -45,9 +45,9 @@ jobs:
           echo "KAZU_OLD_VERSION=$(hatch version)" >> $GITHUB_ENV
           hatch version $KAZU_NEW_VERSION_SEGMENT
           echo "KAZU_NEW_VERSION=$(hatch version)" >> $GITHUB_ENV
-          
+
           hatch build
-          
+
           PIP_CACHE_DIR=$(pip cache dir)
           echo "pip cache dir is "${PIP_CACHE_DIR}
           echo "PIP_CACHE_DIR=${PIP_CACHE_DIR}" >> $GITHUB_ENV
@@ -67,17 +67,17 @@ jobs:
       - name: Build model pack caches and test (with acceptance tests)
         id: model_pack_cache_build_and_test
         run: |
-          
+
           export BASE_KAZU_CONF_PATH=$GITHUB_WORKSPACE"/kazu/conf"
           # random suffix to prevent clashes with other runs          
           export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
-          
+
           mkdir $MODEL_PACK_BUILD_PATH   
-          
+
           . kazu-env/bin/activate
-          
+
           KAZU_LOGGING_CONF=$GITHUB_WORKSPACE"/kazu/utils/model_pack_build_logging.conf"
-          
+
           python -m kazu.utils.build_and_test_model_packs \
           --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
@@ -86,10 +86,10 @@ jobs:
           --zip_model_pack \
           --logging_config_path $KAZU_LOGGING_CONF \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH
-                    
+
           cd /tmp
           pytest $GITHUB_WORKSPACE/kazu/tests
-          
+
           NEW_MODEL_PACK_ZIP=$(echo $MODEL_PACK_BUILD_PATH/*.zip)
           echo "NEW_MODEL_PACK_ZIP=${NEW_MODEL_PACK_ZIP}" >> $GITHUB_ENV
 
@@ -101,20 +101,20 @@ jobs:
       - name: Build changelogs
         run: |
           . kazu-env/bin/activate
-          
+
           # reset to make sure only the outputs of the next steps are committed
           cd $GITHUB_WORKSPACE
           GITHUB_BOT="kazu.versionbump@users.noreply.github.com"
           git config --global user.name 'Kazu Version Bump'
           git config --global user.email $GITHUB_BOT
           git reset --hard
-          
+
           # first, generate release notes for just this release, to pass
           # to the gh release command further down
           current_release_file="/tmp/${KAZU_NEW_VERSION}-notes.md"
           echo "CURRENT_RELEASE_FILE=$current_release_file" >> $GITHUB_ENV
           python -m towncrier build --draft --version=${KAZU_NEW_VERSION} > $current_release_file
-          
+
           python -m towncrier build --yes --version=${KAZU_NEW_VERSION}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -137,7 +137,7 @@ jobs:
           hatch build --clean
 
           git push -u origin --follow-tags releases/$KAZU_RELEASE_VERSION
-          
+
           PR_MERGING_WARNING="Make sure to merge using 'create a merge commit' or the tag for the release will no longer point to a commit on main"
           PR_ID=$(gh pr create -b main --title "version bump: ${KAZU_NEW_VERSION_SEGMENT} to ${KAZU_RELEASE_VERSION}" --body "${PR_MERGING_WARNING}")
           # todo: auto merge when we have a solution for this
@@ -147,7 +147,7 @@ jobs:
           gh release upload $KAZU_RELEASE_VERSION dist/* --clobber
           gh release upload $KAZU_RELEASE_VERSION $NEW_MODEL_PACK_ZIP --clobber
           rm -r $NEW_MODEL_PACK_ZIP
-          
+
         env:
           KAZU_NEW_VERSION_SEGMENT: ${{ inputs.version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

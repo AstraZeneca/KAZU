@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - name: "set short_sha to output"
         id: short-sha
         shell: bash
@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           rm -rf deploy/kazu_model_pack*
-  
+
   deploy-dev:
     name: "Deploy image to K8s Dev cluster"
     runs-on: [self-hosted, kazu-runners]

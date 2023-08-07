@@ -32,7 +32,7 @@ jobs:
       - name: create venv and install dependencies
         run: |
           rm -r /tmp/kazu-env || true
-          
+
           PIP_CACHE_DIR=$(pip cache dir)
           echo "pip cache dir is "${PIP_CACHE_DIR}
           python -m venv /tmp/kazu-env
@@ -65,11 +65,11 @@ jobs:
           export BASE_KAZU_CONF_PATH=$GITHUB_WORKSPACE"/kazu/conf"
           # random suffix to prevent clashes with other runs          
           export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
-     
+
           mkdir $MODEL_PACK_BUILD_PATH   
-          
+
           . /tmp/kazu-env/bin/activate
-          
+
           python -m kazu.utils.build_and_test_model_packs \
           --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
@@ -77,20 +77,20 @@ jobs:
           $DEFAULT_MODEL_PACK_PATH \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH \
           --skip_tests
-          
+
           export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
-          
+
           pytest
           # build sphinx html and run doctests
           # this needs to be after the model pack build because they depend on the
           # model pack being present for doctests that load the full pipeline.
           # build the html as well in case of sphinx issues, which will error here.
           make -C docs html doctest
-          
+
           # need to call twice, for NFS bug
           rm -r /tmp/kazu-env || true
           rm -r /tmp/kazu-env || true
-          
+
           rm -r $MODEL_PACK_BUILD_PATH || true
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:

@@ -14,7 +14,7 @@ on:
       seconds:
         description: time to keep deployment alive in seconds
         required: true
-      
+
 jobs:
   build:
     runs-on: [self-hosted, az-ai-runners]
@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
         with: 
           ref: ${{inputs.git-ref}}
-      
+
       - name: download release
         shell: bash
         run: |
@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           rm -rf deploy/kazu_model_pack*
-  
+
   deploy-temp:
     name: "Deploy image to K8s Dev cluster"
     runs-on: [self-hosted, kazu-runners]
@@ -93,7 +93,7 @@ jobs:
           organisation: ${{secrets.ORG}}
           rechargeref: ${{secrets.RECHARGE_REF}}
           application_name: nlp-kazu
-  
+
   time-to-live:
     name: Apply time to live to Deployment 
     runs-on: [self-hosted, kazu-runners]
@@ -106,4 +106,3 @@ jobs:
           namespace: kazu-test
           project_name: temporary-kazu
           seconds: ${{inputs.seconds}}
-    
