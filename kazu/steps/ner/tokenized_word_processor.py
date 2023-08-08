@@ -54,10 +54,11 @@ class SpanFinder(ABC):
 
     The __call__ method of this class operates on a list of
     TokenizedWord, processing each sequentially according to a logic
-    determined by the implementing class.
+    determined by the implementing class. It returns the spans found
+    - a list of :class:`~TokWordSpan`\\ .
 
-    After being called, the spans can be accessed via self.closed_spans.
-    This is a list of TokWordSpan.
+    After being called, the spans can be later accessed via
+    self.closed_spans.
     """
 
     def __init__(self, text: str, id2label: dict[int, str]):
@@ -152,10 +153,16 @@ class SpanFinder(ABC):
         """
         pass
 
-    def __call__(self, words: list[TokenizedWord]) -> None:
+    def __call__(self, words: list[TokenizedWord]) -> list[TokWordSpan]:
+        """Find spans of entities.
+
+        :param words:
+        :return: The spans found
+        """
         for word in words:
             self.process_next_word(word)
         self.close_spans()
+        return self.closed_spans
 
 
 class SimpleSpanFinder(SpanFinder):
@@ -386,8 +393,8 @@ class TokenizedWordProcessor:
 
     def __call__(self, words: list[TokenizedWord], text: str, namespace: str) -> list[Entity]:
         span_finder: SpanFinder = self.make_span_finder(text)
-        span_finder(words)
-        ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)
+        spans = span_finder(words)
+        ents = self.spans_to_entities(spans, text, namespace)
         return ents
 
     def spans_to_entities(
