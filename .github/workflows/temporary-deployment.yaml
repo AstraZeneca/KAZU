@@ -87,7 +87,6 @@ jobs:
           application_name: nlp-kazu
           env_secrets: |
             KAZU_JWT_KEY=${{secrets.JWT_TOKEN}}
-            CORS_ORIGIN_REGEX=https://kazu-ui.${{vars.AZ_URL}}
           replicas: 1
           enable_autoscaling: "yes"
           max_replicas: 2
