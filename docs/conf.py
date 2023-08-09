@@ -229,6 +229,10 @@ nitpick_ignore = [
     ("py:class", "starlette.requests.HTTPConnection"),
     ("py:class", "starlette.requests.Request"),
     ("py:class", "starlette.responses.Response"),
+    ("py:class", "starlette.responses.JSONResponse"),
     # pydantic uses mkdocs, not Sphinx, and doesn't seem to have full API docs
     ("py:class", "pydantic.main.BaseModel"),
+    # ray does have sphinx docs (at https://docs.ray.io/en/latest/ , but we don't need them for anything else)
+    # but it doesn't have a reference in its docs for ObjectRef (suprisingly)
+    ("py:class", "ray._raylet.ObjectRef"),
 ]
