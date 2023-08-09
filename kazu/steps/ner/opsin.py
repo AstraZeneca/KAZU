@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Callable
+from typing import Optional, Callable, Union
 
 from py4j.java_gateway import JavaGateway
 
@@ -10,11 +10,12 @@ from kazu.steps import Step, document_iterating_step
 
 
 OPSIN_METADATA_KEY = "opsin"
-BREAKS = " !@#&?|\t\n\r" # https://www.acdlabs.com/iupac/nomenclature/93/r93_45.htm
+BREAKS = " !@#&?|\t\n\r"  # https://www.acdlabs.com/iupac/nomenclature/93/r93_45.htm
 
 
 class OpsinStep(Step):
-    """A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature) over py4j.
+    """A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature)
+    over py4j.
 
     :py:class:`~.TransformersModelForTokenClassificationNerStep` often identifies IUPAC strings as entity_class=drug,
     but they fail to map to one of the drug ontology dictionaries. This service provides an extra way to resolve chemical entities.
@@ -61,11 +62,11 @@ class OpsinStep(Step):
         doi = {10.1021/ci100384d},
             note ={PMID: 21384929},
 
-        URL = { 
+        URL = {
                 https://doi.org/10.1021/ci100384d
-            
+
         },
-        eprint = { 
+        eprint = {
                 https://doi.org/10.1021/ci100384d
         }
         }
@@ -73,7 +74,6 @@ class OpsinStep(Step):
     .. raw:: html
 
         </details>
-
     """
 
     def __init__(
@@ -93,7 +93,7 @@ class OpsinStep(Step):
         if not os.path.exists(opsin_fatjar_path):
             raise RuntimeError(f"required jar: {opsin_fatjar_path} not found")
         self.gateway = JavaGateway.launch_gateway(
-            jarpath='.',
+            jarpath=".",
             classpath=opsin_fatjar_path,
             die_on_exit=True,
             java_path=os.path.join(java_home, "bin", "java"),
@@ -105,35 +105,41 @@ class OpsinStep(Step):
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
             for ent in section.entities:
-                if ent.entity_class == self.entity_class: # entity is a drug
-                    if len(ent.mappings) == 0: # entity mapping failed, e.g., no exact matches to dictionaries
+                if ent.entity_class == self.entity_class:  # entity is a drug
+                    if (
+                        len(ent.mappings) == 0
+                    ):  # entity mapping failed, e.g., no exact matches to dictionaries
                         mapping = None
-                        for spaces in range(2,-1,-1): # look up to two spaces out
-                            if mapping == None:
+                        for spaces in range(2, -1, -1):  # look up to two spaces out
+                            if mapping is None:
                                 testStr, ridx, fidx = self.extendString(ent, section.text, spaces)
                                 mapping = self.parseString(testStr)
-                                if mapping != None and testStr != ent.match: # update entity match to expanded string
+                                if (
+                                    mapping is not None and testStr != ent.match
+                                ):  # update entity match to expanded string
                                     ent.match = testStr
                                     ent.match_norm = testStr
                                     ent.start = ridx
                                     ent.end = fidx
-                        if mapping != None:
-                            ent.mappings=[mapping]
-                            ent.syn_term_to_synonym_terms = dict() # remove close synonym matches
+                        if mapping is not None:
+                            ent.mappings = set([mapping])
+                            ent.syn_term_to_synonym_terms = dict()  # remove close synonym matches
 
     # TransformersModelForTokenClassificationNerStep tends to truncate the IUPAC match to a first hyphen
     # Here we extend the entity match
     @staticmethod
-    def extendString(ent: Entity, section: str, spaces: int = 0):
+    def extendString(ent: Entity, section: str, spaces: int = 0) -> tuple[str, int, int]:
         ridx = ent.start
         fidx = ent.end
-        if ent.match != section[ent.start:ent.end]:
+        if ent.match != section[ent.start : ent.end]:
             ridx = section.upper().find(ent.match.upper())
             if ridx > -1:
                 fidx = ridx + len(ent.match)
             else:
-                ridx = ent.start # we might need to try harder to find the index into the original text string, but punt at the moment
-        while ridx > 0 and section[ridx-1] not in BREAKS:
+                ridx = (
+                    ent.start
+                )  # we might need to try harder to find the index into the original text string, but punt at the moment
+        while ridx > 0 and section[ridx - 1] not in BREAKS:
             ridx = ridx - 1
         while fidx < len(section) and (section[fidx] not in BREAKS or spaces > 0):
             if section[fidx] in BREAKS:
@@ -142,22 +148,22 @@ class OpsinStep(Step):
         entStr = section[ridx:fidx]
         return entStr, ridx, fidx
 
-    def parseString(self, name: str) -> Mapping:
+    def parseString(self, name: str) -> Union[Mapping, None]:
         try:
             smiles = self.opsin.nameToStructure(name)
-            if smiles != None:
+            if smiles is not None:
                 smiles = Chem.CanonSmiles(smiles)
                 mapping = Mapping(
-                                default_label=name,
-                                source="Opsin",
-                                parser_name="Opsin",
-                                idx=smiles,
-                                string_match_strategy=self.namespace(),
-                                disambiguation_strategy=None,
-                                string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
-                            )
+                    default_label=name,
+                    source="Opsin",
+                    parser_name="Opsin",
+                    idx=smiles,
+                    string_match_strategy=self.namespace(),
+                    disambiguation_strategy=None,
+                    string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
+                )
                 return mapping
         except Exception as e:
             reason = e.args[1].getMessage()
-            #print("Opsin parsing error:"+str(reason))
+            reason = reason + " "  # print("Opsin parsing error:" + str(reason))
         return None

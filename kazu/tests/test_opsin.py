@@ -3,9 +3,7 @@ from hydra.utils import instantiate
 from kazu.data.data import Document, Entity
 from kazu.tests.utils import requires_model_pack
 
-test_text = (
-    "BREXPIPRAZOLE is great and is the same as OPC-34712 but not 2,2'-ethylenedipyridine"
-)
+test_text = "BREXPIPRAZOLE is great and is the same as OPC-34712 but not 2,2'-ethylenedipyridine"
 
 
 def check_step_has_found_entitites(doc, step_entity_class):
