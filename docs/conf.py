@@ -121,6 +121,7 @@ intersphinx_mapping = {
     "pymongo": ("https://pymongo.readthedocs.io/en/stable/", None),
     # pymongo includes bson
     "bson": ("https://pymongo.readthedocs.io/en/stable/", None),
+    "requests": ("https://requests.readthedocs.io/en/latest/", None),
 }
 
 
