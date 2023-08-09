@@ -8,11 +8,7 @@ import java.util
 import scala.collection.JavaConverters._
 
 class OpsinRunner {
-  /**
-   * wrapper for Opsin, returning a String object. This reduces cross process communication, as py4j only
-   * needs to make one call per text string. JavaConverters are needed so that Py4J correctly assigns Py4J types/
-   * unboxing is handled correctly
-   */
+  /* Wrapper for Opsin, returning a String object. */
   val n2sconfig = new NameToStructureConfig()
   val nts = NameToStructure.getInstance()
   val extendedSmiles = false
