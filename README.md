@@ -183,3 +183,13 @@ Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).
 [SETH detects and normalizes genetic variants in text](https://pubmed.ncbi.nlm.nih.gov/27256315/)
 Bioinformatics (2016)
 http://dx.doi.org/10.1093/bioinformatics/btw234
+
+
+#### Opsin
+
+Kazu's OpsinStep uses Py4j to call OPSIN: Open Parser for Systematic IUPAC nomenclature.
+
+Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen
+Chemical Name to Structure: OPSIN, an Open Source Solution
+Journal of Chemical Information and Modeling 2011 51 (3), 739-753
+DOI: [10.1021/ci100384d](https://doi.org/10.1021/ci100384d)

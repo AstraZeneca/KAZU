@@ -39,9 +39,11 @@ class OpsinStep(Step):
 
     Paper:
 
-    Lowe DM, Corbett PT, Murray-Rust P, Glen RC. 
-    Chemical name to structure: OPSIN, an open source solution. 
-    J Chem Inf Model. 2011 Mar 28;51(3):739-53. doi: 10.1021/ci100384d. Epub 2011 Mar 9. PMID: 21384929.
+    Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen
+    Chemical Name to Structure: OPSIN, an Open Source Solution
+    Journal of Chemical Information and Modeling 2011 51 (3), 739-753
+    DOI: [10.1021/ci100384d](https://doi.org/10.1021/ci100384d)
+
     .. raw:: html
 
         <details>
@@ -72,6 +74,7 @@ class OpsinStep(Step):
     .. raw:: html
 
         </details>
+
     """
 
     def __init__(
