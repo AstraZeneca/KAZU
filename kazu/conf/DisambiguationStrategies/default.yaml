@@ -19,14 +19,12 @@ default:
 gene:
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.DefinedElsewhereInDocumentDisambiguationStrategy
     confidence: ${confidence.disambiguation_highly_likely}
-  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.TfIdfDisambiguationStrategy
+  - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.GildaTfIdfDisambiguationStrategy
     confidence: ${confidence.disambiguation_probable}
-    relevant_aggregation_strategies:
-      - _target_: kazu.data.data.EquivalentIdAggregationStrategy
-        _args_:
-          - CUSTOM
     scorer:
-      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.TfIdfScorer
+      _target_: kazu.steps.linking.post_processing.disambiguation.context_scoring.GildaTfIdfScorer
+      model_path: ${oc.env:KAZU_MODEL_PACK}/mapping_step/tfidf.pkl
+      contexts_path: ${oc.env:KAZU_MODEL_PACK}/mapping_step/disambiguation_contexts.json
   - _target_: kazu.steps.linking.post_processing.disambiguation.strategies.AnnotationLevelDisambiguationStrategy
     confidence: ${confidence.disambiguation_possible}
 
