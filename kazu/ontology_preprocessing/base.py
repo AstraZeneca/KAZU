@@ -75,8 +75,8 @@ def load_global_actions(
     """
     global_actions_path = as_path(path)
     if global_actions_path.exists():
-        with global_actions_path.open(mode="r") as jsonlf:
-            global_actions = GlobalParserActions.from_json(json.load(jsonlf))
+        with global_actions_path.open(mode="r") as jsonf:
+            global_actions = GlobalParserActions.from_json(json.load(jsonf))
     else:
         raise ValueError(f"global actions do not exist at {path}")
     return global_actions
