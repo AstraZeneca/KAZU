@@ -110,7 +110,7 @@ class OpsinStep(Step):
                         mapping = None
                         for spaces in range(2,-1,-1): # look up to two spaces out
                             if mapping == None:
-                                testStr, ridx, fidx = self.extendString(ent, section.get_text(), spaces)
+                                testStr, ridx, fidx = self.extendString(ent, section.text, spaces)
                                 mapping = self.parseString(testStr)
                                 if mapping != None and testStr != ent.match: # update entity match to expanded string
                                     ent.match = testStr
