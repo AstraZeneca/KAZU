@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, List, Any
+from typing import Any
 
 from kazu.data.data import Document
 from kazu.annotation.label_studio import (
@@ -7,7 +7,7 @@ from kazu.annotation.label_studio import (
 )
 
 LSView = str
-LSTask = Dict[str, Any]
+LSTask = dict[str, Any]
 
 
 class LSWebUtils:
@@ -17,7 +17,7 @@ class LSWebUtils:
         self.ls_view_generator = ls_view_generator
         self.ls_converter = ls_converter
 
-    def kazu_doc_to_ls(self, doc: Document) -> Tuple[LSView, List[LSTask]]:
+    def kazu_doc_to_ls(self, doc: Document) -> tuple[LSView, list[LSTask]]:
         ls_tasks = list(self.ls_converter.convert_single_doc_to_tasks(doc))
         ls_view = self.ls_view_generator.create_main_view(ls_tasks)
         return ls_view, ls_tasks

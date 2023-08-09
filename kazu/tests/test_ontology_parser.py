@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Literal, List
+from typing import Optional, Literal
 
 import pytest
 from kazu.data.data import (
@@ -63,7 +63,7 @@ def parser_data_with_split_equiv_id_set():
 
 def setup_databases(
     base_path: Path,
-    curations: Optional[List[CuratedTerm]] = None,
+    curations: Optional[list[CuratedTerm]] = None,
     global_actions: Optional[GlobalParserActions] = None,
     parser_data_includes_target_synonym: bool = False,
     parser_data_has_split_equiv_id_set: bool = False,

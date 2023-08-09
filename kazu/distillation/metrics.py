@@ -1,4 +1,3 @@
-from typing import List
 
 try:
     from seqeval.metrics import f1_score
@@ -18,7 +17,7 @@ def accuracy(preds, labels):
 
 
 def numeric_label_f1_score(
-    preds: List[List[int]], golds: List[List[int]], label_list: List[str]
+    preds: list[list[int]], golds: list[list[int]], label_list: list[str]
 ) -> float:
     """Function to calculate F1 score using seqeval and numerical format
     labels.

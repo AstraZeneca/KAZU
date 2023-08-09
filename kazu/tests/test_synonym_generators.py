@@ -1,6 +1,6 @@
 import unicodedata
 from sys import maxunicode
-from typing import Set, Union
+from typing import Union
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -33,7 +33,7 @@ dummy_equiv_ids = EquivalentIdSet(
 
 def check_generator_result(
     input_str: str,
-    expected_syns: Set[str],
+    expected_syns: set[str],
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
 
@@ -49,7 +49,7 @@ def check_generator_result(
         )
     }
 
-    result: Set[SynonymTerm] = generator(term)
+    result: set[SynonymTerm] = generator(term)
 
     new_syns = set(term for synonym in result for term in synonym.terms)
     assert new_syns == expected_syns

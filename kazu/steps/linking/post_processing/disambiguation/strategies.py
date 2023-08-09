@@ -3,7 +3,8 @@ import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from os import getenv
-from typing import Tuple, Optional, Set, Dict, Iterable, FrozenSet
+from typing import Optional
+from collections.abc import Iterable
 
 import numpy as np
 
@@ -52,8 +53,8 @@ class DisambiguationStrategy(ABC):
 
     @abstractmethod
     def disambiguate(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         """subset a set of :class:`.EquivalentIdSet`\\ .
 
         :param id_sets:
@@ -64,8 +65,8 @@ class DisambiguationStrategy(ABC):
         pass
 
     def __call__(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         self.prepare(document)
         return self.disambiguate(id_sets, document, parser_name)
 
@@ -79,7 +80,7 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
 
     def __init__(self, confidence: DisambiguationConfidence):
         super().__init__(confidence)
-        self.mapped_ids: Set[Tuple[str, str, str]] = set()
+        self.mapped_ids: set[tuple[str, str, str]] = set()
 
     def prepare(self, document: Document) -> None:
         """Note, this method can't be cached, as the state of the document may
@@ -101,8 +102,8 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
         )
 
     def disambiguate(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         found_id_sets = set()
         for id_set in id_sets:
             for idx, source in id_set.ids_and_source:
@@ -149,7 +150,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
             self.relevant_aggregation_strategies = set(relevant_aggregation_strategies)
         self.synonym_db = SynonymDatabase()
         self.scorer = scorer
-        self.parser_name_to_doc_representation: Dict[str, np.ndarray] = {}
+        self.parser_name_to_doc_representation: dict[str, np.ndarray] = {}
 
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document) -> None:
@@ -172,8 +173,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     @staticmethod
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE", 20)))
     def cacheable_build_document_representation(
-        scorer: TfIdfScorer, doc: Document, parsers: FrozenSet[str]
-    ) -> Dict[str, np.ndarray]:
+        scorer: TfIdfScorer, doc: Document, parsers: frozenset[str]
+    ) -> dict[str, np.ndarray]:
         """static cached method, so we don't need to recalculate document
         representation between different instances of this class.
 
@@ -193,8 +194,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     def build_id_set_representation(
         self,
         parser_name: str,
-        id_sets: Set[EquivalentIdSet],
-    ) -> Dict[NormalisedSynonymStr, Set[EquivalentIdSet]]:
+        id_sets: set[EquivalentIdSet],
+    ) -> dict[NormalisedSynonymStr, set[EquivalentIdSet]]:
         result = defaultdict(set)
         for id_set in id_sets:
             for idx in id_set.ids:
@@ -209,8 +210,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         return result
 
     def disambiguate(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         if parser_name not in self.scorer.parser_to_vectorizer:
             return set()
 
@@ -247,8 +248,8 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
         pass
 
     def disambiguate(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         best_score = 0
         best_equiv_id_sets = set()
 

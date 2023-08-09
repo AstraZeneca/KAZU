@@ -1,4 +1,3 @@
-from typing import List
 
 import stanza
 from stanza.models.common.doc import Sentence
@@ -87,7 +86,7 @@ class StanzaStep(Step):
     def __call__(self, doc: Document) -> None:
         for section in doc.sections:
             stanza_doc = self.stanza_pipeline(section.text)
-            sentences: List[Sentence] = stanza_doc.sentences
+            sentences: list[Sentence] = stanza_doc.sentences
             char_spans = (
                 CharSpan(sent.tokens[0].start_char, sent.tokens[-1].end_char) for sent in sentences
             )

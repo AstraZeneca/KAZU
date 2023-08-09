@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from kazu.data.data import Document
 from kazu.ontology_preprocessing.base import OntologyParser

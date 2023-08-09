@@ -1,6 +1,7 @@
 from functools import wraps
 import traceback
-from typing import Any, Callable, List, Protocol, Tuple, TypeVar, Iterable
+from typing import Any, Callable, Protocol, TypeVar
+from collections.abc import Iterable
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.ontology_preprocessing.base import OntologyParser
@@ -18,7 +19,7 @@ class Step(Protocol):
         # it being a classmethod is quite useful.
         return cls.__name__
 
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: list[Document]) -> tuple[list[Document], list[Document]]:
         """Process documents and respond with processed and failed documents.
 
         Note that many steps will be decorated by :func:`~.kazu.steps.step.document_iterating_step`
@@ -59,7 +60,7 @@ Self = TypeVar("Self")
 
 def document_iterating_step(
     per_doc_callable: Callable[[Self, Document], Any]
-) -> Callable[[Self, List[Document]], Tuple[List[Document], List[Document]]]:
+) -> Callable[[Self, list[Document]], tuple[list[Document], list[Document]]]:
     """Handle a list of :class:`~kazu.data.data.Document`\\ s and add error
     handling.
 
@@ -89,7 +90,7 @@ def document_iterating_step(
     """
     # note - this excludes __annotations__ as the returned function has a different type signature
     @wraps(per_doc_callable, assigned=("__module__", "__name__", "__qualname__", "__doc__"))
-    def step_call(self: Self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def step_call(self: Self, docs: list[Document]) -> tuple[list[Document], list[Document]]:
         failed_docs = []
         for doc in docs:
             try:
@@ -103,8 +104,8 @@ def document_iterating_step(
 
 
 def document_batch_step(
-    batch_doc_callable: Callable[[Self, List[Document]], Any]
-) -> Callable[[Self, List[Document]], Tuple[List[Document], List[Document]]]:
+    batch_doc_callable: Callable[[Self, list[Document]], Any]
+) -> Callable[[Self, list[Document]], tuple[list[Document], list[Document]]]:
     """Add error handling to a method that processes batches of
     :class:`~kazu.data.data.Document`\\ s.
 
@@ -133,7 +134,7 @@ def document_batch_step(
     """
     # note - this excludes __annotations__ as the returned function has a different type signature
     @wraps(batch_doc_callable, assigned=("__module__", "__name__", "__qualname__", "__doc__"))
-    def step_call(self: Self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def step_call(self: Self, docs: list[Document]) -> tuple[list[Document], list[Document]]:
         failed_docs = []
         try:
             batch_doc_callable(self, docs)

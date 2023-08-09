@@ -3,7 +3,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import List, Tuple, Dict, Optional, Set
+from typing import Optional
 
 import torch
 from kazu.data.data import Entity, ENTITY_OUTSIDE_SYMBOL, ENTITY_START_SYMBOL, IS_SUBSPAN
@@ -17,13 +17,13 @@ class TokenizedWord:
     """A convenient container for a word, which may be split into multiple
     tokens by e.g. WordPiece tokenisation."""
 
-    token_ids: List[int]
+    token_ids: list[int]
     #: token string representations
-    tokens: List[str]
+    tokens: list[str]
     #: tensor of token logit softmax
     token_confidences: Tensor
     #: character indices of tokens
-    token_offsets: List[Tuple[int, int]]
+    token_offsets: list[tuple[int, int]]
     #: char start index of word
     word_char_start: int
     #: char end index of word
@@ -40,7 +40,7 @@ class TokWordSpan:
     #: is this a subspan? only relevant if using SmartSpanFinder
     subspan: Optional[bool] = None
     #: words associated with this span
-    tok_words: List[TokenizedWord] = field(default_factory=list)
+    tok_words: list[TokenizedWord] = field(default_factory=list)
 
 
 class SpanFinder(ABC):
@@ -60,21 +60,21 @@ class SpanFinder(ABC):
     This is a list of TokWordSpan.
     """
 
-    def __init__(self, text: str, id2label: Dict[int, str]):
+    def __init__(self, text: str, id2label: dict[int, str]):
         """
 
         :param text: the raw text to be processed
         :param id2label: BIO to class label mappings
         """
         self.text = text
-        self.active_spans: List[TokWordSpan] = []
-        self.words: List[TokenizedWord] = []
+        self.active_spans: list[TokWordSpan] = []
+        self.words: list[TokenizedWord] = []
         self.span_breaking_chars = {"(", ")", ";"}
-        self.closed_spans: List[TokWordSpan] = []
+        self.closed_spans: list[TokWordSpan] = []
         self.id2label = id2label
 
     @abstractmethod
-    def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
+    def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
         """return a set of Tuple[<BIO label>,Optional[<class label>]] for a
         TokenizedWord. Optional[<class label>] is None if the BIO label is "O".
 
@@ -85,7 +85,7 @@ class SpanFinder(ABC):
 
     @abstractmethod
     def span_continue_condition(
-        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
+        self, word: TokenizedWord, bio_and_class_labels: set[tuple[str, Optional[str]]]
     ) -> bool:
         """Based upon some logic, determine whether a span should continue or
         not.
@@ -97,7 +97,7 @@ class SpanFinder(ABC):
         pass
 
     def _update_active_spans(
-        self, bio_and_class_labels: Set[Tuple[str, Optional[str]]], word: TokenizedWord
+        self, bio_and_class_labels: set[tuple[str, Optional[str]]], word: TokenizedWord
     ) -> None:
         """updates any active spans. If a B label is detected in an active
         span, make a copy and add to closed spans, as it's likely the start of
@@ -120,7 +120,7 @@ class SpanFinder(ABC):
 
     def start_span(
         self,
-        bio_and_class_labels: Set[Tuple[str, Optional[str]]],
+        bio_and_class_labels: set[tuple[str, Optional[str]]],
         word: TokenizedWord,
         subspan: Optional[bool],
     ) -> None:
@@ -152,7 +152,7 @@ class SpanFinder(ABC):
         """
         pass
 
-    def __call__(self, words: List[TokenizedWord]) -> None:
+    def __call__(self, words: list[TokenizedWord]) -> None:
         for word in words:
             self.process_next_word(word)
         self.close_spans()
@@ -164,12 +164,12 @@ class SimpleSpanFinder(SpanFinder):
     Uses highest confidence labels only
     """
 
-    def __init__(self, text: str, id2label: Dict[int, str]):
+    def __init__(self, text: str, id2label: dict[int, str]):
 
         super().__init__(text, id2label)
 
-    def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
-        bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
+    def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
+        bio_and_class_labels: set[tuple[str, Optional[str]]] = set()
         most_conf_index_per_token = torch.argmax(word.token_confidences, dim=1)
         for confidence_index in most_conf_index_per_token:
             bio_label = self.id2label[confidence_index.item()]
@@ -192,7 +192,7 @@ class SimpleSpanFinder(SpanFinder):
         return bio_and_class_labels
 
     def span_continue_condition(
-        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
+        self, word: TokenizedWord, bio_and_class_labels: set[tuple[str, Optional[str]]]
     ) -> bool:
         """A potential entity span will end if any of the following conditions
         are met:
@@ -235,21 +235,21 @@ class SmartSpanFinder(SpanFinder):
     different classes may be produced, if the associated label is above some threshold
     """
 
-    def __init__(self, threshold: float, text: str, id2label: Dict[int, str]):
+    def __init__(self, threshold: float, text: str, id2label: dict[int, str]):
         super().__init__(text, id2label)
         self.text = text
         self.threshold = threshold
         # we include a whitespace here so that new spans (potential entities) are started for each word
         self.span_breaking_chars = {"(", ")", ";", " "}
 
-    def get_bio_and_class_labels(self, word: TokenizedWord) -> Set[Tuple[str, Optional[str]]]:
+    def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
         """Returns bio and class labels if their confidence is above the
         configured threshold.
 
         :param word:
         :return:
         """
-        bio_and_class_labels: Set[Tuple[str, Optional[str]]] = set()
+        bio_and_class_labels: set[tuple[str, Optional[str]]] = set()
         indices_of_confs_above_threshold = torch.argwhere(word.token_confidences > self.threshold)
         # the 0th dimension is the order of the tokens in the word, which we don't need.
         # The first dimension represents which label the confidence score relates to.
@@ -274,7 +274,7 @@ class SmartSpanFinder(SpanFinder):
         return bio_and_class_labels
 
     def span_continue_condition(
-        self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
+        self, word: TokenizedWord, bio_and_class_labels: set[tuple[str, Optional[str]]]
     ) -> bool:
         """A potential entity span must continue if any of the following
         conditions are met:
@@ -332,9 +332,9 @@ class TokenizedWordProcessor:
     def __init__(
         self,
         confidence_threshold: Optional[float],
-        id2label: Dict[int, str],
+        id2label: dict[int, str],
         detect_subspans: bool = False,
-        strip_re: Optional[Dict[str, str]] = None,
+        strip_re: Optional[dict[str, str]] = None,
     ):
         """
 
@@ -384,15 +384,15 @@ class TokenizedWordProcessor:
         else:
             return self._make_simple_span_finder(text)
 
-    def __call__(self, words: List[TokenizedWord], text: str, namespace: str) -> List[Entity]:
+    def __call__(self, words: list[TokenizedWord], text: str, namespace: str) -> list[Entity]:
         span_finder: SpanFinder = self.make_span_finder(text)
         span_finder(words)
         ents = self.spans_to_entities(span_finder.closed_spans, text, namespace)
         return ents
 
     def spans_to_entities(
-        self, spans: List[TokWordSpan], text: str, namespace: str
-    ) -> List[Entity]:
+        self, spans: list[TokWordSpan], text: str, namespace: str
+    ) -> list[Entity]:
         """Convert spans to instances of Entity, adding in namespace info as
         appropriate.
 
@@ -432,7 +432,7 @@ class TokenizedWordProcessor:
 
         return entities
 
-    def calculate_span_offsets(self, words: List[TokenizedWord]) -> Tuple[int, int]:
+    def calculate_span_offsets(self, words: list[TokenizedWord]) -> tuple[int, int]:
         starts, ends = [], []
         for word in words:
             starts.append(word.word_char_start)
@@ -441,7 +441,7 @@ class TokenizedWordProcessor:
 
     def attempt_strip_suffixes(
         self, start: int, end: int, match_str: str, clazz: str
-    ) -> Tuple[str, int]:
+    ) -> tuple[str, int]:
         """Transformers sometimes get confused about precise offsets, depending
         on the training data (e.g. "COX2" is often classified as "COX2 gene").
         This method offers light post-processing to correct these, for better

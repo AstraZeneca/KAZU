@@ -36,7 +36,7 @@ limitations under the License.
 
 import logging
 import os
-from typing import List, Tuple, Iterable
+from collections.abc import Iterable
 
 from transformers import InputExample, DataProcessor
 
@@ -50,42 +50,42 @@ logger = logging.getLogger(__name__)
 class SeqTagProcessor(DataProcessor):  # type: ignore[misc]
     """Base class for data converters for sequence tagging data sets."""
 
-    def get_train_examples(self, data_dir: str) -> List[InputExample]:
+    def get_train_examples(self, data_dir: str) -> list[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the
         train set."""
         raise NotImplementedError
 
-    def get_dev_examples(self, data_dir: str) -> List[InputExample]:
+    def get_dev_examples(self, data_dir: str) -> list[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the dev
         set."""
         raise NotImplementedError
 
-    def get_aug_examples(self, data_dir: str) -> List[InputExample]:
+    def get_aug_examples(self, data_dir: str) -> list[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the aug
         set."""
         raise NotImplementedError
 
 
 class NerProcessor(SeqTagProcessor):
-    def get_train_examples(self, data_dir: str) -> List[InputExample]:
+    def get_train_examples(self, data_dir: str) -> list[InputExample]:
         return self._create_examples(
             self._read_data(os.path.join(data_dir, "train_dev.tsv")), "train"
         )
 
-    def get_dev_examples(self, data_dir: str) -> List[InputExample]:
+    def get_dev_examples(self, data_dir: str) -> list[InputExample]:
         return self._create_examples(self._read_data(os.path.join(data_dir, "devel.tsv")), "dev")
 
-    def get_test_examples(self, data_dir: str) -> List[InputExample]:
+    def get_test_examples(self, data_dir: str) -> list[InputExample]:
         """Gets a collection of :class:`transformers.InputExample` for the test
         set."""
         return self._create_examples(self._read_data(os.path.join(data_dir, "test.tsv")), "test")
 
-    def get_aug_examples(self, data_dir: str) -> List[InputExample]:
+    def get_aug_examples(self, data_dir: str) -> list[InputExample]:
         return self._create_examples(self._read_tsv(os.path.join(data_dir, "train_aug.tsv")), "aug")
 
     def _create_examples(
-        self, lines: Iterable[Tuple[str, str]], set_type: str
-    ) -> List[InputExample]:
+        self, lines: Iterable[tuple[str, str]], set_type: str
+    ) -> list[InputExample]:
         examples = []
         for (i, line) in enumerate(lines):
             guid = "%s-%s" % (set_type, i)
@@ -96,12 +96,12 @@ class NerProcessor(SeqTagProcessor):
         return examples
 
     @classmethod
-    def _read_data(cls, input_file: PathLike) -> List[Tuple[str, str]]:
+    def _read_data(cls, input_file: PathLike) -> list[tuple[str, str]]:
         """Reads a BIO data."""
         with open(input_file) as inpFilept:
             lines = []
-            words: List[str] = []
-            labels: List[str] = []
+            words: list[str] = []
+            labels: list[str] = []
             continualLineErrorCnt = 0
             for lineIdx, line in enumerate(inpFilept):
                 contents = line.splitlines()[0]

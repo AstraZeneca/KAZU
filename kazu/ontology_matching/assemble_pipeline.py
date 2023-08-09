@@ -1,6 +1,5 @@
 from copy import deepcopy
 from string import ascii_lowercase
-from typing import List
 
 import spacy
 from spacy.lang.en import English, EnglishDefaults
@@ -70,7 +69,7 @@ class KazuCustomEnglish(English):
 
 
 def main(
-    output_dir: PathLike, parsers: List[OntologyParser], span_key: str = SPAN_KEY
+    output_dir: PathLike, parsers: list[OntologyParser], span_key: str = SPAN_KEY
 ) -> spacy.language.Language:
     """Generates, serializes and returns a Spacy pipeline with an
     :class:`~kazu.ontology_matching.ontology_matcher.OntologyMatcher`.

@@ -25,7 +25,7 @@ However, because the problem only materializes for kazu for intersphinx referenc
 to the two inspirations above, the implementation is not related.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 
 from docutils.nodes import Element, TextElement
 from sphinx.addnodes import pending_xref
@@ -58,10 +58,10 @@ def override_cross_reference(
         return None
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
     # some light experimentation suggests 'env' is necessary for the rebuild over just 'html'
     app.add_config_value(
-        "cross_reference_override_mapping", default={}, rebuild="env", types=[Dict[str, str]]
+        "cross_reference_override_mapping", default={}, rebuild="env", types=[dict[str, str]]
     )
     app.connect("missing-reference", override_cross_reference)
 

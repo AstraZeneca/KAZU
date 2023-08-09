@@ -1,5 +1,6 @@
 from itertools import groupby
-from typing import Callable, Iterable, Tuple, TypeVar, TYPE_CHECKING
+from typing import Callable, TypeVar, TYPE_CHECKING
+from collections.abc import Iterable
 
 # see https://github.com/python/typeshed/tree/master/stdlib/_typeshed
 # In short, this is needed as
@@ -22,6 +23,6 @@ as the keys must support comparison in order to be sorted using :func:`sorted`\\
 
 def sort_then_group(
     items: Iterable[Item], key_func: Callable[[Item], Key]
-) -> Iterable[Tuple[Key, Iterable[Item]]]:
+) -> Iterable[tuple[Key, Iterable[Item]]]:
     sorted_items = sorted(items, key=key_func)
     yield from groupby(sorted_items, key=key_func)

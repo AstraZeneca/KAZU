@@ -1,7 +1,8 @@
 import abc
 import itertools
 from abc import ABC
-from typing import List, Optional, Set, Iterable, Dict, FrozenSet, Tuple
+from typing import Optional
+from collections.abc import Iterable
 
 from kazu.data.data import (
     Document,
@@ -22,13 +23,13 @@ class MappingFactory:
 
     @staticmethod
     def create_mapping_from_id_sets(
-        id_sets: Set[EquivalentIdSet],
+        id_sets: set[EquivalentIdSet],
         parser_name: str,
         string_match_strategy: str,
         string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str],
         disambiguation_confidence: Optional[DisambiguationConfidence] = None,
-        additional_metadata: Optional[Dict] = None,
+        additional_metadata: Optional[dict] = None,
     ) -> Iterable[Mapping]:
 
         for id_set in id_sets:
@@ -50,7 +51,7 @@ class MappingFactory:
         string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str],
         disambiguation_confidence: Optional[DisambiguationConfidence] = None,
-        additional_metadata: Optional[Dict] = None,
+        additional_metadata: Optional[dict] = None,
     ) -> Iterable[Mapping]:
         for idx, source in id_set.ids_and_source:
             yield MappingFactory.create_mapping(
@@ -67,7 +68,7 @@ class MappingFactory:
     @staticmethod
     def _get_default_label_and_metadata_from_parser(
         parser_name: str, idx: str
-    ) -> Tuple[str, Metadata]:
+    ) -> tuple[str, Metadata]:
         metadata = MetadataDatabase().get_by_idx(name=parser_name, idx=idx)
         default_label = metadata.pop(DEFAULT_LABEL)
         assert isinstance(default_label, str)
@@ -82,7 +83,7 @@ class MappingFactory:
         string_match_confidence: StringMatchConfidence,
         disambiguation_strategy: Optional[str] = None,
         disambiguation_confidence: Optional[DisambiguationConfidence] = None,
-        additional_metadata: Optional[Dict] = None,
+        additional_metadata: Optional[dict] = None,
         xref_source_parser_name: Optional[str] = None,
     ) -> Mapping:
         default_label, metadata = MappingFactory._get_default_label_and_metadata_from_parser(
@@ -124,7 +125,7 @@ class MappingStrategy(ABC):
     def __init__(
         self,
         confidence: StringMatchConfidence,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_strategies: Optional[list[DisambiguationStrategy]] = None,
         disambiguation_essential: bool = False,
     ):
         """
@@ -163,9 +164,9 @@ class MappingStrategy(ABC):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         """
         Algorithms should override this method to return a set of the "best"
         :class:`.SynonymTermWithMetrics` for a given query string.
@@ -185,8 +186,8 @@ class MappingStrategy(ABC):
         pass
 
     def disambiguate_if_required(
-        self, filtered_terms: Set[SynonymTermWithMetrics], document: Document, parser_name: str
-    ) -> Tuple[Set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
+        self, filtered_terms: set[SynonymTermWithMetrics], document: Document, parser_name: str
+    ) -> tuple[set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
         """applies disambiguation strategies if configured, and either
         len(filtered_terms) > 1 or any of the filtered_terms are ambiguous. If
         ids are still ambiguous after all strategies have run, the
@@ -226,7 +227,7 @@ class MappingStrategy(ABC):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
     ) -> Iterable[Mapping]:
         """
 
@@ -270,9 +271,9 @@ class ExactMatchMappingStrategy(MappingStrategy):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         return set(term for term in terms if term.exact_match)
 
 
@@ -310,9 +311,9 @@ class SymbolMatchMappingStrategy(MappingStrategy):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         return set(term for term in terms if cls.match_symbols(ent_match_norm, term.term_norm))
 
 
@@ -329,7 +330,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
     def __init__(
         self,
         confidence: StringMatchConfidence,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_strategies: Optional[list[DisambiguationStrategy]] = None,
         disambiguation_essential: bool = False,
         min_term_norm_len_to_consider: int = 3,
     ):
@@ -352,9 +353,9 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         norm_tokens = set(ent_match_norm.split(" "))
 
         filtered_terms_and_len = [
@@ -386,7 +387,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
     def __init__(
         self,
         confidence: StringMatchConfidence,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_strategies: Optional[list[DisambiguationStrategy]] = None,
         disambiguation_essential: bool = False,
         search_threshold: float = 80.0,
         symbolic_only: bool = False,
@@ -413,9 +414,9 @@ class StrongMatchMappingStrategy(MappingStrategy):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         if self.symbolic_only:
             relevant_terms_with_scores = [
                 (term, score)
@@ -452,7 +453,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         self,
         confidence: StringMatchConfidence,
         complex_string_scorer: StringSimilarityScorer,
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        disambiguation_strategies: Optional[list[DisambiguationStrategy]] = None,
         disambiguation_essential: bool = False,
         search_threshold: float = 80.0,
         embedding_threshold: float = 0.60,
@@ -486,9 +487,9 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         synonym_term_sorted_by_score = sorted(
             super().filter_terms(
                 ent_match=ent_match,

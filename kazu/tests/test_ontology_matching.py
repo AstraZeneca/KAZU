@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 import pytest
 import spacy
@@ -42,7 +42,7 @@ def test_constructor():
 
 def test_initialize():
     nlp = English()
-    config: Dict[str, Any] = {"parser_name_to_entity_type": {}}
+    config: dict[str, Any] = {"parser_name_to_entity_type": {}}
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
     # no matcher rules are defined
@@ -56,7 +56,7 @@ example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
-def write_curations(path: Path, terms: List[CuratedTerm]):
+def write_curations(path: Path, terms: list[CuratedTerm]):
     with open(path, "w") as f:
         for curation in terms:
             f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")

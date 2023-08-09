@@ -7,16 +7,12 @@ from functools import cache
 from pathlib import Path
 from typing import (
     cast,
-    List,
-    Tuple,
-    Dict,
     Any,
-    Iterable,
-    Set,
     Optional,
     Union,
     overload,
 )
+from collections.abc import Iterable
 from urllib import parse
 
 import pandas as pd
@@ -52,7 +48,7 @@ class JsonLinesOntologyParser(OntologyParser):
     details
     """
 
-    def read(self, path: str) -> Iterable[Dict[str, Any]]:
+    def read(self, path: str) -> Iterable[dict[str, Any]]:
         for json_path in Path(path).glob("*.json"):
             with json_path.open(mode="r") as f:
                 for line in f:
@@ -62,8 +58,8 @@ class JsonLinesOntologyParser(OntologyParser):
         return pd.DataFrame.from_records(self.json_dict_to_parser_records(self.read(self.in_path)))
 
     def json_dict_to_parser_records(
-        self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[Dict[str, Any]]:
+        self, jsons_gen: Iterable[dict[str, Any]]
+    ) -> Iterable[dict[str, Any]]:
         """For a given input json (represented as a python dict), yield
         dictionary record(s) compatible with the expected.
 
@@ -91,8 +87,8 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         return string.split("_")[0]
 
     def json_dict_to_parser_records(
-        self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[Dict[str, Any]]:
+        self, jsons_gen: Iterable[dict[str, Any]]
+    ) -> Iterable[dict[str, Any]]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
             idx = self.look_for_mondo(json_dict["id"], json_dict.get("dbXRefs", []))
@@ -111,7 +107,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                         "dbXRefs": dbXRefs,
                     }
 
-    def look_for_mondo(self, ot_id: str, db_xrefs: List[str]) -> str:
+    def look_for_mondo(self, ot_id: str, db_xrefs: list[str]) -> str:
         if "MONDO" in ot_id:
             return ot_id
         for x in db_xrefs:
@@ -139,7 +135,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         self,
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
-    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
+    ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """since non symbolic gene symbols are also frequently ambiguous, we
         override this method accordingly to disable all synonym resolution, and
         rely on disambiguation to decide on 'true' mappings. Answers on a
@@ -163,8 +159,8 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         return "ENSEMBL"
 
     def json_dict_to_parser_records(
-        self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[Dict[str, Any]]:
+        self, jsons_gen: Iterable[dict[str, Any]]
+    ) -> Iterable[dict[str, Any]]:
         for json_dict in jsons_gen:
             # due to a bug in OT data, TEC genes have "gene" as a synonym. Sunce they're uninteresting, we just filter
             # them
@@ -215,8 +211,8 @@ class OpenTargetsMoleculeOntologyParser(JsonLinesOntologyParser):
         return "CHEMBL"
 
     def json_dict_to_parser_records(
-        self, jsons_gen: Iterable[Dict[str, Any]]
-    ) -> Iterable[Dict[str, Any]]:
+        self, jsons_gen: Iterable[dict[str, Any]]
+    ) -> Iterable[dict[str, Any]]:
         for json_dict in jsons_gen:
             cross_references = json_dict.get("crossReferences", {})
             default_label = json_dict["name"]
@@ -249,7 +245,7 @@ RdfRef = Union[rdflib.paths.Path, rdflib.term.Node, str]
 # Note - lists are actually normally provided here through hydra config
 # but there's apparently no way of type hinting
 # 'any iterable of length two where the items have these types'
-PredicateAndValue = Tuple[RdfRef, rdflib.term.Node]
+PredicateAndValue = tuple[RdfRef, rdflib.term.Node]
 
 
 class RDFGraphParser(OntologyParser):
@@ -438,8 +434,8 @@ class SKOSXLGraphParser(RDFGraphParser):
 class GeneOntologyParser(OntologyParser):
     _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
 
-    instances: Set[str] = set()
-    instances_in_dbs: Set[str] = set()
+    instances: set[str] = set()
+    instances_in_dbs: set[str] = set()
 
     def __init__(
         self,
@@ -470,7 +466,7 @@ class GeneOntologyParser(OntologyParser):
 
     def populate_databases(
         self, force: bool = False, return_curations: bool = False
-    ) -> Optional[List[CuratedTerm]]:
+    ) -> Optional[list[CuratedTerm]]:
         curations = super().populate_databases(force=force, return_curations=return_curations)
         self.instances_in_dbs.add(self.name)
 
@@ -505,7 +501,7 @@ class GeneOntologyParser(OntologyParser):
         # type cast is necessary because iterating over an rdflib query result gives different types depending on the kind
         # of query, so rdflib gives a Union here, but we know it should be a ResultRow because we know we should have a
         # select query
-        list_res = cast(List[rdflib.query.ResultRow], list(result))
+        list_res = cast(list[rdflib.query.ResultRow], list(result))
         for row in list_res:
             idx = str(row.goid)
             label = str(row.label)
@@ -799,15 +795,15 @@ class EnsemblOntologyParser(OntologyParser):
         ids = []
         default_label = []
         all_syns = []
-        all_mapping_type: List[str] = []
+        all_mapping_type: list[str] = []
         docs = data["response"]["docs"]
         for doc in docs:
 
-            def get_with_default_list(key: str) -> List[str]:
+            def get_with_default_list(key: str) -> list[str]:
                 found = doc.get(key, [])
                 if not isinstance(found, list):
                     found = [found]
-                return cast(List[str], found)
+                return cast(list[str], found)
 
             ensembl_gene_id = doc.get("ensembl_gene_id", None)
             name = doc.get("name", None)
@@ -815,7 +811,7 @@ class EnsemblOntologyParser(OntologyParser):
                 continue
             else:
                 # find synonyms
-                synonyms: List[Tuple[str, str]] = []
+                synonyms: list[tuple[str, str]] = []
                 for hgnc_key in keys_to_check:
                     synonyms_this_entity = get_with_default_list(hgnc_key)
                     for potential_synonym in synonyms_this_entity:
@@ -912,7 +908,7 @@ class CellosaurusOntologyParser(OntologyParser):
         self,
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
-    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
+    ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """Treat all synonyms as seperate cell lines.
 
         :param ids_and_source:

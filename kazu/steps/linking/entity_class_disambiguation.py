@@ -1,4 +1,5 @@
-from typing import List, TypedDict, Dict, NamedTuple, Iterable, Set, Tuple, DefaultDict, FrozenSet
+from typing import TypedDict, NamedTuple, DefaultDict
+from collections.abc import Iterable
 from collections import defaultdict
 
 import numpy as np
@@ -23,20 +24,20 @@ class TfIdfDisambiguationEntry(NamedTuple):
 
 class DisambiguationEntry(TypedDict):
     entity_class: str
-    relevant_text: List[str]
+    relevant_text: list[str]
     thresh: float
 
 
-EntSectionPair = Tuple[Entity, Section]
+EntSectionPair = tuple[Entity, Section]
 
 
 class EntityClassTfIdfScorer:
-    def __init__(self, spans_to_tfidf_disambiguator: Dict[str, List[TfIdfDisambiguationEntry]]):
+    def __init__(self, spans_to_tfidf_disambiguator: dict[str, list[TfIdfDisambiguationEntry]]):
         self.spans_to_tfidf_disambiguator = spans_to_tfidf_disambiguator
 
     @staticmethod
     def from_spans_to_sentence_disambiguator(
-        spans_text_disambiguator: Dict[str, List[DisambiguationEntry]]
+        spans_text_disambiguator: dict[str, list[DisambiguationEntry]]
     ) -> "EntityClassTfIdfScorer":
         return EntityClassTfIdfScorer(
             EntityClassTfIdfScorer.build_tfidf_documents(spans_text_disambiguator)
@@ -44,8 +45,8 @@ class EntityClassTfIdfScorer:
 
     @staticmethod
     def build_tfidf_documents(
-        spans_text_disambiguator: Dict[str, List[DisambiguationEntry]]
-    ) -> Dict[str, List[TfIdfDisambiguationEntry]]:
+        spans_text_disambiguator: dict[str, list[DisambiguationEntry]]
+    ) -> dict[str, list[TfIdfDisambiguationEntry]]:
         span_to_tfidf_disambiguator = {}
         for span, disambiguation_entries in spans_text_disambiguator.items():
             span_to_tfidf_disambiguator[span] = [
@@ -99,7 +100,7 @@ class EntityClassTfIdfScorer:
 
 
 class EntityClassDisambiguationStep(Step):
-    def __init__(self, context: Dict[str, List[DisambiguationEntry]]):
+    def __init__(self, context: dict[str, list[DisambiguationEntry]]):
         """Optionally disambiguates the entity class (anatomy, drug, etc.) of
         entities that exactly share a span in a document.
 
@@ -135,9 +136,9 @@ class EntityClassDisambiguationStep(Step):
             sentence_context_spans = sent_spans[context_start_idx:context_end_idx]
             return section.text[sentence_context_spans[0].start : sentence_context_spans[-1].end]
 
-    def spangrouped_ent_section_pairs(self, doc: Document) -> Iterable[List[EntSectionPair]]:
+    def spangrouped_ent_section_pairs(self, doc: Document) -> Iterable[list[EntSectionPair]]:
         spans_to_ents_and_sections: DefaultDict[
-            Tuple[int, FrozenSet[CharSpan]], List[EntSectionPair]
+            tuple[int, frozenset[CharSpan]], list[EntSectionPair]
         ] = defaultdict(list)
         for section_idx, section in enumerate(doc.sections):
             for ent in section.entities:
@@ -147,14 +148,14 @@ class EntityClassDisambiguationStep(Step):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        drop_set: Dict[Section, Set[Entity]] = defaultdict(set)
+        drop_set: dict[Section, set[Entity]] = defaultdict(set)
         for spansharing_ent_section_pairs in self.spangrouped_ent_section_pairs(doc):
             if len(spansharing_ent_section_pairs) == 1:
                 # only a single entity; span(s) are unambiguous for entity class
                 continue
 
             representative_ent, representative_section = spansharing_ent_section_pairs[0]
-            ents: List[Entity] = [ent for ent, section in spansharing_ent_section_pairs]
+            ents: list[Entity] = [ent for ent, section in spansharing_ent_section_pairs]
             class_to_ents = defaultdict(set)
             for ent in ents:
                 class_to_ents[ent.entity_class].add(ent)

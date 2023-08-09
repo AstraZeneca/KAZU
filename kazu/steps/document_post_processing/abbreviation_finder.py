@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from spacy.lang.en import English
 
@@ -17,7 +17,7 @@ class AbbreviationFinderStep(Step):
     abbreviations learnt in one section will be applied throughout the others.
     """
 
-    def __init__(self, exclude_abbrvs: Optional[List[str]] = None):
+    def __init__(self, exclude_abbrvs: Optional[list[str]] = None):
         self.nlp = English(max_length=10**8)
         self.detector = KazuAbbreviationDetector(
             self.nlp, namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs

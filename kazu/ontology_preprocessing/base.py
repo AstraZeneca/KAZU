@@ -6,17 +6,12 @@ from collections import defaultdict, Counter
 from enum import auto
 from typing import (
     cast,
-    List,
-    Tuple,
-    Dict,
-    Iterable,
-    Set,
     Optional,
-    FrozenSet,
     DefaultDict,
     Literal,
     Any,
 )
+from collections.abc import Iterable
 
 import pandas as pd
 from kazu.data.data import (
@@ -50,7 +45,7 @@ IDX = "idx"
 SYN = "syn"
 MAPPING_TYPE = "mapping_type"
 DATA_ORIGIN = "data_origin"
-IdsAndSource = Set[Tuple[str, str]]
+IdsAndSource = set[tuple[str, str]]
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +56,7 @@ class CurationException(Exception):
 
 def load_curated_terms(
     path: PathLike,
-) -> List[CuratedTerm]:
+) -> list[CuratedTerm]:
     """Load :class:`kazu.data.data.CuratedTerm`\\ s from a file path.
 
     :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
@@ -128,8 +123,8 @@ class CurationProcessor:
         parser_name: str,
         entity_class: str,
         global_actions: Optional[GlobalParserActions],
-        curations: List[CuratedTerm],
-        synonym_terms: Set[SynonymTerm],
+        curations: list[CuratedTerm],
+        synonym_terms: set[SynonymTerm],
     ):
         """
 
@@ -142,16 +137,16 @@ class CurationProcessor:
         self.global_actions = global_actions
         self.entity_class = entity_class
         self.parser_name = parser_name
-        self._terms_by_term_norm: Dict[NormalisedSynonymStr, SynonymTerm] = {}
-        self._terms_by_id: DefaultDict[Idx, Set[SynonymTerm]] = defaultdict(set)
+        self._terms_by_term_norm: dict[NormalisedSynonymStr, SynonymTerm] = {}
+        self._terms_by_id: DefaultDict[Idx, set[SynonymTerm]] = defaultdict(set)
         # used by inherited curations to decide behaviour
-        self._curations_by_syn: DefaultDict[str, Set[CuratedTerm]] = defaultdict(set)
+        self._curations_by_syn: DefaultDict[str, set[CuratedTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
 
     @classmethod
-    def curation_sort_key(cls, curated_term: CuratedTerm) -> Tuple[int, bool, str]:
+    def curation_sort_key(cls, curated_term: CuratedTerm) -> tuple[int, bool, str]:
         """Determines the order curations are processed in.
 
         We use associated_id_sets as a key, so that any overrides will
@@ -326,7 +321,7 @@ class CurationProcessor:
 
     def export_curations_and_final_terms(
         self,
-    ) -> Tuple[List[CuratedTerm], Set[SynonymTerm]]:
+    ) -> tuple[list[CuratedTerm], set[SynonymTerm]]:
         """Perform any updates required to the synonym terms as specified in
         the curations/global actions.
 
@@ -344,7 +339,7 @@ class CurationProcessor:
             curation = self._process_curation_action(curation)
             yield curation
 
-    def fix_conflicts_in_curations(self, curations: Set[CuratedTerm]) -> Set[CuratedTerm]:
+    def fix_conflicts_in_curations(self, curations: set[CuratedTerm]) -> set[CuratedTerm]:
         """Check to see if a list of curations contain conflicts.
 
         Conflicts can occur for the following reasons:
@@ -389,8 +384,8 @@ class CurationProcessor:
         return curations
 
     def resolve_behaviour_conflicts(
-        self, curations: Set[CuratedTerm]
-    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
+        self, curations: set[CuratedTerm]
+    ) -> tuple[set[CuratedTerm], set[CuratedTerm]]:
 
         curations_by_syn_lower = defaultdict(set)
         potentially_conflicting_behaviours = set()
@@ -451,14 +446,14 @@ class CurationProcessor:
         return set(), set()
 
     def resolve_case_conflicts(
-        self, curations: Set[CuratedTerm]
-    ) -> Tuple[Set[CuratedTerm], Set[CuratedTerm]]:
+        self, curations: set[CuratedTerm]
+    ) -> tuple[set[CuratedTerm], set[CuratedTerm]]:
 
-        to_add: Set[CuratedTerm] = set()
-        to_remove: Set[CuratedTerm] = set()
+        to_add: set[CuratedTerm] = set()
+        to_remove: set[CuratedTerm] = set()
         cs_conf = set()
         ci_conf = set()
-        cs_lookup: DefaultDict[str, Tuple[Set[CuratedTerm], Set[MentionConfidence]]] = defaultdict(
+        cs_lookup: DefaultDict[str, tuple[set[CuratedTerm], set[MentionConfidence]]] = defaultdict(
             lambda: (set(), set())
         )
         for curation in curations:
@@ -660,7 +655,7 @@ class CurationProcessor:
         :return:
         """
         log_prefix = "%(parser_name)s attempting to create synonym term for <%(synonym)s> term_norm: <%(term_norm)s> IDs: %(ids)s}"
-        log_formatting_dict: Dict[str, Any] = {
+        log_formatting_dict: dict[str, Any] = {
             "parser_name": self.parser_name,
             "synonym": curated_synonym,
             "term_norm": curation_term_norm,
@@ -837,7 +832,7 @@ class OntologyParser(ABC):
         """
         pass
 
-    def resolve_synonyms(self, synonym_df: pd.DataFrame) -> Set[SynonymTerm]:
+    def resolve_synonyms(self, synonym_df: pd.DataFrame) -> set[SynonymTerm]:
 
         result = set()
         synonym_df["syn_norm"] = synonym_df[SYN].apply(
@@ -853,7 +848,7 @@ class OntologyParser(ABC):
         ):
 
             syn_set = row[SYN]
-            mapping_type_set: FrozenSet[str] = frozenset(row[MAPPING_TYPE])
+            mapping_type_set: frozenset[str] = frozenset(row[MAPPING_TYPE])
             syn_norm = row["syn_norm"]
             if len(syn_set) > 1:
                 logger.debug("normaliser has merged %s into a single term: %s", syn_set, syn_norm)
@@ -862,7 +857,7 @@ class OntologyParser(ABC):
                 StringNormalizer.classify_symbolic(x, self.entity_class) for x in syn_set
             )
 
-            ids: Set[str] = row[IDX]
+            ids: set[str] = row[IDX]
             ids_and_source = set(
                 (
                     idx,
@@ -890,7 +885,7 @@ class OntologyParser(ABC):
         self,
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
-    ) -> Tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
+    ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """For a given data source, one normalised synonym may map to one or
         more id. In some cases, the ID may be duplicate/redundant (e.g. there
         are many chembl ids for paracetamol). In other cases, the ID may refer
@@ -948,8 +943,8 @@ class OntologyParser(ABC):
             else:
                 # use similarity to group ids into EquivalentIdSets
 
-                DefaultLabels = Set[str]
-                id_list: List[Tuple[IdsAndSource, DefaultLabels]] = []
+                DefaultLabels = set[str]
+                id_list: list[tuple[IdsAndSource, DefaultLabels]] = []
                 for id_and_source_tuple in ids_and_source:
                     default_label = cast(
                         str,
@@ -1001,7 +996,7 @@ class OntologyParser(ABC):
             ] = self.parsed_dataframe[IDX]
 
     @kazu_disk_cache.memoize(ignore={0})
-    def export_metadata(self, parser_name: str) -> Dict[str, Dict[str, SimpleValue]]:
+    def export_metadata(self, parser_name: str) -> dict[str, dict[str, SimpleValue]]:
         """Export the metadata from the ontology.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -1018,11 +1013,11 @@ class OntologyParser(ABC):
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
-        return cast(Dict[str, Dict[str, SimpleValue]], metadata)
+        return cast(dict[str, dict[str, SimpleValue]], metadata)
 
     def process_curations(
-        self, terms: Set[SynonymTerm]
-    ) -> Tuple[Optional[List[CuratedTerm]], Set[SynonymTerm]]:
+        self, terms: set[SynonymTerm]
+    ) -> tuple[Optional[list[CuratedTerm]], set[SynonymTerm]]:
         if self.curations_path is None and self.synonym_generator is not None:
             logger.warning(
                 "%s is configured to use synonym generators. This may result in noisy NER performance.",
@@ -1063,7 +1058,7 @@ class OntologyParser(ABC):
         return curation_processor.export_curations_and_final_terms()
 
     @kazu_disk_cache.memoize(ignore={0})
-    def export_synonym_terms(self, parser_name: str) -> Set[SynonymTerm]:
+    def export_synonym_terms(self, parser_name: str) -> set[SynonymTerm]:
         """Export :class:`.SynonymTerm` from the parser.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -1083,8 +1078,8 @@ class OntologyParser(ABC):
         return synonym_terms
 
     def generate_synonyms(
-        self, original_synonym_data: Set[SynonymTerm]
-    ) -> Tuple[Set[SynonymTerm], Set[SynonymTerm]]:
+        self, original_synonym_data: set[SynonymTerm]
+    ) -> tuple[set[SynonymTerm], set[SynonymTerm]]:
         """Generate synonyms based on configured synonym generator.
 
         :param original_synonym_data:
@@ -1099,8 +1094,8 @@ class OntologyParser(ABC):
         return original_synonym_data, generated_synonym_data
 
     def generate_curations_from_synonym_generators(
-        self, synonym_terms: Set[SynonymTerm]
-    ) -> Tuple[List[CuratedTerm], List[CuratedTerm]]:
+        self, synonym_terms: set[SynonymTerm]
+    ) -> tuple[list[CuratedTerm], list[CuratedTerm]]:
         original_terms, generated_terms = self.generate_synonyms(synonym_terms)
         original_curations = [
             curation
@@ -1144,7 +1139,7 @@ class OntologyParser(ABC):
     @kazu_disk_cache.memoize(ignore={0})
     def _populate_databases(
         self, parser_name: str
-    ) -> Tuple[Optional[List[CuratedTerm]], Dict[str, Dict[str, SimpleValue]], Set[SynonymTerm]]:
+    ) -> tuple[Optional[list[CuratedTerm]], dict[str, dict[str, SimpleValue]], set[SynonymTerm]]:
         """Disk cacheable method that populates all databases.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -1165,7 +1160,7 @@ class OntologyParser(ABC):
 
     def populate_databases(
         self, force: bool = False, return_curations: bool = False
-    ) -> Optional[List[CuratedTerm]]:
+    ) -> Optional[list[CuratedTerm]]:
         """Populate the databases with the results of the parser.
 
         Also calculates the term norms associated with any curations (if provided) which

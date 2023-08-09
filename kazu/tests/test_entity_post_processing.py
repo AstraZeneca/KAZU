@@ -1,4 +1,3 @@
-from typing import List, Set
 
 from hydra.utils import instantiate
 
@@ -16,7 +15,7 @@ numerical_slash_example = "everyone knows BRCA1/2/3 are oncogenes"
 numerical_slash_example2 = "Monoclonal antibody D8/17 is a thing"
 
 
-def check_expected_matches_are_in_entities(entities: List[Entity], expected_matches: Set[str]):
+def check_expected_matches_are_in_entities(entities: list[Entity], expected_matches: set[str]):
     for ent in entities:
         if ent.match in expected_matches:
             expected_matches.discard(ent.match)

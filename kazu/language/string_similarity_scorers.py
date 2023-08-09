@@ -1,6 +1,6 @@
 import re
 from collections import Counter
-from typing import Protocol, List
+from typing import Protocol
 
 from cachetools import LFUCache
 from pytorch_lightning import Trainer
@@ -68,7 +68,7 @@ class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
     """Checks all modifier phrases in reference_term are represented in
     term_norm."""
 
-    def __init__(self, noun_modifier_phrases: List[str]):
+    def __init__(self, noun_modifier_phrases: list[str]):
         self.noun_modifier_phrases = noun_modifier_phrases
 
     def __call__(self, reference_term: str, query_term: str) -> bool:

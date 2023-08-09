@@ -7,7 +7,7 @@ import subprocess
 from dataclasses import dataclass, field
 from logging.config import fileConfig
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import ray
 from hydra import initialize_config_dir, compose
@@ -23,10 +23,10 @@ class BuildConfiguration:
     #: should this model pack use the base config as a starting point?
     requires_base_config: bool
     #: what model directories should this model pack include from the base model pack?
-    models: List[str]
+    models: list[str]
     #: what ontologies should this model pack use from the base ontology pack?
     #: Arg should be a list of strings to the ontology root, from the root of the base pack
-    ontologies: List[str]
+    ontologies: list[str]
     #: does this model pack have its own config dir? (if used with use_base_config
     #: these will override any config files from the base config)
     has_own_config: bool
@@ -297,7 +297,7 @@ class ModelPackBuilderActor(ModelPackBuilder):
 def build_all_model_packs(
     maybe_base_model_pack_path: Optional[Path],
     maybe_base_configuration_path: Optional[Path],
-    model_pack_paths: List[Path],
+    model_pack_paths: list[Path],
     zip_pack: bool,
     output_dir: Path,
     skip_tests: bool,
@@ -338,7 +338,7 @@ def build_all_model_packs(
     max_parallel_build = (
         max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
     )
-    futures: List[ray.ObjectRef] = []
+    futures: list[ray.ObjectRef] = []
     for model_pack_path in model_pack_paths:
         builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
             logging_config_path=logging_config_path,
@@ -358,7 +358,7 @@ def build_all_model_packs(
         futures = wait_for_model_pack_completion(futures)
 
 
-def wait_for_model_pack_completion(futures: List[ray.ObjectRef]) -> List[ray.ObjectRef]:
+def wait_for_model_pack_completion(futures: list[ray.ObjectRef]) -> list[ray.ObjectRef]:
     # Returns the first ObjectRef that is ready.
     finished, futures = ray.wait(futures, num_returns=1, timeout=180.0 * 60.0)
     result = ray.get(finished[0])

@@ -1,4 +1,4 @@
-from typing import Tuple, Set, List, FrozenSet, Dict, Optional
+from typing import Optional
 
 import pytest
 
@@ -28,14 +28,14 @@ class NoopMappingStrategy(MappingStrategy):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         return set(terms)
 
 
 @pytest.fixture(scope="session")
-def populate_databases() -> Tuple[DummyParser, DummyParser]:
+def populate_databases() -> tuple[DummyParser, DummyParser]:
     parser1 = DummyParser(name="test_parser1", source="test_parser1")
     parser2 = DummyParser(name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
@@ -50,8 +50,8 @@ class TestStrategy(MappingStrategy):
         self,
         confidence: StringMatchConfidence,
         ent_match: str,
-        expected_ids: Set[str],
-        disambiguation_strategies: Optional[List[DisambiguationStrategy]] = None,
+        expected_ids: set[str],
+        disambiguation_strategies: Optional[list[DisambiguationStrategy]] = None,
     ):
         """
 
@@ -61,7 +61,7 @@ class TestStrategy(MappingStrategy):
         """
         super().__init__(confidence, disambiguation_strategies)
         # note, we assign to expected_id in the .prepare method, so we can check .prepare is being called properly too
-        self.expected_ids: Set[str] = set()
+        self.expected_ids: set[str] = set()
         self.temp_ids = expected_ids
         self.ent_match = ent_match
 
@@ -73,9 +73,9 @@ class TestStrategy(MappingStrategy):
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: FrozenSet[SynonymTermWithMetrics],
+        terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
-    ) -> Set[SynonymTermWithMetrics]:
+    ) -> set[SynonymTermWithMetrics]:
         if ent_match == self.ent_match:
             return set(
                 term
@@ -94,8 +94,8 @@ class TestDoNothingDisambiguationStrategy(DisambiguationStrategy):
         pass
 
     def disambiguate(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         return set()
 
 
@@ -111,12 +111,12 @@ class TestDisambiguationStrategy(DisambiguationStrategy):
         self.expected_id = self.temp_id
 
     def disambiguate(
-        self, id_sets: Set[EquivalentIdSet], document: Document, parser_name: str
-    ) -> Set[EquivalentIdSet]:
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
         return set(id_set for id_set in id_sets if self.expected_id in id_set.ids)
 
 
-def build_runner(expected_id_groups: Dict[str, Set[str]]) -> StrategyRunner:
+def build_runner(expected_id_groups: dict[str, set[str]]) -> StrategyRunner:
     """
     create a StrategyRunner configured with dummy strategies for testing
     :param expected_id_groups:
@@ -186,7 +186,7 @@ def create_test_doc(
     parser1_hit_2: SynonymTermWithMetrics,
     parser2_hit_1: SynonymTermWithMetrics,
     parser2_hit_2: SynonymTermWithMetrics,
-) -> Tuple[Document, Dict[str, List[Entity]]]:
+) -> tuple[Document, dict[str, list[Entity]]]:
     """
     create a test doc with dummy entities,
     :param parser1_hit_1:
@@ -337,8 +337,8 @@ def create_test_doc(
 
 
 def build_and_execute_runner(
-    populate_databases: Tuple[DummyParser, DummyParser],
-) -> Tuple[Dict[str, Set[str]], Dict[str, List[Entity]]]:
+    populate_databases: tuple[DummyParser, DummyParser],
+) -> tuple[dict[str, set[str]], dict[str, list[Entity]]]:
     parser1, parser2 = populate_databases
     expected_id_groups = extract_expected_ids_from_parsers(parser1, parser2)
     parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2 = extract_terms_from_parsers(
@@ -352,7 +352,7 @@ def build_and_execute_runner(
 
 def extract_expected_ids_from_parsers(
     parser1: DummyParser, parser2: DummyParser
-) -> Dict[str, Set[str]]:
+) -> dict[str, set[str]]:
     expected_idx_1 = parser1.data[IDX][0]
     assert expected_idx_1 == "first"
     expected_idx_2 = parser2.data[IDX][2]
@@ -372,7 +372,7 @@ def extract_expected_ids_from_parsers(
 
 def extract_terms_from_parsers(
     parser1: DummyParser, parser2: DummyParser
-) -> Tuple[
+) -> tuple[
     SynonymTermWithMetrics, SynonymTermWithMetrics, SynonymTermWithMetrics, SynonymTermWithMetrics
 ]:
     """
@@ -397,7 +397,7 @@ def extract_terms_from_parsers(
 
 
 def check_mappings_from_ents(
-    ents: List[Entity], expected_mapping_count: int, expected_ids: Set[str], message: str
+    ents: list[Entity], expected_mapping_count: int, expected_ids: set[str], message: str
 ):
 
     for ent in ents:

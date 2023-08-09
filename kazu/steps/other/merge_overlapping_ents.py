@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import List, Tuple, DefaultDict, Set, Dict
+from typing import DefaultDict
 
 from kazu.data.data import Document, Entity
 from kazu.steps import Step, document_iterating_step
@@ -17,7 +17,7 @@ class MergeOverlappingEntsStep(Step):
 
     def __init__(
         self,
-        ent_class_preferred_order: List[str],
+        ent_class_preferred_order: list[str],
         ignore_non_contiguous: bool = True,
     ):
         """The algorithm for selecting an entity span is as follows:
@@ -52,7 +52,7 @@ class MergeOverlappingEntsStep(Step):
             namespace: i for i, namespace in enumerate(reversed(ent_class_preferred_order))
         }
 
-    def select_preferred_entity(self, ents: Set[Entity]) -> Tuple[Entity, List[Entity]]:
+    def select_preferred_entity(self, ents: set[Entity]) -> tuple[Entity, list[Entity]]:
         """
         :param ents:
         :return: tuple of Entity<preferred> ,List[Entity]<other entities at this location>
@@ -70,7 +70,7 @@ class MergeOverlappingEntsStep(Step):
         )
         return preferred_ents[0], preferred_ents[1:]
 
-    def filter_ents_across_class(self, ents: Dict[Tuple[int, int], Set[Entity]]) -> List[Entity]:
+    def filter_ents_across_class(self, ents: dict[tuple[int, int], set[Entity]]) -> list[Entity]:
         """Choose the best entities per location.
 
         :param ents:
@@ -105,8 +105,8 @@ class MergeOverlappingEntsStep(Step):
                 section.entities.extend(non_contig_ents)
 
     def group_entities_by_location(
-        self, entities: List[Entity]
-    ) -> Dict[Tuple[int, int], Set[Entity]]:
+        self, entities: list[Entity]
+    ) -> dict[tuple[int, int], set[Entity]]:
         """
 
         :param entities:
@@ -115,7 +115,7 @@ class MergeOverlappingEntsStep(Step):
         if len(entities) == 0:
             return {}
         locations_by_start = sorted(entities, key=lambda x: x.start)
-        locations_overlapped: DefaultDict[Tuple[int, int], Set[Entity]] = defaultdict(set)
+        locations_overlapped: DefaultDict[tuple[int, int], set[Entity]] = defaultdict(set)
         ents_this_group = set()
         start = locations_by_start[0].start
         end = locations_by_start[0].end

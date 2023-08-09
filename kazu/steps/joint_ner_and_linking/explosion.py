@@ -1,5 +1,6 @@
 import logging
-from typing import Iterator, List, Tuple, Iterable, cast
+from typing import cast
+from collections.abc import Iterator, Iterable
 
 import spacy
 from spacy.tokens import Span
@@ -63,16 +64,16 @@ class ExplosionStringMatchingStep(ParserDependentStep):
 
     def extract_entity_data_from_spans(
         self, spans: Iterable[Span]
-    ) -> Iterator[Tuple[int, int, str, _MatcherOntologyData]]:
+    ) -> Iterator[tuple[int, int, str, _MatcherOntologyData]]:
         for span in spans:
             yield span.start_char, span.end_char, span.text, span._.ontology_dict_
 
     @document_batch_step
-    def __call__(self, docs: List[Document]) -> None:
+    def __call__(self, docs: list[Document]) -> None:
         texts_and_sections = ((section.text, section) for doc in docs for section in doc.sections)
 
         # TODO: multiprocessing within the pipe command?
-        spacy_result: Iterator[Tuple[spacy.tokens.Doc, Section]] = self.spacy_pipeline.pipe(
+        spacy_result: Iterator[tuple[spacy.tokens.Doc, Section]] = self.spacy_pipeline.pipe(
             texts_and_sections, as_tuples=True
         )
 

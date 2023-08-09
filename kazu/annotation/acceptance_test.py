@@ -4,7 +4,8 @@ import json
 import os
 from collections import defaultdict, Counter
 from pathlib import Path
-from typing import cast, List, Iterable, Dict, Set, Tuple, DefaultDict, Any
+from typing import cast, DefaultDict, Any
+from collections.abc import Iterable
 
 import hydra
 from hydra.utils import instantiate
@@ -19,7 +20,7 @@ class AcceptanceTestFailure(Exception):
     pass
 
 
-AcceptanceCriteria = Dict[str, Dict[str, Dict[str, float]]]
+AcceptanceCriteria = dict[str, dict[str, dict[str, float]]]
 
 
 def acceptance_criteria() -> AcceptanceCriteria:
@@ -39,8 +40,8 @@ class SectionScorer:
     def __init__(
         self,
         task: str,
-        gold_ents: List[Entity],
-        test_ents: List[Entity],
+        gold_ents: list[Entity],
+        test_ents: list[Entity],
     ):
         """
         :param gold_ents:
@@ -49,19 +50,19 @@ class SectionScorer:
         self.task = task
         self.gold_ents = gold_ents
         self.test_ents = test_ents
-        self.gold_to_test_ent_soft: Dict[Entity, Set[Entity]] = defaultdict(set)
+        self.gold_to_test_ent_soft: dict[Entity, set[Entity]] = defaultdict(set)
 
-        self.ner_fp_soft: Set[Entity] = set(test_ents)
-        self.ner_fn_soft: Set[Entity] = set(gold_ents)
+        self.ner_fp_soft: set[Entity] = set(test_ents)
+        self.ner_fn_soft: set[Entity] = set(gold_ents)
         self.calculate_ner_matches()
 
-        self.gold_to_test_mappings: Dict[
-            Tuple[Entity, str], Dict[str, Set[Tuple[str, str]]]
+        self.gold_to_test_mappings: dict[
+            tuple[Entity, str], dict[str, set[tuple[str, str]]]
         ] = defaultdict(dict)
         self.calculate_linking_matches()
 
     @staticmethod
-    def group_mappings_by_source(ents: Iterable[Entity]) -> Dict[str, Set[Tuple[str, str]]]:
+    def group_mappings_by_source(ents: Iterable[Entity]) -> dict[str, set[tuple[str, str]]]:
         mappings_by_source = defaultdict(set)
         for ent in ents:
             for mapping in ent.mappings:
@@ -103,8 +104,8 @@ class SectionScorer:
 
 
 def score_sections(
-    docs: List[Document],
-) -> Dict[str, List[SectionScorer]]:
+    docs: list[Document],
+) -> dict[str, list[SectionScorer]]:
     """Score a list of documents by Section.
 
     :param docs:
@@ -114,7 +115,7 @@ def score_sections(
     result = defaultdict(list)
     for doc in docs:
         for section in doc.sections:
-            gold_ents: List[Entity] = section.metadata["gold_entities"]
+            gold_ents: list[Entity] = section.metadata["gold_entities"]
             gold_ents_by_class = {
                 k: list(v) for k, v in sort_then_group(gold_ents, key_func=lambda x: x.entity_class)
             }
@@ -138,8 +139,8 @@ class AggregatedAccuracyResult:
     fn: int = 0
     fp_counter: Counter = dataclasses.field(default_factory=Counter)
     fn_counter: Counter = dataclasses.field(default_factory=Counter)
-    fp_items_to_tasks: Dict[Any, set[str]] = dataclasses.field(default_factory=dict)
-    fn_items_to_tasks: Dict[Any, set[str]] = dataclasses.field(default_factory=dict)
+    fp_items_to_tasks: dict[Any, set[str]] = dataclasses.field(default_factory=dict)
+    fn_items_to_tasks: dict[Any, set[str]] = dataclasses.field(default_factory=dict)
 
     def add_fp(self, item: Any, task: str) -> None:
         self.fp += 1
@@ -151,7 +152,7 @@ class AggregatedAccuracyResult:
         self.fn_counter[item] += 1
         self.fn_items_to_tasks.setdefault(item, set()).add(task)
 
-    def tasks_for_fp(self, items: List[Any]) -> Iterable[str]:
+    def tasks_for_fp(self, items: list[Any]) -> Iterable[str]:
         return (
             task
             for item, tasks in self.fp_items_to_tasks.items()
@@ -159,7 +160,7 @@ class AggregatedAccuracyResult:
             if item in items
         )
 
-    def tasks_for_fn(self, items: List[Any]) -> Iterable[str]:
+    def tasks_for_fn(self, items: list[Any]) -> Iterable[str]:
         return (
             task
             for item, tasks in self.fn_items_to_tasks.items()
@@ -193,9 +194,9 @@ class AggregatedAccuracyResult:
 
 
 def aggregate_ner_results(
-    class_and_scorers: Dict[str, List[SectionScorer]]
-) -> Dict[str, AggregatedAccuracyResult]:
-    result: Dict[str, AggregatedAccuracyResult] = {}
+    class_and_scorers: dict[str, list[SectionScorer]]
+) -> dict[str, AggregatedAccuracyResult]:
+    result: dict[str, AggregatedAccuracyResult] = {}
     for ent_class, scorers in class_and_scorers.items():
         acc_result = AggregatedAccuracyResult()
         for scorer in scorers:
@@ -209,8 +210,8 @@ def aggregate_ner_results(
 
 
 def aggregate_linking_results(
-    class_and_scorers: Dict[str, List[SectionScorer]]
-) -> Dict[str, AggregatedAccuracyResult]:
+    class_and_scorers: dict[str, list[SectionScorer]]
+) -> dict[str, AggregatedAccuracyResult]:
 
     result: DefaultDict[str, AggregatedAccuracyResult] = defaultdict(AggregatedAccuracyResult)
     for _, scorers in class_and_scorers.items():
@@ -229,8 +230,8 @@ def aggregate_linking_results(
 
 
 def check_results_meet_threshold(
-    results: Dict[str, AggregatedAccuracyResult],
-    thresholds: Dict[str, Dict[str, float]],
+    results: dict[str, AggregatedAccuracyResult],
+    thresholds: dict[str, dict[str, float]],
 ) -> None:
 
     for key, threshold in thresholds.items():
@@ -262,8 +263,8 @@ def check_results_meet_threshold(
 
 def analyse_full_pipeline(
     pipeline: Pipeline,
-    docs: List[Document],
-    acceptance_criteria: Dict[str, Dict[str, Dict[str, float]]],
+    docs: list[Document],
+    acceptance_criteria: dict[str, dict[str, dict[str, float]]],
 ) -> None:
     pipeline(docs)
     ner_dict = score_sections(docs)
@@ -283,17 +284,17 @@ def check_annotation_consistency(cfg):
 
     manager = instantiate(cfg.LabelStudioManager)
     docs = manager.export_from_ls()
-    all_ents: List[Entity] = []
-    ent_to_task_lookup: Dict[Entity, str] = {}  # used for reporting task id that may have issues
+    all_ents: list[Entity] = []
+    ent_to_task_lookup: dict[Entity, str] = {}  # used for reporting task id that may have issues
     for doc in docs:
         for section in doc.sections:
-            ents: List[Entity] = section.metadata["gold_entities"]
+            ents: list[Entity] = section.metadata["gold_entities"]
             all_ents.extend(ents)
             ent_to_task_lookup.update(
                 {ent: str(section.metadata["label_studio_task_id"]) for ent in ents}
             )
 
-    messages: DefaultDict[str, Set[str]] = defaultdict(set)
+    messages: DefaultDict[str, set[str]] = defaultdict(set)
     # update the messages dict with any apparent issues
     for match_str, ents_iter in sort_then_group(all_ents, lambda x: x.match):
         ents = list(ents_iter)
@@ -307,10 +308,10 @@ def check_annotation_consistency(cfg):
 
 
 def check_ent_match_abnormalities(
-    ent_to_task_lookup: Dict[Entity, str],
-    ents: List[Entity],
+    ent_to_task_lookup: dict[Entity, str],
+    ents: list[Entity],
     match_str: str,
-    messages: Dict[str, Set[str]],
+    messages: dict[str, set[str]],
 ) -> None:
     """Checks to see if any gold standard spans look a bit weird.
 
@@ -330,10 +331,10 @@ def check_ent_match_abnormalities(
 
 
 def check_ent_class_consistency(
-    ent_to_task_lookup: Dict[Entity, str],
-    ents: List[Entity],
+    ent_to_task_lookup: dict[Entity, str],
+    ents: list[Entity],
     match_str: str,
-    messages: Dict[str, Set[str]],
+    messages: dict[str, set[str]],
 ) -> None:
     """Checks to see if any match strings have different entity_class
     information.
@@ -359,10 +360,10 @@ def check_ent_class_consistency(
 
 
 def check_ent_mapping_consistency(
-    ent_to_task_lookup: Dict[Entity, str],
-    ents: List[Entity],
+    ent_to_task_lookup: dict[Entity, str],
+    ents: list[Entity],
     match_str: str,
-    messages: Dict[str, Set[str]],
+    messages: dict[str, set[str]],
 ) -> None:
     """Checks to see if any entity string matches have inconsistent mapping
     information.

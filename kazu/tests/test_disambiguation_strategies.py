@@ -1,5 +1,4 @@
 from itertools import chain
-from typing import Set, List
 
 from kazu.data.data import (
     Document,
@@ -24,14 +23,14 @@ from kazu.utils.utils import Singleton
 
 
 def check_ids_are_represented(
-    ids_to_check: Set[str],
+    ids_to_check: set[str],
     strategy: DisambiguationStrategy,
     doc: Document,
     parser: DummyParser,
-    ents_to_tests: List[Entity],
+    ents_to_tests: list[Entity],
 ):
     strategy.prepare(doc)
-    all_id_sets: Set[EquivalentIdSet] = set(
+    all_id_sets: set[EquivalentIdSet] = set(
         chain.from_iterable(
             term.associated_id_sets
             for ent in ents_to_tests
@@ -52,7 +51,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     text1 = "p27 is often confused, but in this context it's Autoantigen p27"
     text2 = ", and definitely not CDKN1B"
 
-    def create_doc_with_ents(ent_list: List[Entity]) -> Document:
+    def create_doc_with_ents(ent_list: list[Entity]) -> Document:
         """
         we need s fresh document for every test, as the cache on .prepare will otherwise be full
         :param ent_list:
@@ -96,7 +95,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     target_id_set_for_good_mapping = next(
         filter(lambda x: "3" in x.ids, target_term.associated_id_sets)
     )
-    target_mappings: Set[Mapping] = set()
+    target_mappings: set[Mapping] = set()
     target_mappings.update(
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,

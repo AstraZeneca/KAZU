@@ -1,5 +1,6 @@
 import dataclasses
-from typing import List, Protocol, Callable, Iterable, Optional
+from typing import Protocol, Callable, Optional
+from collections.abc import Iterable
 import urllib
 
 from kazu.data.data import (
@@ -22,7 +23,7 @@ class CleanupAction(Protocol):
 
 
 class MappingFilterCleanupAction:
-    def __init__(self, filter_fns: List[MappingFilterFn]):
+    def __init__(self, filter_fns: list[MappingFilterFn]):
         self.filter_fns = filter_fns
 
     def cleanup(self, doc: Document) -> None:
@@ -35,7 +36,7 @@ class MappingFilterCleanupAction:
 
 
 class EntityFilterCleanupAction:
-    def __init__(self, filter_fns: List[EntityFilterFn]):
+    def __init__(self, filter_fns: list[EntityFilterFn]):
         self.filter_fns = filter_fns
 
     def cleanup(self, doc: Document) -> None:
@@ -131,7 +132,7 @@ class StripMappingURIsAction:
 
 
 class CleanupStep(Step):
-    def __init__(self, cleanup_actions: List[CleanupAction]):
+    def __init__(self, cleanup_actions: list[CleanupAction]):
         self.cleanup_actions = cleanup_actions
 
     @document_iterating_step

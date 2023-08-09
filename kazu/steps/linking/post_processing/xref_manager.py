@@ -3,7 +3,8 @@ import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable, Set, Tuple, DefaultDict, Dict, List
+from typing import DefaultDict
+from collections.abc import Iterable
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -18,12 +19,12 @@ logger = logging.getLogger(__name__)
 SourceOntology = str
 SourceIdx = str
 
-TargetSourceAndIdx = Tuple[str, str]
-ToSourceAndIDXMap = Dict[SourceIdx, List[TargetSourceAndIdx]]
-XrefDatabase = Dict[SourceOntology, ToSourceAndIDXMap]
+TargetSourceAndIdx = tuple[str, str]
+ToSourceAndIDXMap = dict[SourceIdx, list[TargetSourceAndIdx]]
+XrefDatabase = dict[SourceOntology, ToSourceAndIDXMap]
 
 
-def request_with_retry(url: str, headers: Dict, json_data: Dict) -> requests.Response:
+def request_with_retry(url: str, headers: dict, json_data: dict) -> requests.Response:
     s = requests.Session()
 
     retries = Retry(
@@ -42,7 +43,7 @@ class CrossReferenceManager(ABC):
 
     xref_db: XrefDatabase
 
-    def __init__(self, source_to_parser_metadata_lookup: Dict[str, str], path: Path):
+    def __init__(self, source_to_parser_metadata_lookup: dict[str, str], path: Path):
         """
         :param source_to_parser_metadata_lookup: when producing cross-referenced instances of Mapping, we need a
             reference in the MetadataDatabase to the target ontology, in order to look up the default label info etc.
@@ -118,11 +119,11 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
     def __init__(
         self,
-        source_to_parser_metadata_lookup: Dict[str, str],
+        source_to_parser_metadata_lookup: dict[str, str],
         path: Path,
-        oxo_kazu_name_mapping: Dict[str, str],
-        uri_prefixes: Dict[str, str],
-        oxo_query: Dict[str, List[str]],
+        oxo_kazu_name_mapping: dict[str, str],
+        uri_prefixes: dict[str, str],
+        oxo_query: dict[str, list[str]],
     ):
         """
 
@@ -154,7 +155,7 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         xref_db = self.parse_oxo_dump(oxo_dump)
         return xref_db
 
-    def _split_and_convert_curie(self, curie: str) -> Tuple[str, str]:
+    def _split_and_convert_curie(self, curie: str) -> tuple[str, str]:
         """
         :param curie: a Compact uniform resource identifier, or CURIE. This is essentially a
             prefix followed by a colon (:) followed by a local ID
@@ -166,9 +167,9 @@ class OxoCrossReferenceManager(CrossReferenceManager):
 
         return converted_source, converted_idx
 
-    def parse_oxo_dump(self, oxo_dump: List[Dict]) -> XrefDatabase:
+    def parse_oxo_dump(self, oxo_dump: list[dict]) -> XrefDatabase:
         xref_db_default_dict: DefaultDict[
-            str, DefaultDict[str, Set[Tuple[str, str]]]
+            str, DefaultDict[str, set[tuple[str, str]]]
         ] = defaultdict(lambda: defaultdict(set))
 
         for oxo_page in oxo_dump:
@@ -183,7 +184,7 @@ class OxoCrossReferenceManager(CrossReferenceManager):
             xref_db[source] = {idx: list(xref) for idx, xref in id_to_xref.items()}
         return xref_db
 
-    def create_oxo_dump(self, path: Path) -> List[Dict]:
+    def create_oxo_dump(self, path: Path) -> list[dict]:
         results = []
         for input_source, mapping_target in self.oxo_query.items():
             data = {

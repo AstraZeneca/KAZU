@@ -1,4 +1,3 @@
-from typing import List
 
 from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.annotation.label_studio import (
@@ -69,7 +68,7 @@ def test_kazu_doc_to_label_studio(make_label_studio_manager):
     docs = manager.export_from_ls()
     assert len(docs) == 1
     doc = docs[0]
-    gold_ents: List[Entity] = doc.sections[0].metadata["gold_entities"]
+    gold_ents: list[Entity] = doc.sections[0].metadata["gold_entities"]
     for ent_class, ents_iter in sort_then_group(gold_ents, key_func=lambda x: x.entity_class):
         ents = list(ents_iter)
         assert len(ents) == 1

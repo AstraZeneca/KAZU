@@ -3,7 +3,8 @@ import logging
 import os
 import time
 import uuid
-from typing import List, Dict, Optional, Protocol, Iterable, Collection
+from typing import Optional, Protocol
+from collections.abc import Iterable, Collection
 
 import psutil
 from hydra.utils import instantiate
@@ -16,7 +17,7 @@ from kazu.utils.utils import PathLike, as_path
 logger = logging.getLogger(__name__)
 
 
-def load_steps_and_log_memory_usage(cfg: DictConfig) -> List[Step]:
+def load_steps_and_log_memory_usage(cfg: DictConfig) -> list[Step]:
     """Loads steps based on the pipeline config, and log the memory increase
     after loading each step.
 
@@ -46,7 +47,7 @@ def calc_doc_size(doc: Document) -> int:
     return sum(len(section.text) for section in doc.sections)
 
 
-def batch_metrics(docs: List[Document]) -> Dict[str, float]:
+def batch_metrics(docs: list[Document]) -> dict[str, float]:
     lengths = []
     ent_count = []
     for doc in docs:
@@ -63,7 +64,7 @@ def batch_metrics(docs: List[Document]) -> Dict[str, float]:
 class FailedDocsHandler(Protocol):
     """Handle failed docs."""
 
-    def __call__(self, step_docs_map: Dict[str, List[Document]]) -> None:
+    def __call__(self, step_docs_map: dict[str, list[Document]]) -> None:
         """
         :param step_docs_map: a dict of step namespace and the docs that failed for it
         :return:
@@ -74,7 +75,7 @@ class FailedDocsHandler(Protocol):
 class FailedDocsLogHandler(FailedDocsHandler):
     """Log failed docs as warnings."""
 
-    def __call__(self, step_docs_map: Dict[str, List[Document]]) -> None:
+    def __call__(self, step_docs_map: dict[str, list[Document]]) -> None:
         for step_namespace, docs in step_docs_map.items():
             for doc in docs:
                 error_message = doc.metadata.get(PROCESSING_EXCEPTION, None)
@@ -94,7 +95,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
     def __init__(self, log_dir: PathLike):
         self.log_dir = as_path(log_dir)
 
-    def __call__(self, step_docs_map: Dict[str, List[Document]]) -> None:
+    def __call__(self, step_docs_map: dict[str, list[Document]]) -> None:
         for step_namespace, docs in step_docs_map.items():
             step_logging_dir = self.log_dir.joinpath(step_namespace)
             step_logging_dir.mkdir(parents=True, exist_ok=True)
@@ -131,11 +132,11 @@ class PipelineValueError(ValueError):
 class Pipeline:
     def __init__(
         self,
-        steps: List[Step],
-        failure_handler: Optional[List[FailedDocsHandler]] = None,
+        steps: list[Step],
+        failure_handler: Optional[list[FailedDocsHandler]] = None,
         profile_steps_dir: Optional[str] = None,
         skip_doc_len: Optional[int] = 200000,
-        step_groups: Optional[Dict[str, Collection[str]]] = None,
+        step_groups: Optional[dict[str, Collection[str]]] = None,
     ):
         """A basic pipeline, used to help run a series of steps.
 
@@ -156,7 +157,7 @@ class Pipeline:
         self.steps = steps
         self._namespace_to_step = {step.namespace(): step for step in steps}
         # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
-        self.failed_docs: Dict[str, List[Document]] = {}
+        self.failed_docs: dict[str, list[Document]] = {}
         # performance tracking
         self.init_time = datetime.now().strftime("%m_%d_%Y_%H_%M")
         logger.info(f"pipeline initialised: {self.init_time}")
@@ -181,7 +182,7 @@ class Pipeline:
             logger.info("profiling not configured")
             self.summary_writer = None
 
-        self.step_groups: Optional[Dict[str, List[Step]]]
+        self.step_groups: Optional[dict[str, list[Step]]]
         if step_groups is None:
             self.step_groups = None
         else:
@@ -191,7 +192,7 @@ class Pipeline:
                     if step_name in group:
                         self.step_groups[group_name].append(step)
 
-    def prefilter_docs(self, docs: List[Document]) -> List[Document]:
+    def prefilter_docs(self, docs: list[Document]) -> list[Document]:
         if self.skip_doc_len is None:
             # we don't filter out any docs due to length
             return docs
@@ -209,10 +210,10 @@ class Pipeline:
 
     def __call__(
         self,
-        docs: List[Document],
+        docs: list[Document],
         step_namespaces: Optional[Iterable[str]] = None,
         step_group: Optional[str] = None,
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Run the pipeline.
 
         :param docs: Docs to process
@@ -286,7 +287,7 @@ class Pipeline:
 
         return docs
 
-    def profile(self, step_times: Dict, batch_time: float, batch_metrics_dict: Dict) -> None:
+    def profile(self, step_times: dict, batch_time: float, batch_metrics_dict: dict) -> None:
         if self.summary_writer is not None:
             self.summary_writer.add_scalars(
                 main_tag="batch_metrics",
@@ -314,7 +315,7 @@ class Pipeline:
                 )
             self.call_count += 1
 
-    def update_failed_docs(self, step: Step, failed_docs: List[Document]) -> None:
+    def update_failed_docs(self, step: Step, failed_docs: list[Document]) -> None:
         if self.failure_handlers is not None:
             self.failed_docs[step.namespace()] = failed_docs
 

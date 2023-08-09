@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import logging
 import uuid
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import jwt
 from starlette.authentication import (
@@ -109,7 +109,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
 
     async def authenticate(
         self, request: HTTPConnection
-    ) -> Union[None, Tuple[AuthCredentials, BaseUser]]:
+    ) -> Union[None, tuple[AuthCredentials, BaseUser]]:
         req_id = str(uuid.uuid4())
         request.headers.__dict__["_list"].append(
             (

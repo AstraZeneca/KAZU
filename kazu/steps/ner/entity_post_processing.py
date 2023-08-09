@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, Callable, Tuple, Dict, Optional, Set
+from typing import Callable, Optional
 
 from kazu.data.data import Entity, CharSpan
 
@@ -9,7 +9,7 @@ from spacy.tokens import Doc
 
 def _copy_ent_with_new_spans(
     entity: Entity,
-    spans: List[Tuple[int, int]],
+    spans: list[tuple[int, int]],
     text: str,
     join_str: str,
     rule_name: Optional[str] = None,
@@ -34,15 +34,15 @@ class SplitOnConjunctionPattern:
         """
         self.nlp = spacy_pipeline
 
-    def __call__(self, entity: Entity, text: str) -> List[Entity]:
+    def __call__(self, entity: Entity, text: str) -> list[Entity]:
         doc = self.nlp(entity.match)
         if any((x in entity.match for x in [" and ", " or ", " nor "])):
             return self.run_conjunction_rules(doc, entity, text)
         else:
             return []
 
-    def run_conjunction_rules(self, doc: Doc, entity: Entity, text: str) -> List[Entity]:
-        ents: List[Entity] = []
+    def run_conjunction_rules(self, doc: Doc, entity: Entity, text: str) -> list[Entity]:
+        ents: list[Entity] = []
         noun_chunks = list(doc.noun_chunks)
         if len(noun_chunks) > 0:
             anchor_chunk = noun_chunks[-1]
@@ -119,7 +119,7 @@ class SplitOnNumericalListPatternWithPrefix:
         """
         self.pattern = pattern
 
-    def __call__(self, entity: Entity, text: str) -> List[Entity]:
+    def __call__(self, entity: Entity, text: str) -> list[Entity]:
         input_ent_start = entity.start
         parts = entity.match.split(self.pattern)
         new_ents = []
@@ -169,12 +169,12 @@ class NonContiguousEntitySplitter:
     """Some simple rules to split non-contiguous entities into component
     entities."""
 
-    def __init__(self, entity_conditions: Dict[str, List[Callable[[Entity, str], List[Entity]]]]):
+    def __init__(self, entity_conditions: dict[str, list[Callable[[Entity, str], list[Entity]]]]):
 
         self.entity_conditions = entity_conditions
 
-    def __call__(self, entity: Entity, text: str) -> List[Entity]:
-        existing_offsets: Set[CharSpan] = set()
+    def __call__(self, entity: Entity, text: str) -> list[Entity]:
+        existing_offsets: set[CharSpan] = set()
         existing_offsets.update(entity.spans)
 
         new_ents = []

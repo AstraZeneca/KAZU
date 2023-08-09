@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import torch
 from omegaconf import OmegaConf
@@ -19,7 +19,7 @@ class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
 
     def save_checkpoint(
         self,
-        checkpoint: Dict[str, Any],
+        checkpoint: dict[str, Any],
         path: Union[str, Path],
         storage_options: Optional[Any] = None,
     ) -> None:
@@ -57,7 +57,7 @@ class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
 
     def load_checkpoint(
         self, path: Union[str, Path], storage_options: Optional[Any] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Not currently implemented.
 
         See :external+pytorch_lightning:meth:`CheckpointIO.load_checkpoint <lightning.pytorch.plugins.io.CheckpointIO.load_checkpoint>`

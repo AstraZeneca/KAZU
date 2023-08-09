@@ -1,7 +1,8 @@
 import logging
 from copy import deepcopy
 from itertools import groupby
-from typing import List, Tuple, Iterable, Dict, FrozenSet, Set, Optional
+from typing import Optional
+from collections.abc import Iterable
 
 from kazu.data.data import (
     Document,
@@ -18,11 +19,11 @@ from kazu.utils.string_normalizer import StringNormalizer
 logger = logging.getLogger(__name__)
 
 
-EntityClassStrategy = Dict[str, List[MappingStrategy]]
+EntityClassStrategy = dict[str, list[MappingStrategy]]
 
 
 # hashable representation of all identical (for the purposes of mapping) entities in the document
-EntityKey = Tuple[str, str, str, FrozenSet[SynonymTermWithMetrics]]
+EntityKey = tuple[str, str, str, frozenset[SynonymTermWithMetrics]]
 
 
 def entity_to_entity_key(
@@ -50,7 +51,7 @@ class ConfidenceLevelStrategyExecution:
     def __init__(
         self,
         ent_class_strategies: EntityClassStrategy,
-        default_strategies: List[MappingStrategy],
+        default_strategies: list[MappingStrategy],
         stop_on_success: bool = False,
     ):
         """
@@ -61,8 +62,8 @@ class ConfidenceLevelStrategyExecution:
         self.stop_on_success = stop_on_success
         self.default_strategies = default_strategies
         self.ent_class_strategies = ent_class_strategies
-        self.unresolved_parsers: Dict[EntityKey, Set[str]] = {}
-        self.entity_mapped: Dict[EntityKey, bool] = {}
+        self.unresolved_parsers: dict[EntityKey, set[str]] = {}
+        self.entity_mapped: dict[EntityKey, bool] = {}
 
     @property
     def longest_mapping_strategy_list_size(self):
@@ -73,10 +74,10 @@ class ConfidenceLevelStrategyExecution:
             )
         )
 
-    def get_strategies_for_entity_class(self, entity_class: str) -> List[MappingStrategy]:
+    def get_strategies_for_entity_class(self, entity_class: str) -> list[MappingStrategy]:
         return self.ent_class_strategies.get(entity_class, self.default_strategies)
 
-    def _get_unresolved_parsers(self, entity_key: EntityKey, entity: Entity) -> Set[str]:
+    def _get_unresolved_parsers(self, entity_key: EntityKey, entity: Entity) -> set[str]:
 
         maybe_unresolved_parsers = self.unresolved_parsers.get(entity_key, None)
         if maybe_unresolved_parsers is not None:
@@ -96,7 +97,7 @@ class ConfidenceLevelStrategyExecution:
         :param document: originating Document
         :return:
         """
-        strategy_list: List[MappingStrategy] = self.get_strategies_for_entity_class(
+        strategy_list: list[MappingStrategy] = self.get_strategies_for_entity_class(
             entity_class=entity.entity_class
         )
         if strategy_index > len(strategy_list) - 1:
@@ -187,9 +188,9 @@ class StrategyRunner:
 
     def __init__(
         self,
-        symbolic_strategies: Dict[str, ConfidenceLevelStrategyExecution],
-        non_symbolic_strategies: Dict[str, ConfidenceLevelStrategyExecution],
-        cross_ref_managers: Optional[List[CrossReferenceManager]] = None,
+        symbolic_strategies: dict[str, ConfidenceLevelStrategyExecution],
+        non_symbolic_strategies: dict[str, ConfidenceLevelStrategyExecution],
+        cross_ref_managers: Optional[list[CrossReferenceManager]] = None,
     ):
         """
 
@@ -210,15 +211,15 @@ class StrategyRunner:
     @staticmethod
     def group_entities_by_symbolism(
         entities: Iterable[Entity],
-    ) -> Tuple[List[Entity], List[Entity]]:
+    ) -> tuple[list[Entity], list[Entity]]:
         """groups entities into symbolic and non-symbolic forms, so they can be
         processed separately.
 
         :param entities:
         :return:
         """
-        symbolic: List[Entity] = []
-        non_symbolic: List[Entity] = []
+        symbolic: list[Entity] = []
+        non_symbolic: list[Entity] = []
         grouped_by_match = sort_then_group(
             entities,
             key_func=lambda x: (
@@ -290,7 +291,7 @@ class StrategyRunner:
 
     def execute_hit_post_processing_strategies(
         self,
-        ents_needing_mappings: List[Entity],
+        ents_needing_mappings: list[Entity],
         document: Document,
         confidence_strategy_execution: ConfidenceLevelStrategyExecution,
     ) -> None:
@@ -318,7 +319,7 @@ class StrategyRunner:
                         strategy_index=i,
                         document=document,
                     ):
-                        xref_mappings: Set[Mapping] = set()
+                        xref_mappings: set[Mapping] = set()
                         if self.cross_ref_managers is not None:
                             for xref_manager in self.cross_ref_managers:
                                 xref_mappings.update(

@@ -1,5 +1,4 @@
 import os
-from typing import List, Tuple, Set
 
 import jwt
 import pytest
@@ -27,7 +26,7 @@ from kazu.steps.linking.post_processing.disambiguation.context_scoring import Tf
 
 @pytest.fixture(scope="session")
 def override_kazu_test_config():
-    def _override_kazu_test_config(overrides: List[str]) -> DictConfig:
+    def _override_kazu_test_config(overrides: list[str]) -> DictConfig:
         """Return an optionally overriden copy of the kazu test config.
 
         :return:
@@ -55,7 +54,7 @@ _SIMPLE_TEST_CASE_DATA = [
 
 
 @pytest.fixture(scope="function")
-def ner_simple_test_cases() -> List[Document]:
+def ner_simple_test_cases() -> list[Document]:
     """Return simple Documents testing NER functionality.
 
     This needs to be function-scoped because Documents can be mutated.
@@ -65,7 +64,7 @@ def ner_simple_test_cases() -> List[Document]:
 
 
 @pytest.fixture(scope="session")
-def set_up_p27_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
+def set_up_p27_test_case() -> tuple[set[SynonymTermWithMetrics], DummyParser]:
 
     dummy_data = {
         IDX: ["1", "1", "1", "2", "2", "2", "3", "3", "3"],

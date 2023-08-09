@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import List, Set, Optional
+from typing import Optional
 
 from kazu.data.data import Document, SynonymTermWithMetrics
 from kazu.steps.step import Step, document_batch_step
@@ -22,10 +22,10 @@ class DictionaryEntityLinkingStep(Step):
 
     def __init__(
         self,
-        indices: List[DictionaryIndex],
+        indices: list[DictionaryIndex],
         lookup_cache_size: int = 5000,
         top_n: int = 20,
-        skip_ner_namespaces: Optional[Set[str]] = None,
+        skip_ner_namespaces: Optional[set[str]] = None,
     ):
         """
 
@@ -43,7 +43,7 @@ class DictionaryEntityLinkingStep(Step):
         self.lookup_cache = EntityLinkingLookupCache(lookup_cache_size)
 
     @document_batch_step
-    def __call__(self, docs: List[Document]) -> None:
+    def __call__(self, docs: list[Document]) -> None:
         """logic of entity linker:
 
         1. first obtain an entity list from all docs
@@ -70,7 +70,7 @@ class DictionaryEntityLinkingStep(Step):
                 else:
                     indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
                     if indices_to_search:
-                        terms: List[SynonymTermWithMetrics] = []
+                        terms: list[SynonymTermWithMetrics] = []
                         for index in indices_to_search:
                             terms.extend(index.search(ent_match_and_class[0], self.top_n))
 

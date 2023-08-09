@@ -1,5 +1,4 @@
 import copy
-from typing import List, Dict
 from kazu.data.data import Document, Entity
 from kazu.steps.linking.entity_class_disambiguation import (
     EntityClassDisambiguationStep,
@@ -8,7 +7,7 @@ from kazu.steps.linking.entity_class_disambiguation import (
 
 
 def test_EntityClassDisambiguationStep():
-    context: Dict[str, List[DisambiguationEntry]] = {
+    context: dict[str, list[DisambiguationEntry]] = {
         "UCB": [
             DisambiguationEntry(
                 entity_class="anatomy", relevant_text=["umbilical pregnancy"], thresh=0.8
@@ -48,7 +47,7 @@ def test_EntityClassDisambiguationStep():
 
 
 def test_same_entity_with_same_span_in_multiple_sections():
-    context: Dict[str, List[DisambiguationEntry]] = {
+    context: dict[str, list[DisambiguationEntry]] = {
         "UCB": [
             DisambiguationEntry(
                 entity_class="anatomy", relevant_text=["umbilical pregnancy"], thresh=0.8

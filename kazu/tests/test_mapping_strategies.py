@@ -1,5 +1,4 @@
 import dataclasses
-from typing import Tuple, Set, List
 
 import pytest
 from hydra.utils import instantiate
@@ -28,7 +27,7 @@ from kazu.utils.string_normalizer import StringNormalizer
 
 
 @pytest.fixture(scope="session")
-def set_up_disease_mapping_test_case() -> Tuple[Set[SynonymTermWithMetrics], DummyParser]:
+def set_up_disease_mapping_test_case() -> tuple[set[SynonymTermWithMetrics], DummyParser]:
 
     dummy_data = {
         IDX: ["1", "1", "2"],
@@ -49,7 +48,7 @@ def set_up_disease_mapping_test_case() -> Tuple[Set[SynonymTermWithMetrics], Dum
     return terms_with_metrics, parser
 
 
-def check_correct_terms_selected(terms: Set[SynonymTermWithMetrics], mappings: List[Mapping]):
+def check_correct_terms_selected(terms: set[SynonymTermWithMetrics], mappings: list[Mapping]):
     term_ids = set(
         (
             term.parser_name,

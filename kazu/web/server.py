@@ -1,7 +1,7 @@
 import logging
 import subprocess
 import time
-from typing import Any, Callable, Dict, List, Union, Optional
+from typing import Any, Callable, Union, Optional
 
 import hydra
 import ray
@@ -51,7 +51,7 @@ app = FastAPI(
 )
 
 
-def openapi_no_auth() -> Dict[str, Any]:
+def openapi_no_auth() -> dict[str, Any]:
     """Remove the bits of the openapi schema that put auth buttons on the
     Swagger UI.
 
@@ -161,7 +161,7 @@ _multiple_docs_mixed_type_example = [
 
 
 class SectionedWebDocument(BaseModel):
-    sections: Dict[str, str]
+    sections: dict[str, str]
 
     def to_kazu_document(self) -> Document:
         return Document.from_named_section_texts(self.sections)
@@ -184,9 +184,9 @@ WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
 
 
 class DocumentCollection(BaseModel):
-    __root__: Union[List[WebDocument], WebDocument]
+    __root__: Union[list[WebDocument], WebDocument]
 
-    def convert_to_kazu_documents(self) -> List[Document]:
+    def convert_to_kazu_documents(self) -> list[Document]:
         if isinstance(self.__root__, list):
             return [doc.to_kazu_document() for doc in self.__root__]
         else:
@@ -287,7 +287,7 @@ class SingleEntityDocumentConverter:
         self.entity_class = entity_class
         self.entity_free_doc_collection = entity_free_doc_collection
 
-    def convert_to_kazu_documents(self) -> List[Document]:
+    def convert_to_kazu_documents(self) -> list[Document]:
         documents = self.entity_free_doc_collection.convert_to_kazu_documents()
         for doc in documents:
             for section in doc.sections:
@@ -362,7 +362,7 @@ class KazuWebAPI:
         self,
         doc_collection: Union[DocumentCollection, SingleEntityDocumentConverter],
         request: Request,
-        step_namespaces: Optional[List[str]] = None,
+        step_namespaces: Optional[list[str]] = None,
         step_group: Optional[str] = None,
     ) -> JSONResponse:
         id_log_prefix = get_id_log_prefix_if_available(request)
@@ -398,7 +398,7 @@ class KazuWebAPI:
         self,
         request: Request,
         doc_collection: DocumentCollection,
-        steps: Optional[List[str]] = None,
+        steps: Optional[list[str]] = None,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
     ) -> JSONResponse:
         """Run specific steps over the provided document or documents.
@@ -493,7 +493,7 @@ class KazuWebAPI:
     @app.post(f"/{KAZU}/batch", deprecated=True)
     def batch_ner(
         self,
-        docs: List[WebDocument],
+        docs: list[WebDocument],
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
     ) -> JSONResponse:

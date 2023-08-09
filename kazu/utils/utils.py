@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
-from typing import List, Dict, Tuple, Union, Iterable, Sequence, overload, Type, Any
+from typing import Union, overload, Any
+from collections.abc import Iterable, Sequence
 
 from transformers import BatchEncoding, PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
@@ -11,7 +12,7 @@ from kazu.data.data import Document, Entity, Section
 logger = logging.getLogger(__name__)
 
 
-def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
+def find_document_from_entity(docs: list[Document], entity: Entity) -> Document:
     """For a given entity and a list of docs, find the doc the entity belongs
     to.
 
@@ -25,7 +26,7 @@ def find_document_from_entity(docs: List[Document], entity: Entity) -> Document:
     raise RuntimeError(f"Error! Entity {entity} is not attached to a document")
 
 
-def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
+def documents_to_id_section_map(docs: list[Document]) -> dict[int, Section]:
     """Return a map of documents, indexed by order of sections.
 
     :param docs:
@@ -41,11 +42,11 @@ def documents_to_id_section_map(docs: List[Document]) -> Dict[int, Section]:
 
 
 def documents_to_document_section_batch_encodings_map(
-    docs: List[Document],
+    docs: list[Document],
     tokenizer: PreTrainedTokenizerBase,
     stride: int = 128,
     max_length: int = 512,
-) -> Tuple[BatchEncoding, Dict[int, Section]]:
+) -> tuple[BatchEncoding, dict[int, Section]]:
     """Convert documents into a BatchEncoding. Also returns a list of <int +
     section> for the resulting encoding.
 
@@ -129,12 +130,12 @@ def _create_ngrams_iter(tokens, n=2):
         yield tokens[i : i + n]
 
 
-def create_char_ngrams(s: str, n: int = 2) -> List[str]:
+def create_char_ngrams(s: str, n: int = 2) -> list[str]:
     """Return list of char ngrams as a string."""
     return list(_create_ngrams_iter(s, n))
 
 
-def create_word_ngrams(s: str, n: int = 2) -> List[str]:
+def create_word_ngrams(s: str, n: int = 2) -> list[str]:
     """Return list of word ngrams as a single space-separated string."""
     words = s.split(" ")
     ngrams_iter = _create_ngrams_iter(words, n)
@@ -142,7 +143,7 @@ def create_word_ngrams(s: str, n: int = 2) -> List[str]:
 
 
 class Singleton(type):
-    _instances: Dict[Type, Any] = {}
+    _instances: dict[type, Any] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:

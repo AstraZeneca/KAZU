@@ -3,7 +3,6 @@ from hydra.utils import instantiate
 from kazu.data.data import Document
 from kazu.tests.utils import requires_model_pack, ner_long_document_test_cases
 from kazu.steps import Step
-from typing import List
 
 
 @requires_model_pack
@@ -17,7 +16,7 @@ def test_StanzaStep(kazu_test_config):
 @requires_model_pack
 def test_generates_correct_spans(kazu_test_config):
     step: Step = instantiate(kazu_test_config.StanzaStep)
-    docs: List[Document] = [
+    docs: list[Document] = [
         Document.create_simple_document(
             "this spans for char 0 to 28. This sentence spans from 29 to 63."
         )
@@ -37,7 +36,7 @@ def test_multiple_sentence_splitters_causes_error(kazu_test_config):
         kazu_test_config.ExplosionStringMatchingStep, include_sentence_offsets=True
     )
 
-    docs: List[Document] = [
+    docs: list[Document] = [
         Document.create_simple_document(
             "This spans from char 0 to 29. This sentence spans from 30 to 64."
         )
@@ -56,7 +55,7 @@ def test_equivalent_to_explosion_for_simple_sents(kazu_test_config):
         kazu_test_config.ExplosionStringMatchingStep, include_sentence_offsets=True
     )
 
-    docs: List[Document] = [
+    docs: list[Document] = [
         Document.create_simple_document(
             "This spans from char 0 to 29. This sentence spans from 30 to 64."
         )

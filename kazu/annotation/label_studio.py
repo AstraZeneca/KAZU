@@ -2,8 +2,9 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
-from typing import Any, Dict, Tuple, Set, List, Iterable, Optional, Union
-from typing import Mapping as TypingMapping  # due to name conflict with kazu.data.data.Mapping
+from typing import Any, Optional, Union
+from collections.abc import Iterable
+from collections.abc import Mapping as TypingMapping  # due to name conflict with kazu.data.data.Mapping
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
@@ -33,7 +34,7 @@ class KazuToLabelStudioConverter:
     """
 
     @classmethod
-    def convert_single_doc_to_tasks(cls, doc: Document) -> Iterable[Dict]:
+    def convert_single_doc_to_tasks(cls, doc: Document) -> Iterable[dict]:
         doc_id = doc.idx
         for i, section in enumerate(doc.sections):
             idx = f"{doc_id}_{section.name}_{i}"
@@ -47,15 +48,15 @@ class KazuToLabelStudioConverter:
             yield {"data": data, "annotations": annotations}
 
     @classmethod
-    def convert_docs_to_tasks(cls, docs: List[Document]) -> List[Dict]:
+    def convert_docs_to_tasks(cls, docs: list[Document]) -> list[dict]:
         return [task for doc in docs for task in cls.convert_single_doc_to_tasks(doc)]
 
     @staticmethod
     def _create_label_studio_labels(
-        entities: List[Entity],
+        entities: list[Entity],
         text: str,
-    ) -> List[Dict]:
-        result_values: List[Dict] = []
+    ) -> list[dict]:
+        result_values: list[dict] = []
         for ent in entities:
             ent_hash = hash(ent)
             prev_region_id: Optional[str] = None
@@ -91,7 +92,7 @@ class KazuToLabelStudioConverter:
     @staticmethod
     def _create_non_contig_entity_links(
         from_id: str, to_id: str
-    ) -> Dict[str, Union[str, List[str]]]:
+    ) -> dict[str, Union[str, list[str]]]:
         return {
             "from_id": from_id,
             "to_id": to_id,
@@ -103,7 +104,7 @@ class KazuToLabelStudioConverter:
     @staticmethod
     def _create_mapping_region(
         ent: Entity, region_id: str, span: CharSpan, match: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
 
         return {
             "id": region_id,
@@ -129,7 +130,7 @@ class KazuToLabelStudioConverter:
     @staticmethod
     def _create_ner_region(
         ent: Entity, region_id: str, span: CharSpan, match: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return {
             "id": region_id,
             "from_name": "ner",
@@ -147,7 +148,7 @@ class KazuToLabelStudioConverter:
 
 
 class LSToKazuConversion:
-    def __init__(self, task: Dict):
+    def __init__(self, task: dict):
         self.text = task["data"]["text"]
         self.task_data_id = task["data"]["id"]
         self.label_studio_task_id = task["id"]
@@ -160,10 +161,10 @@ class LSToKazuConversion:
         annotation = task["annotations"][0]
         result = annotation["result"]
 
-        self.id_to_charspan: Dict[str, CharSpan] = {}
-        self.id_to_labels: Dict[str, Set[str]] = defaultdict(set)
-        self.id_to_mappings: Dict[str, Set[Mapping]] = defaultdict(set)
-        self.non_contig_id_map: Dict[str, Set[str]] = defaultdict(set)
+        self.id_to_charspan: dict[str, CharSpan] = {}
+        self.id_to_labels: dict[str, set[str]] = defaultdict(set)
+        self.id_to_mappings: dict[str, set[Mapping]] = defaultdict(set)
+        self.non_contig_id_map: dict[str, set[str]] = defaultdict(set)
         self.non_contig_regions = set()
 
         for result_data in result:
@@ -193,8 +194,8 @@ class LSToKazuConversion:
         return section
 
     def create_mappings(
-        self, taxonomy_hits: Iterable[Tuple[str, str]], task_id: str
-    ) -> List[Mapping]:
+        self, taxonomy_hits: Iterable[tuple[str, str]], task_id: str
+    ) -> list[Mapping]:
         mappings = []
         for tax in taxonomy_hits:
             if len(tax) != 2:
@@ -218,7 +219,7 @@ class LSToKazuConversion:
             )
         return mappings
 
-    def create_ents(self) -> List[Entity]:
+    def create_ents(self) -> list[Entity]:
         entities = []
         for region_id, span in self.id_to_charspan.items():
             if region_id not in self.non_contig_regions:
@@ -262,12 +263,12 @@ class LSToKazuConversion:
         )
 
     @staticmethod
-    def _get_first_part_of_doc_id(task: Dict[str, Any]) -> str:
+    def _get_first_part_of_doc_id(task: dict[str, Any]) -> str:
         id_: str = task["data"]["id"]
         return id_.split("_")[0]
 
     @classmethod
-    def convert_tasks_to_docs(cls, tasks: List[Dict]) -> List[Document]:
+    def convert_tasks_to_docs(cls, tasks: list[dict]) -> list[Document]:
         # group by first part of doc ID to get sections of multi part docs
         by_doc_id = sort_then_group(tasks, key_func=cls._get_first_part_of_doc_id)
         docs = []
@@ -287,7 +288,7 @@ class LSToKazuConversion:
 
 
 class LabelStudioAnnotationView:
-    def __init__(self, ner_labels: Dict[str, str]):
+    def __init__(self, ner_labels: dict[str, str]):
         """
 
         :param ner_labels: a mapping of ner label (i.e. :attr:`.Entity.entity_class`) to a valid colour
@@ -336,7 +337,7 @@ class LabelStudioAnnotationView:
         element.appendChild(labels)
 
     @staticmethod
-    def build_taxonomy(dom: XMLDocument, element: Element, tasks: List[Dict], name: str) -> None:
+    def build_taxonomy(dom: XMLDocument, element: Element, tasks: list[dict], name: str) -> None:
         """.. (sphinx comment) as above for why we have explicit type links.
 
         :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
@@ -348,7 +349,7 @@ class LabelStudioAnnotationView:
         taxonomy.setAttribute("name", name)
         taxonomy.setAttribute("toName", "text")
         taxonomy.setAttribute("perRegion", "true")
-        source_to_choice_element: Dict[str, Element] = {}
+        source_to_choice_element: dict[str, Element] = {}
 
         for task in tasks:
             for annotation in task["annotations"]:
@@ -372,7 +373,7 @@ class LabelStudioAnnotationView:
                                 choice.setAttribute("value", label_and_idx)
                                 source_choice.appendChild(choice)
 
-    def create_main_view(self, tasks: List[Dict]) -> str:
+    def create_main_view(self, tasks: list[dict]) -> str:
         dom = self.getDOM()
         root = dom.documentElement
         root.setAttribute("style", "display: flex;")
@@ -490,7 +491,7 @@ class LabelStudioManager:
             logger.error(f"failed to create project {self.project_name}")
             raise e
 
-    def update_view(self, view: LabelStudioAnnotationView, docs: List[Document]) -> None:
+    def update_view(self, view: LabelStudioAnnotationView, docs: list[Document]) -> None:
         tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         payload = {"label_config": view.create_main_view(tasks)}
 
@@ -504,7 +505,7 @@ class LabelStudioManager:
             logger.error(f"failed to update view for project {self.project_name}")
             raise e
 
-    def update_tasks(self, docs: List[Document]) -> None:
+    def update_tasks(self, docs: list[Document]) -> None:
         tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         try:
             resp = requests.post(
@@ -518,7 +519,7 @@ class LabelStudioManager:
             logger.error(f"failed to update tasks for project {self.project_name}")
             raise e
 
-    def get_all_tasks(self) -> List[Dict[str, Any]]:
+    def get_all_tasks(self) -> list[dict[str, Any]]:
         tasks = requests.get(
             f"{self.url}/api/tasks?page_size=1000000&project={self.project_id}",
             headers=self.headers,
@@ -526,7 +527,7 @@ class LabelStudioManager:
         ids = [task["id"] for task in tasks["tasks"]]
         return self.get_tasks(ids)
 
-    def get_tasks(self, ids: List[int]) -> List[Dict[str, Any]]:
+    def get_tasks(self, ids: list[int]) -> list[dict[str, Any]]:
         task_data = []
         for idx in ids:
             task_data.append(
@@ -537,6 +538,6 @@ class LabelStudioManager:
             )
         return task_data
 
-    def export_from_ls(self) -> List[Document]:
+    def export_from_ls(self) -> list[Document]:
         tasks = self.get_all_tasks()
         return LSToKazuConversion.convert_tasks_to_docs(tasks)

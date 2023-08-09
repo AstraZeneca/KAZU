@@ -2,7 +2,6 @@ from contextlib import nullcontext as does_not_raise
 import tempfile
 import traceback
 from pathlib import Path
-from typing import List, Tuple
 
 import pytest
 from hydra.utils import instantiate
@@ -14,7 +13,7 @@ from kazu.tests.utils import requires_model_pack
 
 
 class BrokenStep(Step):
-    def __call__(self, docs: List[Document]) -> Tuple[List[Document], List[Document]]:
+    def __call__(self, docs: list[Document]) -> tuple[list[Document], list[Document]]:
         failed_docs = []
         for doc in docs:
             try:

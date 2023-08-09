@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import cast, List, Tuple, Dict, Any, Optional, Union, NamedTuple
+from typing import cast, Any, Optional, Union, NamedTuple
 
 import hydra
 import numpy as np
@@ -43,7 +43,7 @@ class SapbertDataCollatorWithPadding:
     max_length: Optional[int] = None
     pad_to_multiple_of: Optional[int] = None
 
-    def __call__(self, features: List) -> Tuple[BatchEncoding, BatchEncoding]:
+    def __call__(self, features: list) -> tuple[BatchEncoding, BatchEncoding]:
         query_toks1 = [x["query_toks1"] for x in features]
         query_toks1_enc = self.tokenizer.pad(
             query_toks1,
@@ -83,7 +83,7 @@ class HFSapbertInferenceDataset(Dataset):
     This is needed in a multi GPU environment
     """
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
+    def __getitem__(self, index: int) -> dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings.data["input_ids"][index],
             "token_type_ids": self.encodings.data["token_type_ids"][index],
@@ -101,14 +101,14 @@ class HFSapbertInferenceDataset(Dataset):
         self.encodings = encodings
 
     def __len__(self):
-        encodings = cast(List[Encoding], self.encodings.encodings)
+        encodings = cast(list[Encoding], self.encodings.encodings)
         return len(encodings)
 
 
 class HFSapbertPairwiseDataset(Dataset):
     """Dataset used for training SapBert."""
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
+    def __getitem__(self, index: int) -> dict[str, Any]:
         query_toks1 = {
             "input_ids": self.encodings_1.data["input_ids"][index],
             "token_type_ids": self.encodings_1.data["token_type_ids"][index],
@@ -136,7 +136,7 @@ class HFSapbertPairwiseDataset(Dataset):
         self.encodings_2 = encodings_2
 
     def __len__(self):
-        encodings = cast(List[Encoding], self.encodings_1.encodings)
+        encodings = cast(list[Encoding], self.encodings_1.encodings)
         return len(encodings)
 
 
@@ -152,7 +152,7 @@ class SapbertTrainingParams(BaseModel):
 
 
 def get_embedding_dataloader_from_strings(
-    texts: List[str],
+    texts: list[str],
     tokenizer: PreTrainedTokenizerBase,
     batch_size: int,
     num_workers: int,
@@ -208,7 +208,7 @@ class Candidate(NamedTuple):
 class GoldStandardExample(NamedTuple):
     gold_default_label: str
     gold_iri: str
-    candidates: List[
+    candidates: list[
         Candidate
     ]  # candidates (aka nearest neighbours) associate with this gold instance
 
@@ -223,8 +223,8 @@ class SapbertEvaluationDataManager:
     construction
     """
 
-    def __init__(self, sources: Dict[str, List[str]], debug: bool = False):
-        self.datasets: Dict[str, SapbertEvaluationDataset] = {}
+    def __init__(self, sources: dict[str, list[str]], debug: bool = False):
+        self.datasets: dict[str, SapbertEvaluationDataset] = {}
         for source_name, (
             query_source_path,
             ontology_source_path,
@@ -457,7 +457,7 @@ class PLSapbertModel(LightningModule):
         </common/lightning_module.rst#predict-step>`\\ ."""
         return self(batch)
 
-    def get_embeddings(self, output: List[Dict[int, torch.Tensor]]) -> torch.Tensor:
+    def get_embeddings(self, output: list[dict[int, torch.Tensor]]) -> torch.Tensor:
         """Get a tensor of embeddings in original order.
 
         :param output: int is the original index of the input (i.e. what comes out of self.forward)
@@ -472,7 +472,7 @@ class PLSapbertModel(LightningModule):
             embedding = torch.cat(list(full_dict.values()))
         return embedding
 
-    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, List[EPOCH_OUTPUT]]) -> None:
+    def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, list[EPOCH_OUTPUT]]) -> None:
         """
         lightning override
         generate new embeddings for each :attr:`SapbertEvaluationDataset.ontology_source` and query them with
@@ -490,7 +490,7 @@ class PLSapbertModel(LightningModule):
                 self.log(key, value=val, rank_zero_only=True)
                 logger.info(f"{dataset_name}: {key}, {val}")
 
-    def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> List[Candidate]:
+    def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> list[Candidate]:
         """
         Convert rows in a dataframe representing candidate KB entries into a corresponding
         :class:`Candidate` per row
@@ -510,7 +510,7 @@ class PLSapbertModel(LightningModule):
             )
         return candidates_filtered
 
-    def evaluate_topk_acc(self, queries: List[GoldStandardExample]) -> Dict[str, float]:
+    def evaluate_topk_acc(self, queries: list[GoldStandardExample]) -> dict[str, float]:
         """get a dictionary of accuracy results at different levels of k
         (nearest neighbours)
 
@@ -530,7 +530,7 @@ class PLSapbertModel(LightningModule):
         return result
 
     def get_embeddings_for_strings(
-        self, texts: List[str], trainer: Optional[Trainer] = None, batch_size: Optional[int] = None
+        self, texts: list[str], trainer: Optional[Trainer] = None, batch_size: Optional[int] = None
     ) -> torch.Tensor:
         """For a list of strings, generate embeddings.
 
@@ -561,7 +561,7 @@ class PLSapbertModel(LightningModule):
         """
         self.eval()
         predictions = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
-        predictions = cast(List[Dict[int, torch.Tensor]], predictions)
+        predictions = cast(list[dict[int, torch.Tensor]], predictions)
         results = self.get_embeddings(predictions)
         return results
 

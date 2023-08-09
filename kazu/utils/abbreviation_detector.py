@@ -70,7 +70,8 @@ Association for Computational Linguistics.
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import Tuple, List, Optional, Set, Dict, DefaultDict, Iterable
+from typing import Optional, DefaultDict
+from collections.abc import Iterable
 
 from spacy.language import Language
 from spacy.matcher import Matcher
@@ -80,14 +81,14 @@ from kazu.data.data import Document, Entity, Section, MentionConfidence
 
 logger = logging.getLogger(__name__)
 
-SectionAndLongToShortCandidates = Tuple[Section, Span, Span]
-SectionToSpacyDoc = Dict[Section, Doc]
-SectionToCharacterIndexedEntities = DefaultDict[Section, DefaultDict[Tuple[int, int], Set[Entity]]]
+SectionAndLongToShortCandidates = tuple[Section, Span, Span]
+SectionToSpacyDoc = dict[Section, Doc]
+SectionToCharacterIndexedEntities = DefaultDict[Section, DefaultDict[tuple[int, int], set[Entity]]]
 
 
 def find_abbreviation(
     long_form_candidate: Span, short_form_candidate: Span
-) -> Tuple[Span, Optional[Span]]:
+) -> tuple[Span, Optional[Span]]:
     """From
     https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py.
 
@@ -152,8 +153,8 @@ def find_abbreviation(
 
 
 def filter_matches(
-    section: Section, matcher_output: List[Tuple[int, int, int]], doc: Doc
-) -> List[Tuple[Section, Span, Span]]:
+    section: Section, matcher_output: list[tuple[int, int, int]], doc: Doc
+) -> list[tuple[Section, Span, Span]]:
     """From
     https://github.com/allenai/scispacy/blob/main/scispacy/abbreviation.py.
 
@@ -252,7 +253,7 @@ class KazuAbbreviationDetector:
             entities are found
         """
         self.namespace = namespace
-        self.exclude_abbrvs: Set[str] = set(exclude_abbrvs) if exclude_abbrvs is not None else set()
+        self.exclude_abbrvs: set[str] = set(exclude_abbrvs) if exclude_abbrvs is not None else set()
         self.nlp = nlp
         self.matcher = Matcher(nlp.vocab)
         self.matcher.add("parenthesis", [[{"ORTH": "("}, {"OP": "+"}, {"ORTH": ")"}]])
@@ -284,7 +285,7 @@ class KazuAbbreviationDetector:
     def _find_abbreviations_and_override_entities(
         self,
         global_matcher: Matcher,
-        long_form_string_to_source_ents: Dict[str, Set[Entity]],
+        long_form_string_to_source_ents: dict[str, set[Entity]],
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
         section_to_spacy_doc: SectionToSpacyDoc,
     ) -> None:
@@ -315,7 +316,7 @@ class KazuAbbreviationDetector:
         self,
         abbrv_span: Span,
         global_matcher: Matcher,
-        long_form_string_to_source_ents: Dict[str, Set[Entity]],
+        long_form_string_to_source_ents: dict[str, set[Entity]],
         spacy_match_int: int,
         section: Section,
     ) -> None:
@@ -339,7 +340,7 @@ class KazuAbbreviationDetector:
 
     def _remove_existing_entities(
         self,
-        abbrv_char_index_key: Tuple[int, int],
+        abbrv_char_index_key: tuple[int, int],
         section: Section,
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
     ) -> None:
@@ -386,14 +387,14 @@ class KazuAbbreviationDetector:
 
     def _build_matcher_and_identify_source_entities(
         self,
-        section_and_long_to_short_candidates: List[SectionAndLongToShortCandidates],
+        section_and_long_to_short_candidates: list[SectionAndLongToShortCandidates],
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
-    ) -> Tuple[Matcher, Dict[str, Set[Entity]]]:
+    ) -> tuple[Matcher, dict[str, set[Entity]]]:
         global_matcher = Matcher(self.nlp.vocab)
-        all_occurences: Dict[Span, Set[Span]] = defaultdict(set)
-        already_seen_long: Set[str] = set()
-        already_seen_short: Set[str] = set()
-        long_form_string_to_source_ents: Dict[str, Set[Entity]] = {}
+        all_occurences: dict[Span, set[Span]] = defaultdict(set)
+        already_seen_long: set[str] = set()
+        already_seen_short: set[str] = set()
+        long_form_string_to_source_ents: dict[str, set[Entity]] = {}
         for (section, long_candidate, short_candidate) in section_and_long_to_short_candidates:
             short, long = find_abbreviation(long_candidate, short_candidate)
             # We need the long and short form definitions to be unique, because we need
@@ -422,10 +423,10 @@ class KazuAbbreviationDetector:
 
     def _find_candidates_and_index_sections(
         self, document: Document
-    ) -> Tuple[
-        List[SectionAndLongToShortCandidates], SectionToCharacterIndexedEntities, SectionToSpacyDoc
+    ) -> tuple[
+        list[SectionAndLongToShortCandidates], SectionToCharacterIndexedEntities, SectionToSpacyDoc
     ]:
-        long_to_short_candidates: List[SectionAndLongToShortCandidates] = []
+        long_to_short_candidates: list[SectionAndLongToShortCandidates] = []
         section_to_spacy_doc = {}
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities = defaultdict(
             lambda: defaultdict(set)

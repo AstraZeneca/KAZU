@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple, Dict, Iterable
+from collections.abc import Iterable
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -21,7 +21,7 @@ def create_word_and_char_ngrams(
         2,
         3,
     ),
-) -> List[str]:
+) -> list[str]:
     """Function to create char and word ngrams.
 
     :param s: string to process
@@ -48,11 +48,11 @@ class TfIdfScorer(metaclass=Singleton):
 
     def __init__(self):
         self.synonym_db = SynonymDatabase()
-        self.parser_to_vectorizer: Dict[str, TfidfVectorizer] = self.build_vectorizers()
+        self.parser_to_vectorizer: dict[str, TfidfVectorizer] = self.build_vectorizers()
 
     @kazu_disk_cache.memoize(ignore={0})
-    def build_vectorizers(self) -> Dict[str, TfidfVectorizer]:
-        result: Dict[str, TfidfVectorizer] = {}
+    def build_vectorizers(self) -> dict[str, TfidfVectorizer]:
+        result: dict[str, TfidfVectorizer] = {}
         for parser_name in self.synonym_db.loaded_parsers:
             synonyms = self.synonym_db.get_all(parser_name).keys()
             vectoriser = TfidfVectorizer(lowercase=False, analyzer=create_word_and_char_ngrams)
@@ -61,8 +61,8 @@ class TfIdfScorer(metaclass=Singleton):
         return result
 
     def __call__(
-        self, strings: List[str], matrix: np.ndarray, parser: str
-    ) -> Iterable[Tuple[str, float]]:
+        self, strings: list[str], matrix: np.ndarray, parser: str
+    ) -> Iterable[tuple[str, float]]:
         """Transform a list of strings with a parser-specific vectorizer and
         score against a matrix.
 

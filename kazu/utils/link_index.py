@@ -1,5 +1,6 @@
 import logging
-from typing import Tuple, List, Iterable, Optional, Dict
+from typing import Optional
+from collections.abc import Iterable
 
 import numpy
 import numpy as np
@@ -29,7 +30,7 @@ class DictionaryIndex:
     def __init__(
         self,
         parser: OntologyParser,
-        boolean_scorers: Optional[List[BooleanStringSimilarityScorer]] = None,
+        boolean_scorers: Optional[list[BooleanStringSimilarityScorer]] = None,
     ):
         """
 
@@ -103,14 +104,14 @@ class DictionaryIndex:
 
     @kazu_disk_cache.memoize(ignore={0, 1})
     def _build_index_cache(
-        self, synonyms_for_parser: Dict[NormalisedSynonymStr, SynonymTerm], _cache_key: int
-    ) -> Tuple[TfidfVectorizer, numpy.ndarray]:
+        self, synonyms_for_parser: dict[NormalisedSynonymStr, SynonymTerm], _cache_key: int
+    ) -> tuple[TfidfVectorizer, numpy.ndarray]:
         logger.info("building TfidfVectorizer for %s", self.parser_name)
         vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
         tf_idf_matrix = vectorizer.fit_transform(synonyms_for_parser.keys())
         return vectorizer, tf_idf_matrix
 
-    def build_index_cache(self) -> Tuple[TfidfVectorizer, numpy.ndarray]:
+    def build_index_cache(self) -> tuple[TfidfVectorizer, numpy.ndarray]:
         """Build the cache for the index."""
 
         return self._build_index_cache(

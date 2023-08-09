@@ -5,7 +5,8 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
-from typing import Any, List, Dict, Union, Iterable, Tuple, Optional, Set, cast
+from typing import Any, Union, Optional, cast
+from collections.abc import Iterable
 
 import spacy
 import srsly
@@ -34,23 +35,23 @@ MATCH_ID_SEP = ":::"
 
 logger = logging.getLogger(__name__)
 
-_CoocDict = Dict[str, Dict[str, List[str]]]
-_MatcherDict = Dict[str, Matcher]
+_CoocDict = dict[str, dict[str, list[str]]]
+_MatcherDict = dict[str, Matcher]
 
 
 @dataclass
 class OntologyMatcherConfig:
     span_key: str
     match_id_sep: str
-    labels: List[str]
-    parser_name_to_entity_type: Dict[str, str]
+    labels: list[str]
+    parser_name_to_entity_type: dict[str, str]
 
 
 # the strings in the tuple are: parser_name, term_norm, confidence value
-_MatcherOntologyData = Dict[str, Set[Tuple[str, str, str]]]
+_MatcherOntologyData = dict[str, set[tuple[str, str, str]]]
 
 
-def _ontology_dict_setter(span: Span, value: Dict) -> None:
+def _ontology_dict_setter(span: Span, value: dict) -> None:
     # spacy's typing on the property says this has to be a Dict[str, Any]
     # but the __init__ typing says it can be a Dict[Any, Any]
     span.doc.user_data[span] = value  # type: ignore[index]
@@ -82,7 +83,7 @@ class OntologyMatcher:
         *,
         span_key: str = SPAN_KEY,
         match_id_sep: str = MATCH_ID_SEP,
-        parser_name_to_entity_type: Dict[str, str],
+        parser_name_to_entity_type: dict[str, str],
     ):
         """
 
@@ -131,12 +132,12 @@ class OntologyMatcher:
         return self.cfg.match_id_sep
 
     @property
-    def labels(self) -> List[str]:
+    def labels(self) -> list[str]:
         """The labels currently processed by this component."""
         return self.cfg.labels
 
     @property
-    def parser_name_to_entity_type(self) -> Dict[str, str]:
+    def parser_name_to_entity_type(self) -> dict[str, str]:
         return self.cfg.parser_name_to_entity_type
 
     def set_labels(self, labels: Iterable[str]) -> None:
@@ -187,8 +188,8 @@ class OntologyMatcher:
             )
 
     def create_phrasematchers_using_curations(
-        self, parsers: List[OntologyParser]
-    ) -> Tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
+        self, parsers: list[OntologyParser]
+    ) -> tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
         """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\
         s based on :class:`.CuratedTerm`\\ s.
 
@@ -282,7 +283,7 @@ class OntologyMatcher:
             # the if clause at the start of this function would raise an error
             raise AssertionError()
 
-        spans: List[Span] = []
+        spans: list[Span] = []
         for (start, end), matches_grp in sort_then_group(
             matches,
             key_func=lambda x: (
@@ -307,7 +308,7 @@ class OntologyMatcher:
         doc.spans[self.span_key] = span_group
         return doc
 
-    def filter_by_contexts(self, doc: Doc, spans: List[Span]) -> List[Span]:
+    def filter_by_contexts(self, doc: Doc, spans: list[Span]) -> list[Span]:
         """These filters work best when there is sentence segmentation
         available."""
         doc_has_sents = doc.has_annotation("SENT_START")
@@ -315,7 +316,7 @@ class OntologyMatcher:
         for label in self.labels:
             Token.set_extension(label, default=False, force=True)
         # compile the filtered spans by going through each label and each span
-        filtered_spans: List[Span] = []
+        filtered_spans: list[Span] = []
         for label in self.labels:
             # Set all token attributes for other labels (to use in the matcher rules)
             for s in spans:
@@ -400,7 +401,7 @@ class OntologyMatcher:
             return False
         return False
 
-    def _create_token_matchers(self) -> Tuple[_MatcherDict, _MatcherDict]:
+    def _create_token_matchers(self) -> tuple[_MatcherDict, _MatcherDict]:
         tp_matchers: _MatcherDict = {}
         fp_matchers: _MatcherDict = {}
         if CELL_LINE in self.labels:
@@ -416,16 +417,16 @@ class OntologyMatcher:
         """Define patterns where a Cell line or type appears and it's likely a
         true positive."""
         matcher = Matcher(self.nlp.vocab)
-        pattern_1: List[Dict[str, Any]] = [
+        pattern_1: list[dict[str, Any]] = [
             {"_": {ent_class: True}},
             {"LOWER": {"IN": ["cell", "cells"]}},
         ]
-        pattern_2: List[Dict[str, Any]] = [
+        pattern_2: list[dict[str, Any]] = [
             {"LOWER": "cell"},
             {"LOWER": "line"},
             {"_": {ent_class: True}},
         ]
-        pattern_3: List[Dict[str, Any]] = [
+        pattern_3: list[dict[str, Any]] = [
             {"LOWER": "cell"},
             {"LOWER": "type"},
             {"_": {ent_class: True}},
@@ -437,17 +438,17 @@ class OntologyMatcher:
         """Define patterns where an atanomy entity appears and it's likely a
         false positive."""
         matcher = Matcher(self.nlp.vocab)
-        patterns: List[List[Dict[str, Any]]] = []
+        patterns: list[list[dict[str, Any]]] = []
         if DRUG in self.labels:
-            p: List[Dict[str, Any]] = [{"_": {DRUG: True}}, {"_": {ANATOMY: True}, "LOWER": "arm"}]
+            p: list[dict[str, Any]] = [{"_": {DRUG: True}}, {"_": {ANATOMY: True}, "LOWER": "arm"}]
             patterns.append(p)
-        p2: List[Dict[str, Any]] = [
+        p2: list[dict[str, Any]] = [
             {"LOWER": "single"},
             {"LOWER": "-"},
             {"_": {ANATOMY: True}, "LOWER": "arm"},
         ]
         patterns.append(p2)
-        p3: List[Dict[str, Any]] = [
+        p3: list[dict[str, Any]] = [
             {"LOWER": "quality"},
             {"LOWER": "-", "OP": "?"},
             {"LOWER": "of"},

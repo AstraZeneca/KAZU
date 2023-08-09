@@ -6,16 +6,13 @@ from copy import deepcopy
 from pathlib import Path
 from typing import (
     Any,
-    Iterable,
-    List,
     Callable,
     TypeVar,
     Protocol,
     Optional,
-    Set,
     Union,
-    Tuple,
 )
+from collections.abc import Iterable
 
 from cachetools import LFUCache
 from diskcache import Cache
@@ -37,7 +34,7 @@ returns the same type as the original function it 'memoized'.
 
 
 class Memoization(Protocol[Ret]):
-    def __cache_key__(self, *args: Any, **kwargs: Any) -> Tuple[Any, ...]:
+    def __cache_key__(self, *args: Any, **kwargs: Any) -> tuple[Any, ...]:
         raise NotImplementedError
 
     def __call__(self, *args: Any, **kwargs: Any) -> Ret:
@@ -51,7 +48,7 @@ class CacheProtocol(Protocol):
         typed: bool = False,
         expire: Optional[float] = None,
         tag: Optional[str] = None,
-        ignore: Set[Union[str, int]] = set(),
+        ignore: set[Union[str, int]] = set(),
     ) -> Callable[[Callable[..., Ret]], Memoization[Ret]]:
         raise NotImplementedError
 
@@ -103,7 +100,7 @@ class EntityLinkingLookupCache:
     (e.g. bert)"""
 
     def __init__(self, lookup_cache_size: int = 5000):
-        self.terms_lookup_cache: LFUCache[int, Set[SynonymTermWithMetrics]] = LFUCache(
+        self.terms_lookup_cache: LFUCache[int, set[SynonymTermWithMetrics]] = LFUCache(
             lookup_cache_size
         )
 
@@ -115,7 +112,7 @@ class EntityLinkingLookupCache:
         if cache_hit is None:
             self.terms_lookup_cache[hash_val] = set(terms)
 
-    def check_lookup_cache(self, entities: Iterable[Entity]) -> List[Entity]:
+    def check_lookup_cache(self, entities: Iterable[Entity]) -> list[Entity]:
         """checks the cache for synonym terms. If relevant terms are found for
         an entity, update it accordingly. If not return as a list of cache
         misses (e.g. for further processing)

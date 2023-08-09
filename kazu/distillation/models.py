@@ -38,7 +38,7 @@ limitations under the License.
 """
 
 import logging
-from typing import List, Dict, Union, Tuple, Optional, Callable, Any, cast
+from typing import Union, Optional, Callable, Any, cast
 
 import numpy as np
 import pytorch_lightning as pl
@@ -71,7 +71,7 @@ check_min_version("4.0.0")  # at least 4.0.0... for optimerzers
 
 logger = logging.getLogger(__name__)
 
-SCHEDULES: Dict[Optional[str], Callable] = {
+SCHEDULES: dict[Optional[str], Callable] = {
     None: get_constant_schedule,
     "none": get_constant_schedule,
     "warmup_cosine": get_cosine_schedule_with_warmup,
@@ -91,8 +91,8 @@ class NerDataset(Dataset):
     def __init__(
         self,
         tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
-        examples: List[InputExample],
-        label_map: Dict[str, int],
+        examples: list[InputExample],
+        label_map: dict[str, int],
         max_length: int,
     ):
         """
@@ -109,9 +109,9 @@ class NerDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.call_count = 0
-        self.cache: LRUCache[int, Dict[str, List]] = LRUCache(5000)
+        self.cache: LRUCache[int, dict[str, list]] = LRUCache(5000)
 
-    def __getitem__(self, index: int) -> Dict[str, List]:
+    def __getitem__(self, index: int) -> dict[str, list]:
         if index not in self.cache:
             self.cache[index] = self.convert_single_example(
                 ex_index=index, example=self.examples[index]
@@ -122,11 +122,11 @@ class NerDataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def convert_single_example(self, ex_index: int, example: InputExample) -> Dict[str, List]:
+    def convert_single_example(self, ex_index: int, example: InputExample) -> dict[str, list]:
         textlist = example.text_a.split()
         labellist = example.label.split()
-        tokens: List[str] = []
-        labels: List[str] = []
+        tokens: list[str] = []
+        labels: list[str] = []
         for i, word in enumerate(textlist):
             tokenized = self.tokenizer.tokenize(word)
             tokens.extend(tokenized)
@@ -137,9 +137,9 @@ class NerDataset(Dataset):
                 else:
                     labels.append("X")
 
-        ntokens: List[str] = []
-        segment_ids: List[int] = []
-        label_id: List[int] = []
+        ntokens: list[str] = []
+        segment_ids: list[int] = []
+        label_id: list[int] = []
         ntokens.append("[CLS]")
         segment_ids.append(0)
         label_id.append(IGNORE_IDX)
@@ -234,7 +234,7 @@ class TaskSpecificDistillation(pl.LightningModule):
             )
         )
 
-    def get_training_examples(self) -> List[InputExample]:
+    def get_training_examples(self) -> list[InputExample]:
         """Subclasses should implement this.
 
         :return:
@@ -299,7 +299,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         max_epochs: int,
         max_length: int,
         data_dir: str,
-        label_list: Union[List, ListConfig],
+        label_list: Union[list, ListConfig],
         student_model_path: str,
         teacher_model_path: str,
         num_workers: int,
@@ -341,9 +341,9 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         )
 
         self.num_workers = num_workers
-        self.label_list: List[str]
+        self.label_list: list[str]
         if isinstance(label_list, ListConfig):
-            self.label_list = cast(List[str], OmegaConf.to_container(label_list))
+            self.label_list = cast(list[str], OmegaConf.to_container(label_list))
         else:
             self.label_list = label_list
         self.num_labels = len(label_list)
@@ -378,7 +378,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
             persistent_workers=True,
         )
 
-    def get_training_examples(self) -> List[InputExample]:
+    def get_training_examples(self) -> list[InputExample]:
         return self.processor.get_train_examples(self.data_dir)
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
@@ -416,7 +416,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         max_epochs: int,
         max_length: int,
         data_dir: str,
-        label_list: Union[List, ListConfig],
+        label_list: Union[list, ListConfig],
         student_model_path: str,
         teacher_model_path: str,
         num_workers: int,
@@ -556,7 +556,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
 
     def tensor_to_jagged_array(
         self, tensor: torch.Tensor, attention_mask: torch.Tensor
-    ) -> List[List[int]]:
+    ) -> list[list[int]]:
         result = []
         for arr, mask in zip(tensor.numpy(), attention_mask.numpy()):
             result.append(arr[0 : mask.sum()].tolist())
@@ -575,7 +575,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         max_epochs: int,
         max_length: int,
         data_dir: str,
-        label_list: Union[List, ListConfig],
+        label_list: Union[list, ListConfig],
         student_model_path: str,
         teacher_model_path: str,
         num_workers: int,
@@ -621,7 +621,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.loss = MSELoss()
         self.save_hyperparameters()
 
-    def _run_step(self, batch: Any) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _run_step(self, batch: Any) -> tuple[torch.Tensor, torch.Tensor]:
         """function for the training/validation step. Computes attention based
         distillation loss and hidden states based distillation loss.
 

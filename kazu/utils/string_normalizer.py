@@ -3,7 +3,7 @@ from os import getenv
 
 import regex
 from functools import lru_cache
-from typing import Optional, Dict, Protocol, Type, Tuple
+from typing import Optional, Protocol
 
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 
@@ -422,7 +422,7 @@ class StringNormalizer:
     """Call custom entity class normalizers, or a default normalizer if none is
     available."""
 
-    normalizers: Dict[Optional[str], Type[EntityClassNormalizer]] = {
+    normalizers: dict[Optional[str], type[EntityClassNormalizer]] = {
         "gene": GeneStringNormalizer,
         "anatomy": AnatomyStringNormalizer,
         "disease": DiseaseStringNormalizer,
@@ -528,7 +528,7 @@ class GildaUtils:
     """
 
     @staticmethod
-    def depluralize(word: str) -> Tuple[str, str]:
+    def depluralize(word: str) -> tuple[str, str]:
         """Return the depluralized version of the word, along with a status
         flag.
 

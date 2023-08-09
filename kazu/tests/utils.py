@@ -1,6 +1,6 @@
 from os import getenv
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+from typing import Optional
 
 import pandas as pd
 import pytest
@@ -48,7 +48,7 @@ requires_label_studio = pytest.mark.skipif(
 )
 
 
-def ner_long_document_test_cases() -> List[Tuple[str, int, str]]:
+def ner_long_document_test_cases() -> list[tuple[str, int, str]]:
     """
     should return list of tuples: 0 = the text, 1 = the number of times an entity class is expected to be found,
     2 = the entity class type
@@ -77,7 +77,7 @@ class DummyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         source: str = "test_parser",
-        data: Optional[Dict[str, List[str]]] = None,
+        data: Optional[dict[str, list[str]]] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
@@ -106,7 +106,7 @@ class DummyParser(OntologyParser):
 
 
 def make_dummy_synonym_term(
-    ids: List[str],
+    ids: list[str],
     parser_name: str,
     search_score: Optional[float] = None,
     embed_score: Optional[float] = None,
