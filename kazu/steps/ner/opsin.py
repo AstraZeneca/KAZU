@@ -146,7 +146,7 @@ class OpsinStep(Step):
         try:
             smiles = self.opsin.nameToStructure(name)
             if smiles != None:
-                smiles = Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
+                smiles = Chem.CanonSmiles(smiles)
                 mapping = Mapping(
                                 default_label=name,
                                 source="Opsin",
