@@ -2,7 +2,6 @@ package com.astrazeneca.kazu
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
-import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class OpsinRunnerTest extends AnyFunSuite {
