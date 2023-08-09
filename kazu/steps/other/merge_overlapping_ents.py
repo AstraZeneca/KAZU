@@ -54,7 +54,7 @@ class MergeOverlappingEntsStep(Step):
     def select_preferred_entity(self, ents: set[Entity]) -> tuple[Entity, list[Entity]]:
         """
         :param ents:
-        :return: tuple of Entity<preferred> ,List[Entity]<other entities at this location>
+        :return: tuple of Entity<preferred> ,list[Entity]<other entities at this location>
         """
         preferred_ents = sorted(
             ents,
@@ -109,7 +109,7 @@ class MergeOverlappingEntsStep(Step):
         """
 
         :param entities:
-        :return: dict of locations to Set[Entity]
+        :return: dict of locations to set[Entity]
         """
         if len(entities) == 0:
             return {}

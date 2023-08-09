@@ -52,8 +52,8 @@ _MatcherOntologyData = dict[str, set[tuple[str, str, str]]]
 
 
 def _ontology_dict_setter(span: Span, value: dict) -> None:
-    # spacy's typing on the property says this has to be a Dict[str, Any]
-    # but the __init__ typing says it can be a Dict[Any, Any]
+    # spacy's typing on the property says this has to be a dict[str, Any]
+    # but the __init__ typing says it can be a dict[Any, Any]
     span.doc.user_data[span] = value  # type: ignore[index]
 
 

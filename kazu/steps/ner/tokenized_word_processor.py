@@ -33,7 +33,7 @@ class TokenizedWord:
 
 @dataclass
 class TokWordSpan:
-    """dataclass for a span (i.e. a List[TokenizedWord] representing an NE)"""
+    """dataclass for a span (i.e. a list[TokenizedWord] representing an NE)"""
 
     #: entity_class
     clazz: str
@@ -75,7 +75,7 @@ class SpanFinder(ABC):
 
     @abstractmethod
     def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
-        """return a set of Tuple[<BIO label>,Optional[<class label>]] for a
+        """return a set of tuple[<BIO label>,Optional[<class label>]] for a
         TokenizedWord. Optional[<class label>] is None if the BIO label is "O".
 
         :param word:

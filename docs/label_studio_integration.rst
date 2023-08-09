@@ -65,7 +65,7 @@ Our recommended workflow is as follows:
             project_name="test", headers=headers, url=label_studio_url_and_port
         )
 
-        docs: List[Document] = manager.export_from_ls()
+        docs: list[Document] = manager.export_from_ls()
 
 4) Your 'gold standard' entities will now be accessible on the :attr:`kazu.data.data.Section.metadata` dictionary with the key: 'gold_entities'
 

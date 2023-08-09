@@ -219,7 +219,7 @@ class SapbertEvaluationDataManager:
     these are then converted into data loaders, while maintaining a reference
     to the embedding metadata that should be used for evaluation.
 
-    self.dataset is Dict[dataset_name,SapbertEvaluationDataset] after
+    self.dataset is dict[dataset_name, SapbertEvaluationDataset] after
     construction
     """
 

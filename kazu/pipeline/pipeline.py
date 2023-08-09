@@ -156,7 +156,7 @@ class Pipeline:
         self.failure_handlers = failure_handler
         self.steps = steps
         self._namespace_to_step = {step.namespace(): step for step in steps}
-        # documents that failed to process - a dict of [<step namespace>:List[failed docs]]
+        # documents that failed to process - a dict of [<step namespace>:list[failed docs]]
         self.failed_docs: dict[str, list[Document]] = {}
         # performance tracking
         self.init_time = datetime.now().strftime("%m_%d_%Y_%H_%M")
@@ -261,7 +261,7 @@ class Pipeline:
                     " requested step_group %s" % step_group
                 )
 
-            # we can't assign directly to steps_to_run, because the type is Optional[List[Step]]
+            # we can't assign directly to steps_to_run, because the type is Optional[list[Step]]
             # rather than the Iterable[Step] declared above (and required below).
             steps_or_none = self.step_groups.get(step_group)
             if steps_or_none is None:

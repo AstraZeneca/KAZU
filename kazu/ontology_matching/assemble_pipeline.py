@@ -59,7 +59,7 @@ class KazuCustomEnglishDefaults(EnglishDefaults):
     suffixes = EnglishDefaults.suffixes + [
         r"(?<=\b[{au}])\.".format(au=ALPHA_UPPER)
     ]  # type:ignore[operator] # because mypy doesn't know that EnglishDefaults.suffixes is
-    # always a List[str]
+    # always a list[str]
 
 
 @spacy.registry.languages("kazu_custom_en")
