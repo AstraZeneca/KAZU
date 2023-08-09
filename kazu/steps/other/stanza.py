@@ -1,4 +1,3 @@
-
 import stanza
 from stanza.models.common.doc import Sentence
 

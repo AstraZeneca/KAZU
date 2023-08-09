@@ -1,4 +1,3 @@
-
 try:
     from seqeval.metrics import f1_score
 except ImportError as e:

@@ -4,7 +4,9 @@ from copy import deepcopy
 from functools import cached_property
 from typing import Any, Optional, Union
 from collections.abc import Iterable
-from collections.abc import Mapping as TypingMapping  # due to name conflict with kazu.data.data.Mapping
+from collections.abc import (
+    Mapping as TypingMapping,
+)  # due to name conflict with kazu.data.data.Mapping
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 

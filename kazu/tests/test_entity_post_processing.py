@@ -1,4 +1,3 @@
-
 from hydra.utils import instantiate
 
 from kazu.data.data import Entity
