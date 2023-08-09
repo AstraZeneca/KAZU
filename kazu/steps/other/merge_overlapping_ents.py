@@ -1,6 +1,5 @@
 import logging
 from collections import defaultdict
-from typing import DefaultDict
 
 from kazu.data.data import Document, Entity
 from kazu.steps import Step, document_iterating_step
@@ -115,7 +114,7 @@ class MergeOverlappingEntsStep(Step):
         if len(entities) == 0:
             return {}
         locations_by_start = sorted(entities, key=lambda x: x.start)
-        locations_overlapped: DefaultDict[tuple[int, int], set[Entity]] = defaultdict(set)
+        locations_overlapped: defaultdict[tuple[int, int], set[Entity]] = defaultdict(set)
         ents_this_group = set()
         start = locations_by_start[0].start
         end = locations_by_start[0].end

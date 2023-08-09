@@ -1,7 +1,7 @@
 from functools import wraps
 import traceback
-from typing import Any, Callable, Protocol, TypeVar
-from collections.abc import Iterable
+from typing import Any, Protocol, TypeVar
+from collections.abc import Iterable, Callable
 
 from kazu.data.data import Document, PROCESSING_EXCEPTION
 from kazu.ontology_preprocessing.base import OntologyParser

@@ -1,4 +1,4 @@
-from typing import TypedDict, NamedTuple, DefaultDict
+from typing import TypedDict, NamedTuple
 from collections.abc import Iterable
 from collections import defaultdict
 
@@ -137,7 +137,7 @@ class EntityClassDisambiguationStep(Step):
             return section.text[sentence_context_spans[0].start : sentence_context_spans[-1].end]
 
     def spangrouped_ent_section_pairs(self, doc: Document) -> Iterable[list[EntSectionPair]]:
-        spans_to_ents_and_sections: DefaultDict[
+        spans_to_ents_and_sections: defaultdict[
             tuple[int, frozenset[CharSpan]], list[EntSectionPair]
         ] = defaultdict(list)
         for section_idx, section in enumerate(doc.sections):

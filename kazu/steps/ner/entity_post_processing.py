@@ -1,5 +1,6 @@
 from copy import deepcopy
-from typing import Callable, Optional
+from typing import Optional
+from collections.abc import Callable
 
 from kazu.data.data import Entity, CharSpan
 

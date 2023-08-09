@@ -1,5 +1,6 @@
 import os
-from typing import Optional, Callable
+from typing import Optional
+from collections.abc import Callable
 
 from py4j.java_gateway import JavaGateway
 

@@ -1,6 +1,6 @@
 from itertools import groupby
-from typing import Callable, TypeVar, TYPE_CHECKING
-from collections.abc import Iterable
+from typing import TypeVar, TYPE_CHECKING
+from collections.abc import Iterable, Callable
 
 # see https://github.com/python/typeshed/tree/master/stdlib/_typeshed
 # In short, this is needed as

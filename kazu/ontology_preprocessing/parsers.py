@@ -5,13 +5,7 @@ import re
 import sqlite3
 from functools import cache
 from pathlib import Path
-from typing import (
-    cast,
-    Any,
-    Optional,
-    Union,
-    overload,
-)
+from typing import cast, Any, Optional, Union, overload
 from collections.abc import Iterable
 from urllib import parse
 

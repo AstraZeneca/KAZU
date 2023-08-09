@@ -70,7 +70,7 @@ Association for Computational Linguistics.
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import Optional, DefaultDict
+from typing import Optional
 from collections.abc import Iterable
 
 from spacy.language import Language
@@ -83,7 +83,7 @@ logger = logging.getLogger(__name__)
 
 SectionAndLongToShortCandidates = tuple[Section, Span, Span]
 SectionToSpacyDoc = dict[Section, Doc]
-SectionToCharacterIndexedEntities = DefaultDict[Section, DefaultDict[tuple[int, int], set[Entity]]]
+SectionToCharacterIndexedEntities = defaultdict[Section, defaultdict[tuple[int, int], set[Entity]]]
 
 
 def find_abbreviation(

@@ -1,7 +1,7 @@
 import logging
 from functools import partial
-from typing import Optional, Callable, cast
-from collections.abc import Iterable
+from typing import Optional, cast
+from collections.abc import Iterable, Callable
 
 import torch
 from pytorch_lightning import Trainer

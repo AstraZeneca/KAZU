@@ -4,7 +4,7 @@ import json
 import os
 from collections import defaultdict, Counter
 from pathlib import Path
-from typing import cast, DefaultDict, Any
+from typing import cast, Any
 from collections.abc import Iterable
 
 import hydra
@@ -213,7 +213,7 @@ def aggregate_linking_results(
     class_and_scorers: dict[str, list[SectionScorer]]
 ) -> dict[str, AggregatedAccuracyResult]:
 
-    result: DefaultDict[str, AggregatedAccuracyResult] = defaultdict(AggregatedAccuracyResult)
+    result: defaultdict[str, AggregatedAccuracyResult] = defaultdict(AggregatedAccuracyResult)
     for _, scorers in class_and_scorers.items():
         for scorer in scorers:
             for (
@@ -294,7 +294,7 @@ def check_annotation_consistency(cfg):
                 {ent: str(section.metadata["label_studio_task_id"]) for ent in ents}
             )
 
-    messages: DefaultDict[str, set[str]] = defaultdict(set)
+    messages: defaultdict[str, set[str]] = defaultdict(set)
     # update the messages dict with any apparent issues
     for match_str, ents_iter in sort_then_group(all_ents, lambda x: x.match):
         ents = list(ents_iter)

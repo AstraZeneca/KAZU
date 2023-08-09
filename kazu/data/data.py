@@ -7,15 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from enum import Enum, auto, IntEnum
 from math import inf
-from typing import (
-    Any,
-    Optional,
-    Union,
-    DefaultDict,
-    overload,
-    TypeVar,
-    cast,
-)
+from typing import Any, Optional, Union, overload, TypeVar, cast
 from collections.abc import Iterable
 
 import bson
@@ -729,7 +721,7 @@ class GlobalParserActions:
     """Container for all :class:`.ParserAction`\\s."""
 
     actions: list[ParserAction]
-    _parser_name_to_action: DefaultDict[str, list[ParserAction]] = field(
+    _parser_name_to_action: defaultdict[str, list[ParserAction]] = field(
         default_factory=lambda: defaultdict(list), init=False
     )
 

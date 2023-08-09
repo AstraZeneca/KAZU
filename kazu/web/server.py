@@ -1,7 +1,8 @@
 import logging
 import subprocess
 import time
-from typing import Any, Callable, Union, Optional
+from typing import Any, Union, Optional
+from collections.abc import Callable
 
 import hydra
 import ray

@@ -1,6 +1,6 @@
 import dataclasses
-from typing import Protocol, Callable, Optional
-from collections.abc import Iterable
+from typing import Protocol, Optional
+from collections.abc import Iterable, Callable
 import urllib
 
 from kazu.data.data import (

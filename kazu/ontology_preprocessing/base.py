@@ -4,13 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict, Counter
 from enum import auto
-from typing import (
-    cast,
-    Optional,
-    DefaultDict,
-    Literal,
-    Any,
-)
+from typing import cast, Optional, Literal, Any
 from collections.abc import Iterable
 
 import pandas as pd
@@ -138,9 +132,9 @@ class CurationProcessor:
         self.entity_class = entity_class
         self.parser_name = parser_name
         self._terms_by_term_norm: dict[NormalisedSynonymStr, SynonymTerm] = {}
-        self._terms_by_id: DefaultDict[Idx, set[SynonymTerm]] = defaultdict(set)
+        self._terms_by_id: defaultdict[Idx, set[SynonymTerm]] = defaultdict(set)
         # used by inherited curations to decide behaviour
-        self._curations_by_syn: DefaultDict[str, set[CuratedTerm]] = defaultdict(set)
+        self._curations_by_syn: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
@@ -453,7 +447,7 @@ class CurationProcessor:
         to_remove: set[CuratedTerm] = set()
         cs_conf = set()
         ci_conf = set()
-        cs_lookup: DefaultDict[str, tuple[set[CuratedTerm], set[MentionConfidence]]] = defaultdict(
+        cs_lookup: defaultdict[str, tuple[set[CuratedTerm], set[MentionConfidence]]] = defaultdict(
             lambda: (set(), set())
         )
         for curation in curations:

@@ -4,15 +4,8 @@ import sys
 import tempfile
 from copy import deepcopy
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    TypeVar,
-    Protocol,
-    Optional,
-    Union,
-)
-from collections.abc import Iterable
+from typing import Any, TypeVar, Protocol, Optional, Union
+from collections.abc import Iterable, Callable
 
 from cachetools import LFUCache
 from diskcache import Cache

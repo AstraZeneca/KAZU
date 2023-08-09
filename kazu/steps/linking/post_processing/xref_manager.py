@@ -3,7 +3,6 @@ import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict
 from collections.abc import Iterable
 
 import requests
@@ -168,8 +167,8 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         return converted_source, converted_idx
 
     def parse_oxo_dump(self, oxo_dump: list[dict]) -> XrefDatabase:
-        xref_db_default_dict: DefaultDict[
-            str, DefaultDict[str, set[tuple[str, str]]]
+        xref_db_default_dict: defaultdict[
+            str, defaultdict[str, set[tuple[str, str]]]
         ] = defaultdict(lambda: defaultdict(set))
 
         for oxo_page in oxo_dump:

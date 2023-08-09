@@ -38,7 +38,8 @@ limitations under the License.
 """
 
 import logging
-from typing import Union, Optional, Callable, Any, cast
+from typing import Union, Optional, Any, cast
+from collections.abc import Callable
 
 import numpy as np
 import pytorch_lightning as pl
