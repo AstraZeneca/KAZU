@@ -449,7 +449,7 @@ class PLSapbertModel(LightningModule):
         """Implementation of
         :external+pytorch_lightning:ref:`LightningModule.validation_step
         </common/lightning_module.rst#validation-step>`\\ ."""
-        return self(batch)
+        return self(batch)  # type: ignore [no-any-return] # no type info from Pytorch Lightning
 
     def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
         """Implementation of

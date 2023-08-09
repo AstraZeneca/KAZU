@@ -193,6 +193,7 @@ class SimpleSpanFinder(SpanFinder):
 
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: Set[Tuple[str, Optional[str]]]
+    ) -> bool:
         """A potential entity span will end if any of the following conditions
         are met:
 

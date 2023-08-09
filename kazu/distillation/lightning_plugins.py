@@ -12,6 +12,7 @@ from transformers import AutoTokenizer
 # this is subclassing 'Any'.
 class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
     """A plugin for saving student model (without saving teacher model)"""
+
     def __init__(self, model_name_or_path: str):
         super().__init__()
         self.model_name_or_path = model_name_or_path
