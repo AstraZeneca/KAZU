@@ -2,10 +2,6 @@ package com.astrazeneca.kazu
 
 import uk.ac.cam.ch.wwmm.opsin.NameToStructure;
 import uk.ac.cam.ch.wwmm.opsin.NameToStructureConfig;
-import uk.ac.cam.ch.wwmm.opsin.OpsinResult;
-
-import java.util
-import scala.collection.JavaConverters._
 
 class OpsinRunner {
   /* Wrapper for Opsin, returning a String object. */
