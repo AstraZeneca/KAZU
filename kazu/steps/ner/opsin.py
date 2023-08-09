@@ -14,8 +14,7 @@ BREAKS = " !@#&?|\t\n\r" # https://www.acdlabs.com/iupac/nomenclature/93/r93_45.
 
 
 class OpsinStep(Step):
-    """
-    A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature) over py4j.
+    """A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature) over py4j.
 
     TransformersModelForTokenClassificationNerStep often identifies IUPAC strings as entity_class=drug, 
     but they fail to map to one of the drug ontology dictionaries. This service provides an extra way to resolve chemical entities.
