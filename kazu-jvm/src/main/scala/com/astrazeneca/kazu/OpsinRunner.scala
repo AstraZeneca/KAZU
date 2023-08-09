@@ -19,7 +19,7 @@ class OpsinRunner {
 
   def nameToStructure(name: String): String = {
     val result = nts.parseChemicalName(name, n2sconfig)
-    val output = if (extendedSmiles) result.getExtendedSmiles() else result.getSmiles()
+    val output = result.getExtendedSmiles()
     if (output == null)
       throw new Error(result.getMessage())
     output
