@@ -50,6 +50,15 @@ class CacheProtocol(Protocol):
     def delete(self, key: Any) -> bool:
         raise NotImplementedError
 
+    def __enter__(self) -> Cache:
+        raise NotImplementedError
+
+    def __exit__(self, *exception: Exception) -> None:
+        raise NotImplementedError
+
+    def get(self, key: str, raw: Optional[bool] = False) -> Any:
+        raise NotImplementedError
+
 
 kazu_disk_cache: CacheProtocol
 """We use the :class:`diskcache.Cache` concept to cache expensive to produce resources
