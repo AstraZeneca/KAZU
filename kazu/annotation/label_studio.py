@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import Any, Optional, Union
 from collections.abc import Iterable
 from collections.abc import (
-    Mapping as TypingMapping,
+    Mapping as CollectionsMapping,
 )  # due to name conflict with kazu.data.data.Mapping
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
@@ -434,7 +434,7 @@ class LabelStudioManager:
         project_name: str,
         # headers could actually be Mapping[Union[str, bytes], Union[str, bytes]]
         # but typing-requests doesn't allow this.
-        headers: Optional[TypingMapping[str, Union[str, bytes]]],
+        headers: Optional[CollectionsMapping[str, Union[str, bytes]]],
         url: str = "http://localhost:8080",
     ):
         self.project_name = project_name
