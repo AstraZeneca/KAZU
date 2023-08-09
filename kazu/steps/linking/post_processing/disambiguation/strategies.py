@@ -3,7 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from os import getenv
-from typing import Optional
+from typing import Optional, cast
 from collections.abc import Iterable
 
 import numpy as np
@@ -19,7 +19,7 @@ from kazu.database.in_memory_db import (
     SynonymDatabase,
     NormalisedSynonymStr,
 )
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer, GildaTfIdfScorer
 from kazu.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.utils.string_normalizer import StringNormalizer
 
@@ -256,6 +256,86 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
                 if score >= self.context_threshold and len(id_set_representation[best_syn]) == 1:
                     return id_set_representation[best_syn]
             return set()
+
+
+class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
+    def __init__(
+        self,
+        confidence: DisambiguationConfidence,
+        scorer: GildaTfIdfScorer,
+        context_threshold_delta: float = 0.01,
+    ):
+        """
+
+        :param confidence:
+        :param scorer:
+        :param context_threshold_delta: If the maximum delta between the top two :class:`.EquivalentIdSet`\\'s is below this
+            value, assume disambiguation has failed
+        """
+        super().__init__(confidence)
+        self.context_threshold_delta = context_threshold_delta
+        self.scorer = scorer
+
+    @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
+    def prepare(self, document: Document) -> None:
+        """Build document representations by parser names here, and store in a
+        dict. This method is cached so we don't need to call it multiple times
+        per document.
+
+        :param document:
+        :return:
+        """
+        self.doc_vector = self.cacheable_build_document_representation(
+            scorer=self.scorer, doc=document
+        )
+
+    @staticmethod
+    @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE", 20)))
+    def cacheable_build_document_representation(
+        scorer: GildaTfIdfScorer, doc: Document
+    ) -> np.ndarray:
+        """Static cached method, so we don't need to recalculate document
+        representation between different instances of this class.
+
+        :param scorer:
+        :param doc:
+        :return:
+        """
+        doc_string = " ".join(x.text for x in doc.sections)
+        return cast(np.ndarray, scorer.vectorizer.transform([doc_string]))
+
+    def disambiguate(
+        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+    ) -> set[EquivalentIdSet]:
+
+        idx_to_set = defaultdict(set)
+        for id_set in id_sets:
+            for idx in id_set.ids:
+                idx_to_set[idx].add(id_set)
+
+        best_score = 0.0
+        best_set = None
+        for idx, score in self.scorer(
+            context_vec=self.doc_vector,
+            parser_name=parser_name,
+            id_sets=id_sets,
+        ):
+            # Note: we know that len(id_sets)>1 as it's a disambiguation strategy, and
+            # it won't be called if len(id_sets)==1
+            this_set = idx_to_set[idx]
+            if best_set is None:
+                best_set = this_set
+                best_score = score
+            else:
+                if this_set is best_set:  # type: ignore[unreachable] # not sure why mypy thinks this is unreachable?
+                    continue
+                else:
+                    if (best_score - score) < self.context_threshold_delta:
+                        return set()
+                    else:
+                        return best_set
+        # Code should never reach this, but it's required anyway
+        return set()
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):

@@ -11,8 +11,12 @@ from kazu.data.data import (
     EquivalentIdSet,
     SynonymTermWithMetrics,
 )
-from kazu.database.in_memory_db import MetadataDatabase, SynonymDatabase
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
+from kazu.database.in_memory_db import MetadataDatabase
+from kazu.database.in_memory_db import SynonymDatabase
+from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
+    TfIdfScorer,
+)
 from kazu.steps.linking.post_processing.disambiguation.strategies import (
     DisambiguationStrategy,
     DefinedElsewhereInDocumentDisambiguationStrategy,
@@ -23,7 +27,6 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
-from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
@@ -300,4 +303,70 @@ def test_PreferDefaultLabelMatchDisambiguationStrategy():
 
     check_ids_are_represented(
         ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=cdkn1b_ent
+    )
+
+
+@requires_model_pack
+def test_GildaTfIdfContextStrategy(
+    set_up_p27_test_case, tmp_path, override_kazu_test_config, mock_build_gilda_vectoriser_cache
+):
+
+    if GildaTfIdfScorer in Singleton._instances:
+        Singleton._instances.pop(GildaTfIdfScorer)
+
+    terms, parser = set_up_p27_test_case
+    temp_data_file_name = "p27_disamb_test.json"
+    data: defaultdict[str, dict[str, str]] = defaultdict(dict)
+    json_path = tmp_path.joinpath(temp_data_file_name)
+    with json_path.open(mode="w") as f:
+        ids = {
+            idx
+            for term in terms
+            for equiv_id_set in term.associated_id_sets
+            for idx in equiv_id_set.ids
+        }
+        for idx in ids:
+            if idx == "1":
+                data[parser.name][
+                    idx
+                ] = """Cyclin-dependent kinase inhibitor 1B (p27Kip1) is an enzyme inhibitor that in humans is encoded by the CDKN1B gene.[5]
+ It encodes a protein which belongs to the Cip/Kip family of cyclin dependent kinase (Cdk) inhibitor proteins.
+ The encoded protein binds to and prevents the activation of cyclin E-CDK2 or cyclin D-CDK4 complexes, and thus controls the cell cycle progression at G1.
+ It is often referred to as a cell cycle inhibitor protein because its major function is to stop or slow down the cell division cycle."""
+            else:
+                data[parser.name][idx] = "this is not relevant"
+
+        json.dump(data, f)
+
+    cfg = override_kazu_test_config(
+        overrides=[
+            f"DisambiguationStrategies.gene.1.scorer.contexts_path={str(json_path)}",
+        ]
+    )
+
+    strategy: GildaTfIdfDisambiguationStrategy = instantiate(cfg.DisambiguationStrategies.gene[1])
+
+    text = "p27 is often confused, but in this context it's CDKN1B"
+    doc = Document.create_simple_document(text)
+    cdkn1b_ent = Entity.load_contiguous_entity(
+        start=len(text) - len("CDKN1B"),
+        end=len(text),
+        match="CDKN1B",
+        entity_class="gene",
+        namespace="test",
+    )
+    doc.sections[0].entities.append(cdkn1b_ent)
+    p27_ent = Entity.load_contiguous_entity(
+        start=0,
+        end=len("p27"),
+        match="p27",
+        entity_class="gene",
+        namespace="test",
+    )
+
+    p27_ent.update_terms(terms)
+    doc.sections[0].entities.append(p27_ent)
+
+    check_ids_are_represented(
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
     )
