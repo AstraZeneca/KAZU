@@ -42,6 +42,36 @@ class OpsinStep(Step):
     Lowe DM, Corbett PT, Murray-Rust P, Glen RC. 
     Chemical name to structure: OPSIN, an open source solution. 
     J Chem Inf Model. 2011 Mar 28;51(3):739-53. doi: 10.1021/ci100384d. Epub 2011 Mar 9. PMID: 21384929.
+    .. raw:: html
+
+        <details>
+        <summary>Bibtex Citation Details</summary>
+
+    .. code:: bibtex
+
+        @article{doi:10.1021/ci100384d,
+        author = {Lowe, Daniel M. and Corbett, Peter T. and Murray-Rust, Peter and Glen, Robert C.},
+        title = {Chemical Name to Structure: OPSIN, an Open Source Solution},
+        journal = {Journal of Chemical Information and Modeling},
+        volume = {51},
+        number = {3},
+        pages = {739-753},
+        year = {2011},
+        doi = {10.1021/ci100384d},
+            note ={PMID: 21384929},
+
+        URL = { 
+                https://doi.org/10.1021/ci100384d
+            
+        },
+        eprint = { 
+                https://doi.org/10.1021/ci100384d
+        }
+        }
+
+    .. raw:: html
+
+        </details>
     """
 
     def __init__(
