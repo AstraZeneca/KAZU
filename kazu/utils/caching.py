@@ -28,14 +28,19 @@ kazu_model_pack_dir = os.getenv("KAZU_MODEL_PACK")
 KAZU_DISK_CACHE_NAME = "kazu_disk_cache"
 
 
-_Ret = TypeVar("_Ret", covariant=True)
+Ret = TypeVar("Ret", covariant=True)
+"""A TypeVar to represent a return value.
+
+Used in :class:`~.Memoization` to encode that a memorized function
+returns the same type as the original function it 'memoized'.
+"""
 
 
-class Memoization(Protocol[_Ret]):
+class Memoization(Protocol[Ret]):
     def __cache_key__(self, *args: Any, **kwargs: Any) -> Tuple[Any, ...]:
         raise NotImplementedError
 
-    def __call__(self, *args: Any, **kwargs: Any) -> _Ret:
+    def __call__(self, *args: Any, **kwargs: Any) -> Ret:
         raise NotImplementedError
 
 
@@ -47,7 +52,7 @@ class CacheProtocol(Protocol):
         expire: Optional[float] = None,
         tag: Optional[str] = None,
         ignore: Set[Union[str, int]] = set(),
-    ) -> Callable[[Callable[..., _Ret]], Memoization[_Ret]]:
+    ) -> Callable[[Callable[..., Ret]], Memoization[Ret]]:
         raise NotImplementedError
 
     def clear(self) -> int:

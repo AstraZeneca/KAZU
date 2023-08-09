@@ -543,6 +543,12 @@ class Document:
 
 
 T = TypeVar("T")
+"""A TypeVar.
+
+Currently used in :func:`~DocumentJsonUtils.remove_empty_elements` to
+signal that the function will return the same type as the input
+argument.
+"""
 
 
 class DocumentJsonUtils:
