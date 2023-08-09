@@ -124,7 +124,7 @@ class OpsinStep(Step):
     # TransformersModelForTokenClassificationNerStep tends to truncate the IUPAC match to a first hyphen
     # Here we extend the entity match
     @staticmethod
-    def extendString(ent: Entity, section, spaces = 0):
+    def extendString(ent: Entity, section: str, spaces: int = 0):
         ridx = ent.start
         fidx = ent.end
         if ent.match != section[ent.start:ent.end]:
