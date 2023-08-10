@@ -26,9 +26,15 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
 
-NoneType = type(None)
-JsonDictType = Union[dict[str, Any], list, int, float, bool, str, NoneType]
-"""Represents a json-encodable object."""
+JsonDictType = Optional[
+    Union[dict[str, "JsonDictType"], list["JsonDictType"], int, float, bool, str]
+]
+"""Represents a json-encodable object.
+
+Note that because :class:`dict` is invariant, there can be issues with
+using types like ``dict[str, str]`` (see further
+`here <https://github.com/python/typing/issues/182#issuecomment-1320974824>`_).
+"""
 
 
 class AutoNameEnum(Enum):
@@ -573,10 +579,15 @@ class DocumentJsonUtils:
 
     @classmethod
     def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonDictType]:
-        """.. without the override below, it fails to find NoneType.
+        """.. without the override below, it fails to find NoneType and JsonDictType.
 
         ..
-          This is due to an issue with Sphinx handling builtins
+          JsonDictType failure is because it's recursive, but sphinx tries to
+          expand it out, so this doesn't work.
+          Note we used to have a non-recursive (but over-accepting) definition
+          of JsonDictType anyway, so that isn't the key blocker here (as we
+          could have kept that definition and been happy enough).
+          The NoneType failure is due to an issue with Sphinx handling builtins
           - see https://github.com/sphinx-doc/sphinx/issues/11571 as it used
           to work while using typing.Dict instead of the builtin dict.
           Switching to show JsonDictType instead as it's simpler to write this
@@ -595,6 +606,11 @@ class DocumentJsonUtils:
 
     @classmethod
     def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
+        """.. without the override below, it fails to find JsonDictType, as above.
+
+        :param obj:
+        :rtype: :py:data:`~kazu.data.data.JsonDictType`
+        """
         if isinstance(obj, Enum):
             return obj.name
         elif isinstance(obj, cls.atomic_types):
@@ -615,13 +631,21 @@ class DocumentJsonUtils:
             s: str = obj.isoformat()
             return s
         elif isinstance(obj, bson.ObjectId):
-            d: dict[str, str] = json_util.default(obj)
+            # we know this is actually a dict[str, str]
+            # but because dict is invariant (see
+            # https://mypy.readthedocs.io/en/stable/generics.html#variance-of-generic-types )
+            # mypy will reject returning a dict[str, str] when it wants a
+            # dict[str, JsonDictType]
+            d: dict[str, JsonDictType] = json_util.default(obj)
             return d
         else:
             raise cls.ConversionException(f"Unknown object type: {type(obj)}")
 
     @classmethod
     def _preprocess_dict_pair(cls, kv_pair: tuple[Any, Any]) -> tuple[str, JsonDictType]:
+        # note that sphinx would fail to generate docs for this function due to
+        # the JsonDictType in the return, but this method is 'private' due to
+        # the leading '_', so no docs are currently generated.
         k, v = kv_pair
         if k == "offset_map":
             # v is a dict of CharSpan->CharSpan, needs conversion
