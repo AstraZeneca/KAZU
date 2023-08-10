@@ -103,7 +103,7 @@ class OpsinStep(Step):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        if self.condition and not self.condition(doc):
+        if self.condition is None or not self.condition(doc):
             # skip this document
             return
 
@@ -131,7 +131,7 @@ class OpsinStep(Step):
 
             for original_entity, opsin_entity in updated_mappings.items():
                 section.entities.remove(original_entity)
-                section.entities.add(opsin_entity)
+                section.entities.append(opsin_entity)
 
     # TransformersModelForTokenClassificationNerStep tends to truncate the IUPAC match to a first hyphen
     # Here we extend the entity match
