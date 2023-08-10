@@ -67,6 +67,14 @@ def test_opsin_step_with_condition(kazu_test_config):
     doc.sections[0].entities.append(
         Entity.from_spans(
             text=test_text,
+            spans=[(68, 88)],  # Bicyclo[3.2.1]octane
+            namespace="test",
+            entity_class="some irrelevant entity class",  # this should not be mapped because of invalid entity class
+        )
+    )
+    doc.sections[0].entities.append(
+        Entity.from_spans(
+            text=test_text,
             spans=[(68, 82)],  # mimic transformer partial match 'Bicyclo[3.2.1]'
             namespace="test",
             entity_class=next(iter(step.condition.required_entities)),
