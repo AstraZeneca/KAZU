@@ -28,6 +28,7 @@ PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
 NoneType = type(None)
 JsonDictType = Union[dict[str, Any], list, int, float, bool, str, NoneType]
+"""Represents a json-encodable object."""
 
 
 class AutoNameEnum(Enum):
@@ -572,6 +573,24 @@ class DocumentJsonUtils:
 
     @classmethod
     def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonDictType]:
+        """.. without the override below, it fails to find NoneType.
+
+        ..
+          This is due to an issue with Sphinx handling builtins
+          - see https://github.com/sphinx-doc/sphinx/issues/11571 as it used
+          to work while using typing.Dict instead of the builtin dict.
+          Switching to show JsonDictType instead as it's simpler to write this
+          override, plus I think more readable for users.
+          An alternative would be to attempt to use Sphinx's
+          autodoc_type_aliases
+          https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_type_aliases
+          but this requires doing `from __future__ import annotations` which
+          could break pydantic stuff and have wider codebase implications, so
+          this would be a potentially larger piece of work for not much gain.
+
+        :param doc:
+        :rtype: :class:`dict`\\ [:class:`str`\\ , :py:data:`~kazu.data.data.JsonDictType`]
+        """
         return {k: DocumentJsonUtils.obj_to_dict_repr(v) for k, v in doc.__dict__.items()}
 
     @classmethod
