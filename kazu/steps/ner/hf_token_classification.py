@@ -59,7 +59,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param trainer:
         :param detect_subspans: attempt to detect nested entities (threshold must be configured)
         :param threshold: the confidence threshold used to detect nested entities
-        :param entity_splitter: instance of :class:`kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter` to detect non-contiguous entities
+        :param entity_splitter: to detect non-contiguous entities if provided
         :param strip_re: passed to :class:`~kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor`
         """
         self.entity_splitter = entity_splitter
