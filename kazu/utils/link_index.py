@@ -1,4 +1,5 @@
 import logging
+import hashlib
 from typing import Optional
 from collections.abc import Iterable
 
@@ -6,7 +7,7 @@ import numpy
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from kazu.utils.caching import kazu_disk_cache
-from kazu.data.data import SynonymTermWithMetrics, SynonymTerm
+from kazu.data.data import SynonymTerm, SynonymTermWithMetrics
 from kazu.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
@@ -47,8 +48,16 @@ class DictionaryIndex:
         self.metadata_db: MetadataDatabase = MetadataDatabase()
         self.namespace = self.__class__.__name__
         self.boolean_scorers = boolean_scorers
+        self.normalized_synonyms: list[str] = []
+        self.synonym_list: list[SynonymTerm] = []
+        # we sort here to ensure that the order of self.synonym_list matches the
+        # order of the synonyms in the cached vectorized from _build_index_cache
+        # if present, without relying on the order in the SynonymDatabase being the
+        # same.
+        for norm_syn, syn_term in sorted(self.synonyms_for_parser.items()):
+            self.normalized_synonyms.append(norm_syn)
+            self.synonym_list.append(syn_term)
         self.vectorizer, self.tf_idf_matrix = self.build_index_cache()
-        self.synonym_list = list(self.synonyms_for_parser.values())
 
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
 
@@ -104,16 +113,18 @@ class DictionaryIndex:
 
     @kazu_disk_cache.memoize(ignore={0, 1})
     def _build_index_cache(
-        self, synonyms_for_parser: dict[NormalisedSynonymStr, SynonymTerm], _cache_key: int
+        self, synonyms_for_parser: Iterable[NormalisedSynonymStr], _cache_key: bytes
     ) -> tuple[TfidfVectorizer, numpy.ndarray]:
         logger.info("building TfidfVectorizer for %s", self.parser_name)
         vectorizer = TfidfVectorizer(min_df=1, analyzer=create_char_ngrams, lowercase=False)
-        tf_idf_matrix = vectorizer.fit_transform(synonyms_for_parser.keys())
+        tf_idf_matrix = vectorizer.fit_transform(synonyms_for_parser)
         return vectorizer, tf_idf_matrix
 
     def build_index_cache(self) -> tuple[TfidfVectorizer, numpy.ndarray]:
         """Build the cache for the index."""
 
-        return self._build_index_cache(
-            self.synonyms_for_parser, hash(frozenset(self.synonyms_for_parser.values()))
-        )
+        h = hashlib.new("sha1", usedforsecurity=False)
+        for norm_syn in self.normalized_synonyms:
+            h.update(norm_syn.encode(encoding="utf-8"))
+
+        return self._build_index_cache(self.normalized_synonyms, h.digest())
