@@ -127,6 +127,7 @@ class OpsinStep(Step):
                                     mappings=set([maybe_mapping]),
                                 )
                                 updated_mappings[ent] = opsin_entity
+                                break
 
             for original_entity, opsin_entity in updated_mappings.items():
                 section.entities.remove(original_entity)
@@ -136,24 +137,16 @@ class OpsinStep(Step):
     # Here we extend the entity match
     @staticmethod
     def extendString(ent: Entity, section: str, spaces: int = 0) -> tuple[str, int, int]:
-        ridx = ent.start
-        fidx = ent.end
-        if ent.match != section[ent.start : ent.end]:
-            ridx = section.upper().find(ent.match.upper())
-            if ridx > -1:
-                fidx = ridx + len(ent.match)
-            else:
-                ridx = (
-                    ent.start
-                )  # we might need to try harder to find the index into the original text string, but punt at the moment
-        while ridx > 0 and section[ridx - 1] not in BREAKS:
-            ridx = ridx - 1
-        while fidx < len(section) and (section[fidx] not in BREAKS or spaces > 0):
-            if section[fidx] in BREAKS:
+        start = ent.start
+        end = ent.end
+        while start > 0 and section[start - 1] not in BREAKS:
+            start = start - 1
+        while end < len(section) and (section[end] not in BREAKS or spaces > 0):
+            if section[end] in BREAKS:
                 spaces = spaces - 1
-            fidx = fidx + 1
-        entStr = section[ridx:fidx]
-        return entStr, ridx, fidx
+            end = end + 1
+        entStr = section[start:end]
+        return entStr, start, end
 
     def parseString(self, name: str) -> Union[Mapping, None]:
         try:
