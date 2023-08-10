@@ -74,6 +74,21 @@ autodoc_typehints = "description"
 # Don't show class signature with the class' name.
 autodoc_class_signature = "separated"
 
+# see https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-python_use_unqualified_type_names
+# "If true, suppress the module name of the python reference if it can be resolved."
+# We added this because Sphinx gives long, 'fully qualified' versions of the type with the module name
+# when using builtin generics instead of those from typing
+# (see https://github.com/sphinx-doc/sphinx/issues/11571)
+# which makes the docs much less readable in some places.
+# Turning on this option 'cancels this out', and has almost no other
+# effect other than changing how things are italicised in some cases - I
+# don't think the new style of italicising is particularly worse (if
+# anything, it seems a little more consistent to me) so this seems like a
+# good outcome for now. We could consider turning this option off in
+# future if Sphinx resolves the issue above, but even in that case, it's
+# not necessarily causing any harm.
+python_use_unqualified_type_names = True
+
 # ignore kazu for sorting modules, since everything starts with this
 modindex_common_prefix = ["kazu."]
 
