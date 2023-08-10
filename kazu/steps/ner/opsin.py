@@ -108,26 +108,29 @@ class OpsinStep(Step):
             return
 
         for section in doc.sections:
+            updated_mappings = dict()
             for ent in section.entities:
                 if ent.entity_class == self.entity_class:  # entity is a drug
                     if (
                         len(ent.mappings) == 0
                     ):  # entity mapping failed, e.g., no exact matches to dictionaries
-                        mapping = None
                         for spaces in range(2, -1, -1):  # look up to two spaces out
-                            if mapping is None:
-                                testStr, ridx, fidx = self.extendString(ent, section.text, spaces)
-                                mapping = self.parseString(testStr)
-                                if (
-                                    mapping is not None and testStr != ent.match
-                                ):  # update entity match to expanded string
-                                    ent.match = testStr
-                                    ent.match_norm = testStr
-                                    ent.start = ridx
-                                    ent.end = fidx
-                        if mapping is not None:
-                            ent.mappings = set([mapping])
-                            ent.syn_term_to_synonym_terms = dict()  # remove close synonym matches
+                            match, start, end = self.extendString(ent, section.text, spaces)
+                            maybe_mapping = self.parseString(match)
+                            if maybe_mapping:
+                                opsin_entity = Entity.load_contiguous_entity(
+                                    start=start,
+                                    end=end,
+                                    namespace=ent.namespace,
+                                    entity_class=ent.entity_class,
+                                    match=match,
+                                    mappings=set([maybe_mapping]),
+                                )
+                                updated_mappings[ent] = opsin_entity
+
+            for original_entity, opsin_entity in updated_mappings.items():
+                section.entities.remove(original_entity)
+                section.entities.add(opsin_entity)
 
     # TransformersModelForTokenClassificationNerStep tends to truncate the IUPAC match to a first hyphen
     # Here we extend the entity match
