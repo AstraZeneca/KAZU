@@ -137,7 +137,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
         :param ids_and_source:
         :param is_symbolic:
-        :param original_syn_set:
         :return:
         """
 
@@ -907,7 +906,6 @@ class CellosaurusOntologyParser(OntologyParser):
 
         :param ids_and_source:
         :param is_symbolic:
-        :param original_syn_set:
         :return:
         """
 

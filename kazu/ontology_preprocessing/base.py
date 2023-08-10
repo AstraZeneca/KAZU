@@ -909,7 +909,6 @@ class OntologyParser(ABC):
 
         :param ids_and_source: ids to determine appropriate groupings of, and their associated sources
         :param is_symbolic: is the underlying synonym symbolic?
-        :param original_syn_set: original synonyms associated with ids
         :return:
         """
         if self.string_scorer is None:
