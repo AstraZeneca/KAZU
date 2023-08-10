@@ -26,8 +26,8 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
 
-JsonDictType = Optional[
-    Union[dict[str, "JsonDictType"], list["JsonDictType"], int, float, bool, str]
+JsonEncodable = Optional[
+    Union[dict[str, "JsonEncodable"], list["JsonEncodable"], int, float, bool, str]
 ]
 """Represents a json-encodable object.
 
@@ -578,19 +578,19 @@ class DocumentJsonUtils:
         return doc_json_dict
 
     @classmethod
-    def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonDictType]:
-        """.. without the override below, it fails to find NoneType and JsonDictType.
+    def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonEncodable]:
+        """.. without the override below, it fails to find NoneType and JsonEncodable.
 
         ..
-          JsonDictType failure is because it's recursive, but sphinx tries to
+          JsonEncodable failure is because it's recursive, but sphinx tries to
           expand it out, so this doesn't work.
           Note we used to have a non-recursive (but over-accepting) definition
-          of JsonDictType anyway, so that isn't the key blocker here (as we
+          of JsonEncodable anyway, so that isn't the key blocker here (as we
           could have kept that definition and been happy enough).
           The NoneType failure is due to an issue with Sphinx handling builtins
           - see https://github.com/sphinx-doc/sphinx/issues/11571 as it used
           to work while using typing.Dict instead of the builtin dict.
-          Switching to show JsonDictType instead as it's simpler to write this
+          Switching to show JsonEncodable instead as it's simpler to write this
           override, plus I think more readable for users.
           An alternative would be to attempt to use Sphinx's
           autodoc_type_aliases
@@ -600,16 +600,16 @@ class DocumentJsonUtils:
           this would be a potentially larger piece of work for not much gain.
 
         :param doc:
-        :rtype: :class:`dict`\\ [:class:`str`\\ , :py:data:`~kazu.data.data.JsonDictType`]
+        :rtype: :class:`dict`\\ [:class:`str`\\ , :py:data:`~kazu.data.data.JsonEncodable`]
         """
         return {k: DocumentJsonUtils.obj_to_dict_repr(v) for k, v in doc.__dict__.items()}
 
     @classmethod
-    def obj_to_dict_repr(cls, obj: Any) -> JsonDictType:
-        """.. without the override below, it fails to find JsonDictType, as above.
+    def obj_to_dict_repr(cls, obj: Any) -> JsonEncodable:
+        """.. without the override below, it fails to find JsonEncodable, as above.
 
         :param obj:
-        :rtype: :py:data:`~kazu.data.data.JsonDictType`
+        :rtype: :py:data:`~kazu.data.data.JsonEncodable`
         """
         if isinstance(obj, Enum):
             return obj.name
@@ -635,16 +635,16 @@ class DocumentJsonUtils:
             # but because dict is invariant (see
             # https://mypy.readthedocs.io/en/stable/generics.html#variance-of-generic-types )
             # mypy will reject returning a dict[str, str] when it wants a
-            # dict[str, JsonDictType]
-            d: dict[str, JsonDictType] = json_util.default(obj)
+            # dict[str, JsonEncodable]
+            d: dict[str, JsonEncodable] = json_util.default(obj)
             return d
         else:
             raise cls.ConversionException(f"Unknown object type: {type(obj)}")
 
     @classmethod
-    def _preprocess_dict_pair(cls, kv_pair: tuple[Any, Any]) -> tuple[str, JsonDictType]:
+    def _preprocess_dict_pair(cls, kv_pair: tuple[Any, Any]) -> tuple[str, JsonEncodable]:
         # note that sphinx would fail to generate docs for this function due to
-        # the JsonDictType in the return, but this method is 'private' due to
+        # the JsonEncodable in the return, but this method is 'private' due to
         # the leading '_', so no docs are currently generated.
         k, v = kv_pair
         if k == "offset_map":
