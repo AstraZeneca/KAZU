@@ -20,6 +20,7 @@ from kazu.data.data import (
     GlobalParserActions,
     AutoNameEnum,
     MentionConfidence,
+    IdsAndSource,
 )
 from kazu.database.in_memory_db import (
     MetadataDatabase,
@@ -39,7 +40,6 @@ IDX = "idx"
 SYN = "syn"
 MAPPING_TYPE = "mapping_type"
 DATA_ORIGIN = "data_origin"
-IdsAndSource = set[tuple[str, str]]
 
 logger = logging.getLogger(__name__)
 

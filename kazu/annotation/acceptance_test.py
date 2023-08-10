@@ -10,7 +10,7 @@ from collections.abc import Iterable
 import hydra
 from hydra.utils import instantiate
 
-from kazu.data.data import Entity, Document
+from kazu.data.data import Entity, Document, IdsAndSource
 from kazu.pipeline import Pipeline
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.utils.grouping import sort_then_group
@@ -56,13 +56,13 @@ class SectionScorer:
         self.ner_fn_soft: set[Entity] = set(gold_ents)
         self.calculate_ner_matches()
 
-        self.gold_to_test_mappings: dict[
-            tuple[Entity, str], dict[str, set[tuple[str, str]]]
-        ] = defaultdict(dict)
+        self.gold_to_test_mappings: dict[tuple[Entity, str], dict[str, IdsAndSource]] = defaultdict(
+            dict
+        )
         self.calculate_linking_matches()
 
     @staticmethod
-    def group_mappings_by_source(ents: Iterable[Entity]) -> dict[str, set[tuple[str, str]]]:
+    def group_mappings_by_source(ents: Iterable[Entity]) -> dict[str, IdsAndSource]:
         mappings_by_source = defaultdict(set)
         for ent in ents:
             for mapping in ent.mappings:

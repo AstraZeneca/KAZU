@@ -9,7 +9,7 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 
 from kazu.utils.caching import kazu_disk_cache
-from kazu.data.data import Mapping
+from kazu.data.data import Mapping, IdsAndSource
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 
 logger = logging.getLogger(__name__)
@@ -167,9 +167,9 @@ class OxoCrossReferenceManager(CrossReferenceManager):
         return converted_source, converted_idx
 
     def parse_oxo_dump(self, oxo_dump: list[dict]) -> XrefDatabase:
-        xref_db_default_dict: defaultdict[
-            str, defaultdict[str, set[tuple[str, str]]]
-        ] = defaultdict(lambda: defaultdict(set))
+        xref_db_default_dict: defaultdict[str, defaultdict[str, IdsAndSource]] = defaultdict(
+            lambda: defaultdict(set)
+        )
 
         for oxo_page in oxo_dump:
             for search_result in oxo_page["_embedded"]["searchResults"]:

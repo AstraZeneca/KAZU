@@ -130,6 +130,14 @@ class EquivalentIdAggregationStrategy(AutoNameEnum):
     MODIFIED_BY_CURATION = auto()
 
 
+# this is frozen below, but for use in typehints elsewhere the mutable version is
+# more useful, as a function written for an immutable frozenset would often behave
+# correctly when passed a mutable set, and sometimes our functions actually produce
+# the mutable version, as all we wish to do is compare with an immutable version,
+# and the mutable version is easier to produce when constructed iteratively.
+IdsAndSource = set[tuple[str, str]]
+
+
 @dataclass(frozen=True, eq=True, order=True)
 class EquivalentIdSet:
     """A representation of a set of kb ID's that map to the same synonym and
