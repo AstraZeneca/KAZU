@@ -103,6 +103,10 @@ class OpsinStep(Step):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
+        if self.condition and not self.condition(doc):
+            # skip this document
+            return
+
         for section in doc.sections:
             for ent in section.entities:
                 if ent.entity_class == self.entity_class:  # entity is a drug
