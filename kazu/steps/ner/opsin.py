@@ -23,8 +23,6 @@ class OpsinStep(Step):
 
     Adding ${OpsinStep} just after ${MappingStep} in kazu/conf/Pipeline/default.yaml will enable this step.
 
-    A test: BREXPIPRAZOLE is great and is the same as OPC-34712 but not Bicyclo[3.2.1]octane or 2,2'-ethylenedipyridine or Benzo[1\",2\":3,4;4\",5\":3',4']dicyclobuta[1,2-b:1',2'-c']difuran or Cyclohexanone ethyl methyl ketal or 4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]-1H-pyrrole-2-carboxamide added to 7-cyclopentyl-5-(4-methoxyphenyl)pyrrolo[2,3-d]pyrimidin-4-amine
-
     Examples:
         Bicyclo[3.2.1]octane
         2,2'-ethylenedipyridine
