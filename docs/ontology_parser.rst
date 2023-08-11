@@ -40,34 +40,54 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
    merge the IDs into a single :class:`.EquivalentIdSet`. The idea here is that noun phrase entities 'ought' to be distinct enough such that
    references to the same string across different identifiers refer to the same concept.
 
-    example:
+   Example:
 
-        'seborrheic eczema' -> IDs 'http://purl.obolibrary.org/obo/HP_0001051' and 'http://purl.obolibrary.org/obo/MONDO_0006608'
+   .. parsed-literal::
 
-    result:
+     'seborrheic eczema'
+     IDs: '\ http://purl.obolibrary.org/obo/HP_0001051\ ',
+          '\ http://purl.obolibrary.org/obo/MONDO_0006608\ '
 
-        EquivalentIdSetAggregationStrategy.MERGED_AS_NON_SYMBOLIC
+   Result:
+
+   .. parsed-literal::
+
+     EquivalentIdSetAggregationStrategy.MERGED_AS_NON_SYMBOLIC
 
 2) If the term is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
    group these IDs into one or more sets of IDs. The idea here is that we can use embeddings to check if semantically, each ID associated with a confused symbol is referring
    to either a very similar concept to another ID associated with the symbol, or something completely different in the knowledgebase. Typically, we use a distilled form of the
    `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
 
-    example:
+   Example:
 
-        "OFD" -> either `osteofibrous dysplasia <http://purl.obolibrary.org/obo/MONDO_0011806>`_ or `orofaciodigital syndrome <http://purl.obolibrary.org/obo/MONDO_0015375>`_.
+   .. parsed-literal::
 
-    result:
+     "OFD" either:
+     `osteofibrous dysplasia <http://purl.obolibrary.org/obo/MONDO_0011806>`_
+     `orofaciodigital syndrome <http://purl.obolibrary.org/obo/MONDO_0015375>`_
 
-        sapbert similarity: 0.4532. Threshold: 0.70. Decision -> split into two instances of :class:`.EquivalentIdSet`
+   Result:
 
-    example:
+   .. parsed-literal::
 
-        "XLOA" -> either `X-linked recessive ocular albinism <http://purl.obolibrary.org/obo/MONDO_0021019>`_ or `ocular albinism <http://purl.obolibrary.org/obo/MONDO_0017304>`_
+     sapbert similarity: 0.4532. Threshold: 0.70.
+     Decision: split into two instances of :class:`.EquivalentIdSet`
 
-    result:
+   Example:
 
-        sapbert similarity: 0.7426. Threshold: 0.70. Decision -> merge into one instance of :class:`.EquivalentIdSet`
+   .. parsed-literal::
+
+     "XLOA" either:
+     `X-linked recessive ocular albinism <http://purl.obolibrary.org/obo/MONDO_0021019>`_
+     `ocular albinism <http://purl.obolibrary.org/obo/MONDO_0017304>`_
+
+   Result:
+
+   .. parsed-literal::
+
+     sapbert similarity: 0.7426. Threshold: 0.70.
+     Decision: merge into one instance of :class:`.EquivalentIdSet`
 
 Naturally, this behaviour may not always be desired. You may want two instances of :class:`.SynonymTerm` for the term "XLOA" (despite the MONDO ontology
 suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.SynonymTerm` is most appropriate.
