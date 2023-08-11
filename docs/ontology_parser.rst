@@ -44,9 +44,9 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
    .. parsed-literal::
 
-     'seborrheic eczema'
-     IDs: '\ http://purl.obolibrary.org/obo/HP_0001051\ ',
-          '\ http://purl.obolibrary.org/obo/MONDO_0006608\ '
+     "seborrheic eczema"
+     IDs: "\ http://purl.obolibrary.org/obo/HP_0001051\ ",
+          "\ http://purl.obolibrary.org/obo/MONDO_0006608\ "
 
    Result:
 
