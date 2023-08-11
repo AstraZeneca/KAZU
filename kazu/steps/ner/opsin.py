@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Optional, Callable, Union
 
 from py4j.java_gateway import JavaGateway
@@ -11,6 +12,9 @@ from kazu.steps import Step, document_iterating_step
 
 OPSIN_METADATA_KEY = "opsin"
 BREAKS = " !@#&?|\t\n\r"  # https://www.acdlabs.com/iupac/nomenclature/93/r93_45.htm
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class OpsinStep(Step):
@@ -146,6 +150,8 @@ class OpsinStep(Step):
         entStr = section[start:end]
         return entStr, start, end
 
+    # opsin is fast and we can afford to try to parse many potential strings as IUPAC
+    # generally we want to silently fail, but logging for debugging
     def parseString(self, name: str) -> Union[Mapping, None]:
         try:
             smiles = self.opsin.nameToStructure(name)
@@ -163,5 +169,5 @@ class OpsinStep(Step):
                 return mapping
         except Exception as e:
             reason = e.args[1].getMessage()
-            reason = reason + " "  # print("Opsin parsing error:" + str(reason))
+            logging.debug(f"Opsin parsing error: {reason}")
         return None
