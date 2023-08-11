@@ -52,7 +52,7 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
    .. parsed-literal::
 
-     EquivalentIdSetAggregationStrategy.MERGED_AS_NON_SYMBOLIC
+     EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC
 
 2) If the term is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
    group these IDs into one or more sets of IDs. The idea here is that we can use embeddings to check if semantically, each ID associated with a confused symbol is referring
