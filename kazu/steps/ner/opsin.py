@@ -107,14 +107,14 @@ class OpsinStep(Step):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        if self.condition is None or not self.condition(doc):
+        if self.condition and not self.condition(doc):
             # skip this document
             return
 
         for section in doc.sections:
             updated_mappings = dict()
             for ent in section.entities:
-                if ent.entity_class == self.entity_class:
+                if ent.entity_class == self.entity_class or not self.condition:
                     if (
                         len(ent.mappings) == 0
                     ):  # entity mapping failed, e.g., no exact matches to dictionaries

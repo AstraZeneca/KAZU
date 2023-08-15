@@ -37,14 +37,14 @@ def test_opsin_step_no_condition(override_kazu_test_config):
     doc.sections[0].entities.append(
         Entity.from_spans(
             text=test_text,
-            spans=[(68, 88)],
+            spans=[(68, 88)],  # Bicyclo[3.2.1]octane
             namespace="test",
-            entity_class=step.entity_class,
+            entity_class="some irrelevant entity class",  # this should not be mapped because of invalid entity class
         )
     )
     processed_docs, failed_docs = step([doc])
     assert len(failed_docs) == 0
-    assert check_step_has_found_entities(processed_docs[0], step.entity_class) == 0
+    assert check_step_has_found_entities(processed_docs[0], "some irrelevant entity class") == 1
 
 
 @requires_model_pack
