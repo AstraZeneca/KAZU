@@ -156,6 +156,7 @@ module = [
     "srsly.*",
     "py4j.*",
     "diskcache.*",
+    "rdkit.*",
 ]
 ignore_missing_imports = true
 
