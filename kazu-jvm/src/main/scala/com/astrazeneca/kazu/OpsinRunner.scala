@@ -7,7 +7,6 @@ class OpsinRunner {
   /* Wrapper for Opsin, returning a String object. */
   val n2sconfig = new NameToStructureConfig()
   val nts = NameToStructure.getInstance()
-  val extendedSmiles = false
 
   def nameToStructure(name: String): String = {
     val result = nts.parseChemicalName(name, n2sconfig)
