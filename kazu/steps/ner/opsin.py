@@ -25,18 +25,20 @@ class OpsinStep(Step):
     but they fail to map to one of the drug ontology dictionaries. This service provides an extra way to resolve chemical entities.
     Opsin produces a SMILES from an IUPAC string and we use rdkit to convert that to a canonical SMILES for comparison, as an IDX.
 
-    Adding ${OpsinStep} just after ${MappingStep} in kazu/conf/Pipeline/default.yaml will enable this step.
+    Adding ``${OpsinStep}`` just after ``${MappingStep}`` in ``kazu/conf/Pipeline/default.yaml`` will enable this step.
 
     Examples:
-        Bicyclo[3.2.1]octane
-        2,2'-ethylenedipyridine
-        Benzo[1",2":3,4;4",5":3',4']dicyclobuta[1,2-b:1',2'-c']difuran
-        Cyclohexanone ethyl methyl ketal
-        4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]-1H-pyrrole-2-carboxamide
-        7-cyclopentyl-5-(4-methoxyphenyl)pyrrolo[2,3-d]pyrimidin-4-amine
+        | Bicyclo[3.2.1]octane
+        | 2,2'-ethylenedipyridine
+        | Benzo[1",2":3,4;4",5":3',4']dicyclobuta[1,2-b:1',2'-c']difuran
+        | Cyclohexanone ethyl methyl ketal
+        | 4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]-1H-pyrrole-2-carboxamide
+        | 7-cyclopentyl-5-(4-methoxyphenyl)pyrrolo[2,3-d]pyrimidin-4-amine
 
     Tough cases:
-        Fails to parse 1,4:3,6-dianhydro-2,5-di-O-Nitro-D-glucitol but does parse [(3S,3aS,6R,6aS)-3-nitrooxy-2,3,3a,5,6,6a-hexahydrofuro[3,2-b]furan-6-yl] nitrate  see https://pubchem.ncbi.nlm.nih.gov/compound/6883
+        Fails to parse ``1,4:3,6-dianhydro-2,5-di-O-Nitro-D-glucitol`` but does parse
+        ``[(3S,3aS,6R,6aS)-3-nitrooxy-2,3,3a,5,6,6a-hexahydrofuro[3,2-b]furan-6-yl] nitrate``
+        see https://pubchem.ncbi.nlm.nih.gov/compound/6883
 
 
     Paper:
@@ -44,7 +46,7 @@ class OpsinStep(Step):
     Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen
     Chemical Name to Structure: OPSIN, an Open Source Solution
     Journal of Chemical Information and Modeling 2011 51 (3), 739-753
-    DOI: [10.1021/ci100384d](https://doi.org/10.1021/ci100384d)
+    DOI: `10.1021/ci100384d <https://doi.org/10.1021/ci100384d>`_
 
     .. raw:: html
 
