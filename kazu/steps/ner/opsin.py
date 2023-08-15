@@ -113,7 +113,7 @@ class OpsinStep(Step):
         for section in doc.sections:
             updated_mappings = dict()
             for ent in section.entities:
-                if ent.entity_class == self.entity_class:  # entity is a drug
+                if ent.entity_class == self.entity_class:
                     if (
                         len(ent.mappings) == 0
                     ):  # entity mapping failed, e.g., no exact matches to dictionaries
