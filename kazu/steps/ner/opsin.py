@@ -10,7 +10,6 @@ from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step
 
 
-OPSIN_METADATA_KEY = "opsin"
 BREAKS = " !@#&?|\t\n\r"  # https://www.acdlabs.com/iupac/nomenclature/93/r93_45.htm
 
 logger = logging.getLogger(__name__)
