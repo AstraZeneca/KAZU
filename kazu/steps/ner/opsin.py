@@ -153,7 +153,7 @@ class OpsinStep(Step):
 
     # opsin is fast and we can afford to try to parse many potential strings as IUPAC
     # generally we want to silently fail, but logging for debugging
-    def parseString(self, name: str) -> Union[Mapping, None]:
+    def parseString(self, name: str) -> Optional[Mapping]:
         try:
             smiles = self.opsin.nameToStructure(name)
             if smiles is not None:
