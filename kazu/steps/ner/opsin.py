@@ -127,7 +127,7 @@ class OpsinStep(Step):
                                     namespace=ent.namespace,
                                     entity_class=ent.entity_class,
                                     match=match,
-                                    mappings=set([maybe_mapping]),
+                                    mappings={maybe_mapping},
                                 )
                                 updated_mappings[ent] = opsin_entity
                                 break
