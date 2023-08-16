@@ -4,11 +4,42 @@ Quickstart
 Installation
 ------------
 
+Python version 3.9 or higher is required (tested with Python 3.9).
+
+Installing Pytorch (prerequisite)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Kazu handles pytorch installation for users where possible - if torch is installable with:
+
+.. code-block:: console
+
+   $ pip install torch
+
+then Kazu will handle it for you.
+
+However, this is only possible on some platforms (e.g Mac, Windows without using a GPU, Linux with a specific version of CUDA).
+
+See the PyTorch website `here <https://pytorch.org/get-started/locally/>`_ and select your platform .
+If the command specifies an ``index_url`` you will need to run the command, although installing
+``torchvision`` and ``torchaudio`` is not necessary.
+
+For example, at time of writing these docs, to install pytorch on Linux without a GPU, you will need to do:
+
+.. code-block:: console
+
+   $ pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+
+Installing Kazu
+^^^^^^^^^^^^^^^
+
+If you have already installed pytorch or it is installable on your platform with ``pip install torch``, installing Kazu
+is as simple as:
+
 .. code-block:: console
 
    $ pip install kazu
 
-Python version 3.9 or higher is required (tested with Python 3.9).
 
 If you intend to use `Mypy <https://mypy.readthedocs.io/en/stable/#>`_ on your own codebase, consider installing Kazu using:
 
