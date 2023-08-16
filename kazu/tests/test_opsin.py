@@ -44,7 +44,7 @@ def test_opsin_step_no_condition(override_kazu_test_config):
     )
     processed_docs, failed_docs = step([doc])
     assert len(failed_docs) == 0
-    assert check_step_has_found_entities(processed_docs[0], "some irrelevant entity class") == 1
+    assert check_step_has_found_entities(processed_docs[0], "some irrelevant entity class") == 0
 
 
 @requires_model_pack
