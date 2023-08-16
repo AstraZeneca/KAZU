@@ -32,6 +32,7 @@ COPY $KAZU_PACKAGE .
 RUN pip install --upgrade pip
 RUN pip install hatch
 RUN hatch build
+RUN pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
 RUN pip install "./dist/kazu-$KAZU_VERSION-py3-none-any.whl[dev]"
 
 RUN unzip model_pack.zip -d /model_pack

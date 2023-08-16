@@ -19,6 +19,7 @@ ENV GH_TOKEN $TOKEN_GITHUB
 COPY $MODEL_PACK_PATH /model_pack.zip
 RUN unzip model_pack.zip -d /model_pack
 
+RUN pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
 RUN pip install --extra-index-url https://$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN@$ARTIFACTORY_URL kazu[webserver]==$KAZU_VERSION
 
 RUN apt-get update
