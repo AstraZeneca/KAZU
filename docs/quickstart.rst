@@ -59,7 +59,7 @@ Model Pack
 ----------
 In order to use the majority of Kazu, you will need a model pack, which contains
 the pretrained models and knowledge bases/ontologies required by the pipeline.
-These are available from the `release page <https://github.com/astrazeneca/kazu/releases>`_
+These are available from the `release page <https://github.com/astrazeneca/kazu/releases>`_\ .
 
 Default configuration
 ---------------------
