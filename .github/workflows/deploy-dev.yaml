@@ -4,11 +4,12 @@ on:
     workflows: ["Create Release"]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: [self-hosted, kazu-runners]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: github.event_name == 'workflow_dispatch' || ${{ github.event.workflow_run.conclusion == 'success' }}
     name: "Building Docker Image"
     outputs:
       short_sha: ${{ steps.short-sha.outputs.short_sha }}
