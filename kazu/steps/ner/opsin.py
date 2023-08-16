@@ -88,7 +88,6 @@ class OpsinStep(Step):
     ):
         """
         :param entity_class: search entities of this class for resolvable IUPAC string
-        :param entity_class: the entity_class to assign to any Entities that emerge
         :param opsin_fatjar_path: path to a py4j fatjar, containing OPSIN dependencies
         :param condition: Since OPSIN can be slow, we can optionally specify a callable, so that
             any documents that don't contain pre-existing drug entities are not processed
