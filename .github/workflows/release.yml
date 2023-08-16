@@ -64,7 +64,8 @@ jobs:
           . kazu-env/bin/activate
           python -m pip install --upgrade pip
           WHEEL_PATH=$(echo $GITHUB_WORKSPACE/dist/*whl)
-          pip install "${WHEEL_PATH}[dev]" --force-reinstall --cache-dir $PIP_CACHE_DIR --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.python.org/simple 
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
+          pip install -e ."[dev]" --cache-dir $PIP_CACHE_DIR
 
       - name: Build model pack caches and test (with acceptance tests)
         id: model_pack_cache_build_and_test

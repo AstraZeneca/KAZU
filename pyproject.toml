@@ -18,6 +18,11 @@ classifiers = [
 ]
 dependencies = [
   "spacy>=3.2.2",
+  # note to kazu devs: if the torch version changes in future,
+  # we need to change for CI jobs where we specify this install
+  # elsewhere because of the CPU wheel needing a different pypi index.
+  # search the project for --index-url https://download.pytorch.org/whl/cpu
+  # and/or torch>=2.0.0
   "torch>=2.0.0",
   "transformers>=4.0.0",
   "rdflib>=6.0.0",

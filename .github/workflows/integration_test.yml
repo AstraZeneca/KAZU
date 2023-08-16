@@ -38,7 +38,8 @@ jobs:
           python -m venv /tmp/kazu-env
           . /tmp/kazu-env/bin/activate
           python -m pip install --upgrade pip
-          pip install -e ."[dev]" --cache-dir $PIP_CACHE_DIR --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.python.org/simple
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
+          pip install -e ."[dev]" --cache-dir $PIP_CACHE_DIR
 
 
       - name: Check precommit
