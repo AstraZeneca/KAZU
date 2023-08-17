@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sqlite3
+from collections import defaultdict
 from functools import cache
 from pathlib import Path
 from typing import cast, Any, Optional, Union, overload
@@ -11,6 +12,7 @@ from urllib import parse
 
 import pandas as pd
 import rdflib
+from kazu.database.in_memory_db import MetadataDatabase
 
 from kazu.data.data import (
     EquivalentIdSet,
@@ -30,6 +32,7 @@ from kazu.ontology_preprocessing.base import (
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.utils import PathLike
+from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
 
@@ -130,23 +133,38 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
     ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        """since non symbolic gene symbols are also frequently ambiguous, we
-        override this method accordingly to disable all synonym resolution, and
-        rely on disambiguation to decide on 'true' mappings. Answers on a
-        postcard if anyone has a better idea on how to do this!
+        """Group Ensembl gene IDs belonging to the same gene.
+
+        .. admonition:: Note for non-biologists about genes
+           :class: note
+
+           The concept of a 'gene' is complex, and Ensembl gene IDs actually refer
+           to locations on the genome, rather than individual genes. In fact, one
+           'gene' can be made up of multiple Ensembl gene IDs, generally speaking
+           these are exons that produce different isoforms of a given protein.
 
         :param ids_and_source:
         :param is_symbolic:
         :return:
         """
+        meta_db = MetadataDatabase()
+        assoc_id_sets: set[EquivalentIdSet] = set()
 
-        return (
-            frozenset(
-                EquivalentIdSet(ids_and_source=frozenset((single_id_and_source,)))
-                for single_id_and_source in ids_and_source
-            ),
-            EquivalentIdAggregationStrategy.CUSTOM,
-        )
+        for _, grouped_ids_and_source in sort_then_group(
+            ids_and_source, lambda x: meta_db.get_by_idx(name=self.name, idx=x[0])[DEFAULT_LABEL]
+        ):
+            assoc_id_sets.add(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        (
+                            grouped_idx,
+                            source,
+                        )
+                        for grouped_idx, source in grouped_ids_and_source
+                    )
+                )
+            )
+        return frozenset(assoc_id_sets), EquivalentIdAggregationStrategy.CUSTOM
 
     def find_kb(self, string: str) -> str:
         return "ENSEMBL"
@@ -154,8 +172,9 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
+        hgnc_to_id_set = defaultdict(set)
         for json_dict in jsons_gen:
-            # due to a bug in OT data, TEC genes have "gene" as a synonym. Sunce they're uninteresting, we just filter
+            # due to a bug in OT data, TEC genes have "gene" as a synonym. Since they're uninteresting, we just filter
             # them
             biotype = json_dict.get("biotype")
             if biotype == "" or biotype == "tec" or json_dict["id"] == json_dict["approvedSymbol"]:
@@ -167,13 +186,16 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
                 if len(json_dict.get(annotation_field, [])) > 0
             )
 
+            idx = json_dict["id"]
+            default_label = json_dict["approvedSymbol"]
             shared_values = {
-                IDX: json_dict["id"],
-                DEFAULT_LABEL: json_dict["approvedSymbol"],
+                IDX: idx,
+                DEFAULT_LABEL: default_label,
                 "dbXRefs": json_dict.get("dbXRefs", []),
                 "approvedName": json_dict["approvedName"],
                 "annotation_score": annotation_score,
             }
+            hgnc_to_id_set[default_label].add(idx)
 
             for key in ["synonyms", "obsoleteSymbols", "obsoleteNames", "proteinIds"]:
                 synonyms_and_sources_lst = json_dict.get(key, [])
