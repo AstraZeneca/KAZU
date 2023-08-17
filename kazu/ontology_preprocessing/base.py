@@ -138,6 +138,7 @@ class CurationProcessor:
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.curations = set(curations)
+        self.dropped_keys: set[NormalisedSynonymStr] = set()
 
     @classmethod
     def curation_sort_key(cls, curated_term: CuratedTerm) -> tuple[int, bool, str]:
@@ -196,6 +197,7 @@ class CurationProcessor:
         """
         try:
             term_to_remove = self._terms_by_term_norm.pop(synonym)
+            self.dropped_keys.add(synonym)
             for equiv_id_set in term_to_remove.associated_id_sets:
                 for idx in equiv_id_set.ids:
                     terms_by_id = self._terms_by_id.get(idx)
@@ -207,11 +209,17 @@ class CurationProcessor:
                 self.entity_class,
             )
         except KeyError:
-            logger.warning(
-                "tried to drop %s from database, but key doesn't exist for %s",
-                synonym,
-                self.parser_name,
-            )
+            if synonym in self.dropped_keys:
+                logger.debug(
+                    "tried to drop %s from database, but key already dropped by another CuratedTerm",
+                    synonym,
+                )
+            else:
+                logger.warning(
+                    "tried to drop %s from database, but key doesn't exist for %s",
+                    synonym,
+                    self.parser_name,
+                )
 
     def _drop_id_from_all_synonym_terms(self, id_to_drop: Idx) -> Counter:
         """Remove a given id from all :class:`.SynonymTerm`\\ s.
