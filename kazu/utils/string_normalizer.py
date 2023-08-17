@@ -154,7 +154,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         :return:
         """
         for re_sub, replace in DefaultStringNormalizer.re_subs_2.items():
-            string = re.sub(re_sub, replace, string)
+            string = re_sub.sub(replace, string)
         return string
 
     @staticmethod
@@ -217,7 +217,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         :return:
         """
         return " ".join(
-            x.strip() for x in re.split(DefaultStringNormalizer.number_split_pattern, string)
+            x.strip() for x in DefaultStringNormalizer.number_split_pattern.split(string)
         )
 
     @staticmethod
@@ -233,7 +233,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
             if substr in string:
                 string = string.replace(substr, replace)
         for re_sub, replace in DefaultStringNormalizer.re_subs.items():
-            string = re.sub(re_sub, replace, string)
+            string = re_sub.sub(replace, string)
         return string
 
 
@@ -527,6 +527,8 @@ class GildaUtils:
         </details>
     """
 
+    PLURAL_CAPS_S_PATTERN: regex.Pattern = regex.compile(r"^\p{Lu}+$")
+
     @staticmethod
     def depluralize(word: str) -> tuple[str, str]:
         """Return the depluralized version of the word, along with a status
@@ -563,7 +565,7 @@ class GildaUtils:
         # If the word is all caps and the last letter is an s, then it's a very
         # strong signal that it is pluralized so we have a custom return value
         # for that
-        elif regex.match(r"^\p{Lu}+$", word[:-1]):
+        elif GildaUtils.PLURAL_CAPS_S_PATTERN.match(word[:-1]):
             return word[:-1], "plural_caps_s"
         # Otherwise, we just go with the assumption that the last s is the
         # plural marker
