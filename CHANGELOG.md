@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.0.3 - 2023-08-15
+
+
+### Features
+
+- Improved spacy tokenization for the ExplosionStringMatchingStep.
+  Previously, this caused us to miss entities that ended with a single-letter uppercase token at the end (like 'Haemophilia A') if it was at the end of a sentence. 
+- Make SpanFinder return found spans directly, rather than having to access `.closed_spans` after calling, which is easier. Note that `.closed_spans` remains, so this is backwards-compatible. 
+- Turned on 'strict' mypy checking (with some exceptions as to the exact flags used), and fixed issues that this raised. 
+
+
+### Bugfixes
+
+- Fix incorrect caching behaviour of Index TfidfVectorizer builds.
+  This meant they got rebuilt every time, which meant in turn that the cache and therefore the model pack size grew after use. 
+
+
+### Improved Documentation
+
+- Started using docformatter to automatically format docstrings, and tweak minor issues this brought up.
+  This will help us comply with PEP257 and be consistent across the codebase. 
+
+
+### Deprecations and Removals
+
+- Removed various pieces of dead code.
+  These are very unlikely to have been used by end users, so not deprecating/doing a major version bump. 
+- Rename Type Alias JsonDictType to JsonEncodable - which is more straightforward/correct what it actually means.
+  This was used internally to Kazu rather than being expected to be used by end users, so no deprecation/major version bump.
+
+
 ## 1.0.2 - 2023-08-07
 
 
