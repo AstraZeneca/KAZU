@@ -11,7 +11,6 @@ from typing import Optional
 
 import ray
 from hydra import initialize_config_dir, compose
-from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from kazu import __version__ as kazu_version
@@ -257,15 +256,6 @@ class ModelPackBuilder:
         :param cfg:
         :return:
         """
-        parsers = instantiate(cfg.ontologies.parsers).values()
-        explosion_path = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("spacy_pipeline")
-        # local import so the cache is correctly configured with KAZU_MODEL_PACK
-        from kazu.ontology_matching import assemble_pipeline
-
-        assemble_pipeline.main(
-            parsers=parsers,
-            output_dir=explosion_path,
-        )
         from kazu.pipeline import load_steps_and_log_memory_usage
 
         load_steps_and_log_memory_usage(cfg)
