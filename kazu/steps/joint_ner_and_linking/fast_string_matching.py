@@ -4,7 +4,7 @@ from collections.abc import Iterable
 
 import ahocorasick
 import spacy
-from kazu.data.data import Document, Entity, SynonymTermWithMetrics, MentionConfidence
+from kazu.data.data import Document, Entity, SynonymTermWithMetrics, MentionConfidence, CharSpan
 from kazu.database.in_memory_db import SynonymDatabase, ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
@@ -37,8 +37,14 @@ class FastStringMatchingStep(ParserDependentStep):
     checking for word boundaries with the spacy tokeniser.
     """
 
-    def __init__(self, parsers: Iterable[OntologyParser], reload_spacy_at: int = 2000):
+    def __init__(
+        self,
+        parsers: Iterable[OntologyParser],
+        include_sentence_offsets: bool = True,
+        reload_spacy_at: int = 2000,
+    ):
         super().__init__(parsers)
+        self.include_sentence_offsets = include_sentence_offsets
         self.reload_spacy_at = reload_spacy_at
         self.parsers = parsers
         self.automaton_strict, self.automaton_lc = self.create_automatons()
@@ -174,4 +180,8 @@ class FastStringMatchingStep(ParserDependentStep):
                     self._process_automation(
                         self.automaton_strict, section.text, section.text, starts, ends
                     )
+                )
+            if self.include_sentence_offsets:
+                section.sentence_spans = (
+                    CharSpan(sent.start_char, sent.end_char) for sent in spacy_doc.sents
                 )
