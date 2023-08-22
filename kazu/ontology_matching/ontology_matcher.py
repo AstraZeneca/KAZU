@@ -2,26 +2,24 @@ import logging
 import pickle
 import uuid
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
 from typing import Any, Union, Optional, cast
-from collections.abc import Iterable
 
 import spacy
 import srsly
-from kazu.database.in_memory_db import SynonymDatabase
+from kazu.ontology_preprocessing.base import (
+    OntologyParser,
+)
+from kazu.utils.curated_term_tools import filter_curations_for_ner
+from kazu.utils.grouping import sort_then_group
+from kazu.utils.utils import PathLike
 from spacy.language import Language
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, SpanGroup, Doc, Token
 from spacy.util import SimpleFrozenList
-
-from kazu.data.data import CuratedTermBehaviour, CuratedTerm
-from kazu.ontology_preprocessing.base import (
-    OntologyParser,
-)
-from kazu.utils.grouping import sort_then_group
-from kazu.utils.utils import PathLike
 
 GENE = "gene"
 DRUG = "drug"
@@ -148,45 +146,6 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
-    def filter_curations_for_ner(
-        self, curations: Iterable[CuratedTerm], parser: OntologyParser
-    ) -> Iterable[CuratedTerm]:
-        """Check curations are still represented in DB before they can be used
-        for NER."""
-        original_terms = defaultdict(set)
-        inherited_terms = defaultdict(set)
-        syn_db = SynonymDatabase()
-        for curation in curations:
-            if curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
-                original_terms[curation.curated_synonym].add(curation)
-            elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
-                inherited_terms[curation.source_term].add(curation)
-            else:
-                # not an ner behaviour, so move on to the next curation in the loop
-                continue
-        for curated_synonym, curation_set in original_terms.items():
-            if len(curation_set) > 1:
-                # note, this shouldn't happen, as it should be handled by the curation validation logic.
-                # however, just in case this logic changes, we'll leave this here
-                logger.warning(
-                    "multiple curations detected for %s, %s", curated_synonym, curation_set
-                )
-                term_norm = next(iter(curation_set)).term_norm_for_linking(parser.entity_class)
-                if term_norm not in syn_db.get_all(parser.name):
-                    logger.warning(
-                        "dictionary based NER needs an database entry for %s, %s, but none exists",
-                        term_norm,
-                        parser.name,
-                    )
-                    continue
-            yield from curation_set
-            yield from inherited_terms.pop(curated_synonym, set())
-        if len(inherited_terms) > 0:
-            logger.warning(
-                "The following inherited curations were unmatched to a source term, and will be ignored for NER: %s",
-                inherited_terms.values(),
-            )
-
     def create_phrasematchers_using_curations(
         self, parsers: list[OntologyParser]
     ) -> tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
@@ -219,7 +178,7 @@ class OntologyMatcher:
                 )
                 continue
 
-            curations_for_ner = set(self.filter_curations_for_ner(parser_curations, parser))
+            curations_for_ner = set(filter_curations_for_ner(parser_curations, parser))
 
             # deduplicating match id's and patterns saves memory in the spacy pipeline
             match_ids_and_strings_cs = set()
