@@ -23,6 +23,7 @@ from kazu.web.server import start, stop
 from kazu.utils.caching import kazu_disk_cache
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
 from kazu.utils.utils import Singleton
+from kazu.steps.joint_ner_and_linking.fast_string_matching import FastStringMatchingStep
 
 
 @pytest.fixture(scope="session")
@@ -196,3 +197,13 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
 def mock_build_vectoriser_cache(monkeypatch):
     # type ignore as above - mypy doesn't know this function is 'wrapped'
     monkeypatch.setattr(TfIdfScorer, "build_vectorizers", TfIdfScorer.build_vectorizers.__wrapped__)  # type: ignore[attr-defined]
+
+
+@pytest.fixture(scope="function")
+def mock_build_fast_string_matcher_cache(monkeypatch):
+    # type ignore as above - mypy doesn't know this function is 'wrapped'
+    monkeypatch.setattr(
+        FastStringMatchingStep,
+        "create_automatons",
+        FastStringMatchingStep.create_automatons.__wrapped__,  # type: ignore[attr-defined]
+    )
