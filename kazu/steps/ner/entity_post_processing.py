@@ -36,8 +36,8 @@ class SplitOnConjunctionPattern:
         self.nlp = spacy_pipeline
 
     def __call__(self, entity: Entity, text: str) -> list[Entity]:
-        doc = self.nlp(entity.match)
         if any((x in entity.match for x in [" and ", " or ", " nor "])):
+            doc = self.nlp(entity.match)
             return self.run_conjunction_rules(doc, entity, text)
         else:
             return []
