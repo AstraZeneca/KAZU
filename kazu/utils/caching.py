@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 import tempfile
-from copy import deepcopy
 from pathlib import Path
 from typing import Any, TypeVar, Protocol, Optional, Union
 from collections.abc import Iterable, Callable
@@ -120,5 +119,5 @@ class EntityLinkingLookupCache:
             if not terms_from_cache:
                 cache_misses.append(ent)
             else:
-                ent.update_terms(deepcopy(terms_from_cache))
+                ent.update_terms(terms_from_cache)
         return cache_misses
