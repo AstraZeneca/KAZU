@@ -41,6 +41,7 @@ defaults:
   - LSWebUtils: default
   - Middlewares: default
   - EntityClassDisambiguationStep: default
+  - RuleBasedDisambiguationStep: default
   - confidence: default
   - cache_sizes: default
   - global_actions: default

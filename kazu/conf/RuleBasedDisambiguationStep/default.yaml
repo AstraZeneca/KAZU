@@ -1,0 +1,85 @@
+_target_: kazu.steps.linking.rule_based_disambiguator.RulesBasedEntityClassDisambiguationFilterStep
+class_matcher_rules:
+  cell_line:
+    tp:
+      - - "_":
+            cell_line: True
+        - LOWER:
+            IN:
+              - cell
+              - cells
+      - - LOWER: cell
+        - LOWER: line
+        - "_":
+            cell_line: True
+      - - LOWER: cell
+        - LOWER: type
+        - "_":
+            cell_line: True
+    fp: ~
+  cell_type:
+    tp:
+      - - "_":
+            cell_type: True
+        - LOWER:
+            IN:
+              - cell
+              - cells
+      - - LOWER: cell
+        - LOWER: line
+        - "_":
+            cell_type: True
+      - - LOWER: cell
+        - LOWER: type
+        - "_":
+            cell_type: True
+    fp: ~
+  anatomy:
+    tp: ~
+    fp:
+      - - "_":
+            drug: True
+        - "_":
+            anatomy: True
+        - LOWER: arm
+      - - LOWER: "single"
+        - LOWER: "-"
+        - "_":
+            anatomy: True
+            LOWER: arm
+      - - LOWER: quality
+        - LOWER: "-"
+          OP: "?"
+        - LOWER: "of"
+        - LOWER: "-"
+          OP: "?"
+        - "_":
+            anatomy: True
+            LOWER: life
+
+cooccurence_rules:
+  disease:
+    IVF:
+      fp:
+        - ICSI"
+        - cycle"
+        - treatment"
+    MFS:
+      fp:
+        - endpoint"
+  gene:
+    IVF:
+      fp:
+        - ICSI
+        - cycle
+        - treatment
+    EMA:
+      fp:
+        - European
+        - Agency
+  drug:
+    UCB:
+      fp:
+        - pharma
+        - company
+        - brussels
