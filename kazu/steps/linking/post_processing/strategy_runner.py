@@ -66,7 +66,7 @@ class ConfidenceLevelStrategyExecution:
         self.entity_mapped: dict[EntityKey, bool] = {}
 
     @property
-    def longest_mapping_strategy_list_size(self):
+    def longest_mapping_strategy_list_size(self) -> int:
         return max(
             (
                 len(self.default_strategies),

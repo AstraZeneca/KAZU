@@ -169,7 +169,7 @@ class AggregatedAccuracyResult:
         )
 
     @property
-    def precision(self):
+    def precision(self) -> float:
         div = self.fp + self.tp
         if div == 0:
             return 0.0
@@ -177,7 +177,7 @@ class AggregatedAccuracyResult:
             return float(self.tp / div)
 
     @property
-    def recall(self):
+    def recall(self) -> float:
         div = self.fn + self.tp
         if div == 0:
             return 0.0
@@ -185,11 +185,11 @@ class AggregatedAccuracyResult:
             return float(self.tp / div)
 
     @property
-    def fp_info(self):
+    def fp_info(self) -> list[Any]:
         return self.fp_counter.most_common()
 
     @property
-    def fn_info(self):
+    def fn_info(self) -> list[Any]:
         return self.fn_counter.most_common()
 
 

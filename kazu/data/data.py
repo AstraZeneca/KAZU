@@ -212,7 +212,7 @@ class SynonymTerm:
     original_term: Optional[str] = None
 
     @property
-    def is_ambiguous(self):
+    def is_ambiguous(self) -> bool:
         return len(self.associated_id_sets) > 1
 
 
