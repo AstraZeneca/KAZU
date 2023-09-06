@@ -553,9 +553,11 @@ argument.
 """
 
 
+class ConversionException(Exception):
+    pass
+
+
 class DocumentJsonUtils:
-    class ConversionException(Exception):
-        pass
 
     atomic_types = (int, float, str, bool, type(None))
     listlike_types = (list, tuple, set, frozenset)
@@ -647,7 +649,7 @@ class DocumentJsonUtils:
             d: dict[str, JsonEncodable] = json_util.default(obj)
             return d
         else:
-            raise cls.ConversionException(f"Unknown object type: {type(obj)}")
+            raise ConversionException(f"Unknown object type: {type(obj)}")
 
     @classmethod
     def _preprocess_dict_pair(cls, kv_pair: tuple[Any, Any]) -> tuple[str, JsonEncodable]:
