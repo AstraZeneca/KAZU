@@ -113,20 +113,28 @@ class GildaTfIdfScorer(metaclass=Singleton):
     def __init__(self, contexts_path: str, model_path: str):
         """
 
-        :param contexts_path: path to a json file with structure {<parser_name>:{<identifier:{context_text}>}}
+        :param contexts_path: json file in the
+            .. code-block::
+
+                {<parser name>:
+                    {<idx>:<context string>}
+                }
+
         :param model_path: path to a pretrained :class:`sklearn.feature_extraction.text.TfidfVectorizer` model
         """
         self.model_path = model_path
         self.contexts_path = contexts_path
         self.vectorizer: TfidfVectorizer = joblib.load(model_path)
-        self.calculate_id_vectors(self.contexts_path)
+        self._calculate_id_vectors(self.contexts_path)
 
     @kazu_disk_cache.memoize(ignore={0})
-    def calculate_id_vectors(self, contexts_path: str) -> None:
-        """Store the context matrices in the cache.
+    def _calculate_id_vectors(self, contexts_path: str) -> None:
+        """Calculate the TF-IDF vectors for the file of contexts.
 
-        Since we don't want every single one
-        in memory at runtime, we keep them on disk until needed.
+        This method is disk cached - since we don't want every
+        single one in memory at runtime, we keep them on disk
+        until needed.
+
         :param contexts_path:
         :return:
         """
@@ -165,12 +173,12 @@ class GildaTfIdfScorer(metaclass=Singleton):
         self, context_vec: np.ndarray, id_sets: set[EquivalentIdSet], parser_name: str
     ) -> Iterable[tuple[str, float]]:
         """Given a context vector, yield the most likely identifiers and their
-        score from the given identifiers.
+        score from the given set of identifiers.
 
         :param context_vec:
         :param id_sets:
         :param parser_name:
-        :return:
+        :return: identifier string and score
         """
         scores = []
         for equiv_id_set in id_sets:
