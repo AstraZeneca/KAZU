@@ -137,6 +137,7 @@ intersphinx_mapping = {
     # pymongo includes bson
     "bson": ("https://pymongo.readthedocs.io/en/stable/", None),
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "urllib3": ("https://urllib3.readthedocs.io/en/stable/", None),
 }
 
 
@@ -207,6 +208,7 @@ cross_reference_override_mapping = {
     "lightning_fabric.plugins.io.checkpoint_io.CheckpointIO": "lightning.pytorch.plugins.io.CheckpointIO",
     "pytorch_lightning.core.module.LightningModule": "lightning.pytorch.core.LightningModule",
     "pytorch_lightning.trainer.trainer.Trainer": "lightning.pytorch.trainer.trainer.Trainer",
+    "urllib3.util.retry.Retry": "urllib3.util.Retry",
 }
 
 
