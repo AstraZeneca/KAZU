@@ -214,7 +214,7 @@ class ModelPackBuilder:
             self.copy_base_model_pack_resources_to_target()
 
     def copy_base_model_pack_resources_to_target(self):
-        assert isinstance(self.maybe_base_model_pack_path, Path)
+        assert self.maybe_base_model_pack_path is not None
 
         for model in self.build_config.models:
 

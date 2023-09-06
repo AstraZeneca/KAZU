@@ -1010,7 +1010,7 @@ class OntologyParser(ABC):
         :return: {idx:{metadata_key:metadata_value}}
         """
         self._parse_df_if_not_already_parsed()
-        assert isinstance(self.parsed_dataframe, pd.DataFrame)
+        assert self.parsed_dataframe is not None
         metadata_columns = self.parsed_dataframe.columns
         metadata_columns.drop([MAPPING_TYPE, SYN])
         metadata_df = self.parsed_dataframe[metadata_columns]
@@ -1072,7 +1072,7 @@ class OntologyParser(ABC):
         :return:
         """
         self._parse_df_if_not_already_parsed()
-        assert isinstance(self.parsed_dataframe, pd.DataFrame)
+        assert self.parsed_dataframe is not None
         # ensure correct order
         syn_df = self.parsed_dataframe[self.all_synonym_column_names].copy()
         syn_df = syn_df.dropna(subset=[SYN])
