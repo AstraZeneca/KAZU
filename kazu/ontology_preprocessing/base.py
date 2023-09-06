@@ -984,9 +984,12 @@ class OntologyParser(ABC):
             self.parsed_dataframe = self.parse_to_dataframe()
             self.parsed_dataframe[DATA_ORIGIN] = self.data_origin
             self.parsed_dataframe[IDX] = self.parsed_dataframe[IDX].astype(str)
-            self.parsed_dataframe.loc[
-                pd.isnull(self.parsed_dataframe[DEFAULT_LABEL]), DEFAULT_LABEL
-            ] = self.parsed_dataframe[IDX]
+            # since we always need a value for DEFAULT_LABEL,
+            # if the underlying data doesn't provide one, just use the IDX
+            rows_without_default_label = self.parsed_dataframe.loc[
+                pd.isnull(self.parsed_dataframe[DEFAULT_LABEL])
+            ]
+            rows_without_default_label[DEFAULT_LABEL] = rows_without_default_label[IDX]
 
     @kazu_disk_cache.memoize(ignore={0})
     def export_metadata(self, parser_name: str) -> dict[str, dict[str, SimpleValue]]:
