@@ -40,11 +40,19 @@ class FastStringMatchingStep(ParserDependentStep):
     def __init__(
         self,
         parsers: Iterable[OntologyParser],
-        include_sentence_offsets: bool = True,
+        include_sentence_indices: bool = True,
         reload_spacy_at: int = 2000,
     ):
+        """
+
+        :param parsers:
+        :param include_sentence_indices: Should spacy sentence indices be added to the section?
+        :param reload_spacy_at: Since spacy suffers from
+            `memory leaks <https://github.com/explosion/spaCy/discussions/9362>`_, reload the
+            spacy pipeline to clear the vocab build up after this many calls.
+        """
         super().__init__(parsers)
-        self.include_sentence_offsets = include_sentence_offsets
+        self.include_sentence_offsets = include_sentence_indices
         self.reload_spacy_at = reload_spacy_at
         self.parsers = parsers
         self.automaton_strict, self.automaton_lc = self.create_automatons()
