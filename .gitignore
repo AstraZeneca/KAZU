@@ -68,11 +68,9 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-docs/_build/doctrees/
-
-# Sphinx doctest output
-docs/_build/doctest/output.txt
+# Sphinx documentation build
+docs/_build
+docs/_autosummary
 
 # PyBuilder
 target/
