@@ -6,7 +6,7 @@ repos:
     name: black
     stages: [commit]
     language: system
-    entry: black .
+    entry: black
     require_serial: true
     types: [python]
   
