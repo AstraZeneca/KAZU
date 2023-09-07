@@ -86,6 +86,10 @@ dev = [
   # of the steps.
   "tensorboard",
   "towncrier",
+  # needed as towncrier is broken with higher versions of importlib-resources -
+  # we can remove this when https://github.com/twisted/towncrier/pull/529
+  # is in a towncrier release
+  "importlib-resources<6",
   "ray>=1.10.0",
 ]
 
