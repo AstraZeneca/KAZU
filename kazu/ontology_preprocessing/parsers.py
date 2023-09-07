@@ -753,8 +753,6 @@ class EnsemblOntologyParser(OntologyParser):
 
     For example,
     http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json.
-
-    :return:
     """
 
     def __init__(
