@@ -850,7 +850,7 @@ class ChemblOntologyParser(OntologyParser):
     """Input is a sqllite dump from Chembl.
 
     For example,
-    https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz.
+    https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_33/chembl_33_sqlite.tar.gz.
     """
 
     def find_kb(self, string: str) -> str:
