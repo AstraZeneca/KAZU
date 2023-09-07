@@ -749,8 +749,10 @@ class MondoOntologyParser(OntologyParser):
 
 
 class EnsemblOntologyParser(OntologyParser):
-    """Input is a json from HGNC e.g. http://ftp.ebi.ac.uk/pub/databases/genena
-    mes/hgnc/json/hgnc_complete_set.json.
+    """Input is a json from HGNC.
+
+    For example,
+    http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json.
 
     :return:
     """
@@ -847,8 +849,11 @@ class EnsemblOntologyParser(OntologyParser):
 
 
 class ChemblOntologyParser(OntologyParser):
-    """Input is a sqllite dump from Chembl, e.g. https://ftp.ebi.ac.uk/pub/data
-    bases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz."""
+    """Input is a sqllite dump from Chembl.
+
+    For example,
+    https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_29_sqlite.tar.gz.
+    """
 
     def find_kb(self, string: str) -> str:
         return "CHEMBL"
