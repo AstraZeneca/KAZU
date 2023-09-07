@@ -33,7 +33,7 @@ repos:
   - id: mypy
     name: mypy
     stages: [commit]
-    language: python
+    language: system
     entry:  mypy
     types: [python] 
     types_or: [python, pyi]
