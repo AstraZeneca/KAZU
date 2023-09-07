@@ -13,27 +13,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Features
 
 - Improved spacy tokenization for the ExplosionStringMatchingStep.
-  Previously, this caused us to miss entities that ended with a single-letter uppercase token at the end (like 'Haemophilia A') if it was at the end of a sentence. 
-- Make SpanFinder return found spans directly, rather than having to access `.closed_spans` after calling, which is easier. Note that `.closed_spans` remains, so this is backwards-compatible. 
-- Turned on 'strict' mypy checking (with some exceptions as to the exact flags used), and fixed issues that this raised. 
+  Previously, this caused us to miss entities that ended with a single-letter uppercase token at the end (like 'Haemophilia A') if it was at the end of a sentence.
+- Make SpanFinder return found spans directly, rather than having to access `.closed_spans` after calling, which is easier. Note that `.closed_spans` remains, so this is backwards-compatible.
+- Turned on 'strict' mypy checking (with some exceptions as to the exact flags used), and fixed issues that this raised.
 
 
 ### Bugfixes
 
 - Fix incorrect caching behaviour of Index TfidfVectorizer builds.
-  This meant they got rebuilt every time, which meant in turn that the cache and therefore the model pack size grew after use. 
+  This meant they got rebuilt every time, which meant in turn that the cache and therefore the model pack size grew after use.
 
 
 ### Improved Documentation
 
 - Started using docformatter to automatically format docstrings, and tweak minor issues this brought up.
-  This will help us comply with PEP257 and be consistent across the codebase. 
+  This will help us comply with PEP257 and be consistent across the codebase.
 
 
 ### Deprecations and Removals
 
 - Removed various pieces of dead code.
-  These are very unlikely to have been used by end users, so not deprecating/doing a major version bump. 
+  These are very unlikely to have been used by end users, so not deprecating/doing a major version bump.
 - Rename Type Alias JsonDictType to JsonEncodable - which is more straightforward/correct what it actually means.
   This was used internally to Kazu rather than being expected to be used by end users, so no deprecation/major version bump.
 
@@ -55,19 +55,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Features
 
-- added more informative logging to build_and_test_model_packs.py 
-- dependencies that work are now stored in the model pack 
+- added more informative logging to build_and_test_model_packs.py
+- dependencies that work are now stored in the model pack
 
 
 ### Bugfixes
 
-- URIs are now stripped in acceptance testing if called from build_and_test_model_packs.py 
-- fixed CI bug installing cuda pytorch which we don't want 
+- URIs are now stripped in acceptance testing if called from build_and_test_model_packs.py
+- fixed CI bug installing cuda pytorch which we don't want
 
 
 ### Improved Documentation
 
-- added sphinx docs to data classes 
+- added sphinx docs to data classes
 
 
 ### Deprecations and Removals
@@ -80,32 +80,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Features
 
-- Added support for SKOS-XL ontologies with SKOSXLGraphParser. 
+- Added support for SKOS-XL ontologies with SKOSXLGraphParser.
 - Allowed running only some steps in a pipeline (including via API). See the Pipeline docs
-  (and the OpenAPI spec for the API details of new endpoints). 
+  (and the OpenAPI spec for the API details of new endpoints).
 - Curations have been significantly overhauled and are now called CuratedTerms.
-  They now apply to single parsers, and offer a range of actions affecting linking and NER behaviour. Each CuratedTerm has a single CuratedTermBeheaviour, making them significantly simpler. 
-- Move MergeOverlappingEntsStep to after the AbbreviationFinderStep, which improves precision. 
+  They now apply to single parsers, and offer a range of actions affecting linking and NER behaviour. Each CuratedTerm has a single CuratedTermBeheaviour, making them significantly simpler.
+- Move MergeOverlappingEntsStep to after the AbbreviationFinderStep, which improves precision.
 - Moved model training specific dependencies to an optional dependency group.
   In particular, this is of value because the seqeval dependency doesn't distribute
   a wheel, only an sdist in a legacy manner, which broke kazu installation in
-  environments requiring proxies. 
+  environments requiring proxies.
 - Switch off URI Stripping by default, and enable customizing the behaviour of URI stripping for Mapping ids.
-  See the docs for the StripMappingURIsAction class for details. 
-- The LabelStudio integration interface was improved and simplified. 
+  See the docs for the StripMappingURIsAction class for details.
+- The LabelStudio integration interface was improved and simplified.
 - We now assign a MentionConfidence to each Entity based on the confidence of the NER hit.
   This allows decoupling between specific NER steps and disambiguation strategies, which were previously intertwined.
-  This also applies to the CleanupStep which is decoupled from specific NER steps. 
+  This also applies to the CleanupStep which is decoupled from specific NER steps.
 - We now use diskcache to give a simpler interface to elements of kazu that need to be 'built' in advance.
   This particularly benefits the parsers, where it is now easy to use a new ParserDependentStep abstraction
-  to ensure appropriate parsers are loading, but to only load parsers once across all steps. 
+  to ensure appropriate parsers are loading, but to only load parsers once across all steps.
 
 
 ### Improved Documentation
 
 - We now generate docs for ``__call__`` methods. These are often significant in KAZU,
   and we had the docstrings written in many cases, Sphinx just didn't show them
-  in the html. 
+  in the html.
 
 
 ### Deprecations and Removals
@@ -114,7 +114,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   in a future release. ``ner_and_linking`` should be used instead. This is because
   we now have an ``ner_only`` endpoint, so the naming was liable to cause confusion.
   It also simplifies the api, as a single endpoint can handle both a single document or
-  multiple. 
+  multiple.
 - We deleted the 'modelling' element of the module structure, as this didn't add anything semantically, but led to longer imports.
   This does mean any imports from these directories in your code will need to be rewritten - fortunately this is a simple 'find and delete' with 'modelling.' within your imports.
 
@@ -124,8 +124,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Features
 
-- Kazu frontend can now be served from the Ray HTTP deployment. 
-- Upgraded SETH to 1.4.0 . 
+- Kazu frontend can now be served from the Ray HTTP deployment.
+- Upgraded SETH to 1.4.0 .
 - removed CuratedTerm and replaced with more flexible Curation and GlobalAction system
 
 
@@ -134,12 +134,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Features
 
-- Added a Kazu web interface for demoing NER results on text snippets. 
+- Added a Kazu web interface for demoing NER results on text snippets.
 
 
 ### Improved Documentation
 
-- Added link to changelogs on main documentation page. 
-- Added towncrier for generating changelogs. 
-- Generating and committing changelog during release workflow. 
+- Added link to changelogs on main documentation page.
+- Added towncrier for generating changelogs.
+- Generating and committing changelog during release workflow.
 - Removed previous changelogs file (NEWS.md).

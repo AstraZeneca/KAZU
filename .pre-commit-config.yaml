@@ -9,7 +9,7 @@ repos:
     entry: black
     require_serial: true
     types: [python]
-  
+
   - id: blacken-docs
     name: blacken-docs
     stages: [commit]
@@ -35,7 +35,7 @@ repos:
     stages: [commit]
     language: system
     entry:  mypy
-    types: [python] 
+    types: [python]
     types_or: [python, pyi]
     require_serial: true
     minimum_pre_commit_version: '2.9.2'
@@ -49,6 +49,9 @@ repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.1.0
   hooks:
+  - id: trailing-whitespace
+  - id: check-yaml
+    exclude: "^kubernetes/ray/templates/.*\\.yaml$"
   - id: end-of-file-fixer
     exclude: "\\.png$|\
       \\.bin$|\

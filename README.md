@@ -10,7 +10,7 @@
 Welcome to Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
 designed to handle production workloads.
 
-This library aims to simplify the process of using state of the art NLP research in production systems. Some of the 
+This library aims to simplify the process of using state of the art NLP research in production systems. Some of the
 research contained within are our own, but most of it comes from the community, for which we are immensely grateful.
 
 If you want to use Kazu, please cite our [EMNLP 2022 publication](https://aclanthology.org/2022.emnlp-industry.63)!
@@ -27,7 +27,7 @@ If you want to use Kazu, please cite our [EMNLP 2022 publication](https://aclant
 
 Python version 3.9 or higher is required (tested with Python 3.9).
 
-Either: 
+Either:
 
 `pip install kazu`
 
@@ -41,7 +41,7 @@ This will pull in typing stubs for kazu's dependencies (such as [types-requests]
 so that mypy has access to as much relevant typing information as possible when type checking your codebase. Otherwise (depending on mypy config), you may see errors when running mypy like:
 
 ```
-.venv/lib/python3.10/site-packages/kazu/steps/linking/post_processing/xref_manager.py:10: error: Library stubs not installed for "requests" [import] 
+.venv/lib/python3.10/site-packages/kazu/steps/linking/post_processing/xref_manager.py:10: error: Library stubs not installed for "requests" [import]
 ```
 
 ## Getting the model pack
@@ -51,7 +51,7 @@ extract the archive and:
 
 `export KAZU_MODEL_PACK=<path to the extracted archive>`
 
-Kazu is highly configurable (using [Hydra](https://hydra.cc/docs/intro/)), although it comes preconfigured with defaults appropriate for most literature processing use cases. 
+Kazu is highly configurable (using [Hydra](https://hydra.cc/docs/intro/)), although it comes preconfigured with defaults appropriate for most literature processing use cases.
 To make use of these, and process a simple document:
 
 ```python
@@ -149,10 +149,10 @@ The Stanza framework:
 Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020. Stanza: A Python Natural Language Processing Toolkit for Many Human Languages. In Association for Computational Linguistics (ACL) System Demonstrations. 2020.
 https://arxiv.org/abs/2003.07082
 
-Biomedical NLP models are derived from: 
+Biomedical NLP models are derived from:
 
-Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz. 
-Biomedical and Clinical English Model Packages in the Stanza Python NLP Library, 
+Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz.
+Biomedical and Clinical English Model Packages in the Stanza Python NLP Library,
 Journal of the American Medical Informatics Association. 2021.
 https://doi.org/10.1093/jamia/ocab090
 

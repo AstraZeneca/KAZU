@@ -1,6 +1,6 @@
 name: Check For dead code
 
-on:  
+on:
   schedule:
     # every Monday at 9:00, see https://crontab.guru/#0_9_*_*_1
     - cron: '0 9 * * 1'

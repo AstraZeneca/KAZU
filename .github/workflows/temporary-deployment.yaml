@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
-        with: 
+        with:
           ref: ${{inputs.git-ref}}
 
       - name: download release
@@ -95,7 +95,7 @@ jobs:
           wait: 300
 
   time-to-live:
-    name: Apply time to live to Deployment 
+    name: Apply time to live to Deployment
     runs-on: [self-hosted, kazu-runners]
     needs: deploy-temp
     steps:

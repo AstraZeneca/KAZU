@@ -4,7 +4,7 @@ The Kazu team welcomes pull requests from the community
 
 ## How you can help
 
-* Report bugs as issues 
+* Report bugs as issues
 * Request new features (or implement them yourself and submit a PR)
 
 ### Developing for Kazu

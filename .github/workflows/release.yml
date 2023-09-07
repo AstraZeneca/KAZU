@@ -72,10 +72,10 @@ jobs:
         run: |
 
           export BASE_KAZU_CONF_PATH=$GITHUB_WORKSPACE"/kazu/conf"
-          # random suffix to prevent clashes with other runs          
+          # random suffix to prevent clashes with other runs
           export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
 
-          mkdir $MODEL_PACK_BUILD_PATH   
+          mkdir $MODEL_PACK_BUILD_PATH
 
           . kazu-env/bin/activate
 
@@ -147,8 +147,8 @@ jobs:
           PR_ID=$(gh pr create -b main --title "version bump: ${KAZU_NEW_VERSION_SEGMENT} to ${KAZU_RELEASE_VERSION}" --body "${PR_MERGING_WARNING}")
           # todo: auto merge when we have a solution for this
           # gh pr merge $PR_ID --admin --rebase
-          NEW_MODEL_PACK_ZIP=$(echo "${{ env.NEW_MODEL_PACK_ZIP }}")          
-          gh release create $KAZU_RELEASE_VERSION --notes-file $CURRENT_RELEASE_FILE --title $KAZU_RELEASE_VERSION          
+          NEW_MODEL_PACK_ZIP=$(echo "${{ env.NEW_MODEL_PACK_ZIP }}")
+          gh release create $KAZU_RELEASE_VERSION --notes-file $CURRENT_RELEASE_FILE --title $KAZU_RELEASE_VERSION
           gh release upload $KAZU_RELEASE_VERSION dist/* --clobber
           gh release upload $KAZU_RELEASE_VERSION $NEW_MODEL_PACK_ZIP --clobber
           rm -r $NEW_MODEL_PACK_ZIP
@@ -174,7 +174,7 @@ jobs:
 
       - name: remove temp resources
         run: |
-          # need to call twice, for NFS bug      
+          # need to call twice, for NFS bug
           MODEL_PACK_BUILD_PATH=$(echo "${{ env.MODEL_PACK_BUILD_PATH }}")
           rm -r $MODEL_PACK_BUILD_PATH || true
           rm -r $MODEL_PACK_BUILD_PATH || true

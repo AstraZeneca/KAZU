@@ -4,7 +4,7 @@ Some valuable BioNLP algorithms are implemented in JVM languages (e.g. SETH, Ops
 accessible to python, we use Py4J to call them from a Kazu Step instance.
 
 # Compiling the JVM
-In order to make such algorithms available to Py4J, we need to compile a fatjar, which can then be placed on the 
+In order to make such algorithms available to Py4J, we need to compile a fatjar, which can then be placed on the
 classpath of the JVM process started by Py4J.
 
 We use the gradle wrapper concept

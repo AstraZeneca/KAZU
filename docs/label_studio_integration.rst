@@ -50,7 +50,7 @@ Our recommended workflow is as follows:
         manager.update_view(view=view, docs=docs)
 
 3) view/correct annotations in label studio. Once you're finished, you can export back to Kazu Documents as follows:
-   
+
    .. code-block:: python
 
         from kazu.annotation.label_studio import LabelStudioManager

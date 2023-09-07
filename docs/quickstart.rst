@@ -52,7 +52,7 @@ so that mypy has access to as much relevant typing information as possible when 
 
 .. code-block:: console
 
-    .venv/lib/python3.10/site-packages/kazu/steps/linking/post_processing/xref_manager.py:10: error: Library stubs not installed for "requests" [import] 
+    .venv/lib/python3.10/site-packages/kazu/steps/linking/post_processing/xref_manager.py:10: error: Library stubs not installed for "requests" [import]
 
 
 Model Pack
