@@ -211,8 +211,9 @@ class CurationProcessor:
         except KeyError:
             if synonym in self.dropped_keys:
                 logger.debug(
-                    "tried to drop %s from database, but key already dropped by another CuratedTerm",
+                    "tried to drop %s from database, but key already dropped by another CuratedTerm for %s",
                     synonym,
+                    self.parser_name,
                 )
             else:
                 logger.warning(
