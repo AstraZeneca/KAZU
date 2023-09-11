@@ -748,7 +748,7 @@ class MondoOntologyParser(OntologyParser):
         return bool(match)
 
 
-class EnsemblOntologyParser(OntologyParser):
+class HGNCGeneOntologyParser(OntologyParser):
     """Input is a json from HGNC.
 
     For example,
