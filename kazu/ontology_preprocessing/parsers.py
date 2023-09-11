@@ -847,9 +847,9 @@ class HGNCGeneOntologyParser(OntologyParser):
 
 
 class ChemblOntologyParser(OntologyParser):
-    """Input is a sqllite dump from Chembl.
+    """Input is a directory containing an extracted sqllite dump from Chembl.
 
-    For example,
+    For example, this can be sourced from:
     https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_33/chembl_33_sqlite.tar.gz.
     """
 
