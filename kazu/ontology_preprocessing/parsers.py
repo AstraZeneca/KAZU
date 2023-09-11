@@ -172,7 +172,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
-        hgnc_to_id_set = defaultdict(set)
         for json_dict in jsons_gen:
             # due to a bug in OT data, TEC genes have "gene" as a synonym. Since they're uninteresting, we just filter
             # them
@@ -195,7 +194,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
                 "approvedName": json_dict["approvedName"],
                 "annotation_score": annotation_score,
             }
-            hgnc_to_id_set[default_label].add(idx)
 
             for key in ["synonyms", "obsoleteSymbols", "obsoleteNames", "proteinIds"]:
                 synonyms_and_sources_lst = json_dict.get(key, [])
