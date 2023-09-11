@@ -749,9 +749,9 @@ class MondoOntologyParser(OntologyParser):
 
 
 class HGNCGeneOntologyParser(OntologyParser):
-    """Input is a json from HGNC.
+    """Parse HGNC data and extract individual genes as entities.
 
-    For example,
+    Input is a json from HGNC. For example,
     http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json.
     """
 
@@ -1195,6 +1195,11 @@ class CLOntologyParser(RDFGraphParser):
 
 
 class HGNCGeneFamilyParser(OntologyParser):
+    """Parse HGNC data and extract only Gene Families as entities.
+
+    Input is a json from HGNC. For example,
+    http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/json/hgnc_complete_set.json.
+    """
 
     syn_column_keys = {"Family alias", "Common root gene symbol"}
 
