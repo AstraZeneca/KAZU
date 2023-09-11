@@ -26,6 +26,33 @@ class OpsinStep(Step):
 
     Adding ``${OpsinStep}`` just after ``${MappingStep}`` in ``kazu/conf/Pipeline/default.yaml`` will enable this step.
 
+    .. note::
+
+      The nature of this functionality is considered experimental and we may split it into two steps in the future, without
+      making a major release. If you are using or are interested in using this step, please
+      `open a GitHub issue <https://github.com/AstraZeneca/KAZU/issues/new>`_.
+
+      .. raw:: html
+
+        <details>
+        <summary>Full details of possible change</summary>
+
+      In particular, this step does two things:
+
+      1. Adjust incorrect NER boundaries (particularly coming from the :class:`~.TransformersModelForTokenClassificationNerStep`\\ )
+      2. Link drug entities consisting of IUPAC strings to a canonical SMILES
+
+      The second of these aligns closely with the 'linking' stage in kazu, along with :class:`~.DictionaryEntityLinkingStep`\\ .
+      We would ideally like to wrap the logic of 1. above into :class:`~.TransformersModelForTokenClassificationNerStep` like with the
+      :class:`~.NonContiguousEntitySplitter` to fix these issues everywhere, and have 2. as a standalone linking step. However,
+      this will require changes to the MappingLogic, and it may be tricky to de-couple 1 & 2 (the way this step currently does this
+      depends on running Opsin to do accurately, which we would like to avoid doing twice, which may justify leaving this as a single
+      step).
+
+      .. raw:: html
+
+        </details>
+
     Examples:
         | Bicyclo[3.2.1]octane
         | 2,2'-ethylenedipyridine
