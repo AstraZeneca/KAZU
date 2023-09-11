@@ -283,9 +283,9 @@ class PLSapbertModel(LightningModule):
 
     Paper:
 
-    Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, and Nigel Collier. 2021.
-    `Self-alignment pretraining for biomedical entity representations. <https://www.aclweb.org/anthology/2021.naacl-main.334.pdf>`_
-    In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pages 4228–4238.
+    | Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, and Nigel Collier. 2021.
+    | `Self-alignment pretraining for biomedical entity representations. <https://www.aclweb.org/anthology/2021.naacl-main.334.pdf>`_
+    | In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pages 4228–4238.
 
     .. raw:: html
 

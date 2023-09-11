@@ -18,9 +18,9 @@ class StanzaStep(Step):
 
     Stanza biomedical and clinical models:
 
-    Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz.
-    `Biomedical and Clinical English Model Packages in the Stanza Python NLP Library <https://doi.org/10.1093/jamia/ocab090>`_,
-    Journal of the American Medical Informatics Association. 2021.
+    | Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz.
+    | `Biomedical and Clinical English Model Packages in the Stanza Python NLP Library <https://doi.org/10.1093/jamia/ocab090>`_,
+    | Journal of the American Medical Informatics Association. 2021.
 
     .. raw:: html
 

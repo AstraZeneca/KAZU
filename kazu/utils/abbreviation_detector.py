@@ -32,10 +32,10 @@ limitations under the License.
 
 Paper:
 
-Mark Neumann, Daniel King, Iz Beltagy, and Waleed Ammar. 2019.
-`ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing. <https://doi.org/10.18653/v1/W19-5034>`_
-In Proceedings of the 18th BioNLP Workshop and Shared Task, pages 319–327 Florence, Italy.
-Association for Computational Linguistics.
+| Mark Neumann, Daniel King, Iz Beltagy, and Waleed Ammar. 2019.
+| `ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing. <https://doi.org/10.18653/v1/W19-5034>`_
+| In Proceedings of the 18th BioNLP Workshop and Shared Task, pages 319–327 Florence, Italy.
+| Association for Computational Linguistics.
 
 .. raw:: html
 

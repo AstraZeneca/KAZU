@@ -42,10 +42,10 @@ class OpsinStep(Step):
 
     Paper:
 
-    Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen
-    Chemical Name to Structure: OPSIN, an Open Source Solution
-    Journal of Chemical Information and Modeling 2011 51 (3), 739-753
-    DOI: `10.1021/ci100384d <https://doi.org/10.1021/ci100384d>`_
+    | Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen
+    | Chemical Name to Structure: OPSIN, an Open Source Solution
+    | Journal of Chemical Information and Modeling 2011 51 (3), 739-753
+    | DOI: `10.1021/ci100384d <https://doi.org/10.1021/ci100384d>`_
 
     .. raw:: html
 

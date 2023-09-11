@@ -459,9 +459,9 @@ class GildaUtils:
 
     Paper:
 
-    Benjamin M Gyori, Charles Tapley Hoyt, and Albert Steppi. 2022.
-    `Gilda: biomedical entity text normalization with machine-learned disambiguation as a service. <https://doi.org/10.1093/bioadv/vbac034>`_
-    Bioinformatics Advances. Vbac034.
+    | Benjamin M Gyori, Charles Tapley Hoyt, and Albert Steppi. 2022.
+    | `Gilda: biomedical entity text normalization with machine-learned disambiguation as a service. <https://doi.org/10.1093/bioadv/vbac034>`_
+    | Bioinformatics Advances. Vbac034.
 
     .. raw:: html
 

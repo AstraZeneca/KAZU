@@ -17,9 +17,9 @@ class SethStep(Step):
 
     Paper:
 
-    Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).
-    `SETH detects and normalizes genetic variants in text. <https://pubmed.ncbi.nlm.nih.gov/27256315/>`_
-    Bioinformatics (2016)
+    | Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).
+    | `SETH detects and normalizes genetic variants in text. <https://pubmed.ncbi.nlm.nih.gov/27256315/>`_
+    | Bioinformatics (2016)
 
     .. raw:: html
 
