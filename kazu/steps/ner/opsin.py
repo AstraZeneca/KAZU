@@ -53,18 +53,130 @@ class OpsinStep(Step):
 
         </details>
 
-    Examples:
-        | Bicyclo[3.2.1]octane
-        | 2,2'-ethylenedipyridine
-        | Benzo[1",2":3,4;4",5":3',4']dicyclobuta[1,2-b:1',2'-c']difuran
-        | Cyclohexanone ethyl methyl ketal
-        | 4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]-1H-pyrrole-2-carboxamide
-        | 7-cyclopentyl-5-(4-methoxyphenyl)pyrrolo[2,3-d]pyrimidin-4-amine
+    .. testsetup::
+        :skipif: kazu_model_pack_missing
 
-    Tough cases:
-        Fails to parse ``1,4:3,6-dianhydro-2,5-di-O-Nitro-D-glucitol`` but does parse
-        ``[(3S,3aS,6R,6aS)-3-nitrooxy-2,3,3a,5,6,6a-hexahydrofuro[3,2-b]furan-6-yl] nitrate``
-        see https://pubchem.ncbi.nlm.nih.gov/compound/6883
+        from pathlib import Path
+
+        from hydra import initialize_config_dir, compose
+
+        from kazu.utils.constants import HYDRA_VERSION_BASE
+
+        # the hydra config is kept in the model pack
+        cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("conf")
+
+        with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)):
+            kazu_config = compose(config_name="config")
+
+        from hydra.utils import instantiate
+
+        from kazu.data.data import Mapping
+        from kazu.steps.ner.opsin import OpsinStep
+
+        opsin_step: OpsinStep = instantiate(kazu_config.OpsinStep)
+
+        # function to make the doctests shorter
+        def op(s: str) -> str:
+            mapping: Optional[Mapping] = opsin_step.parseString(s)
+            if mapping is None:
+                return None
+            else:
+                return mapping.idx
+
+    +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Examples                                                                                                                                                                                             |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | IUPAC Input                                                                                                                 | SMILES Output                                                          |
+    +=============================================================================================================================+========================================================================+
+    | Bicyclo[3.2.1]octane                                                                                                        | C1CC2CCC(C1)C2                                                         |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op("Bicyclo[3.2.1]octane")                                      |
+    |                                                                                                                             |    'C1CC2CCC(C1)C2'                                                    |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | 2,2'-ethylenedipyridine                                                                                                     | c1ccc(CCc2ccccn2)nc1                                                   |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op("2,2'-ethylenedipyridine")                                   |
+    |                                                                                                                             |    'c1ccc(CCc2ccccn2)nc1'                                              |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | Benzo[1",2":3,4;4",5":3',4']dicyclobuta[1,2-b:1',2'-c']difuran                                                              | c1cc2c3cc4c5cocc5c4cc3c2o1                                             |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op(                                                             |
+    |                                                                                                                             |    ...     "Benzo[1\\",2\\":3,4;4\\",5\\":3',4']dicyclobuta"               |
+    |                                                                                                                             |    ...     "[1,2-b:1',2'-c']difuran"                                   |
+    |                                                                                                                             |    ... )                                                               |
+    |                                                                                                                             |    'c1cc2c3cc4c5cocc5c4cc3c2o1'                                        |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | Cyclohexanone ethyl methyl ketal                                                                                            | CCOC1(OC)CCCCC1                                                        |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op("Cyclohexanone ethyl methyl ketal")                          |
+    |                                                                                                                             |    'CCOC1(OC)CCCCC1'                                                   |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | 4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]-1H-pyrrole-2-carboxamide | Cc1cnc(Nc2ccc(F)cc2Cl)nc1-c1c[nH]c(C(=O)N[C@H](CO)c2cccc(Cl)c2)c1      |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op(                                                             |
+    |                                                                                                                             |    ...     "4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin"         |
+    |                                                                                                                             |    ...     "-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]"         |
+    |                                                                                                                             |    ...     "-1H-pyrrole-2-carboxamide"                                 |
+    |                                                                                                                             |    ... )                                                               |
+    |                                                                                                                             |    'Cc1cnc(Nc2ccc(F)cc2Cl)nc1-c1c[nH]c(C(=O)N[C@H](CO)c2cccc(Cl)c2)c1' |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | 7-cyclopentyl-5-(4-methoxyphenyl)pyrrolo[2,3-d]pyrimidin-4-amine                                                            | COc1ccc(-c2cn(C3CCCC3)c3ncnc(N)c23)cc1                                 |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op(                                                             |
+    |                                                                                                                             |    ...     "7-cyclopentyl-5-(4-methoxyphenyl)"                         |
+    |                                                                                                                             |    ...     "pyrrolo[2,3-d]pyrimidin-4-amine"                           |
+    |                                                                                                                             |    ... )                                                               |
+    |                                                                                                                             |    'COc1ccc(-c2cn(C3CCCC3)c3ncnc(N)c23)cc1'                            |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | | [(3S,3aS,6R,6aS)-3-nitrooxy-2,3,3a,5,6,6a-hexahydrofuro[3,2-b]furan-6-yl] nitrate                                         | O=[N+]([O-])O[C@H]1CO[C@H]2[C@@H]1OC[C@H]2O[N+](=O)[O-]                |
+    | | (see `pubchem <https://pubchem.ncbi.nlm.nih.gov/compound/6883>`_)                                                         |                                                                        |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op(                                                             |
+    |                                                                                                                             |    ...     "[(3S,3aS,6R,6aS)-3-nitrooxy"                               |
+    |                                                                                                                             |    ...     "-2,3,3a,5,6,6a-hexahydrofuro[3,2-b]furan-6-yl]"            |
+    |                                                                                                                             |    ...     " nitrate"                                                  |
+    |                                                                                                                             |    ... )                                                               |
+    |                                                                                                                             |    'O=[N+]([O-])O[C@H]1CO[C@H]2[C@@H]1OC[C@H]2O[N+](=O)[O-]'           |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+    | 1,4:3,6-dianhydro-2,5-di-O-Nitro-D-glucitol                                                                                 | | Opsin fails to parse this.                                           |
+    |                                                                                                                             | | As a result, the Step will not produce a :class:`~.Mapping`\\ .       |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             | .. doctest::                                                           |
+    |                                                                                                                             |    :hide:                                                              |
+    |                                                                                                                             |    :skipif: kazu_model_pack_missing                                    |
+    |                                                                                                                             |                                                                        |
+    |                                                                                                                             |    >>> op("1,4:3,6-dianhydro-2,5-di-O-Nitro-D-glucitol") is None       |
+    |                                                                                                                             |    True                                                                |
+    +-----------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------+
+
 
 
     Paper:
