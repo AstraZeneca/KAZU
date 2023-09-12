@@ -56,6 +56,7 @@ class SethStep(Step):
         """
         :param entity_class: the entity_class to assign to any Entities that emerge
         :param seth_fatjar_path: path to a py4j fatjar, containing SETH dependencies
+        :param java_home: path to installed java runtime
         :param condition: Since SETH can be slow, we can optionally specify a callable, so that
             any documents that don't contain pre-existing gene/protein entities are not processed
         """
