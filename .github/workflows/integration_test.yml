@@ -72,7 +72,7 @@ jobs:
           . /tmp/kazu-env/bin/activate
 
           python -m kazu.utils.build_and_test_model_packs \
-          --base_model_pack_path $DEFAULT_MODEL_PACK_PATH \
+          --resources_path $RESOURCES_PATH \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
           --model_packs_to_build \
           $DEFAULT_MODEL_PACK_PATH \
@@ -95,4 +95,4 @@ jobs:
           rm -r $MODEL_PACK_BUILD_PATH || true
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:
-          DEFAULT_MODEL_PACK_PATH: /home/github/runner/.kazu_data/kazu_model_pack_public
+          RESOURCES_PATH: /home/github/runner/.kazu_data/kazu_resources/
