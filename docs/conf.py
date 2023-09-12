@@ -250,4 +250,6 @@ nitpick_ignore = [
     # ray does have sphinx docs (at https://docs.ray.io/en/latest/ , but we don't need them for anything else)
     # but it doesn't have a reference in its docs for ObjectRef (suprisingly)
     ("py:class", "ray._raylet.ObjectRef"),
+    # regex doesn't seem to have API docs at all
+    ("py:class", "_regex.Pattern"),
 ]
