@@ -20,11 +20,20 @@ class OpsinStep(Step):
     """A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature)
     over py4j.
 
-    :py:class:`~.TransformersModelForTokenClassificationNerStep` often identifies IUPAC strings as entity_class=drug,
-    but they fail to map to one of the drug ontology dictionaries. This service provides an extra way to resolve chemical entities.
-    Opsin produces a SMILES from an IUPAC string and we use `rdkit <https://www.rdkit.org>`_ to convert that to a canonical SMILES for comparison, as an IDX.
+    :py:class:`~.TransformersModelForTokenClassificationNerStep` often identifies
+    `IUPAC chemical nomenclature strings <https://en.wikipedia.org/wiki/IUPAC_nomenclature_of_organic_chemistry>`_
+    as :class:`~.Entity`\\ s with an :attr:`~.Entity.entity_class` of ``drug``, but these entities
+    fail to map to any of the drug parsers as no synonym is present. This step provides an extra
+    way to resolve these chemical entities.
 
-    Adding ``${OpsinStep}`` just after ``${MappingStep}`` in ``kazu/conf/Pipeline/default.yaml`` will enable this step.
+    `Opsin <https://opsin.ch.cam.ac.uk/>`_ produces a
+    `SMILES <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`_
+    from an IUPAC string and we use `rdkit <https://www.rdkit.org>`_ to convert that to a canonical
+    SMILES to allow comparison between entities. This step then produces a :class:`~.Mapping` with
+    the canonical SMILES string as the :attr:`~.Mapping.idx`\\ .
+
+    Adding ``${OpsinStep}`` just after ``${MappingStep}`` in ``kazu/conf/Pipeline/default.yaml``
+    will enable this step.
 
     .. note::
 
