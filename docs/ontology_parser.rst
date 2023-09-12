@@ -1,8 +1,10 @@
 The OntologyParser
 ================================
 
-*Ontologies are not designed for NLP* - Angus Roberts
+.. epigraph::
+    *Ontologies are not designed for NLP*
 
+    -- Angus Roberts
 
 Ontologies, or more broadly Knowledge Bases are a core component of entity linking. In addition, they may hold a lot of
 value as a vocabulary source for Dictionary based NER. However, they often need careful handling, as the (uncontextualised)
