@@ -1,9 +1,6 @@
 import logging
-from typing import cast
 from collections.abc import Iterator, Iterable
-
-import spacy
-from spacy.tokens import Span
+from typing import cast
 
 from kazu.data.data import (
     CharSpan,
@@ -19,7 +16,9 @@ from kazu.ontology_matching.ontology_matcher import OntologyMatcher, _MatcherOnt
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_batch_step
 from kazu.steps.step import ParserDependentStep
+from kazu.utils.spacy_pipeline import SpacyPipelines
 from kazu.utils.utils import PathLike, as_path
+from spacy.tokens import Span, Doc
 
 logger = logging.getLogger(__name__)
 
@@ -48,19 +47,22 @@ class ExplosionStringMatchingStep(ParserDependentStep):
 
         if self.path.exists() and not ignore_cache:
             logger.info("loading spacy pipeline from %s", str(path))
-            self.spacy_pipeline = spacy.load(path)
+            SpacyPipelines.add_from_path(name=self.namespace(), path=str(self.path.absolute()))
         else:
             logger.info(
                 "cached spacy pipeline not detected or ignore_cache=True. Creating it at %s. This may take some time",
                 str(self.path),
             )
-            self.spacy_pipeline = assemble_pipeline.main(
-                output_dir=self.path, parsers=list(parsers)
-            )
-        matcher = cast(OntologyMatcher, self.spacy_pipeline.get_pipe("ontology_matcher"))
+            assemble_pipeline.main(output_dir=self.path, parsers=list(parsers))
+            SpacyPipelines.add_from_path(name=self.namespace(), path=str(self.path.absolute()))
+
+        matcher = cast(
+            OntologyMatcher, SpacyPipelines.get_model(self.namespace()).get_pipe("ontology_matcher")
+        )
         self.span_key = matcher.span_key
 
         self.synonym_db = SynonymDatabase()
+        self.spacy_pipelines = SpacyPipelines()
 
     def extract_entity_data_from_spans(
         self, spans: Iterable[Span]
@@ -73,8 +75,11 @@ class ExplosionStringMatchingStep(ParserDependentStep):
         texts_and_sections = ((section.text, section) for doc in docs for section in doc.sections)
 
         # TODO: multiprocessing within the pipe command?
-        spacy_result: Iterator[tuple[spacy.tokens.Doc, Section]] = self.spacy_pipeline.pipe(
-            texts_and_sections, as_tuples=True
+        spacy_result = cast(
+            Iterable[tuple[Doc, Section]],
+            self.spacy_pipelines.process_batch(
+                texts=texts_and_sections, model_name=self.namespace(), as_tuples=True
+            ),
         )
 
         for processed_text, section in spacy_result:
