@@ -22,11 +22,12 @@ class BuildConfiguration:
 
     #: should this model pack use the base config as a starting point?
     requires_base_config: bool
-    #: what model directories should this model pack include from the base model pack?
-    models: list[str]
-    #: what ontologies should this model pack use from the base ontology pack?
-    #: Arg should be a list of strings to the ontology root, from the root of the base pack
-    ontologies: list[str]
+    #: what model directories should this model pack include from other model packs?
+    #: structure is <model pack name>:[paths within pack]
+    models: dict[str, list[str]]
+    #: what ontologies should this model pack use from other model packs?
+    #: structure is <model pack name>:[paths within pack]
+    ontologies: dict[str, list[str]]
     #: does this model pack have its own config dir? (if used with use_base_config
     #: these will override any config files from the base config)
     has_own_config: bool
@@ -34,16 +35,16 @@ class BuildConfiguration:
     run_acceptance_tests: bool = False
     #: should consistency checks be run on the gold standard?
     run_consistency_checks: bool = False
-    #: Whether a base model pack is required to build this model pack
+    #: Whether resources (e.g. model binaries) are required to build this model pack
     #: This will be set automatically based on the values of the other fields,
     #: it's not available to set when instantiating the class.
-    requires_base_model_pack: bool = field(init=False)
+    requires_resources: bool = field(init=False)
 
     def __post_init__(self):
         if len(self.models) > 0 or len(self.ontologies) > 0:
-            self.requires_base_model_pack = True
+            self.requires_resources = True
         else:
-            self.requires_base_model_pack = False
+            self.requires_resources = False
 
 
 class ModelPackBuildError(Exception):
@@ -57,7 +58,7 @@ class ModelPackBuilder:
         target_model_pack_path: Path,
         kazu_version: str,
         build_dir: Path,
-        maybe_base_model_pack_path: Optional[Path],
+        resources_path: Optional[Path],
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
@@ -78,7 +79,7 @@ class ModelPackBuilder:
         :param target_model_pack_path: path to model pack to process
         :param kazu_version: version of kazu used to generate model pack
         :param build_dir: build the pack in this directory
-        :param maybe_base_model_pack_path: if this pack requires the base model pack, specify path
+        :param resources_path: if this pack requires resources, specify the path
         :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
@@ -89,7 +90,7 @@ class ModelPackBuilder:
         self.zip_pack = zip_pack
         self.skip_tests = skip_tests
         self.maybe_base_configuration_path = maybe_base_configuration_path
-        self.maybe_base_model_pack_path = maybe_base_model_pack_path
+        self.resources_path = resources_path
         self.build_dir = build_dir
         self.kazu_version = kazu_version
         self.target_model_pack_path = target_model_pack_path
@@ -162,10 +163,9 @@ class ModelPackBuilder:
         return self.model_pack_build_path
 
     def load_build_configuration(self) -> BuildConfiguration:
-        """Try to load a merge configuration from the model pack root. The
-        merge configuration should be a json file called
-        base_model_merge_config.json. None is returned if no model pack is
-        found.
+        """Try to load a build configuration from the model pack root. The
+        merge configuration should be a json file called build_config.json.
+        None is returned if no model pack is found.
 
         :return:
         """
@@ -203,31 +203,33 @@ class ModelPackBuilder:
                 dirs_exist_ok=True,
             )
 
-        if self.maybe_base_model_pack_path is None and self.build_config.requires_base_model_pack:
+        if self.resources_path is None and self.build_config.requires_resources:
             raise ModelPackBuildError(
                 f"merge config asked for base model pack path but none was provided: {self.build_config}"
             )
-        elif (
-            self.maybe_base_model_pack_path is not None
-            and self.build_config.requires_base_model_pack
-        ):
-            self.copy_base_model_pack_resources_to_target()
+        elif self.resources_path is not None and self.build_config.requires_resources:
+            self.copy_resources_to_target()
 
-    def copy_base_model_pack_resources_to_target(self):
-        assert self.maybe_base_model_pack_path is not None
+    def copy_resources_to_target(self):
+        assert self.resources_path is not None
 
-        for model in self.build_config.models:
-
-            model_source_path = self.maybe_base_model_pack_path.joinpath(model)
-            target_dir = self.model_pack_build_path.joinpath(model_source_path.name)
-            shutil.copytree(str(model_source_path), str(target_dir), dirs_exist_ok=True)
-        for ontology_path_str in self.build_config.ontologies:
-            ontology_path = self.maybe_base_model_pack_path.joinpath(ontology_path_str)
-            target_path = self.model_pack_build_path.joinpath(ontology_path_str)
-            if ontology_path.is_dir():
-                shutil.copytree(str(ontology_path), str(target_path), dirs_exist_ok=True)
-            else:
-                shutil.copy(ontology_path, target_path)
+        for model_pack_name, resource_list in self.build_config.models.items():
+            for resource_path in resource_list:
+                model_source_path = self.resources_path.joinpath(model_pack_name).joinpath(
+                    resource_path
+                )
+                target_dir = self.model_pack_build_path.joinpath(resource_path)
+                shutil.copytree(str(model_source_path), str(target_dir), dirs_exist_ok=True)
+        for model_pack_name, resource_list in self.build_config.ontologies.items():
+            for resource_path in resource_list:
+                ontology_path = self.resources_path.joinpath(model_pack_name).joinpath(
+                    resource_path
+                )
+                target_path = self.model_pack_build_path.joinpath(resource_path)
+                if ontology_path.is_dir():
+                    shutil.copytree(str(ontology_path), str(target_path), dirs_exist_ok=True)
+                else:
+                    shutil.copy(ontology_path, target_path)
 
     def clear_cached_resources_from_model_pack_dir(self):
         """Delete any cached data from the input path.
@@ -295,7 +297,7 @@ class ModelPackBuilderActor(ModelPackBuilder):
 
 
 def build_all_model_packs(
-    maybe_base_model_pack_path: Optional[Path],
+    resources_path: Optional[Path],
     maybe_base_configuration_path: Optional[Path],
     model_pack_paths: list[Path],
     zip_pack: bool,
@@ -306,7 +308,7 @@ def build_all_model_packs(
 ) -> None:
     """Build multiple model packs.
 
-    :param maybe_base_model_pack_path: Path to the base model pack, if required
+    :param resources_path: Path to the resources the pack needs, if required
     :param maybe_base_configuration_path: Path to the base configuration, if required
     :param model_pack_paths: list of paths to model pack resources
     :param zip_pack: should the packs be zipped at the end?
@@ -342,7 +344,7 @@ def build_all_model_packs(
     for model_pack_path in model_pack_paths:
         builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
             logging_config_path=logging_config_path,
-            maybe_base_model_pack_path=maybe_base_model_pack_path,
+            resources_path=resources_path,
             maybe_base_configuration_path=maybe_base_configuration_path,
             kazu_version=kazu_version,
             zip_pack=zip_pack,
@@ -378,17 +380,17 @@ how it is called, one or more of the following may be required:
 2) an acceptance_criteria.json in the path <model_pack_root>/acceptance_criteria.json in order for the
   acceptance tests to run. This file should specify the thresholds per NER class/Ontology for NER/linking
   respectively (see the provided model pack for an example)
-3) a merge config in the path <model_pack_root>/base_model_merge_config.json, which determines which elements
+3) a merge config in the path <model_pack_root>/build_config.json, which determines which elements
   of the base configuration and model pack should be used
 """
 
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        "--base_model_pack_path",
+        "--resources_path",
         type=Path,
         required=False,
-        help="path to base model pack, if required",
+        help="path to a directory containing the resources the model pack needs, if required",
     )
     parser.add_argument(
         "--base_configuration_path",
@@ -436,7 +438,7 @@ how it is called, one or more of the following may be required:
     args = parser.parse_args()
 
     build_all_model_packs(
-        maybe_base_model_pack_path=args.base_model_pack_path,
+        resources_path=args.resources_path,
         maybe_base_configuration_path=args.base_configuration_path,
         model_pack_paths=args.model_packs_to_build,
         zip_pack=args.zip_model_pack,
