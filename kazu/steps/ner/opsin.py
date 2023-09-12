@@ -22,7 +22,7 @@ class OpsinStep(Step):
 
     :py:class:`~.TransformersModelForTokenClassificationNerStep` often identifies IUPAC strings as entity_class=drug,
     but they fail to map to one of the drug ontology dictionaries. This service provides an extra way to resolve chemical entities.
-    Opsin produces a SMILES from an IUPAC string and we use rdkit to convert that to a canonical SMILES for comparison, as an IDX.
+    Opsin produces a SMILES from an IUPAC string and we use `rdkit <https://www.rdkit.org>`_ to convert that to a canonical SMILES for comparison, as an IDX.
 
     Adding ``${OpsinStep}`` just after ``${MappingStep}`` in ``kazu/conf/Pipeline/default.yaml`` will enable this step.
 
