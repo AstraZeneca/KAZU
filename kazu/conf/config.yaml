@@ -16,7 +16,7 @@ defaults:
       - stato
       - uberon
   - PLSapbertModel: default
-  - SpacyPipeline: default
+  - SciSpacyPipeline: default
   - StanzaPipeline: default
   - AbbreviationFinderStep: default
   - SpacyNerStep: default

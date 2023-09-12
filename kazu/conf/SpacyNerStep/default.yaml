@@ -1,2 +1,2 @@
 _target_: kazu.steps.ner.spacy_ner.SpacyNerStep
-spacy_pipeline: ${SpacyPipeline}
+path: ${SciSpacyPipeline.path}
