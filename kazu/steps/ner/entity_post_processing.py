@@ -1,10 +1,9 @@
+from collections.abc import Callable
 from copy import deepcopy
 from typing import Optional
-from collections.abc import Callable
 
 from kazu.data.data import Entity, CharSpan
-
-import spacy
+from kazu.utils.spacy_pipeline import SpacyPipelines
 from spacy.tokens import Doc
 
 
@@ -28,16 +27,18 @@ def _copy_ent_with_new_spans(
 
 
 class SplitOnConjunctionPattern:
-    def __init__(self, spacy_pipeline: spacy.language.Language):
+    def __init__(self, path: str):
         """Analyse.
 
         :param pattern:
         """
-        self.nlp = spacy_pipeline
+        self.path = path
+        self.spacy_pipelines = SpacyPipelines()
+        self.spacy_pipelines.add_from_path(path, path)
 
     def __call__(self, entity: Entity, text: str) -> list[Entity]:
         if any((x in entity.match for x in [" and ", " or ", " nor "])):
-            doc = self.nlp(entity.match)
+            doc = self.spacy_pipelines.process_single(entity.match, model_name=self.path)
             return self.run_conjunction_rules(doc, entity, text)
         else:
             return []
