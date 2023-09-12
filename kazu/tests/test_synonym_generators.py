@@ -2,10 +2,9 @@ import unicodedata
 from sys import maxunicode
 from typing import Union
 
-from hydra.utils import instantiate
-from omegaconf import DictConfig
 import pytest
-
+from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
+from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
     SynonymGenerator,
@@ -14,9 +13,9 @@ from kazu.ontology_preprocessing.synonym_generation import (
     GreekSymbolSubstitution,
     CombinatorialSynonymGenerator,
 )
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
-from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.tests.utils import requires_model_pack
+from kazu.utils.spacy_pipeline import basic_spacy_pipeline
+from omegaconf import DictConfig
 
 # this is frozen so we only need to instantiate once
 dummy_equiv_ids = EquivalentIdSet(
@@ -57,8 +56,7 @@ def check_generator_result(
 
 @pytest.fixture(scope="session")
 def separator_expansion_generator(kazu_test_config: DictConfig) -> SeparatorExpansion:
-    spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
-    return SeparatorExpansion(spacy_pipeline)
+    return SeparatorExpansion(basic_spacy_pipeline())
 
 
 # fmt: off

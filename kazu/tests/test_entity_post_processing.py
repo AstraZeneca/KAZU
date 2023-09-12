@@ -1,5 +1,3 @@
-from hydra.utils import instantiate
-
 from kazu.data.data import Entity
 from kazu.steps.ner.entity_post_processing import (
     NonContiguousEntitySplitter,
@@ -23,12 +21,12 @@ def check_expected_matches_are_in_entities(entities: list[Entity], expected_matc
 
 @requires_model_pack
 def test_non_contiguous_entity_splitter(kazu_test_config):
-    spacy_pipeline = instantiate(kazu_test_config.SpacyPipeline)
+    spacy_pipeline_path = kazu_test_config.SciSpacyPipeline.path
 
     splitter = NonContiguousEntitySplitter(
         entity_conditions={
             "gene": [SplitOnNumericalListPatternWithPrefix("/")],
-            "disease": [SplitOnConjunctionPattern(spacy_pipeline)],
+            "disease": [SplitOnConjunctionPattern(spacy_pipeline_path)],
         }
     )
 

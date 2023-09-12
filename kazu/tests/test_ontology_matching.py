@@ -11,10 +11,7 @@ from kazu.data.data import (
     CuratedTermBehaviour,
     EquivalentIdSet,
 )
-from kazu.ontology_matching.assemble_pipeline import (
-    main as assemble_pipeline,
-    SPACY_DEFAULT_INFIXES,
-)
+from kazu.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.ontology_matching.ontology_matcher import OntologyMatcher
 from kazu.ontology_preprocessing.base import (
     IDX,
@@ -27,6 +24,7 @@ from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
 from spacy.lang.en import English
 from spacy.lang.en.punctuation import TOKENIZER_INFIXES
+from kazu.utils.spacy_pipeline import SPACY_DEFAULT_INFIXES
 
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
