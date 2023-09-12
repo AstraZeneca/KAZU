@@ -1,7 +1,5 @@
 from typing import Optional
 
-from spacy.lang.en import English
-
 from kazu.data.data import Document
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.abbreviation_detector import KazuAbbreviationDetector
@@ -18,9 +16,8 @@ class AbbreviationFinderStep(Step):
     """
 
     def __init__(self, exclude_abbrvs: Optional[list[str]] = None):
-        self.nlp = English(max_length=10**8)
         self.detector = KazuAbbreviationDetector(
-            self.nlp, namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs
+            namespace=self.namespace(), exclude_abbrvs=exclude_abbrvs
         )
 
     @document_iterating_step
