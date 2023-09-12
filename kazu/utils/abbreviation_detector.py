@@ -69,15 +69,14 @@ Paper:
 
 import logging
 from collections import defaultdict
+from collections.abc import Iterable
 from copy import deepcopy
 from typing import Optional
-from collections.abc import Iterable
-
-from spacy.language import Language
-from spacy.matcher import Matcher
-from spacy.tokens import Span, Doc
 
 from kazu.data.data import Document, Entity, Section, MentionConfidence
+from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
+from spacy.matcher import Matcher
+from spacy.tokens import Span, Doc
 
 logger = logging.getLogger(__name__)
 
@@ -241,7 +240,6 @@ class KazuAbbreviationDetector:
 
     def __init__(
         self,
-        nlp: Language,
         namespace: str,
         exclude_abbrvs: Optional[Iterable[str]] = None,
     ) -> None:
@@ -254,8 +252,13 @@ class KazuAbbreviationDetector:
         """
         self.namespace = namespace
         self.exclude_abbrvs: set[str] = set(exclude_abbrvs) if exclude_abbrvs is not None else set()
-        self.nlp = nlp
-        self.matcher = Matcher(nlp.vocab)
+        self.spacy_pipelines = SpacyPipelines()
+        self.spacy_pipelines.add_from_func(name=BASIC_PIPELINE_NAME, func=basic_spacy_pipeline)
+        self.load_matcher()
+        self.spacy_pipelines.add_reload_callback_func(BASIC_PIPELINE_NAME, self.load_matcher)
+
+    def load_matcher(self):
+        self.matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
         self.matcher.add("parenthesis", [[{"ORTH": "("}, {"OP": "+"}, {"ORTH": ")"}]])
 
     def __call__(self, document: Document) -> None:
@@ -390,7 +393,7 @@ class KazuAbbreviationDetector:
         section_and_long_to_short_candidates: list[SectionAndLongToShortCandidates],
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
     ) -> tuple[Matcher, dict[str, set[Entity]]]:
-        global_matcher = Matcher(self.nlp.vocab)
+        global_matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
         all_occurences: dict[Span, set[Span]] = defaultdict(set)
         already_seen_long: set[str] = set()
         already_seen_short: set[str] = set()
@@ -432,7 +435,10 @@ class KazuAbbreviationDetector:
             lambda: defaultdict(set)
         )
         for section in document.sections:
-            spacy_doc = self.nlp(section.text)
+            spacy_doc: Doc = self.spacy_pipelines.process_single(
+                section.text, model_name=BASIC_PIPELINE_NAME
+            )
+
             matches = self.matcher(spacy_doc)
             matches_no_brackets = [(x[0], x[1] + 1, x[2] - 1) for x in matches]
 
