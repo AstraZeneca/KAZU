@@ -7,7 +7,7 @@ from typing import Union, Any
 
 import spacy
 from kazu.utils.utils import Singleton
-from spacy import Language
+from spacy.language import Language
 from spacy.lang.char_classes import (
     LIST_ELLIPSES,
     LIST_ICONS,
@@ -77,6 +77,7 @@ BASIC_PIPELINE_NAME = "basic"
 
 
 def basic_spacy_pipeline() -> Language:
+    """A basic Spacy pipeline with a customised tokenizer and sentence splitter."""
     nlp = spacy.blank("kazu_custom_en")
     nlp.add_pipe("sentencizer")
     return nlp
@@ -108,11 +109,15 @@ class SpacyPipelines(metaclass=Singleton):
 
     @reload_at.setter
     def reload_at(self, value: int) -> None:
+        """Change the interval at which spacy models are reloaded."""
+
         instance = SpacyPipelines()
         instance._reload_at = value
 
     @staticmethod
     def add_from_path(name: str, path: str) -> None:
+        """Add a spacy model from a path."""
+
         instance = SpacyPipelines()
         if name in instance.name_to_path_or_build_func:
             logger.info("The spacy pipeline key %s is already loaded.", name)
@@ -122,6 +127,8 @@ class SpacyPipelines(metaclass=Singleton):
 
     @staticmethod
     def add_from_func(name: str, func: Callable[[], Language]) -> None:
+        """Add a spacy model from a callable."""
+
         instance = SpacyPipelines()
         if name in instance.name_to_path_or_build_func:
             logger.info("The spacy pipeline key %s is already loaded.", name)
@@ -131,11 +138,24 @@ class SpacyPipelines(metaclass=Singleton):
 
     @staticmethod
     def add_reload_callback_func(name: str, func: Callable[[], None]) -> None:
+        """Add a callback when a model is reloaded.
+
+        If using spacy components outside the context of a
+        `Language <https://spacy.io/api/language>`_, these will also need to be reloaded when the
+        underlying model is reloaded. This can be done by providing a zero
+        argument, None return type callable.
+
+        :param name:
+        :param func:
+        :return:
+        """
         instance = SpacyPipelines()
         instance.name_to_reload_callbacks[name].append(func)
 
     @staticmethod
     def get_model(name: str) -> Language:
+        """Get the underlying `Language <https://spacy.io/api/language>`_ for a
+        given model key."""
         return SpacyPipelines().name_to_model[name]
 
     def process_batch(
@@ -144,6 +164,14 @@ class SpacyPipelines(metaclass=Singleton):
         model_name: str,
         **kwargs: Any,
     ) -> Union[Iterable[Doc], Iterable[tuple[Doc, Any]]]:
+        """Process an iterable of `Doc <https://spacy.io/api/doc>`_ or text
+        with a given spacy model.
+
+        :param texts:
+        :param model_name:
+        :param kwargs: passed to the pipe method of `Language <https://spacy.io/api/language>`_
+        :return:
+        """
         for result in self.name_to_model[model_name].pipe(texts=texts, **kwargs):
             yield result
             self.call_counter[model_name] += 1
@@ -151,6 +179,14 @@ class SpacyPipelines(metaclass=Singleton):
         self._reload_if_required(model_name)
 
     def process_single(self, text: Union[str, Doc], model_name: str, **kwargs: Any) -> Doc:
+        """Process a single `Doc <https://spacy.io/api/doc>`_ or text with a
+        given spacy model.
+
+        :param text:
+        :param model_name:
+        :param kwargs: passed to the call method of `Language <https://spacy.io/api/language>`_
+        :return:
+        """
         self.call_counter[model_name] += 1
         self._reload_if_required(model_name)
         return self.name_to_model[model_name](text, **kwargs)
@@ -161,7 +197,8 @@ class SpacyPipelines(metaclass=Singleton):
     ) -> None:
         if self.call_counter[model_name] >= self.reload_at:
             logger.info(
-                "max spacy calls exceeded for %s, see https://github.com/explosion/spaCy/discussions/9362 for more info",
+                "max spacy calls exceeded for %s, "
+                "see https://github.com/explosion/spaCy/discussions/9362 for more info",
                 model_name,
             )
             self.reload_model(model_name)
