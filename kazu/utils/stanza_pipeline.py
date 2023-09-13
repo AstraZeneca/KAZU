@@ -1,7 +1,13 @@
 from functools import cache
 
-import stanza
-from stanza.pipeline.core import DownloadMethod
+try:
+    import stanza
+    from stanza.pipeline.core import DownloadMethod
+except ImportError as e:
+    raise ImportError(
+        "To use a stanza pipeline, you need to install stanza.\n"
+        "You can either install py4j yourself, or install kazu[all_steps].\n"
+    ) from e
 
 from kazu.utils.utils import PathLike
 

@@ -2,9 +2,14 @@ import os
 import logging
 from typing import Optional, Callable
 
-from py4j.java_gateway import JavaGateway
-
-from rdkit import Chem
+try:
+    from py4j.java_gateway import JavaGateway
+    from rdkit import Chem
+except ImportError as e:
+    raise ImportError(
+        "To use OpsinStep, you need to install py4j and rdkit.\n"
+        "You can either install these yourself, or install kazu[all_steps].\n"
+    ) from e
 
 from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step

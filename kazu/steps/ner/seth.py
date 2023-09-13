@@ -2,7 +2,13 @@ import os
 from typing import Optional
 from collections.abc import Callable
 
-from py4j.java_gateway import JavaGateway
+try:
+    from py4j.java_gateway import JavaGateway
+except ImportError as e:
+    raise ImportError(
+        "To use SethStep, you need to install py4j.\n"
+        "You can either install py4j yourself, or install kazu[all_steps].\n"
+    ) from e
 
 from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step

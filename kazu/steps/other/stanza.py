@@ -1,5 +1,11 @@
-import stanza
-from stanza.models.common.doc import Sentence
+try:
+    import stanza
+    from stanza.models.common.doc import Sentence
+except ImportError as e:
+    raise ImportError(
+        "To use StanzaStep, you need to install stanza.\n"
+        "You can either install stanza yourself, or install kazu[all_steps].\n"
+    ) from e
 
 from kazu.data.data import Document, CharSpan
 from kazu.steps import Step, document_iterating_step
