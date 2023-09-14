@@ -215,16 +215,12 @@ class ModelPackBuilder:
 
         for model_pack_name, resource_list in self.build_config.models.items():
             for resource_path in resource_list:
-                model_source_path = self.resources_path.joinpath(model_pack_name).joinpath(
-                    resource_path
-                )
+                model_source_path = self.resources_path.joinpath(model_pack_name, resource_path)
                 target_dir = self.model_pack_build_path.joinpath(resource_path)
                 shutil.copytree(model_source_path, target_dir, dirs_exist_ok=True)
         for model_pack_name, resource_list in self.build_config.ontologies.items():
             for resource_path in resource_list:
-                ontology_path = self.resources_path.joinpath(model_pack_name).joinpath(
-                    resource_path
-                )
+                ontology_path = self.resources_path.joinpath(model_pack_name, resource_path)
                 target_path = self.model_pack_build_path.joinpath(resource_path)
                 if ontology_path.is_dir():
                     shutil.copytree(str(ontology_path), str(target_path), dirs_exist_ok=True)
