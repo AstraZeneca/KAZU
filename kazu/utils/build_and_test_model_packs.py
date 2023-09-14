@@ -22,12 +22,9 @@ class BuildConfiguration:
 
     #: should this model pack use the base config as a starting point?
     requires_base_config: bool
-    #: what model directories should this model pack include from other model packs?
-    #: structure is <model pack name>:[paths within pack]
-    models: dict[str, list[str]]
-    #: what ontologies should this model pack use from other model packs?
-    #: structure is <model pack name>:[paths within pack]
-    ontologies: dict[str, list[str]]
+    #: what resource directories should this model pack include?
+    #: structure is <parent_directory>:[paths within parent]
+    resources: dict[str, list[str]]
     #: does this model pack have its own config dir? (if used with use_base_config
     #: these will override any config files from the base config)
     has_own_config: bool
@@ -41,7 +38,7 @@ class BuildConfiguration:
     requires_resources: bool = field(init=False)
 
     def __post_init__(self):
-        if len(self.models) > 0 or len(self.ontologies) > 0:
+        if len(self.resources) > 0:
             self.requires_resources = True
         else:
             self.requires_resources = False
@@ -203,29 +200,18 @@ class ModelPackBuilder:
                 dirs_exist_ok=True,
             )
 
-        if self.resources_path is None and self.build_config.requires_resources:
-            raise ModelPackBuildError(
-                f"merge config asked for base model pack path but none was provided: {self.build_config}"
-            )
-        elif self.resources_path is not None and self.build_config.requires_resources:
+        if self.build_config.requires_resources:
             self.copy_resources_to_target()
 
     def copy_resources_to_target(self):
-        assert self.resources_path is not None
 
-        for model_pack_name, resource_list in self.build_config.models.items():
+        for parent_dir_str, resource_list in self.build_config.resources.items():
+            parent_dir_path = Path(parent_dir_str)
+            assert parent_dir_path.is_dir(), f"{parent_dir_str} is not a directory"
             for resource_path in resource_list:
-                model_source_path = self.resources_path.joinpath(model_pack_name, resource_path)
+                full_path = parent_dir_path.joinpath(resource_path).absolute()
                 target_dir = self.model_pack_build_path.joinpath(resource_path)
-                shutil.copytree(model_source_path, target_dir, dirs_exist_ok=True)
-        for model_pack_name, resource_list in self.build_config.ontologies.items():
-            for resource_path in resource_list:
-                ontology_path = self.resources_path.joinpath(model_pack_name, resource_path)
-                target_path = self.model_pack_build_path.joinpath(resource_path)
-                if ontology_path.is_dir():
-                    shutil.copytree(ontology_path, target_path, dirs_exist_ok=True)
-                else:
-                    shutil.copy(ontology_path, target_path)
+                shutil.copytree(full_path, target_dir, dirs_exist_ok=True)
 
     def clear_cached_resources_from_model_pack_dir(self):
         """Delete any cached data from the input path.
