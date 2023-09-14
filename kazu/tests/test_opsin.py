@@ -1,6 +1,9 @@
+import pytest
+
 from hydra.utils import instantiate
 
 from kazu.data.data import Document, Entity
+from kazu.steps.ner.opsin import OpsinStep
 from kazu.tests.utils import requires_model_pack
 
 test_text = "A test: BREXPIPRAZOLE is great and is the same as OPC-34712 but not Bicyclo[3.2.1]octane or 2,2'-ethylenedipyridine or Benzo[1\",2\":3,4;4\",5\":3',4']dicyclobuta[1,2-b:1',2'-c']difuran or Cyclohexanone ethyl methyl ketal or 4-[2-(2-chloro-4-fluoroanilino)-5-methylpyrimidin-4-yl]-N-[(1S)-1-(3-chlorophenyl)-2-hydroxyethyl]-1H-pyrrole-2-carboxamide added to 7-cyclopentyl-5-(4-methoxyphenyl)pyrrolo[2,3-d]pyrimidin-4-amine"
@@ -133,3 +136,77 @@ def test_opsin_step_with_condition(kazu_test_config):
     )
     processed_docs, failed_docs = step([doc])
     assert check_step_has_found_entities(processed_docs[0], step.entity_class) == 8
+
+
+simple_section = "some entity with spaces between it that hasn't been recognised properly"
+
+
+class TestOpsinExtendString:
+    @staticmethod
+    def assert_opsin_extendString(
+        match_str: str, section: str, spaces: int, expected: tuple[str, ...]
+    ) -> None:
+        """This assumes that match strings are unique - construct your section carefully if
+        you use this!
+        """
+        ent_start = section.find(match_str)
+
+        # the test is broken in this case, as the match string was not found in the section
+        assert ent_start != -1
+
+        ent_end = ent_start + len(match_str)
+        e = Entity.load_contiguous_entity(
+            match=match_str,
+            entity_class="drug",
+            start=ent_start,
+            end=ent_end,
+            namespace="test",
+        )
+        result = tuple(OpsinStep.extendString(e, section, spaces))
+        for (match, start, end) in result:
+            assert section[start:end] == match
+        result_matches = tuple(match for (match, start, end) in result)
+        assert result_matches == expected
+
+    @pytest.mark.parametrize("section", (simple_section, "some entity", "entity"))
+    @pytest.mark.parametrize("match_str", ("entity", "ity"))
+    def test_extendString_single_word_no_spaces(self, match_str, section):
+        self.assert_opsin_extendString(
+            match_str=match_str, section=section, spaces=0, expected=("entity",)
+        )
+
+    @pytest.mark.parametrize(
+        "section", (simple_section, "some entity with spaces", "entity with spaces")
+    )
+    @pytest.mark.parametrize("match_str", ("entity with spaces", "ity with spaces", "ity with spa"))
+    def test_extendString_multi_word_no_spaces(self, match_str, section):
+        self.assert_opsin_extendString(
+            match_str=match_str, section=section, spaces=0, expected=("entity with spaces",)
+        )
+
+    @pytest.mark.parametrize(
+        "section", (simple_section, "some entity with spaces", "entity with spaces")
+    )
+    @pytest.mark.parametrize("match_str", ("entity", "ity"))
+    def test_extendString_single_word_2_spaces(self, match_str, section):
+        self.assert_opsin_extendString(
+            match_str=match_str,
+            section=section,
+            spaces=2,
+            expected=("entity with spaces", "entity with", "entity"),
+        )
+
+    @pytest.mark.parametrize(
+        "section", (simple_section, "some entity with spaces between", "entity with spaces between")
+    )
+    @pytest.mark.parametrize("match_str", ("entity with", "ity wi"))
+    def test_extendString_multi_word_2_spaces(self, match_str, section):
+        self.assert_opsin_extendString(
+            match_str=match_str,
+            section=section,
+            spaces=2,
+            expected=("entity with spaces between", "entity with spaces", "entity with"),
+        )
+
+
+# note that we have tests for OpsinStep.parseString as doctests in the OpsinStep docstring (within the table of examples).
