@@ -219,7 +219,7 @@ class ModelPackBuilder:
                     resource_path
                 )
                 target_dir = self.model_pack_build_path.joinpath(resource_path)
-                shutil.copytree(str(model_source_path), str(target_dir), dirs_exist_ok=True)
+                shutil.copytree(model_source_path, target_dir, dirs_exist_ok=True)
         for model_pack_name, resource_list in self.build_config.ontologies.items():
             for resource_path in resource_list:
                 ontology_path = self.resources_path.joinpath(model_pack_name).joinpath(
