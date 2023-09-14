@@ -352,7 +352,7 @@ class LabelStudioAnnotationView:
         taxonomy.setAttribute("toName", "text")
         taxonomy.setAttribute("perRegion", "true")
         source_to_choice_element: dict[str, Element] = {}
-
+        added: defaultdict[str, set[tuple[str, str]]] = defaultdict(set)
         for task in tasks:
             for annotation in task["annotations"]:
                 for result in annotation["result"]:
@@ -365,15 +365,19 @@ class LabelStudioAnnotationView:
                                 )
                             else:
                                 source, label_and_idx = tax[0], tax[1]
+                                if label_and_idx in added[source]:
+                                    continue
                                 source_choice = source_to_choice_element.get(source)
                                 if source_choice is None:
                                     source_choice = dom.createElement("Choice")
                                     source_choice.setAttribute("value", source)
                                     taxonomy.appendChild(source_choice)
                                     source_to_choice_element[source] = source_choice
+
                                 choice = dom.createElement("Choice")
                                 choice.setAttribute("value", label_and_idx)
                                 source_choice.appendChild(choice)
+                                added[source].add(label_and_idx)
 
     def create_main_view(self, tasks: list[dict]) -> str:
         dom = self.getDOM()
