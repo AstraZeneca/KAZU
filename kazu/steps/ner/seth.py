@@ -21,6 +21,25 @@ class SethStep(Step):
     """A Step that calls SETH (SNP Extraction Tool for Human Variations) over
     py4j.
 
+    .. attention::
+
+        To use this step, you will need `py4j <https://www.py4j.org>`_ installed,
+        which is not installed as part of the default kazu install because this
+        step isn't used as part of the default pipeline.
+
+        You can either do:
+
+        .. code-block:: console
+
+            pip install py4j
+
+        Or you can install required dependencies for all steps included in kazu
+        with:
+
+        .. code-block:: console
+
+            pip install kazu[all_steps]
+
     Paper:
 
     | Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).

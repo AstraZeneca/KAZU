@@ -15,6 +15,25 @@ class StanzaStep(Step):
     """Currently just provides sentence-segmentation using a tokenizer trained
     on the genia treebank.
 
+    .. attention::
+
+        To use this step, you will need `stanza <https://stanfordnlp.github.io/stanza/>`_
+        installed, which is not installed as part of the default kazu install
+        because this step isn't used as part of the default pipeline.
+
+        You can either do:
+
+        .. code-block:: console
+
+            pip install stanza
+
+        Or you can install required dependencies for all steps included in kazu
+        with:
+
+        .. code-block:: console
+
+            pip install kazu[all_steps]
+
     Stanza paper:
 
     Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020.

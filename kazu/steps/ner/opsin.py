@@ -40,6 +40,26 @@ class OpsinStep(Step):
     Adding ``${OpsinStep}`` just after ``${MappingStep}`` in ``kazu/conf/Pipeline/default.yaml``
     will enable this step.
 
+    .. attention::
+
+        To use this step, you will need `py4j <https://www.py4j.org>`_ and
+        `rdkit <https://www.rdkit.org>`_ installed, which is not installed as
+        part of the default kazu install because this step isn't used as part
+        of the default pipeline.
+
+        You can either do:
+
+        .. code-block:: console
+
+            pip install py4j rdkit
+
+        Or you can install required dependencies for all steps included in kazu
+        with:
+
+        .. code-block:: console
+
+            pip install kazu[all_steps]
+
     .. note::
 
       The nature of this functionality is considered experimental and we may split it into two steps in the future, without
