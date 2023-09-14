@@ -93,7 +93,7 @@ class SpacyPipelines(metaclass=Singleton):
     """
 
     def __init__(self):
-        # because this is a singleton, we can't parameterise the reload variable ins the constructor
+        # because this is a singleton, we can't parameterise the reload variable in the constructor
         self._reload_at = 1000
         self.name_to_path_or_build_func: dict[str, Union[str, Callable[[], Language]]] = {}
         self.name_to_reload_callbacks: defaultdict[str, list[Callable[[], None]]] = defaultdict(
