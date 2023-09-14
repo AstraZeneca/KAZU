@@ -1,6 +1,7 @@
 import os
 import logging
 from typing import Optional, Callable
+from collections import Iterable
 
 try:
     from py4j.java_gateway import JavaGateway
@@ -288,11 +289,10 @@ class OpsinStep(Step):
             updated_mappings = dict()
             for ent in section.entities:
                 if ent.entity_class == self.entity_class:
-                    if (
-                        len(ent.mappings) == 0
-                    ):  # entity mapping failed, e.g., no exact matches to dictionaries
-                        for spaces in range(2, -1, -1):  # look up to two spaces out
-                            match, start, end = self.extendString(ent, section.text, spaces)
+                    if len(ent.mappings) == 0:
+                        # entity mapping failed, e.g. no exact matches to dictionaries
+                        # look up to two spaces out
+                        for (match, start, end) in self.extendString(ent, section.text, spaces=2):
                             maybe_mapping = self.parseString(match)
                             if maybe_mapping:
                                 opsin_entity = Entity.load_contiguous_entity(
@@ -313,17 +313,28 @@ class OpsinStep(Step):
     # TransformersModelForTokenClassificationNerStep tends to truncate the IUPAC match to a first hyphen
     # Here we extend the entity match
     @staticmethod
-    def extendString(ent: Entity, section: str, spaces: int = 0) -> tuple[str, int, int]:
+    def extendString(ent: Entity, section: str, spaces: int = 0) -> Iterable[tuple[str, int, int]]:
         start = ent.start
         end = ent.end
+        res: list[tuple[str, int, int]] = []
         while start > 0 and section[start - 1] not in BREAKS:
             start = start - 1
         while end < len(section) and (section[end] not in BREAKS or spaces > 0):
             if section[end] in BREAKS:
                 spaces = spaces - 1
+                res.append((section[start:end], start, end))
             end = end + 1
-        entStr = section[start:end]
-        return entStr, start, end
+
+        last_result = (section[start:end], start, end)
+        if len(res) == 0 or not res[-1] == last_result:
+            # res[-1] == last_result can be true when the while loop above
+            # is broken out of immediately after encountering a BREAK and appending a result.
+            # this can happen if there is a BREAK immediately before the end of
+            # a section, or if there are two BREAKS in a row at the point at which
+            # spaces decreases from 1 to 0
+            res.append(last_result)
+        # reversed because we prefer the longest strings
+        yield from reversed(res)
 
     # opsin is fast and we can afford to try to parse many potential strings as IUPAC
     # generally we want to silently fail, but logging for debugging
