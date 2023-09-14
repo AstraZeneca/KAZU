@@ -76,9 +76,9 @@ jobs:
           . kazu-env/bin/activate
 
           KAZU_LOGGING_CONF=$GITHUB_WORKSPACE"/kazu/utils/model_pack_build_logging.conf"
-
-          python -m kazu.utils.build_and_test_model_packs \
-          --resources_path $RESOURCES_PATH \
+          
+          # change to $RESOURCES_PATH so that build config relative dirs work and build pack          
+          cd $RESOURCES_PATH && python -m kazu.utils.build_and_test_model_packs \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
           --model_packs_to_build \
           $DEFAULT_MODEL_PACK_PATH \
