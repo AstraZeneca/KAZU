@@ -286,7 +286,7 @@ class OpsinStep(Step):
             return
 
         for section in doc.sections:
-            updated_mappings = dict()
+            updated_mappings = {}
             for ent in section.entities:
                 if ent.entity_class == self.entity_class:
                     if len(ent.mappings) == 0:
