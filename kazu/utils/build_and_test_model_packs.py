@@ -76,7 +76,6 @@ class ModelPackBuilder:
         :param target_model_pack_path: path to model pack to process
         :param kazu_version: version of kazu used to generate model pack
         :param build_dir: build the pack in this directory
-        :param resources_path: if this pack requires resources, specify the path
         :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
@@ -87,7 +86,6 @@ class ModelPackBuilder:
         self.zip_pack = zip_pack
         self.skip_tests = skip_tests
         self.maybe_base_configuration_path = maybe_base_configuration_path
-        self.resources_path = resources_path
         self.build_dir = build_dir
         self.kazu_version = kazu_version
         self.target_model_pack_path = target_model_pack_path
@@ -279,7 +277,6 @@ class ModelPackBuilderActor(ModelPackBuilder):
 
 
 def build_all_model_packs(
-    resources_path: Optional[Path],
     maybe_base_configuration_path: Optional[Path],
     model_pack_paths: list[Path],
     zip_pack: bool,
@@ -326,7 +323,6 @@ def build_all_model_packs(
     for model_pack_path in model_pack_paths:
         builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
             logging_config_path=logging_config_path,
-            resources_path=resources_path,
             maybe_base_configuration_path=maybe_base_configuration_path,
             kazu_version=kazu_version,
             zip_pack=zip_pack,
@@ -368,12 +364,6 @@ how it is called, one or more of the following may be required:
 
     parser = argparse.ArgumentParser(description=description)
 
-    parser.add_argument(
-        "--resources_path",
-        type=Path,
-        required=False,
-        help="path to a directory containing the resources the model pack needs, if required",
-    )
     parser.add_argument(
         "--base_configuration_path",
         type=Path,
@@ -420,7 +410,6 @@ how it is called, one or more of the following may be required:
     args = parser.parse_args()
 
     build_all_model_packs(
-        resources_path=args.resources_path,
         maybe_base_configuration_path=args.base_configuration_path,
         model_pack_paths=args.model_packs_to_build,
         zip_pack=args.zip_model_pack,
