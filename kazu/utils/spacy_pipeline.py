@@ -77,7 +77,8 @@ BASIC_PIPELINE_NAME = "basic"
 
 
 def basic_spacy_pipeline() -> Language:
-    """A basic Spacy pipeline with a customised tokenizer and sentence splitter."""
+    """A basic Spacy pipeline with a customised tokenizer and sentence
+    splitter."""
     nlp = spacy.blank("kazu_custom_en")
     nlp.add_pipe("sentencizer")
     return nlp
@@ -109,7 +110,14 @@ class SpacyPipelines(metaclass=Singleton):
 
     @reload_at.setter
     def reload_at(self, value: int) -> None:
-        """Change the interval at which spacy models are reloaded."""
+        """Change the interval at which spacy models are reloaded.
+
+        Note, as this is a singleton, it will change the reload value for all
+        spacy pipelines (i.e. globally)
+
+        :param value: reload after this many calls
+        :return:
+        """
 
         instance = SpacyPipelines()
         instance._reload_at = value
