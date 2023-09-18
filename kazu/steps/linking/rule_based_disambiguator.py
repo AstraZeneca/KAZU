@@ -34,7 +34,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
     Rules can have both true positive and false positive aspects.
 
     `Matcher <https://spacy.io/api/matcher>`_ rules operate on the entity class level
-    (i.e. apply to whole classes of an entity, whereas co-occurrence rules operate
+    (i.e. apply to whole classes of an entity), whereas co-occurrence rules operate
     on the mention level (i.e. does a specific mention of an entity co-occur with some expected words,
     in the same sentence).
 
@@ -177,7 +177,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 for token in span:
                     token._.set(entity.entity_class, True)
                 if (
-                    entity.entity_class in self.class_matchers
+                    entity_class in self.class_matchers
                     or match in self.cooccurrence_rules.get(entity_class, {})
                 ):
                     entity_mentions_needing_disambiguation.add(entity)
@@ -202,10 +202,8 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
             for ent in list(section.entities):
                 if ent.entity_class in maybe_class_keys_to_drop:
                     section.entities.remove(ent)
-                else:
-                    key = ent.match, ent.entity_class
-                    if key in maybe_mention_keys_to_drop:
-                        section.entities.remove(ent)
+                elif (ent.match, ent.entity_class) in maybe_mention_keys_to_drop:
+                    section.entities.remove(ent)
 
     def _check_cooccurrence_rules(
         self, ent_to_span: dict[Entity, Span], entity_mentions_needing_disambiguation: set[Entity]
@@ -229,7 +227,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 key = entity.match, entity.entity_class
                 if False not in cooccurrence_results and True in cooccurrence_results:
                     mention_keys_to_keep.add(key)
-                elif False in cooccurrence_results or True not in cooccurrence_results:
+                else:
                     maybe_mention_keys_to_drop.add(key)
         return maybe_mention_keys_to_drop, mention_keys_to_keep
 
@@ -243,6 +241,6 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 class_match_results = set(self._run_class_matchers(entity_class, spacy_doc))
                 if False not in class_match_results and True in class_match_results:
                     class_keys_to_keep.add(entity_class)
-                elif False in class_match_results or True not in class_match_results:
+                else:
                     maybe_class_keys_to_drop.add(entity_class)
         return class_keys_to_keep, maybe_class_keys_to_drop

@@ -60,10 +60,10 @@ from kazu.steps.linking.rule_based_disambiguator import (
         ),
     ],
 )
-def test_this(class_matcher_rules, cooccurence_rules):
+def test_RulesBasedEntityClassDisambiguationFilterStep(class_matcher_rules, cooccurence_rules):
 
-    drug_text = """Insulin is a molecule."""
-    gene_text = """Insulin is a gene."""
+    drug_text = "Insulin is a molecule."
+    gene_text = "Insulin is a gene."
     low_info_text = "Insulin is commonly studied"
 
     drug_doc = Document.create_simple_document(drug_text)
