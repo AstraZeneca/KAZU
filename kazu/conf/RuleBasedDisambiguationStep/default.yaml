@@ -42,7 +42,7 @@ class_matcher_rules:
         - "_":
             anatomy: True
         - LOWER: arm
-      - - LOWER: "single"
+      - - LOWER: single
         - LOWER: "-"
         - "_":
             anatomy: True
@@ -50,7 +50,7 @@ class_matcher_rules:
       - - LOWER: quality
         - LOWER: "-"
           OP: "?"
-        - LOWER: "of"
+        - LOWER: of
         - LOWER: "-"
           OP: "?"
         - "_":
@@ -61,12 +61,12 @@ cooccurence_rules:
   disease:
     IVF:
       fp:
-        - ICSI"
-        - cycle"
-        - treatment"
+        - ICSI
+        - cycle
+        - treatment
     MFS:
       fp:
-        - endpoint"
+        - endpoint
   gene:
     IVF:
       fp:
