@@ -309,10 +309,19 @@ class OpsinStep(Step):
                 section.entities.remove(original_entity)
                 section.entities.append(opsin_entity)
 
-    # TransformersModelForTokenClassificationNerStep tends to truncate the IUPAC match to a first hyphen
-    # Here we extend the entity match
     @staticmethod
     def extendString(ent: Entity, section: str, spaces: int = 0) -> Iterable[tuple[str, int, int]]:
+        """Extend a possible IUPAC Entity match to longer plausible strings.
+
+        :class:`~.TransformersModelForTokenClassificationNerStep` tends to truncate IUPAC matches to
+        a first hyphen. Here, we attempt to extend the match to try to capture the full IUPAC string.
+
+        :param ent: the entity we suspect contains (some of) an IUPAC string
+        :param section: the section the entity is contained in
+        :param spaces: the maximum number of IUPAC spaces/breaks to 'extend' the match through
+        :return: plausible IUPAC strings with section start and end positions, ordered
+            from longest to shortest.
+        """
         start = ent.start
         end = ent.end
         res: list[tuple[str, int, int]] = []
@@ -335,9 +344,24 @@ class OpsinStep(Step):
         # reversed because we prefer the longest strings
         yield from reversed(res)
 
-    # opsin is fast and we can afford to try to parse many potential strings as IUPAC
-    # generally we want to silently fail, but logging for debugging
     def parseString(self, name: str) -> Optional[Mapping]:
+        """Attempt to parse a potential IUPAC drug name into a
+        :class:`~.Mapping`\\ .
+
+        Call Opsin with a potential IUPAC drug name to see if it parses - Opsin is fast enough
+        that we can afford to try many potential candidates.
+
+        If Opsin parses the string successfully, we convert the resulting
+        `SMILES <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`_
+        into a canonical SMILES using `rdkit <https://www.rdkit.org>`_\\ , and produce a
+        :class:`~.Mapping` with the canonical SMILES as the :attr:`~.Mapping.idx`\\ .
+
+        If Opsin parsing fails, ``None`` is returned. If the log level is set to debug,
+        the error from Opsin for the parsing failure will be logged.
+
+        :param name: the potential IUPAC drug name
+        :return:
+        """
         try:
             smiles = self.opsin.nameToStructure(name)
             if smiles is not None:
