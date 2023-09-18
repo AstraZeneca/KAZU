@@ -176,9 +176,8 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 ent_to_span[entity] = span
                 for token in span:
                     token._.set(entity.entity_class, True)
-                if (
-                    entity_class in self.class_matchers
-                    or match in self.cooccurrence_rules.get(entity_class, {})
+                if entity_class in self.class_matchers or match in self.cooccurrence_rules.get(
+                    entity_class, {}
                 ):
                     entity_mentions_needing_disambiguation.add(entity)
                     entity_classes_needing_disambiguation[section].add(
