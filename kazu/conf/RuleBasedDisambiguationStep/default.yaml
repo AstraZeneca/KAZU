@@ -47,7 +47,7 @@ class_matcher_rules:
         - "_":
             anatomy: True
             LOWER: arm
-      - - LOWER: "multi"
+      - - LOWER: multi
         - LOWER: "-"
         - "_":
             anatomy: True
