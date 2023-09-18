@@ -1,4 +1,5 @@
 import os
+import dataclasses
 import logging
 from typing import Optional, Callable
 from collections import Iterable
@@ -12,7 +13,7 @@ except ImportError as e:
         "You can either install these yourself, or install kazu[all_steps].\n"
     ) from e
 
-from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
+from kazu.data.data import Document, Entity, CharSpan, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step
 
 
@@ -294,12 +295,10 @@ class OpsinStep(Step):
                         for (match, start, end) in self.extendString(ent, section.text, spaces=2):
                             maybe_mapping = self.parseString(match)
                             if maybe_mapping:
-                                opsin_entity = Entity.load_contiguous_entity(
-                                    start=start,
-                                    end=end,
-                                    namespace=ent.namespace,
-                                    entity_class=ent.entity_class,
+                                opsin_entity = dataclasses.replace(
+                                    ent,
                                     match=match,
+                                    spans=frozenset([CharSpan(start=start, end=end)]),
                                     mappings={maybe_mapping},
                                 )
                                 updated_mappings[ent] = opsin_entity
