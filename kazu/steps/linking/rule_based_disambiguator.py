@@ -15,10 +15,11 @@ from kazu.ontology_matching.assemble_pipeline import (  # noqa: F401 # we need t
 
 
 logger = logging.getLogger(__name__)
-CooccurrenceListData = dict[str, dict[str, dict[str, Optional[list[str]]]]]
+TPOrFP = Literal["tp", "fp"]
+CooccurrenceListData = dict[str, dict[str, dict[TPOrFP, Optional[list[str]]]]]
 CooccurrenceSetData = dict[str, dict[str, dict[str, set[str]]]]
 ClassMatchers = dict[str, dict[str, Matcher]]
-MatcherClassRules = dict[str, dict[str, list[list[dict[str, Any]]]]]
+MatcherClassRules = dict[str, dict[TPOrFP, list[list[dict[str, Any]]]]]
 
 
 class RulesBasedEntityClassDisambiguationFilterStep(Step):
