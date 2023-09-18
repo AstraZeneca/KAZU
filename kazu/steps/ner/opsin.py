@@ -19,7 +19,6 @@ from kazu.steps import Step, document_iterating_step
 BREAKS = set(" !@#&?|\t\n\r")  # https://www.acdlabs.com/iupac/nomenclature/93/r93_45.htm
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class OpsinStep(Step):
@@ -355,5 +354,5 @@ class OpsinStep(Step):
                 return mapping
         except Exception as e:
             reason = e.args[1].getMessage()
-            logging.debug(f"Opsin parsing error: {reason}")
+            logger.debug(f"Opsin parsing error: {reason}")
         return None
