@@ -4,116 +4,135 @@ from kazu.steps.linking.rule_based_disambiguator import (
     RulesBasedEntityClassDisambiguationFilterStep,
 )
 
+DRUG_TP_CLASS_BLOCK = [
+    [
+        {"_": {"drug": True}},
+        {"LOWER": "is"},
+        {"LOWER": "a"},
+        {"LOWER": "molecule"},
+    ]
+]
+DRUG_FP_CLASS_BLOCK = [
+    [
+        {"_": {"gene": True}},
+        {"LOWER": "is"},
+        {"LOWER": "a"},
+        {"LOWER": "gene"},
+    ]
+]
+
+GENE_TP_CLASS_BLOCK = [
+    [
+        {"_": {"gene": True}},
+        {"LOWER": "is"},
+        {"LOWER": "a"},
+        {"LOWER": "gene"},
+    ]
+]
+GENE_FP_CLASS_BLOCK = [
+    [
+        {"_": {"drug": True}},
+        {"LOWER": "is"},
+        {"LOWER": "a"},
+        {"LOWER": "molecule"},
+    ]
+]
+DRUG_TP_MENTION_BLOCK = [[{"LOWER": "drug"}]]
+DRUG_FP_MENTION_BLOCK = [[{"LOWER": "protein"}]]
+GENE_TP_MENTION_BLOCK = [[{"LOWER": "protein"}]]
+GENE_FP_MENTION_BLOCK = [[{"LOWER": "drug"}]]
+LOW_INFO_TEXT = "Insulin is commonly studied"
+
 
 @pytest.mark.parametrize(
-    ("class_matcher_rules", "cooccurence_rules"),
+    ("class_matcher_rules", "mention_matcher_rules"),
     [
         pytest.param(
             {
                 "drug": {
-                    "tp": [
-                        [
-                            {"_": {"drug": True}},
-                            {"LOWER": "is"},
-                            {"LOWER": "a"},
-                            {"LOWER": "molecule"},
-                        ]
-                    ],
-                    "fp": [
-                        [
-                            {"_": {"gene": True}},
-                            {"LOWER": "is"},
-                            {"LOWER": "a"},
-                            {"LOWER": "gene"},
-                        ]
-                    ],
+                    "tp": DRUG_TP_CLASS_BLOCK,
+                    "fp": DRUG_FP_CLASS_BLOCK,
                 },
                 "gene": {
-                    "tp": [
-                        [
-                            {"_": {"gene": True}},
-                            {"LOWER": "is"},
-                            {"LOWER": "a"},
-                            {"LOWER": "gene"},
-                        ]
-                    ],
-                    "fp": [
-                        [
-                            {"_": {"drug": True}},
-                            {"LOWER": "is"},
-                            {"LOWER": "a"},
-                            {"LOWER": "molecule"},
-                        ]
-                    ],
+                    "tp": GENE_TP_CLASS_BLOCK,
+                    "fp": GENE_FP_CLASS_BLOCK,
                 },
             },
             {},
-            id="class_matcher_rules",
+            id="all_tp_and_fp_class_matcher_rules",
+        ),
+        pytest.param(
+            {
+                "drug": {
+                    "tp": DRUG_TP_CLASS_BLOCK,
+                },
+                "gene": {
+                    "tp": GENE_TP_CLASS_BLOCK,
+                },
+            },
+            {},
+            id="all_tp_class_matcher_rules",
+        ),
+        pytest.param(
+            {
+                "drug": {
+                    "fp": DRUG_FP_CLASS_BLOCK,
+                },
+                "gene": {
+                    "fp": GENE_FP_CLASS_BLOCK,
+                },
+            },
+            {},
+            id="all_fp_class_matcher_rules",
+        ),
+        pytest.param(
+            {
+                "drug": {
+                    "tp": DRUG_TP_CLASS_BLOCK,
+                },
+                "gene": {
+                    "fp": GENE_FP_CLASS_BLOCK,
+                },
+            },
+            {},
+            id="single_tp_fp_class_matcher_rules",
         ),
         pytest.param(
             {},
             {
-                "drug": {"Insulin": {"tp": ["molecule"], "fp": ["gene"]}},
-                "gene": {"Insulin": {"fp": ["molecule"], "tp": ["gene"]}},
+                "drug": {"Insulin": {"tp": DRUG_TP_MENTION_BLOCK, "fp": DRUG_FP_MENTION_BLOCK}},
+                "gene": {"Insulin": {"tp": GENE_TP_MENTION_BLOCK, "fp": GENE_FP_MENTION_BLOCK}},
             },
-            id="cooccurrence_rules",
+            id="all_mention_rules",
+        ),
+        pytest.param(
+            {
+                "drug": {
+                    "tp": DRUG_TP_CLASS_BLOCK,
+                    "fp": DRUG_FP_CLASS_BLOCK,
+                },
+                "gene": {
+                    "tp": GENE_TP_CLASS_BLOCK,
+                    "fp": GENE_FP_CLASS_BLOCK,
+                },
+            },
+            {
+                "drug": {"Insulin": {"tp": DRUG_TP_MENTION_BLOCK, "fp": DRUG_FP_MENTION_BLOCK}},
+                "gene": {"Insulin": {"tp": GENE_TP_MENTION_BLOCK, "fp": GENE_FP_MENTION_BLOCK}},
+            },
+            id="all_class_and_mention_rules",
         ),
     ],
 )
-def test_RulesBasedEntityClassDisambiguationFilterStep(class_matcher_rules, cooccurence_rules):
+def test_RulesBasedEntityClassDisambiguationFilterStep(class_matcher_rules, mention_matcher_rules):
 
-    drug_text = "Insulin is a molecule."
-    gene_text = "Insulin is a gene."
-    low_info_text = "Insulin is commonly studied"
+    drug_text = "Insulin is a molecule or drug."
+    gene_text = "Insulin is a gene or protein."
 
-    drug_doc = Document.create_simple_document(drug_text)
-    drug_doc.sections.append(Section(name="test2", text=low_info_text))
-    drug_doc.sections[0].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
-        )
-    )
-    drug_doc.sections[0].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
-        )
-    )
-    drug_doc.sections[1].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
-        )
-    )
-    drug_doc.sections[1].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
-        )
-    )
-
-    gene_doc = Document.create_simple_document(gene_text)
-    gene_doc.sections.append(Section(name="test2", text=low_info_text))
-    gene_doc.sections[0].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
-        )
-    )
-    gene_doc.sections[0].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
-        )
-    )
-    gene_doc.sections[1].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
-        )
-    )
-    gene_doc.sections[1].entities.append(
-        Entity.load_contiguous_entity(
-            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
-        )
-    )
+    drug_doc, gene_doc = _create_test_docs(drug_text, gene_text)
 
     step = RulesBasedEntityClassDisambiguationFilterStep(
-        class_matcher_rules=class_matcher_rules, cooccurrence_rules=cooccurence_rules
+        class_matcher_rules=class_matcher_rules, mention_matcher_rules=mention_matcher_rules
     )
     step([drug_doc, gene_doc])
     drug_ents = drug_doc.get_entities()
@@ -122,3 +141,79 @@ def test_RulesBasedEntityClassDisambiguationFilterStep(class_matcher_rules, cooc
     gene_ents = gene_doc.get_entities()
     assert len(gene_ents) == 2
     assert all(ent.entity_class == "gene" for ent in gene_ents)
+
+
+def _create_test_docs(doc1_text: str, doc2_text: str):
+    doc1 = Document.create_simple_document(doc1_text)
+    doc1.sections.append(Section(name="test2", text=LOW_INFO_TEXT))
+    doc1.sections[0].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
+        )
+    )
+    doc1.sections[0].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
+        )
+    )
+    doc1.sections[1].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
+        )
+    )
+    doc1.sections[1].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
+        )
+    )
+    doc2 = Document.create_simple_document(doc2_text)
+    doc2.sections.append(Section(name="test2", text=LOW_INFO_TEXT))
+    doc2.sections[0].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
+        )
+    )
+    doc2.sections[0].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
+        )
+    )
+    doc2.sections[1].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="gene", namespace="test", match="Insulin"
+        )
+    )
+    doc2.sections[1].entities.append(
+        Entity.load_contiguous_entity(
+            start=0, end=7, entity_class="drug", namespace="test", match="Insulin"
+        )
+    )
+    return doc1, doc2
+
+
+def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
+    patho_1 = "Insulin is a molecule or protein."  # fails on mention result
+    patho_2 = "Insulin is a molecule or gene."  # fails on class result
+
+    patho_1_doc, patho_2_doc = _create_test_docs(patho_1, patho_2)
+
+    step = RulesBasedEntityClassDisambiguationFilterStep(
+        class_matcher_rules={
+            "drug": {
+                "tp": DRUG_TP_CLASS_BLOCK,
+                "fp": DRUG_FP_CLASS_BLOCK,
+            },
+            "gene": {
+                "tp": GENE_TP_CLASS_BLOCK,
+                "fp": GENE_FP_CLASS_BLOCK,
+            },
+        },
+        mention_matcher_rules={
+            "drug": {"Insulin": {"tp": DRUG_TP_MENTION_BLOCK, "fp": DRUG_FP_MENTION_BLOCK}},
+            "gene": {"Insulin": {"tp": GENE_TP_MENTION_BLOCK, "fp": GENE_FP_MENTION_BLOCK}},
+        },
+    )
+    docs = [patho_1_doc, patho_2_doc]
+    step(docs)
+    for doc in docs:
+        assert len(doc.get_entities()) == 0
