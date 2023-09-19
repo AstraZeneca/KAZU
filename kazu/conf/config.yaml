@@ -40,8 +40,7 @@ defaults:
   - LabelStudioManager: default
   - LSWebUtils: default
   - Middlewares: default
-  - EntityClassDisambiguationStep: default
-  - RuleBasedDisambiguationStep: default
+  - RulesBasedEntityClassDisambiguationFilterStep: default
   - confidence: default
   - cache_sizes: default
   - global_actions: default
