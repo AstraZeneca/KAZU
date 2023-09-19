@@ -1,5 +1,4 @@
 import logging
-import subprocess
 import time
 from typing import Any, Union, Optional
 from collections.abc import Callable
@@ -19,6 +18,7 @@ from ray import serve
 from starlette.requests import HTTPConnection, Request
 from starlette.responses import RedirectResponse
 
+from kazu import __version__ as kazu_version
 from kazu.data.data import Document, Entity
 from kazu.pipeline import Pipeline, PipelineValueError
 from kazu.utils.constants import HYDRA_VERSION_BASE
@@ -35,12 +35,6 @@ The Web API is designed for light usage, if you need to run kazu for a heavy wor
 *[here](https://astrazeneca.github.io/KAZU/index.html)*.
 """
 logger = logging.getLogger("ray")
-kazu_version = (
-    subprocess.check_output("pip show kazu | grep Version", shell=True)
-    .decode("utf-8")
-    .split(" ")[1]
-    .strip()
-)
 app = FastAPI(
     title="Kazu - Biomedical NLP Framework",
     description=description,

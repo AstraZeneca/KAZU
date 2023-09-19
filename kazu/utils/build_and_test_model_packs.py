@@ -14,6 +14,8 @@ from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
+from kazu import __version__ as kazu_version
+
 
 @dataclass
 class BuildConfiguration:
@@ -305,12 +307,6 @@ def build_all_model_packs(
     if len(list(output_dir.iterdir())) > 0:
         raise ModelPackBuildError(f"{str(output_dir)} is not empty")
 
-    kazu_version = (
-        subprocess.check_output("pip show kazu | grep Version", shell=True)
-        .decode("utf-8")
-        .split(" ")[1]
-        .strip()
-    )
     runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
     ray.init(
         num_cpus=max_parallel_build,
