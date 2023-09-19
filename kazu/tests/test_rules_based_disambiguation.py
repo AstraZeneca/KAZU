@@ -200,12 +200,12 @@ def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
     step = RulesBasedEntityClassDisambiguationFilterStep(
         class_matcher_rules={
             "drug": {
-                "tp": DRUG_TP_CLASS_BLOCK,
-                "fp": DRUG_FP_CLASS_BLOCK,
+                "tp": DRUG_TP_CLASS_BLOCK,  # type:ignore[dict-item]
+                "fp": DRUG_FP_CLASS_BLOCK,  # type:ignore[dict-item]
             },
             "gene": {
-                "tp": GENE_TP_CLASS_BLOCK,
-                "fp": GENE_FP_CLASS_BLOCK,
+                "tp": GENE_TP_CLASS_BLOCK,  # type:ignore[dict-item]
+                "fp": GENE_FP_CLASS_BLOCK,  # type:ignore[dict-item]
             },
         },
         mention_matcher_rules={
