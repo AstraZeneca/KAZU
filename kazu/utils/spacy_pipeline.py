@@ -8,7 +8,9 @@ from string import ascii_lowercase
 from typing import Union, Any, overload, Literal
 
 import spacy
-from kazu.utils.utils import Singleton
+from spacy.lang.en import English, EnglishDefaults
+from spacy.lang.en.tokenizer_exceptions import TOKENIZER_EXCEPTIONS
+from spacy.tokens import Doc,Span,Token
 from spacy.language import Language
 from spacy.lang.char_classes import (
     LIST_ELLIPSES,
@@ -19,9 +21,9 @@ from spacy.lang.char_classes import (
     ALPHA,
     HYPHENS,
 )
-from spacy.lang.en import English, EnglishDefaults
-from spacy.lang.en.tokenizer_exceptions import TOKENIZER_EXCEPTIONS
-from spacy.tokens import Doc
+
+from kazu.utils.utils import Singleton
+from kazu.data.data import Section,Entity
 
 logger = logging.getLogger(__name__)
 
@@ -256,3 +258,33 @@ class SpacyPipelines(metaclass=Singleton):
         self.name_to_model[model_name] = func()
         for callback in self.name_to_reload_callbacks[model_name]:
             callback()
+
+
+def _nested_default_dict_to_set():
+    return defaultdict(lambda: defaultdict(set))
+
+
+class SpacyToKazuObjectMapper:
+    def __init__(self, nlp: Language, section: Section):
+        self.nlp = nlp
+        self.ent_to_span: dict[Entity, Span] = {}
+        self.span_to_class_to_ent: defaultdict[
+            Span, defaultdict[str, set[Entity]]
+        ] = _nested_default_dict_to_set()
+        self.token_to_class_to_ent: defaultdict[
+            Token, defaultdict[str, set[Entity]]
+        ] = _nested_default_dict_to_set()
+        spacy_doc: Doc = self.nlp(section.text)
+        for entity in section.entities:
+            entity_class = entity.entity_class
+            Token.set_extension(entity_class, default=False, force=True)
+            span = spacy_doc.char_span(
+                start_idx=entity.start, end_idx=entity.end, label=entity.entity_class
+            )
+
+            self.ent_to_span[entity] = span
+            self.span_to_class_to_ent[span][entity_class].add(entity)
+
+            for token in span:
+                token._.set(entity.entity_class, True)
+                self.token_to_class_to_ent[token][entity.entity_class].add(entity)
