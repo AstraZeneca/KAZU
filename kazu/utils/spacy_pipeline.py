@@ -265,6 +265,8 @@ def _nested_default_dict_to_set():
 
 
 class SpacyToKazuObjectMapper:
+    """Maps a :class:`.Section` to a Spacy `Doc <https://spacy.io/api/doc>`_"""
+
     def __init__(self, nlp: Language, section: Section):
         self.nlp = nlp
         self.ent_to_span: dict[Entity, Span] = {}
