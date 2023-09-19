@@ -10,7 +10,7 @@ from kazu.ontology_matching.assemble_pipeline import (  # noqa: F401 # we need t
 )
 from kazu.steps import Step, document_iterating_step
 from spacy.matcher import Matcher
-from spacy.tokens import Token, Span
+from spacy.tokens import Span
 from kazu.utils.spacy_pipeline import SpacyToKazuObjectMapper
 
 logger = logging.getLogger(__name__)
