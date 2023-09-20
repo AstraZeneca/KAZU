@@ -209,7 +209,10 @@ class ModelPackBuilder:
             for resource_path in resource_list:
                 full_path = parent_dir_path.joinpath(resource_path).absolute()
                 target_dir = self.model_pack_build_path.joinpath(resource_path)
-                shutil.copytree(full_path, target_dir, dirs_exist_ok=True)
+                if full_path.is_dir():
+                    shutil.copytree(full_path, target_dir, dirs_exist_ok=True)
+                else:
+                    shutil.copy(full_path, target_dir)
 
     def clear_cached_resources_from_model_pack_dir(self):
         """Delete any cached data from the input path.
