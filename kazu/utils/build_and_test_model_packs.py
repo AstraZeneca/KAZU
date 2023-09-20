@@ -287,7 +287,6 @@ def build_all_model_packs(
 ) -> None:
     """Build multiple model packs.
 
-    :param resources_path: Path to the resources the pack needs, if required
     :param maybe_base_configuration_path: Path to the base configuration, if required
     :param model_pack_paths: list of paths to model pack resources
     :param zip_pack: should the packs be zipped at the end?
