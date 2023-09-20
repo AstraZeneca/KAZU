@@ -55,7 +55,6 @@ class ModelPackBuilder:
         target_model_pack_path: Path,
         kazu_version: str,
         build_dir: Path,
-        resources_path: Optional[Path],
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
