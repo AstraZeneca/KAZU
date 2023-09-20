@@ -78,8 +78,7 @@ jobs:
 
           python -m kazu.utils.build_and_test_model_packs \
           --base_configuration_path $BASE_KAZU_CONF_PATH \
-          --model_packs_to_build \
-          $DEFAULT_MODEL_PACK_PATH \
+          --model_packs_to_build kazu_model_pack_public \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH \
           --skip_tests
 
