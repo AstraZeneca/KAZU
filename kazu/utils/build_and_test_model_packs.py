@@ -157,11 +157,12 @@ class ModelPackBuilder:
         return self.model_pack_build_path
 
     def load_build_configuration(self) -> BuildConfiguration:
-        """Try to load a build configuration from the model pack root. The
-        merge configuration should be a json file called build_config.json.
-        None is returned if no model pack is found.
+        """Try to load a build configuration from the model pack root.
 
-        :return:
+        The merge configuration should be a json file called build_config.json.
+
+        :raises ModelPackBuildError: if the merge config isn't found at the
+            expected path
         """
         config_path = self.target_model_pack_path.joinpath("build_config.json")
         if not config_path.exists():
