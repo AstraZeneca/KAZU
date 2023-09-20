@@ -359,7 +359,25 @@ how it is called, one or more of the following may be required:
   respectively (see the provided model pack for an example)
 3) a merge config in the path <model_pack_root>/build_config.json, which determines which elements
   of the base configuration and model pack should be used
+
+Note, if the environment variable KAZU_MODEL_PACK_BUILD_RESOURCES_PATH is set, this script will change it's
+working directory to that location before doing anything. This will change the interpretation of relative
+paths in a model packs build_config.json.
 """
+
+    working_dir_str = os.getenv("KAZU_MODEL_PACK_BUILD_RESOURCES_PATH")
+    if working_dir_str is not None:
+        path = Path(working_dir_str)
+        if path.is_dir():
+            print(
+                f"KAZU_MODEL_PACK_BUILD_RESOURCES_PATH is set to {working_dir_str}. Changing to"
+                f" this path. This will affect relative paths in build_config.json"
+            )
+            os.chdir(path)
+        else:
+            raise ValueError(
+                f"KAZU_MODEL_PACK_BUILD_RESOURCES_PATH is set to {working_dir_str}, but this is not a directory"
+            )
 
     parser = argparse.ArgumentParser(description=description)
 
