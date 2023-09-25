@@ -13,8 +13,7 @@ from kazu.ontology_preprocessing.synonym_generation import (
     GreekSymbolSubstitution,
     CombinatorialSynonymGenerator,
 )
-from kazu.tests.utils import requires_model_pack
-from kazu.utils.spacy_pipeline import basic_spacy_pipeline
+from kazu.utils.spacy_pipeline import BASIC_PIPELINE_NAME, SpacyPipelines, basic_spacy_pipeline
 from omegaconf import DictConfig
 
 # this is frozen so we only need to instantiate once
@@ -56,7 +55,8 @@ def check_generator_result(
 
 @pytest.fixture(scope="session")
 def separator_expansion_generator(kazu_test_config: DictConfig) -> SeparatorExpansion:
-    return SeparatorExpansion(basic_spacy_pipeline())
+    SpacyPipelines().add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
+    return SeparatorExpansion(BASIC_PIPELINE_NAME)
 
 
 # fmt: off
@@ -93,7 +93,6 @@ def separator_expansion_generator(kazu_test_config: DictConfig) -> SeparatorExpa
     ),
 )
 # fmt: on
-@requires_model_pack
 def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_generator):
     check_generator_result(input_str, expected_syns, separator_expansion_generator)
 
@@ -158,9 +157,7 @@ def greek_symbol_generator() -> StringReplacement:
                 "Α ϐ test",
                 "Α Β test",
             },
-            marks=pytest.mark.xfail(
-                reason="above problem with beta/eta"
-            ),
+            marks=pytest.mark.xfail(reason="above problem with beta/eta"),
         ),
     ),
 )
