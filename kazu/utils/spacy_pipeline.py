@@ -109,8 +109,7 @@ class SpacyPipelines(metaclass=Singleton):
 
     @property
     def reload_at(self) -> int:
-        instance = SpacyPipelines()
-        return instance._reload_at
+        return self._reload_at
 
     @reload_at.setter
     def reload_at(self, value: int) -> None:
@@ -123,8 +122,7 @@ class SpacyPipelines(metaclass=Singleton):
         :return:
         """
 
-        instance = SpacyPipelines()
-        instance._reload_at = value
+        self._reload_at = value
 
     @staticmethod
     def add_from_path(name: str, path: str) -> None:
