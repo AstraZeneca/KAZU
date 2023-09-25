@@ -92,6 +92,9 @@ class SpacyPipelines(metaclass=Singleton):
     In addition, due to a
     `known memory issue <https://github.com/explosion/spaCy/discussions/9362>`_
     , we reload each pipeline after a certain number of calls.
+
+    Note, in order for the GC to collect old spacy Vocab objects, users
+    should ensure that spacy.Doc objects are de-referenced as soon as possible.
     """
 
     def __init__(self):
