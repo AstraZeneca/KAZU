@@ -15,9 +15,7 @@ class SpacyNerStep(Step):
     def __init__(self, path: str):
         """
 
-        :param model_name: name of spacy pipeline to load.
-        :param path: If the spacy pipeline is not already installed into the python environment, attempt to
-            install it from this path.
+        :param path: path to the spacy pipeline to use.
         """
         self.path = path
         self.spacy_pipelines = SpacyPipelines()
