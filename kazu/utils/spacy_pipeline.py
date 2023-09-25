@@ -219,5 +219,5 @@ class SpacyPipelines(metaclass=Singleton):
         func = self.name_to_func[model_name]
         logger.info("The model will be reloaded from %s.", func)
         self.name_to_model[model_name] = func()
-        for call_back in self.name_to_reload_callbacks[model_name]:
-            call_back()
+        for callback in self.name_to_reload_callbacks[model_name]:
+            callback()
