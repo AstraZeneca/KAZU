@@ -13,11 +13,12 @@ from spacy.matcher import Matcher
 from spacy.tokens import Span
 from kazu.utils.spacy_pipeline import SpacyToKazuObjectMapper
 
+SpacyMatcherRules = list[list[dict[str, Any]]]
 logger = logging.getLogger(__name__)
 TPOrFP = Literal["tp", "fp"]
 TPOrFPMatcher = dict[TPOrFP, Matcher]
-MatcherMentionRules = dict[str, dict[str, dict[TPOrFP, list[list[dict[str, Any]]]]]]
-MatcherClassRules = dict[str, dict[TPOrFP, list[list[dict[str, Any]]]]]
+MatcherMentionRules = dict[str, dict[str, dict[TPOrFP, SpacyMatcherRules]]]
+MatcherClassRules = dict[str, dict[TPOrFP, SpacyMatcherRules]]
 MentionMatchers = dict[str, dict[str, TPOrFPMatcher]]
 ClassMatchers = dict[str, TPOrFPMatcher]
 
