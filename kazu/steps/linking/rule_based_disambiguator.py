@@ -105,11 +105,9 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 for rule_type, rule_instances in rules.items():
                     if rule_instances is not None:
                         matcher = Matcher(self.nlp.vocab)
-                        matcher.add(f"{class_name}_{rule_type}", rule_instances)
+                        matcher.add(f"{class_name}_{target_term}_{rule_type}", rule_instances)
                         result.setdefault(class_name, {})
                         result[class_name].setdefault(target_term, {})
-                        matcher = Matcher(self.nlp.vocab)
-                        matcher.add(f"{class_name}_{target_term}_{rule_type}", rule_instances)
                         result[class_name][target_term][rule_type] = matcher
         return result
 
