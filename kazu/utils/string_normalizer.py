@@ -307,8 +307,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
         :param original_string:
         :return:
         """
-        string = GildaUtils.replace_dashes(original_string, " ")
-        tokens = string.split(" ")
+        tokens = GildaUtils.split_on_dashes_or_space(original_string)
         if len(tokens) == 1 and not any(
             tokens[0].endswith(suffix) for suffix in GeneStringNormalizer.gene_name_suffixes
         ):
@@ -583,3 +582,18 @@ class GildaUtils:
         for d in DASHES:
             s = s.replace(d, rep)
         return s
+
+    # replacing '-' with '\-' is necessary otherwise the regex compiler thinks we have a malformed
+    # character range (like [a-zA-Z] but instead it's [ -−] where the second dash is a different character)
+    DASHES_OR_SPACE_PATTERN = re.compile(
+        "[ " + "".join("\\-" if d == "-" else d for d in DASHES) + "]+"
+    )
+
+    @classmethod
+    def split_on_dashes_or_space(cls, s: str) -> list[str]:
+        """Split input string on a space or any kind of dash.
+
+        :param s: Input string for splitting
+        :return: The resulting split string as a list
+        """
+        return cls.DASHES_OR_SPACE_PATTERN.split(s)
