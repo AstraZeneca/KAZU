@@ -57,3 +57,4 @@ hydra:
       # whether it affects an environment variable or not.
       TOKENIZERS_PARALLELISM: false # prevent rust tokenisers from forking
       PL_DISABLE_FORK: 1 # prevent pytorch lighting from spawning processes, which causes Ray to freeze
+      KAZU_SPACY_RELOAD_INTERVAL: 1000 # reload spacy pipelines after this many calls. This is required to stop OOM on batch processing due to https://github.com/explosion/spaCy/discussions/9362
