@@ -245,7 +245,6 @@ class KazuAbbreviationDetector:
     ) -> None:
         """
 
-        :param nlp: spacy model to use
         :param namespace: the namespace to give any generated entities
         :param exclude_abbrvs: detected abbreviations matching this list will not be removed, even if no source
             entities are found
