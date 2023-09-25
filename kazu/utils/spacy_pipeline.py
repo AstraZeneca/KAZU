@@ -197,9 +197,10 @@ class SpacyPipelines(metaclass=Singleton):
         :param kwargs: passed to the call method of `Language <https://spacy.io/api/language>`_
         :return:
         """
+        res = self.name_to_model[model_name](text, **kwargs)
         self.call_counter[model_name] += 1
         self._reload_if_required(model_name)
-        return self.name_to_model[model_name](text, **kwargs)
+        return res
 
     def _reload_if_required(
         self,
