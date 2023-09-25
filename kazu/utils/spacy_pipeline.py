@@ -93,8 +93,9 @@ class SpacyPipelines(metaclass=Singleton):
     `known memory issue <https://github.com/explosion/spaCy/discussions/9362>`_
     , we reload each pipeline after a certain number of calls.
 
-    Note, in order for the GC to collect old spacy Vocab objects, users
-    should ensure that spacy.Doc objects are de-referenced as soon as possible.
+    .. note::
+        In order for the GC to collect old spacy Vocab objects, users
+        should ensure that spacy.Doc objects are de-referenced as soon as possible.
     """
 
     def __init__(self):
@@ -109,19 +110,20 @@ class SpacyPipelines(metaclass=Singleton):
 
     @property
     def reload_at(self) -> int:
+        """The interval (number of calls) at which spacy models are reloaded.
+
+        .. note::
+            As this class is a singleton, it will change the reload value for all
+            spacy pipelines (i.e. globally).
+
+        :getter: Get the currently configured interval.
+        :setter: Set the interval.
+        :type: int
+        """
         return self._reload_at
 
     @reload_at.setter
     def reload_at(self, value: int) -> None:
-        """Change the interval at which spacy models are reloaded.
-
-        Note, as this is a singleton, it will change the reload value for all
-        spacy pipelines (i.e. globally)
-
-        :param value: reload after this many calls
-        :return:
-        """
-
         self._reload_at = value
 
     @staticmethod
