@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
 from spacy.matcher import PhraseMatcher
@@ -71,15 +72,13 @@ class CallBackTest:
         self.spacy_pipelines = SpacyPipelines()
         self.init_matcher()
 
-    def init_matcher(self) -> None:
-        self.matcher = PhraseMatcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
-        assert (
-            A_STRANGE_TOKEN not in self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab.strings
-        )
+    def add_rule(self):
         self.matcher.add(
             "strange_rule", [self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME)(A_STRANGE_TOKEN)]
         )
-        assert A_STRANGE_TOKEN in self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab.strings
+
+    def init_matcher(self) -> None:
+        self.matcher = PhraseMatcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
 
 
 def test_reload_with_callbacks():
@@ -88,9 +87,23 @@ def test_reload_with_callbacks():
     spacy_pipelines.reload_at = 2
     spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
     call_back_test = CallBackTest()
-    spacy_pipelines.add_reload_callback_func(BASIC_PIPELINE_NAME, call_back_test.init_matcher)
-    spacy_pipelines.process_single(SHORT_TEXT, model_name=BASIC_PIPELINE_NAME)
-    spacy_pipelines.process_single(MEDIUM_TEXT, model_name=BASIC_PIPELINE_NAME)
+    with patch.object(CallBackTest, "init_matcher", wraps=call_back_test.init_matcher) as mock:
+        call_back_test.init_matcher()
+        spacy_pipelines.add_reload_callback_func(BASIC_PIPELINE_NAME, call_back_test.init_matcher)
+        assert (
+            A_STRANGE_TOKEN not in spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab.strings
+        )  # the vocab doesn't have A_STRANGE_TOKEN until we call 'add_rule'
+        call_back_test.add_rule()
+        assert A_STRANGE_TOKEN in spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab.strings
+        # after processing one document, the vocab should still have A_STRANGE_TOKEN
+        spacy_pipelines.process_single(SHORT_TEXT, model_name=BASIC_PIPELINE_NAME)
+        assert A_STRANGE_TOKEN in spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab.strings
+        # after processing a second document, the model should have been reloaded, and A_STRANGE_TOKEN
+        # should no longer be in it
+        spacy_pipelines.process_single(MEDIUM_TEXT, model_name=BASIC_PIPELINE_NAME)
+        assert A_STRANGE_TOKEN not in spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab.strings
+        # check init_matcher was called twice
+        assert mock.call_count == 2
 
 
 def test_batch():
