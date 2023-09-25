@@ -2,6 +2,7 @@ from pathlib import Path
 
 from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
 from spacy.matcher import PhraseMatcher
+from kazu.utils.utils import Singleton
 
 SHORT_TEXT = "Some random text and a WEirdTokenDDDD"
 MEDIUM_TEXT = "Another bit of random text and a WiererdTokenDDDD"
@@ -12,6 +13,7 @@ LONG_TEXT = (
 
 
 def test_string_store_is_dereferenced():
+    Singleton.clear_all()
     spacy_pipelines = SpacyPipelines()
     spacy_pipelines.reload_at = 3
     spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
@@ -27,6 +29,7 @@ def test_string_store_is_dereferenced():
 
 
 def test_reload_from_path(tmpdir):
+    Singleton.clear_all()
     nlp1_path = Path(tmpdir) / "nlp1"
     spacy_pipelines = SpacyPipelines()
     spacy_pipelines.reload_at = 1
@@ -43,6 +46,7 @@ def test_reload_from_path(tmpdir):
 
 
 def test_reload_from_func():
+    Singleton.clear_all()
     spacy_pipelines = SpacyPipelines()
     spacy_pipelines.reload_at = 2
     spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
@@ -79,6 +83,7 @@ class CallBackTest:
 
 
 def test_reload_with_callbacks():
+    Singleton.clear_all()
     spacy_pipelines = SpacyPipelines()
     spacy_pipelines.reload_at = 2
     spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
@@ -89,6 +94,7 @@ def test_reload_with_callbacks():
 
 
 def test_batch():
+    Singleton.clear_all()
     spacy_pipelines = SpacyPipelines()
     spacy_pipelines.reload_at = 2
     spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
