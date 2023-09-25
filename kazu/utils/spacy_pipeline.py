@@ -5,7 +5,7 @@ from collections import defaultdict
 from collections.abc import Callable, Iterable
 from copy import deepcopy
 from string import ascii_lowercase
-from typing import Union, Any
+from typing import Union, Any, overload
 
 import spacy
 from kazu.utils.utils import Singleton
@@ -168,21 +168,46 @@ class SpacyPipelines(metaclass=Singleton):
         given model key."""
         return SpacyPipelines().name_to_model[name]
 
+    @overload
     def process_batch(
         self,
-        texts: Union[Iterable[Union[str, Doc]], Iterable[tuple[Union[str, Doc], Any]]],
+        texts: Iterable[Union[str, Doc]],
         model_name: str,
+        as_tuples: bool = False,
         **kwargs: Any,
-    ) -> Union[Iterable[Doc], Iterable[tuple[Doc, Any]]]:
-        """Process an iterable of `Doc <https://spacy.io/api/doc>`_ or text
+    ) -> Iterable[Doc]:
+        ...
+
+    @overload
+    def process_batch(
+        self,
+        texts: Iterable[tuple[Union[str, Doc], Any]],
+        model_name: str,
+        as_tuples: bool = True,
+        **kwargs: Any,
+    ) -> Iterable[tuple[Doc, Any]]:
+        ...
+
+    def process_batch(
+        self,
+        texts,
+        model_name,
+        as_tuples,
+        **kwargs,
+    ):
+        """Process an iterable of `Doc <https://spacy.io/api/doc>`_ or strings
         with a given spacy model.
 
-        :param texts:
-        :param model_name:
+        :param texts: either an iterable of spacy.Doc or strings, or an iterable of tuples of spacy.Doc or strings,
+            AND other objects if as_tuples=True
+        :param model_name: spacy model to process texts with
+        :param as_tuples:
         :param kwargs: passed to the pipe method of `Language <https://spacy.io/api/language>`_
-        :return:
+        :return: Iterable of spacy.Doc or spacy.Doc and objects, if using as_tuples
         """
-        for result in self.name_to_model[model_name].pipe(texts=texts, **kwargs):
+        for result in self.name_to_model[model_name].pipe(
+            texts=texts, as_tuples=as_tuples, **kwargs
+        ):
             yield result
             self.call_counter[model_name] += 1
 
