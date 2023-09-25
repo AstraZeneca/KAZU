@@ -91,7 +91,7 @@ class SpacyPipelines(metaclass=Singleton):
 
     In addition, due to a
     `known memory issue <https://github.com/explosion/spaCy/discussions/9362>`_
-    , we reload each pipeline after a certain number of calls
+    , we reload each pipeline after a certain number of calls.
     """
 
     def __init__(self):
