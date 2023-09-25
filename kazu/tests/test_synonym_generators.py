@@ -1,8 +1,9 @@
 import unicodedata
 from sys import maxunicode
 from typing import Union
-
 import pytest
+from omegaconf import DictConfig
+
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
@@ -14,7 +15,6 @@ from kazu.ontology_preprocessing.synonym_generation import (
     CombinatorialSynonymGenerator,
 )
 from kazu.utils.spacy_pipeline import BASIC_PIPELINE_NAME, SpacyPipelines, basic_spacy_pipeline
-from omegaconf import DictConfig
 
 # this is frozen so we only need to instantiate once
 dummy_equiv_ids = EquivalentIdSet(
