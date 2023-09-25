@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 from collections import defaultdict
@@ -101,7 +102,7 @@ class SpacyPipelines(metaclass=Singleton):
     def __init__(self):
         # because this is a singleton, we can't parameterise the reload variable in the constructor
         self._reload_at = int(os.getenv("KAZU_SPACY_RELOAD_INTERVAL", 1000))
-        self.name_to_path_or_build_func: dict[str, Union[str, Callable[[], Language]]] = {}
+        self.name_to_func: dict[str, Callable[[], Language]] = {}
         self.name_to_reload_callbacks: defaultdict[str, list[Callable[[], None]]] = defaultdict(
             list
         )
@@ -128,24 +129,21 @@ class SpacyPipelines(metaclass=Singleton):
 
     @staticmethod
     def add_from_path(name: str, path: str) -> None:
-        """Add a spacy model from a path."""
+        """Add a spacy model from a path.
 
-        instance = SpacyPipelines()
-        if name in instance.name_to_path_or_build_func:
-            logger.info("The spacy pipeline key %s is already loaded.", name)
-        else:
-            instance.name_to_path_or_build_func[name] = path
-        instance.name_to_model[name] = spacy.load(path)
+        Technically, this is just a curried wrapper around spacy.load
+        """
+        SpacyPipelines.add_from_func(name=name, func=functools.partial(spacy.load, path))
 
     @staticmethod
     def add_from_func(name: str, func: Callable[[], Language]) -> None:
         """Add a spacy model from a callable."""
 
         instance = SpacyPipelines()
-        if name in instance.name_to_path_or_build_func:
+        if name in instance.name_to_func:
             logger.info("The spacy pipeline key %s is already loaded.", name)
         else:
-            instance.name_to_path_or_build_func[name] = func
+            instance.name_to_func[name] = func
         instance.name_to_model[name] = func()
 
     @staticmethod
@@ -218,12 +216,8 @@ class SpacyPipelines(metaclass=Singleton):
 
     def reload_model(self, model_name: str) -> None:
         """Reload a model, clearing the spacy vocab."""
-
-        path_or_func = self.name_to_path_or_build_func[model_name]
-        logger.info("The model will be reloaded from %s.", path_or_func)
-        if isinstance(path_or_func, str):
-            self.name_to_model[model_name] = spacy.load(path_or_func)
-        else:
-            self.name_to_model[model_name] = path_or_func()
+        func = self.name_to_func[model_name]
+        logger.info("The model will be reloaded from %s.", func)
+        self.name_to_model[model_name] = func()
         for call_back in self.name_to_reload_callbacks[model_name]:
             call_back()
