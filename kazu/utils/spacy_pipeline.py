@@ -95,8 +95,10 @@ class SpacyPipelines(metaclass=Singleton):
     we reload each pipeline after a certain number of calls, namely :attr:`~.reload_at`.
 
     .. note::
-        In order for the GC to collect old spacy Vocab objects, users
-        should ensure that spacy.Doc objects are de-referenced as soon as possible.
+        In order for the Garbage Collector to remove old spacy Vocab objects, users
+        should ensure that `spacy.Doc <https://spacy.io/api/doc>`_ objects are de-referenced as soon as possible
+        (i.e. that you don't keep the results of :meth:`~.process_single` or :meth:`~.process_batch` around for
+        a long time).
     """
 
     def __init__(self):
