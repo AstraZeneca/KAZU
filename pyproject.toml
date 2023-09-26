@@ -55,7 +55,12 @@ webserver = [
   "PyJWT>=2.0.0",
   ]
 typed = [
-  "types-requests",
+  # version 2.31.0.3 introduces
+  # overly strict typing of requests.HttpError
+  # we expect a fix shortly, and then can update
+  # this constraint just to rule out only the broken
+  # releases
+  "types-requests<2.31.0.3",
   "types-cachetools",
   "types-regex",
   "types-psutil",
