@@ -33,7 +33,7 @@ def test_reload_from_path(tmpdir):
     Singleton.clear_all()
     nlp1_path = Path(tmpdir) / "nlp1"
     spacy_pipelines = SpacyPipelines()
-    spacy_pipelines.reload_at = 1
+    spacy_pipelines.reload_at = 2
     nlp1 = basic_spacy_pipeline()
     nlp1.to_disk(nlp1_path)
     spacy_pipelines.add_from_path(BASIC_PIPELINE_NAME, str(nlp1_path))
