@@ -98,4 +98,5 @@ jobs:
           rm -r $MODEL_PACK_BUILD_PATH || true
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:
-          KAZU_MODEL_PACK_BUILD_RESOURCES_PATH: ${{ inputs.resources_path }}
+          # this sets the envvar to input.resources_path if it's present (i.e. a manual run), otherwise (automated run) to the final path
+          KAZU_MODEL_PACK_BUILD_RESOURCES_PATH: ${{ inputs.resources_path && inputs.resources_path || '/home/github/runner/.kazu_data/' }}
