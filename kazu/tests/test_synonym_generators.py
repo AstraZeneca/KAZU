@@ -3,6 +3,7 @@ from sys import maxunicode
 from typing import Union
 
 import pytest
+
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
