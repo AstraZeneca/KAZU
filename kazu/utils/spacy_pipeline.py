@@ -132,7 +132,10 @@ class SpacyPipelines(metaclass=Singleton):
         """Add a spacy model from a path.
 
         Technically, this is just a curried wrapper around spacy.load
-        """
+        Convenience function to call :meth:`~.add_from_func` with a
+        wrapped version of
+        `spacy.load <https://spacy.io/api/top-level#spacy.load>`_
+        with the relevant path argument.
         SpacyPipelines.add_from_func(name=name, func=functools.partial(spacy.load, path))
 
     @staticmethod
