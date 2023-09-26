@@ -153,7 +153,8 @@ class SpacyPipelines(metaclass=Singleton):
         If using spacy components outside the context of a
         `Language <https://spacy.io/api/language>`_, these will also need to be reloaded when the
         underlying model is reloaded. This can be done by providing a zero
-        argument, None return type callable.
+        argument, None return type callable. If you need to modify a field of an object with a
+        callback, we recommend the use of :func:`functools.partial` to build the callback function.
 
         :param name:
         :param func:
