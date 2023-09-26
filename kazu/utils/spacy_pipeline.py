@@ -102,32 +102,25 @@ class SpacyPipelines(metaclass=Singleton):
     """
 
     def __init__(self):
-        # because this is a singleton, we can't parameterise the reload variable in the constructor
-        self._reload_at = int(os.getenv("KAZU_SPACY_RELOAD_INTERVAL", 1000))
+        self.reload_at = int(os.getenv("KAZU_SPACY_RELOAD_INTERVAL", 1000))
+        """The interval (number of calls) at which spacy models are reloaded.
+
+        Normally set within the kazu model pack config using the environment variable
+        ``KAZU_SPACY_RELOAD_INTERVAL``, but if this isn't set (either using the config
+        or as a normal environment variable), this defaults to 1000.
+
+        .. note::
+            As this class is a singleton, modifying this will change the reload value for all
+            spacy pipelines (i.e. globally).
+
+        :type: int
+        """
         self.name_to_func: dict[str, Callable[[], Language]] = {}
         self.name_to_reload_callbacks: defaultdict[str, list[Callable[[], None]]] = defaultdict(
             list
         )
         self.call_counter: defaultdict[str, int] = defaultdict(lambda: 0)
         self.name_to_model: dict[str, Language] = {}
-
-    @property
-    def reload_at(self) -> int:
-        """The interval (number of calls) at which spacy models are reloaded.
-
-        .. note::
-            As this class is a singleton, it will change the reload value for all
-            spacy pipelines (i.e. globally).
-
-        :getter: Get the currently configured interval.
-        :setter: Set the interval.
-        :type: int
-        """
-        return self._reload_at
-
-    @reload_at.setter
-    def reload_at(self, value: int) -> None:
-        self._reload_at = value
 
     @staticmethod
     def add_from_path(name: str, path: str) -> None:
@@ -138,6 +131,7 @@ class SpacyPipelines(metaclass=Singleton):
         wrapped version of
         `spacy.load <https://spacy.io/api/top-level#spacy.load>`_
         with the relevant path argument.
+        """
         SpacyPipelines.add_from_func(name=name, func=functools.partial(spacy.load, path))
 
     @staticmethod
