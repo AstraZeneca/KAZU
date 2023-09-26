@@ -91,8 +91,8 @@ class SpacyPipelines(metaclass=Singleton):
     different locations without additional memory overhead.
 
     In addition, due to a
-    `known memory issue <https://github.com/explosion/spaCy/discussions/9362>`_
-    , we reload each pipeline after a certain number of calls.
+    `known memory issue <https://github.com/explosion/spaCy/discussions/9362>`_,
+    we reload each pipeline after a certain number of calls, namely :attr:`~.reload_at`.
 
     .. note::
         In order for the GC to collect old spacy Vocab objects, users
