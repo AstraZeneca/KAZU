@@ -79,7 +79,7 @@ BASIC_PIPELINE_NAME = "basic"
 
 
 def basic_spacy_pipeline() -> Language:
-    """A basic Spacy pipeline with a sentence split and a customised
+    """A basic Spacy pipeline with a sentence splitter and a customised
     tokenizer."""
     nlp = spacy.blank("kazu_custom_en")
     nlp.add_pipe("sentencizer")
