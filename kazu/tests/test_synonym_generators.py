@@ -1,9 +1,8 @@
 import unicodedata
 from sys import maxunicode
 from typing import Union
-import pytest
-from omegaconf import DictConfig
 
+import pytest
 from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
@@ -14,7 +13,6 @@ from kazu.ontology_preprocessing.synonym_generation import (
     GreekSymbolSubstitution,
     CombinatorialSynonymGenerator,
 )
-from kazu.utils.spacy_pipeline import BASIC_PIPELINE_NAME, SpacyPipelines, basic_spacy_pipeline
 
 # this is frozen so we only need to instantiate once
 dummy_equiv_ids = EquivalentIdSet(
@@ -53,12 +51,6 @@ def check_generator_result(
     assert new_syns == expected_syns
 
 
-@pytest.fixture(scope="session")
-def separator_expansion_generator(kazu_test_config: DictConfig) -> SeparatorExpansion:
-    SpacyPipelines().add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
-    return SeparatorExpansion(BASIC_PIPELINE_NAME)
-
-
 # fmt: off
 @pytest.mark.parametrize(
     argnames=("input_str", "expected_syns"),
@@ -93,8 +85,8 @@ def separator_expansion_generator(kazu_test_config: DictConfig) -> SeparatorExpa
     ),
 )
 # fmt: on
-def test_SeparatorExpansion(input_str, expected_syns, separator_expansion_generator):
-    check_generator_result(input_str, expected_syns, separator_expansion_generator)
+def test_SeparatorExpansion(input_str, expected_syns):
+    check_generator_result(input_str, expected_syns, SeparatorExpansion())
 
 
 def test_StopWordRemover():

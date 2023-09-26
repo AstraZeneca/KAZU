@@ -5,14 +5,14 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from copy import deepcopy
 from typing import Optional
-from collections.abc import Iterable
 
 from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
+from kazu.utils.spacy_pipeline import basic_spacy_pipeline
 from kazu.utils.utils import PathLike
-from kazu.utils.spacy_pipeline import SpacyPipelines
 
 logger = logging.getLogger(__name__)
 
@@ -91,12 +91,8 @@ class CombinatorialSynonymGenerator:
 # TODO: this isn't used currently - do we want to try and refine it
 # or just kill it off altogether?
 class SeparatorExpansion(SynonymGenerator):
-    def __init__(self, spacy_pipeline_name: str):
-        """
-
-        :param spacy_pipeline_name: use the stopwords from this spacy pipeline name
-        """
-        self.all_stopwords = SpacyPipelines().get_model(spacy_pipeline_name).Defaults.stop_words
+    def __init__(self):
+        self.all_stopwords = basic_spacy_pipeline().Defaults.stop_words
         self.end_expression_brackets = r"(.*)\((.*)\)$"
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
