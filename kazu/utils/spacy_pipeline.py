@@ -5,7 +5,7 @@ from collections import defaultdict
 from collections.abc import Callable, Iterable
 from copy import deepcopy
 from string import ascii_lowercase
-from typing import Union, Any, overload
+from typing import Union, Any, overload, Literal
 
 import spacy
 from kazu.utils.utils import Singleton
@@ -171,39 +171,47 @@ class SpacyPipelines(metaclass=Singleton):
     @overload
     def process_batch(
         self,
-        texts: Iterable[Union[str, Doc]],
+        texts: Iterable[tuple[Union[str, Doc], Any]],
         model_name: str,
-        as_tuples: bool = False,
+        as_tuples: Literal[True],
         **kwargs: Any,
-    ) -> Iterable[Doc]:
+    ) -> Iterable[tuple[Doc, Any]]:
         ...
 
     @overload
     def process_batch(
         self,
-        texts: Iterable[tuple[Union[str, Doc], Any]],
+        texts: Iterable[Union[str, Doc]],
         model_name: str,
-        as_tuples: bool = True,
+        as_tuples: Literal[False] = False,
         **kwargs: Any,
-    ) -> Iterable[tuple[Doc, Any]]:
+    ) -> Iterable[Doc]:
         ...
 
     def process_batch(
         self,
         texts,
         model_name,
-        as_tuples,
+        as_tuples=False,
         **kwargs,
     ):
-        """Process an iterable of `Doc <https://spacy.io/api/doc>`_ or strings
-        with a given spacy model.
+        """Process an iterable of `spacy.Doc <https://spacy.io/api/doc>`_ or
+        strings with a given spacy model.
 
-        :param texts: either an iterable of spacy.Doc or strings, or an iterable of tuples of spacy.Doc or strings,
-            AND other objects if as_tuples=True
+        :param texts: either an iterable of 'texts'
+            (`spacy.Doc <https://spacy.io/api/doc>`_\\ s or :class:`str`\\ s)
+            if ``as_tuples=False`` (the default),
+            or an iterable of length 2 tuples ``(text, context)`` where context
+            is an arbitrary python object that is provided back in the output
+            alongside its matching text.
         :param model_name: spacy model to process texts with
-        :param as_tuples:
-        :param kwargs: passed to the pipe method of `Language <https://spacy.io/api/language>`_
-        :return: Iterable of spacy.Doc or spacy.Doc and objects, if using as_tuples
+        :param as_tuples: If set to ``True`` (the default is ``False``), texts are paired with
+            a 'context' inside a tuple both in input and output. See the description of the
+            texts argument and the output, and read the type information.
+        :param kwargs: passed to `Language.pipe <https://spacy.io/api/language#pipe>`_\\ .
+        :return: Iterable of `spacy.Doc <https://spacy.io/api/doc>`_\\ s if ``as_tuples=False``
+            (the default).
+            If ``as_tuples=True``, the result is an Iterable of (doc, context) tuples.
         """
         for result in self.name_to_model[model_name].pipe(
             texts=texts, as_tuples=as_tuples, **kwargs
