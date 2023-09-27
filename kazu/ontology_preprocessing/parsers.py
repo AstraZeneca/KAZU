@@ -384,7 +384,7 @@ class RDFGraphParser(OntologyParser):
     def is_valid_iri(self, text: str) -> bool:
         """Check if input string is a valid IRI for the ontology being parsed.
 
-        Uses ``self._uri_regex`` to define valid IRIs
+        Uses ``self._uri_regex`` to define valid IRIs.
         """
         match = self._uri_regex.match(text)
         return bool(match)
