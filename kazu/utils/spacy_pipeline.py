@@ -194,11 +194,11 @@ class SpacyPipelines(metaclass=Singleton):
         as_tuples=False,
         **kwargs,
     ):
-        """Process an iterable of `spacy.Doc <https://spacy.io/api/doc>`_ or
-        strings with a given spacy model.
+        """Process an iterable of `spacy.Doc`_ or strings with a given spacy
+        model.
 
         :param texts: either an iterable of 'texts'
-            (`spacy.Doc <https://spacy.io/api/doc>`_\\ s or :class:`str`\\ s)
+            (`spacy.Doc`_\\ s or :class:`str`\\ s)
             if ``as_tuples=False`` (the default),
             or an iterable of length 2 tuples ``(text, context)`` where context
             is an arbitrary python object that is provided back in the output
@@ -208,9 +208,11 @@ class SpacyPipelines(metaclass=Singleton):
             a 'context' inside a tuple both in input and output. See the description of the
             texts argument and the output, and read the type information.
         :param kwargs: passed to `Language.pipe <https://spacy.io/api/language#pipe>`_\\ .
-        :return: Iterable of `spacy.Doc <https://spacy.io/api/doc>`_\\ s if ``as_tuples=False``
+        :return: Iterable of `spacy.Doc`_\\ s if ``as_tuples=False``
             (the default).
-            If ``as_tuples=True``, the result is an Iterable of (doc, context) tuples.
+            If ``as_tuples=True``, the result is an Iterable of ``(doc, context)`` tuples.
+
+        .. _spacy.Doc: https://spacy.io/api/doc
         """
         for result in self.name_to_model[model_name].pipe(
             texts=texts, as_tuples=as_tuples, **kwargs
