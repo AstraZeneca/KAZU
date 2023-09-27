@@ -35,7 +35,7 @@ def sort_then_group(
       readable for users.
       An alternative would be to attempt to use Sphinx's autodoc_type_aliases
       https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_type_aliases
-      but this requires doing `from __future__ import annotations` which could
+      but this requires doing ``from __future__ import annotations`` which could
       break pydantic stuff and have wider codebase implications, so this would
       be a potentially larger piece of work for not much gain.
 

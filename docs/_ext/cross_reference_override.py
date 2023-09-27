@@ -10,9 +10,9 @@ In essense, we allow configuring a mapping of 'where Sphinx (and intersphinx) ex
 find it'.
 
 The problem in more detail: when Sphinx tries to create references for type hints, it ultimately (usually) uses the __qualname__
-property of the 'live' object in the type hint. For example, if you do `from transformers import BatchEncoding`
-and then use `BatchEncoding` as a type hint, Sphinx will try to look up `transformers.tokenization_utils_base.BatchEncoding`
-in the object inventory. With intersphinx however, transformers has this object as `transformers.BatchEncoding` in its object
+property of the 'live' object in the type hint. For example, if you do ``from transformers import BatchEncoding``
+and then use ``BatchEncoding`` as a type hint, Sphinx will try to look up ``transformers.tokenization_utils_base.BatchEncoding``
+in the object inventory. With intersphinx however, transformers has this object as ``transformers.BatchEncoding`` in its object
 inventory, so the link fails.
 
 I was inspired to try to work around this using Sphinx extension hooks by Scanpydoc https://github.com/theislab/scanpydoc
