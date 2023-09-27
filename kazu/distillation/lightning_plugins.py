@@ -25,7 +25,7 @@ class StudentModelCheckpointIO(CheckpointIO):  # type: ignore[misc]
     ) -> None:
         """Save distilled (student) model. Loading currently not implemented.
 
-        :param checkpoint: contents to save. Including `state_dict`, `optimizer_states` and `callbacks`.
+        :param checkpoint: contents to save. Including ``state_dict``, ``optimizer_states`` and ``callbacks``.
         :param path:
         :param storage_options:
         """
