@@ -43,6 +43,7 @@ dependencies = [
 [project.urls]
 documentation = "https://astrazeneca.github.io/KAZU/index.html"
 repository = "https://github.com/AstraZeneca/KAZU"
+changelog = "https://astrazeneca.github.io/KAZU/changelog.html"
 
 [project.optional-dependencies]
 webserver = [
