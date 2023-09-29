@@ -22,6 +22,7 @@ from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.server import start, stop
 from kazu.utils.caching import kazu_disk_cache
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
+from kazu.utils.utils import Singleton
 
 
 @pytest.fixture(scope="session")
@@ -124,6 +125,9 @@ def make_label_studio_manager():
 
 @pytest.fixture(scope="function")
 def ray_server(override_kazu_test_config):
+    # clear any residual singleton info, as ray runs separate processes and
+    # hanging resources can cause OOM
+    Singleton.clear_all()
     cfg = override_kazu_test_config(
         overrides=["ray=local", "ray.serve.detached=true"],
     )
@@ -134,6 +138,9 @@ def ray_server(override_kazu_test_config):
 
 @pytest.fixture(scope="function")
 def ray_server_with_jwt_auth(override_kazu_test_config):
+    # clear any residual singleton info, as ray runs separate processes and
+    # hanging resources can cause OOM
+    Singleton.clear_all()
     os.environ["KAZU_JWT_KEY"] = "this secret key is not secret"
     cfg = override_kazu_test_config(
         overrides=["ray=local", "ray.serve.detached=true", "Middlewares=jwt"],
