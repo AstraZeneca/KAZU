@@ -16,7 +16,7 @@ LONG_TEXT = (
 def test_string_store_is_dereferenced():
     Singleton.clear_all()
     spacy_pipelines = SpacyPipelines()
-    spacy_pipelines.reload_at = 3
+    spacy_pipelines.reload_at = 2
     spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
     doc1 = spacy_pipelines.process_single(SHORT_TEXT, model_name=BASIC_PIPELINE_NAME)
     doc2 = spacy_pipelines.process_single(MEDIUM_TEXT, model_name=BASIC_PIPELINE_NAME)
