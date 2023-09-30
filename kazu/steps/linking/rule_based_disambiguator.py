@@ -3,15 +3,16 @@ from collections import defaultdict
 from enum import Enum, auto
 from typing import Any, Literal, Optional
 
-import spacy
 from kazu.data.data import Document, Entity
-from kazu.ontology_matching.assemble_pipeline import (  # noqa: F401 # we need this import to register the spacy component
-    KazuCustomEnglish,
-)
 from kazu.steps import Step, document_iterating_step
 from spacy.matcher import Matcher
 from spacy.tokens import Span
-from kazu.utils.spacy_pipeline import SpacyToKazuObjectMapper
+from kazu.utils.spacy_pipeline import (
+    SpacyToKazuObjectMapper,
+    SpacyPipelines,
+    BASIC_PIPELINE_NAME,
+    basic_spacy_pipeline,
+)
 
 SpacyMatcherRules = list[list[dict[str, Any]]]
 logger = logging.getLogger(__name__)
@@ -82,34 +83,42 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                     }
                 }
         """
-        self.nlp = spacy.blank("kazu_custom_en")
-        self.nlp.add_pipe("sentencizer")
-        self.class_matchers: ClassMatchers = self._build_class_matchers(class_matcher_rules)
-        self.mention_matchers: MentionMatchers = self._build_mention_matchers(mention_matcher_rules)
+        self.class_matcher_rules = class_matcher_rules
+        self.mention_matcher_rules = mention_matcher_rules
+        self.spacy_pipelines = SpacyPipelines()
+        self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
+        self.spacy_pipelines.add_reload_callback_func(
+            BASIC_PIPELINE_NAME, self._build_class_matchers
+        )
+        self.spacy_pipelines.add_reload_callback_func(
+            BASIC_PIPELINE_NAME, self._build_mention_matchers
+        )
+        self._build_class_matchers()
+        self._build_mention_matchers()
 
-    def _build_class_matchers(self, class_rules: MatcherClassRules) -> ClassMatchers:
+    def _build_class_matchers(self) -> None:
         result: ClassMatchers = {}
-        for class_name, rules in class_rules.items():
+        for class_name, rules in self.class_matcher_rules.items():
             for rule_type, rule_instances in rules.items():
                 if rule_instances is not None:
-                    matcher = Matcher(self.nlp.vocab)
+                    matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
                     matcher.add(f"{class_name}_{rule_type}", rule_instances)
                     result.setdefault(class_name, {})[rule_type] = matcher
-        return result
+        self.class_matchers = result
 
-    def _build_mention_matchers(self, mention_rules: MatcherMentionRules) -> MentionMatchers:
+    def _build_mention_matchers(self) -> None:
         result: MentionMatchers = {}
         rule_type: TPOrFP
-        for class_name, target_term_dict in mention_rules.items():
+        for class_name, target_term_dict in self.mention_matcher_rules.items():
             for target_term, rules in target_term_dict.items():
                 for rule_type, rule_instances in rules.items():
                     if rule_instances is not None:
-                        matcher = Matcher(self.nlp.vocab)
+                        matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
                         matcher.add(f"{class_name}_{target_term}_{rule_type}", rule_instances)
                         result.setdefault(class_name, {})
                         result[class_name].setdefault(target_term, {})
                         result[class_name][target_term][rule_type] = matcher
-        return result
+        self.mention_matchers = result
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
@@ -122,7 +131,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         key_requires_mention_tp = {}
         key_requires_mention_fp = {}
         for section in doc.sections:
-            mapper = SpacyToKazuObjectMapper(self.nlp, section)
+            mapper = SpacyToKazuObjectMapper(section)
             for entity in section.entities:
                 entity_class = entity.entity_class
 
