@@ -232,6 +232,7 @@ nitpick_ignore = [
     ("py:class", "spacy.matcher.phrasematcher.PhraseMatcher"),
     ("py:class", "spacy.tokens.doc.Doc"),
     ("py:class", "spacy.tokens.span.Span"),
+    ("py:class", "spacy.tokens.token.Token"),
     ("py:class", "spacy.lang.en.English"),
     ("py:class", "spacy.lang.en.EnglishDefaults"),
     # stanza doesn't appear to build API docs (and the build process is unclear - they may not even use Sphinx at all)
