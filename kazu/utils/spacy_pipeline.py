@@ -10,7 +10,7 @@ from typing import Union, Any, overload, Literal
 import spacy
 from spacy.lang.en import English, EnglishDefaults
 from spacy.lang.en.tokenizer_exceptions import TOKENIZER_EXCEPTIONS
-from spacy.tokens import Doc,Span,Token
+from spacy.tokens import Doc, Span, Token
 from spacy.language import Language
 from spacy.lang.char_classes import (
     LIST_ELLIPSES,
@@ -23,7 +23,7 @@ from spacy.lang.char_classes import (
 )
 
 from kazu.utils.utils import Singleton
-from kazu.data.data import Section,Entity
+from kazu.data.data import Section, Entity
 
 logger = logging.getLogger(__name__)
 
@@ -265,18 +265,27 @@ def _nested_default_dict_to_set():
 
 
 class SpacyToKazuObjectMapper:
-    """Maps a :class:`.Section` to a Spacy `Doc <https://spacy.io/api/doc>`_"""
+    """Maps entities and text from a :class:`.Section` to a Spacy `Doc
+    <https://spacy.io/api/doc>`_ using :func:`.basic_spacy_pipeline`\\.
 
-    def __init__(self, nlp: Language, section: Section):
-        self.nlp = nlp
+    After initialisation, relevant mapping information can be recovered
+    from the instance fields.
+    """
+
+    def __init__(self, section: Section):
+        self.spacy_pipelines = SpacyPipelines()
+        self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
+        #: Kazu entity to Spacy `Span <https://spacy.io/api/span>`_.
         self.ent_to_span: dict[Entity, Span] = {}
+        #: Spacy `Span <https://spacy.io/api/span>`_ to Kazu entity class to a set of Kazu entities.
         self.span_to_class_to_ent: defaultdict[
             Span, defaultdict[str, set[Entity]]
         ] = _nested_default_dict_to_set()
+        #: Spacy `Token <https://spacy.io/api/token>`_ to Kazu entity class to a set of Kazu entities.
         self.token_to_class_to_ent: defaultdict[
             Token, defaultdict[str, set[Entity]]
         ] = _nested_default_dict_to_set()
-        spacy_doc: Doc = self.nlp(section.text)
+        spacy_doc: Doc = self.spacy_pipelines.process_single(section.text, BASIC_PIPELINE_NAME)
         for entity in section.entities:
             entity_class = entity.entity_class
             Token.set_extension(entity_class, default=False, force=True)
