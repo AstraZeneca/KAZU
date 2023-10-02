@@ -253,4 +253,5 @@ nitpick_ignore = [
     ("py:class", "ray._raylet.ObjectRef"),
     # regex doesn't seem to have API docs at all
     ("py:class", "_regex.Pattern"),
+    ("py:class", "ahocorasick.Automaton"),
 ]
