@@ -29,7 +29,7 @@ defaults:
   - SethStep: default
   - SynonymGeneration: default
   - ExplosionStringMatchingStep: default
-  - FastStringMatchingStep: default
+  - MemoryEfficientStringMatchingStep: default
   - MergeOverlappingEntsStep: default
   - StanzaStep: default
   - MappingStep: default

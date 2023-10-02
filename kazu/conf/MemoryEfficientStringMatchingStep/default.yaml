@@ -1,0 +1,2 @@
+_target_: kazu.steps.joint_ner_and_linking.memory_efficient_string_matching.MemoryEfficientStringMatchingStep
+parsers: ${oc.dict.values:ontologies.parsers}

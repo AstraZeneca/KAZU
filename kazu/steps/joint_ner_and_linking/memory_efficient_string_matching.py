@@ -3,18 +3,16 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 import ahocorasick
-import spacy
-from kazu.data.data import Document, Entity, SynonymTermWithMetrics, MentionConfidence, CharSpan
+from spacy.tokens import Span
+
+from kazu.data.data import Document, Entity, SynonymTermWithMetrics, MentionConfidence
 from kazu.database.in_memory_db import SynonymDatabase, ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
-from kazu.ontology_matching.assemble_pipeline import (  # noqa: F401 #we need this import to register the spacy component
-    KazuCustomEnglish,
-)
-from spacy.tokens import Span
 from kazu.steps.step import ParserDependentStep
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.curated_term_tools import filter_curations_for_ner
+from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -27,43 +25,23 @@ EntityEndIndex = int
 MatchedString = str
 
 
-class FastStringMatchingStep(ParserDependentStep):
+class MemoryEfficientStringMatchingStep(ParserDependentStep):
     """A wrapper for the ahocorasick algorithm.
 
     In testing, this implementation is comparable in speed to a Spacy
     `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\,
     and uses a fraction of the memory. Since this implementation is unaware
-    of NLP concepts such as tokenisation, we backfill this capability by
-    checking for word boundaries with the spacy tokeniser.
+    of NLP concepts such as tokenization, we backfill this capability by
+    checking for word boundaries with a custom spacy tokenizer.
     """
 
-    def __init__(
-        self,
-        parsers: Iterable[OntologyParser],
-        include_sentence_indices: bool = True,
-        reload_spacy_at: int = 2000,
-    ):
-        """
-
-        :param parsers:
-        :param include_sentence_indices: Should spacy sentence indices be added to the section?
-        :param reload_spacy_at: Since spacy suffers from
-            `memory leaks <https://github.com/explosion/spaCy/discussions/9362>`_, reload the
-            spacy pipeline to clear the vocab build up after this many calls.
-        """
+    def __init__(self, parsers: Iterable[OntologyParser]):
         super().__init__(parsers)
-        self.include_sentence_offsets = include_sentence_indices
-        self.reload_spacy_at = reload_spacy_at
         self.parsers = parsers
         self.automaton_strict, self.automaton_lc = self.create_automatons()
-        self.nlp = self.reload_spacy_pipeline()
-        self.call_count = 0
+        self.spacy_pipelines = SpacyPipelines()
+        self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
         self.synonym_db = SynonymDatabase()
-
-    def reload_spacy_pipeline(self):
-        nlp = spacy.blank("kazu_custom_en")
-        nlp.add_pipe("sentencizer")
-        return nlp
 
     @kazu_disk_cache.memoize(ignore={0})
     def create_automatons(self):
@@ -153,7 +131,7 @@ class FastStringMatchingStep(ParserDependentStep):
                         terms.append(term_with_metrics)
                     e = Entity.load_contiguous_entity(
                         start=start_index,
-                        end=end_index + 1,
+                        end=end_index,
                         match=original_match,
                         entity_class=entity_class,
                         namespace=self.namespace(),
@@ -165,12 +143,9 @@ class FastStringMatchingStep(ParserDependentStep):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        self.call_count += 1
-        if self.call_count % self.reload_spacy_at == 0:
-            self.nlp = self.reload_spacy_pipeline()
 
         for section in doc.sections:
-            spacy_doc = self.nlp(section.text)
+            spacy_doc = self.spacy_pipelines.process_single(section.text, BASIC_PIPELINE_NAME)
             starts, ends = set(), set()
             for tok in spacy_doc:
                 span = Span(spacy_doc, tok.i, tok.i + 1)
@@ -188,8 +163,4 @@ class FastStringMatchingStep(ParserDependentStep):
                     self._process_automation(
                         self.automaton_strict, section.text, section.text, starts, ends
                     )
-                )
-            if self.include_sentence_offsets:
-                section.sentence_spans = (
-                    CharSpan(sent.start_char, sent.end_char) for sent in spacy_doc.sents
                 )

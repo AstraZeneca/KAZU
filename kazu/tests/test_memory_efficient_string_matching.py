@@ -19,7 +19,9 @@ from kazu.ontology_preprocessing.base import (
 )
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
-from kazu.steps.joint_ner_and_linking.fast_string_matching import FastStringMatchingStep
+from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
+    MemoryEfficientStringMatchingStep,
+)
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
@@ -367,7 +369,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         curations_path=str(TEST_CURATIONS_PATH_PARSER_2),
         data=parser_2_data,
     )
-    step = FastStringMatchingStep(parsers=[parser_1, parser_2])
+    step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2])
     success, failed = step([Document.create_simple_document(example_text)])
     entities = success[0].get_entities()
     assert_matches(entities, match_len, match_texts, match_ontology_dicts)
@@ -429,7 +431,7 @@ def test_pipeline_build_from_parsers_alone(tmp_path, mock_build_fast_string_matc
         },
     )
 
-    step = FastStringMatchingStep(parsers=[parser_1, parser_2, parser_3])
+    step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2, parser_3])
     success, failed = step([Document.create_simple_document(example_text)])
     entities = success[0].get_entities()
 
