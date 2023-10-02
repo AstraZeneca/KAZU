@@ -12,8 +12,11 @@ logger = logging.getLogger(__name__)
 def filter_curations_for_ner(
     curations: Iterable[CuratedTerm], parser: OntologyParser
 ) -> Iterable[CuratedTerm]:
-    """Check curations are still represented in DB before they can be used for
-    NER."""
+    """Filter curations to retain those that can be used for dictionary based
+    NER.
+
+    Also checks the curations are represented in the internal database.
+    """
     original_terms = defaultdict(set)
     inherited_terms = defaultdict(set)
     syn_db = SynonymDatabase()
