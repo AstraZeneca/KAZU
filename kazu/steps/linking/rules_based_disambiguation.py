@@ -3,7 +3,7 @@ from collections import defaultdict
 from enum import Enum, auto
 from typing import Any, Literal, Optional
 
-from kazu.data.data import Document, Entity
+from kazu.data.data import Document, Entity, Section
 from kazu.steps import Step, document_iterating_step
 from spacy.matcher import Matcher
 from spacy.tokens import Span
@@ -126,10 +126,16 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         ent_fp_class_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
         ent_tp_mention_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
         ent_fp_mention_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
+
         key_requires_class_tp = {}
         key_requires_class_fp = {}
         key_requires_mention_tp = {}
         key_requires_mention_fp = {}
+
+        # keep track of only entities that could be affected by this step, so we don't need
+        # to loop over everything later
+        section_to_ents_under_consideration: defaultdict[Section, set[Entity]] = defaultdict(set)
+
         for section in doc.sections:
             mapper = SpacyToKazuObjectMapper(section)
             for entity in section.entities:
@@ -144,8 +150,11 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 maybe_mention_matchers = self.mention_matchers.get(entity_class, {}).get(
                     entity.match
                 )
+                # if neither class nor mention matcher defined (the usual case), just continue
                 if maybe_class_matchers is None and maybe_mention_matchers is None:
                     continue
+
+                section_to_ents_under_consideration[section].add(entity)
 
                 tp_class_result, fp_class_result = self._check_tp_fp_matcher_rules(
                     entity, mapper, maybe_class_matchers
@@ -177,8 +186,8 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 ent_tp_mention_results[key].add(tp_mention_result in self._tp_allowed_values)
                 ent_fp_mention_results[key].add(fp_class_result is MatcherResult.HIT)
 
-        for section in doc.sections:
-            for ent in list(section.entities):
+        for section, ents in section_to_ents_under_consideration.items():
+            for ent in ents:
                 key = (
                     ent.match,
                     ent.entity_class,
