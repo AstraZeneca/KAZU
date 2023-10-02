@@ -38,13 +38,13 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
     def __init__(self, parsers: Iterable[OntologyParser]):
         super().__init__(parsers)
         self.parsers = parsers
-        self.automaton_strict, self.automaton_lc = self.create_automatons()
+        self.automaton_strict, self.automaton_lc = self._create_automatons()
         self.spacy_pipelines = SpacyPipelines()
         self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
         self.synonym_db = SynonymDatabase()
 
     @kazu_disk_cache.memoize(ignore={0})
-    def create_automatons(self):
+    def _create_automatons(self):
         """Create :class:`ahocorasick.Automaton`\\'s for parsers."""
         key_to_ontology_info_lc: defaultdict[str, EntityInfoToOntologyInfoMapping] = defaultdict(
             lambda: defaultdict(set)
@@ -104,12 +104,12 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
         return automaton_strict, automaton_lc
 
-    def word_is_valid(
+    def _word_is_valid(
         self, start_char: int, end_char: int, starts: set[int], ends: set[int]
     ) -> bool:
         return start_char in starts and end_char in ends
 
-    def _process_automation(
+    def _process_automaton(
         self,
         automaton: ahocorasick.Automaton,
         matchable_text: str,
@@ -121,7 +121,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
         for end_index, (match_key, ontology_dict) in automaton.iter(matchable_text):
             start_index = end_index - len(match_key) + 1
             original_match = original_text[start_index : end_index + 1]
-            if self.word_is_valid(start_index, end_index, starts, ends):
+            if self._word_is_valid(start_index, end_index, starts, ends):
                 for (entity_class, confidence), parser_info_set in ontology_dict.items():
                     terms = list()
                     for parser_name, term_norm in parser_info_set:
@@ -154,13 +154,13 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
             if self.automaton_lc is not None:
                 section.entities.extend(
-                    self._process_automation(
+                    self._process_automaton(
                         self.automaton_lc, section.text.lower(), section.text, starts, ends
                     )
                 )
             if self.automaton_strict is not None:
                 section.entities.extend(
-                    self._process_automation(
+                    self._process_automaton(
                         self.automaton_strict, section.text, section.text, starts, ends
                     )
                 )
