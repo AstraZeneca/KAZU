@@ -215,7 +215,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
     def _check_matcher(context: Span, maybe_matcher: Optional[Matcher]) -> MatcherResult:
         if maybe_matcher is None:
             return MatcherResult.NOT_CONFIGURED
-        if bool(maybe_matcher(context)):
+        if maybe_matcher(context):
             return MatcherResult.HIT
         else:
             return MatcherResult.MISS
