@@ -26,7 +26,7 @@ MatcherMentionRules = dict[str, dict[str, dict[TPOrFP, SpacyMatcherRules]]]
 MatcherClassRules = dict[str, dict[TPOrFP, SpacyMatcherRules]]
 MentionMatchers = dict[str, dict[str, TPOrFPMatcher]]
 ClassMatchers = dict[str, TPOrFPMatcher]
-_EntityToClassResults = defaultdict[tuple[str, str], set[bool]]
+_KeyToMatcherResults = dict[tuple[str, str], bool]
 
 
 class MatcherResult(AutoNameEnum):
@@ -133,10 +133,10 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        ent_tp_class_results: _EntityToClassResults = defaultdict(set)
-        ent_fp_class_results: _EntityToClassResults = defaultdict(set)
-        ent_tp_mention_results: _EntityToClassResults = defaultdict(set)
-        ent_fp_mention_results: _EntityToClassResults = defaultdict(set)
+        ent_tp_class_results: _KeyToMatcherResults = {}
+        ent_fp_class_results: _KeyToMatcherResults = {}
+        ent_tp_mention_results: _KeyToMatcherResults = {}
+        ent_fp_mention_results: _KeyToMatcherResults = {}
 
         class_tp_is_configured_for_key = {}
         class_fp_is_configured_for_key = {}
@@ -180,8 +180,13 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                 else:
                     class_fp_is_configured_for_key[key] = True
 
-                ent_tp_class_results[key].add(tp_class_result in self._tp_allowed_values)
-                ent_fp_class_results[key].add(fp_class_result is MatcherResult.HIT)
+                ent_tp_class_results[key] = (
+                    ent_tp_class_results.get(key, False)
+                    or tp_class_result in self._tp_allowed_values
+                )
+                ent_fp_class_results[key] = (
+                    ent_fp_class_results.get(key, False) or fp_class_result is MatcherResult.HIT
+                )
 
                 tp_mention_result, fp_mention_result = self._check_tp_fp_matcher_rules(
                     entity, ent_to_span, maybe_mention_matchers
@@ -195,8 +200,13 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                 else:
                     mention_fp_is_configured_for_key[key] = True
 
-                ent_tp_mention_results[key].add(tp_mention_result in self._tp_allowed_values)
-                ent_fp_mention_results[key].add(fp_class_result is MatcherResult.HIT)
+                ent_tp_mention_results[key] = (
+                    ent_tp_mention_results.get(key, False)
+                    or tp_mention_result in self._tp_allowed_values
+                )
+                ent_fp_mention_results[key] = (
+                    ent_fp_mention_results.get(key, False) or fp_class_result is MatcherResult.HIT
+                )
 
         for section, ents in section_to_ents_under_consideration.items():
             for ent in ents:
@@ -205,19 +215,10 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                     ent.entity_class,
                 )
                 if (
-                    (class_fp_is_configured_for_key[key] and True in ent_fp_class_results[key])
-                    or (
-                        class_tp_is_configured_for_key[key]
-                        and True not in ent_tp_class_results[key]
-                    )
-                    or (
-                        mention_fp_is_configured_for_key[key]
-                        and True in ent_fp_mention_results[key]
-                    )
-                    or (
-                        mention_tp_is_configured_for_key[key]
-                        and True not in ent_tp_mention_results[key]
-                    )
+                    (class_fp_is_configured_for_key[key] and ent_fp_class_results[key])
+                    or (class_tp_is_configured_for_key[key] and not ent_tp_class_results[key])
+                    or (mention_fp_is_configured_for_key[key] and ent_fp_mention_results[key])
+                    or (mention_tp_is_configured_for_key[key] and not ent_tp_mention_results[key])
                 ):
                     section.entities.remove(ent)
 
