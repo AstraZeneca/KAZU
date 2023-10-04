@@ -37,7 +37,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
 
     This step utilises Spacy `Matcher <https://spacy.io/api/matcher>`_
     rules to determine whether an entity class and or/mention entities are valid or not.
-    These Matcher rules operate on the sentence in which each under consideration
+    These Matcher rules operate on the sentence in which each mention under consideration
     is located.
 
     Rules can have both true positive and false positive aspects. If defined, that
@@ -46,7 +46,6 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
 
     Non-contiguous entities are evaluated on the full span of the text they cover, rather
     than the specific tokens.
-
     """
 
     _tp_allowed_values = {MatcherResult.HIT, MatcherResult.NOT_CONFIGURED}
