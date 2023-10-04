@@ -51,7 +51,7 @@ For most use cases we've encountered, the default configuration should suffice. 
         go_cc:
           - CC_GENE_ONTOLOGY
 
-4) Disambiguate the entity class of exactly overlappings entities within a document using :py:class:`~kazu.steps.linking.entity_class_disambiguation.EntityClassDisambiguationStep`
+4) Apply rules to disambiguate certain entity classes and mentions within a document using :py:class:`~kazu.steps.linking.rules_based_disambiguation.RulesBasedEntityClassDisambiguationFilterStep`
 
 5) Decide which candidates are appropriate and extract mappings accordingly. This uses :py:class:`~kazu.steps.linking.post_processing.mapping_step.MappingStep`
 
