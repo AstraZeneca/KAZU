@@ -200,7 +200,9 @@ def _create_test_docs(doc1_text: str, doc2_text: str):
     return doc1, doc2
 
 
-def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
+def test_RulesBasedEntityClassDisambiguationFilterStep_pathological(
+    mock_kazu_disk_cache_on_parsers,
+):
     patho_1 = "Insulin is a molecule or protein."  # fails on mention result
     patho_2 = "Insulin is a molecule or gene."  # fails on class result
 
