@@ -1,5 +1,6 @@
 _convert_: 'all'
 _target_: kazu.steps.linking.rules_based_disambiguation.RulesBasedEntityClassDisambiguationFilterStep
+parsers: ${oc.dict.values:ontologies.parsers}
 class_matcher_rules:
   cell_line:
     tp:
