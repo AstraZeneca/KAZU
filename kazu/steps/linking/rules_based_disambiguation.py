@@ -22,6 +22,7 @@ MatcherMentionRules = dict[str, dict[str, dict[TPOrFP, SpacyMatcherRules]]]
 MatcherClassRules = dict[str, dict[TPOrFP, SpacyMatcherRules]]
 MentionMatchers = dict[str, dict[str, TPOrFPMatcher]]
 ClassMatchers = dict[str, TPOrFPMatcher]
+_EntityToClassResults = defaultdict[tuple[str, str], set[bool]]
 
 
 class MatcherResult(AutoNameEnum):
@@ -123,15 +124,15 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        ent_tp_class_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
-        ent_fp_class_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
-        ent_tp_mention_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
-        ent_fp_mention_results: defaultdict[tuple[str, str], set[bool]] = defaultdict(set)
+        ent_tp_class_results: _EntityToClassResults = defaultdict(set)
+        ent_fp_class_results: _EntityToClassResults = defaultdict(set)
+        ent_tp_mention_results: _EntityToClassResults = defaultdict(set)
+        ent_fp_mention_results: _EntityToClassResults = defaultdict(set)
 
-        key_requires_class_tp = {}
-        key_requires_class_fp = {}
-        key_requires_mention_tp = {}
-        key_requires_mention_fp = {}
+        class_tp_is_configured_for_key = {}
+        class_fp_is_configured_for_key = {}
+        mention_tp_is_configured_for_key = {}
+        mention_fp_is_configured_for_key = {}
 
         # keep track of only entities that could be affected by this step, so we don't need
         # to loop over everything later
@@ -161,13 +162,13 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                     entity, mapper, maybe_class_matchers
                 )
                 if tp_class_result is MatcherResult.NOT_CONFIGURED:
-                    key_requires_class_tp[key] = False
+                    class_tp_is_configured_for_key[key] = False
                 else:
-                    key_requires_class_tp[key] = True
+                    class_tp_is_configured_for_key[key] = True
                 if fp_class_result is MatcherResult.NOT_CONFIGURED:
-                    key_requires_class_fp[key] = False
+                    class_fp_is_configured_for_key[key] = False
                 else:
-                    key_requires_class_fp[key] = True
+                    class_fp_is_configured_for_key[key] = True
 
                 ent_tp_class_results[key].add(tp_class_result in self._tp_allowed_values)
                 ent_fp_class_results[key].add(fp_class_result is MatcherResult.HIT)
@@ -176,13 +177,13 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                     entity, mapper, maybe_mention_matchers
                 )
                 if tp_mention_result is MatcherResult.NOT_CONFIGURED:
-                    key_requires_mention_tp[key] = False
+                    mention_tp_is_configured_for_key[key] = False
                 else:
-                    key_requires_mention_tp[key] = True
+                    mention_tp_is_configured_for_key[key] = True
                 if fp_mention_result is MatcherResult.NOT_CONFIGURED:
-                    key_requires_mention_fp[key] = False
+                    mention_fp_is_configured_for_key[key] = False
                 else:
-                    key_requires_mention_fp[key] = True
+                    mention_fp_is_configured_for_key[key] = True
 
                 ent_tp_mention_results[key].add(tp_mention_result in self._tp_allowed_values)
                 ent_fp_mention_results[key].add(fp_class_result is MatcherResult.HIT)
@@ -194,10 +195,19 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                     ent.entity_class,
                 )
                 if (
-                    (key_requires_class_fp[key] and True in ent_fp_class_results[key])
-                    or (key_requires_class_tp[key] and True not in ent_tp_class_results[key])
-                    or (key_requires_mention_fp[key] and True in ent_fp_mention_results[key])
-                    or (key_requires_mention_tp[key] and True not in ent_tp_mention_results[key])
+                    (class_fp_is_configured_for_key[key] and True in ent_fp_class_results[key])
+                    or (
+                        class_tp_is_configured_for_key[key]
+                        and True not in ent_tp_class_results[key]
+                    )
+                    or (
+                        mention_fp_is_configured_for_key[key]
+                        and True in ent_fp_mention_results[key]
+                    )
+                    or (
+                        mention_tp_is_configured_for_key[key]
+                        and True not in ent_tp_mention_results[key]
+                    )
                 ):
                     section.entities.remove(ent)
 
