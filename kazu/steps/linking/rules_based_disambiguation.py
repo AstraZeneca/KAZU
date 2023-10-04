@@ -114,9 +114,11 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                     if rule_instances is not None:
                         matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
                         matcher.add(f"{class_name}_{target_term}_{rule_type}", rule_instances)
-                        result.setdefault(class_name, {})
-                        result[class_name].setdefault(target_term, {})
-                        result[class_name][target_term][rule_type] = matcher
+                        result_for_class = result.setdefault(class_name, {})
+                        result_for_class_and_target_term = result_for_class.setdefault(
+                            target_term, {}
+                        )
+                        result_for_class_and_target_term[rule_type] = matcher
         self.mention_matchers = result
 
     @document_iterating_step
