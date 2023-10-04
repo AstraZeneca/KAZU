@@ -8,10 +8,7 @@ from string import ascii_lowercase
 from typing import Union, Any, overload, Literal
 
 import spacy
-from spacy.lang.en import English, EnglishDefaults
-from spacy.lang.en.tokenizer_exceptions import TOKENIZER_EXCEPTIONS
-from spacy.tokens import Doc, Span, Token
-from spacy.language import Language
+from kazu.utils.utils import Singleton
 from spacy.lang.char_classes import (
     LIST_ELLIPSES,
     LIST_ICONS,
@@ -21,9 +18,10 @@ from spacy.lang.char_classes import (
     ALPHA,
     HYPHENS,
 )
-
-from kazu.utils.utils import Singleton
-from kazu.data.data import Section, Entity
+from spacy.lang.en import English, EnglishDefaults
+from spacy.lang.en.tokenizer_exceptions import TOKENIZER_EXCEPTIONS
+from spacy.language import Language
+from spacy.tokens import Doc
 
 logger = logging.getLogger(__name__)
 
@@ -262,40 +260,3 @@ class SpacyPipelines(metaclass=Singleton):
 
 def _nested_default_dict_to_set():
     return defaultdict(lambda: defaultdict(set))
-
-
-class SpacyToKazuObjectMapper:
-    """Maps entities and text from a :class:`.Section` to a Spacy `Doc
-    <https://spacy.io/api/doc>`_ using :func:`.basic_spacy_pipeline`\\.
-
-    After initialisation, relevant mapping information can be recovered
-    from the instance fields.
-    """
-
-    def __init__(self, section: Section):
-        self.spacy_pipelines = SpacyPipelines()
-        self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
-        #: Kazu entity to Spacy `Span <https://spacy.io/api/span>`_.
-        self.ent_to_span: dict[Entity, Span] = {}
-        #: Spacy `Span <https://spacy.io/api/span>`_ to Kazu entity class to a set of Kazu entities.
-        self.span_to_class_to_ent: defaultdict[
-            Span, defaultdict[str, set[Entity]]
-        ] = _nested_default_dict_to_set()
-        #: Spacy `Token <https://spacy.io/api/token>`_ to Kazu entity class to a set of Kazu entities.
-        self.token_to_class_to_ent: defaultdict[
-            Token, defaultdict[str, set[Entity]]
-        ] = _nested_default_dict_to_set()
-        spacy_doc: Doc = self.spacy_pipelines.process_single(section.text, BASIC_PIPELINE_NAME)
-        for entity in section.entities:
-            entity_class = entity.entity_class
-            Token.set_extension(entity_class, default=False, force=True)
-            span = spacy_doc.char_span(
-                start_idx=entity.start, end_idx=entity.end, label=entity.entity_class
-            )
-
-            self.ent_to_span[entity] = span
-            self.span_to_class_to_ent[span][entity_class].add(entity)
-
-            for token in span:
-                token._.set(entity.entity_class, True)
-                self.token_to_class_to_ent[token][entity.entity_class].add(entity)
