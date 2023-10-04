@@ -3,6 +3,7 @@ from kazu.data.data import Document, Entity, Section
 from kazu.steps.linking.rules_based_disambiguation import (
     RulesBasedEntityClassDisambiguationFilterStep,
 )
+from kazu.tests.utils import DummyParser
 
 DRUG_TP_CLASS_BLOCK = [
     [
@@ -124,15 +125,23 @@ LOW_INFO_TEXT = "Insulin is commonly studied"
         ),
     ],
 )
-def test_RulesBasedEntityClassDisambiguationFilterStep(class_matcher_rules, mention_matcher_rules):
+def test_RulesBasedEntityClassDisambiguationFilterStep(
+    class_matcher_rules, mention_matcher_rules, mock_kazu_disk_cache_on_parsers
+):
 
     drug_text = "Insulin is a molecule or drug."
     gene_text = "Insulin is a gene or protein."
 
     drug_doc, gene_doc = _create_test_docs(drug_text, gene_text)
+    parsers = [
+        DummyParser(entity_class="drug", name="test1"),
+        DummyParser(entity_class="gene", name="test2"),
+    ]
 
     step = RulesBasedEntityClassDisambiguationFilterStep(
-        class_matcher_rules=class_matcher_rules, mention_matcher_rules=mention_matcher_rules
+        class_matcher_rules=class_matcher_rules,
+        mention_matcher_rules=mention_matcher_rules,
+        parsers=parsers,
     )
     step([drug_doc, gene_doc])
     drug_ents = drug_doc.get_entities()
@@ -196,7 +205,10 @@ def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
     patho_2 = "Insulin is a molecule or gene."  # fails on class result
 
     patho_1_doc, patho_2_doc = _create_test_docs(patho_1, patho_2)
-
+    parsers = [
+        DummyParser(entity_class="drug", name="test1"),
+        DummyParser(entity_class="gene", name="test2"),
+    ]
     step = RulesBasedEntityClassDisambiguationFilterStep(
         class_matcher_rules={
             "drug": {
@@ -212,6 +224,7 @@ def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
             "drug": {"Insulin": {"tp": DRUG_TP_MENTION_BLOCK, "fp": DRUG_FP_MENTION_BLOCK}},
             "gene": {"Insulin": {"tp": GENE_TP_MENTION_BLOCK, "fp": GENE_FP_MENTION_BLOCK}},
         },
+        parsers=parsers,
     )
     docs = [patho_1_doc, patho_2_doc]
     step(docs)

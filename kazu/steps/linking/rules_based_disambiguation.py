@@ -1,18 +1,22 @@
 import logging
 from collections import defaultdict
 from enum import auto
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Iterable
+
+from spacy.matcher import Matcher
+from spacy.tokens import Span
+
 
 from kazu.data.data import Document, Entity, Section, AutoNameEnum
-from kazu.steps import Step, document_iterating_step
+from kazu.ontology_preprocessing.base import OntologyParser
+from kazu.steps import document_iterating_step
+from kazu.steps.step import ParserDependentStep
 from kazu.utils.spacy_pipeline import (
-    SpacyToKazuObjectMapper,
     SpacyPipelines,
     BASIC_PIPELINE_NAME,
     basic_spacy_pipeline,
 )
-from spacy.matcher import Matcher
-from spacy.tokens import Span
+from kazu.utils.spacy_object_mapper import SpacyToKazuObjectMapper
 
 SpacyMatcherRules = list[list[dict[str, Any]]]
 logger = logging.getLogger(__name__)
@@ -31,7 +35,7 @@ class MatcherResult(AutoNameEnum):
     NOT_CONFIGURED = auto()
 
 
-class RulesBasedEntityClassDisambiguationFilterStep(Step):
+class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
     """Removes instances of :class:`.Entity` from
     :class:`.Section`\\s that don't meet rules based
     disambiguation requirements in at least one location in the document.
@@ -52,7 +56,10 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
     _tp_allowed_values = {MatcherResult.HIT, MatcherResult.NOT_CONFIGURED}
 
     def __init__(
-        self, class_matcher_rules: MatcherClassRules, mention_matcher_rules: MatcherMentionRules
+        self,
+        class_matcher_rules: MatcherClassRules,
+        mention_matcher_rules: MatcherMentionRules,
+        parsers: Iterable[OntologyParser],
     ):
         """
 
@@ -83,6 +90,8 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                     }
                 }
         """
+        super().__init__(parsers)
+        self.mapper = SpacyToKazuObjectMapper(parsers)
         self.class_matcher_rules = class_matcher_rules
         self.mention_matcher_rules = mention_matcher_rules
         self.spacy_pipelines = SpacyPipelines()
@@ -139,7 +148,8 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         section_to_ents_under_consideration: defaultdict[Section, set[Entity]] = defaultdict(set)
 
         for section in doc.sections:
-            mapper = SpacyToKazuObjectMapper(section)
+            ent_to_span = self.mapper(section)
+
             for entity in section.entities:
                 entity_class = entity.entity_class
 
@@ -159,7 +169,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 section_to_ents_under_consideration[section].add(entity)
 
                 tp_class_result, fp_class_result = self._check_tp_fp_matcher_rules(
-                    entity, mapper, maybe_class_matchers
+                    entity, ent_to_span, maybe_class_matchers
                 )
                 if tp_class_result is MatcherResult.NOT_CONFIGURED:
                     class_tp_is_configured_for_key[key] = False
@@ -174,7 +184,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
                 ent_fp_class_results[key].add(fp_class_result is MatcherResult.HIT)
 
                 tp_mention_result, fp_mention_result = self._check_tp_fp_matcher_rules(
-                    entity, mapper, maybe_mention_matchers
+                    entity, ent_to_span, maybe_mention_matchers
                 )
                 if tp_mention_result is MatcherResult.NOT_CONFIGURED:
                     mention_tp_is_configured_for_key[key] = False
@@ -222,11 +232,11 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
 
     @staticmethod
     def _check_tp_fp_matcher_rules(
-        entity: Entity, mapper: SpacyToKazuObjectMapper, matchers: Optional[TPOrFPMatcher]
+        entity: Entity, ent_to_span: dict[Entity, Span], matchers: Optional[TPOrFPMatcher]
     ) -> tuple[MatcherResult, MatcherResult]:
         if matchers is None:
             return MatcherResult.NOT_CONFIGURED, MatcherResult.NOT_CONFIGURED
-        span = mapper.ent_to_span[entity]
+        span = ent_to_span[entity]
         context = span.sent
 
         tp_matcher = matchers.get("tp")
