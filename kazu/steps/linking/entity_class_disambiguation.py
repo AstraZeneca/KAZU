@@ -100,6 +100,11 @@ class EntityClassTfIdfScorer:
 
 
 class EntityClassDisambiguationStep(Step):
+    """
+    .. warning::
+           This step is deprecated and may be removed in a future release.
+    """
+
     def __init__(self, context: dict[str, list[DisambiguationEntry]]):
         """Optionally disambiguates the entity class (anatomy, drug, etc.) of
         entities that exactly share a span in a document.
