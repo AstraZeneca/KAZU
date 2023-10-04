@@ -32,7 +32,7 @@ class MatcherResult(AutoNameEnum):
 
 class RulesBasedEntityClassDisambiguationFilterStep(Step):
     """Removes instances of :class:`.Entity` from
-    :class:`.Section` that don't meet rules based
+    :class:`.Section`\\s that don't meet rules based
     disambiguation requirements in at least one location in the document.
 
     This step utilises Spacy `Matcher <https://spacy.io/api/matcher>`_
