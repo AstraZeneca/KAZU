@@ -53,8 +53,6 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
     than the specific tokens.
     """
 
-    _tp_allowed_values = {MatcherResult.HIT, MatcherResult.NOT_CONFIGURED}
-
     def __init__(
         self,
         class_matcher_rules: MatcherClassRules,
@@ -181,8 +179,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                     class_fp_is_configured_for_key[key] = True
 
                 ent_tp_class_results[key] = (
-                    ent_tp_class_results.get(key, False)
-                    or tp_class_result in self._tp_allowed_values
+                    ent_tp_class_results.get(key, False) or tp_class_result is MatcherResult.HIT
                 )
                 ent_fp_class_results[key] = (
                     ent_fp_class_results.get(key, False) or fp_class_result is MatcherResult.HIT
@@ -201,8 +198,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                     mention_fp_is_configured_for_key[key] = True
 
                 ent_tp_mention_results[key] = (
-                    ent_tp_mention_results.get(key, False)
-                    or tp_mention_result in self._tp_allowed_values
+                    ent_tp_mention_results.get(key, False) or tp_mention_result is MatcherResult.HIT
                 )
                 ent_fp_mention_results[key] = (
                     ent_fp_mention_results.get(key, False) or fp_class_result is MatcherResult.HIT
