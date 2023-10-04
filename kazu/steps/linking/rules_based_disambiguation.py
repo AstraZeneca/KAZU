@@ -1,18 +1,18 @@
 import logging
 from collections import defaultdict
-from enum import Enum, auto
+from enum import auto
 from typing import Any, Literal, Optional
 
-from kazu.data.data import Document, Entity, Section
+from kazu.data.data import Document, Entity, Section, AutoNameEnum
 from kazu.steps import Step, document_iterating_step
-from spacy.matcher import Matcher
-from spacy.tokens import Span
 from kazu.utils.spacy_pipeline import (
     SpacyToKazuObjectMapper,
     SpacyPipelines,
     BASIC_PIPELINE_NAME,
     basic_spacy_pipeline,
 )
+from spacy.matcher import Matcher
+from spacy.tokens import Span
 
 SpacyMatcherRules = list[list[dict[str, Any]]]
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ MentionMatchers = dict[str, dict[str, TPOrFPMatcher]]
 ClassMatchers = dict[str, TPOrFPMatcher]
 
 
-class MatcherResult(Enum):
+class MatcherResult(AutoNameEnum):
     HIT = auto()
     MISS = auto()
     NOT_CONFIGURED = auto()
