@@ -65,9 +65,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 )
                 continue
 
-            curations_for_ner = set(filter_curations_for_ner(parser_curations, parser))
-
-            for curation in curations_for_ner:
+            for curation in filter_curations_for_ner(parser_curations, parser):
                 # a curation can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
