@@ -483,6 +483,8 @@ def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
     match_data = set()
     parser_data = set()
     for m in matches:
+        assert m.match == example_text[m.start : m.end + 1]
+
         syn_term = next(iter(m.syn_term_to_synonym_terms))
         match_data.add(
             (
