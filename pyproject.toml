@@ -34,7 +34,6 @@ dependencies = [
   "pymongo>=4.3.3",
   "rapidfuzz>=1.0.0",
   "scikit-learn>=0.24.0",
-  "stanza>=1.0.0,<1.6.0", # We're seeing IT test failures on linux with stanza 1.6.0
   "regex>=2020.1.7",
   "psutil>=5.3.0",
   "cachetools>=5.2.0",
@@ -71,7 +70,7 @@ model_training = [
 all_steps = [
   "py4j>=0.10.9",
   "rdkit>=2023.3.1",
-  "stanza>=1.0.0",
+  "stanza>=1.0.0,<1.6.0", # We're seeing IT test failures on linux with stanza 1.6.0
 ]
 dev = [
   "kazu[webserver,typed,model_training,all_steps]",
