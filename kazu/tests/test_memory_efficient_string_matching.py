@@ -24,8 +24,9 @@ from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 
-pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
-
+pytestmark = pytest.mark.usefixtures(
+    "mock_kazu_disk_cache_on_parsers", "mock_build_fast_string_matcher_cache"
+)
 
 example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
     This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
@@ -347,7 +348,6 @@ def test_pipeline_build_from_parsers_and_curated_list(
     match_ontology_dicts,
     parser_1_data,
     parser_2_data,
-    mock_build_fast_string_matcher_cache,
 ):
 
     Singleton.clear_all()
@@ -375,7 +375,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
     assert_matches(entities, match_len, match_texts, match_ontology_dicts)
 
 
-def test_pipeline_build_from_parsers_alone(tmp_path, mock_build_fast_string_matcher_cache):
+def test_pipeline_build_from_parsers_alone(tmp_path):
     Singleton.clear_all()
     parser_1 = DummyParser(
         name="first_mock_parser",
