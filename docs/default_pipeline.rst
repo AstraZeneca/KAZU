@@ -4,7 +4,7 @@ At a glance: How to use the default Kazu pipeline
 For most use cases we've encountered, the default configuration should suffice. This will
 
 1) Tag the following entity classes with a curated dictionary using the Spacy PhraseMatcher. This uses
-   :py:class:`~kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`
+   :py:class:`~kazu.steps.joint_ner_and_linking.memory_efficient_string_matching.MemoryEfficientStringMatchingStep`
 
    a. gene
    b. disease
@@ -13,6 +13,11 @@ For most use cases we've encountered, the default configuration should suffice. 
    e. cell_type
    f. gene ontology (split into go_bp, go_cc and go_mf)
    g. anatomy
+
+.. note::
+   This step is limited to string matching only. A full `FlashText <https://github.com/vi3k6i5/flashtext>`_ implementation
+   (i.e. based on tokens) is available via :py:class:`~kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`,
+   however this uses considerably more memory.
 
 2) Tag the following entity classes with the TinyBERN2 model (see the
    `EMNLP Kazu paper <https://aclanthology.org/2022.emnlp-industry.63>`_ for more details).
