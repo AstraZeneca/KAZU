@@ -805,7 +805,7 @@ class CuratedTerm:
     :class:`.SynonymTerm`.
 
     This can affect both the behaviour of :class:`kazu.ontology_preprocessing.base.OntologyParser`,
-    and dictionary based NER (if using the :class:`kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep`).
+    and dictionary based NER.
 
     Example 1:
 
