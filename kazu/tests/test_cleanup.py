@@ -63,8 +63,13 @@ def test_configured_mapping_cleanup_discards_ambiguous_mappings(kazu_test_config
     assert mapping.string_match_confidence == StringMatchConfidence.HIGHLY_LIKELY
 
 
-def test_configured_entity_cleanup_discards_unmapped_explosion_ents(kazu_test_config):
+def test_configured_entity_cleanup_discards_unmapped_explosion_ents(override_kazu_test_config):
     explosion_step_namespace = ExplosionStringMatchingStep.namespace()
+    kazu_test_config = override_kazu_test_config(
+        overrides=[
+            f"CleanupActions.EntityFilterCleanupAction.filter_fns.0.from_ent_namespaces=[{explosion_step_namespace}]"
+        ]
+    )
     mock_other_ner_namespace = "mock_other_ner_namespace"
 
     action = instantiate(kazu_test_config.CleanupActions.EntityFilterCleanupAction)
