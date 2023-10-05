@@ -10,16 +10,17 @@ from typing import Any, Union, Optional, cast
 
 import spacy
 import srsly
+from spacy.language import Language
+from spacy.matcher import PhraseMatcher, Matcher
+from spacy.tokens import Span, SpanGroup, Doc, Token
+from spacy.util import SimpleFrozenList
+
 from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.utils.curated_term_tools import filter_curations_for_ner
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
-from spacy.language import Language
-from spacy.matcher import PhraseMatcher, Matcher
-from spacy.tokens import Span, SpanGroup, Doc, Token
-from spacy.util import SimpleFrozenList
 
 GENE = "gene"
 DRUG = "drug"
