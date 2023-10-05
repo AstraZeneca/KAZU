@@ -4,4 +4,5 @@ lookup_cache_size: 50000
 top_n: 20
 skip_ner_namespaces:
   - _target_: kazu.steps.joint_ner_and_linking.explosion.ExplosionStringMatchingStep.namespace
+  - _target_: kazu.steps.joint_ner_and_linking.memory_efficient_string_matching.MemoryEfficientStringMatchingStep.namespace
 indices: ${oc.dict.values:ontologies.indices}
