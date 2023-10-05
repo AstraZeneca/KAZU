@@ -206,6 +206,6 @@ def mock_build_fast_string_matcher_cache(monkeypatch):
     # type ignore as above - mypy doesn't know this function is 'wrapped'
     monkeypatch.setattr(
         MemoryEfficientStringMatchingStep,
-        "_create_automatons",
-        MemoryEfficientStringMatchingStep._create_automatons.__wrapped__,  # type: ignore[attr-defined]
+        "_create_automaton",
+        MemoryEfficientStringMatchingStep._create_automaton.__wrapped__,  # type: ignore[attr-defined]
     )
