@@ -84,7 +84,11 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 case_insensitive_automaton.add_word(key.lower(), (key, entity_to_ontology_info))
             case_insensitive_automaton.make_automaton()
         else:
-            case_insensitive_automaton = None
+            raise RuntimeError(
+                f"No valid curations were available for {self.__class__.__name__}. Either remove this step "
+                "from your pipeline or ensure at least one valid curation is generated from the chosen "
+                "parsers."
+            )
 
         return case_insensitive_automaton
 
