@@ -150,10 +150,13 @@ filterwarnings = [
 [tool.mypy]
 strict = true
 warn_unreachable = true
-# these are too noisy for us with our existing codebase
-disallow_untyped_defs = false
-disallow_any_generics = false
+# this is painful to have on because if there is an existing function that is 'untyped', any new
+# call site of it would raise a new error. We only really care about our own functions that are 'untyped',
+# which would raise an error anyway for having no/incomplete typing if one was introduced in a new file.
 disallow_untyped_calls = false
+# turning this on is a pain, as it means __init__.py files like kazu/steps/__init__.py
+# need additional work to 'reexport' symbols - probably the simplest is a redundant 'from x import y as y' (adding the as y)
+# but this seems more work than is justified by the benefit.
 no_implicit_reexport = false
 
 [[tool.mypy.overrides]]
@@ -179,6 +182,76 @@ module = [
 # in particular, return types for pytest test
 # functions are always None, we don't want to have to annotate that
 disallow_incomplete_defs = false
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+# the number in the comment after each line is the number of errors of this type for that file
+# it's possible this becomes out of date if we fix a few issues in one file, or introduce a new
+# issue(!) but this seems reasonably unlikely.
+# the numbers can be re-calculated with:
+# mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{print $2"  # "$1""}'
+module = [
+  "kazu.data.data",  # 18
+  "kazu.distillation.models",  # 10
+  "kazu.utils.string_normalizer",  # 8
+  "conftest",  # 8
+  "kazu.utils.build_and_test_model_packs",  # 7
+  "kazu.ontology_matching.ontology_matcher",  # 6
+  "kazu.linking.sapbert.train",  # 5
+  "kazu.annotation.acceptance_test",  # 4
+  "kazu.utils.utils",  # 3
+  "kazu.utils.spacy_pipeline",  # 3
+  "kazu.ontology_preprocessing.parsers",  # 3
+  "kazu.web.server",  # 2
+  "kazu.ontology_preprocessing.synonym_generation",  # 2
+  "kazu.distillation.tiny_transformers",  # 2
+  "kazu.database.in_memory_db",  # 2
+  "kazu.annotation.label_studio",  # 2
+  "kazu.web.req_id_header",  # 1
+  "kazu.utils.abbreviation_detector",  # 1
+  "kazu.steps.other.cleanup",  # 1
+  "kazu.steps.ner.tokenized_word_processor",  # 1
+  "kazu.steps.linking.post_processing.strategy_runner",  # 1
+  "kazu.steps.linking.post_processing.disambiguation.context_scoring",  # 1
+  "kazu.ontology_preprocessing.base",  # 1
+  "kazu.distillation.metrics",  # 1
+  # this is docs/conf.py
+  "conf"  # 1
+]
+# we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
+# to fix at that time for the payoff. Having overrides for the modules that would error rather than
+# everywhere means that new files get the full 'strict' treatment (and also existing files that are already ok),
+# and the lines above (combined with the counts) should make it easier to 'chip away' at
+# these existing untyped functions file-by-file incrementally.
+disallow_untyped_defs = false
+
+
+[[tool.mypy.overrides]]
+# as above - number is errors for that file
+module = [
+  "kazu.distillation.models",  # 8
+  "kazu.data.data",  # 8
+  "kazu.annotation.label_studio",  # 8
+  "kazu.linking.sapbert.train",  # 6
+  "kazu.steps.linking.post_processing.xref_manager",  # 3
+  "kazu.steps.linking.post_processing.mapping_strategies.strategies",  # 3
+  "kazu.web.server",  # 2
+  "kazu.web.jwtauth",  # 2
+  "kazu.utils.link_index",  # 2
+  "kazu.utils.build_and_test_model_packs",  # 2
+  "kazu.steps.ner.hf_token_classification",  # 2
+  "kazu.steps.linking.post_processing.disambiguation.strategies",  # 2
+  "kazu.ontology_preprocessing.parsers",  # 2
+  "kazu.annotation.acceptance_test",  # 2
+  "kazu.utils.string_normalizer",  # 1
+  "kazu.steps.linking.post_processing.disambiguation.context_scoring",  # 1
+  "kazu.steps.linking.entity_class_disambiguation",  # 1
+  "kazu.pipeline.pipeline",  # 1
+  "kazu.ontology_preprocessing.base",  # 1
+  "kazu.ontology_matching.ontology_matcher"  # 1
+]
+# as above, we want this to be true for files it can be, especially new files.
+disallow_any_generics = false
 
 [tool.towncrier]
 package = "kazu"
