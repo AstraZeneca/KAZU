@@ -572,7 +572,7 @@ class KazuWebUI:
 
     @app.get("/")
     def root(self) -> RedirectResponse:
-        return RedirectResponse("/index.html")
+        return RedirectResponse("/ui/index.html")
 
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")
