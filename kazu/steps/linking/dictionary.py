@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Optional
 
 from kazu.data.data import Document, SynonymTermWithMetrics
-from kazu.steps.step import Step, document_batch_step
+from kazu.steps import Step, document_batch_step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.link_index import DictionaryIndex
