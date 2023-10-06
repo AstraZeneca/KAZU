@@ -10,7 +10,7 @@ from spacy.tokens import Span
 from kazu.data.data import Document, Entity, Section, AutoNameEnum
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
-from kazu.steps.step import ParserDependentStep
+from kazu.steps import ParserDependentStep
 from kazu.utils.spacy_pipeline import (
     SpacyPipelines,
     BASIC_PIPELINE_NAME,

@@ -15,7 +15,7 @@ from kazu.ontology_matching import assemble_pipeline
 from kazu.ontology_matching.ontology_matcher import OntologyMatcher, _MatcherOntologyData
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_batch_step
-from kazu.steps.step import ParserDependentStep
+from kazu.steps import ParserDependentStep
 from kazu.utils.spacy_pipeline import SpacyPipelines
 from kazu.utils.utils import PathLike, as_path
 from spacy.tokens import Span, Doc
