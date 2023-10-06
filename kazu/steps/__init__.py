@@ -3,7 +3,11 @@ from kazu.steps.document_post_processing.abbreviation_finder import Abbreviation
 from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
 from kazu.steps.linking.dictionary import DictionaryEntityLinkingStep
 from kazu.steps.linking.post_processing.mapping_step import MappingStep
+from kazu.steps.linking.rules_based_disambiguation import (
+    RulesBasedEntityClassDisambiguationFilterStep,
+)
 from kazu.steps.ner.hf_token_classification import TransformersModelForTokenClassificationNerStep
+from kazu.steps.ner.opsin import OpsinStep
 from kazu.steps.ner.seth import SethStep
 from kazu.steps.ner.spacy_ner import SpacyNerStep
 from kazu.steps.other.cleanup import CleanupStep
