@@ -23,7 +23,8 @@
   "overrides": {
     "word-wrap": "npm:@aashutoshrathi/word-wrap@1.2.6",
     "css-select": "5.1.0",
-    "d3-color": "3.1.0"
+    "d3-color": "3.1.0",
+    "postcss": "8.4.31"
   },
   "scripts": {
     "start": "react-scripts start",
