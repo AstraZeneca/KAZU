@@ -256,7 +256,3 @@ class SpacyPipelines(metaclass=Singleton):
         self.name_to_model[model_name] = func()
         for callback in self.name_to_reload_callbacks[model_name]:
             callback()
-
-
-def _nested_default_dict_to_set():
-    return defaultdict(lambda: defaultdict(set))
