@@ -124,7 +124,7 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
         "parser_2_curations",
         "match_len",
         "match_texts",
-        "match_ontology_dicts",
+        "match_ontology_data",
         "parser_1_data",
         "parser_2_data",
     ),
@@ -134,26 +134,20 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
             [SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
             2,
             {"ComplexVII Disease\u03B1"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-                {
-                    ENT_TYPE_2: {
-                        (
-                            SECOND_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
+            {
+                (
+                    ENT_TYPE_1,
+                    FIRST_MOCK_PARSER,
+                    COMPLEX_7_DISEASE_ALPHA_NORM,
+                    MentionConfidence.HIGHLY_LIKELY,
+                ),
+                (
+                    ENT_TYPE_2,
+                    SECOND_MOCK_PARSER,
+                    COMPLEX_7_DISEASE_ALPHA_NORM,
+                    MentionConfidence.HIGHLY_LIKELY,
+                ),
+            },
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             id="Two curated case insensitive terms from two parsers Both should hit",
@@ -163,17 +157,14 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
             [dataclasses.replace(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, case_sensitive=True)],
             1,
             {"ComplexVII Disease\u03B1"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
+            {
+                (
+                    ENT_TYPE_1,
+                    FIRST_MOCK_PARSER,
+                    COMPLEX_7_DISEASE_ALPHA_NORM,
+                    MentionConfidence.HIGHLY_LIKELY,
+                )
+            },
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             id="Two curated terms from two parsers One should hit to test case sensitivity",
@@ -187,17 +178,14 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
             ],
             1,
             {"ComplexVII Disease\u03B1"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
+            {
+                (
+                    ENT_TYPE_1,
+                    FIRST_MOCK_PARSER,
+                    COMPLEX_7_DISEASE_ALPHA_NORM,
+                    MentionConfidence.HIGHLY_LIKELY,
+                )
+            },
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             id="Two curated terms from two parsers One should hit to test ignore logic",
@@ -212,17 +200,14 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
             [],
             1,
             {"This sentence is just to test"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            "THIS SENTENCE IS JUST TO TEST",
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
+            {
+                (
+                    ENT_TYPE_1,
+                    FIRST_MOCK_PARSER,
+                    "THIS SENTENCE IS JUST TO TEST",
+                    MentionConfidence.HIGHLY_LIKELY,
+                )
+            },
             PARSER_1_DEFAULT_DATA,
             PARSER_2_DEFAULT_DATA,
             id="One curated term with a novel synonym This should be added to the synonym DB and hit",
@@ -235,7 +220,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
     parser_2_curations,
     match_len,
     match_texts,
-    match_ontology_dicts,
+    match_ontology_data,
     parser_1_data,
     parser_2_data,
 ):
@@ -262,7 +247,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
     step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2])
     success, failed = step([Document.create_simple_document(example_text)])
     entities = success[0].get_entities()
-    assert_matches(entities, match_len, match_texts, match_ontology_dicts)
+    assert_matches(entities, match_len, match_texts, match_ontology_data)
 
 
 def test_pipeline_build_from_parsers_alone():
@@ -334,44 +319,27 @@ def test_pipeline_build_from_parsers_alone():
         "ComplexVII Disease\u03B1",
         "amongst",
     }
-    match_ontology_dicts = [
-        {"ent_type_1": {("first_mock_parser", "Q42_SYN", str(MentionConfidence.POSSIBLE.value))}},
-        {"ent_type_1": {("first_mock_parser", "Q42_SYN", str(MentionConfidence.POSSIBLE.value))}},
-        {"ent_type_2": {("second_mock_parser", "Q8_SYN", str(MentionConfidence.POSSIBLE.value))}},
-        {
-            "ent_type_3": {
-                ("third_mock_parser", "SYNONYMTERM", str(MentionConfidence.POSSIBLE.value))
-            }
-        },
-        {
-            "ent_type_3": {
-                (
-                    "third_mock_parser",
-                    "COMPLEX 7 DISEASE ALPHA",
-                    str(MentionConfidence.PROBABLE.value),
-                )
-            }
-        },
-        {
-            "ent_type_3": {
-                (
-                    "third_mock_parser",
-                    "COMPLEX 7 DISEASE ALPHA",
-                    str(MentionConfidence.PROBABLE.value),
-                )
-            }
-        },
-        {"ent_type_3": {("third_mock_parser", "AMONGST", str(MentionConfidence.PROBABLE.value))}},
-    ]
+    match_ontology_data = {
+        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.POSSIBLE),
+        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.POSSIBLE),
+        ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.POSSIBLE),
+        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.POSSIBLE),
+        (
+            "ent_type_3",
+            "third_mock_parser",
+            "COMPLEX 7 DISEASE ALPHA",
+            MentionConfidence.PROBABLE,
+        ),
+        ("ent_type_3", "third_mock_parser", "AMONGST", MentionConfidence.PROBABLE),
+    }
 
-    assert_matches(entities, match_len, match_texts, match_ontology_dicts)
+    assert_matches(entities, match_len, match_texts, match_ontology_data)
 
 
-def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
+def assert_matches(matches, match_len, match_texts, match_ontology_data):
     assert len(matches) == match_len
     assert set(m.match for m in matches) == match_texts
     match_data = set()
-    parser_data = set()
     for m in matches:
         assert m.match == example_text[m.start : m.end + 1]
 
@@ -381,11 +349,7 @@ def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
                 m.entity_class,
                 syn_term.parser_name,
                 syn_term.term_norm,
-                str(m.mention_confidence.value),
+                m.mention_confidence,
             )
         )
-    for item in match_ontology_dicts:
-        for k, v in item.items():
-            parser_data.add((k,) + next(iter(v)))
-
-    assert match_data == parser_data
+    assert match_data == match_ontology_data
