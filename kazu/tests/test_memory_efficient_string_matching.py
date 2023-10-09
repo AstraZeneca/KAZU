@@ -485,4 +485,4 @@ def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
         for k, v in item.items():
             parser_data.add((k,) + next(iter(v)))
 
-    assert len(match_data.symmetric_difference(parser_data)) == 0
+    assert match_data == parser_data
