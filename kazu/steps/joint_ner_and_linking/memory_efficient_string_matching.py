@@ -138,7 +138,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                     ]
                     e = Entity.load_contiguous_entity(
                         start=start_index,
-                        end=end_index,
+                        end=end_index + 1,
                         match=original_match,
                         entity_class=entity_class,
                         namespace=self.namespace(),

@@ -341,7 +341,7 @@ def assert_matches(matches, match_len, match_texts, match_ontology_data):
     assert set(m.match for m in matches) == match_texts
     match_data = set()
     for m in matches:
-        assert m.match == example_text[m.start : m.end + 1]
+        assert m.match == example_text[m.start : m.end]
 
         syn_term = next(iter(m.syn_term_to_synonym_terms))
         match_data.add(
