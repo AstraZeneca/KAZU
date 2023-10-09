@@ -30,9 +30,13 @@ class SpacyToKazuObjectMapper:
         for entity in section.entities:
             entity_class = entity.entity_class
             span = spacy_doc.char_span(
-                start_idx=entity.start, end_idx=entity.end, label=entity_class
+                start_idx=entity.start,
+                end_idx=entity.end,
+                label=entity_class,
+                alignment_mode="expand",
             )
-            ent_to_span[entity] = span
-            for token in span:
-                token._.set(entity_class, True)
+            if span is not None:
+                ent_to_span[entity] = span
+                for token in span:
+                    token._.set(entity_class, True)
         return ent_to_span

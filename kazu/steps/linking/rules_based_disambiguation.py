@@ -149,6 +149,11 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
             ent_to_span = self.mapper(section)
 
             for entity in section.entities:
+                if entity not in ent_to_span:
+                    # there's a chance that an entity can't be matched to a spacy
+                    # span, e.g. if the entity only covers non-token text.
+                    # We skip the entity in this case.
+                    continue
                 entity_class = entity.entity_class
 
                 entity_match = entity.match
@@ -165,7 +170,6 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                     continue
 
                 section_to_ents_under_consideration[section].add(entity)
-
                 tp_class_result, fp_class_result = self._check_tp_fp_matcher_rules(
                     entity, ent_to_span, maybe_class_matchers
                 )
