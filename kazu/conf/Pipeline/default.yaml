@@ -10,7 +10,7 @@ steps:
   - ${MergeOverlappingEntsStep}
 step_groups:
   ner_only:
-    - _target_: kazu.steps.joint_ner_and_linking.explosion.MemoryEfficientStringMatchingStep.namespace
+    - _target_: kazu.steps.joint_ner_and_linking.memory_efficient_string_matching.MemoryEfficientStringMatchingStep.namespace
     - _target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep.namespace
   linking_only:
     - _target_: kazu.steps.linking.dictionary.DictionaryEntityLinkingStep.namespace
