@@ -1,8 +1,9 @@
+import functools
 import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union, cast, overload
 from collections.abc import Iterable
 from collections.abc import (
     Mapping as CollectionsMapping,
@@ -27,12 +28,39 @@ logger = logging.getLogger(__name__)
 _TAX_NAME = "taxonomy"
 
 
+def _merge_task_dicts(task_list_1: list[dict], task_list_2: list[dict]) -> list[dict]:
+    results = []
+    for task_1, task2 in zip(task_list_1, task_list_2):
+        assert task_1["data"] == task2["data"], "task data does not match"
+        result = {}
+        result.update(task_1)
+        result["annotations"].extend(task2["annotations"])
+        results.append(result)
+    return results
+
+
 class KazuToLabelStudioConverter:
     """Converts a Kazu :class:`.Document` into Label Studio tasks.
 
     Since LS is region based, we need to create a new region for every CharSpan (even
     overlapping ones), and add entity information (class, mappings etc) to the region.
     """
+
+    @classmethod
+    def convert_multiple_docs_to_tasks(cls, docs: Iterable[set[Document]]) -> Iterable[dict]:
+        """If you want to utilise multiple annotation views in label studio,
+        you can supply an iterable of sets of kazu documents annotated by
+        different pipelines. The entity information from each will be added to
+        an independent annotation set in label studio.
+
+        :param docs:
+        :return:
+        """
+        for doc_list in docs:
+            task_list = []
+            for doc in doc_list:
+                task_list.append(list(cls.convert_single_doc_to_tasks(doc)))
+            yield from functools.reduce(_merge_task_dicts, task_list)
 
     @classmethod
     def convert_single_doc_to_tasks(cls, doc: Document) -> Iterable[dict]:
@@ -515,10 +543,29 @@ class LabelStudioManager:
             logger.error(f"failed to create project {self.project_name}")
             raise e
 
+    @overload
     def update_view(self, view: LabelStudioAnnotationView, docs: list[Document]) -> None:
-        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
-        payload = {"label_config": view.create_main_view(tasks)}
+        pass
 
+    @overload
+    def update_view(self, view: LabelStudioAnnotationView, docs: list[set[Document]]) -> None:
+        pass
+
+    def update_view(self, view, docs):
+        """Update the view of a label studio project.
+
+        :param view:
+        :param docs: either a list of kazu documents, or a list of a set of kazu documents. If using the latter,
+            each document in the set should be identical, apart from the entity information. Each documents entity
+            information will form a seperate annotation set in label studio.
+        :return:
+        """
+        if isinstance(docs[0], set):
+            tasks = list(KazuToLabelStudioConverter.convert_multiple_docs_to_tasks(docs))
+        else:
+            tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
+
+        payload = {"label_config": view.create_main_view(tasks)}
         try:
             resp = requests.patch(
                 f"{self.url}/api/projects/{self.project_id}",
@@ -532,8 +579,26 @@ class LabelStudioManager:
             logger.error(f"failed to update view for project {self.project_name}")
             raise e
 
+    @overload
     def update_tasks(self, docs: list[Document]) -> None:
-        tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
+        pass
+
+    @overload
+    def update_tasks(self, docs: list[set[Document]]) -> None:
+        pass
+
+    def update_tasks(self, docs):
+        """Add tasks to a label studio project.
+
+        :param docs: either a list of kazu documents, or a list of a set of kazu documents. If using the latter,
+            each document in the set should be identical, apart from the entity information. Each documents entity
+            information will form a seperate annotation set in label studio.
+        :return:
+        """
+        if isinstance(docs[0], set):
+            tasks = list(KazuToLabelStudioConverter.convert_multiple_docs_to_tasks(docs))
+        else:
+            tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
         try:
             resp = requests.post(
                 f"{self.url}/api/projects/{self.project_id}/import",
