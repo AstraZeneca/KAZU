@@ -1,3 +1,4 @@
+import json
 from os import getenv
 from pathlib import Path
 from typing import Optional
@@ -9,6 +10,8 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTermWithMetrics,
     GlobalParserActions,
+    CuratedTerm,
+    DocumentJsonUtils,
 )
 from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.base import (
@@ -139,3 +142,9 @@ def make_dummy_synonym_term(
         is_symbolic=True,
         mapping_types=frozenset(),
     )
+
+
+def write_curations(path: Path, terms: list[CuratedTerm]):
+    with open(path, "w") as f:
+        for curation in terms:
+            f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")

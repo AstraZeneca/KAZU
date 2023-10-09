@@ -1,12 +1,9 @@
-import json
-from pathlib import Path
 from typing import Any
 
 import pytest
 import spacy
 from kazu.data.data import (
     CuratedTerm,
-    DocumentJsonUtils,
     MentionConfidence,
     CuratedTermBehaviour,
     EquivalentIdSet,
@@ -20,11 +17,11 @@ from kazu.ontology_preprocessing.base import (
     MAPPING_TYPE,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
-from kazu.tests.utils import DummyParser
+from kazu.tests.utils import DummyParser, write_curations
+from kazu.utils.spacy_pipeline import SPACY_DEFAULT_INFIXES
 from kazu.utils.utils import Singleton
 from spacy.lang.en import English
 from spacy.lang.en.punctuation import TOKENIZER_INFIXES
-from kazu.utils.spacy_pipeline import SPACY_DEFAULT_INFIXES
 
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
@@ -52,13 +49,6 @@ def test_initialize():
 example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
     This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
-
-
-def write_curations(path: Path, terms: list[CuratedTerm]):
-    with open(path, "w") as f:
-        for curation in terms:
-            f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
-
 
 FIRST_MOCK_PARSER = "first_mock_parser"
 SECOND_MOCK_PARSER = "second_mock_parser"

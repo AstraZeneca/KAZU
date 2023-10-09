@@ -1,28 +1,23 @@
-import json
-from pathlib import Path
-
 import pytest
 from kazu.data.data import (
     CuratedTerm,
-    DocumentJsonUtils,
     MentionConfidence,
     CuratedTermBehaviour,
     EquivalentIdSet,
     Document,
 )
-
 from kazu.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
     SYN,
     MAPPING_TYPE,
 )
-from kazu.tests.utils import DummyParser
-from kazu.utils.utils import Singleton
+from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
     MemoryEfficientStringMatchingStep,
 )
-from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.tests.utils import DummyParser, write_curations
+from kazu.utils.utils import Singleton
 
 pytestmark = pytest.mark.usefixtures(
     "mock_kazu_disk_cache_on_parsers", "mock_build_fast_string_matcher_cache"
@@ -31,12 +26,6 @@ pytestmark = pytest.mark.usefixtures(
 example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
     This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
-
-
-def write_curations(path: Path, terms: list[CuratedTerm]):
-    with open(path, "w") as f:
-        for curation in terms:
-            f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
 
 
 FIRST_MOCK_PARSER = "first_mock_parser"
