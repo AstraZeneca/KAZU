@@ -23,7 +23,7 @@ from kazu.ontology_preprocessing.base import (
     load_global_actions,
     CurationException,
 )
-from kazu.tests.utils import DummyParser
+from kazu.tests.utils import DummyParser, write_curations
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import Singleton
 
@@ -73,9 +73,7 @@ def setup_databases(
     curations_path = None
     if curations is not None:
         curations_path = base_path.joinpath("curations.jsonl")
-        with open(curations_path, "w") as f:
-            for curated_term in curations:
-                f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curated_term)) + "\n")
+        write_curations(curations_path, curations)
 
     global_actions_path = None
     if global_actions is not None:
