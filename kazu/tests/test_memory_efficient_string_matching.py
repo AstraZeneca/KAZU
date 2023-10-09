@@ -1,3 +1,5 @@
+import dataclasses
+
 import pytest
 from kazu.data.data import (
     CuratedTerm,
@@ -76,6 +78,45 @@ PARSER_2_DEFAULT_DATA = {
     MAPPING_TYPE: ["test", "test", "test", "test"],
 }
 
+FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = CuratedTerm(
+    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+    curated_synonym="complexVII disease\u03B1",
+    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+    associated_id_sets=frozenset(
+        [
+            EquivalentIdSet(
+                ids_and_source=frozenset(
+                    [
+                        (
+                            TARGET_IDX,
+                            FIRST_MOCK_PARSER,
+                        )
+                    ]
+                )
+            )
+        ]
+    ),
+    case_sensitive=False,
+)
+
+SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
+    FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+    associated_id_sets=frozenset(
+        [
+            EquivalentIdSet(
+                ids_and_source=frozenset(
+                    [
+                        (
+                            TARGET_IDX,
+                            SECOND_MOCK_PARSER,
+                        )
+                    ]
+                )
+            )
+        ]
+    ),
+)
+
 
 @pytest.mark.parametrize(
     (
@@ -89,50 +130,8 @@ PARSER_2_DEFAULT_DATA = {
     ),
     [
         pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
+            [FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+            [SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
             2,
             {"ComplexVII Disease\u03B1"},
             [
@@ -160,50 +159,8 @@ PARSER_2_DEFAULT_DATA = {
             id="Two curated case insensitive terms from two parsers Both should hit",
         ),
         pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                )
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=True,
-                )
-            ],
+            [FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+            [dataclasses.replace(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, case_sensitive=True)],
             1,
             {"ComplexVII Disease\u03B1"},
             [
@@ -222,49 +179,11 @@ PARSER_2_DEFAULT_DATA = {
             id="Two curated terms from two parsers One should hit to test case sensitivity",
         ),
         pytest.param(
+            [FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
             [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.IGNORE,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
+                dataclasses.replace(
+                    SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, behaviour=CuratedTermBehaviour.IGNORE
+                )
             ],
             1,
             {"ComplexVII Disease\u03B1"},
@@ -285,26 +204,10 @@ PARSER_2_DEFAULT_DATA = {
         ),
         pytest.param(
             [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                dataclasses.replace(
+                    FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
                     curated_synonym="This sentence is just to test",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
+                )
             ],
             [],
             1,
