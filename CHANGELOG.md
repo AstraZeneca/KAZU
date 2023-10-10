@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.1.0 - 2023-10-10
+
+
+### Features
+
+- A couple of easy, non-behaviour changing performance improvements that on their own sped up Kazu around 10% (but other changes in this release will affect this too, and speedup will be workload dependent)
+- Added new OpsinStep which maps IUPAC drug strings to canonical SMILES - see the API docs for details.
+  This functionality is currently experimental and may be changed without making a new major release.
+  Please [open a GitHub issue](https://github.com/AstraZeneca/KAZU/issues/new) if you wish to use this functionality.
+- Ensembl Gene IDs are now grouped by HGNC approved symbols, eliminating disambiguation problems for gene IDs belonging to the same gene.
+- Entity produced by TransformersModelForTokenClassificationNerStep but without Mappings will be dropped by default now, in the same way as for other NER steps.
+  This was an exception to handle an AstraZeneca internal use case that wanted this different, but it could cause issues with MergeOverlappingEntsStep in some cases,
+  so it is safer to have this off by default.
+- New SpacyPipelines abstraction, which allows using the same spacy pipeline in different places, but only load it once and prevent uncontrolled memory growth.
+  On the uncontrolled memory growth, see https://github.com/explosion/spaCy/discussions/10015 for why this was happening - the 'fix' is to reload a spacy pipeline after a certain number of calls.
+- Slimmed down base dependencies by removing dependencies for steps not in the base pipeline.
+  These can be added back in manually in user projects, or use the new `kazu[all_steps]` dependency
+  group to install dependencies for all steps as before. The docs reflect this, and informative errors
+  are raised when trying to use these steps when dependencies aren't installed.
+- Very large memory savings from an overhaul of the string matching process.
+  The new version should also be faster in general, but the priority was memory rather than speed (since previously, this step accounted for the majority of kazu's memory usage but only a fraction of its runtime)
+
+### Bugfixes
+
+- Curated terms that drop the same normalised version of the term no longer report erroneous warnings.
+
+### Deprecations and Removals
+
+- The API for building custom model packs has changed to be more flexible, and more simple.
+  This is a backwards-incompatible change, but we don't currently expect/know of any non-AstraZeneca users of this script, so won't do a major version bump for it.
+  Please let us know (in a [GitHub issue](https://github.com/AstraZeneca/KAZU/issues/new)) if you are using this and this change was problematic for you.
+
+
 ## 1.0.3 - 2023-08-15
 
 
