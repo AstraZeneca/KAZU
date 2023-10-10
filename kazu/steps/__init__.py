@@ -10,9 +10,8 @@ from kazu.steps.linking.rules_based_disambiguation import (
     RulesBasedEntityClassDisambiguationFilterStep,
 )
 from kazu.steps.ner.hf_token_classification import TransformersModelForTokenClassificationNerStep
-from kazu.steps.ner.opsin import OpsinStep
-from kazu.steps.ner.seth import SethStep
 from kazu.steps.ner.spacy_ner import SpacyNerStep
 from kazu.steps.other.cleanup import CleanupStep
 from kazu.steps.other.merge_overlapping_ents import MergeOverlappingEntsStep
-from kazu.steps.other.stanza import StanzaStep
+
+# note, do not add Step imports here unless they are covered by the base dependencies!
