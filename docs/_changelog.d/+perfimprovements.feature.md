@@ -1,1 +1,0 @@
-A couple of easy, non-behaviour changing performance improvements that on their own sped up Kazu around 10% (but other changes in this release will affect this too, and speedup will be workload dependent)
