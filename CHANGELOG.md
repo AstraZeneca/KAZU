@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.1.1 - 2023-10-10
+
+
+### Bugfixes
+
+- fixed a bug where steps depending on additional dependencies were imported in steps.__init_.py
+
+
 ## 1.1.0 - 2023-10-10
 
 
