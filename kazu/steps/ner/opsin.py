@@ -2,7 +2,7 @@ import os
 import dataclasses
 import logging
 from typing import Optional, Callable
-from collections import Iterable
+from collections.abc import Iterable
 
 try:
     from py4j.java_gateway import JavaGateway
