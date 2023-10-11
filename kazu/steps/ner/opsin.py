@@ -52,14 +52,14 @@ class OpsinStep(Step):
 
         .. code-block:: console
 
-            pip install py4j rdkit
+            $ pip install py4j rdkit
 
         Or you can install required dependencies for all steps included in kazu
         with:
 
         .. code-block:: console
 
-            pip install kazu[all-steps]
+            $ pip install kazu[all-steps]
 
     .. note::
 

@@ -25,14 +25,14 @@ class StanzaStep(Step):
 
         .. code-block:: console
 
-            pip install stanza
+            $ pip install stanza
 
         Or you can install required dependencies for all steps included in kazu
         with:
 
         .. code-block:: console
 
-            pip install kazu[all-steps]
+            $ pip install kazu[all-steps]
 
     Stanza paper:
 

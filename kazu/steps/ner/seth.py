@@ -31,14 +31,14 @@ class SethStep(Step):
 
         .. code-block:: console
 
-            pip install py4j
+            $ pip install py4j
 
         Or you can install required dependencies for all steps included in kazu
         with:
 
         .. code-block:: console
 
-            pip install kazu[all-steps]
+            $ pip install kazu[all-steps]
 
     Paper:
 
