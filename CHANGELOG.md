@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Bugfixes
 
-- fixed a bug where steps depending on additional dependencies were imported in `steps.__init_.py`
+- fixed a bug where steps depending on additional dependencies were imported in `steps.__init__.py`
 
 
 ## 1.1.0 - 2023-10-10
