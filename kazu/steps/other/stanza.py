@@ -4,7 +4,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "To use StanzaStep, you need to install stanza.\n"
-        "You can either install stanza yourself, or install kazu[all_steps].\n"
+        "You can either install stanza yourself, or install kazu[all-steps].\n"
     ) from e
 
 from kazu.data.data import Document, CharSpan
@@ -32,7 +32,7 @@ class StanzaStep(Step):
 
         .. code-block:: console
 
-            pip install kazu[all_steps]
+            pip install kazu[all-steps]
 
     Stanza paper:
 

@@ -10,7 +10,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "To use OpsinStep, you need to install py4j and rdkit.\n"
-        "You can either install these yourself, or install kazu[all_steps].\n"
+        "You can either install these yourself, or install kazu[all-steps].\n"
     ) from e
 
 from kazu.data.data import Document, Entity, CharSpan, Mapping, StringMatchConfidence
@@ -59,7 +59,7 @@ class OpsinStep(Step):
 
         .. code-block:: console
 
-            pip install kazu[all_steps]
+            pip install kazu[all-steps]
 
     .. note::
 

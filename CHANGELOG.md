@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - New SpacyPipelines abstraction, which allows using the same spacy pipeline in different places, but only load it once and prevent uncontrolled memory growth.
   On the uncontrolled memory growth, see https://github.com/explosion/spaCy/discussions/10015 for why this was happening - the 'fix' is to reload a spacy pipeline after a certain number of calls.
 - Slimmed down base dependencies by removing dependencies for steps not in the base pipeline.
-  These can be added back in manually in user projects, or use the new `kazu[all_steps]` dependency
+  These can be added back in manually in user projects, or use the new `kazu[all-steps]` dependency
   group to install dependencies for all steps as before. The docs reflect this, and informative errors
   are raised when trying to use these steps when dependencies aren't installed.
 - Very large memory savings from an overhaul of the string matching process.

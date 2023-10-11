@@ -64,17 +64,17 @@ typed = [
   "types-docutils",
   "pandas-stubs>=2.0.0",
 ]
-model_training = [
+model-training = [
   "pytorch-metric-learning>=0.9.99",
   "seqeval>=1.0.0",
 ]
-all_steps = [
+all-steps = [
   "py4j>=0.10.9",
   "rdkit>=2023.3.1",
   "stanza>=1.0.0,<1.6.0", # We're seeing IT test failures on linux with stanza 1.6.0
 ]
 dev = [
-  "kazu[webserver,typed,model_training,all_steps]",
+  "kazu[webserver,typed,model-training,all-steps]",
   "black~=22.0",
   "blacken-docs",
   "flake8",

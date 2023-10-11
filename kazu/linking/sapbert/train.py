@@ -337,7 +337,7 @@ class PLSapbertModel(LightningModule):
             except ImportError as e:
                 raise ImportError(
                     "Running the SapBERT model training code requires pytorch_metric_learning to be installed.\n"
-                    "We recommend running 'pip install kazu[model_training]' to get all model training"
+                    "We recommend running 'pip install kazu[model-training]' to get all model training"
                     " dependencies."
                 ) from e
             self.loss = losses.MultiSimilarityLoss(alpha=1, beta=60, base=0.5)

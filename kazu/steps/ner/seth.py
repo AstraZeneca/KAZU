@@ -7,7 +7,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "To use SethStep, you need to install py4j.\n"
-        "You can either install py4j yourself, or install kazu[all_steps].\n"
+        "You can either install py4j yourself, or install kazu[all-steps].\n"
     ) from e
 
 from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
@@ -38,7 +38,7 @@ class SethStep(Step):
 
         .. code-block:: console
 
-            pip install kazu[all_steps]
+            pip install kazu[all-steps]
 
     Paper:
 
