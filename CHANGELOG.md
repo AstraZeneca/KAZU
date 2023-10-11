@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.1.2 - 2023-10-11
+
+
+### Bugfixes
+
+- fixed a deprecated Iterable import for python 3.10 compatibility.
+- fixed an extra indent in RulesBasedEntityClassDisambiguationFilterStep that led to inappropriate matcher rules.
+
+
 ## 1.1.1 - 2023-10-10
 
 
