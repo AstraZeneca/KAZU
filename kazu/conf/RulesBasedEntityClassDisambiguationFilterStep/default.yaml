@@ -48,12 +48,12 @@ class_matcher_rules:
         - LOWER: "-"
         - "_":
             anatomy: True
-            LOWER: arm
+          LOWER: arm
       - - LOWER: multi
         - LOWER: "-"
         - "_":
             anatomy: True
-            LOWER: arm
+          LOWER: arm
       - - LOWER: quality
         - LOWER: "-"
           OP: "?"
@@ -62,7 +62,7 @@ class_matcher_rules:
           OP: "?"
         - "_":
             anatomy: True
-            LOWER: life
+          LOWER: life
 
 mention_matcher_rules:
   disease:
