@@ -34,11 +34,17 @@ from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import PathLike, as_path
 
-# dataframe column keys
+#: The column name in a dataframe parsed with :meth:`~.OntologyParser.parse_to_dataframe`
+#: for the column of the entity's default/preferred label
 DEFAULT_LABEL = "default_label"
+#: The column name for the id of each entity
 IDX = "idx"
+#: The column name for the synonyms/alternative labels for each entity
 SYN = "syn"
+#: The column name for the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by the ontology
 MAPPING_TYPE = "mapping_type"
+#: The origin of a dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc.
+#: Note, this is different from the parser.name, as is used to identify the origin of a mapping back to a data source
 DATA_ORIGIN = "data_origin"
 
 logger = logging.getLogger(__name__)
@@ -1202,12 +1208,12 @@ class OntologyParser(ABC):
         columns:
 
 
-        [IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE]
+        [:data:`~.IDX`, :data:`~.DEFAULT_LABEL`, :data:`~.SYN`, :data:`~.MAPPING_TYPE`]
 
-        | IDX: the ontology id
-        | DEFAULT_LABEL: the preferred label
-        | SYN: a synonym of the concept
-        | MAPPING_TYPE: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by the ontology
+        | :data:`~.IDX`: the ontology id
+        | :data:`~.DEFAULT_LABEL`: the preferred label
+        | :data:`~.SYN`: a synonym of the concept
+        | :data:`~.MAPPING_TYPE`: the type of mapping from default label to synonym - e.g. xref, exactSyn etc. Usually defined by the ontology
 
         Note: It is the responsibility of the implementation of parse_to_dataframe to add default labels as synonyms.
 
