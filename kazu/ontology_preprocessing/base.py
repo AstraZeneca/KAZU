@@ -754,26 +754,30 @@ class CurationProcessor:
 
 class OntologyParser(ABC):
     """Parse an ontology (or similar) into a set of outputs suitable for NLP
-    entity linking. Implementations should have a class attribute 'name' to
-    something suitably representative. The key method is parse_to_dataframe,
-    which should convert an input source to a dataframe suitable for further
-    processing.
+    entity linking.
 
-    The other important method is find_kb. This should parse an ID
+    Implementations should have a class attribute 'name' to
+    something suitably representative. The key method is
+    :meth:`~.OntologyParser.parse_to_dataframe`, which should convert an
+    input source to a dataframe suitable for further processing.
+
+    The other important method is :meth:`~.find_kb`. This should parse an ID
     string (if required) and return the underlying source. This is
     important for composite resources that contain identifiers from
-    different seed sources
+    different seed sources.
+
+    See :ref:`ontology_parser` for a more detailed guide.
 
     Generally speaking, when parsing a data source, synonyms that are
-    symbolic (as determined by the StringNormalizer) that refer to more
+    symbolic (as determined by the :class:`~.StringNormalizer`) that refer to more
     than one id are more likely to be ambiguous. Therefore, we assume
     they refer to unique concepts (e.g. COX 1 could be 'ENSG00000095303'
     OR 'ENSG00000198804', and thus they will yield multiple instances of
-    EquivalentIdSet. Non symbolic synonyms (i.e. noun phrases) are far
+    :class:`~.EquivalentIdSet`. Non symbolic synonyms (i.e. noun phrases) are far
     less likely to refer to distinct entities, so we might want to merge
     the associated ID's non-symbolic ambiguous synonyms into a single
-    EquivalentIdSet. The result of StringNormalizer.is_symbolic forms
-    the is_symbolic parameter to .score_and_group_ids.
+    :class:`~.EquivalentIdSet`. The result of :meth:`.StringNormalizer.classify_symbolic`
+    forms the ``is_symbolic`` parameter to :meth:`~.score_and_group_ids`.
 
     If the underlying knowledgebase contains more than one entity type,
     muliple parsers should be implemented, subsetting accordingly (e.g.

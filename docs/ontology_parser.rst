@@ -1,3 +1,5 @@
+.. _ontology_parser:
+
 The OntologyParser
 ================================
 
