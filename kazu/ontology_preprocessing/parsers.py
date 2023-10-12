@@ -54,9 +54,10 @@ logger = logging.getLogger(__name__)
 class JsonLinesOntologyParser(OntologyParser):
     """A parser for a jsonlines dataset.
 
-    Assumes one kb entry per line (i.e. json object) implemetations
-    should implement json_dict_to_parser_dict (see method notes for
-    details
+    Assumes one kb entry per line (i.e. json object).
+
+    This should be subclassed and subclasses must implement
+    :meth:`~.json_dict_to_parser_records`.
     """
 
     def read(self, path: str) -> Iterable[dict[str, Any]]:
@@ -72,12 +73,14 @@ class JsonLinesOntologyParser(OntologyParser):
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
         """For a given input json (represented as a python dict), yield
-        dictionary record(s) compatible with the expected.
+        dictionary record(s) compatible with the expected structure of the
+        Ontology Parser superclass.
 
-        structure of the Ontology Parser superclass - i.e. should have keys for SYN, MAPPING_TYPE, DEFAULT_LABEL and
-        IDX. All other keys are used as mapping metadata
+        This means dictionaries should have keys for :data:`~.SYN`,
+        :data:`~.MAPPING_TYPE`, :data:`~.DEFAULT_LABEL` and
+        :data:`~.IDX`. All other keys are used as mapping metadata.
 
-        :param jsons_gen: iterator of python dict representing json objects
+        :param jsons_gen: iterable of python dict representing json objects
         :return:
         """
         raise NotImplementedError
