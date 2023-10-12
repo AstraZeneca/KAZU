@@ -345,8 +345,11 @@ class RDFGraphParser(OntologyParser):
             self.exclude_entity_patterns = tuple()
 
     def find_kb(self, string: str) -> str:
-        # By default, just return the name of the parser.
-        # If more complex behaviour is necessary, write a custom subclass and override this method.
+        """By default, just return the name of the parser.
+
+        If more complex behaviour is necessary, write a custom subclass
+        and override this method.
+        """
         return self.name
 
     @overload
