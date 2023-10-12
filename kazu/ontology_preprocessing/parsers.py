@@ -279,7 +279,15 @@ PredicateAndValue = tuple[RdfRef, rdflib.term.Node]
 
 
 class RDFGraphParser(OntologyParser):
-    """Parser for Owl files."""
+    """Parser for rdf files.
+
+    Supports any format of rdf that :meth:`rdflib.Graph.parse` can infer
+    the format of from the file extension, e.g. ``.xml`` , ``.ttl`` ,
+    ``.owl`` , ``.json``. Case of the extension does not matter. This
+    functionality is handled by :func:`rdflib.util.guess_format`, but
+    will fall back to attempting to parse as turtle/ttl format in the
+    case of an unknown file extension.
+    """
 
     def __init__(
         self,
