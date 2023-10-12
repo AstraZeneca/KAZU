@@ -811,7 +811,7 @@ class OntologyParser(ABC):
             instance is provided, all synonym conflicts will be assumed to refer to different concepts. This is not
             recommended!
         :param synonym_merge_threshold: similarity threshold to trigger a merge of conflicted synonyms into a single
-            EquivalentIdSet. See docs for score_and_group_ids for further details
+            :class:`~.EquivalentIdSet`. See :meth:`~.OntologyParser.score_and_group_ids` for further details
         :param data_origin: The origin of this dataset - e.g. HGNC release 2.1, MEDDRA 24.1 etc. Note, this is different
             from the parser.name, as is used to identify the origin of a mapping back to a data source
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
