@@ -1266,7 +1266,21 @@ class HGNCGeneFamilyParser(OntologyParser):
 
 
 class TabularOntologyParser(OntologyParser):
-    """For already tabulated data."""
+    """For already tabulated data.
+
+    This expects ``in_path`` to be the path to a file that can be loaded
+    by :func:`pandas.read_csv` (e.g. a `.csv` or `.tsv` file),
+    and the result be in the format that is produced by
+    :meth:`~.OntologyParser.parse_to_dataframe` - see the docs of that
+    method for more details on the format of this dataframe.
+
+    Note that this class's ``__init__` method takes a ``kwargs`` param
+    which is passed through to :func:`pandas.read_csv` , which gives you
+    a notable degree of flexibility on how exactly the input file is
+    converted into this dataframe. Although if this becomes complex to
+    pass through in the ``kwargs``, it may be worth considering
+    :ref:`writing-a-custom-parser`.
+    """
 
     def __init__(
         self,
