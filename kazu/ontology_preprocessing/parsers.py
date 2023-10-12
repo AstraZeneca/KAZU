@@ -1,3 +1,18 @@
+"""This module consists entirely of implementations of
+:class:`~.OntologyParser`.
+
+Some of these are aimed specifically at a custom format for individual
+ontologies, like :class:`~.ChemblOntologyParser` or
+:class:`~.MeddraOntologyParser`.
+
+Others are aimed to provide flexibly for a user across a format, such as
+:class:`~.RDFGraphParser`, :class:`~.TabularOntologyParser` and
+:class:`~.JsonLinesOntologyParser`.
+
+If you do not find a parser that meets your needs, please see
+:ref:`writing-a-custom-parser`.
+"""
+
 import json
 import logging
 import os

@@ -95,6 +95,7 @@ Naturally, this behaviour may not always be desired. You may want two instances 
 suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.SynonymTerm` is most appropriate.
 In this case, you can override this behaviour with :meth:`.OntologyParser.score_and_group_ids`\ .
 
+.. _writing-a-custom-parser:
 
 Writing a Custom Parser
 -------------------------
