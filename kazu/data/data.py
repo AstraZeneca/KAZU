@@ -187,12 +187,12 @@ AssociatedIdSets = frozenset[EquivalentIdSet]
 @dataclass(frozen=True, eq=True)
 class SynonymTerm:
     """A SynonymTerm is a container for a single normalised synonym, and is
-    produced by an OntologyParser implementation.
+    produced by an :class:`~.OntologyParser` implementation.
 
     It may be composed of multiple terms that normalise to the same
     unique string (e.g. "breast cancer" and "Breast Cancer"). The number
-    of associated_id_sets that this synonym maps to is determined by the
-    score_and_group_ids method of the associated OntologyParser.
+    of ``associated_id_sets`` that this synonym maps to is determined by the
+    :meth:`~.OntologyParser.score_and_group_ids` method of the associated OntologyParser.
     """
 
     #: unnormalised synonym strings
