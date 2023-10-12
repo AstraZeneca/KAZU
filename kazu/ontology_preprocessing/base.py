@@ -906,25 +906,26 @@ class OntologyParser(ABC):
         'ENSG00000198804').
 
         Since synonyms from data sources are confused in such a manner, we need to decide some way to cluster them into
-        a single SynonymTerm concept, which in turn is a container for one or more EquivalentIdSet (depending on
-        whether the concept is ambiguous or not)
+        a single :class:`~.SynonymTerm` concept, which in turn is a container for one or more :class:`~.EquivalentIdSet`
+        (depending on whether the concept is ambiguous or not)
 
-        The job of score_and_group_ids is to determine how many EquivalentIdSet's for a given set of ids should be
-        produced.
+        The job of ``score_and_group_ids`` is to determine how many :class:`~.EquivalentIdSet`\\ s for a given set of
+        ids should be produced.
 
         The default algorithm (which can be overridden by concrete parser implementations) works as follows:
 
-        1. If no StringScorer is configured, create an EquivalentIdSet for each id (strategy NO_STRATEGY -
-           not recommended)
+        1. If no ``string_scorer`` is configured, create an :class:`~.EquivalentIdSet` for each id (strategy
+           :attr:`~.EquivalentIdAggregationStrategy.NO_STRATEGY` - not recommended)
         2. If only one ID is referenced, or the associated normalised synonym string is not symbolic, group the
-           ids into a single EquivalentIdSet (strategy UNAMBIGUOUS)
+           ids into a single :class:`~.EquivalentIdSet` (strategy :attr:`~.EquivalentIdAggregationStrategy.UNAMBIGUOUS`)
         3. otherwise, compare the default label associated with each ID to every other default label. If it's above
-           self.synonym_merge_threshold, merge into one EquivalentIdSet, if not, create a new one
+           ``self.synonym_merge_threshold``, merge into one :class:`~.EquivalentIdSet`, if not, create a new one.
 
-        recommendation: Use the SapbertStringSimilarityScorer for comparison
+        recommendation: Use the :class:`~.SapbertStringSimilarityScorer` for comparison.
 
-        IMPORTANT NOTE: any calls to this method requires the metadata DB to be populated, as this is the store of
-        DEFAULT_LABEL
+        .. important::
+            Any calls to this method requires the metadata DB to be populated, as this is the store of
+            :data:`~.DEFAULT_LABEL`.
 
         :param ids_and_source: ids to determine appropriate groupings of, and their associated sources
         :param is_symbolic: is the underlying synonym symbolic?
