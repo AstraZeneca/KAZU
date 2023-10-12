@@ -1208,8 +1208,7 @@ class OntologyParser(ABC):
 
     @abstractmethod
     def parse_to_dataframe(self) -> pd.DataFrame:
-        """
-        implementations should override this method, returning a 'long, thin' pd.DataFrame of at least the following
+        """Implementations should override this method, returning a 'long, thin' :class:`pandas.DataFrame` of at least the following
         columns:
 
 
