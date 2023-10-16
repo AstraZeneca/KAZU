@@ -245,7 +245,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         data=parser_2_data,
     )
     step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2])
-    success, failed = step([Document.create_simple_document(example_text)])
+    success, _failed = step([Document.create_simple_document(example_text)])
     entities = success[0].get_entities()
     assert_matches(entities, match_len, match_texts, match_ontology_data)
 
@@ -307,7 +307,7 @@ def test_pipeline_build_from_parsers_alone():
     )
 
     step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2, parser_3])
-    success, failed = step([Document.create_simple_document(example_text)])
+    success, _failed = step([Document.create_simple_document(example_text)])
     entities = success[0].get_entities()
 
     match_len = 7
