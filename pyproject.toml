@@ -63,6 +63,7 @@ typed = [
   "types-psutil",
   "types-docutils",
   "pandas-stubs>=2.0.0",
+  "types-tqdm"
 ]
 model-training = [
   "pytorch-metric-learning>=0.9.99",
