@@ -1,3 +1,4 @@
+_convert_: "all"
 _target_: kazu.pipeline.pipeline.Pipeline
 steps:
   - ${MemoryEfficientStringMatchingStep}
