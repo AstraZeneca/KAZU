@@ -142,7 +142,7 @@ class SpacyPipelines(metaclass=Singleton):
             logger.info("The spacy pipeline key %s is already loaded.", name)
         else:
             instance.name_to_func[name] = func
-        instance.name_to_model[name] = func()
+            instance.name_to_model[name] = func()
 
     @staticmethod
     def add_reload_callback_func(name: str, func: Callable[[], None]) -> None:
@@ -242,8 +242,9 @@ class SpacyPipelines(metaclass=Singleton):
     ) -> None:
         if self.call_counter[model_name] >= self.reload_at:
             logger.info(
-                "max spacy calls exceeded for %s, "
+                "max spacy calls (%s) exceeded for %s, "
                 "see https://github.com/explosion/spaCy/discussions/9362 for more info",
+                self.reload_at,
                 model_name,
             )
             self.reload_model(model_name)
