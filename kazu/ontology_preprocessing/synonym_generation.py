@@ -1,17 +1,21 @@
 import dataclasses
+import functools
 import itertools
 import json
 import logging
 import re
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections import defaultdict
 from collections.abc import Iterable
 from copy import deepcopy
 from typing import Optional
 
-from kazu.data.data import SynonymTerm, EquivalentIdAggregationStrategy
+from tqdm import tqdm
+from spacy.matcher import Matcher
+
+from kazu.data.data import SynonymTerm
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
-from kazu.utils.spacy_pipeline import basic_spacy_pipeline
+from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike
 
 logger = logging.getLogger(__name__)
@@ -330,4 +334,110 @@ class NgramHyphenation(SynonymGenerator):
             new_terms = set()
             for hyphen in DASHES:
                 new_terms.add(hyphen.join(parts))
+        return new_terms
+
+
+class TokenListReplacementGenerator(SynonymGenerator):
+    """Given lists of tokens, generate an alternative string based upon a query
+    token."""
+
+    def __init__(
+        self,
+        token_lists_to_consider: list[list[str]],
+    ):
+        """
+
+        :param token_lists_to_consider: if any token from the sublist matches a query string, generate
+            new strings based upon all tokens in this sublist.
+        """
+
+        SpacyPipelines().add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
+        SpacyPipelines().add_reload_callback_func(BASIC_PIPELINE_NAME, self.init_token_matcher)
+        self.token_lists_to_consider = token_lists_to_consider
+        self.init_token_matcher()
+
+    def init_token_matcher(self) -> None:
+        matcher = Matcher(SpacyPipelines.get_model(BASIC_PIPELINE_NAME).vocab)
+        for i, token_list in enumerate(self.token_lists_to_consider):
+            matcher.add(key=i, patterns=[[{"LOWER": {"IN": token_list}}]])
+        self.token_matcher = matcher
+
+    def call(self, synonym_str: str) -> Optional[set[str]]:
+        new_terms = set()
+        doc = SpacyPipelines().process_single(text=synonym_str, model_name=BASIC_PIPELINE_NAME)
+        matches = self.token_matcher(doc)
+        if matches is not None:
+            for match_id, match_start, match_end in matches:
+                found_tokens = doc[match_start:match_end].text
+                variant_list = self.token_lists_to_consider[match_id]
+                for variant in variant_list:
+                    new_terms.add(synonym_str.replace(found_tokens, variant))
+        return new_terms
+
+
+class VerbPhraseVariantGenerator(SynonymGenerator):
+    """Generate alternative verb phrases based on a list of tense templates,
+    and lemmas matched in a query."""
+
+    NOUN_PLACEHOLDER = "{NOUN}"
+    VERB_PLACEHOLDER = "{TARGET}"
+
+    def __init__(
+        self,
+        tense_templates: list[str],
+        lemmas_to_consider: list[dict[str, list[str]]],
+        spacy_model_path: str,
+    ):
+        """
+
+        :param tense_templates: e.g. ["{NOUN} {TARGET}", "{TARGET} in {NOUN}"].
+        :param lemmas_to_consider: a dict of verb lemmas to surface forms to generate,
+            e.g. {"increase": ["increasing", "increased"]}.
+        :param spacy_model_path: path to a serialised spacy model - must have a lemmatizer component.
+        """
+        SpacyPipelines().add_from_path(spacy_model_path, spacy_model_path)
+        SpacyPipelines().add_reload_callback_func(spacy_model_path, self.init_lemma_matcher)
+        self.spacy_model_path = spacy_model_path
+        self.tense_templates = tense_templates
+        self.lemmas_to_consider = lemmas_to_consider
+        self.init_lemma_matcher()
+
+    def init_lemma_matcher(self) -> None:
+        matcher = Matcher(SpacyPipelines.get_model(self.spacy_model_path).vocab)
+        for i, lemma_dict in enumerate(self.lemmas_to_consider):
+            matcher.add(key=i, patterns=[[{"LEMMA": {"IN": list(lemma_dict.keys())}}]])
+        self.lemma_matcher = matcher
+
+    def _populate_lemma_template(
+        self, template: str, lemma: str, surface_forms: list[str], noun: str
+    ) -> Iterable[str]:
+        yield template.replace(self.NOUN_PLACEHOLDER, noun).replace(self.VERB_PLACEHOLDER, lemma)
+        for form in surface_forms:
+            yield template.replace(self.NOUN_PLACEHOLDER, noun).replace(self.VERB_PLACEHOLDER, form)
+
+    def call(self, synonym_str: str) -> Optional[set[str]]:
+        new_terms: set[str] = set()
+        doc = SpacyPipelines().process_single(text=synonym_str, model_name=self.spacy_model_path)
+        noun_matches = self.lemma_matcher(doc)
+        if noun_matches is not None:
+            for match_id, match_start, _ in noun_matches:
+                verb_lemma = None
+                noun = []
+                for i, tok in enumerate(doc):
+                    if i == match_start:
+                        verb_lemma = tok.lemma_
+                    else:
+                        noun.append(tok.text)
+                if len(noun) > 0 and verb_lemma is not None:
+                    noun_str = " ".join(noun)
+                    surface_forms = self.lemmas_to_consider[match_id][verb_lemma]
+                    for template in self.tense_templates:
+                        new_terms.update(
+                            self._populate_lemma_template(
+                                template=template,
+                                surface_forms=surface_forms,
+                                noun=noun_str,
+                                lemma=verb_lemma,
+                            )
+                        )
         return new_terms
