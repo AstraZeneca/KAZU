@@ -22,28 +22,39 @@ logger = logging.getLogger(__name__)
 
 
 class SynonymGenerator(ABC):
-    @abstractmethod
     def call(self, synonym_str: str) -> Optional[set[str]]:
         pass
+
+    @functools.cache
+    def generate_synonyms(self, synonym_str: str) -> Optional[set[str]]:
+        return self.call(synonym_str)
 
     def __call__(self, synonym_terms: set[SynonymTerm]) -> set[SynonymTerm]:
 
         existing_terms = set(term for synonym in synonym_terms for term in synonym.terms)
 
         result: set[SynonymTerm] = set()
-        for synonym_term in synonym_terms:
+        for synonym_term in tqdm(
+            synonym_terms,
+            total=len(synonym_terms),
+            desc=f"generating synonyms for {self.__class__.__name__}",
+        ):
             for synonym_str in synonym_term.terms:
-                generated_synonym_strings = self.call(synonym_str)
+                generated_synonym_strings = self.generate_synonyms(synonym_str)
                 if generated_synonym_strings:
                     new_terms: set[str] = set()
                     for generated_syn in generated_synonym_strings:
                         if generated_syn in existing_terms:
                             logger.debug(
-                                f"generated synonym '{generated_syn}' matches existing synonym {synonym_term} "
+                                "generated synonym %s matches existing synonym %s",
+                                generated_syn,
+                                synonym_term,
                             )
                         elif generated_syn in new_terms:
                             logger.debug(
-                                f"generated synonym '{generated_syn}' matches another generated synonym {synonym_term} "
+                                "generated synonym %s matches another generated synonym %s",
+                                generated_syn,
+                                synonym_term,
                             )
                         else:
                             new_terms.add(generated_syn)
@@ -54,13 +65,9 @@ class SynonymGenerator(ABC):
                             orig_term = synonym_str
                         result.add(
                             dataclasses.replace(
-                                synonym_term,
-                                original_term=orig_term,
-                                terms=frozenset(new_terms),
-                                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+                                synonym_term, original_term=orig_term, terms=frozenset(new_terms)
                             )
                         )
-
         return result
 
 
@@ -76,19 +83,28 @@ class CombinatorialSynonymGenerator:
         :return: generated synonyms. Note, the field values of the generated synonyms will
             be the same as the seed synonym, apart from SynonymTerm.terms, which contains the generated synonyms
         """
-        synonym_gen_permutations = itertools.permutations(self.synonym_generators)
+        synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
         results = set()
+        logger.info(
+            "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
+        )
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original synonyms
             all_syns = deepcopy(synonyms)
-            logger.info(f"running permutation set {i}. Permutations: {permutation_list}")
+            logger.info(
+                "running permutation set %s of %s. Permutations: %s",
+                i + 1,
+                len(synonym_gen_permutations),
+                permutation_list,
+            )
             for generator in permutation_list:
                 # run the generator
                 new_syns: set[SynonymTerm] = generator(all_syns)
-                for new_syn_term in new_syns:
-                    results.add(new_syn_term)
-                    all_syns.add(new_syn_term)
+                results.update(new_syns)
+                all_syns.update(new_syns)
 
+        for generator in self.synonym_generators:
+            generator.generate_synonyms.cache_clear()
         return results
 
 
