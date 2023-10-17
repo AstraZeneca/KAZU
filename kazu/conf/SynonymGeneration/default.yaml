@@ -1,3 +1,4 @@
+_convert_: "all"
 default:
   _target_: kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
   synonym_generators:
@@ -36,3 +37,184 @@ chemical:
   synonym_generators:
     - _target_: kazu.ontology_preprocessing.synonym_generation.StringReplacement
       include_greek: true
+meddra:
+  _target_: kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator
+  synonym_generators:
+    - _target_: kazu.ontology_preprocessing.synonym_generation.StopWordRemover
+    - _target_: kazu.ontology_preprocessing.synonym_generation.NgramHyphenation
+    - _target_: kazu.ontology_preprocessing.synonym_generation.StringReplacement
+      replacement_dict:
+        "-":
+          - " "
+          - "_"
+        "_":
+          - " "
+          - "-"
+        " NOS": #replace Not Otherwise Specified
+          - ""
+      digit_aware_replacement_dict:
+        " ":
+          - "-"
+      include_greek: true
+    - _target_: kazu.ontology_preprocessing.synonym_generation.TokenListReplacementGenerator
+      token_lists_to_consider:
+        -  - anomalous
+           - unusual
+           - atypical
+           - deviant
+           - aberrant
+           - peculiar
+           - eccentric
+           - strange
+           - bizarre
+           - odd
+           - weird
+           - uncommon
+           - freakish
+           - irregular
+           - outlandish
+           - exceptional
+           - unnatural
+           - unhealthy
+           - abnormal
+        -  - typical
+           - ordinary
+           - standard
+           - regular
+           - usual
+           - natural
+           - routine
+           - average
+           - expected
+           - balanced
+           - stable
+           - healthy
+
+    - _target_: kazu.ontology_preprocessing.synonym_generation.VerbPhraseVariantGenerator
+      spacy_model_path: ${SciSpacyPipeline.path}
+      tense_templates:
+        - "{TARGET} in {NOUN}"
+        - "{TARGET} of {NOUN}"
+        - "{TARGET} {NOUN}"
+        - "{NOUN} is {TARGET}"
+        - "{NOUN} has been {TARGET}"
+        - "{NOUN} had been {TARGET}"
+        - "{NOUN} will be {TARGET}"
+        - "{NOUN} is being {TARGET}"
+        - "{NOUN} was {TARGET}"
+        - "{NOUN} will have been {TARGET}"
+        - "{NOUN} is going to be {TARGET}"
+        - "{NOUN} is going to be {TARGET}"
+        - "{NOUN} {TARGET}"
+        - "{TARGET} {NOUN}"
+      lemmas_to_consider:
+         -  increase:
+                - increasing
+                - increased
+                - increases
+
+            expand:
+                - expanding
+                - expands
+                - expanded
+
+            enhance:
+                - enhancing
+                - enhances
+                - enhanced
+            raise:
+                - raising
+                - raises
+                - raised
+            boost:
+                - boosting
+                - boosts
+                - boosted
+            escalate:
+                - escalating
+                - escalates
+                - escalated
+            augment:
+                - augmenting
+                - augments
+                - augmented
+            intensify:
+                - intensifying
+                - intensifies
+                - intensifed
+            amplify:
+                - amplifing
+                - amplifies
+                - amplified
+            strengthen:
+                - strengthening
+                - strengthens
+                - strengthened
+            heighten:
+                - heightening
+                - heightens
+                - heightened
+         -  decrease:
+                - decreasing
+                - decreases
+                - decreased
+            reduce:
+                - reducing
+                - reduces
+                - reduced
+            diminish:
+                - diminishing
+                - diminishes
+                - diminished
+            lower:
+                - lowering
+                - lowers
+                - lowered
+            minimize:
+                - minimizing
+                - minimizes
+                - minimized
+            minimise:
+                - minimising
+                - minimises
+                - minimised
+            curtail:
+                - curtailing
+                - curtails
+                - curtailed
+            shrink:
+                - shrinking
+                - shrinks
+                - shrinked
+            contract:
+                - contracting
+                - contracts
+                - contracted
+            narrow:
+                - narrowing
+                - narrows
+                - narrowed
+            taper:
+                - tapering
+                - tapers
+                - tapered
+            constrict:
+                - constricting
+                - constricts
+                - constricted
+            dwindle:
+                - dwindling
+                - dwindles
+                - dwindled
+            subside:
+                - subsiding
+                - subsides
+                - subsided
+            weaken:
+                - weakening
+                - weakens
+                - weakened
+            decrement:
+                - decrementing
+                - decrements
+                - decremented
