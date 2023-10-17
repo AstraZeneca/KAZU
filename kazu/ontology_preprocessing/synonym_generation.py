@@ -23,10 +23,16 @@ logger = logging.getLogger(__name__)
 
 class SynonymGenerator(ABC):
     def call(self, synonym_str: str) -> Optional[set[str]]:
+        """Implementations should override this method to generate new strings
+        from an input string."""
         pass
 
     @functools.cache
     def generate_synonyms(self, synonym_str: str) -> Optional[set[str]]:
+        """Cached wrapper around :meth:`.SynonymGenerator.call`\\.
+
+        Caching prevents recomputation of redundant strings.
+        """
         return self.call(synonym_str)
 
     def __call__(self, synonym_terms: set[SynonymTerm]) -> set[SynonymTerm]:
@@ -368,11 +374,11 @@ class TokenListReplacementGenerator(SynonymGenerator):
         """
 
         SpacyPipelines().add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
-        SpacyPipelines().add_reload_callback_func(BASIC_PIPELINE_NAME, self.init_token_matcher)
+        SpacyPipelines().add_reload_callback_func(BASIC_PIPELINE_NAME, self._init_token_matcher)
         self.token_lists_to_consider = token_lists_to_consider
-        self.init_token_matcher()
+        self._init_token_matcher()
 
-    def init_token_matcher(self) -> None:
+    def _init_token_matcher(self) -> None:
         matcher = Matcher(SpacyPipelines.get_model(BASIC_PIPELINE_NAME).vocab)
         for i, token_list in enumerate(self.token_lists_to_consider):
             matcher.add(key=i, patterns=[[{"LOWER": {"IN": token_list}}]])
@@ -406,19 +412,28 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
     ):
         """
 
-        :param tense_templates: e.g. ["{NOUN} {TARGET}", "{TARGET} in {NOUN}"].
-        :param lemmas_to_consider: a dict of verb lemmas to surface forms to generate,
-            e.g. {"increase": ["increasing", "increased"]}.
+        :param tense_templates: template expressons to generate, for example:
+
+            .. code-block:: python
+
+                ["{NOUN} {TARGET}", "{TARGET} in {NOUN}"]
+
+        :param lemmas_to_consider: a dict of verb lemmas to surface forms to generate, for example:
+
+            .. code-block:: python
+
+                [{"increase": ["increasing", "increased"]}, {"decrease": ["decreased", "decreasing"]}]
+
         :param spacy_model_path: path to a serialised spacy model - must have a lemmatizer component.
         """
         SpacyPipelines().add_from_path(spacy_model_path, spacy_model_path)
-        SpacyPipelines().add_reload_callback_func(spacy_model_path, self.init_lemma_matcher)
+        SpacyPipelines().add_reload_callback_func(spacy_model_path, self._init_lemma_matcher)
         self.spacy_model_path = spacy_model_path
         self.tense_templates = tense_templates
         self.lemmas_to_consider = lemmas_to_consider
-        self.init_lemma_matcher()
+        self._init_lemma_matcher()
 
-    def init_lemma_matcher(self) -> None:
+    def _init_lemma_matcher(self) -> None:
         matcher = Matcher(SpacyPipelines.get_model(self.spacy_model_path).vocab)
         for i, lemma_dict in enumerate(self.lemmas_to_consider):
             matcher.add(key=i, patterns=[[{"LEMMA": {"IN": list(lemma_dict.keys())}}]])
