@@ -143,9 +143,8 @@ class EquivalentIdSet:
     """A representation of a set of kb ID's that map to the same synonym and
     mean the same thing."""
 
-    ids_and_source: frozenset[tuple[str, str]] = field(
-        default_factory=frozenset, hash=True
-    )  # other ID's mapping to this syn, from different KBs
+    # other ID's mapping to this syn, from different KBs
+    ids_and_source: frozenset[tuple[str, str]] = field(default_factory=frozenset)
 
     @property
     def sources(self) -> set[str]:
