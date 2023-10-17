@@ -13,7 +13,10 @@ from kazu.ontology_preprocessing.synonym_generation import (
     StringReplacement,
     GreekSymbolSubstitution,
     CombinatorialSynonymGenerator,
+    VerbPhraseVariantGenerator,
+    TokenListReplacementGenerator,
 )
+from kazu.tests.utils import requires_model_pack
 
 # this is frozen so we only need to instantiate once
 dummy_equiv_ids = EquivalentIdSet(
@@ -156,6 +159,48 @@ def greek_symbol_generator() -> StringReplacement:
 )
 def test_GreekSymbolSubstitution(input_str, expected_syns, greek_symbol_generator):
     check_generator_result(input_str, expected_syns, greek_symbol_generator)
+
+
+def test_TokenListReplacementGenerator():
+    generator = TokenListReplacementGenerator(
+        token_lists_to_consider=[["typical", "ordinary"], ["abnormal", "incorrect"]],
+    )
+    input_str = "ALT was typical"
+    expected_syns = {"ALT was ordinary"}
+    check_generator_result(input_str, expected_syns, generator)
+    input_str = "ALT was abnormal"
+    expected_syns = {"ALT was incorrect"}
+    check_generator_result(input_str, expected_syns, generator)
+
+
+@requires_model_pack
+def test_VerbPhraseVariantGenerator(kazu_test_config):
+    generator = VerbPhraseVariantGenerator(
+        tense_templates=["{NOUN} {TARGET}", "{TARGET} in {NOUN}"],
+        spacy_model_path=kazu_test_config.SciSpacyPipeline.path,
+        lemmas_to_consider=[
+            {"increase": ["increasing", "increased"], "decrease": ["decreasing", "decreased"]}
+        ],
+    )
+    input_str = "ALT increased"
+    expected_syns = {
+        "ALT increasing",
+        "ALT increase",
+        "increased in ALT",
+        "increasing in ALT",
+        "increase in ALT",
+    }
+    check_generator_result(input_str, expected_syns, generator)
+    input_str = "decreasing ALT"
+    expected_syns = {
+        "ALT decreasing",
+        "ALT decrease",
+        "ALT decreased",
+        "decreased in ALT",
+        "decreasing in ALT",
+        "decrease in ALT",
+    }
+    check_generator_result(input_str, expected_syns, generator)
 
 
 def test_greek_substitution_is_stripped():
