@@ -178,9 +178,10 @@ def test_VerbPhraseVariantGenerator(kazu_test_config):
     generator = VerbPhraseVariantGenerator(
         tense_templates=["{NOUN} {TARGET}", "{TARGET} in {NOUN}"],
         spacy_model_path=kazu_test_config.SciSpacyPipeline.path,
-        lemmas_to_consider=[
-            {"increase": ["increasing", "increased"], "decrease": ["decreasing", "decreased"]}
-        ],
+        lemmas_to_consider={
+            "increase": ["increasing", "increased"],
+            "decrease": ["decreasing", "decreased"],
+        },
     )
     input_str = "ALT increased"
     expected_syns = {

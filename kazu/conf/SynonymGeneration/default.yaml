@@ -106,113 +106,113 @@ meddra:
         - "{NOUN} is going to be {TARGET}"
         - "{NOUN} {TARGET}"
       lemmas_to_consider:
-         -  increase:
-                - increasing
-                - increased
-                - increases
+        increase:
+            - increasing
+            - increased
+            - increases
 
-            expand:
-                - expanding
-                - expands
-                - expanded
+        expand:
+            - expanding
+            - expands
+            - expanded
 
-            enhance:
-                - enhancing
-                - enhances
-                - enhanced
-            raise:
-                - raising
-                - raises
-                - raised
-            boost:
-                - boosting
-                - boosts
-                - boosted
-            escalate:
-                - escalating
-                - escalates
-                - escalated
-            augment:
-                - augmenting
-                - augments
-                - augmented
-            intensify:
-                - intensifying
-                - intensifies
-                - intensifed
-            amplify:
-                - amplifing
-                - amplifies
-                - amplified
-            strengthen:
-                - strengthening
-                - strengthens
-                - strengthened
-            heighten:
-                - heightening
-                - heightens
-                - heightened
-         -  decrease:
-                - decreasing
-                - decreases
-                - decreased
-            reduce:
-                - reducing
-                - reduces
-                - reduced
-            diminish:
-                - diminishing
-                - diminishes
-                - diminished
-            lower:
-                - lowering
-                - lowers
-                - lowered
-            minimize:
-                - minimizing
-                - minimizes
-                - minimized
-            minimise:
-                - minimising
-                - minimises
-                - minimised
-            curtail:
-                - curtailing
-                - curtails
-                - curtailed
-            shrink:
-                - shrinking
-                - shrinks
-                - shrinked
-            contract:
-                - contracting
-                - contracts
-                - contracted
-            narrow:
-                - narrowing
-                - narrows
-                - narrowed
-            taper:
-                - tapering
-                - tapers
-                - tapered
-            constrict:
-                - constricting
-                - constricts
-                - constricted
-            dwindle:
-                - dwindling
-                - dwindles
-                - dwindled
-            subside:
-                - subsiding
-                - subsides
-                - subsided
-            weaken:
-                - weakening
-                - weakens
-                - weakened
-            decrement:
-                - decrementing
-                - decrements
-                - decremented
+        enhance:
+            - enhancing
+            - enhances
+            - enhanced
+        raise:
+            - raising
+            - raises
+            - raised
+        boost:
+            - boosting
+            - boosts
+            - boosted
+        escalate:
+            - escalating
+            - escalates
+            - escalated
+        augment:
+            - augmenting
+            - augments
+            - augmented
+        intensify:
+            - intensifying
+            - intensifies
+            - intensifed
+        amplify:
+            - amplifing
+            - amplifies
+            - amplified
+        strengthen:
+            - strengthening
+            - strengthens
+            - strengthened
+        heighten:
+            - heightening
+            - heightens
+            - heightened
+        decrease:
+            - decreasing
+            - decreases
+            - decreased
+        reduce:
+            - reducing
+            - reduces
+            - reduced
+        diminish:
+            - diminishing
+            - diminishes
+            - diminished
+        lower:
+            - lowering
+            - lowers
+            - lowered
+        minimize:
+            - minimizing
+            - minimizes
+            - minimized
+        minimise:
+            - minimising
+            - minimises
+            - minimised
+        curtail:
+            - curtailing
+            - curtails
+            - curtailed
+        shrink:
+            - shrinking
+            - shrinks
+            - shrinked
+        contract:
+            - contracting
+            - contracts
+            - contracted
+        narrow:
+            - narrowing
+            - narrows
+            - narrowed
+        taper:
+            - tapering
+            - tapers
+            - tapered
+        constrict:
+            - constricting
+            - constricts
+            - constricted
+        dwindle:
+            - dwindling
+            - dwindles
+            - dwindled
+        subside:
+            - subsiding
+            - subsides
+            - subsided
+        weaken:
+            - weakening
+            - weakens
+            - weakened
+        decrement:
+            - decrementing
+            - decrements
+            - decremented

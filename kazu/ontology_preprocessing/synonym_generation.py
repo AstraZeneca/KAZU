@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import re
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
 from copy import deepcopy
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class SynonymGenerator(ABC):
+    @abstractmethod
     def call(self, synonym_str: str) -> Optional[set[str]]:
         """Implementations should override this method to generate new strings
         from an input string."""
@@ -359,9 +360,12 @@ class NgramHyphenation(SynonymGenerator):
         return new_terms
 
 
+_MEDDRA_DOC_INFO = """It's mainly designed for ontologies like Meddra which stretch the definition of an entity somewhat, by incorporating verbs (e.g. "increase in AST")"""
+
+
 class TokenListReplacementGenerator(SynonymGenerator):
-    """Given lists of tokens, generate an alternative string based upon a query
-    token."""
+    f"""Given lists of tokens, generate an alternative string based upon a query
+    token. Note, this implementation is pretty basic, and only replaces one token at a time. {_MEDDRA_DOC_INFO}"""
 
     def __init__(
         self,
@@ -398,8 +402,8 @@ class TokenListReplacementGenerator(SynonymGenerator):
 
 
 class VerbPhraseVariantGenerator(SynonymGenerator):
-    """Generate alternative verb phrases based on a list of tense templates,
-    and lemmas matched in a query."""
+    f"""Generate alternative verb phrases based on a list of tense templates,
+    and lemmas matched in a query. {_MEDDRA_DOC_INFO}"""
 
     NOUN_PLACEHOLDER = "{NOUN}"
     VERB_PLACEHOLDER = "{TARGET}"
@@ -407,7 +411,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
     def __init__(
         self,
         tense_templates: list[str],
-        lemmas_to_consider: list[dict[str, list[str]]],
+        lemmas_to_consider: dict[str, list[str]],
         spacy_model_path: str,
     ):
         """
@@ -422,7 +426,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
 
             .. code-block:: python
 
-                [{"increase": ["increasing", "increased"]}, {"decrease": ["decreased", "decreasing"]}]
+                {"increase": ["increasing", "increased"], "decrease": ["decreased", "decreasing"]}
 
         :param spacy_model_path: path to a serialised spacy model - must have a lemmatizer component.
         """
@@ -435,8 +439,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
 
     def _init_lemma_matcher(self) -> None:
         matcher = Matcher(SpacyPipelines.get_model(self.spacy_model_path).vocab)
-        for i, lemma_dict in enumerate(self.lemmas_to_consider):
-            matcher.add(key=i, patterns=[[{"LEMMA": {"IN": list(lemma_dict.keys())}}]])
+        matcher.add(key=0, patterns=[[{"LEMMA": {"IN": list(self.lemmas_to_consider.keys())}}]])
         self.lemma_matcher = matcher
 
     def _populate_lemma_template(
@@ -451,7 +454,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
         doc = SpacyPipelines().process_single(text=synonym_str, model_name=self.spacy_model_path)
         noun_matches = self.lemma_matcher(doc)
         if noun_matches is not None:
-            for match_id, match_start, _ in noun_matches:
+            for _match_id, match_start, _ in noun_matches:
                 verb_lemma = None
                 noun = []
                 for i, tok in enumerate(doc):
@@ -461,7 +464,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
                         noun.append(tok.text)
                 if len(noun) > 0 and verb_lemma is not None:
                     noun_str = " ".join(noun)
-                    surface_forms = self.lemmas_to_consider[match_id][verb_lemma]
+                    surface_forms = self.lemmas_to_consider[verb_lemma]
                     for template in self.tense_templates:
                         new_terms.update(
                             self._populate_lemma_template(
