@@ -32,7 +32,7 @@ from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
-from kazu.utils.utils import PathLike, as_path
+from kazu.utils.utils import PathLike, as_path, string_to_putative_curation
 
 #: The column name in a dataframe parsed with :meth:`~.OntologyParser.parse_to_dataframe`
 #: for the column of the entity's default/preferred label
@@ -1034,11 +1034,15 @@ class OntologyParser(ABC):
                 "%s is configured to use synonym generators. This may result in noisy NER performance.",
                 self.name,
             )
-            (
-                original_curations,
-                generated_curations,
-            ) = self.generate_curations_from_synonym_generators(terms)
-            curations = original_curations + generated_curations
+            curations = []
+            for generated_syn, original_syn in self.synonym_generator(terms):
+                curations.append(
+                    string_to_putative_curation(
+                        generated_syn,
+                        entity_class=self.entity_class,
+                        original_term_string=original_syn,
+                    )
+                )
         elif (
             self.curations_path is None
         ):  # implies self.synonym_generator is None as failed the if above
@@ -1046,11 +1050,15 @@ class OntologyParser(ABC):
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
                 self.name,
             )
-            curations = [
-                curation
-                for term in terms
-                for curation in self.synonym_term_to_putative_curation(term)
-            ]
+            curations = []
+            for term in terms:
+                for term_str in term.terms:
+                    curations.append(
+                        string_to_putative_curation(
+                            term_str, entity_class=self.entity_class, original_term_string=term_str
+                        )
+                    )
+
         else:
             assert self.curations_path is not None
             logger.info(
@@ -1087,65 +1095,6 @@ class OntologyParser(ABC):
         assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
         synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
         return synonym_terms
-
-    def generate_synonyms(
-        self, original_synonym_data: set[SynonymTerm]
-    ) -> tuple[set[SynonymTerm], set[SynonymTerm]]:
-        """Generate synonyms based on configured synonym generator.
-
-        :param original_synonym_data:
-        :return: first set is original terms, second are generated terms
-        """
-        generated_synonym_data = set()
-        if self.synonym_generator:
-            generated_synonym_data = self.synonym_generator(original_synonym_data)
-        logger.info(
-            f"{len(original_synonym_data)} original synonyms and {len(generated_synonym_data)} generated synonyms produced"
-        )
-        return original_synonym_data, generated_synonym_data
-
-    def generate_curations_from_synonym_generators(
-        self, synonym_terms: set[SynonymTerm]
-    ) -> tuple[list[CuratedTerm], list[CuratedTerm]]:
-        original_terms, generated_terms = self.generate_synonyms(synonym_terms)
-        original_curations = [
-            curation
-            for term in original_terms
-            for curation in self.synonym_term_to_putative_curation(term)
-        ]
-        generated_curations = [
-            curation
-            for term in generated_terms
-            for curation in self.synonym_term_to_putative_curation(term)
-        ]
-
-        return original_curations, generated_curations
-
-    def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[CuratedTerm]:
-        """Convert a :class:`.SynonymTerm`\\ s to curations to use for dictionary based
-        NER.
-
-        This is used when curations are not provided to the parser.
-
-        Can handle either 'original' or 'generated' :class:`.SynonymTerm`\\ s.
-
-        :param term:
-        :return:
-        """
-        for term_str in term.terms:
-            if term.original_term is None:
-                behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
-            else:
-                behaviour = CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
-            is_symbolic = StringNormalizer.classify_symbolic(term_str, self.entity_class)
-            conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
-            yield CuratedTerm(
-                curated_synonym=term_str,
-                mention_confidence=conf,
-                case_sensitive=is_symbolic,
-                behaviour=behaviour,
-                source_term=term.original_term,
-            )
 
     @kazu_disk_cache.memoize(ignore={0})
     def _populate_databases(
