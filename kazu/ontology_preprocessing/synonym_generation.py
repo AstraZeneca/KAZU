@@ -360,7 +360,7 @@ class NgramHyphenation(SynonymGenerator):
         return new_terms
 
 
-_MEDDRA_DOC_INFO = """It's mainly designed for ontologies like Meddra which stretch the definition of an entity somewhat, by incorporating verbs (e.g. "increase in AST")"""
+_MEDDRA_DOC_INFO = """It's mainly designed for ontologies like Meddra which stretch the definition of an entity somewhat, by incorporating verbs (e.g. "increase in AST")."""
 
 
 class TokenListReplacementGenerator(SynonymGenerator):
