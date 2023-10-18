@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.2.0 - 2023-10-18
+
+
+### Features
+
+- added two new synonym generation routines, VerbPhraseVariantGenerator and TokenListReplacementGenerator
+- synonym generators now cache results, and are thus much faster
+
+
 ## 1.1.2 - 2023-10-11
 
 
