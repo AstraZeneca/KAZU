@@ -1,15 +1,59 @@
 import logging
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Union, overload, Any
-from collections.abc import Iterable, Sequence
 
+from kazu.data.data import (
+    Document,
+    Entity,
+    Section,
+    CuratedTerm,
+    CuratedTermBehaviour,
+    MentionConfidence,
+)
+from kazu.utils.string_normalizer import StringNormalizer
 from transformers import BatchEncoding, PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
 
-from kazu.data.data import Document, Entity, Section
-
 logger = logging.getLogger(__name__)
+
+
+def string_to_putative_curation(
+    term_string: str, entity_class: str, original_term_string: str
+) -> CuratedTerm:
+    """Create a :class:`.CuratedTerm` from a string.
+
+    Uses some simple heuristics to suggest basic rules for how
+    this term should be handled by Kazu - You will probably want to
+    change these in some cases, depending on your use case.
+
+    :param term_string: forms the curated_synonym attribute of the resulting term
+    :param entity_class: used to determine whether the string is symbolic or not, and
+        thus it's default case sensitivity behaviour
+    :param: original_term_string: the original ontology term this term was derived from.
+        Can be the same as term_string.
+    :return:
+    """
+
+    if len(original_term_string) == 1:
+        behaviour = CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+    elif original_term_string == term_string:
+        behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
+    else:
+        behaviour = CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
+
+    source_term = None if original_term_string == term_string else original_term_string
+
+    is_symbolic = StringNormalizer.classify_symbolic(term_string, entity_class)
+    conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
+    return CuratedTerm(
+        curated_synonym=term_string,
+        mention_confidence=conf,
+        case_sensitive=is_symbolic,
+        behaviour=behaviour,
+        source_term=source_term,
+    )
 
 
 def find_document_from_entity(docs: list[Document], entity: Entity) -> Document:
