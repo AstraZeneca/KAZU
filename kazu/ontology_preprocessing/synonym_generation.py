@@ -360,12 +360,15 @@ class NgramHyphenation(SynonymGenerator):
         return new_terms
 
 
-_MEDDRA_DOC_INFO = """It's mainly designed for ontologies like Meddra which stretch the definition of an entity somewhat, by incorporating verbs (e.g. "increase in AST")."""
-
-
 class TokenListReplacementGenerator(SynonymGenerator):
-    f"""Given lists of tokens, generate an alternative string based upon a query
-    token. Note, this implementation is pretty basic, and only replaces one token at a time. {_MEDDRA_DOC_INFO}"""
+    """Given lists of tokens, generate an alternative string based upon a query
+    token.
+
+    Note, this implementation is pretty basic, and only replaces one
+    token at a time. It's mainly designed for ontologies like Meddra
+    which stretch the definition of an entity somewhat, by incorporating
+    verbs (e.g. "increase in AST").
+    """
 
     def __init__(
         self,
@@ -402,8 +405,13 @@ class TokenListReplacementGenerator(SynonymGenerator):
 
 
 class VerbPhraseVariantGenerator(SynonymGenerator):
-    f"""Generate alternative verb phrases based on a list of tense templates,
-    and lemmas matched in a query. {_MEDDRA_DOC_INFO}"""
+    """Generate alternative verb phrases based on a list of tense templates,
+    and lemmas matched in a query.
+
+    It's mainly designed for ontologies like Meddra which stretch the
+    definition of an entity somewhat, by incorporating verbs (e.g.
+    "increase in AST").
+    """
 
     NOUN_PLACEHOLDER = "NOUN"
     VERB_PLACEHOLDER = "TARGET"
