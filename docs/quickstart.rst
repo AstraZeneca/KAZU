@@ -61,6 +61,42 @@ In order to use the majority of Kazu, you will need a model pack, which contains
 the pretrained models and knowledge bases/ontologies required by the pipeline.
 These are available from the `release page <https://github.com/astrazeneca/kazu/releases>`_\ .
 
+For Kazu to work as expected, you will need to set an environment variable ``KAZU_MODEL_PACK``
+to the path to your model pack.
+
+On MacOS/Linux/Windows Subsystem for Linux (WSL):
+
+.. code-block:: console
+
+   $ export KAZU_MODEL_PACK=/Users/me/path/to/kazu_model_pack_public-vCurrent.Version
+
+
+.. raw:: html
+
+    <details>
+    <summary>For Windows</summary>
+
+Using the default Windows CMD shell:
+
+..
+    console below isn't actually correct, as its specifically bash highlighting
+    according to Pygments, but otherwise, our only option is ``powershell``
+    and we won't get the '$' in the same way, so there's no obvious way of doing this.
+
+.. code-block:: console
+
+   $ set KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-v1.1.2
+
+Using Powershell:
+
+.. code-block:: console
+
+   $ $Env:KAZU_MODEL_PACK = 'KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-v1.1.2'
+
+.. raw:: html
+
+    </details>
+
 Default configuration
 ---------------------
 Kazu has a LOT of moving parts, each of which can be configured according to your requirements.
@@ -71,6 +107,9 @@ the 'conf/' directory of the model pack.
 
 Processing your first document
 ------------------------------
+
+Make sure you've installed Kazu correctly as above, and have set the ``KAZU_MODEL_PACK`` variable
+as described in the Model Pack section above.
 
 .. testcode::
     :skipif: kazu_model_pack_missing
