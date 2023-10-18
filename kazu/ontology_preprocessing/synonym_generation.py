@@ -405,8 +405,8 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
     f"""Generate alternative verb phrases based on a list of tense templates,
     and lemmas matched in a query. {_MEDDRA_DOC_INFO}"""
 
-    NOUN_PLACEHOLDER = "{NOUN}"
-    VERB_PLACEHOLDER = "{TARGET}"
+    NOUN_PLACEHOLDER = "NOUN"
+    VERB_PLACEHOLDER = "TARGET"
 
     def __init__(
         self,
@@ -445,9 +445,8 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
     def _populate_lemma_template(
         self, template: str, lemma: str, surface_forms: list[str], noun: str
     ) -> Iterable[str]:
-        yield template.replace(self.NOUN_PLACEHOLDER, noun).replace(self.VERB_PLACEHOLDER, lemma)
-        for form in surface_forms:
-            yield template.replace(self.NOUN_PLACEHOLDER, noun).replace(self.VERB_PLACEHOLDER, form)
+        for form in [lemma] + surface_forms:
+            yield template.format(**{self.NOUN_PLACEHOLDER: noun, self.VERB_PLACEHOLDER: form})
 
     def call(self, synonym_str: str) -> Optional[set[str]]:
         new_terms: set[str] = set()
