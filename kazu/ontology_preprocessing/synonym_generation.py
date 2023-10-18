@@ -1,4 +1,3 @@
-import dataclasses
 import functools
 import itertools
 import json
@@ -23,82 +22,85 @@ logger = logging.getLogger(__name__)
 
 class SynonymGenerator(ABC):
     @abstractmethod
-    def call(self, synonym_str: str) -> Optional[set[str]]:
-        """Implementations should override this method to generate new strings from an
-        input string."""
+    def call(self, synonym_str: str) -> set[str]:
+        """Implementations should override this method to generate new strings
+        from an input string."""
         pass
 
     @functools.cache
-    def generate_synonyms(self, synonym_str: str) -> Optional[set[str]]:
+    def generate_synonyms(self, synonym_str: str) -> set[str]:
         """Cached wrapper around :meth:`.SynonymGenerator.call`\\.
 
         Caching prevents recomputation of redundant strings.
         """
         return self.call(synonym_str)
 
-    def __call__(self, synonym_terms: set[SynonymTerm]) -> set[SynonymTerm]:
+    def __call__(self, strings_to_mutate: set[str]) -> set[tuple[str, str]]:
+        """Takes a set of strings, and returns a set of tuples of the generated
+        string and the original string.
 
-        existing_terms = set(term for synonym in synonym_terms for term in synonym.terms)
+        The original string is always included in the output.
+        """
 
-        result: set[SynonymTerm] = set()
-        for synonym_term in tqdm(
-            synonym_terms,
-            total=len(synonym_terms),
+        result: set[tuple[str, str]] = set()
+        for string_to_mutate in tqdm(
+            strings_to_mutate,
+            total=len(strings_to_mutate),
             desc=f"generating synonyms for {self.__class__.__name__}",
         ):
-            for synonym_str in synonym_term.terms:
-                generated_synonym_strings = self.generate_synonyms(synonym_str)
-                if generated_synonym_strings:
-                    new_terms: set[str] = set()
-                    for generated_syn in generated_synonym_strings:
-                        if generated_syn in existing_terms:
-                            logger.debug(
-                                "generated synonym %s matches existing synonym %s",
-                                generated_syn,
-                                synonym_term,
-                            )
-                        elif generated_syn in new_terms:
-                            logger.debug(
-                                "generated synonym %s matches another generated synonym %s",
-                                generated_syn,
-                                synonym_term,
-                            )
-                        else:
-                            new_terms.add(generated_syn)
-                    if new_terms:
-                        if synonym_term.original_term is not None:
-                            orig_term = synonym_term.original_term
-                        else:
-                            orig_term = synonym_str
-                        result.add(
-                            dataclasses.replace(
-                                synonym_term, original_term=orig_term, terms=frozenset(new_terms)
-                            )
+            result.add(
+                (
+                    string_to_mutate,
+                    string_to_mutate,
+                )
+            )
+            generated_synonym_strings = self.generate_synonyms(string_to_mutate)
+            if generated_synonym_strings:
+                new_terms: set[tuple[str, str]] = set()
+                for generated_syn in generated_synonym_strings:
+                    if (generated_syn, string_to_mutate) in result:
+                        logger.debug(
+                            "generated synonym %s matches existing synonym",
+                            generated_syn,
                         )
+                    elif (generated_syn, string_to_mutate) in new_terms:
+                        logger.debug(
+                            "generated synonym %s matches another generated synonym",
+                            generated_syn,
+                        )
+                    else:
+                        new_terms.add((generated_syn, string_to_mutate))
+                for terms_tup in new_terms:
+                    result.add(terms_tup)
         return result
 
 
 class CombinatorialSynonymGenerator:
+    """For every permutation of modifiers, generate a list of syns, then aggregate at the end."""
+
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, synonyms: set[SynonymTerm]) -> set[SynonymTerm]:
-        """For every permutation of modifiers, generate a list of syns, then aggregate
-        at the end.
+    def __call__(self, synonyms: set[SynonymTerm]) -> set[tuple[str, str]]:
+        """Takes a set of :class:`.SynonymTerm`\\s, and returns a set of tuples
+        of the generated string and the original string.
 
-        :param synonyms: input to generation process
-        :return: generated synonyms. Note, the field values of the generated synonyms
-            will be the same as the seed synonym, apart from SynonymTerm.terms, which
-            contains the generated synonyms
+        The original strings from the :class:`.SynonymTerm`\\s are always included in the output.
+
+        :param synonyms:
+        :return:
         """
         synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
-        results = set()
+        results: set[tuple[str, str]] = set()
+        original_synonym_strings: set[str] = {
+            term_str for syn_term in synonyms for term_str in syn_term.terms
+        }
         logger.info(
             "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
         )
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original synonyms
-            all_syns = deepcopy(synonyms)
+            all_syns = deepcopy(original_synonym_strings)
             logger.info(
                 "running permutation set %s of %s. Permutations: %s",
                 i + 1,
@@ -107,9 +109,10 @@ class CombinatorialSynonymGenerator:
             )
             for generator in permutation_list:
                 # run the generator
-                new_syns: set[SynonymTerm] = generator(all_syns)
-                results.update(new_syns)
-                all_syns.update(new_syns)
+                new_terms: set[tuple[str, str]] = generator(all_syns)
+                for new_term in new_terms:
+                    results.add(new_term)
+                    all_syns.add(new_term[0])
 
         for generator in self.synonym_generators:
             generator.generate_synonyms.cache_clear()
@@ -125,7 +128,7 @@ class SeparatorExpansion(SynonymGenerator):
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
         self.excluded_parenthesis = ["", "non-protein coding"]
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
         bracket_results = set()
         all_group_results = set()
         if "(" in synonym_str and ")" in synonym_str:
@@ -161,10 +164,7 @@ class SeparatorExpansion(SynonymGenerator):
                 for split in splits:
                     bracket_results.add(split.strip())
         bracket_results.update(all_group_results)
-        if len(bracket_results) > 0:
-            return bracket_results
-        else:
-            return None
+        return bracket_results
 
 
 class StopWordRemover(SynonymGenerator):
@@ -173,7 +173,7 @@ class StopWordRemover(SynonymGenerator):
     all_stopwords = {"of", "and", "in", "to", "with", "caused", "involved", "by", "the"}
 
     @classmethod
-    def call(cls, synonym_str: str) -> Optional[set[str]]:
+    def call(cls, synonym_str: str) -> set[str]:
         new_terms = set()
         lst = []
         detected = False
@@ -184,10 +184,7 @@ class StopWordRemover(SynonymGenerator):
                 lst.append(token)
         if detected:
             new_terms.add(" ".join(lst))
-        if new_terms:
-            return new_terms
-        else:
-            return None
+        return new_terms
 
 
 class GreekSymbolSubstitution:
@@ -227,7 +224,7 @@ class StringReplacement(SynonymGenerator):
         self.replacement_dict = replacement_dict
         self.digit_aware_replacement_dict = digit_aware_replacement_dict
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
         results = set()
         if self.replacement_dict:
             for to_replace, replacement_list in self.replacement_dict.items():
@@ -246,10 +243,7 @@ class StringReplacement(SynonymGenerator):
         if self.include_greek:
             self._generate_greek_subs(results, synonym_str)
 
-        if len(results) > 0:
-            return results
-        else:
-            return None
+        return results
 
     def _generate_greek_subs(self, results, synonym_str):
         # only strip text once initially - the greek character replacement
@@ -303,7 +297,7 @@ class SuffixReplacement(SynonymGenerator):
     def __init__(self, suffixes: Iterable[str]):
         self.suffixes = set(suffixes)
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
         new_terms: set[str] = set()
         for suffix in self.suffixes:
             # Note that this will trigger twice for 'ia' since 'a' is also present.
@@ -316,10 +310,7 @@ class SuffixReplacement(SynonymGenerator):
                     if new_suffix is not suffix
                 )
 
-        if new_terms:
-            return new_terms
-        else:
-            return None
+        return new_terms
 
 
 class SpellingVariationReplacement(SynonymGenerator):
@@ -333,15 +324,12 @@ class SpellingVariationReplacement(SynonymGenerator):
         # lowercase for case-insensitive comparison
         self.variation_mapping = {k.lower(): val for k, val in raw_variation_mapping.items()}
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
         new_terms = set()
         variations = self.variation_mapping.get(synonym_str.lower())
         if variations is not None:
             new_terms.update(variations)
-        if new_terms:
-            return new_terms
-        else:
-            return None
+        return new_terms
 
 
 class NgramHyphenation(SynonymGenerator):
@@ -350,12 +338,12 @@ class NgramHyphenation(SynonymGenerator):
     def __init__(self, ngram: int = 2):
         self.ngram = ngram
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
+        new_terms: set[str] = set()
         parts = synonym_str.split()
         if len(parts) != self.ngram:
-            return None
+            return new_terms
         else:
-            new_terms = set()
             for hyphen in DASHES:
                 new_terms.add(hyphen.join(parts))
         return new_terms
@@ -395,7 +383,7 @@ class TokenListReplacementGenerator(SynonymGenerator):
             matcher.add(key=i, patterns=[[{"LOWER": {"IN": token_list}}]])
         self.token_matcher = matcher
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
         new_terms = set()
         doc = SpacyPipelines().process_single(text=synonym_str, model_name=BASIC_PIPELINE_NAME)
         matches = self.token_matcher(doc)
@@ -458,7 +446,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
         for form in [lemma] + surface_forms:
             yield template.format(**{self.NOUN_PLACEHOLDER: noun, self.VERB_PLACEHOLDER: form})
 
-    def call(self, synonym_str: str) -> Optional[set[str]]:
+    def call(self, synonym_str: str) -> set[str]:
         new_terms: set[str] = set()
         doc = SpacyPipelines().process_single(text=synonym_str, model_name=self.spacy_model_path)
         noun_matches = self.lemma_matcher(doc)

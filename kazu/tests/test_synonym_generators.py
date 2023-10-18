@@ -36,22 +36,25 @@ def check_generator_result(
     expected_syns: set[str],
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
+    result: set[tuple[str, str]]
+    if isinstance(generator, CombinatorialSynonymGenerator):
+        synonym_terms = {
+            SynonymTerm(
+                terms=frozenset([input_str]),
+                term_norm="NA",
+                is_symbolic=False,
+                mapping_types=frozenset(),
+                associated_id_sets=frozenset([dummy_equiv_ids]),
+                parser_name="test",
+                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
+            )
+        }
 
-    term = {
-        SynonymTerm(
-            terms=frozenset([input_str]),
-            term_norm="NA",
-            is_symbolic=False,
-            mapping_types=frozenset(),
-            associated_id_sets=frozenset([dummy_equiv_ids]),
-            parser_name="test",
-            aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
-        )
-    }
+        result = set(generator(synonym_terms))
+    else:
+        result = set(generator({input_str}))
 
-    result: set[SynonymTerm] = generator(term)
-
-    new_syns = set(term for synonym in result for term in synonym.terms)
+    new_syns = set(term[0] for term in result)
     assert new_syns == expected_syns
 
 
@@ -62,6 +65,7 @@ def check_generator_result(
         (
             "ABAC (ABAC1/ABAC2)",
             {
+                "ABAC (ABAC1/ABAC2)",
                 "ABAC",
                 "ABAC1",
                 "ABAC2",
@@ -71,6 +75,7 @@ def check_generator_result(
         (
             "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
             {
+                "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
                 "cyclin-dependent kinase inhibitor 1B",
                 "p27",
                 "Kip1",
@@ -80,11 +85,11 @@ def check_generator_result(
         ),
         (
             "gonadotropin-releasing hormone (type 2) receptor 2",
-            {"gonadotropin-releasing hormone receptor 2"},
+            {"gonadotropin-releasing hormone (type 2) receptor 2","gonadotropin-releasing hormone receptor 2"},
         ),
         (
             "oxidase (cytochrome c) assembly 1-like",
-            {"oxidase assembly 1-like"},
+            {"oxidase (cytochrome c) assembly 1-like","oxidase assembly 1-like"},
         ),
     ),
 )
@@ -96,7 +101,9 @@ def test_SeparatorExpansion(input_str, expected_syns):
 def test_StopWordRemover():
     generator = StopWordRemover()
     check_generator_result(
-        input_str="The cat sat in the mat", expected_syns={"cat sat mat"}, generator=generator
+        input_str="The cat sat in the mat",
+        expected_syns={"cat sat mat", "The cat sat in the mat"},
+        generator=generator,
     )
 
 
@@ -104,7 +111,11 @@ def test_StringReplacement():
     generator = StringReplacement(replacement_dict={"cat": ["dog", "chicken"]})
     check_generator_result(
         input_str="The cat sat on the mat",
-        expected_syns={"The dog sat on the mat", "The chicken sat on the mat"},
+        expected_syns={
+            "The dog sat on the mat",
+            "The chicken sat on the mat",
+            "The cat sat on the mat",
+        },
         generator=generator,
     )
 
@@ -119,19 +130,20 @@ def greek_symbol_generator() -> StringReplacement:
     argvalues=(
         (
             "alpha-thalassaemia",
-            {"α-thalassaemia", "Α-thalassaemia"},
+            {"alpha-thalassaemia", "α-thalassaemia", "Α-thalassaemia"},
         ),
         (
             "α-thalassaemia",
-            {"alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"},
+            {"α-thalassaemia", "alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"},
         ),
         (
             "A-thalassaemia",
-            set(),
+            {"A-thalassaemia"},
         ),
         pytest.param(
             "beta test",
             {
+                "beta test",
                 "β test",
                 "ϐ test",
                 "Β test",
@@ -141,6 +153,7 @@ def greek_symbol_generator() -> StringReplacement:
         pytest.param(
             "alpha beta test",
             {
+                "alpha beta test",
                 "alpha β test",
                 "alpha ϐ test",
                 "alpha Β test",
@@ -166,10 +179,10 @@ def test_TokenListReplacementGenerator():
         token_lists_to_consider=[["typical", "ordinary"], ["abnormal", "incorrect"]],
     )
     input_str = "ALT was typical"
-    expected_syns = {"ALT was ordinary"}
+    expected_syns = {"ALT was ordinary", input_str}
     check_generator_result(input_str, expected_syns, generator)
     input_str = "ALT was abnormal"
-    expected_syns = {"ALT was incorrect"}
+    expected_syns = {"ALT was incorrect", input_str}
     check_generator_result(input_str, expected_syns, generator)
 
 
@@ -185,6 +198,7 @@ def test_VerbPhraseVariantGenerator(kazu_test_config):
     )
     input_str = "ALT increased"
     expected_syns = {
+        input_str,
         "ALT increasing",
         "ALT increase",
         "increased in ALT",
@@ -194,6 +208,7 @@ def test_VerbPhraseVariantGenerator(kazu_test_config):
     check_generator_result(input_str, expected_syns, generator)
     input_str = "decreasing ALT"
     expected_syns = {
+        input_str,
         "ALT decreasing",
         "ALT decrease",
         "ALT decreased",
@@ -250,6 +265,7 @@ def test_CombinatorialSynonymGenerator():
     check_generator_result(
         input_str="alpha-thalassaemia",
         expected_syns={
+            "alpha-thalassaemia",
             "alpha thalassaemia",
             "alpha_thalassaemia",
             "α-thalassaemia",
