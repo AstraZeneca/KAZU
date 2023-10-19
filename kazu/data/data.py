@@ -176,6 +176,20 @@ class Mapping:
     #: generic metadata
     metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
 
+    @staticmethod
+    def from_dict(mapping_dict: dict) -> "Mapping":
+        string_match_confidence = StringMatchConfidence[mapping_dict.pop("string_match_confidence")]
+        disambiguation_confidence = (
+            DisambiguationConfidence[mapping_dict.pop("disambiguation_confidence")]
+            if mapping_dict.get("disambiguation_confidence") is not None
+            else None
+        )
+        return Mapping(
+            string_match_confidence=string_match_confidence,
+            disambiguation_confidence=disambiguation_confidence,
+            **mapping_dict,
+        )
+
 
 NumericMetric = Union[bool, int, float]
 
@@ -253,6 +267,28 @@ class SynonymTermWithMetrics(SynonymTerm):
         }
         new_term = dataclasses.replace(self, **new_values)
         return new_term
+
+    @staticmethod
+    def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
+        terms = frozenset(term_dict.pop("terms", ()))
+        associated_id_sets = set()
+        for equiv_id_dict in term_dict.pop("associated_id_sets", []):
+            associated_id_sets.add(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        tuple(ids_and_source) for ids_and_source in equiv_id_dict["ids_and_source"]  # type: ignore[misc]
+                    )
+                )
+            )
+        mapping_types = frozenset(term_dict.pop("mapping_types", []))
+        aggregated_by = EquivalentIdAggregationStrategy(term_dict.pop("aggregated_by"))
+        return SynonymTermWithMetrics(
+            terms=terms,
+            associated_id_sets=frozenset(associated_id_sets),
+            mapping_types=mapping_types,
+            aggregated_by=aggregated_by,
+            **term_dict,
+        )
 
 
 @dataclass
@@ -420,6 +456,28 @@ class Entity:
         single_span = frozenset([CharSpan(start=start, end=end)])
         return cls(spans=single_span, **kwargs)
 
+    @staticmethod
+    def from_dict(entity_dict: dict) -> "Entity":
+        entity_dict.pop("start")
+        entity_dict.pop("end")
+        entity_dict.pop("match_norm")
+        synonym_terms = {
+            SynonymTermWithMetrics.from_dict(term) for term in entity_dict.pop("synonym_terms", [])
+        }
+        mappings = {
+            Mapping.from_dict(mapping_dict) for mapping_dict in entity_dict.pop("mappings", [])
+        }
+        synonym_terms_dict = {term: term for term in synonym_terms}
+        spans = frozenset(CharSpan(**x) for x in entity_dict.pop("spans", []))
+        mention_confidence = MentionConfidence[entity_dict.pop("mention_confidence")]
+        return Entity(
+            syn_term_to_synonym_terms=synonym_terms_dict,
+            spans=spans,
+            mappings=mappings,
+            mention_confidence=mention_confidence,
+            **entity_dict,
+        )
+
 
 @dataclass(unsafe_hash=True)
 class Section:
@@ -464,6 +522,17 @@ class Section:
 
     def __str__(self):
         return f"name: {self.name}, text: {self.text[:100]}"
+
+    @staticmethod
+    def from_dict(section_dict: dict) -> "Section":
+        section = Section(
+            name=section_dict["name"],
+            text=section_dict["text"],
+            metadata=section_dict.get("metadata", {}),
+        )
+        section.sentence_spans = [CharSpan(**x) for x in section_dict.get("sentence_spans", [])]
+        section.entities = [Entity.from_dict(x) for x in section_dict.get("entities", [])]
+        return section
 
 
 @dataclass(unsafe_hash=True)
@@ -541,6 +610,21 @@ class Document:
         for section in self.sections:
             length += len(section.text)
         return length
+
+    @staticmethod
+    def from_dict(document_dict: dict) -> "Document":
+        sections = [
+            Section.from_dict(section_dict) for section_dict in document_dict.get("sections", [])
+        ]
+        return Document(
+            idx=document_dict.get("idx", uuid.uuid4().hex),
+            sections=sections,
+            metadata=document_dict.get("metadata", {}),
+        )
+
+    @staticmethod
+    def from_json(json_str: str) -> "Document":
+        return Document.from_dict(json.loads(json_str))
 
 
 T = TypeVar("T")
