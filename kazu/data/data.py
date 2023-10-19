@@ -485,8 +485,6 @@ class Section:
     text: str
     #: the name of the section (e.g. abstract, body, header, footer etc)
     name: str
-    #: not required. if a preprocessed_text is used, this represents mappings of the preprocessed charspans back to the original
-    offset_map: dict[CharSpan, CharSpan] = field(default_factory=dict, hash=False, init=False)
     #: generic metadata
     metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
     #: entities detected in this section
@@ -740,10 +738,7 @@ class DocumentJsonUtils:
         # the JsonEncodable in the return, but this method is 'private' due to
         # the leading '_', so no docs are currently generated.
         k, v = kv_pair
-        if k == "offset_map":
-            # v is a dict of CharSpan->CharSpan, needs conversion
-            return k, list(v.items())
-        elif k == "_sentence_spans":
+        if k == "_sentence_spans":
             return "sentence_spans", list(v)
         elif k == "syn_term_to_synonym_terms":
             return "synonym_terms", list(v.values())
