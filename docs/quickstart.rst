@@ -85,13 +85,13 @@ Using the default Windows CMD shell:
 
 .. code-block:: console
 
-   $ set KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-v1.1.2
+   $ set KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-vCurrent.Version
 
 Using Powershell:
 
 .. code-block:: console
 
-   $ $Env:KAZU_MODEL_PACK = 'KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-v1.1.2'
+   $ $Env:KAZU_MODEL_PACK = 'KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-vCurrent.Version'
 
 .. raw:: html
 
