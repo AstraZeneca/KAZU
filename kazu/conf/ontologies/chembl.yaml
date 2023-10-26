@@ -6,7 +6,7 @@ indices:
 parsers:
   chembl_parser:
     _target_: kazu.ontology_preprocessing.parsers.ChemblOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_32_sqlite/chembl_32.db
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_33/chembl_33_sqlite/chembl_33.db
     data_origin: '33'
     name: CHEMBL
     string_scorer: ${SapbertStringSimilarityScorer}
