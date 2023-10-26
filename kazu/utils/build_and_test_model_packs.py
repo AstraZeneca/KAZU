@@ -59,6 +59,7 @@ class ModelPackBuilder:
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
+        generate_curation_report: bool = False,
     ):
         """A ModelPackBuilder is a helper class to assist in the building of a model
         pack.
@@ -79,7 +80,9 @@ class ModelPackBuilder:
         :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
+        :param generate_curation_report: should the curation report be run?
         """
+        self.generate_curation_report = generate_curation_report
         if logging_config_path is not None:
             fileConfig(logging_config_path)
         self.logger = logging.getLogger(__name__)
@@ -106,8 +109,17 @@ class ModelPackBuilder:
         self.logger.info("building model pack at %s", self.model_pack_build_path)
         self.model_pack_build_path.mkdir()
         self.apply_merge_configurations()
-
         self.clear_cached_resources_from_model_pack_dir()
+
+        if self.generate_curation_report:
+            # local import so the cache is correctly configured with KAZU_MODEL_PACK
+            from kazu.utils.curation_report import run_curation_report
+            from kazu.utils.utils import Singleton
+            self.logger.info("running curation report at %s", self.model_pack_build_path)
+            run_curation_report(self.model_pack_build_path)
+            # needed as the report will interfere with the cache
+            self.clear_cached_resources_from_model_pack_dir()
+            Singleton.clear_all()
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
         from kazu.utils.constants import HYDRA_VERSION_BASE
         from kazu.steps.other.cleanup import StripMappingURIsAction
@@ -281,6 +293,8 @@ def build_all_model_packs(
     skip_tests: bool,
     logging_config_path: Optional[Path],
     max_parallel_build: Optional[int],
+    generate_curation_report: bool = False,
+    debug: bool = False,
 ) -> None:
     """Build multiple model packs.
 
@@ -292,6 +306,8 @@ def build_all_model_packs(
     :param logging_config_path: passed to logging.config.fileConfig
     :param max_parallel_build: build at most this many model packs simultaneously. If
         None, use all available CPUs
+    :param generate_curation_report: Should the curation report be run?
+    :param debug: Disables Ray parallelization, enabling the use of debugger tools
     :return:
     """
     if not output_dir.is_dir():
@@ -299,6 +315,66 @@ def build_all_model_packs(
     if len(list(output_dir.iterdir())) > 0:
         raise ModelPackBuildError(f"{str(output_dir)} is not empty")
 
+    if debug:
+        if len(model_pack_paths) > 1:
+            raise ValueError(
+                f"Only one model pack can be built if --debug. Currently selected {model_pack_paths}"
+            )
+        _build_debug(
+            generate_curation_report,
+            logging_config_path,
+            maybe_base_configuration_path,
+            model_pack_paths[0],
+            output_dir,
+            skip_tests,
+            zip_pack,
+        )
+    else:
+
+        _build_with_ray(
+            generate_curation_report,
+            logging_config_path,
+            max_parallel_build,
+            maybe_base_configuration_path,
+            model_pack_paths,
+            output_dir,
+            skip_tests,
+            zip_pack,
+        )
+
+
+def _build_debug(
+    generate_curation_report: bool,
+    logging_config_path: Optional[Path],
+    maybe_base_configuration_path: Optional[Path],
+    model_pack_path: Path,
+    output_dir: Path,
+    skip_tests: bool,
+    zip_pack: bool,
+) -> None:
+    builder = ModelPackBuilder(
+        logging_config_path=logging_config_path,
+        maybe_base_configuration_path=maybe_base_configuration_path,
+        kazu_version=kazu_version,
+        zip_pack=zip_pack,
+        target_model_pack_path=model_pack_path,
+        build_dir=output_dir,
+        skip_tests=skip_tests,
+        generate_curation_report=generate_curation_report,
+    )
+    builder.build_model_pack()
+
+
+def _build_with_ray(
+    generate_curation_report: bool,
+    logging_config_path: Optional[Path],
+    max_parallel_build: Optional[int],
+    maybe_base_configuration_path: Optional[Path],
+    model_pack_paths: list[Path],
+    output_dir: Path,
+    skip_tests: bool,
+    zip_pack: bool,
+) -> None:
     runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
     ray.init(
         num_cpus=max_parallel_build,
@@ -319,11 +395,11 @@ def build_all_model_packs(
             target_model_pack_path=model_pack_path,
             build_dir=output_dir,
             skip_tests=skip_tests,
+            generate_curation_report=generate_curation_report,
         )
         futures.append(builder.build_model_pack.remote())
         while len(futures) >= max_parallel_build:
             futures = wait_for_model_pack_completion(futures)
-
     while len(futures) != 0:
         futures = wait_for_model_pack_completion(futures)
 
@@ -414,6 +490,17 @@ paths in a model packs build_config.json.
         required=False,
         help="build at most this many model packs simultaneously. If None, use all available CPUs",
     )
+    parser.add_argument(
+        "--generate_curation_report",
+        action="store_true",
+        help="When building the model packs, run a curation report. This is useful when upgrading ontologies, to observe which curations are now obsolete, "
+        "and what new terms are available in the ontology upgrade. Warning - as this runs all synonym generation routines, it is slow!",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Disables Ray parallelization, enabling the use of debugger tools",
+    )
 
     args = parser.parse_args()
 
@@ -425,4 +512,6 @@ paths in a model packs build_config.json.
         skip_tests=args.skip_tests,
         logging_config_path=args.logging_config_path,
         max_parallel_build=args.max_parallel_build,
+        generate_curation_report=args.generate_curation_report,
+        debug=args.debug,
     )
