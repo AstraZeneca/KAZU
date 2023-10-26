@@ -55,22 +55,15 @@ class SynonymGenerator(ABC):
                 )
             )
             generated_synonym_strings = self.generate_synonyms(string_to_mutate)
-            new_terms: set[tuple[str, str]] = set()
             for generated_syn in generated_synonym_strings:
-                if (generated_syn, string_to_mutate) in result:
+                mapping = generated_syn, string_to_mutate
+                if mapping in result:
                     logger.debug(
-                        "generated synonym %s matches existing synonym",
-                        generated_syn,
-                    )
-                elif (generated_syn, string_to_mutate) in new_terms:
-                    logger.debug(
-                        "generated synonym %s matches another generated synonym",
-                        generated_syn,
+                        "generated synonym %s has already been generated",
+                        mapping,
                     )
                 else:
-                    new_terms.add((generated_syn, string_to_mutate))
-            for terms_tup in new_terms:
-                result.add(terms_tup)
+                    result.add(mapping)
         return result
 
 
