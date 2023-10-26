@@ -9,13 +9,11 @@ from collections.abc import Iterable
 from copy import deepcopy
 from typing import Optional
 
-from tqdm import tqdm
-from spacy.matcher import Matcher
-
-from kazu.data.data import SynonymTerm
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike
+from spacy.matcher import Matcher
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -73,26 +71,21 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, synonyms: set[SynonymTerm]) -> set[tuple[str, str]]:
-        """Takes a set of :class:`.SynonymTerm`\\s, and returns a set of tuples
-        of the generated string and the original string.
-
-        The original strings from the :class:`.SynonymTerm`\\s are always included in the output.
+    def __call__(self, strings_to_mutate: set[str]) -> set[tuple[str, str]]:
+        """Takes a set of strings, and returns a set of tuples of the generated
+        string and the original string.
 
         :param synonyms:
         :return:
         """
         synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
         results: set[tuple[str, str]] = set()
-        original_synonym_strings: set[str] = {
-            term_str for syn_term in synonyms for term_str in syn_term.terms
-        }
         logger.info(
             "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
         )
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original synonyms
-            all_syns = deepcopy(original_synonym_strings)
+            all_syns = deepcopy(strings_to_mutate)
             logger.info(
                 "running permutation set %s of %s. Permutations: %s",
                 i + 1,
