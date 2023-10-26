@@ -3,8 +3,6 @@ from sys import maxunicode
 from typing import Union
 
 import pytest
-
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
 from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
@@ -18,18 +16,6 @@ from kazu.ontology_preprocessing.synonym_generation import (
 )
 from kazu.tests.utils import requires_model_pack
 
-# this is frozen so we only need to instantiate once
-dummy_equiv_ids = EquivalentIdSet(
-    ids_and_source=frozenset(
-        (
-            (
-                "text",
-                "text",
-            ),
-        ),
-    )
-)
-
 
 def check_generator_result(
     input_str: str,
@@ -37,23 +23,7 @@ def check_generator_result(
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
     result: set[tuple[str, str]]
-    if isinstance(generator, CombinatorialSynonymGenerator):
-        synonym_terms = {
-            SynonymTerm(
-                terms=frozenset([input_str]),
-                term_norm="NA",
-                is_symbolic=False,
-                mapping_types=frozenset(),
-                associated_id_sets=frozenset([dummy_equiv_ids]),
-                parser_name="test",
-                aggregated_by=EquivalentIdAggregationStrategy.CUSTOM,
-            )
-        }
-
-        result = set(generator(synonym_terms))
-    else:
-        result = set(generator({input_str}))
-
+    result = set(generator({input_str}))
     new_syns = set(term[0] for term in result)
     assert new_syns == expected_syns
 
