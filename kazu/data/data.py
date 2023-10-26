@@ -461,13 +461,13 @@ class Entity:
         entity_dict.pop("start")
         entity_dict.pop("end")
         entity_dict.pop("match_norm")
-        synonym_terms = {
-            SynonymTermWithMetrics.from_dict(term) for term in entity_dict.pop("synonym_terms", [])
+        synonym_terms_dict = {
+            (syn_term := SynonymTermWithMetrics.from_dict(term)): syn_term
+            for term in entity_dict.pop("synonym_terms", ())
         }
         mappings = {
-            Mapping.from_dict(mapping_dict) for mapping_dict in entity_dict.pop("mappings", [])
+            Mapping.from_dict(mapping_dict) for mapping_dict in entity_dict.pop("mappings", ())
         }
-        synonym_terms_dict = {term: term for term in synonym_terms}
         spans = frozenset(CharSpan(**x) for x in entity_dict.pop("spans", []))
         mention_confidence = MentionConfidence[entity_dict.pop("mention_confidence")]
         return Entity(
