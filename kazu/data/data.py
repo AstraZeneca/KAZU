@@ -614,11 +614,11 @@ class Document:
         sections = [
             Section.from_dict(section_dict) for section_dict in document_dict.get("sections", [])
         ]
-        return Document(
-            idx=document_dict.get("idx", uuid.uuid4().hex),
-            sections=sections,
-            metadata=document_dict.get("metadata", {}),
-        )
+        doc_args = {"sections": sections, "metadata": document_dict.get("metadata", {})}
+        doc_id = document_dict.get("idx")
+        if doc_id is not None:
+            doc_args["idx"] = doc_id
+        return Document(**doc_args)
 
     @staticmethod
     def from_json(json_str: str) -> "Document":
