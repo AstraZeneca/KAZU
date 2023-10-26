@@ -1042,3 +1042,12 @@ class CuratedTerm:
         as_json = self.to_dict(False)
         assert isinstance(as_json, dict)
         return json.dumps(as_json)
+
+    @property
+    def is_extra(self) -> bool:
+        """True if this term created in addition to the source terms defined in
+        the original Ontology."""
+        return self.associated_id_sets is not None and self.behaviour in {
+            CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+            CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        }
