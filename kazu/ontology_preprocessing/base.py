@@ -32,7 +32,12 @@ from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
-from kazu.utils.utils import PathLike, as_path, string_to_putative_curation
+from kazu.utils.utils import (
+    PathLike,
+    as_path,
+    string_to_putative_curation,
+    extract_term_strings_from_synonym_terms,
+)
 
 #: The column name in a dataframe parsed with :meth:`~.OntologyParser.parse_to_dataframe`
 #: for the column of the entity's default/preferred label
@@ -1035,7 +1040,9 @@ class OntologyParser(ABC):
                 self.name,
             )
             curations = []
-            for generated_syn, original_syn in self.synonym_generator(terms):
+            for generated_syn, original_syn in self.synonym_generator(
+                extract_term_strings_from_synonym_terms(terms)
+            ):
                 curations.append(
                     string_to_putative_curation(
                         generated_syn,
