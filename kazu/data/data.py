@@ -272,7 +272,7 @@ class SynonymTermWithMetrics(SynonymTerm):
     def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
         terms = frozenset(term_dict.pop("terms", ()))
         associated_id_sets = set()
-        for equiv_id_dict in term_dict.pop("associated_id_sets", []):
+        for equiv_id_dict in term_dict.pop("associated_id_sets", ()):
             associated_id_sets.add(
                 EquivalentIdSet(
                     ids_and_source=frozenset(
@@ -280,7 +280,7 @@ class SynonymTermWithMetrics(SynonymTerm):
                     )
                 )
             )
-        mapping_types = frozenset(term_dict.pop("mapping_types", []))
+        mapping_types = frozenset(term_dict.pop("mapping_types", ()))
         aggregated_by = EquivalentIdAggregationStrategy(term_dict.pop("aggregated_by"))
         return SynonymTermWithMetrics(
             terms=terms,
