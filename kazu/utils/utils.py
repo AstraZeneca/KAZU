@@ -10,6 +10,7 @@ from kazu.data.data import (
     CuratedTerm,
     CuratedTermBehaviour,
     MentionConfidence,
+    SynonymTerm,
 )
 from kazu.utils.string_normalizer import StringNormalizer
 from transformers import BatchEncoding, PreTrainedTokenizerBase
@@ -17,6 +18,10 @@ from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
 
 logger = logging.getLogger(__name__)
+
+
+def extract_term_strings_from_synonym_terms(synonym_terms: set[SynonymTerm]) -> set[str]:
+    return {term_str for syn_term in synonym_terms for term_str in syn_term.terms}
 
 
 def string_to_putative_curation(
