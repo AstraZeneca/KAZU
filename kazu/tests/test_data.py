@@ -64,6 +64,7 @@ def test_serialisation():
     deserialised_doc = Document.from_json(json_str)
     original_entities = original_doc.sections[0].entities
     deserialised_entities = deserialised_doc.sections[0].entities
+    # remove entities, since they will never be equal
     original_doc.sections[0].entities = []
     deserialised_doc.sections[0].entities = []
     assert deserialised_doc == original_doc
