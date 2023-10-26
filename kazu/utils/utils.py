@@ -41,14 +41,16 @@ def string_to_putative_curation(
     :return:
     """
 
+    is_original_term = original_term_string == term_string
+
     if len(original_term_string) == 1:
         behaviour = CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
-    elif original_term_string == term_string:
+    elif is_original_term:
         behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
     else:
         behaviour = CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
 
-    source_term = None if original_term_string == term_string else original_term_string
+    source_term = None if is_original_term else original_term_string
 
     is_symbolic = StringNormalizer.classify_symbolic(term_string, entity_class)
     conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
