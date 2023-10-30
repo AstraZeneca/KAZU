@@ -1,0 +1,26 @@
+indices:
+  hpo_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.hpo_parser}
+    boolean_scorers: ${StringScorers.disease}
+parsers:
+  hpo_parser:
+    _target_: kazu.ontology_preprocessing.parsers.RDFGraphParser
+    name: HPO_PHENOTYPE_ABNORMALITY
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/hp-full.owl
+    data_origin: '2023-10-09'
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.default}
+    entity_class: disease
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}
+    uri_regex: "^http://purl.obolibrary.org/obo/HP_[0-9]+$"
+    synonym_predicates:
+      - 'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym'
+    include_entity_patterns:
+      - - _target_: rdflib.paths.MulPath
+          path:
+            _target_: rdflib.URIRef
+            value: 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
+          mod: '+'
+        - 'http://purl.obolibrary.org/obo/HP_0000118'

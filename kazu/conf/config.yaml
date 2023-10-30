@@ -13,6 +13,7 @@ defaults:
       - go_cc
       - hgnc_gene_family
       - mondo
+      - hpo
       - stato
       - uberon
   - PLSapbertModel: default
