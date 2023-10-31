@@ -19,8 +19,8 @@ strategy_runner:
         HP:
           - MONDO
       source_to_parser_metadata_lookup:
-        MONDO: MONDO
-        HP: HPO_PHENOTYPE_ABNORMALITY
+        MONDO: ${ontologies.parsers.mondo_parser.name}
+        HP: ${ontologies.parsers.hpo_parser.name}
       path:
         _target_: pathlib.Path
         _args_:
