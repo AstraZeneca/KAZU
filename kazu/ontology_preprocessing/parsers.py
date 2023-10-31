@@ -1429,3 +1429,8 @@ class StatoParser(RDFGraphParser):
 
     def find_kb(self, string: str) -> str:
         return "OBI" if "OBI" in string else "STATO"
+
+
+class HPOntologyParser(RDFGraphParser):
+    def find_kb(self, string: str) -> str:
+        return "HP"

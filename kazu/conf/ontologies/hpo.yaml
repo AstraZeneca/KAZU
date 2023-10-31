@@ -5,7 +5,7 @@ indices:
     boolean_scorers: ${StringScorers.disease}
 parsers:
   hpo_parser:
-    _target_: kazu.ontology_preprocessing.parsers.RDFGraphParser
+    _target_: kazu.ontology_preprocessing.parsers.HPOntologyParser
     name: HPO_PHENOTYPE_ABNORMALITY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/hp-full.owl
     data_origin: '2023-10-09'
