@@ -110,31 +110,55 @@ Kazu includes elements under compatible licenses (full licenses are in relevant 
 
 ## Dataset licences
 
+For the version of each ontology currently in use, please see the 'data_origin' field in kazu/conf/ontologies
+
 ### Under [Creative Commons Attribution-Share Alike 3.0 Unported Licence](https://creativecommons.org/licenses/by/3.0/legalcode)
 
 #### Chembl
-ChEMBL data is from http://www.ebi.ac.uk/chembl - the version of ChEMBL is ChEMBL_29
+ChEMBL data is from http://www.ebi.ac.uk/chembl
 
 #### CLO
-CLO data is from http://www.ebi.ac.uk/ols/ontologies/clo - downloaded 18th October 2021
+CLO data is from http://www.ebi.ac.uk/ols/ontologies/clo
 
 #### UBERON
-UBERON data is from http://www.ebi.ac.uk/ols/ontologies/uberon - downloaded 18th October 2021
-
+UBERON data is from http://www.ebi.ac.uk/ols/ontologies/uberon
 
 ### Under [Creative Commons Attribution 4.0 Unported License](https://creativecommons.org/licenses/by/4.0/legalcode>)
 
 #### MONDO
-MONDO data is from http://www.ebi.ac.uk/ols/ontologies/mondo - downloaded 29th July 2022
+MONDO data is from http://www.ebi.ac.uk/ols/ontologies/mondo
 
 #### CELLOSAURUS
-CELLOSAURUS data is from https://www.cellosaurus.org/ - downloaded 8th November 2021
+CELLOSAURUS data is from https://www.cellosaurus.org/
 
 #### Gene Ontology
-Gene Ontology data is from (version https://zenodo.org/record/7186998#.Y2OcR-zP3iM )
+Gene Ontology data is from http://purl.obolibrary.org/obo/go.owl
 
 
 ### Other licenced datasets and models
+
+#### HPO
+
+This service/product uses the Human Phenotype Ontology (version information). Find out more at http://www.human-phenotype-ontology.org
+
+Freely licenced under https://hpo.jax.org/app/license
+
+Sebastian Köhler, Michael Gargano, Nicolas Matentzoglu, Leigh C Carmody, David Lewis-Smith,
+Nicole A Vasilevsky, Daniel Danis, Ganna Balagura, Gareth Baynam, Amy M Brower,
+Tiffany J Callahan, Christopher G Chute, Johanna L Est, Peter D Galer, Shiva Ganesan,
+Matthias Griese, Matthias Haimel, Julia Pazmandi, Marc Hanauer, Nomi L Harris,
+Michael J Hartnett, Maximilian Hastreiter, Fabian Hauck, Yongqun He, Tim Jeske, Hugh Kearney,
+Gerhard Kindle, Christoph Klein, Katrin Knoflach, Roland Krause, David Lagorce, Julie A McMurry,
+Jillian A Miller, Monica C Munoz-Torres, Rebecca L Peters, Christina K Rapp, Ana M Rath,
+Shahmir A Rind, Avi Z Rosenberg, Michael M Segal, Markus G Seidel, Damian Smedley,
+Tomer Talmy, Yarlalu Thomas, Samuel A Wiafe, Julie Xian, Zafer Yüksel, Ingo Helbig,
+Christopher J Mungall, Melissa A Haendel, Peter N Robinson,
+
+The Human Phenotype Ontology in 2021,
+
+Nucleic Acids Research, Volume 49, Issue D1, 8 January 2021, Pages D1207–D1217,
+https://doi.org/10.1093/nar/gkaa1043
+
 
 #### OPEN TARGETS
 Open Targets datasets are kindly provided by www.opentargets.org, which are free for commercial use cases <https://platform-docs.opentargets.org/licence>
