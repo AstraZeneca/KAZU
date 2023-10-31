@@ -70,7 +70,7 @@ def download_single_file_resources(output_dir: Path) -> None:
         "http://purl.obolibrary.org/obo/uberon.owl": "uberon.owl",
         'http://biomart.genenames.org/martservice/results?query=<!DOCTYPE Query><Query client="biomartclient" processor="TSV" limit="-1" header="1"><Dataset name="hgnc_family_mart" config="family_config"><Attribute name="family__family_id_103"/><Attribute name="family__name_103"/><Attribute name="family__alias__alias_101"/><Attribute name="family__root_symbol_103"/></Dataset></Query>': "gene_family.tsv",
         "https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo": "cellosaurus.obo",
-        "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp-full.json": "hp-full.json",
+        "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp-full.owl": "hp-full.owl",
     }
     for url, local_path in ontologies_to_path.items():
         response = requests.get(url)
