@@ -7,7 +7,7 @@ parsers:
   chembl_parser:
     _target_: kazu.ontology_preprocessing.parsers.ChemblOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_32_sqlite/chembl_32.db
-    data_origin: 'chembl_32_sqlite'
+    data_origin: '33'
     name: CHEMBL
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.chemical}

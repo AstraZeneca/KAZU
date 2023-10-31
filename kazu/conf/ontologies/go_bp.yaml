@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.BiologicalProcessGeneOntologyParser
     name: BP_GENE_ONTOLOGY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: 'GO-BP-2023-05-10'
+    data_origin: '2023-10-09'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: go_bp
