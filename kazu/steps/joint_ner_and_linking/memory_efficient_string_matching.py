@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 EntityClass = str
 CaseSensitive = bool
 EntityInfoToOntologyInfoMapping = defaultdict[
-    tuple[EntityClass, MentionConfidence, CaseSensitive, NormalisedSynonymStr], set[ParserName]
+    tuple[EntityClass, MentionConfidence, CaseSensitive, NormalisedSynonymStr, str], set[ParserName]
 ]
 
 
@@ -75,13 +75,14 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                     curation.mention_confidence,
                     curation.case_sensitive,
                     term_norm,
+                    curation.curated_synonym,
                 )
-                key_to_ontology_info[curation.curated_synonym][entity_key].add(parser.name)
+                key_to_ontology_info[curation.curated_synonym.lower()][entity_key].add(parser.name)
 
         if len(key_to_ontology_info) > 0:
             case_insensitive_automaton = ahocorasick.Automaton()
             for key, entity_to_ontology_info in key_to_ontology_info.items():
-                case_insensitive_automaton.add_word(key.lower(), (key, entity_to_ontology_info))
+                case_insensitive_automaton.add_word(key, (key, entity_to_ontology_info))
             case_insensitive_automaton.make_automaton()
         else:
             raise RuntimeError(
@@ -114,19 +115,21 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
         entities = []
         for end_index, (match_key, ontology_dict) in automaton.iter(matchable_text):
             start_index = end_index - len(match_key) + 1
-            original_match = original_text[start_index : end_index + 1]
+            matched_text = original_text[start_index : end_index + 1]
             if self._word_is_valid(start_index, end_index, starts, ends):
+
                 for entity_info, parser_name_set in ontology_dict.items():
                     (
                         entity_class,
                         confidence,
                         case_sensitive,
                         term_norm,
+                        original_case,
                     ) = entity_info
                     # filter out cases where we've specified we only want exact matches, but we only have a lowercase match
                     if not self._case_matches(
-                        actual_match=original_match,
-                        original_casing=match_key,
+                        actual_match=matched_text,
+                        original_casing=original_case,
                         case_sensitive=case_sensitive,
                     ):
                         continue
@@ -139,7 +142,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                     e = Entity.load_contiguous_entity(
                         start=start_index,
                         end=end_index + 1,
-                        match=original_match,
+                        match=matched_text,
                         entity_class=entity_class,
                         namespace=self.namespace(),
                         mention_confidence=confidence,
