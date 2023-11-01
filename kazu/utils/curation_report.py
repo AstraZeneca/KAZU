@@ -63,23 +63,28 @@ class _OntologyUpgradeReport:
         for curation in existing_curations:
             self.existing_curations_case_sensitive[curation.curated_synonym].add(curation)
 
+        # old/new curations that perfectly match on .curated_synonym
         self.matched_curations: set[CuratedTerm] = set()
+
+        # a pointer to new curations that can be discarded
         self.eliminated_generated_curations_case_insensitive: defaultdict[
             str, set[CuratedTerm]
         ] = defaultdict(set)
+
+        # curations that match in a case insensitive fashion, and can be automatically modified
         self.modified_curations: set[CuratedTerm] = set()
-        self.extra_ontology_terms: set[
-            CuratedTerm
-        ] = set()  # terms that don't appear in the ontology, but have been manually added
-        self.failed_migrations: defaultdict[str, set[CuratedTerm]] = defaultdict(
-            set
-        )  # terms that match only if case not considered
-        self.obsolete_terms: defaultdict[str, set[CuratedTerm]] = defaultdict(
-            set
-        )  # terms that no longer appear in the ontology
-        self.novel_terms: defaultdict[str, set[CuratedTerm]] = defaultdict(
-            set
-        )  # terms that no longer appear in the ontology
+
+        # terms that don't appear in the ontology, but have been manually added
+        self.extra_ontology_terms: set[CuratedTerm] = set()
+
+        # terms that match only if case not considered
+        self.failed_migrations: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
+
+        # terms that no longer appear in the ontology
+        self.obsolete_terms: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
+
+        # terms that are new in the latest version of the ontology
+        self.novel_terms: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
 
     def match_existing_terms_to_new_terms(
         self,
