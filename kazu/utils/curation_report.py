@@ -161,8 +161,18 @@ class _OntologyUpgradeReport:
                         self.failed_migrations[generated_term.curated_synonym].add(generated_term)
 
         # any remaining terms are novel
-        for generated_terms in self.incoming_curations_case_insensitive.values():
-            for term in generated_terms:
+        for (
+            generated_term_string_case_insensitive,
+            matched_generated_terms_ci,
+        ) in self.incoming_curations_case_insensitive.items():
+            matched_generated_terms_ci_minus_already_handled_ones = (
+                matched_generated_terms_ci.difference(
+                    self.eliminated_generated_curations_case_insensitive[
+                        generated_term_string_case_insensitive.lower()
+                    ]
+                )
+            )
+            for term in matched_generated_terms_ci_minus_already_handled_ones:
                 if term.source_term is None:
                     self.novel_terms[term.curated_synonym].add(term)
                 else:
