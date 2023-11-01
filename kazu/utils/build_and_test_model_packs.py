@@ -115,6 +115,7 @@ class ModelPackBuilder:
             # local import so the cache is correctly configured with KAZU_MODEL_PACK
             from kazu.utils.curation_report import run_curation_report
             from kazu.utils.utils import Singleton
+
             self.logger.info("running curation report at %s", self.model_pack_build_path)
             run_curation_report(self.model_pack_build_path)
             # needed as the report will interfere with the cache
