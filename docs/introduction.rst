@@ -21,7 +21,7 @@ For NER:
 For linking:
 
 1) There are numerous ontologies that overlap, either conceptually or in a composite fashion. Rather than depending on a composite system like UMLS,
-   we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date release of a given ontology, whilst avoiding issues
+   we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date with a given ontology, whilst avoiding issues
    associated with the development of a composite ontology.
 
 2) However, entity Linking is a challenging problem that starts with dealing with the inconsistencies with the source knowledgebase.
