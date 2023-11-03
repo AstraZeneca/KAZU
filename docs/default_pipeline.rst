@@ -3,7 +3,7 @@ At a glance: How to use the default Kazu pipeline
 
 For most use cases we've encountered, the default configuration should suffice. This will
 
-1) Tag the following entity classes with a curated dictionary using the Spacy PhraseMatcher. This uses
+1) Tag the following entity classes with a curated dictionary using the spaCy PhraseMatcher. This uses
    :py:class:`~kazu.steps.joint_ner_and_linking.memory_efficient_string_matching.MemoryEfficientStringMatchingStep`
 
    a. gene
@@ -73,7 +73,7 @@ Note that other steps are available in Kazu which are not used in the default pi
 - :py:class:`~kazu.steps.ner.seth.SethStep` for tagging mutations with the `SETH tagger <https://rockt.github.io/SETH/>`_.
 - :py:class:`~kazu.steps.ner.opsin.OpsinStep` for resolving IUPAC labels with the `OPSIN <https://opsin.ch.cam.ac.uk/>`_.
 - :py:class:`~kazu.steps.other.stanza.StanzaStep` for high accuracy sentence-segmentation (note that this does slow the pipeline down considerably, hence why it's not in by default).
-- :py:class:`~kazu.steps.ner.spacy_ner.SpacyNerStep` for using a generic spacy pipeline (such as `scispacy <https://allenai.github.io/scispacy/>`_) for Named Entity Recognition.
+- :py:class:`~kazu.steps.ner.spacy_ner.SpacyNerStep` for using a generic spaCy pipeline (such as `scispacy <https://allenai.github.io/scispacy/>`_) for Named Entity Recognition.
 
 Some of these require additional dependencies which are not included in the default installion of kazu. You can get all of these dependencies with:
 
