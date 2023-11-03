@@ -75,7 +75,7 @@ Note that other steps are available in Kazu which are not used in the default pi
 - :py:class:`~kazu.steps.other.stanza.StanzaStep` for high accuracy sentence-segmentation (note that this does slow the pipeline down considerably, hence why it's not in by default).
 - :py:class:`~kazu.steps.ner.spacy_ner.SpacyNerStep` for using a generic spaCy pipeline (such as `scispacy <https://allenai.github.io/scispacy/>`_) for Named Entity Recognition.
 
-Some of these require additional dependencies which are not included in the default installion of kazu. You can get all of these dependencies with:
+Some of these require additional dependencies which are not included in the default installation of kazu. You can get all of these dependencies with:
 
 .. code-block:: console
 
