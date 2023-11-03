@@ -165,7 +165,7 @@ as described in the Model Pack section above.
 
     EGFR mutations are often implicated in lung cancer
 
-You can now inspect the doc object, and explore what entities were detected on each section
+You can now inspect the doc object, and explore what entities were detected on each section.
 
 Running Steps
 -------------
