@@ -19,7 +19,7 @@ then Kazu will handle it for you.
 
 However, this is only possible on some platforms (e.g Mac, Windows without using a GPU, Linux with a specific version of CUDA).
 
-See the PyTorch website `here <https://pytorch.org/get-started/locally/>`_ and select your platform .
+See the PyTorch website `here <https://pytorch.org/get-started/locally/>`_ and select your platform.
 If the command specifies an ``index_url`` you will need to run the command, although installing
 ``torchvision`` and ``torchaudio`` is not necessary.
 
