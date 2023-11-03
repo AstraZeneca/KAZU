@@ -24,7 +24,7 @@ For linking:
    we prefer to link directly to the source ontology URIs. This enables Kazu to always be up to date with a given ontology, whilst avoiding issues
    associated with the development of a composite ontology.
 
-2) However, entity Linking is a challenging problem that starts with dealing with the inconsistencies with the source knowledgebase.
+2) However, entity linking is a challenging problem that starts with dealing with the inconsistencies with the source knowledgebase.
    Therefore, we wanted a system that could fully (or at least partially) automate the preprocessing/cleaning of knowledgebases and
    ontologies, in preparation for them to become a linking target.
 
