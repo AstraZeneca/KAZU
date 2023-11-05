@@ -96,13 +96,20 @@ class CurationModificationResult(AutoNameEnum):
 
 
 class CurationProcessor:
-    """A CurationProcessor is responsible for modifying the set of :class:`.SynonymTerm`\\s produced
-    by an :class:`kazu.ontology_preprocessing.base.OntologyParser` with any relevant :class:`.GlobalParserActions` and/or
-    :class:`.CuratedTerm` associated with the parser.
+    """A CurationProcessor is responsible for modifying the set of
+    :class:`.SynonymTerm`\\s produced by an
+    :class:`kazu.ontology_preprocessing.base.OntologyParser` with any relevant
+    :class:`.GlobalParserActions` and/or :class:`.CuratedTerm` associated with
+    the parser.
 
     That is to say, this class modifies the raw data produced by a parser with any a posteriori
-    observations about the data (such as bad synonyms, mis-mapped terms etc). Is also identifies
-    curations that should be used for dictionary based NER.
+    observations about the data (such as conflicts in case sensitivity/identifiers/mention confidence etc). Is also
+    identifies curations that should be used for dictionary based NER.
+
+    Note that this class does not handle inherited behaviour. For instance, if a :class:`.CuratedTerm` has the behaviour
+    INHERIT_FROM_SOURCE_TERM, and the source terms behaviour is DROP_SYNONYM_TERM_FOR_LINKING, it is the responsibility
+    of the caller to ensure that the inherited curation is handled correctly.
+    :func:`kazu.utils.curated_term_tools.filter_curations_for_ner` may be useful in this case.
 
     This class should be used before instances of :class:`.SynonymTerm`\\s are loaded into the
     internal database representation.
@@ -519,27 +526,12 @@ class CurationProcessor:
         if curation.behaviour is CuratedTermBehaviour.IGNORE:
             logger.debug("curation ignored: %s for %s", curation, self.parser_name)
         elif curation.behaviour is CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM:
-            assert curation.source_term is not None, curation
             logger.debug(
-                "curation inherits linking behaviour from %s for %s",
+                "curation inherits behaviour from %s for %s",
                 curation.source_term,
                 self.parser_name,
             )
-            source_curations = self._curations_by_syn.get(curation.source_term)
-            if source_curations is None:
-                logger.warning(
-                    "no source curation found for %s for %s. The curation will be ignored",
-                    curation.source_term,
-                    self.parser_name,
-                )
-                return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
-            elif len(source_curations) > 1:
-                logger.warning(
-                    "multiple source curations found for %s for %s. The curation will be ignored",
-                    curation.source_term,
-                    self.parser_name,
-                )
-                return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
+            return curation
         elif curation.behaviour is CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
             self._drop_synonym_term(term_norm)
         elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
