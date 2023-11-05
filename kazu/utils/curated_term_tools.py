@@ -44,7 +44,10 @@ def filter_curations_for_ner(
         yield from curation_set
         yield from inherited_terms.pop(curated_synonym, set())
     if len(inherited_terms) > 0:
-        logger.warning(
-            "The following inherited curations were unmatched to a source term, and will be ignored for NER: %s",
-            inherited_terms.values(),
-        )
+        for curation_set in inherited_terms.values():
+            for curation in curation_set:
+                if curation.source_term not in original_terms:
+                    logger.debug(
+                        "A curation with inherited behaviour has no matching source term to inherit from, and will be ignored for NER: %s",
+                        curation,
+                    )
