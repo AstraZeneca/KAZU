@@ -424,13 +424,13 @@ class CurationProcessor:
                 else CuratedTermBehaviour.IGNORE
             )
             logger.warning(
-                "conflicting behaviours detected. The following source curations will be %s\n%s",
+                "conflicting behaviours detected. The following source curations will be\n%s\n%s",
                 resolved_behaviour.name,
                 "\n\n".join(curation.to_json() for curation in source_curations) + "\n\n",
             )
             if len(inherited_curations) > 0:
                 logger.warning(
-                    "conflicting behaviours detected. The following inherited curations will be %s\n%s",
+                    "conflicting behaviours detected. The following inherited curations will be\n%s\n%s",
                     CuratedTermBehaviour.IGNORE.name,
                     "\n\n".join(curation.to_json() for curation in inherited_curations) + "\n\n",
                 )
@@ -485,9 +485,9 @@ class CurationProcessor:
             # set all to CI min
             target_conf = min(ci_conf)
             logger.warning(
-                "conflict detected in case sensitivity/confidence combination for the following curations. Affected curations will adopt the conservative confidence value %s,%s",
+                "conflict detected in case sensitivity/confidence combination for the following curations. Affected curations will adopt the conservative confidence value\n%s\n%s",
                 target_conf.name,
-                "\n".join(curation.to_json() for curation in curations) + "\n\n",
+                "\n\n".join(curation.to_json() for curation in curations) + "\n\n",
             )
             to_add.update(
                 dataclasses.replace(curation, mention_confidence=target_conf)
