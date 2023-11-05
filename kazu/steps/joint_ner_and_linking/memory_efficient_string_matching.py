@@ -82,7 +82,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
         if len(key_to_ontology_info) > 0:
             case_insensitive_automaton = ahocorasick.Automaton()
             for key, entity_to_ontology_info in key_to_ontology_info.items():
-                case_insensitive_automaton.add_word(key, (key, entity_to_ontology_info))
+                case_insensitive_automaton.add_word(key, entity_to_ontology_info)
             case_insensitive_automaton.make_automaton()
         else:
             raise RuntimeError(
@@ -113,7 +113,9 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
         ends: set[int],
     ) -> list[Entity]:
         entities = []
-        for end_index, (match_key, ontology_dict) in automaton.iter(matchable_text):
+        for end_index, ontology_dict in automaton.iter(matchable_text):
+            # all keys should have the same value for curated synonym
+            match_key = next(iter(ontology_dict.keys()))[-1]
             start_index = end_index - len(match_key) + 1
             matched_text = original_text[start_index : end_index + 1]
             if self._word_is_valid(start_index, end_index, starts, ends):
