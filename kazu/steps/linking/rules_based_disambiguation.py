@@ -58,6 +58,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
         class_matcher_rules: MatcherClassRules,
         mention_matcher_rules: MatcherMentionRules,
         parsers: Iterable[OntologyParser],
+        other_entity_classes: Optional[Iterable[str]] = None,
     ):
         """
 
@@ -87,9 +88,16 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                         }
                     }
                 }
+        :param other_entity_classes: any other entity classes that are detected by the pipeline. This is needed to stop
+            spacy from throwing extension exceptions
         """
         super().__init__(parsers)
-        self.mapper = SpacyToKazuObjectMapper(parsers)
+        entity_classes = (
+            [parser.entity_class for parser in parsers] + list(other_entity_classes)
+            if other_entity_classes is not None
+            else []
+        )
+        self.mapper = SpacyToKazuObjectMapper(entity_classes)
         self.class_matcher_rules = class_matcher_rules
         self.mention_matcher_rules = mention_matcher_rules
         self.spacy_pipelines = SpacyPipelines()

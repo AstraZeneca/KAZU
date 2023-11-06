@@ -1,23 +1,21 @@
 from collections.abc import Iterable
 
-from spacy.tokens import Doc, Span, Token
-
 from kazu.data.data import Section, Entity
-from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
+from spacy.tokens import Doc, Span, Token
 
 
 class SpacyToKazuObjectMapper:
     """Maps entities and text from a :class:`.Section` to a Spacy `Doc
     <https://spacy.io/api/doc>`_ using :func:`.basic_spacy_pipeline`\\."""
 
-    def __init__(self, parsers: Iterable[OntologyParser]):
+    def __init__(self, entity_classes: Iterable[str]):
         """
 
-        :param parsers: parsers are required so that all entity classes can be set as spacy extensions
+        :param entity_classes: entity_classes are required so that all entity classes can be set as spacy extensions
         """
-        for parser in parsers:
-            Token.set_extension(parser.entity_class, default=False, force=True)
+        for entity_class in entity_classes:
+            Token.set_extension(entity_class, default=False, force=True)
         self.spacy_pipelines = SpacyPipelines()
         self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
 
