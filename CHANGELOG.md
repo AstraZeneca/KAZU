@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.3.0 - 2023-11-07
+
+
+### Features
+
+- CurationProcessor no longer tries to handle curations with INHERIT_FROM_SOURCE_TERM behaviour, as this was causing confusion and conflicts. This is now the responsibility of the caller.
+- Updated ontologies for October 2023.
+
+### Bugfixes
+
+- Fixed a bug in MemoryEfficientStringMatchingStep where caseinsensitive overlaps caused ontology info to be lost.
+
+
 ## 1.2.0 - 2023-10-18
 
 
