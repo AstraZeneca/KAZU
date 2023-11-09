@@ -1034,37 +1034,26 @@ class OntologyParser(ABC):
     def process_curations(
         self, terms: set[SynonymTerm]
     ) -> tuple[Optional[list[CuratedTerm]], set[SynonymTerm]]:
-        if self.curations_path is None and self.synonym_generator is not None:
-            logger.warning(
-                "%s is configured to use synonym generators. This may result in noisy NER performance.",
-                self.name,
-            )
-            curations = []
-            for generated_syn, original_syn in self.synonym_generator(
-                extract_term_strings_from_synonym_terms(terms)
-            ):
-                curations.append(
-                    string_to_putative_curation(
-                        generated_syn,
-                        entity_class=self.entity_class,
-                        original_term_string=original_syn,
-                    )
-                )
-        elif (
-            self.curations_path is None
-        ):  # implies self.synonym_generator is None as failed the if above
+        if self.curations_path is None:
             logger.warning(
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
                 self.name,
             )
-            curations = []
-            for term in terms:
-                for term_str in term.terms:
-                    curations.append(
-                        string_to_putative_curation(
-                            term_str, entity_class=self.entity_class, original_term_string=term_str
-                        )
+            curations_set = set()
+            for term_str in extract_term_strings_from_synonym_terms(terms):
+                curations_set.add(
+                    string_to_putative_curation(
+                        term_string=term_str,
+                        entity_class=self.entity_class,
                     )
+                )
+                if self.synonym_generator is not None:
+                    logger.warning(
+                        "%s is configured to use synonym generators. This may result in noisy NER performance.",
+                        self.name,
+                    )
+                    curations_set.update(self.synonym_generator(curations_set))
+            curations = list(curations_set)
 
         else:
             assert self.curations_path is not None
