@@ -24,34 +24,25 @@ def extract_term_strings_from_synonym_terms(synonym_terms: set[SynonymTerm]) -> 
     return {term_str for syn_term in synonym_terms for term_str in syn_term.terms}
 
 
-def string_to_putative_curation(
-    term_string: str, entity_class: str, original_term_string: str
-) -> CuratedTerm:
+def string_to_putative_curation(term_string: str, entity_class: str) -> CuratedTerm:
     """Create a :class:`.CuratedTerm` from a string.
 
     Uses some simple heuristics to suggest basic rules for how
     this term should be handled by Kazu - You will probably want to
     change these in some cases, depending on your use case.
 
+    This should only be used with original ontology terms (not generated)
+
     :param term_string: forms the curated_synonym attribute of the resulting term
     :param entity_class: used to determine whether the string is symbolic or not, and
         thus it's default case sensitivity behaviour
-    :param: original_term_string: the original ontology term this term was derived from.
-        Can be the same as term_string.
     :return:
     """
 
-    is_original_term = original_term_string == term_string
-
-    if len(original_term_string) == 1:
+    if len(term_string) == 1:
         behaviour = CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
-    elif is_original_term:
-        behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
     else:
-        behaviour = CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM
-
-    source_term = None if is_original_term else original_term_string
-
+        behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
     is_symbolic = StringNormalizer.classify_symbolic(term_string, entity_class)
     conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
     return CuratedTerm(
@@ -59,7 +50,7 @@ def string_to_putative_curation(
         mention_confidence=conf,
         case_sensitive=is_symbolic,
         behaviour=behaviour,
-        source_term=source_term,
+        source_term=None,
     )
 
 
