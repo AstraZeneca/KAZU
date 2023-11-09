@@ -10,11 +10,10 @@ import requests
 _ONTOLOGY_DIR_NAME = "ontologies"
 
 
-def download_and_process_chembl(output_dir: Path, CHEMBL_VERSION: str) -> None:
+def download_and_process_chembl(output_dir: Path, chembl_version: str) -> None:
     target_dir = output_dir.joinpath(_ONTOLOGY_DIR_NAME).absolute()
-    chembl_url = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_{CHEMBL_VERSION}_sqlite.tar.gz".format(
-        CHEMBL_VERSION=CHEMBL_VERSION
-    )
+    chembl_url = f"https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{chembl_version}/chembl_{chembl_version}_sqlite.tar.gz"
+
     print("downloading chembl")
     subprocess.run(
         ["wget", chembl_url],
@@ -23,9 +22,9 @@ def download_and_process_chembl(output_dir: Path, CHEMBL_VERSION: str) -> None:
     print("extracting chembl DB")
     subprocess.run(["tar", "-xvzf", chembl_url.split("/")[-1]], cwd=target_dir)
     chembl_db_path = (
-        target_dir.joinpath("chembl_{CHEMBL_VERSION}".format(CHEMBL_VERSION=CHEMBL_VERSION))
-        .joinpath("chembl_{CHEMBL_VERSION}_sqlite".format(CHEMBL_VERSION=CHEMBL_VERSION))
-        .joinpath("chembl_{CHEMBL_VERSION}.db".format(CHEMBL_VERSION=CHEMBL_VERSION))
+        target_dir.joinpath(f"chembl_{chembl_version}")
+        .joinpath(f"chembl_{chembl_version}_sqlite")
+        .joinpath(f"chembl_{chembl_version}.db")
     )
 
     conn = sqlite3.connect(chembl_db_path)
@@ -48,10 +47,7 @@ def download_and_process_chembl(output_dir: Path, CHEMBL_VERSION: str) -> None:
             "molecule_synonyms",
         }:
             print(f"dropping table {table_name}")
-            drop_cur = conn.cursor()
-            drop_cur.execute(f"DROP TABLE {table_name}")
-
-            drop_cur.close()
+            conn.execute(f"DROP TABLE {table_name}")
     cur.close()
     print("running sqllite VACUUM")
     subprocess.run(
@@ -73,28 +69,23 @@ def download_single_file_resources(output_dir: Path) -> None:
         "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp-full.owl": "hp-full.owl",
     }
     for url, local_path in ontologies_to_path.items():
-        response = requests.get(url)
+        response = requests.get(url, stream=True)
         if response.status_code > 300:
             print(f"request failed: {url}")
             print(response)
         else:
             print(f"downloading data from {url}")
             with output_dir.joinpath(_ONTOLOGY_DIR_NAME).joinpath(local_path).open(mode="w") as f:
-                f.write(response.text)
+                for chunk in response.iter_content(chunk_size=None):
+                    f.write(chunk)
 
 
-def download_ftp_resources(output_dir: Path, OT_VERSION: str) -> None:
+def download_ftp_resources(output_dir: Path, open_targets_version: str) -> None:
     path_to_ftp_directories = {
         "opentargets/": [
-            "ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/{OT_VERSION}/output/etl/json/targets".format(
-                OT_VERSION=OT_VERSION
-            ),
-            "ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/{OT_VERSION}/output/etl/json/diseases".format(
-                OT_VERSION=OT_VERSION
-            ),
-            "ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/{OT_VERSION}/output/etl/json/molecule".format(
-                OT_VERSION=OT_VERSION
-            ),
+            f"ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/{open_targets_version}/output/etl/json/targets"
+            f"ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/{open_targets_version}/output/etl/json/diseases"
+            f"ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/{open_targets_version}/output/etl/json/molecule"
         ]
     }
     for path_str, ftp_directories in path_to_ftp_directories.items():
@@ -118,20 +109,20 @@ def download_ftp_resources(output_dir: Path, OT_VERSION: str) -> None:
 
 
 if __name__ == "__main__":
-    description = """Download public ontologies for Kazu."""
+    description = "Download public ontologies for Kazu."
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "--open_targets_release_version",
         type=str,
         required=False,
-        help="""Version of OpenTargets to use, e.g. '23.09'""",
+        help="Version of OpenTargets to use, e.g. '23.09'",
     )
     parser.add_argument(
         "--chembl_version",
         type=str,
         required=False,
-        help="""Version of Chembl to use, e.g. '33' """,
+        help="Version of Chembl to use, e.g. '33' ",
     )
     parser.add_argument(
         "--output_dir",
@@ -148,9 +139,11 @@ if __name__ == "__main__":
     if args.open_targets_release_version:
         download_ftp_resources(output_dir, args.open_targets_release_version)
     else:
-        print("skipping open targets")
+        print(
+            "skipping open targets as no version was provided with --open_targets_release_version"
+        )
 
     if args.chembl_version:
         download_and_process_chembl(output_dir, args.chembl_version)
     else:
-        print("skipping chembl")
+        print("skipping chembl as no version was provided with --chembl_version")
