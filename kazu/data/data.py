@@ -1,3 +1,36 @@
+"""This module contains the core aspects of the :doc:`/datamodel`.
+
+See the page linked above for a quick introduction to the key concepts.
+
+.. _data-serialization:
+
+Data Serialization and deserialization
+--------------------------------------
+
+As :class:`~.Document`\\ s are the key container of data processed by (or to be
+processed by) Kazu, we focus on the (de)serialization of this container, to and from
+json format.
+
+:meth:`.DocumentJsonUtils.doc_to_json_dict` is the key method here for serialization,
+and :meth:`.Document.from_json` for deserialization.
+
+:class:`~.Document` and other classes that can be stored on :class:`~.Document` have
+a :meth:`~.Document.from_dict` method. Note that this method mutates the input dictionary
+- if this is not desired for your usage, call :func:`copy.deepcopy` on your dictionary
+before calling the relevant ``from_dict`` method.
+
+These ``from_dict`` methods all expect dictionaries in the format produced by
+:meth:`.DocumentJsonUtils.doc_to_json_dict` when serializing a document - for an object
+like a :class:`~.Section` or :class:`~.Entity` this is the result of
+:meth:`.DocumentJsonUtils.obj_to_dict_repr`.
+
+.. |metadata_s11n_warn| replace:: Note that storing objects here that don't straightforwardly
+   convert to and from json may cause problems for (de)serialization.
+   See :ref:`data-serialization` for more details.
+
+.. |from_dict_note| replace:: See :ref:`data-serialization`.
+"""
+
 import dataclasses
 import json
 import uuid
@@ -173,11 +206,14 @@ class Mapping:
     disambiguation_strategy: Optional[str] = None
     #: source parser name if mapping is an XREF
     xref_source_parser_name: Optional[str] = None
-    #: generic metadata
+    #: | generic metadata
+    #: |
+    #: | |metadata_s11n_warn|
     metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
 
     @staticmethod
     def from_dict(mapping_dict: dict) -> "Mapping":
+        """|from_dict_note|"""
         string_match_confidence = StringMatchConfidence[mapping_dict.pop("string_match_confidence")]
         disambiguation_confidence = (
             DisambiguationConfidence[mapping_dict.pop("disambiguation_confidence")]
@@ -270,6 +306,7 @@ class SynonymTermWithMetrics(SynonymTerm):
 
     @staticmethod
     def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
+        """|from_dict_note|"""
         terms = frozenset(term_dict.pop("terms", ()))
         associated_id_sets = set()
         for equiv_id_dict in term_dict.pop("associated_id_sets", ()):
@@ -309,7 +346,9 @@ class Entity:
     namespace: str
     mention_confidence: MentionConfidence = MentionConfidence.HIGHLY_LIKELY
     mappings: set[Mapping] = field(default_factory=set)
-    #: generic metadata
+    #: | generic metadata
+    #: |
+    #: | |metadata_s11n_warn|
     metadata: dict[Any, Any] = field(default_factory=dict)
     start: int = field(init=False)
     end: int = field(init=False)
@@ -458,6 +497,7 @@ class Entity:
 
     @staticmethod
     def from_dict(entity_dict: dict) -> "Entity":
+        """|from_dict_note|"""
         entity_dict.pop("start")
         entity_dict.pop("end")
         entity_dict.pop("match_norm")
@@ -481,11 +521,18 @@ class Entity:
 
 @dataclass(unsafe_hash=True)
 class Section:
+    """A container for text and entities.
+
+    One or more make up a :class:`kazu.data.data.Document`.
+    """
+
     #: the text to be processed
     text: str
     #: the name of the section (e.g. abstract, body, header, footer etc)
     name: str
-    #: generic metadata
+    #: | generic metadata
+    #: |
+    #: | |metadata_s11n_warn|
     metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
     #: entities detected in this section
     entities: list[Entity] = field(default_factory=list, hash=False)
@@ -523,6 +570,7 @@ class Section:
 
     @staticmethod
     def from_dict(section_dict: dict) -> "Section":
+        """|from_dict_note|"""
         section = Section(
             name=section_dict["name"],
             text=section_dict["text"],
@@ -535,11 +583,16 @@ class Section:
 
 @dataclass(unsafe_hash=True)
 class Document:
+    """A container that is the primary input into a
+    :class:`kazu.pipeline.pipeline.Pipeline`."""
+
     #: a document identifier
     idx: str = field(default_factory=lambda: uuid.uuid4().hex)
     #: sections comprising this document
     sections: list[Section] = field(default_factory=list, hash=False)
-    #: generic metadata
+    #: | generic metadata
+    #: |
+    #: | |metadata_s11n_warn|
     metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
 
     def __str__(self):
@@ -611,6 +664,7 @@ class Document:
 
     @staticmethod
     def from_dict(document_dict: dict) -> "Document":
+        """|from_dict_note|"""
         sections = [
             Section.from_dict(section_dict) for section_dict in document_dict.get("sections", [])
         ]
@@ -977,6 +1031,7 @@ class CuratedTerm:
 
     @classmethod
     def from_dict(cls, json_dict: dict) -> "CuratedTerm":
+        """|from_dict_note|"""
         if json_dict["associated_id_sets"] is None:
             frozen_assoc_id_sets = None
         else:
