@@ -50,10 +50,9 @@ def download_and_process_chembl(output_dir: Path, chembl_version: str) -> None:
             conn.execute(f"DROP TABLE {table_name}")
     cur.close()
     print("running sqllite VACUUM")
-    subprocess.run(
-        ["sqlite3", chembl_db_path.name, "VACUUM;"],
-        cwd=chembl_db_path.parent,
-    )
+    conn = sqlite3.connect(chembl_db_path,isolation_level=None)
+    conn.execute("VACUUM")
+    conn.close()
 
 
 def download_single_file_resources(output_dir: Path) -> None:
