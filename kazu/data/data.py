@@ -2,31 +2,10 @@
 
 See the page linked above for a quick introduction to the key concepts.
 
-.. _data-serialization:
-
-Data Serialization and deserialization
---------------------------------------
-
-As :class:`~.Document`\\ s are the key container of data processed by (or to be
-processed by) Kazu, we focus on the (de)serialization of this container, to and from
-json format.
-
-:meth:`.DocumentJsonUtils.doc_to_json_dict` is the key method here for serialization,
-and :meth:`.Document.from_json` for deserialization.
-
-:class:`~.Document` and other classes that can be stored on :class:`~.Document` have
-a :meth:`~.Document.from_dict` method. Note that this method mutates the input dictionary
-- if this is not desired for your usage, call :func:`copy.deepcopy` on your dictionary
-before calling the relevant ``from_dict`` method.
-
-These ``from_dict`` methods all expect dictionaries in the format produced by
-:meth:`.DocumentJsonUtils.doc_to_json_dict` when serializing a document - for an object
-like a :class:`~.Section` or :class:`~.Entity` this is the result of
-:meth:`.DocumentJsonUtils.obj_to_dict_repr`.
-
-.. |metadata_s11n_warn| replace:: Note that storing objects here that don't straightforwardly
-   convert to and from json may cause problems for (de)serialization.
-   See :ref:`data-serialization` for more details.
+.. |metadata_s11n_warn| replace:: Note that storing objects here that
+don't straightforwardly    convert to and from json may cause problems
+for (de)serialization.    See :ref:`data-serialization` for more
+details.
 
 .. |from_dict_note| replace:: See :ref:`data-serialization`.
 """
