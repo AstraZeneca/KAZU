@@ -1,3 +1,5 @@
+import copy
+import dataclasses
 import functools
 import itertools
 import json
@@ -6,9 +8,9 @@ import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
-from copy import deepcopy
 from typing import Optional
 
+from kazu.data.data import CuratedTerm, CuratedTermBehaviour
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike
@@ -33,35 +35,29 @@ class SynonymGenerator(ABC):
         """
         return self.call(synonym_str)
 
-    def __call__(self, strings_to_mutate: set[str]) -> set[tuple[str, str]]:
+    def __call__(self, strings_to_mutate: set[str]) -> set[str]:
         """Takes a set of strings, and returns a set of tuples of the generated
         string and the original string.
 
         The original string is always included in the output.
         """
 
-        result: set[tuple[str, str]] = set()
+        result: set[str] = set()
         for string_to_mutate in tqdm(
             strings_to_mutate,
             total=len(strings_to_mutate),
             desc=f"generating synonyms for {self.__class__.__name__}",
         ):
-            result.add(
-                (
-                    string_to_mutate,
-                    string_to_mutate,
-                )
-            )
+            result.add(string_to_mutate)
             generated_synonym_strings = self.generate_synonyms(string_to_mutate)
             for generated_syn in generated_synonym_strings:
-                mapping = generated_syn, string_to_mutate
-                if mapping in result:
+                if generated_syn in result:
                     logger.debug(
                         "generated synonym %s has already been generated",
-                        mapping,
+                        generated_syn,
                     )
                 else:
-                    result.add(mapping)
+                    result.add(generated_syn)
         return result
 
 
@@ -71,7 +67,7 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, strings_to_mutate: set[str]) -> set[tuple[str, str]]:
+    def __call__(self, curated_terms: set[CuratedTerm]) -> set[CuratedTerm]:
         """Takes a set of strings, and returns a set of tuples of the generated
         string and the original string.
 
@@ -79,13 +75,14 @@ class CombinatorialSynonymGenerator:
         :return:
         """
         synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
-        results: set[tuple[str, str]] = set()
         logger.info(
             "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
         )
+
+        generated_results: set[CuratedTerm] = set()
         for i, permutation_list in enumerate(synonym_gen_permutations):
-            # make a copy of the original synonyms
-            all_syns = deepcopy(strings_to_mutate)
+            # make a copy of the original terms
+            all_syns = copy.deepcopy(curated_terms)
             logger.info(
                 "running permutation set %s of %s. Permutations: %s",
                 i + 1,
@@ -94,14 +91,24 @@ class CombinatorialSynonymGenerator:
             )
             for generator in permutation_list:
                 # run the generator
-                new_terms: set[tuple[str, str]] = generator(all_syns)
-                for new_term in new_terms:
-                    results.add(new_term)
-                    all_syns.add(new_term[0])
+                for curation in list(all_syns):
+
+                    new_terms: set[str] = generator({curation.curated_synonym})
+                    for term in new_terms:
+                        if term != curation.curated_synonym:
+                            new_curated_term = dataclasses.replace(
+                                curation,
+                                source_term=curation.curated_synonym,
+                                curated_synonym=term,
+                                behaviour=CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+                            )
+                            generated_results.add(new_curated_term)
+                            all_syns.add(new_curated_term)
 
         for generator in self.synonym_generators:
             generator.generate_synonyms.cache_clear()
-        return results
+
+        return generated_results
 
 
 # TODO: this isn't used currently - do we want to try and refine it
