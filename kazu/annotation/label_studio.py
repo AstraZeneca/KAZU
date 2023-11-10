@@ -324,8 +324,8 @@ class LabelStudioAnnotationView:
     def build_labels(self, dom: XMLDocument, element: Element) -> None:
         """.. (sphinx comment) as above for why we have explicit type links.
 
-        :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
-        :type element: :external+python:ref:`xml.dom.minidom.Element <dom-element-objects>`
+        :type dom: :ref:`xml.dom.minidom.Document <dom-document-objects>`
+        :type element: :ref:`xml.dom.minidom.Element <dom-element-objects>`
         """
         labels = dom.createElement("Labels")
         labels.setAttribute("name", "ner")
@@ -342,8 +342,8 @@ class LabelStudioAnnotationView:
     def build_taxonomy(dom: XMLDocument, element: Element, tasks: list[dict], name: str) -> None:
         """.. (sphinx comment) as above for why we have explicit type links.
 
-        :type dom: :external+python:ref:`xml.dom.minidom.Document <dom-document-objects>`
-        :type element: :external+python:ref:`xml.dom.minidom.Element <dom-element-objects>`
+        :type dom: :ref:`xml.dom.minidom.Document <dom-document-objects>`
+        :type element: :ref:`xml.dom.minidom.Element <dom-element-objects>`
         """
         taxonomy = dom.createElement("Taxonomy")
         element.appendChild(taxonomy)
