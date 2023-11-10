@@ -31,6 +31,7 @@ def main(
     :param span_key: the key to use within the generated spaCy Docs'
         `span attribute <https://spacy.io/api/doc#spans>`_ to store and access recognised NER
         spans.
+    :return:
     """
     nlp = basic_spacy_pipeline()
     config = {

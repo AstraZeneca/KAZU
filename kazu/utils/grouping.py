@@ -43,6 +43,7 @@ def sort_then_group(
     :type items: ~collections.abc.Iterable[~kazu.utils.grouping.Item]
     :param key_func:
     :type key_func: ~collections.abc.Callable[[~kazu.utils.grouping.Item], ~kazu.utils.grouping.Key]
+    :return:
     :rtype: ~collections.abc.Iterable[tuple[~kazu.utils.grouping.Key], ~collections.abc.Iterable[~kazu.utils.grouping.Item]]
     """
     sorted_items = sorted(items, key=key_func)

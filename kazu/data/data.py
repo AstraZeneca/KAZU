@@ -724,6 +724,7 @@ class DocumentJsonUtils:
           this would be a potentially larger piece of work for not much gain.
 
         :param doc:
+        :return:
         :rtype: :class:`dict`\\ [:class:`str`\\ , :py:data:`~kazu.data.data.JsonEncodable`]
         """
         return {k: DocumentJsonUtils.obj_to_dict_repr(v) for k, v in doc.__dict__.items()}
@@ -733,6 +734,7 @@ class DocumentJsonUtils:
         """.. without the override below, it fails to find JsonEncodable, as above.
 
         :param obj:
+        :return:
         :rtype: :py:data:`~kazu.data.data.JsonEncodable`
         """
         if isinstance(obj, Enum):

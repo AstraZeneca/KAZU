@@ -85,6 +85,7 @@ def document_iterating_step(
     :param per_doc_callable: A function that processes a single document, that you want to use as
         the :literal:`__call__` method of a :class:`Step`\\ . This must do its work by mutating the
         input document: the return value is ignored.
+    :return:
     """
     # note - this excludes __annotations__ as the returned function has a different type signature
     @wraps(per_doc_callable, assigned=("__module__", "__name__", "__qualname__", "__doc__"))
@@ -129,6 +130,7 @@ def document_batch_step(
     :param batch_doc_callable: A function that processes a batch of documents, that you want to use
         as the :literal:`__call__` method of a :class:`Step`. This must do its work by mutating the
         input documents: the return value is ignored.
+    :return:
     """
     # note - this excludes __annotations__ as the returned function has a different type signature
     @wraps(batch_doc_callable, assigned=("__module__", "__name__", "__qualname__", "__doc__"))
