@@ -249,7 +249,7 @@ class DiseaseStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """Revert to DefaultStringNormalizer.normalize_symbol.
+        """Revert to :meth:`DefaultStringNormalizer.normalize_symbol`.
 
         :param original_string:
         :return:
@@ -274,7 +274,7 @@ class AnatomyStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_symbol(original_string: str) -> str:
-        """revert to DefaultStringNormalizer.normalize_noun_phrase (note, since
+        """revert to :meth:`DefaultStringNormalizer.normalize_noun_phrase` (note, since
         all anatomy is non-symbolic, this is theoretically superfluous, but we
         include it anyway)
 
@@ -322,7 +322,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def gene_token_classifier(original_string):
-        """slightly modified version of DefaultStringNormalizer.is_symbol_like,
+        """slightly modified version of :meth:`DefaultStringNormalizer.is_symbol_like`,
         designed to work on single tokens. Checks if the casing of the symbol
         changes from lower to upper (if so, is likely to be symbolic, e.g.
         erbB2)
@@ -384,7 +384,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
-        """Revert to DefaultStringNormalizer.normalize_noun_phrase for non
+        """Revert to :meth:`DefaultStringNormalizer.normalize_noun_phrase` for non
         symbolic genes.
 
         :param original_string:
