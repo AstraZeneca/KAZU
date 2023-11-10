@@ -364,9 +364,14 @@ class NgramHyphenation(SynonymGenerator):
 class TokenListReplacementGenerator(SynonymGenerator):
     """Given lists of tokens, generate an alternative string based upon a query token.
 
+    .. define a sphinx 'replacement' so we can reuse this later as well
+
+    .. |meddra_specific_syn_generation_comment| replace::
+       It's mainly designed for ontologies like Meddra which stretch the definition of an
+       entity somewhat, by incorporating verbs (e.g. "increase in AST").
+
     Note, this implementation is pretty basic, and only replaces one token at a time.
-    It's mainly designed for ontologies like Meddra which stretch the definition of an
-    entity somewhat, by incorporating verbs (e.g. "increase in AST").
+    |meddra_specific_syn_generation_comment|
     """
 
     def __init__(
@@ -407,8 +412,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
     """Generate alternative verb phrases based on a list of tense templates, and lemmas
     matched in a query.
 
-    It's mainly designed for ontologies like Meddra which stretch the definition of an
-    entity somewhat, by incorporating verbs (e.g. "increase in AST").
+    |meddra_specific_syn_generation_comment|
     """
 
     NOUN_PLACEHOLDER = "NOUN"
