@@ -51,18 +51,15 @@ class SeqTagProcessor(DataProcessor):  # type: ignore[misc]
     """Base class for data converters for sequence tagging data sets."""
 
     def get_train_examples(self, data_dir: str) -> list[InputExample]:
-        """Gets a collection of :class:`transformers.InputExample` for the
-        train set."""
+        """Gets a collection of :class:`transformers.InputExample` for the train set."""
         raise NotImplementedError
 
     def get_dev_examples(self, data_dir: str) -> list[InputExample]:
-        """Gets a collection of :class:`transformers.InputExample` for the dev
-        set."""
+        """Gets a collection of :class:`transformers.InputExample` for the dev set."""
         raise NotImplementedError
 
     def get_aug_examples(self, data_dir: str) -> list[InputExample]:
-        """Gets a collection of :class:`transformers.InputExample` for the aug
-        set."""
+        """Gets a collection of :class:`transformers.InputExample` for the aug set."""
         raise NotImplementedError
 
 
@@ -76,8 +73,7 @@ class NerProcessor(SeqTagProcessor):
         return self._create_examples(self._read_data(os.path.join(data_dir, "devel.tsv")), "dev")
 
     def get_test_examples(self, data_dir: str) -> list[InputExample]:
-        """Gets a collection of :class:`transformers.InputExample` for the test
-        set."""
+        """Gets a collection of :class:`transformers.InputExample` for the test set."""
         return self._create_examples(self._read_data(os.path.join(data_dir, "test.tsv")), "test")
 
     def get_aug_examples(self, data_dir: str) -> list[InputExample]:

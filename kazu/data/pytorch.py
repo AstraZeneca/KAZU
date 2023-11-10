@@ -14,8 +14,8 @@ class HFDataset(IterableDataset[dict[str, Any]]):
         }
 
     def __init__(self, encodings: BatchEncoding):
-        """Simple implementation of :class:`torch.utils.data.IterableDataset`\\
-        , producing HF tokenizer input_id.
+        """Simple implementation of :class:`torch.utils.data.IterableDataset`\\ ,
+        producing HF tokenizer input_id.
 
         :param encodings:
         """

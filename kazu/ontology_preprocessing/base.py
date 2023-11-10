@@ -99,8 +99,8 @@ class CurationProcessor:
     """A CurationProcessor is responsible for modifying the set of
     :class:`.SynonymTerm`\\s produced by an
     :class:`kazu.ontology_preprocessing.base.OntologyParser` with any relevant
-    :class:`.GlobalParserActions` and/or :class:`.CuratedTerm` associated with
-    the parser.
+    :class:`.GlobalParserActions` and/or :class:`.CuratedTerm` associated with the
+    parser.
 
     That is to say, this class modifies the raw data produced by a parser with any a posteriori
     observations about the data (such as conflicts in case sensitivity/identifiers/mention confidence etc). Is also
@@ -157,8 +157,8 @@ class CurationProcessor:
     def curation_sort_key(cls, curated_term: CuratedTerm) -> tuple[int, bool, str]:
         """Determines the order curations are processed in.
 
-        We use associated_id_sets as a key, so that any overrides will
-        be processed after any original behaviours
+        We use associated_id_sets as a key, so that any overrides will be processed
+        after any original behaviours
         """
         return (
             cls._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
@@ -202,8 +202,8 @@ class CurationProcessor:
             return CurationModificationResult.NO_ACTION
 
     def _drop_synonym_term(self, synonym: NormalisedSynonymStr) -> None:
-        """Remove a synonym term from the database, so that it cannot be used
-        as a linking target.
+        """Remove a synonym term from the database, so that it cannot be used as a
+        linking target.
 
         :param synonym:
         :return:
@@ -303,8 +303,8 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
     ]:
-        """Modifies or drops a :class:`.SynonymTerm` after a
-        :class:`.AssociatedIdSets` has changed.
+        """Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets`
+        has changed.
 
         :param new_associated_id_sets:
         :param synonym_term:
@@ -338,8 +338,8 @@ class CurationProcessor:
     def export_curations_and_final_terms(
         self,
     ) -> tuple[list[CuratedTerm], set[SynonymTerm]]:
-        """Perform any updates required to the synonym terms as specified in
-        the curations/global actions.
+        """Perform any updates required to the synonym terms as specified in the
+        curations/global actions.
 
         The returned :class:`.CuratedTerm`\\s can be used for Dictionary based NER, whereas the
         returned :class:`.SynonymTerm`\\s can be loaded into the internal database for linking.
@@ -635,8 +635,8 @@ class CurationProcessor:
     ) -> Literal[
         CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
     ]:
-        """Create a new :class:`~kazu.data.data.SynonymTerm` for the database,
-        or return an existing matching one if already present.
+        """Create a new :class:`~kazu.data.data.SynonymTerm` for the database, or return
+        an existing matching one if already present.
 
         Notes:
 
@@ -745,8 +745,8 @@ class CurationProcessor:
 
 
 class OntologyParser(ABC):
-    """Parse an ontology (or similar) into a set of outputs suitable for NLP
-    entity linking.
+    """Parse an ontology (or similar) into a set of outputs suitable for NLP entity
+    linking.
 
     Implementations should have a class attribute 'name' to
     something suitably representative. The key method is
@@ -891,11 +891,10 @@ class OntologyParser(ABC):
         ids_and_source: IdsAndSource,
         is_symbolic: bool,
     ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        """For a given data source, one normalised synonym may map to one or
-        more id. In some cases, the ID may be duplicate/redundant (e.g. there
-        are many chembl ids for paracetamol). In other cases, the ID may refer
-        to distinct concepts (e.g. COX 1 could be 'ENSG00000095303' OR
-        'ENSG00000198804').
+        """For a given data source, one normalised synonym may map to one or more id. In
+        some cases, the ID may be duplicate/redundant (e.g. there are many chembl ids
+        for paracetamol). In other cases, the ID may refer to distinct concepts (e.g.
+        COX 1 could be 'ENSG00000095303' OR 'ENSG00000198804').
 
         Since synonyms from data sources are confused in such a manner, we need to decide some way to cluster them into
         a single :class:`~.SynonymTerm` concept, which in turn is a container for one or more :class:`~.EquivalentIdSet`
@@ -1070,8 +1069,8 @@ class OntologyParser(ABC):
         """Export :class:`.SynonymTerm` from the parser.
 
         :param parser_name: name of this parser. Required for correct operation of cache
-            (Note, we cannot pass self to the disk cache as the constructor consumes too much
-            memory)
+            (Note, we cannot pass self to the disk cache as the constructor consumes too
+            much memory)
         :return:
         """
         self._parse_df_if_not_already_parsed()
@@ -1119,8 +1118,8 @@ class OntologyParser(ABC):
         return original_curations, generated_curations
 
     def synonym_term_to_putative_curation(self, term: SynonymTerm) -> Iterable[CuratedTerm]:
-        """Convert a :class:`.SynonymTerm`\\ s to curations to use for
-        dictionary based NER.
+        """Convert a :class:`.SynonymTerm`\\ s to curations to use for dictionary based
+        NER.
 
         This is used when curations are not provided to the parser.
 

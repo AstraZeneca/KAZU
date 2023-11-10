@@ -115,7 +115,7 @@ class SplitOnNumericalListPatternWithPrefix:
     """
 
     def __init__(self, pattern: str = "/"):
-        """pattern to split the string on (typically "/")
+        """Pattern to split the string on (typically "/")
 
         :param pattern:
         """
@@ -168,8 +168,7 @@ class SplitOnNumericalListPatternWithPrefix:
 
 
 class NonContiguousEntitySplitter:
-    """Some simple rules to split non-contiguous entities into component
-    entities."""
+    """Some simple rules to split non-contiguous entities into component entities."""
 
     def __init__(self, entity_conditions: dict[str, list[Callable[[Entity, str], list[Entity]]]]):
 

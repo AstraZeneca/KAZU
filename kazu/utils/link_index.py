@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 class DictionaryIndex:
-    """The dictionary index looks for SynonymTerms via a char ngram search
-    between the normalised version of the query string and the term_norm of all
-    SynonymTerms associated with the provided OntologyParser."""
+    """The dictionary index looks for SynonymTerms via a char ngram search between the
+    normalised version of the query string and the term_norm of all SynonymTerms
+    associated with the provided OntologyParser."""
 
     def __init__(
         self,

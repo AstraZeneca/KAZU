@@ -1,5 +1,4 @@
-"""This module consists entirely of implementations of
-:class:`~.OntologyParser`.
+"""This module consists entirely of implementations of :class:`~.OntologyParser`.
 
 Some of these are aimed specifically at a custom format for individual
 ontologies, like :class:`~.ChemblOntologyParser` or
@@ -72,9 +71,9 @@ class JsonLinesOntologyParser(OntologyParser):
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
-        """For a given input json (represented as a python dict), yield
-        dictionary record(s) compatible with the expected structure of the
-        Ontology Parser superclass.
+        """For a given input json (represented as a python dict), yield dictionary
+        record(s) compatible with the expected structure of the Ontology Parser
+        superclass.
 
         This means dictionaries should have keys for :data:`~.SYN`,
         :data:`~.MAPPING_TYPE`, :data:`~.DEFAULT_LABEL` and
@@ -347,8 +346,8 @@ class RDFGraphParser(OntologyParser):
     def find_kb(self, string: str) -> str:
         """By default, just return the name of the parser.
 
-        If more complex behaviour is necessary, write a custom subclass
-        and override this method.
+        If more complex behaviour is necessary, write a custom subclass and override
+        this method.
         """
         return self.name
 
@@ -430,11 +429,10 @@ SKOS_XL_ALT_LABEL_PATH: rdflib.paths.Path = rdflib.URIRef(
 class SKOSXLGraphParser(RDFGraphParser):
     """Parse SKOS-XL RDF Files.
 
-    Note that this just sets a default label predicate and synonym
-    predicate to SKOS-XL appropriate paths, and then passes to the
-    parent RDFGraphParser class. This class is just a convenience to
-    make specifying a SKOS-XL parser easier, this functionality is still
-    available via RDFGraphParser directly.
+    Note that this just sets a default label predicate and synonym predicate to SKOS-XL
+    appropriate paths, and then passes to the parent RDFGraphParser class. This class is
+    just a convenience to make specifying a SKOS-XL parser easier, this functionality is
+    still available via RDFGraphParser directly.
     """
 
     def __init__(
@@ -1029,8 +1027,7 @@ class CellosaurusOntologyParser(OntologyParser):
 
 
 class MeddraOntologyParser(OntologyParser):
-    """input is an unzipped directory to a Meddra release (Note, requires
-    licence).
+    """Input is an unzipped directory to a Meddra release (Note, requires licence).
 
     This should contain the files 'mdhier.asc' and 'llt.asc'.
     """

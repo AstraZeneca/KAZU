@@ -6,9 +6,8 @@ from kazu.utils.abbreviation_detector import KazuAbbreviationDetector
 
 
 class AbbreviationFinderStep(Step):
-    """Detects abbreviations using the algorithm in "A simple algorithm for
-    identifying abbreviation definitions in biomedical text.", (Schwartz &
-    Hearst, 2003).
+    """Detects abbreviations using the algorithm in "A simple algorithm for identifying
+    abbreviation definitions in biomedical text.", (Schwartz & Hearst, 2003).
 
     Uses a modified version of the scispacy abbreviation finder rules, to expand abbreviations (see
     :class:`kazu.utils.abbreviation_detector.KazuAbbreviationDetector`\\ ). In this implementation,

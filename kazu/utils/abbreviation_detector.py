@@ -322,8 +322,7 @@ class KazuAbbreviationDetector:
         spacy_match_int: int,
         section: Section,
     ) -> None:
-        """Create new entities from the long form (if possible), and add to the
-        section.
+        """Create new entities from the long form (if possible), and add to the section.
 
         :param abbrv_span:
         :param global_matcher:
@@ -346,8 +345,7 @@ class KazuAbbreviationDetector:
         section: Section,
         section_to_ents_by_char_index: SectionToCharacterIndexedEntities,
     ) -> None:
-        """Remove any existing ents at the location, unless they're in the
-        exclude list.
+        """Remove any existing ents at the location, unless they're in the exclude list.
 
         :param abbrv_char_index_key:
         :param section:

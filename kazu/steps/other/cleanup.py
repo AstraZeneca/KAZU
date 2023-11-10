@@ -88,8 +88,8 @@ class DropUnmappedEntityFilter:
 
 
 class StripMappingURIsAction:
-    """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part
-    of the URI.
+    """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part of the
+    URI.
 
     For example, this will turn
     http://purl.obolibrary.org/obo/MONDO_0004979

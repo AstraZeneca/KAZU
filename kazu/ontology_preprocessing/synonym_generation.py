@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 class SynonymGenerator(ABC):
     @abstractmethod
     def call(self, synonym_str: str) -> Optional[set[str]]:
-        """Implementations should override this method to generate new strings
-        from an input string."""
+        """Implementations should override this method to generate new strings from an
+        input string."""
         pass
 
     @functools.cache
@@ -83,12 +83,13 @@ class CombinatorialSynonymGenerator:
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
     def __call__(self, synonyms: set[SynonymTerm]) -> set[SynonymTerm]:
-        """For every permutation of modifiers, generate a list of syns, then
-        aggregate at the end.
+        """For every permutation of modifiers, generate a list of syns, then aggregate
+        at the end.
 
         :param synonyms: input to generation process
-        :return: generated synonyms. Note, the field values of the generated synonyms will
-            be the same as the seed synonym, apart from SynonymTerm.terms, which contains the generated synonyms
+        :return: generated synonyms. Note, the field values of the generated synonyms
+            will be the same as the seed synonym, apart from SynonymTerm.terms, which
+            contains the generated synonyms
         """
         synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
         results = set()
@@ -322,8 +323,8 @@ class SuffixReplacement(SynonymGenerator):
 
 
 class SpellingVariationReplacement(SynonymGenerator):
-    """Generate additional synonyms using a mapping of (known) synonyms to a
-    list of variations."""
+    """Generate additional synonyms using a mapping of (known) synonyms to a list of
+    variations."""
 
     def __init__(self, input_path: PathLike):
         with open(input_path, mode="r", encoding="utf-8") as inf:
@@ -361,13 +362,11 @@ class NgramHyphenation(SynonymGenerator):
 
 
 class TokenListReplacementGenerator(SynonymGenerator):
-    """Given lists of tokens, generate an alternative string based upon a query
-    token.
+    """Given lists of tokens, generate an alternative string based upon a query token.
 
-    Note, this implementation is pretty basic, and only replaces one
-    token at a time. It's mainly designed for ontologies like Meddra
-    which stretch the definition of an entity somewhat, by incorporating
-    verbs (e.g. "increase in AST").
+    Note, this implementation is pretty basic, and only replaces one token at a time.
+    It's mainly designed for ontologies like Meddra which stretch the definition of an
+    entity somewhat, by incorporating verbs (e.g. "increase in AST").
     """
 
     def __init__(
@@ -405,12 +404,11 @@ class TokenListReplacementGenerator(SynonymGenerator):
 
 
 class VerbPhraseVariantGenerator(SynonymGenerator):
-    """Generate alternative verb phrases based on a list of tense templates,
-    and lemmas matched in a query.
+    """Generate alternative verb phrases based on a list of tense templates, and lemmas
+    matched in a query.
 
-    It's mainly designed for ontologies like Meddra which stretch the
-    definition of an entity somewhat, by incorporating verbs (e.g.
-    "increase in AST").
+    It's mainly designed for ontologies like Meddra which stretch the definition of an
+    entity somewhat, by incorporating verbs (e.g. "increase in AST").
     """
 
     NOUN_PLACEHOLDER = "NOUN"

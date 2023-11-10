@@ -336,8 +336,7 @@ def check_ent_class_consistency(
     match_str: str,
     messages: dict[str, set[str]],
 ) -> None:
-    """Checks to see if any match strings have different entity_class
-    information.
+    """Checks to see if any match strings have different entity_class information.
 
     :param ent_to_task_lookup:
     :param ents:
@@ -365,8 +364,7 @@ def check_ent_mapping_consistency(
     match_str: str,
     messages: dict[str, set[str]],
 ) -> None:
-    """Checks to see if any entity string matches have inconsistent mapping
-    information.
+    """Checks to see if any entity string matches have inconsistent mapping information.
 
     :param ent_to_task_lookup:
     :param ents:

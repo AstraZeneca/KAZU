@@ -55,7 +55,7 @@ class DisambiguationStrategy(ABC):
     def disambiguate(
         self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
     ) -> set[EquivalentIdSet]:
-        """subset a set of :class:`.EquivalentIdSet`\\ .
+        """Subset a set of :class:`.EquivalentIdSet`\\ .
 
         :param id_sets:
         :param document:
@@ -83,8 +83,8 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
         self.mapped_ids: set[tuple[str, str, str]] = set()
 
     def prepare(self, document: Document) -> None:
-        """Note, this method can't be cached, as the state of the document may
-        change between executions.
+        """Note, this method can't be cached, as the state of the document may change
+        between executions.
 
         :param document:
         :return:
@@ -154,9 +154,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document) -> None:
-        """Build document representations by parser names here, and store in a
-        dict. This method is cached so we don't need to call it multiple times
-        per document.
+        """Build document representations by parser names here, and store in a dict.
+        This method is cached so we don't need to call it multiple times per document.
 
         :param document:
         :return:
@@ -175,8 +174,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     def cacheable_build_document_representation(
         scorer: TfIdfScorer, doc: Document, parsers: frozenset[str]
     ) -> dict[str, np.ndarray]:
-        """static cached method, so we don't need to recalculate document
-        representation between different instances of this class.
+        """Static cached method, so we don't need to recalculate document representation
+        between different instances of this class.
 
         :param scorer:
         :param doc:
@@ -232,16 +231,14 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
 
 
 class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
-    """certain entities are often mentioned by some colloquial name, even if
-    it's technically incorrect.
+    """Certain entities are often mentioned by some colloquial name, even if it's
+    technically incorrect.
 
-    In these cases, we may have an annotation_score field in the
-    metadata_db, as a proxy of how widely studied the entity is. We use
-    this annotation score as a proxy for 'given a random mention of the
-    entity, how likely is it that the author is referring to instance x
-    vs instance y'. Naturally, this is a pretty unsophisticated
-    disambiguation strategy, so should generally only be used as a last
-    resort!
+    In these cases, we may have an annotation_score field in the metadata_db, as a proxy
+    of how widely studied the entity is. We use this annotation score as a proxy for
+    'given a random mention of the entity, how likely is it that the author is referring
+    to instance x vs instance y'. Naturally, this is a pretty unsophisticated
+    disambiguation strategy, so should generally only be used as a last resort!
     """
 
     def prepare(self, document: Document) -> None:

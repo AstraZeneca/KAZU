@@ -83,8 +83,8 @@ class EntityClassTfIdfScorer:
         )
 
     def score_entity_context(self, ent_span: str, ent_context: str) -> Iterable[ScoredContext]:
-        """Score the entity context against the TfIdf documents specified for
-        the entity's span.
+        """Score the entity context against the TfIdf documents specified for the
+        entity's span.
 
         :param ent_span:
         :param ent_context:
@@ -106,8 +106,8 @@ class EntityClassDisambiguationStep(Step):
     """
 
     def __init__(self, context: dict[str, list[DisambiguationEntry]]):
-        """Optionally disambiguates the entity class (anatomy, drug, etc.) of
-        entities that exactly share a span in a document.
+        """Optionally disambiguates the entity class (anatomy, drug, etc.) of entities
+        that exactly share a span in a document.
 
         For example, "UCB" could refer to "umbilical cord blood" an anatomical entity, or the pharmaceutical company
         UCB, a corporate entity. An expected context might be "umbilical pregnancy blood baby placenta..." in the former

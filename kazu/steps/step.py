@@ -37,10 +37,9 @@ class Step(Protocol):
 class ParserDependentStep(Step):
     """A step that depends on ontology parsers in any form.
 
-    Steps that need information from parsers should subclass this class,
-    in order for the internal databases to be correctly populated.
-    Generally, these will be steps that have anything to do with Entity
-    Linking.
+    Steps that need information from parsers should subclass this class, in order for
+    the internal databases to be correctly populated. Generally, these will be steps
+    that have anything to do with Entity Linking.
     """
 
     def __init__(self, parsers: Iterable[OntologyParser]):
@@ -61,8 +60,7 @@ Self = TypeVar("Self")
 def document_iterating_step(
     per_doc_callable: Callable[[Self, Document], Any]
 ) -> Callable[[Self, list[Document]], tuple[list[Document], list[Document]]]:
-    """Handle a list of :class:`~kazu.data.data.Document`\\ s and add error
-    handling.
+    """Handle a list of :class:`~kazu.data.data.Document`\\ s and add error handling.
 
     Use this to decorate a method that processes a single :class:`~kazu.data.data.Document`\\ .
     The resulting method will then iterate over a list of

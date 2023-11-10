@@ -106,8 +106,8 @@ class MappingFactory:
 
 
 class MappingStrategy(ABC):
-    """A MappingStrategy is responsible for actualising instances of
-    :class:`.Mapping`\\ .
+    """A MappingStrategy is responsible for actualising instances of :class:`.Mapping`\\
+    .
 
     This is performed in two steps:
 
@@ -167,8 +167,7 @@ class MappingStrategy(ABC):
         terms: frozenset[SynonymTermWithMetrics],
         parser_name: str,
     ) -> set[SynonymTermWithMetrics]:
-        """
-        Algorithms should override this method to return a set of the "best"
+        """Algorithms should override this method to return a set of the "best"
         :class:`.SynonymTermWithMetrics` for a given query string.
 
         Ideally, this will be a set with a single element. However, it may not be possible to
@@ -188,11 +187,10 @@ class MappingStrategy(ABC):
     def disambiguate_if_required(
         self, filtered_terms: set[SynonymTermWithMetrics], document: Document, parser_name: str
     ) -> tuple[set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
-        """applies disambiguation strategies if configured, and either
-        len(filtered_terms) > 1 or any of the filtered_terms are ambiguous. If
-        ids are still ambiguous after all strategies have run, the
-        disambiguation confidence will be
-        :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
+        """Applies disambiguation strategies if configured, and either
+        len(filtered_terms) > 1 or any of the filtered_terms are ambiguous. If ids are
+        still ambiguous after all strategies have run, the disambiguation confidence
+        will be :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
 
         :param filtered_terms: terms to disambiguate
         :param document: originating Document
@@ -280,9 +278,9 @@ class ExactMatchMappingStrategy(MappingStrategy):
 class SymbolMatchMappingStrategy(MappingStrategy):
     """Split both query and reference terms by whitespace.
 
-    Select the term with the most splits as the 'query'. Check all of
-    these tokens (and no more) are within the other term. Useful for
-    symbol matching e.g. "MAP K8" (longest) vs "MAPK8" (shortest).
+    Select the term with the most splits as the 'query'. Check all of these tokens (and
+    no more) are within the other term. Useful for symbol matching e.g. "MAP K8"
+    (longest) vs "MAPK8" (shortest).
     """
 
     @staticmethod
@@ -318,9 +316,8 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 
 class TermNormIsSubStringMappingStrategy(MappingStrategy):
-    """for a set of :class:`.SynonymTermWithMetrics`, see if any of their
-    .term_norm are string matches of the match_norm tokens based on whitespace
-    tokenisation.
+    """For a set of :class:`.SynonymTermWithMetrics`, see if any of their .term_norm are
+    string matches of the match_norm tokens based on whitespace tokenisation.
 
     If exactly one :class:`.SynonymTermWithMetrics` matches, prefer it.
 
@@ -441,12 +438,12 @@ class StrongMatchMappingStrategy(MappingStrategy):
 
 
 class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMappingStrategy):
-    """
-    Same as parent class, but a complex string scorer with a predefined threshold is used to confirm that the
-    ent_match is broadly similar to one of the terms attached to the
-    :class:`.SynonymTermWithMetrics`\\ .
+    """Same as parent class, but a complex string scorer with a predefined threshold is
+    used to confirm that the ent_match is broadly similar to one of the terms attached
+    to the :class:`.SynonymTermWithMetrics`\\ .
 
-    Useful for refining non-symbolic close string matches (e.g. "Neck disease" and "Heck disease").
+    Useful for refining non-symbolic close string matches (e.g. "Neck disease" and "Heck
+    disease").
     """
 
     def __init__(

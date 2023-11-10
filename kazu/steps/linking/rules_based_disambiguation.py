@@ -36,9 +36,8 @@ class MatcherResult(AutoNameEnum):
 
 
 class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
-    """Removes instances of :class:`.Entity` from
-    :class:`.Section`\\s that don't meet rules based
-    disambiguation requirements in at least one location in the document.
+    """Removes instances of :class:`.Entity` from :class:`.Section`\\s that don't meet
+    rules based disambiguation requirements in at least one location in the document.
 
     This step utilises Spacy `Matcher <https://spacy.io/api/matcher>`_
     rules to determine whether an entity class and or/mention entities are valid or not.

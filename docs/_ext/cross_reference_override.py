@@ -1,5 +1,5 @@
-"""A sphinx extension to allow specifying where to look for cross reference
-links, particularly useful for type hint linking.
+"""A sphinx extension to allow specifying where to look for cross reference links,
+particularly useful for type hint linking.
 
 This particularly helps when using external types in a type hint, that you expect to be resolvable with intersphinx, but intersphinx
 doesn't find the class documented where it expects it to be.
@@ -37,12 +37,12 @@ from sphinx.ext.intersphinx import resolve_reference_detect_inventory
 def override_cross_reference(
     app: Sphinx, env: BuildEnvironment, node: pending_xref, contnode: TextElement
 ) -> Optional[Element]:
-    """Override type hints that aren't registered in the object inventory in
-    the place Sphinx expects.
+    """Override type hints that aren't registered in the object inventory in the place
+    Sphinx expects.
 
-    This function works by plugging in to the 'missing-reference' hook
-    that Sphinx provided, which fires when a cross-reference has failed
-    to resolve. For more info, see
+    This function works by plugging in to the 'missing-reference' hook that Sphinx
+    provided, which fires when a cross-reference has failed to resolve. For more info,
+    see
     https://www.sphinx-doc.org/en/master/extdev/appapi.html#event-missing-reference
     .
 

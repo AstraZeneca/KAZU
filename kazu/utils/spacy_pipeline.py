@@ -79,8 +79,7 @@ BASIC_PIPELINE_NAME = "basic"
 
 
 def basic_spacy_pipeline() -> Language:
-    """A basic Spacy pipeline with a sentence splitter and a customised
-    tokenizer."""
+    """A basic Spacy pipeline with a sentence splitter and a customised tokenizer."""
     nlp = spacy.blank("kazu_custom_en")
     nlp.add_pipe("sentencizer")
     return nlp
@@ -194,8 +193,7 @@ class SpacyPipelines(metaclass=Singleton):
         as_tuples=False,
         **kwargs,
     ):
-        """Process an iterable of `spacy.Doc`_ or strings with a given spacy
-        model.
+        """Process an iterable of `spacy.Doc`_ or strings with a given spacy model.
 
         :param texts: either an iterable of 'texts'
             (`spacy.Doc`_\\ s or :class:`str`\\ s)

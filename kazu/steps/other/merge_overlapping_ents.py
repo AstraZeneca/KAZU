@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 class MergeOverlappingEntsStep(Step):
     """This step merges overlapping and nested entities.
 
-    The final result should not allow any overlapped entities see
-    algorithm description below
+    The final result should not allow any overlapped entities see algorithm description
+    below
     """
 
     def __init__(

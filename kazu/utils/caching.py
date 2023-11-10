@@ -52,13 +52,12 @@ class CacheProtocol(Protocol):
 
 
 kazu_disk_cache: CacheProtocol
-"""We use the :class:`diskcache.Cache` concept to cache expensive to produce
-resources to disk. Methods and functions can be decorated with
-kazu_disk_cache.memoize() to use this feature. Note, when used with a class
-method, the default behaviour of this function is to generate a key based on
-the constructor arguments of the class instance. Since these can be large (e.g.
-OntologyParser), we sometimes use the ignore argument to override this
-behaviour.
+"""We use the :class:`diskcache.Cache` concept to cache expensive to produce resources
+to disk. Methods and functions can be decorated with kazu_disk_cache.memoize() to use
+this feature. Note, when used with a class method, the default behaviour of this
+function is to generate a key based on the constructor arguments of the class instance.
+Since these can be large (e.g. OntologyParser), we sometimes use the ignore argument to
+override this behaviour.
 
 e.g.
 
@@ -88,8 +87,8 @@ kazu_disk_cache = Cache(
 
 
 class EntityLinkingLookupCache:
-    """A simple wrapper around LFUCache to reduce calls to expensive processes
-    (e.g. bert)"""
+    """A simple wrapper around LFUCache to reduce calls to expensive processes (e.g.
+    bert)"""
 
     def __init__(self, lookup_cache_size: int = 5000):
         self.terms_lookup_cache: LFUCache[int, set[SynonymTermWithMetrics]] = LFUCache(
@@ -105,9 +104,9 @@ class EntityLinkingLookupCache:
             self.terms_lookup_cache[hash_val] = set(terms)
 
     def check_lookup_cache(self, entities: Iterable[Entity]) -> list[Entity]:
-        """checks the cache for synonym terms. If relevant terms are found for
-        an entity, update it accordingly. If not return as a list of cache
-        misses (e.g. for further processing)
+        """Checks the cache for synonym terms. If relevant terms are found for an
+        entity, update it accordingly. If not return as a list of cache misses (e.g. for
+        further processing)
 
         :param entities:
         :return:

@@ -103,8 +103,8 @@ class DisambiguationConfidence(AutoNameEnum):
 
 @dataclass(frozen=True)
 class CharSpan:
-    """A concept similar to a Spacy Span, except is character index based
-    rather than token based."""
+    """A concept similar to a Spacy Span, except is character index based rather than
+    token based."""
 
     start: int
     end: int
@@ -152,8 +152,8 @@ IdsAndSource = set[tuple[str, str]]
 
 @dataclass(frozen=True, eq=True, order=True)
 class EquivalentIdSet:
-    """A representation of a set of kb ID's that map to the same synonym and
-    mean the same thing."""
+    """A representation of a set of kb ID's that map to the same synonym and mean the
+    same thing."""
 
     # other ID's mapping to this syn, from different KBs
     ids_and_source: frozenset[tuple[str, str]] = field(default_factory=frozenset)
@@ -214,8 +214,8 @@ AssociatedIdSets = frozenset[EquivalentIdSet]
 
 @dataclass(frozen=True, eq=True)
 class SynonymTerm:
-    """A SynonymTerm is a container for a single normalised synonym, and is
-    produced by an :class:`~.OntologyParser` implementation.
+    """A SynonymTerm is a container for a single normalised synonym, and is produced by
+    an :class:`~.OntologyParser` implementation.
 
     It may be composed of multiple terms that normalise to the same
     unique string (e.g. "breast cancer" and "Breast Cancer"). The number
@@ -248,8 +248,8 @@ class SynonymTerm:
 class SynonymTermWithMetrics(SynonymTerm):
     """Similar to SynonymTerm, but also allows metrics to be scored.
 
-    As these metrics are not used in the hash function, care should be
-    taken when hashing of this object is required.
+    As these metrics are not used in the hash function, care should be taken when
+    hashing of this object is required.
     """
 
     search_score: Optional[float] = field(compare=False, default=None)
@@ -370,8 +370,8 @@ class Entity:
         self.match_norm = StringNormalizer.normalize(self.match, self.entity_class)
 
     def is_completely_overlapped(self, other):
-        """True if all CharSpan instances are completely encompassed by all
-        other CharSpan instances.
+        """True if all CharSpan instances are completely encompassed by all other
+        CharSpan instances.
 
         :param other:
         :return:
@@ -385,8 +385,8 @@ class Entity:
         return True
 
     def is_partially_overlapped(self, other):
-        """True if only one CharSpan instance is defined in both self and
-        other, and they are partially overlapped.
+        """True if only one CharSpan instance is defined in both self and other, and
+        they are partially overlapped.
 
         If multiple CharSpan are defined in both self and other, this becomes pathological, as while they may overlap
         in the technical sense, they may have distinct semantic meaning. For instance, consider the case where
@@ -452,9 +452,8 @@ class Entity:
     def from_spans(
         cls, spans: list[tuple[int, int]], text: str, join_str: str = "", **kwargs: Any
     ) -> "Entity":
-        """Create an instance of Entity from a list of character indices. A
-        text string of underlying doc is also required to produce a
-        representative match.
+        """Create an instance of Entity from a list of character indices. A text string
+        of underlying doc is also required to produce a representative match.
 
         :param spans:
         :param text:
@@ -528,9 +527,8 @@ class Section:
 
     @sentence_spans.setter
     def sentence_spans(self, sent_spans: Iterable[CharSpan]) -> None:
-        """Setter for sentence_spans. sentence_spans are stored in the order
-        provided by the iterable sent_spans param, which may not necessarily be
-        in sorted order.
+        """Setter for sentence_spans. sentence_spans are stored in the order provided by
+        the iterable sent_spans param, which may not necessarily be in sorted order.
 
         :param sent_spans:
         :return:
@@ -590,8 +588,7 @@ class Document:
         drop_terms: bool = False,
         **kwargs: Any,
     ) -> str:
-        """Custom encoder needed to handle serialisation issues with our data
-        model.
+        """Custom encoder needed to handle serialisation issues with our data model.
 
         :param drop_unmapped_ents: drop any entities that have no mappings
         :param drop_terms: drop the synonym term dict field
@@ -895,8 +892,8 @@ class GlobalParserActions:
                 self._parser_name_to_action[parser_name].append(action)
 
     def parser_behaviour(self, parser_name: str) -> Iterable[ParserAction]:
-        """Generator that yields behaviours for a specific parser, based on the
-        order they are specified in.
+        """Generator that yields behaviours for a specific parser, based on the order
+        they are specified in.
 
         :param parser_name:
         :return:

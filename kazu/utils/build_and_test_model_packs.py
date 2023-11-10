@@ -18,8 +18,8 @@ from kazu import __version__ as kazu_version
 
 @dataclass
 class BuildConfiguration:
-    """Dataclass that controls how a base model pack and config should be
-    merged with a target model pack."""
+    """Dataclass that controls how a base model pack and config should be merged with a
+    target model pack."""
 
     #: should this model pack use the base config as a starting point?
     requires_base_config: bool
@@ -60,8 +60,8 @@ class ModelPackBuilder:
         skip_tests: bool,
         zip_pack: bool,
     ):
-        """A ModelPackBuilder is a helper class to assist in the building of a
-        model pack.
+        """A ModelPackBuilder is a helper class to assist in the building of a model
+        pack.
 
         .. danger::
            WARNING! since this class will configure the kazu global cache, executing
@@ -162,8 +162,8 @@ class ModelPackBuilder:
 
         The merge configuration should be a json file called build_config.json.
 
-        :raises ModelPackBuildError: if the merge config isn't found at the
-            expected path
+        :raises ModelPackBuildError: if the merge config isn't found at the expected
+            path
         """
         config_path = self.target_model_pack_path.joinpath("build_config.json")
         if not config_path.exists():
@@ -230,8 +230,8 @@ class ModelPackBuilder:
             shutil.rmtree(maybe_spacy_pipeline)
 
     def zip_model_pack(self):
-        """Call the zip subprocess to compress model pack (requires zip on CLI)
-        also moves it to parent dir.
+        """Call the zip subprocess to compress model pack (requires zip on CLI) also
+        moves it to parent dir.
 
         :return:
         """
@@ -288,8 +288,8 @@ def build_all_model_packs(
     :param output_dir: directory to build model packs in
     :param skip_tests: don't run any tests
     :param logging_config_path: passed to logging.config.fileConfig
-    :param max_parallel_build: build at most this many model packs simultaneously.
-        If None, use all available CPUs
+    :param max_parallel_build: build at most this many model packs simultaneously. If
+        None, use all available CPUs
     :return:
     """
     if not output_dir.is_dir():

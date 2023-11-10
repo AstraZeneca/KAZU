@@ -65,8 +65,7 @@ class SapbertDataCollatorWithPadding:
 
 
 def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
-    """Get a standard HF DataCollatorWithPadding, with
-    padding=PaddingStrategy.LONGEST.
+    """Get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST.
 
     :param tokenizer:
     :return:
@@ -78,9 +77,9 @@ def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPa
 class HFSapbertInferenceDataset(Dataset):
     """A dataset to be used for inferencing.
 
-    In addition to standard BERT  encodings, this uses an 'indices'
-    encoding that can be used to track the vector index of an embedding.
-    This is needed in a multi GPU environment
+    In addition to standard BERT  encodings, this uses an 'indices' encoding that can be
+    used to track the vector index of an embedding. This is needed in a multi GPU
+    environment
     """
 
     def __getitem__(self, index: int) -> dict[str, Any]:
@@ -93,8 +92,7 @@ class HFSapbertInferenceDataset(Dataset):
         return query_toks1
 
     def __init__(self, encodings: BatchEncoding):
-        """Simple implementation of IterableDataset, producing HF tokenizer
-        input_id.
+        """Simple implementation of IterableDataset, producing HF tokenizer input_id.
 
         :param encodings:
         """
@@ -159,8 +157,8 @@ def get_embedding_dataloader_from_strings(
     max_length: int = 50,
 ) -> DataLoader:
     """Get a dataloader with dataset HFSapbertInferenceDataset and
-    DataCollatorWithPadding. This should be used to generate embeddings for
-    strings of interest.
+    DataCollatorWithPadding. This should be used to generate embeddings for strings of
+    interest.
 
     :param texts: strings to use in the dataset
     :param tokenizer:
@@ -187,11 +185,12 @@ def get_embedding_dataloader_from_strings(
 
 
 class SapbertEvaluationDataset(NamedTuple):
-    """to evaluate a given embedding model, we need a query datasource (i.e.
-    things that need to be linked)] and an ontology datasource (i.e. things
-    that we need to generate an embedding space for, that can be queried
-    against) each should have three columns: default_label (text), iri
-    (ontology id) and source (ontology name)"""
+    """To evaluate a given embedding model, we need a query datasource (i.e. things that
+    need to be linked)] and an ontology datasource (i.e. things that we need to generate
+    an embedding space for, that can be queried against) each should have three columns:
+
+    default_label (text), iri (ontology id) and source (ontology name)
+    """
 
     query_source: pd.DataFrame
     ontology_source: pd.DataFrame
@@ -214,13 +213,12 @@ class GoldStandardExample(NamedTuple):
 
 
 class SapbertEvaluationDataManager:
-    """Manages the loading/parsing of multiple evaluation datasets. Each
-    dataset should have two sources, a query source and an ontology source.
-    these are then converted into data loaders, while maintaining a reference
-    to the embedding metadata that should be used for evaluation.
+    """Manages the loading/parsing of multiple evaluation datasets. Each dataset should
+    have two sources, a query source and an ontology source. these are then converted
+    into data loaders, while maintaining a reference to the embedding metadata that
+    should be used for evaluation.
 
-    self.dataset is dict[dataset_name, SapbertEvaluationDataset] after
-    construction
+    self.dataset is dict[dataset_name, SapbertEvaluationDataset] after construction
     """
 
     def __init__(self, sources: dict[str, list[str]], debug: bool = False):
@@ -363,7 +361,8 @@ class PLSapbertModel(LightningModule):
     def forward(self, batch):
         """For inference.
 
-        :param batch: standard bert input, with an additional 'indices' for representing the location of the embedding
+        :param batch: standard bert input, with an additional 'indices' for representing
+            the location of the embedding
         :return:
         """
         indices = batch.pop("indices")
@@ -460,7 +459,8 @@ class PLSapbertModel(LightningModule):
     def get_embeddings(self, output: list[dict[int, torch.Tensor]]) -> torch.Tensor:
         """Get a tensor of embeddings in original order.
 
-        :param output: int is the original index of the input (i.e. what comes out of self.forward)
+        :param output: int is the original index of the input (i.e. what comes out of
+            self.forward)
         :return:
         """
         full_dict = {}
@@ -473,9 +473,8 @@ class PLSapbertModel(LightningModule):
         return embedding
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, list[EPOCH_OUTPUT]]) -> None:
-        """
-        lightning override
-        generate new embeddings for each :attr:`SapbertEvaluationDataset.ontology_source` and query them with
+        """Lightning override generate new embeddings for each
+        :attr:`SapbertEvaluationDataset.ontology_source` and query them with
         :attr:`SapbertEvaluationDataset.query_source`
 
         :param outputs:
@@ -491,9 +490,8 @@ class PLSapbertModel(LightningModule):
                 logger.info(f"{dataset_name}: {key}, {val}")
 
     def get_candidate_dict(self, np_candidates: pd.DataFrame, golden_iri: str) -> list[Candidate]:
-        """
-        Convert rows in a dataframe representing candidate KB entries into a corresponding
-        :class:`Candidate` per row
+        """Convert rows in a dataframe representing candidate KB entries into a
+        corresponding :class:`Candidate` per row.
 
         :param np_candidates:
         :param golden_iri:
@@ -511,8 +509,8 @@ class PLSapbertModel(LightningModule):
         return candidates_filtered
 
     def evaluate_topk_acc(self, queries: list[GoldStandardExample]) -> dict[str, float]:
-        """get a dictionary of accuracy results at different levels of k
-        (nearest neighbours)
+        """Get a dictionary of accuracy results at different levels of k (nearest
+        neighbours)
 
         :param queries:
         :return:
@@ -534,11 +532,12 @@ class PLSapbertModel(LightningModule):
     ) -> torch.Tensor:
         """For a list of strings, generate embeddings.
 
-        This is a convenience function for users, as we need to carry out these steps several times
-        in the codebase.
+        This is a convenience function for users, as we need to carry out these steps
+        several times in the codebase.
 
         :param texts:
-        :param trainer: an optional PL Trainer to use. If not specified, uses the default one
+        :param trainer: an optional PL Trainer to use. If not specified, uses the
+            default one
         :param batch_size: optional batch size to use. If not specified, use 16
         :return: a 2d tensor of embeddings
         """
@@ -552,8 +551,7 @@ class PLSapbertModel(LightningModule):
         return results
 
     def get_embeddings_from_dataloader(self, loader: DataLoader, trainer: Trainer) -> torch.Tensor:
-        """Get the cls token output from all data in a dataloader as a 2d
-        tensor.
+        """Get the cls token output from all data in a dataloader as a 2d tensor.
 
         :param loader:
         :param trainer: the PL Trainer to use

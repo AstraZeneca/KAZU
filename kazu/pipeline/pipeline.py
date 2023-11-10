@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def load_steps_and_log_memory_usage(cfg: DictConfig) -> list[Step]:
-    """Loads steps based on the pipeline config, and log the memory increase
-    after loading each step.
+    """Loads steps based on the pipeline config, and log the memory increase after
+    loading each step.
 
     Note that you can instantiate the pipeline directly from the config in a way that gives the
     same results, but this is useful for monitoring/debugging high memory usage.

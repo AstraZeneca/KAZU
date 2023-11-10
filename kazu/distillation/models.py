@@ -85,8 +85,8 @@ SCHEDULES: dict[Optional[str], Callable] = {
 class NerDataset(Dataset):
     """A dataset used for Ner.
 
-    designed for on the fly tokenisation to speed up multi processing.
-    Uses caching to prevent repeated processing
+    designed for on the fly tokenisation to speed up multi processing. Uses caching to
+    prevent repeated processing
     """
 
     def __init__(
@@ -424,8 +424,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         schedule: Optional[str] = None,
         metric: str = "Default",
     ):
-        """A class for sequence tagging (task-specific) final-layer
-        distillation step.
+        """A class for sequence tagging (task-specific) final-layer distillation step.
 
         :param temperature:
         :param warmup_steps:
@@ -583,8 +582,8 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         schedule: Optional[str] = None,
         metric: str = "Default",
     ):
-        """A class for sequence tagging (task-specific) intermediate-layer
-        (Transformer, Embedding) distillation step.
+        """A class for sequence tagging (task-specific) intermediate-layer (Transformer,
+        Embedding) distillation step.
 
         :param temperature:
         :param warmup_steps:
@@ -623,7 +622,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         self.save_hyperparameters()
 
     def _run_step(self, batch: Any) -> tuple[torch.Tensor, torch.Tensor]:
-        """function for the training/validation step. Computes attention based
+        """Function for the training/validation step. Computes attention based
         distillation loss and hidden states based distillation loss.
 
         :param batch: The output of DataLoader.

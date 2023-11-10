@@ -159,8 +159,8 @@ def ray_server_with_jwt_auth(override_kazu_test_config):
 def mock_kazu_disk_cache_on_parsers(monkeypatch):
     """Disables the caching functions on OntologyParsers during testing.
 
-    Since we employ diskcache in a slightly unusual way, we need to use some
-    python tricks to turn the caching on/off during tests.
+    Since we employ diskcache in a slightly unusual way, we need to use some python
+    tricks to turn the caching on/off during tests.
 
     :param monkeypatch:
     :return:

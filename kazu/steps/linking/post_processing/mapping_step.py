@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class MappingStep(ParserDependentStep):
-    """A wrapper for :class:`.StrategyRunner`\\, so it can be used in a
-    pipeline."""
+    """A wrapper for :class:`.StrategyRunner`\\, so it can be used in a pipeline."""
 
     def __init__(
         self,

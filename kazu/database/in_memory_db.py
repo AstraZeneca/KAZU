@@ -34,9 +34,9 @@ class MetadataDatabase(metaclass=Singleton):
         self.loaded_parsers: set[str] = set()
 
     def add_parser(self, name: ParserName, metadata: dict[Idx, Metadata]) -> None:
-        """Add metadata to the ontology. Note, metadata is assumed to be
-        static, and global. Calling this function will override any existing
-        entries with associated with the keys in the metadata dict.
+        """Add metadata to the ontology. Note, metadata is assumed to be static, and
+        global. Calling this function will override any existing entries with associated
+        with the keys in the metadata dict.
 
         :param name: name of ontology to add to
         :param metadata: dict in format {idx:metadata}
@@ -80,7 +80,7 @@ class SynonymDatabase(metaclass=Singleton):
         self.loaded_parsers: set[ParserName] = set()
 
     def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> None:
-        """add synonyms to the database.
+        """Add synonyms to the database.
 
         :param name: name of ontology to add to
         :param synonyms: iterable of SynonymTerms to add
@@ -105,8 +105,7 @@ class SynonymDatabase(metaclass=Singleton):
                     )
 
     def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
-        """Get a set of EquivalentIdSets associated with an ontology and
-        synonym string.
+        """Get a set of EquivalentIdSets associated with an ontology and synonym string.
 
         :param name: name of ontology to query
         :param synonym: idx to query

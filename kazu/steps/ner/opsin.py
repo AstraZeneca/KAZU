@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 class OpsinStep(Step):
-    """A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature)
-    over py4j.
+    """A Step that calls Opsin (Open Parser for Systematic IUPAC Nomenclature) over
+    py4j.
 
     :py:class:`~.TransformersModelForTokenClassificationNerStep` often identifies
     `IUPAC chemical nomenclature strings <https://en.wikipedia.org/wiki/IUPAC_nomenclature_of_organic_chemistry>`_
@@ -344,8 +344,7 @@ class OpsinStep(Step):
         yield from reversed(res)
 
     def parseString(self, name: str) -> Optional[Mapping]:
-        """Attempt to parse a potential IUPAC drug name into a
-        :class:`~.Mapping`\\ .
+        """Attempt to parse a potential IUPAC drug name into a :class:`~.Mapping`\\ .
 
         Call Opsin with a potential IUPAC drug name to see if it parses - Opsin is fast enough
         that we can afford to try many potential candidates.

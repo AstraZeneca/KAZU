@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def find_document_from_entity(docs: list[Document], entity: Entity) -> Document:
-    """For a given entity and a list of docs, find the doc the entity belongs
-    to.
+    """For a given entity and a list of docs, find the doc the entity belongs to.
 
     :param docs:
     :param entity:
@@ -47,8 +46,8 @@ def documents_to_document_section_batch_encodings_map(
     stride: int = 128,
     max_length: int = 512,
 ) -> tuple[BatchEncoding, dict[int, Section]]:
-    """Convert documents into a BatchEncoding. Also returns a list of <int +
-    section> for the resulting encoding.
+    """Convert documents into a BatchEncoding. Also returns a list of <int + section>
+    for the resulting encoding.
 
     :param docs:
     :param tokenizer:
@@ -87,8 +86,8 @@ def as_path(p: PathLike) -> Path:
 
 
 class EntityClassFilter:
-    """A condition that returns True if a document has any entities that match
-    the class of the required_entity_classes."""
+    """A condition that returns True if a document has any entities that match the class
+    of the required_entity_classes."""
 
     def __init__(self, required_entity_classes: Iterable[str]):
         """
@@ -116,8 +115,8 @@ def _create_ngrams_iter(tokens: Sequence[str], n: int) -> Iterable[Sequence[str]
 def _create_ngrams_iter(tokens, n=2):
     """Yields ngrams of the input as a sequence of strings.
 
-    Tokens can be a single string where each token is a character, or an
-    Iterable of words. If tokens is a str
+    Tokens can be a single string where each token is a character, or an Iterable of
+    words. If tokens is a str
     """
     num_tokens = len(tokens)
     for i in range(num_tokens):

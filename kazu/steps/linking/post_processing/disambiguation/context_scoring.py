@@ -38,12 +38,11 @@ def create_word_and_char_ngrams(
 
 
 class TfIdfScorer(metaclass=Singleton):
-    """
-    This class manages a set of TFIDF models (via
+    """This class manages a set of TFIDF models (via
     :class:`sklearn.feature_extraction.text.TfidfVectorizer`\\ ).
 
-    It's a singleton, so that the models can be accessed in multiple locations without the need to
-    load them into memory multiple times.
+    It's a singleton, so that the models can be accessed in multiple locations without
+    the need to load them into memory multiple times.
     """
 
     def __init__(self):
@@ -63,8 +62,8 @@ class TfIdfScorer(metaclass=Singleton):
     def __call__(
         self, strings: list[str], matrix: np.ndarray, parser: str
     ) -> Iterable[tuple[str, float]]:
-        """Transform a list of strings with a parser-specific vectorizer and
-        score against a matrix.
+        """Transform a list of strings with a parser-specific vectorizer and score
+        against a matrix.
 
         :param strings:
         :param matrix:

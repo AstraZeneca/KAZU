@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class TokenizedWord:
-    """A convenient container for a word, which may be split into multiple
-    tokens by e.g. WordPiece tokenisation."""
+    """A convenient container for a word, which may be split into multiple tokens by
+    e.g. WordPiece tokenisation."""
 
     token_ids: list[int]
     #: token string representations
@@ -33,7 +33,7 @@ class TokenizedWord:
 
 @dataclass
 class TokWordSpan:
-    """dataclass for a span (i.e. a list[TokenizedWord] representing an NE)"""
+    """Dataclass for a span (i.e. a list[TokenizedWord] representing an NE)"""
 
     #: entity_class
     clazz: str
@@ -44,9 +44,9 @@ class TokWordSpan:
 
 
 class SpanFinder(ABC):
-    """Since Bert like models use wordpiece tokenisers to handle the OOV
-    problem, we need to reconstitute this info back into document character
-    indices to represent actual NEs.
+    """Since Bert like models use wordpiece tokenisers to handle the OOV problem, we
+    need to reconstitute this info back into document character indices to represent
+    actual NEs.
 
     Since transformer NER is an inprecise art, we may want to use
     different logic in how this works, so we can subclass this class to
@@ -76,7 +76,7 @@ class SpanFinder(ABC):
 
     @abstractmethod
     def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
-        """return a set of tuple[<BIO label>,Optional[<class label>]] for a
+        """Return a set of tuple[<BIO label>,Optional[<class label>]] for a
         TokenizedWord. Optional[<class label>] is None if the BIO label is "O".
 
         :param word:
@@ -88,8 +88,7 @@ class SpanFinder(ABC):
     def span_continue_condition(
         self, word: TokenizedWord, bio_and_class_labels: set[tuple[str, Optional[str]]]
     ) -> bool:
-        """Based upon some logic, determine whether a span should continue or
-        not.
+        """Based upon some logic, determine whether a span should continue or not.
 
         :param word:
         :param bio_and_class_labels:
@@ -100,10 +99,9 @@ class SpanFinder(ABC):
     def _update_active_spans(
         self, bio_and_class_labels: set[tuple[str, Optional[str]]], word: TokenizedWord
     ) -> None:
-        """updates any active spans. If a B label is detected in an active
-        span, make a copy and add to closed spans, as it's likely the start of
-        another entity of the same class (but we still want to keep the
-        original span open)
+        """Updates any active spans. If a B label is detected in an active span, make a
+        copy and add to closed spans, as it's likely the start of another entity of the
+        same class (but we still want to keep the original span open)
 
         :param bio_and_class_labels: BIO and optional class label set
         :param word:
@@ -218,8 +216,7 @@ class SimpleSpanFinder(SpanFinder):
             return True
 
     def process_next_word(self, word: TokenizedWord) -> None:
-        """Process the next word in the sequence, updating span information
-        accordingly.
+        """Process the next word in the sequence, updating span information accordingly.
 
         :param word:
         :return:
@@ -250,8 +247,8 @@ class SmartSpanFinder(SpanFinder):
         self.span_breaking_chars = {"(", ")", ";", " "}
 
     def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
-        """Returns bio and class labels if their confidence is above the
-        configured threshold.
+        """Returns bio and class labels if their confidence is above the configured
+        threshold.
 
         :param word:
         :return:
@@ -304,8 +301,7 @@ class SmartSpanFinder(SpanFinder):
             return False
 
     def process_next_word(self, word: TokenizedWord) -> None:
-        """Process the next word in the sequence, updating span information
-        accordingly.
+        """Process the next word in the sequence, updating span information accordingly.
 
         :param word:
         :return:
@@ -327,13 +323,12 @@ class SmartSpanFinder(SpanFinder):
 
 class TokenizedWordProcessor:
     """Because of the inherent obscurity of the inner workings of transformers,
-    sometimes they produce BIO tags that don't correctly align to whole words,
-    or maybe the classic BIO format gets confused by nested entities.
+    sometimes they produce BIO tags that don't correctly align to whole words, or maybe
+    the classic BIO format gets confused by nested entities.
 
-    This class is designed to work when an entire sequence of NER labels
-    is known and therefore we can apply some post-processing logic.
-    Namely, we use the SpanFinder class to find entity spans according
-    to their internal logic
+    This class is designed to work when an entire sequence of NER labels is known and
+    therefore we can apply some post-processing logic. Namely, we use the SpanFinder
+    class to find entity spans according to their internal logic
     """
 
     def __init__(
@@ -449,10 +444,10 @@ class TokenizedWordProcessor:
     def attempt_strip_suffixes(
         self, start: int, end: int, match_str: str, clazz: str
     ) -> tuple[str, int]:
-        """Transformers sometimes get confused about precise offsets, depending
-        on the training data (e.g. "COX2" is often classified as "COX2 gene").
-        This method offers light post-processing to correct these, for better
-        entity linking results.
+        """Transformers sometimes get confused about precise offsets, depending on the
+        training data (e.g. "COX2" is often classified as "COX2 gene"). This method
+        offers light post-processing to correct these, for better entity linking
+        results.
 
         :param start: original start
         :param end: original end

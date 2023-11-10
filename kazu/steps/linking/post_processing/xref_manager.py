@@ -109,8 +109,7 @@ class OxoCrossReferenceManager(CrossReferenceManager):
     """A CrossReferenceManager that uses the EBI OXO service to identify cross-
     references.
 
-    Downloads a set of cross-references directly from EBI, and caches
-    locally
+    Downloads a set of cross-references directly from EBI, and caches locally
     """
 
     oxo_url = "https://www.ebi.ac.uk/spot/oxo/api/search"

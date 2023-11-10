@@ -13,8 +13,8 @@ from kazu.utils.utils import Singleton
 
 
 class StringSimilarityScorer(Protocol):
-    """Calculates a NumericMetric based on a string match or a normalised
-    string match and a normalised term."""
+    """Calculates a NumericMetric based on a string match or a normalised string match
+    and a normalised term."""
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
         raise NotImplementedError
@@ -38,8 +38,7 @@ class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """Checks all TYPE x mentions in match norm are represented in term
-    norm."""
+    """Checks all TYPE x mentions in match norm are represented in term norm."""
 
     # need to handle I explicitly
     # other roman numerals get normalized to integers,
@@ -65,8 +64,7 @@ class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """Checks all modifier phrases in reference_term are represented in
-    term_norm."""
+    """Checks all modifier phrases in reference_term are represented in term_norm."""
 
     def __init__(self, noun_modifier_phrases: list[str]):
         self.noun_modifier_phrases = noun_modifier_phrases
@@ -80,10 +78,10 @@ class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
-    """uses rapid fuzz to calculate string similarity.
+    """Uses rapid fuzz to calculate string similarity.
 
-    Note, if the token count >4 and reference_term has more than 10
-    chars, token_sort_ratio is used. Otherwise, WRatio is used
+    Note, if the token count >4 and reference_term has more than 10 chars,
+    token_sort_ratio is used. Otherwise, WRatio is used
     """
 
     @staticmethod
@@ -95,8 +93,8 @@ class RapidFuzzStringSimilarityScorer(StringSimilarityScorer):
 
 
 class SapbertStringSimilarityScorer(metaclass=Singleton):
-    """Note this is an implementation of the StringSimilarityScorer Protocol,
-    but as a Singleton we can't inherit it."""
+    """Note this is an implementation of the StringSimilarityScorer Protocol, but as a
+    Singleton we can't inherit it."""
 
     def __init__(self, sapbert: PLSapbertModel, trainer: Trainer, cache_size: int = 1000):
         """
