@@ -531,31 +531,31 @@ class GildaUtils:
 
     @staticmethod
     def depluralize(word: str) -> tuple[str, str]:
-        """Return the depluralized version of the word, along with a status
-        flag.
+        """Return the depluralized version of the word, along with a status flag.
 
         :param word: The word which is to be depluralized.
-        :return: The first element is the original word, if it is detected to be non-plural, or the
-            depluralized version of the word.
+        :return: A tuple containing:
 
-            The second element is a status flag representing the detected pluralization status of
-            the word, with non_plural (e.g., BRAF), plural_oes (e.g., mosquitoes),
-            plural_ies (e.g., antibodies), plural_es (e.g., switches),
-            plural_cap_s (e.g., MAPKs), and plural_s (e.g., receptors).
+            1. The original word, if it is detected to be
+               non-plural, or the depluralized version of the word.
+            2. A status flag representing the detected
+               pluralization status of the word, with non_plural (e.g. BRAF), plural_oes
+               (e.g. mosquitoes), plural_ies (e.g. antibodies), plural_es (e.g. switches),
+               plural_cap_s (e.g. MAPKs), and plural_s (e.g. receptors).
         """
         # If the word doesn't end in s, we assume it's not plural
         if not word.endswith("s"):
             return word, "non_plural"
-        # Another case is words ending in -sis (e.g., apoptosis), these are almost
+        # Another case is words ending in -sis (e.g. apoptosis), these are almost
         # exclusively non plural so we return here too
         elif word.endswith("sis"):
             return word, "non_plural"
         # This is the case when the word ends with an o which is pluralized as oes
-        # e.g., mosquitoes
+        # e.g. mosquitoes
         elif word.endswith("oes"):
             return word[:-2], "plural_oes"
         # This is the case when the word ends with a y which is pluralized as ies,
-        # e.g., antibodies
+        # e.g. antibodies
         elif word.endswith("ies"):
             return word[:-3] + "y", "plural_ies"
         # These are the cases where words form plurals by adding -es so we
