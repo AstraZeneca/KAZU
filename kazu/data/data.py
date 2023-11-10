@@ -109,7 +109,7 @@ class CharSpan:
     start: int
     end: int
 
-    def is_completely_overlapped(self, other):
+    def is_completely_overlapped(self, other: "CharSpan") -> bool:
         """True if other completely overlaps this span.
 
         :param other:
@@ -117,7 +117,7 @@ class CharSpan:
         """
         return self.start >= other.start and self.end <= other.end
 
-    def is_partially_overlapped(self, other):
+    def is_partially_overlapped(self, other: "CharSpan") -> bool:
         """True if other partially overlaps this span.
 
         :param other:
@@ -369,7 +369,7 @@ class Entity:
         self.start, self.end = self.calc_starts_and_ends()
         self.match_norm = StringNormalizer.normalize(self.match, self.entity_class)
 
-    def is_completely_overlapped(self, other):
+    def is_completely_overlapped(self, other: "Entity") -> bool:
         """True if all CharSpan instances are completely encompassed by all other
         CharSpan instances.
 
@@ -384,7 +384,7 @@ class Entity:
                 return False
         return True
 
-    def is_partially_overlapped(self, other):
+    def is_partially_overlapped(self, other: "Entity") -> bool:
         """True if only one CharSpan instance is defined in both self and other, and
         they are partially overlapped.
 
@@ -433,7 +433,7 @@ class Entity:
         """
         return f"{self.match}:{self.entity_class}:{self.namespace}:{self.start}:{self.end}"
 
-    def as_brat(self):
+    def as_brat(self) -> str:
         """
         :return: this entity in the third party biomedical nlp Brat format
             (see the `docs <https://brat.nlplab.org/introduction.html>`_\\ ,

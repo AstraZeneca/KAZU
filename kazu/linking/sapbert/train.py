@@ -214,7 +214,7 @@ class PLSapbertModel(LightningModule):
         )
         return optimizer
 
-    def forward(self, batch):
+    def forward(self, batch: BatchEncoding) -> dict[int, torch.Tensor]:
         """For inference.
 
         :param batch: standard bert input, with an additional 'indices' for representing

@@ -228,7 +228,7 @@ class ModelPackBuilder:
                 else:
                     shutil.copy(full_path, target_dir)
 
-    def clear_cached_resources_from_model_pack_dir(self):
+    def clear_cached_resources_from_model_pack_dir(self) -> None:
         """Delete any cached data from the input path.
 
         :return:
@@ -242,7 +242,7 @@ class ModelPackBuilder:
         if maybe_spacy_pipeline.exists():
             shutil.rmtree(maybe_spacy_pipeline)
 
-    def zip_model_pack(self):
+    def zip_model_pack(self) -> None:
         """Call the zip subprocess to compress model pack (requires zip on CLI) also
         moves it to parent dir.
 

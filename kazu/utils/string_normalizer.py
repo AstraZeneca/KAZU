@@ -135,7 +135,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return " ".join(string.upper().split())
 
     @staticmethod
-    def depluralize(string):
+    def depluralize(string: str) -> str:
         """Apply some depluralisation rules.
 
         :param string:
@@ -146,7 +146,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return string
 
     @staticmethod
-    def sub_greek_char_abbreviations(string):
+    def sub_greek_char_abbreviations(string: str) -> str:
         """
         substitute single characters for alphanumeric representation - e.g. A -> ALPHA B--> BETA
 
@@ -158,7 +158,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return string
 
     @staticmethod
-    def handle_lower_case_prefixes(string):
+    def handle_lower_case_prefixes(string: str) -> str:
         """Preserve case only if first char of contiguous subsequence is lower case, and
         is alphanum, and upper case detected in rest of part. Currently unused as it
         causes problems with normalisation of e.g. erbB2, which is a commonly used form
@@ -185,7 +185,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return string
 
     @staticmethod
-    def remove_non_alphanum(string):
+    def remove_non_alphanum(string: str) -> str:
         """Removes all non alphanumeric characters.
 
         :param string:
@@ -198,7 +198,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         )
 
     @staticmethod
-    def replace_greek(string):
+    def replace_greek(string: str) -> str:
         """Replaces greek characters with string representation.
 
         :param string:
@@ -210,7 +210,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         return string
 
     @staticmethod
-    def split_on_numbers(string):
+    def split_on_numbers(string: str) -> str:
         """Splits a string on numbers, for consistency.
 
         :param string:
@@ -221,7 +221,7 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         )
 
     @staticmethod
-    def replace_substrings(original_string):
+    def replace_substrings(original_string: str) -> str:
         """Replaces a range of other strings that might be confusing to a classifier,
         such as roman numerals.
 
@@ -320,7 +320,7 @@ class GeneStringNormalizer(EntityClassNormalizer):
             return all(len(x) < 4 or GeneStringNormalizer.gene_token_classifier(x) for x in tokens)
 
     @staticmethod
-    def gene_token_classifier(original_string):
+    def gene_token_classifier(original_string: str) -> bool:
         """Slightly modified version of :meth:`DefaultStringNormalizer.is_symbol_like`,
         designed to work on single tokens. Checks if the casing of the symbol changes
         from lower to upper (if so, is likely to be symbolic, e.g. erbB2)
