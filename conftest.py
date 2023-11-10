@@ -161,9 +161,6 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
 
     Since we employ diskcache in a slightly unusual way, we need to use some python
     tricks to turn the caching on/off during tests.
-
-    :param monkeypatch:
-    :return:
     """
 
     def do_nothing(*args, **kwargs):
