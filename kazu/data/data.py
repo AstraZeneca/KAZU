@@ -435,7 +435,10 @@ class Entity:
 
     def as_brat(self):
         """
-        :return: self as the third party biomedical nlp Brat format, (see docs on Brat)
+        :return: this entity in the third party biomedical nlp Brat format,
+            (see the `docs <https://brat.nlplab.org/introduction.html>`_\\ ,
+            `paper <https://aclanthology.org/E12-2021.pdf>`_\\ , and
+            `codebase <https://github.com/nlplab/brat>`_\\ )
         """
         # TODO: update this to make use of non-contiguous entities
         return f"{hash(self)}\t{self.entity_class}\t{self.start}\t{self.end}\t{self.match}\n"
