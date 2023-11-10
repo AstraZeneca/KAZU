@@ -316,6 +316,7 @@ class SequenceTaggingDistillationBase(TaskSpecificDistillation):
         :param batch_size:
         :param accumulate_grad_batches:
         :param max_epochs:
+        :param max_length:
         :param data_dir:
         :param label_list:
         :param student_model_path:
@@ -433,6 +434,7 @@ class SequenceTaggingDistillationForFinalLayer(SequenceTaggingDistillationBase):
         :param batch_size:
         :param accumulate_grad_batches:
         :param max_epochs:
+        :param max_length:
         :param data_dir:
         :param label_list:
         :param student_model_path:
@@ -592,6 +594,7 @@ class SequenceTaggingDistillationForIntermediateLayer(SequenceTaggingDistillatio
         :param batch_size:
         :param accumulate_grad_batches:
         :param max_epochs:
+        :param max_length:
         :param data_dir:
         :param label_list:
         :param student_model_path:

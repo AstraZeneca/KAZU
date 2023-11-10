@@ -86,8 +86,11 @@ class OntologyMatcher:
         parser_name_to_entity_type: dict[str, str],
     ):
         """
-
+        :param nlp: a spacy model, used for its vocab and tokenizer
+        :param name: the name of this component. Used for spacy config
         :param span_key: the key for doc.spans to store the matches in
+        :param match_id_sep: a separator this splits fields in the match id
+        :param parser_name_to_entity_type: a mapping from parsers to their entity class
         """
 
         Span.set_extension(

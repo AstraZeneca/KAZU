@@ -809,6 +809,7 @@ class OntologyParser(ABC):
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
         :param curations_path: path to jsonl file of curations to apply to the parser
+        :param global_actions:
         """
 
         self.in_path = in_path

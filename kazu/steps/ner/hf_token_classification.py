@@ -53,6 +53,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param batch_size: batch size for dataloader
         :param stride: passed to HF tokenizers (for splitting long docs)
         :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
+        :param labels:
         :param detect_subspans: attempt to detect nested entities (threshold must be configured)
         :param threshold: the confidence threshold used to detect nested entities
         :param entity_splitter: to detect non-contiguous entities if provided

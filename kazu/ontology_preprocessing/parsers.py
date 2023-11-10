@@ -1302,6 +1302,7 @@ class TabularOntologyParser(OntologyParser):
         :param data_origin:
         :param synonym_generator:
         :param curations_path:
+        :param global_actions:
         :param kwargs: passed to pandas.read_csv
         """
         super().__init__(

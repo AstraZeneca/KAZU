@@ -56,6 +56,10 @@ class ConfidenceLevelStrategyExecution:
 
         :param ent_class_strategies: per class strategies
         :param default_strategies: default strategies
+        :param stop_on_success: If ``True``, stop after the first
+            successful strategy, even if some parsers remain
+            unresolved. Otherwise, keep running until all parsers
+            are resolved (or all relevant strategies have been tried).
         """
         self.stop_on_success = stop_on_success
         self.default_strategies = default_strategies

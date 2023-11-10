@@ -44,6 +44,7 @@ class SectionScorer:
         test_ents: list[Entity],
     ):
         """
+        :param task:
         :param gold_ents:
         :param test_ents:
         """

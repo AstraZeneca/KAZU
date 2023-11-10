@@ -35,7 +35,7 @@ class ExplosionStringMatchingStep(ParserDependentStep):
     ):
         """
 
-
+        :param parsers: the parsers used for the matching.
         :param path: path to spaCy pipeline including Ontology Matcher.
         :param include_sentence_offsets: whether to add sentence offsets to the metadata.
         :param ignore_cache: ignore cached version of spaCy pipeline (if available) and rebuild

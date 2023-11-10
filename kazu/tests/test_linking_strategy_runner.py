@@ -58,6 +58,7 @@ class TestStrategy(MappingStrategy):
         :param confidence:
         :param ent_match: filter_terms only fires when ent_match is this this value
         :param expected_id: only return SynonymTermWithMetrics which have this id
+        :param disambiguation_strategies:
         """
         super().__init__(confidence, disambiguation_strategies)
         # note, we assign to expected_id in the .prepare method, so we can check .prepare is being called properly too
