@@ -41,7 +41,10 @@ class ExplosionStringMatchingStep(ParserDependentStep):
         :param ignore_cache: ignore cached version of spacy pipeline (if available) and rebuild
 
         """
-        super().__init__(parsers)
+        # if we pass this straight to super().__init__ , this could exhaust the iterable
+        # and we iterate over it again later, so this needs to be a list
+        parser_list = list(parsers)
+        super().__init__(parser_list)
         self.include_sentence_offsets = include_sentence_offsets
         self.path = as_path(path)
 
@@ -53,7 +56,7 @@ class ExplosionStringMatchingStep(ParserDependentStep):
                 "cached spacy pipeline not detected or ignore_cache=True. Creating it at %s. This may take some time",
                 str(self.path),
             )
-            assemble_pipeline.main(output_dir=self.path, parsers=list(parsers))
+            assemble_pipeline.main(output_dir=self.path, parsers=parser_list)
             SpacyPipelines.add_from_path(name=self.namespace(), path=str(self.path.absolute()))
 
         matcher = cast(
