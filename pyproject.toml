@@ -195,18 +195,17 @@ disallow_untyped_defs = false
 # the numbers can be re-calculated with:
 # mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{print $2"  # "$1""}'
 module = [
-  "kazu.data.data",  # 18
+  "kazu.data.data",  # 13
   "kazu.distillation.models",  # 10
-  "kazu.utils.string_normalizer",  # 8
-  "conftest",  # 8
-  "kazu.utils.build_and_test_model_packs",  # 7
+  "conftest",  # 10
   "kazu.ontology_matching.ontology_matcher",  # 6
-  "kazu.linking.sapbert.train",  # 5
+  "kazu.utils.build_and_test_model_packs",  # 5
+  "kazu.linking.sapbert.train",  # 4
   "kazu.annotation.acceptance_test",  # 4
   "kazu.utils.utils",  # 3
-  "kazu.utils.spacy_pipeline",  # 3
   "kazu.ontology_preprocessing.parsers",  # 3
   "kazu.web.server",  # 2
+  "kazu.utils.spacy_pipeline",  # 2
   "kazu.ontology_preprocessing.synonym_generation",  # 2
   "kazu.distillation.tiny_transformers",  # 2
   "kazu.database.in_memory_db",  # 2
@@ -220,7 +219,7 @@ module = [
   "kazu.ontology_preprocessing.base",  # 1
   "kazu.distillation.metrics",  # 1
   # this is docs/conf.py
-  "conf"  # 1
+  "conf",  # 1
 ]
 # we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
 # to fix at that time for the payoff. Having overrides for the modules that would error rather than
@@ -233,9 +232,9 @@ disallow_untyped_defs = false
 [[tool.mypy.overrides]]
 # as above - number is errors for that file
 module = [
+  "kazu.data.data",  # 13
+  "kazu.annotation.label_studio",  # 9
   "kazu.distillation.models",  # 8
-  "kazu.data.data",  # 8
-  "kazu.annotation.label_studio",  # 8
   "kazu.linking.sapbert.train",  # 6
   "kazu.steps.linking.post_processing.xref_manager",  # 3
   "kazu.steps.linking.post_processing.mapping_strategies.strategies",  # 3
@@ -252,7 +251,7 @@ module = [
   "kazu.steps.linking.entity_class_disambiguation",  # 1
   "kazu.pipeline.pipeline",  # 1
   "kazu.ontology_preprocessing.base",  # 1
-  "kazu.ontology_matching.ontology_matcher"  # 1
+  "kazu.ontology_matching.ontology_matcher",  # 1
 ]
 # as above, we want this to be true for files it can be, especially new files.
 disallow_any_generics = false
