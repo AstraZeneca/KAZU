@@ -280,6 +280,11 @@ check-property-returns = true
 disable = [
     "E113",  # function is missing a docstring
     "E114",  # class is missing a docstring
+    # docsig considers it a syntax error if there's no actual description
+    # of the parameter. This is the main syntax error this catches, so turning
+    # it off doesn't do much harm
     "E115",  # syntax error in description
+    # this isn't a problem, it just means there's a blank 'returns' section
+    # of the documentation. We could go back and clean this up.
     "E104",  # return statement documented for None
 ]
