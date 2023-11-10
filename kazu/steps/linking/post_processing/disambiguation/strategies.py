@@ -137,6 +137,8 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     ):
         """
 
+        :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
+            for human users, and has no bearing on the actual algorithm.
         :param scorer: handles scoring of contexts
         :param context_threshold: only consider terms above this search threshold
         :param relevant_aggregation_strategies: Only consider these strategies when selecting synonyms from the
