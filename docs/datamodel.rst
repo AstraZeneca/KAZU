@@ -19,7 +19,7 @@ For further data model documentation, please see the API docs for :class:`kazu.d
 Data Serialization and deserialization
 --------------------------------------
 
-As :class:`~.Document`\\ s are the key container of data processed by (or to be
+As :class:`~.Document`\ s are the key container of data processed by (or to be
 processed by) Kazu, we focus on the (de)serialization of this container, to and from
 json format.
 
