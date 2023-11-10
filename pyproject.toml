@@ -94,11 +94,9 @@ dev = [
   # to allow profiling
   # of the steps.
   "tensorboard",
-  "towncrier",
-  # needed as towncrier is broken with higher versions of importlib-resources -
-  # we can remove this when https://github.com/twisted/towncrier/pull/529
-  # is in a towncrier release
-  "importlib-resources<6",
+  # towncrier versions older than this are broken for
+  # importlib-resources version 6 or newer
+  "towncrier>=23.10.0",
   "ray>=1.10.0",
 ]
 
