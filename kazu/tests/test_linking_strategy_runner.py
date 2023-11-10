@@ -187,13 +187,14 @@ def create_test_doc(
     parser2_hit_1: SynonymTermWithMetrics,
     parser2_hit_2: SynonymTermWithMetrics,
 ) -> tuple[Document, dict[str, list[Entity]]]:
-    """
-    create a test doc with dummy entities,
+    """Create a test doc with dummy entities.
+
     :param parser1_hit_1:
     :param parser1_hit_2:
     :param parser2_hit_1:
     :param parser2_hit_2:
-    :return: Document and dict of <test_name_key>:<list of entities associated with this test>>
+    :return: Document and dict of <test_name_key>:<list of entities associated with this
+        test>
     """
 
     #
@@ -375,8 +376,8 @@ def extract_terms_from_parsers(
 ) -> tuple[
     SynonymTermWithMetrics, SynonymTermWithMetrics, SynonymTermWithMetrics, SynonymTermWithMetrics
 ]:
-    """
-    extract a tuple of SynonymTermWithMetrics we need for testing
+    """Extract a tuple of SynonymTermWithMetrics we need for testing.
+
     :param parser1:
     :param parser2:
     :return:

@@ -258,8 +258,8 @@ class DiseaseStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
-        """
-        revert to DefaultStringNormalizer.normalize_noun_phrase
+        """Revert to :meth:`DefaultStringNormalizer.normalize_noun_phrase`.
+
         :param original_string:
         :return:
         """
@@ -285,8 +285,8 @@ class AnatomyStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
-        """
-        revert to DefaultStringNormalizer.normalize_noun_phrase
+        """Revert to :meth:`DefaultStringNormalizer.normalize_noun_phrase`.
+
         :param original_string:
         :return:
         """
@@ -410,8 +410,8 @@ class CompanyStringNormalizer(EntityClassNormalizer):
 
     @staticmethod
     def normalize_noun_phrase(original_string: str) -> str:
-        """
-        revert to DefaultStringNormalizer.normalize_noun_phrase
+        """Revert to :meth:`DefaultStringNormalizer.normalize_noun_phrase`.
+
         :param original_string:
         :return:
         """
