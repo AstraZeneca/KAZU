@@ -40,6 +40,11 @@ repos:
     require_serial: true
     minimum_pre_commit_version: '2.9.2'
 
+  - id: docsig
+    name: docsig
+    entry: docsig
+    language: python
+
 - repo: https://github.com/PyCQA/docformatter
   rev: v1.7.5
   hooks:

@@ -85,6 +85,7 @@ dev = [
   "blacken-docs",
   "flake8",
   "mypy",
+  "docsig>=0.36.1",  # this is the first version that supports @typing.overload-ed methods
   "vulture",
   "bump2version",
   "pre-commit",
@@ -269,3 +270,16 @@ make_whitelist = false
 # we may need to change this to 80 or 100 if we find it too noisy
 min_confidence = 60
 paths = ["kazu", ".vulture_whitelist.py"]
+
+[tool.docsig]
+check-dunders = true
+check-overridden = true
+check-protected = true
+ignore-no-params = true
+check-property-returns = true
+disable = [
+    "E113",  # function is missing a docstring
+    "E114",  # class is missing a docstring
+    "E115",  # syntax error in description
+    "E104",  # return statement documented for None
+]
