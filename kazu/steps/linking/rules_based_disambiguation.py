@@ -19,11 +19,12 @@ from kazu.utils.spacy_pipeline import (
 from kazu.utils.spacy_object_mapper import SpacyToKazuObjectMapper
 
 SpacyMatcherRules = list[list[dict[str, Any]]]
+MaybeSpacyMatcherRules = Optional[SpacyMatcherRules]
 logger = logging.getLogger(__name__)
 TPOrFP = Literal["tp", "fp"]
 TPOrFPMatcher = dict[TPOrFP, Matcher]
-MatcherMentionRules = dict[str, dict[str, dict[TPOrFP, SpacyMatcherRules]]]
-MatcherClassRules = dict[str, dict[TPOrFP, SpacyMatcherRules]]
+MatcherMentionRules = dict[str, dict[str, dict[TPOrFP, MaybeSpacyMatcherRules]]]
+MatcherClassRules = dict[str, dict[TPOrFP, MaybeSpacyMatcherRules]]
 MentionMatchers = dict[str, dict[str, TPOrFPMatcher]]
 ClassMatchers = dict[str, TPOrFPMatcher]
 _KeyToMatcherResults = dict[tuple[str, str], bool]
