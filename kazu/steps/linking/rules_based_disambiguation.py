@@ -8,8 +8,7 @@ from spacy.tokens import Span
 
 
 from kazu.data.data import Document, Entity, Section, AutoNameEnum
-from kazu.steps import document_iterating_step
-from kazu.steps import Step
+from kazu.steps import document_iterating_step, Step
 from kazu.utils.spacy_pipeline import (
     SpacyPipelines,
     BASIC_PIPELINE_NAME,
