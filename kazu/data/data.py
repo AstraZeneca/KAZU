@@ -292,7 +292,7 @@ class SynonymTermWithMetrics(SynonymTerm):
             associated_id_sets.add(
                 EquivalentIdSet(
                     ids_and_source=frozenset(
-                        tuple(ids_and_source) for ids_and_source in equiv_id_dict["ids_and_source"]  # type: ignore[misc]
+                        tuple(ids_and_source) for ids_and_source in equiv_id_dict["ids_and_source"]
                     )
                 )
             )
