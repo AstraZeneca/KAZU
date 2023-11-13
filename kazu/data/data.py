@@ -435,7 +435,7 @@ class Entity:
 
     def as_brat(self):
         """
-        :return: this entity in the third party biomedical nlp Brat format,
+        :return: this entity in the third party biomedical nlp Brat format
             (see the `docs <https://brat.nlplab.org/introduction.html>`_\\ ,
             `paper <https://aclanthology.org/E12-2021.pdf>`_\\ , and
             `codebase <https://github.com/nlplab/brat>`_\\ )
