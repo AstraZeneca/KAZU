@@ -92,14 +92,14 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
             spacy from throwing extension exceptions
         """
         super().__init__(parsers)
-        entity_classes = (
-            [parser.entity_class for parser in parsers] + list(other_entity_classes)
-            if other_entity_classes is not None
-            else []
-        )
-        self.mapper = SpacyToKazuObjectMapper(entity_classes)
+
         self.class_matcher_rules = class_matcher_rules
         self.mention_matcher_rules = mention_matcher_rules
+
+        self.entity_classes_used_in_rules = self._calculate_entity_classes_used_in_rules()
+
+        self.mapper = SpacyToKazuObjectMapper(self.entity_classes_used_in_rules)
+
         self.spacy_pipelines = SpacyPipelines()
         self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
         self.spacy_pipelines.add_reload_callback_func(
@@ -110,6 +110,27 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
         )
         self._build_class_matchers()
         self._build_mention_matchers()
+
+    def _calculate_entity_classes_used_in_rules(self) -> set[str]:
+        spacy_rules: SpacyMatcherRules = []
+        entity_classes: set[str] = set()
+        for tp_or_fp_rule_struct in self.class_matcher_rules.values():
+            for rules in tp_or_fp_rule_struct.values():
+                if rules is not None:
+                    spacy_rules.extend(rules)
+
+        for mention_rule_struct in self.mention_matcher_rules.values():
+            for tp_or_fp_rule_struct in mention_rule_struct.values():
+                for rules in tp_or_fp_rule_struct.values():
+                    if rules is not None:
+                        spacy_rules.extend(rules)
+
+        for rule in spacy_rules:
+            for token_dict in rule:
+                if (current_entity_classes := token_dict.get("_")) is not None:
+                    entity_classes.update(current_entity_classes.keys())
+
+        return entity_classes
 
     def _build_class_matchers(self) -> None:
         result: ClassMatchers = {}
