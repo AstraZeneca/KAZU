@@ -25,11 +25,11 @@ EntityInfoToOntologyInfoMapping = defaultdict[
 class MemoryEfficientStringMatchingStep(ParserDependentStep):
     """A wrapper for the ahocorasick algorithm.
 
-    In testing, this implementation is comparable in speed to a Spacy
+    In testing, this implementation is comparable in speed to a spaCy
     `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\,
     and uses a fraction of the memory. Since this implementation is unaware
     of NLP concepts such as tokenization, we backfill this capability by
-    checking for word boundaries with a custom spacy tokenizer.
+    checking for word boundaries with a custom spaCy tokenizer.
     """
 
     def __init__(self, parsers: Iterable[OntologyParser]):

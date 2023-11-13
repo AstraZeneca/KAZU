@@ -71,7 +71,7 @@ def _ontology_dict_getter(span: Span) -> _MatcherOntologyData:
 class OntologyMatcher:
     """String matching to synonyms.
 
-    Core strict matching is done by Spacy's
+    Core strict matching is done by spaCy's
     `PhraseMatcher <https://spacy.io/api/phrasematcher>`_.
     """
 
@@ -150,7 +150,7 @@ class OntologyMatcher:
     def create_phrasematchers_using_curations(
         self, parsers: list[OntologyParser]
     ) -> tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
-        """Create Spacy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\
+        """Create spaCy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\
         s based on :class:`.CuratedTerm`\\ s.
 
         Curations are produced by :py:meth:`.OntologyParser.populate_databases`\\ method

@@ -59,8 +59,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Entity produced by TransformersModelForTokenClassificationNerStep but without Mappings will be dropped by default now, in the same way as for other NER steps.
   This was an exception to handle an AstraZeneca internal use case that wanted this different, but it could cause issues with MergeOverlappingEntsStep in some cases,
   so it is safer to have this off by default.
-- New SpacyPipelines abstraction, which allows using the same spacy pipeline in different places, but only load it once and prevent uncontrolled memory growth.
-  On the uncontrolled memory growth, see https://github.com/explosion/spaCy/discussions/10015 for why this was happening - the 'fix' is to reload a spacy pipeline after a certain number of calls.
+- New SpacyPipelines abstraction, which allows using the same spaCy pipeline in different places, but only load it once and prevent uncontrolled memory growth.
+  On the uncontrolled memory growth, see https://github.com/explosion/spaCy/discussions/10015 for why this was happening - the 'fix' is to reload a spaCy pipeline after a certain number of calls.
 - Slimmed down base dependencies by removing dependencies for steps not in the base pipeline.
   These can be added back in manually in user projects, or use the new `kazu[all-steps]` dependency
   group to install dependencies for all steps as before. The docs reflect this, and informative errors
@@ -84,7 +84,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Features
 
-- Improved spacy tokenization for the ExplosionStringMatchingStep.
+- Improved spaCy tokenization for the ExplosionStringMatchingStep.
   Previously, this caused us to miss entities that ended with a single-letter uppercase token at the end (like 'Haemophilia A') if it was at the end of a sentence.
 - Make SpanFinder return found spans directly, rather than having to access `.closed_spans` after calling, which is easier. Note that `.closed_spans` remains, so this is backwards-compatible.
 - Turned on 'strict' mypy checking (with some exceptions as to the exact flags used), and fixed issues that this raised.

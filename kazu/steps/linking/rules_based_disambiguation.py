@@ -40,7 +40,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
     """Removes instances of :class:`.Entity` from :class:`.Section`\\s that don't meet
     rules based disambiguation requirements in at least one location in the document.
 
-    This step utilises Spacy `Matcher <https://spacy.io/api/matcher>`_
+    This step utilises spaCy `Matcher <https://spacy.io/api/matcher>`_
     rules to determine whether an entity class and or/mention entities are valid or not.
     These Matcher rules operate on the sentence in which each mention under consideration
     is located.
@@ -70,7 +70,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                     "<entity class>": {
                         "<tp or fp (for true positive or false positive rules respectively>": [
                             "<a list of rules>",
-                            "<according to the spacy pattern matcher syntax>",
+                            "<according to the spaCy pattern matcher syntax>",
                         ]
                     }
                 }
@@ -83,7 +83,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                         "<mention to disambiguate>": {
                             "<tp or fp>": [
                                 "<a list of rules>",
-                                "<according to the spacy pattern matcher syntax>",
+                                "<according to the spaCy pattern matcher syntax>",
                             ]
                         }
                     }

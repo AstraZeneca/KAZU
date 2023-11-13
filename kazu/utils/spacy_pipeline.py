@@ -79,14 +79,14 @@ BASIC_PIPELINE_NAME = "basic"
 
 
 def basic_spacy_pipeline() -> Language:
-    """A basic Spacy pipeline with a sentence splitter and a customised tokenizer."""
+    """A basic spaCy pipeline with a sentence splitter and a customised tokenizer."""
     nlp = spacy.blank("kazu_custom_en")
     nlp.add_pipe("sentencizer")
     return nlp
 
 
 class SpacyPipelines(metaclass=Singleton):
-    """Wraps spacy pipelines into a singleton, so multiple can be accessed from
+    """Wraps spaCy pipelines into a singleton, so multiple can be accessed from
     different locations without additional memory overhead.
 
     In addition, due to a
@@ -94,7 +94,7 @@ class SpacyPipelines(metaclass=Singleton):
     we reload each pipeline after a certain number of calls, namely :attr:`~.reload_at`.
 
     .. note::
-        In order for the Garbage Collector to remove old spacy Vocab objects, users
+        In order for the Garbage Collector to remove old spaCy Vocab objects, users
         should ensure that `spacy.Doc <https://spacy.io/api/doc>`_ objects are de-referenced as soon as possible
         (i.e. that you don't keep the results of :meth:`~.process_single` or :meth:`~.process_batch` around for
         a long time).
@@ -102,7 +102,7 @@ class SpacyPipelines(metaclass=Singleton):
 
     def __init__(self):
         self.reload_at = int(os.getenv("KAZU_SPACY_RELOAD_INTERVAL", 1000))
-        """The interval (number of calls) at which spacy models are reloaded.
+        """The interval (number of calls) at which spaCy models are reloaded.
 
         Normally set within the kazu model pack config using the environment variable
         ``KAZU_SPACY_RELOAD_INTERVAL``, but if this isn't set (either using the config
@@ -110,7 +110,7 @@ class SpacyPipelines(metaclass=Singleton):
 
         .. note::
             As this class is a singleton, modifying this will change the reload value for all
-            spacy pipelines (i.e. globally).
+            spaCy pipelines (i.e. globally).
 
         :type: int
         """
@@ -123,7 +123,7 @@ class SpacyPipelines(metaclass=Singleton):
 
     @staticmethod
     def add_from_path(name: str, path: str) -> None:
-        """Add a spacy model from a path.
+        """Add a spaCy model from a path.
 
         Convenience function to call :meth:`~.add_from_func` with a
         wrapped version of
@@ -134,11 +134,11 @@ class SpacyPipelines(metaclass=Singleton):
 
     @staticmethod
     def add_from_func(name: str, func: Callable[[], Language]) -> None:
-        """Add a spacy model from a callable."""
+        """Add a spaCy model from a callable."""
 
         instance = SpacyPipelines()
         if name in instance.name_to_func:
-            logger.info("The spacy pipeline key %s is already loaded.", name)
+            logger.info("The spaCy pipeline key %s is already loaded.", name)
         else:
             instance.name_to_func[name] = func
             instance.name_to_model[name] = func()
@@ -147,7 +147,7 @@ class SpacyPipelines(metaclass=Singleton):
     def add_reload_callback_func(name: str, func: Callable[[], None]) -> None:
         """Add a callback when a model is reloaded.
 
-        If using spacy components outside the context of a
+        If using spaCy components outside the context of a
         `Language <https://spacy.io/api/language>`_, these will also need to be reloaded when the
         underlying model is reloaded. This can be done by providing a zero
         argument, None return type callable. If you need to modify a field of an object with a
@@ -193,7 +193,7 @@ class SpacyPipelines(metaclass=Singleton):
         as_tuples=False,
         **kwargs,
     ):
-        """Process an iterable of `spacy.Doc`_ or strings with a given spacy model.
+        """Process an iterable of `spacy.Doc`_ or strings with a given spaCy model.
 
         :param texts: either an iterable of 'texts'
             (`spacy.Doc`_\\ s or :class:`str`\\ s)
@@ -201,7 +201,7 @@ class SpacyPipelines(metaclass=Singleton):
             or an iterable of length 2 tuples ``(text, context)`` where context
             is an arbitrary python object that is provided back in the output
             alongside its matching text.
-        :param model_name: spacy model to process texts with
+        :param model_name: spaCy model to process texts with
         :param as_tuples: If set to ``True`` (the default is ``False``), texts are paired with
             a 'context' inside a tuple both in input and output. See the description of the
             texts argument and the output, and read the type information.
@@ -222,7 +222,7 @@ class SpacyPipelines(metaclass=Singleton):
 
     def process_single(self, text: Union[str, Doc], model_name: str, **kwargs: Any) -> Doc:
         """Process a single `Doc <https://spacy.io/api/doc>`_ or text with a
-        given spacy model.
+        given spaCy model.
 
         :param text:
         :param model_name:
@@ -240,7 +240,7 @@ class SpacyPipelines(metaclass=Singleton):
     ) -> None:
         if self.call_counter[model_name] >= self.reload_at:
             logger.info(
-                "max spacy calls (%s) exceeded for %s, "
+                "max spaCy calls (%s) exceeded for %s, "
                 "see https://github.com/explosion/spaCy/discussions/9362 for more info",
                 self.reload_at,
                 model_name,
@@ -249,7 +249,7 @@ class SpacyPipelines(metaclass=Singleton):
             self.call_counter[model_name] = 0
 
     def reload_model(self, model_name: str) -> None:
-        """Reload a model, clearing the spacy vocab."""
+        """Reload a model, clearing the spaCy vocab."""
         func = self.name_to_func[model_name]
         logger.info("The model will be reloaded from %s.", func)
         self.name_to_model[model_name] = func()

@@ -77,7 +77,7 @@ def document_iterating_step(
     Normally, :func:`~.kazu.steps.step.document_iterating_step` would be used in preference to
     :func:`~.kazu.steps.step.document_batch_step`\\, unless the method involves computation which
     is more efficient when run in a batch, such as inference with a transformer-based Machine
-    Learning model, or using spacy's `pipe <https://spacy.io/api/language/#pipe>`_ method.
+    Learning model, or using spaCy's `pipe <https://spacy.io/api/language/#pipe>`_ method.
 
     Note that this will only work for a method of a class, rather than a standalone function,
     as it expects to have to pass through 'self' as a parameter.

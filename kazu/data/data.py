@@ -103,7 +103,7 @@ class DisambiguationConfidence(AutoNameEnum):
 
 @dataclass(frozen=True)
 class CharSpan:
-    """A concept similar to a Spacy Span, except is character index based rather than
+    """A concept similar to a spaCy Span, except is character index based rather than
     token based."""
 
     start: int

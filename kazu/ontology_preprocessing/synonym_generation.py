@@ -438,7 +438,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
 
                 {"increase": ["increasing", "increased"], "decrease": ["decreased", "decreasing"]}
 
-        :param spacy_model_path: path to a serialised spacy model - must have a lemmatizer component.
+        :param spacy_model_path: path to a serialised spaCy model - must have a lemmatizer component.
         """
         SpacyPipelines().add_from_path(spacy_model_path, spacy_model_path)
         SpacyPipelines().add_reload_callback_func(spacy_model_path, self._init_lemma_matcher)

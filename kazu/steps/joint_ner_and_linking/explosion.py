@@ -36,9 +36,9 @@ class ExplosionStringMatchingStep(ParserDependentStep):
         """
 
 
-        :param path: path to spacy pipeline including Ontology Matcher.
+        :param path: path to spaCy pipeline including Ontology Matcher.
         :param include_sentence_offsets: whether to add sentence offsets to the metadata.
-        :param ignore_cache: ignore cached version of spacy pipeline (if available) and rebuild
+        :param ignore_cache: ignore cached version of spaCy pipeline (if available) and rebuild
 
         """
         # if we pass this straight to super().__init__ , this could exhaust the iterable

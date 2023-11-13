@@ -9,10 +9,10 @@ from kazu.utils.spacy_pipeline import basic_spacy_pipeline
 def main(
     output_dir: PathLike, parsers: list[OntologyParser], span_key: str = SPAN_KEY
 ) -> spacy.language.Language:
-    """Generates, serializes and returns a Spacy pipeline with an
+    """Generates, serializes and returns a spaCy pipeline with an
     :class:`~kazu.ontology_matching.ontology_matcher.OntologyMatcher`.
 
-    Generates an English Spacy pipeline with a tokenizer, a sentencizer with default
+    Generates an English spaCy pipeline with a tokenizer, a sentencizer with default
     config, and an OntologyMatcher based on the input parameters. The pipeline is
     written to disk, and also returned to the caller.
 
@@ -28,7 +28,7 @@ def main(
 
     :param output_dir: the output directory to write the pipeline into.
     :param parsers: build the pipeline using these parsers as a data source.
-    :param span_key: the key to use within the generated Spacy Docs'
+    :param span_key: the key to use within the generated spaCy Docs'
         `span attribute <https://spacy.io/api/doc#spans>`_ to store and access recognised NER
         spans.
     """
