@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 from collections.abc import Iterable
 from collections.abc import (
     Mapping as CollectionsMapping,
@@ -199,7 +199,11 @@ class LSToKazuConversion:
     ) -> list[Mapping]:
         mappings = []
         for tax in taxonomy_hits:
-            if len(tax) != 2:
+            if len(cast(tuple, tax)) != 2:
+                # cast is needed because otherwise mypy thinks this is 'unreachable' because
+                # the type hint says the tuple is length 2. We don't really want to change the type hint,
+                # because we want our docs to say what users should actually pass, not just what the function
+                # handles but may do so by ignoring it.
                 logger.warning(
                     "warning! malformed taxonomy label (prob not a low level term): %s <%s>",
                     tax,
