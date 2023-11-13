@@ -2,9 +2,10 @@ import pytest
 from kazu.data.data import Document, Entity, Section
 from kazu.steps.linking.rules_based_disambiguation import (
     RulesBasedEntityClassDisambiguationFilterStep,
+    SpacyMatcherRules,
 )
 
-DRUG_TP_CLASS_BLOCK = [
+DRUG_TP_CLASS_BLOCK: SpacyMatcherRules = [
     [
         {"_": {"drug": True}},
         {"LOWER": "is"},
@@ -12,7 +13,7 @@ DRUG_TP_CLASS_BLOCK = [
         {"LOWER": "molecule"},
     ]
 ]
-DRUG_FP_CLASS_BLOCK = [
+DRUG_FP_CLASS_BLOCK: SpacyMatcherRules = [
     [
         {"_": {"gene": True}},
         {"LOWER": "is"},
@@ -21,7 +22,7 @@ DRUG_FP_CLASS_BLOCK = [
     ]
 ]
 
-GENE_TP_CLASS_BLOCK = [
+GENE_TP_CLASS_BLOCK: SpacyMatcherRules = [
     [
         {"_": {"gene": True}},
         {"LOWER": "is"},
@@ -29,7 +30,7 @@ GENE_TP_CLASS_BLOCK = [
         {"LOWER": "gene"},
     ]
 ]
-GENE_FP_CLASS_BLOCK = [
+GENE_FP_CLASS_BLOCK: SpacyMatcherRules = [
     [
         {"_": {"drug": True}},
         {"LOWER": "is"},
@@ -200,12 +201,12 @@ def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
     step = RulesBasedEntityClassDisambiguationFilterStep(
         class_matcher_rules={
             "drug": {
-                "tp": DRUG_TP_CLASS_BLOCK,  # type:ignore[dict-item]
-                "fp": DRUG_FP_CLASS_BLOCK,  # type:ignore[dict-item]
+                "tp": DRUG_TP_CLASS_BLOCK,
+                "fp": DRUG_FP_CLASS_BLOCK,
             },
             "gene": {
-                "tp": GENE_TP_CLASS_BLOCK,  # type:ignore[dict-item]
-                "fp": GENE_FP_CLASS_BLOCK,  # type:ignore[dict-item]
+                "tp": GENE_TP_CLASS_BLOCK,
+                "fp": GENE_FP_CLASS_BLOCK,
             },
         },
         mention_matcher_rules={
