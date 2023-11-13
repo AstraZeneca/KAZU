@@ -1,16 +1,15 @@
 import logging
 from collections import defaultdict
 from enum import auto
-from typing import Any, Literal, Optional, Iterable
+from typing import Any, Literal, Optional
 
 from spacy.matcher import Matcher
 from spacy.tokens import Span
 
 
 from kazu.data.data import Document, Entity, Section, AutoNameEnum
-from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
-from kazu.steps import ParserDependentStep
+from kazu.steps import Step
 from kazu.utils.spacy_pipeline import (
     SpacyPipelines,
     BASIC_PIPELINE_NAME,
@@ -36,7 +35,7 @@ class MatcherResult(AutoNameEnum):
     NOT_CONFIGURED = auto()
 
 
-class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
+class RulesBasedEntityClassDisambiguationFilterStep(Step):
     """Removes instances of :class:`.Entity` from :class:`.Section`\\s that don't meet
     rules based disambiguation requirements in at least one location in the document.
 
@@ -57,8 +56,6 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
         self,
         class_matcher_rules: MatcherClassRules,
         mention_matcher_rules: MatcherMentionRules,
-        parsers: Iterable[OntologyParser],
-        other_entity_classes: Optional[Iterable[str]] = None,
     ):
         """
 
@@ -88,10 +85,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(ParserDependentStep):
                         }
                     }
                 }
-        :param other_entity_classes: any other entity classes that are detected by the pipeline. This is needed to stop
-            spacy from throwing extension exceptions
         """
-        super().__init__(parsers)
 
         self.class_matcher_rules = class_matcher_rules
         self.mention_matcher_rules = mention_matcher_rules
