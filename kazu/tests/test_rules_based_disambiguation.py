@@ -218,3 +218,103 @@ def test_RulesBasedEntityClassDisambiguationFilterStep_pathological():
     step(docs)
     for doc in docs:
         assert len(doc.get_entities()) == 0
+
+
+@pytest.mark.parametrize(
+    ("class_matcher_rules", "mention_matcher_rules", "expectation"),
+    [
+        pytest.param(
+            {
+                "drug": {
+                    "tp": DRUG_TP_CLASS_BLOCK,
+                },
+                "gene": {
+                    "tp": GENE_TP_CLASS_BLOCK,
+                },
+            },
+            {},
+            {"drug", "gene"},
+            id="only_class_rules_one_drug_one_gene_usage",
+        ),
+        pytest.param(
+            {},
+            {
+                "drug": {"Insulin": {"tp": DRUG_TP_MENTION_BLOCK, "fp": DRUG_FP_MENTION_BLOCK}},
+                "gene": {"Insulin": {"tp": GENE_TP_MENTION_BLOCK, "fp": GENE_FP_MENTION_BLOCK}},
+            },
+            set(),
+            id="only_mention_rules_no_extensions",
+        ),
+        pytest.param(
+            {
+                "drug": {
+                    "tp": DRUG_TP_CLASS_BLOCK,
+                },
+                "gene": {
+                    "fp": GENE_FP_CLASS_BLOCK,
+                },
+            },
+            {},
+            {
+                "drug",
+            },
+            id="drug_only_class_matchers",
+        ),
+        pytest.param(
+            {},
+            {
+                # this doesn't really make sense as a set of rules,
+                # but the structure is correct so the test is still valid.
+                "drug": {
+                    "paracetamol": {
+                        "tp": DRUG_TP_CLASS_BLOCK,
+                        "fp": DRUG_FP_CLASS_BLOCK,
+                    }
+                }
+            },
+            {"drug", "gene"},
+            id="only_mention_rules_one_drug_one_gene_usage",
+        ),
+        pytest.param(
+            {
+                "some_entity_class": {
+                    "tp": [
+                        [
+                            {"_": {"EntCls1": True, "EntCls2": False}},
+                            {"LOWER": "is"},
+                            {"LOWER": "a"},
+                            {"_": {"EntCls3": True, "EntCls4": False}},
+                        ]
+                    ],
+                }
+            },
+            {
+                # this doesn't really make sense as a set of rules,
+                # but the structure is correct so the test is still valid.
+                "some_other_entity_class": {
+                    "some_mention": {
+                        "fp": [
+                            [
+                                {"_": {"EntCls5": True, "EntCls6": False}},
+                                {"LOWER": "is"},
+                                {"LOWER": "a"},
+                                {"_": {"EntCls7": True, "EntCls8": False}},
+                            ]
+                        ],
+                    }
+                }
+            },
+            set(f"EntCls{i}" for i in range(1, 9)),
+            id="multiple_mentions_per_token_and_per_rule_both_rule_types",
+        ),
+    ],
+)
+def test_calculate_custom_extensions_used_in_rules(
+    class_matcher_rules, mention_matcher_rules, expectation
+):
+    assert (
+        RulesBasedEntityClassDisambiguationFilterStep._calculate_custom_extensions_used_in_rules(
+            class_matcher_rules, mention_matcher_rules
+        )
+        == expectation
+    )
