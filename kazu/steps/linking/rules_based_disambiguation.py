@@ -89,7 +89,9 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         self.class_matcher_rules = class_matcher_rules
         self.mention_matcher_rules = mention_matcher_rules
 
-        self.entity_classes_used_in_rules = self._calculate_custom_extensions_used_in_rules()
+        self.entity_classes_used_in_rules = self._calculate_custom_extensions_used_in_rules(
+            class_matcher_rules, mention_matcher_rules
+        )
 
         self.mapper = SpacyToKazuObjectMapper(self.entity_classes_used_in_rules)
 
@@ -104,7 +106,11 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         self._build_class_matchers()
         self._build_mention_matchers()
 
-    def _calculate_custom_extensions_used_in_rules(self) -> set[str]:
+    @staticmethod
+    def _calculate_custom_extensions_used_in_rules(
+        class_matcher_rules: MatcherClassRules,
+        mention_matcher_rules: MatcherMentionRules,
+    ) -> set[str]:
         """Calculate the spaCy 'custom extensions' used in rules.
 
         This considers both the class matcher rules and mention matcher
@@ -117,12 +123,12 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         """
         spacy_rules: SpacyMatcherRules = []
         custom_extensions: set[str] = set()
-        for tp_or_fp_rule_struct in self.class_matcher_rules.values():
+        for tp_or_fp_rule_struct in class_matcher_rules.values():
             for rules in tp_or_fp_rule_struct.values():
                 if rules is not None:
                     spacy_rules.extend(rules)
 
-        for mention_rule_struct in self.mention_matcher_rules.values():
+        for mention_rule_struct in mention_matcher_rules.values():
             for tp_or_fp_rule_struct in mention_rule_struct.values():
                 for rules in tp_or_fp_rule_struct.values():
                     if rules is not None:
