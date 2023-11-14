@@ -105,6 +105,16 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         self._build_mention_matchers()
 
     def _calculate_custom_extensions_used_in_rules(self) -> set[str]:
+        """Calculate the spaCy 'custom extensions' used in rules.
+
+        This considers both the class matcher rules and mention matcher
+        rules passed to the class constructor.
+
+        These are all expected to be entity classes, since these are the
+        only attributes that will be populated by
+        SpacyToKazuObjectMapper, so using any other custom extensions
+        would have no effect.
+        """
         spacy_rules: SpacyMatcherRules = []
         custom_extensions: set[str] = set()
         for tp_or_fp_rule_struct in self.class_matcher_rules.values():
