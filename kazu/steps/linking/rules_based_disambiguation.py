@@ -89,7 +89,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         self.class_matcher_rules = class_matcher_rules
         self.mention_matcher_rules = mention_matcher_rules
 
-        self.entity_classes_used_in_rules = self._calculate_entity_classes_used_in_rules()
+        self.entity_classes_used_in_rules = self._calculate_custom_extensions_used_in_rules()
 
         self.mapper = SpacyToKazuObjectMapper(self.entity_classes_used_in_rules)
 
@@ -104,9 +104,9 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         self._build_class_matchers()
         self._build_mention_matchers()
 
-    def _calculate_entity_classes_used_in_rules(self) -> set[str]:
+    def _calculate_custom_extensions_used_in_rules(self) -> set[str]:
         spacy_rules: SpacyMatcherRules = []
-        entity_classes: set[str] = set()
+        custom_extensions: set[str] = set()
         for tp_or_fp_rule_struct in self.class_matcher_rules.values():
             for rules in tp_or_fp_rule_struct.values():
                 if rules is not None:
@@ -120,10 +120,10 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
 
         for rule in spacy_rules:
             for token_dict in rule:
-                if (current_entity_classes := token_dict.get("_")) is not None:
-                    entity_classes.update(current_entity_classes.keys())
+                if (current_custom_extensions := token_dict.get("_")) is not None:
+                    custom_extensions.update(current_custom_extensions.keys())
 
-        return entity_classes
+        return custom_extensions
 
     def _build_class_matchers(self) -> None:
         result: ClassMatchers = {}
