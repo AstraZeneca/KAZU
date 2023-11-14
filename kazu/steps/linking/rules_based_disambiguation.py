@@ -113,13 +113,12 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
     ) -> set[str]:
         """Calculate the spaCy 'custom extensions' used in rules.
 
-        This considers both the class matcher rules and mention matcher
-        rules passed to the class constructor.
+        This considers both the class matcher rules and mention matcher rules passed to
+        the class constructor.
 
-        These are all expected to be entity classes, since these are the
-        only attributes that will be populated by
-        SpacyToKazuObjectMapper, so using any other custom extensions
-        would have no effect.
+        These are all expected to be entity classes, since these are the only attributes
+        that will be populated by SpacyToKazuObjectMapper, so using any other custom
+        extensions would have no effect.
         """
         spacy_rules: SpacyMatcherRules = []
         custom_extensions: set[str] = set()

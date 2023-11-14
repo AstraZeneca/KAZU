@@ -6,8 +6,8 @@ from spacy.tokens import Doc, Span, Token
 
 
 class SpacyToKazuObjectMapper:
-    """Maps entities and text from a :class:`.Section` to the spaCy data model
-    using :func:`.basic_spacy_pipeline`\\.
+    """Maps entities and text from a :class:`.Section` to the spaCy data model using
+    :func:`.basic_spacy_pipeline`\\.
 
     .. attention::
        Providing incomplete ``entity_classes`` for your usage (or leaving it blank)
