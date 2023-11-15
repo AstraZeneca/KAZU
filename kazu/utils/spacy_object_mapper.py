@@ -1,11 +1,22 @@
+"""Provides :class:`KazuToSpacyObjectMapper`.
+
+This class used to be called ``SpacyToKazuObjectMapper`` but this naming was confusing.
+The old name will still work for now, but using it produces a
+:external+python:exc:`DeprecationWarning` (although this may be filtered out depending on
+:external+python:ref:`warning-filter`).
+"""
+
+
 from collections.abc import Iterable
+from typing import Any
+from warnings import warn
 
 from kazu.data.data import Section, Entity
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from spacy.tokens import Doc, Span, Token
 
 
-class SpacyToKazuObjectMapper:
+class KazuToSpacyObjectMapper:
     """Maps entities and text from a :class:`.Section` to the spaCy data model using
     :func:`.basic_spacy_pipeline`\\.
 
@@ -95,3 +106,16 @@ class SpacyToKazuObjectMapper:
                 for token in span:
                     token._.set(entity_class, True)
         return ent_to_span
+
+
+# this makes SpacyToKazuObjectMapper still work, but give you back KazuToSpacyObjectMapper
+# it's possible this causes some issues in strange cases where users are depending
+# on the exact name of the live code object, but this is highly unlikely.
+def __getattr__(name: str) -> Any:
+    if name == "SpacyToKazuObjectMapper":
+        warn(
+            "SpacyToKazuObjectMapper has been renamed to KazuToSpacyObjectMapper for increased clarity. Use the new name instead",
+            DeprecationWarning,
+        )
+        return KazuToSpacyObjectMapper
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

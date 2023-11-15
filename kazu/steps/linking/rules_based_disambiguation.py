@@ -14,7 +14,7 @@ from kazu.utils.spacy_pipeline import (
     BASIC_PIPELINE_NAME,
     basic_spacy_pipeline,
 )
-from kazu.utils.spacy_object_mapper import SpacyToKazuObjectMapper
+from kazu.utils.spacy_object_mapper import KazuToSpacyObjectMapper
 
 SpacyMatcherRules = list[list[dict[str, Any]]]
 MaybeSpacyMatcherRules = Optional[SpacyMatcherRules]
@@ -93,7 +93,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
             class_matcher_rules, mention_matcher_rules
         )
 
-        self.mapper = SpacyToKazuObjectMapper(self.entity_classes_used_in_rules)
+        self.mapper = KazuToSpacyObjectMapper(self.entity_classes_used_in_rules)
 
         self.spacy_pipelines = SpacyPipelines()
         self.spacy_pipelines.add_from_func(BASIC_PIPELINE_NAME, basic_spacy_pipeline)
@@ -117,7 +117,7 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
         the class constructor.
 
         These are all expected to be entity classes, since these are the only attributes
-        that will be populated by SpacyToKazuObjectMapper, so using any other custom
+        that will be populated by KazuToSpacyObjectMapper, so using any other custom
         extensions would have no effect.
         """
         spacy_rules: SpacyMatcherRules = []

@@ -3,7 +3,7 @@ from spacy.tokens.underscore import Underscore
 import pytest
 
 from kazu.data.data import Section, Entity
-from kazu.utils.spacy_object_mapper import SpacyToKazuObjectMapper
+from kazu.utils.spacy_object_mapper import KazuToSpacyObjectMapper
 
 
 # see https://github.com/explosion/spaCy/discussions/5424#discussioncomment-189880
@@ -83,7 +83,7 @@ sample_section = Section(
     ],
 )
 def test_object_mapper_incremental_attributes(entity_classes):
-    mapper = SpacyToKazuObjectMapper(
+    mapper = KazuToSpacyObjectMapper(
         entity_classes=entity_classes, set_attributes_incrementally=True
     )
 
@@ -100,7 +100,7 @@ def test_object_mapper_incremental_attributes(entity_classes):
 
 
 def test_object_mapper_non_incremental_attributes():
-    mapper = SpacyToKazuObjectMapper(
+    mapper = KazuToSpacyObjectMapper(
         entity_classes=drug_gene_and_disease, set_attributes_incrementally=False
     )
 
