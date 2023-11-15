@@ -216,6 +216,10 @@ class _OntologyUpgradeReport:
 def run_curation_report(model_pack_path: Path) -> None:
     """Assists with upgrading CuratedTerms to a new version of an Ontology.
 
+    .. warning::
+
+       Calling this function will invalidate the kazu disk cache in the model pack.
+
     Since the currency of NER is strings, but the currency of entity
     linking is identifiers, it can be challenging to migrate an existing
     set of CuratedTerms to a new version of an ontology. Many things can
@@ -231,11 +235,33 @@ def run_curation_report(model_pack_path: Path) -> None:
     version of an ontology, and highlights obsolete/new terms for
     curation.
 
-    .. warning::
+    The algorithm runs as follows:
 
-       Calling this function will invalidate the kazu disk cache in the model pack.
+    1. Run synonym generation routines on the new version of the ontology to produce a set of :class:`.CuratedTerm`\\.
+
+    2. Match generated synonyms with existing curations on a case-sensitive basis.
+
+    3. Per synonym, if a match is detected, keep the original :class:`.CuratedTerm` and disregard any generated
+       :class:`.CuratedTerm`\\s.
+
+    4. For any remaining existing curations, match again in a case-insensitive fashion.
+
+    5. If no match is detected, the term is either manually added, or is now obsolete in the original ontology.
+
+    6. If a match is detected, the term may be migrated. This means copying the behaviour of the original
+       :class:`.CuratedTerm` to the newly generated term. This is only possible if a single set of control aspects
+       is defined for this synonym (defined by :attr:`.CuratedTerm.control_aspects`\\. Otherwise, the term
+       will have to be manually curated again.
+
+    7. If no match is detected, the newly generated :class:`.CuratedTerm` is novel to this version of the ontology and
+       must be curated.
+
+    A curation report directory will be created in the model pack, with subdirectories per parser. Follow on instructions
+    can be found in these directories.
     """
-    from kazu.utils.constants import HYDRA_VERSION_BASE
+
+    # relative imports so function can be imported without initialising disk cache
+    from kazu.utils.caching import kazu_disk_cache
     from kazu.ontology_preprocessing.base import load_curated_terms
 
     with initialize_config_dir(
