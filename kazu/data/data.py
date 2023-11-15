@@ -1044,7 +1044,7 @@ class CuratedTerm:
         return json.dumps(as_json)
 
     @property
-    def is_extra(self) -> bool:
+    def additional_to_source(self) -> bool:
         """True if this term created in addition to the source terms defined in
         the original Ontology."""
         return self.associated_id_sets is not None and self.behaviour in {
