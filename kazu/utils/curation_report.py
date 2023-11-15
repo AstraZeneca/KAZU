@@ -4,9 +4,10 @@ from pathlib import Path
 
 from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
-from kazu.data.data import CuratedTerm
 from omegaconf import open_dict
 
+from kazu.data.data import CuratedTerm
+from kazu.utils.constants import HYDRA_VERSION_BASE
 
 _SOURCE_TERMS_PREFIX = "source_terms"
 _GENERATED_TERMS_PREFIX = "generated_terms"
