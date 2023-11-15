@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.3.1 - 2023-11-15
+
+
+### Features
+
+- Added methods to dataclasses that allow them to be deserialied from json.
+
+### Deprecations and Removals
+
+- Renamed `SpacyToKazuObjectMapper` to `KazuToSpacyObjectMapper`.
+  The old name will continue to work until kazu 1.6, but using it will produce a `DeprecationWarning`
+- `RulesBasedEntityClassDisambiguationFilterStep` no longer requires `parsers` or `other_entity_classes`.
+  It previously used these to construct the `entity_classes` argument of `KazuToSpacyObjectMapper.__init__`, but now we can just calculate which of these we really need from the class and mention rules passed to `RulesBasedEntityClassDisambiguationFilterStep.__init__`
+
+
 ## 1.3.0 - 2023-11-07
 
 
