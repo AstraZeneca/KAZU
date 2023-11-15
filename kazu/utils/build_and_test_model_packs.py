@@ -7,7 +7,7 @@ import subprocess
 from dataclasses import dataclass, field
 from logging.config import fileConfig
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 import ray
 from hydra import initialize_config_dir, compose
@@ -316,79 +316,25 @@ def build_all_model_packs(
     if len(list(output_dir.iterdir())) > 0:
         raise ModelPackBuildError(f"{str(output_dir)} is not empty")
 
-    if debug:
-        if len(model_pack_paths) > 1:
-            raise ValueError(
-                f"Only one model pack can be built if --debug. Currently selected {model_pack_paths}"
-            )
-        _build_debug(
-            generate_curation_report,
-            logging_config_path,
-            maybe_base_configuration_path,
-            model_pack_paths[0],
-            output_dir,
-            skip_tests,
-            zip_pack,
+    if not debug:
+
+        runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
+        ray.init(
+            num_cpus=max_parallel_build,
+            runtime_env=runtime_env,
+            configure_logging=False,
+            log_to_driver=True,
         )
+        max_parallel_build_int = (
+            max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
+        )
+        builder_creator = ModelPackBuilderActor.remote  # type: ignore[attr-defined]
     else:
+        builder_creator = ModelPackBuilder
 
-        _build_with_ray(
-            generate_curation_report,
-            logging_config_path,
-            max_parallel_build,
-            maybe_base_configuration_path,
-            model_pack_paths,
-            output_dir,
-            skip_tests,
-            zip_pack,
-        )
-
-
-def _build_debug(
-    generate_curation_report: bool,
-    logging_config_path: Optional[Path],
-    maybe_base_configuration_path: Optional[Path],
-    model_pack_path: Path,
-    output_dir: Path,
-    skip_tests: bool,
-    zip_pack: bool,
-) -> None:
-    builder = ModelPackBuilder(
-        logging_config_path=logging_config_path,
-        maybe_base_configuration_path=maybe_base_configuration_path,
-        kazu_version=kazu_version,
-        zip_pack=zip_pack,
-        target_model_pack_path=model_pack_path,
-        build_dir=output_dir,
-        skip_tests=skip_tests,
-        generate_curation_report=generate_curation_report,
-    )
-    builder.build_model_pack()
-
-
-def _build_with_ray(
-    generate_curation_report: bool,
-    logging_config_path: Optional[Path],
-    max_parallel_build: Optional[int],
-    maybe_base_configuration_path: Optional[Path],
-    model_pack_paths: list[Path],
-    output_dir: Path,
-    skip_tests: bool,
-    zip_pack: bool,
-) -> None:
-    runtime_env = {"env_vars": {"PL_DISABLE_FORK": str(1), "TOKENIZERS_PARALLELISM": "false"}}
-    ray.init(
-        num_cpus=max_parallel_build,
-        runtime_env=runtime_env,
-        configure_logging=False,
-        log_to_driver=True,
-    )
-    max_parallel_build = (
-        max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
-    )
     futures: list[ray.ObjectRef] = []
     for model_pack_path in model_pack_paths:
-        builder = ModelPackBuilderActor.remote(  # type: ignore[attr-defined]
+        builder = builder_creator(
             logging_config_path=logging_config_path,
             maybe_base_configuration_path=maybe_base_configuration_path,
             kazu_version=kazu_version,
@@ -398,9 +344,12 @@ def _build_with_ray(
             skip_tests=skip_tests,
             generate_curation_report=generate_curation_report,
         )
-        futures.append(builder.build_model_pack.remote())
-        while len(futures) >= max_parallel_build:
-            futures = wait_for_model_pack_completion(futures)
+        if not debug:
+            futures.append(cast(ray.ObjectRef, builder.build_model_pack.remote()))
+            while len(futures) >= max_parallel_build_int:
+                futures = wait_for_model_pack_completion(futures)
+        else:
+            builder.build_model_pack()
     while len(futures) != 0:
         futures = wait_for_model_pack_completion(futures)
 
