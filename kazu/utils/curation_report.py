@@ -323,3 +323,4 @@ def run_curation_report(model_pack_path: Path) -> None:
                 prefix=_GENERATED_TERMS_PREFIX,
                 curation_file_name=curations_path.name,
             )
+            kazu_disk_cache.clear()
