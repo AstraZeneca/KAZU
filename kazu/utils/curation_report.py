@@ -124,7 +124,7 @@ class _OntologyUpgradeReport:
             if matched_generated_terms_ci is None:
                 # if no match, term is either extra ontological (i.e. added separately) or obsolete
                 for term in existing_terms:
-                    if term.is_extra:
+                    if term.additional_to_source:
                         self.extra_ontology_terms.add(term)
                     elif (
                         term.source_term is None
