@@ -1051,3 +1051,8 @@ class CuratedTerm:
             CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
             CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         }
+
+    @property
+    def control_aspects(self):
+        """A tuple of attributes that describe how this term behaves."""
+        return self.behaviour, self.case_sensitive, self.associated_id_sets
