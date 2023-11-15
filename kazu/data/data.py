@@ -1045,8 +1045,8 @@ class CuratedTerm:
 
     @property
     def additional_to_source(self) -> bool:
-        """True if this term created in addition to the source terms defined in
-        the original Ontology."""
+        """True if this term created in addition to the source terms defined in the
+        original Ontology."""
         return self.associated_id_sets is not None and self.behaviour in {
             CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
             CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
