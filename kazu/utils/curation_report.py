@@ -210,8 +210,7 @@ class _OntologyUpgradeReport:
                 for curation in terms:
                     f.write(f"{curation.to_json()}\n")
         with results_dir.joinpath("instructions.txt").open(mode="w") as f:
-            f.write(CURATION_REPORT_INSTRUCTIONS)
-            f.write(curation_file_name)
+            f.write(CURATION_REPORT_INSTRUCTIONS + curation_file_name)
 
 
 def run_curation_report(model_pack_path: Path) -> None:
