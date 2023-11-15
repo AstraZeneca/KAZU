@@ -142,9 +142,7 @@ class _OntologyUpgradeReport:
                     )
                 )
                 # we can only migrate a term if there is only a single set of behaviours from the original curation
-                human_behaviour_set = set(
-                    (x.behaviour, x.case_sensitive, x.associated_id_sets) for x in existing_terms
-                )
+                human_behaviour_set = set(x.control_aspects for x in existing_terms)
                 if len(human_behaviour_set) == 1:
                     human_term = next(iter(existing_terms))
                     for generated_term in matched_generated_terms_ci_minus_already_handled_ones:
