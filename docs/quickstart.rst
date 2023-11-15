@@ -91,7 +91,7 @@ Using Powershell:
 
 .. code-block:: console
 
-   $ $Env:KAZU_MODEL_PACK = 'KAZU_MODEL_PACK=C:\Users\me\path\to\kazu_model_pack_public-vCurrent.Version'
+   $ $Env:KAZU_MODEL_PACK = 'C:\Users\me\path\to\kazu_model_pack_public-vCurrent.Version'
 
 .. raw:: html
 
