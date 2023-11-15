@@ -1,4 +1,4 @@
-"""Provides :class:`KazuToSpacyObjectMapper`.
+"""Provides :class:`.KazuToSpacyObjectMapper`.
 
 This class used to be called ``SpacyToKazuObjectMapper`` but this naming was confusing.
 The old name will still work for now, but using it produces a
