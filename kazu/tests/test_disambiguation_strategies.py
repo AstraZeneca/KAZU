@@ -52,9 +52,10 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     text2 = ", and definitely not CDKN1B"
 
     def create_doc_with_ents(ent_list: list[Entity]) -> Document:
-        """We need s fresh document for every test, as the cache on .prepare will
-        otherwise be full :param ent_list:
+        """We need a fresh document for every test, as the cache on .prepare will
+        otherwise be full.
 
+        :param ent_list:
         :return:
         """
 

@@ -118,9 +118,9 @@ class TestDisambiguationStrategy(DisambiguationStrategy):
 
 
 def build_runner(expected_id_groups: dict[str, set[str]]) -> StrategyRunner:
-    """Create a StrategyRunner configured with dummy strategies for testing :param
-    expected_id_groups:
+    """Create a StrategyRunner configured with dummy strategies for testing.
 
+    :param expected_id_groups:
     :return:
     """
     first_test_strategy = TestStrategy(
