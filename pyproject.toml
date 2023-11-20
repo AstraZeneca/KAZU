@@ -190,10 +190,8 @@ disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
 # the number in the comment after each line is the number of errors of this type for that file
-# it's possible this becomes out of date if we fix a few issues in one file, or introduce a new
-# issue(!) but this seems reasonably unlikely.
 # the numbers can be re-calculated with:
-# mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{print $2"  # "$1""}'
+# mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{file_without_dot_py = substr($2, 0, length($2)-3); gsub("/", ".", file_without_dot_py); print "  \""file_without_dot_py"\",  # "$1}'
 module = [
   "kazu.data.data",  # 13
   "kazu.distillation.models",  # 10
