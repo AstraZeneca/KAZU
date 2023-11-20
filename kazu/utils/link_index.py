@@ -101,15 +101,20 @@ class DictionaryIndex:
             distances = score_matrix[neighbours]
             distances = 100 * -distances
             for neighbour, score in zip(neighbours, distances):
-                # get by index
-                term = self.synonym_list[neighbour]
-                if self.apply_boolean_scorers(reference_term=match_norm, query_term=term.term_norm):
-                    term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
-                        term, search_score=score, bool_score=True, exact_match=False
-                    )
-                    yield term_with_metrics
+                if score > 0.0:
+                    # get by index
+                    term = self.synonym_list[neighbour]
+                    if self.apply_boolean_scorers(
+                        reference_term=match_norm, query_term=term.term_norm
+                    ):
+                        term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
+                            term, search_score=score, bool_score=True, exact_match=False
+                        )
+                        yield term_with_metrics
+                    else:
+                        logger.debug("filtered term %s as failed boolean checks", term)
                 else:
-                    logger.debug("filtered term %s as failed boolean checks", term)
+                    logger.debug("score is 0.0")
 
     @kazu_disk_cache.memoize(ignore={0, 1})
     def _build_index_cache(
