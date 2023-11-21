@@ -29,6 +29,11 @@ dependencies = [
   "requests>=2.20.0",
   "hydra-core>=1.3.0",
   "pytorch-lightning>=1.7.4,<2.0.0",
+  # version 0.10.0 causes the model
+  # inference to fail, and lightning
+  # itself doesn't restrict strictly
+  # enough
+  "lightning-utilities==0.9.0",
   "pandas>=1.0.0",
   "pyahocorasick",
   "pyarrow>=8.0.0",

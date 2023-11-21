@@ -1,0 +1,1 @@
+Pin lightning-utilities dependency, a new version of which completely broke the model inference, despite lightning itself being pinned (they didn't pin lightning-utilities appropriately in the version we're using).
