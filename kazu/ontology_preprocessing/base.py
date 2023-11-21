@@ -1016,7 +1016,10 @@ class OntologyParser(ABC):
         metadata_columns = self.parsed_dataframe.columns
         metadata_columns = metadata_columns.drop([MAPPING_TYPE, SYN])
         metadata_df = self.parsed_dataframe[metadata_columns]
-        metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
+        metadata_df = metadata_df.drop_duplicates(subset=[IDX])
+        metadata_df = metadata_df.dropna(
+            axis=0, subset=["idx"] + OntologyParser.minimum_metadata_column_names
+        )
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
