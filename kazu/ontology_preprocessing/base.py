@@ -1014,7 +1014,7 @@ class OntologyParser(ABC):
         self._parse_df_if_not_already_parsed()
         assert self.parsed_dataframe is not None
         metadata_columns = self.parsed_dataframe.columns
-        metadata_columns.drop([MAPPING_TYPE, SYN])
+        metadata_columns = metadata_columns.drop([MAPPING_TYPE, SYN])
         metadata_df = self.parsed_dataframe[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX]).dropna(axis=0)
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
