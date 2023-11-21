@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.3.2 - 2023-11-21
+
+
+### Bugfixes
+
+- Hits with scores of 0.0 are no longer returned by DictionaryIndex
+- Pin lightning-utilities dependency, a new version of which completely broke the model inference, despite lightning itself being pinned (they didn't pin lightning-utilities appropriately in the version we're using).
+
+
 ## 1.3.1 - 2023-11-15
 
 
