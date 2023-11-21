@@ -72,6 +72,12 @@ class DictionaryIndex:
     def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
         """Search the index with a query string.
 
+        .. note::
+           This method will only return results with search scores above 0.
+           As a result, it will return fewer than ``top_n`` results when there are not
+           ``top_n`` :class:`~.SynonymTerm`\\ s in the index that score about 0 for the given
+           query.
+
         :param query: term to search
         :param top_n: max number of results
         :return:
