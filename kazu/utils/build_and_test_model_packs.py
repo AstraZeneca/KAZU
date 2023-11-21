@@ -261,7 +261,9 @@ class ModelPackBuilder:
         load_steps_and_log_memory_usage(cfg)
 
     def report_tested_dependencies(self):
-        dependencies = subprocess.check_output("pip freeze", shell=True).decode("utf-8")
+        dependencies = subprocess.check_output("pip freeze --exclude-editable", shell=True).decode(
+            "utf-8"
+        )
         with self.model_pack_build_path.joinpath("tested_dependencies.txt").open(mode="w") as f:
             f.write(dependencies)
 
