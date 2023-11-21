@@ -61,7 +61,7 @@ jobs:
           python -m pip install --upgrade pip
           WHEEL_PATH=$(echo $GITHUB_WORKSPACE/dist/*whl)
           pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
-          pip install -e ."[dev,webserver]" --cache-dir $PIP_CACHE_DIR
+          pip install -e ."[dev]" --cache-dir $PIP_CACHE_DIR
 
       - name: Build model pack caches and test (with acceptance tests)
         id: model_pack_cache_build_and_test
