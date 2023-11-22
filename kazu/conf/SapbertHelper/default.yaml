@@ -1,0 +1,2 @@
+_target_: kazu.utils.sapbert.SapBertHelper
+path: ${oc.env:KAZU_MODEL_PACK}/sapbert-tiny

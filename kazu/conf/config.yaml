@@ -16,7 +16,7 @@ defaults:
       - hpo
       - stato
       - uberon
-  - PLSapbertModel: default
+  - SapbertHelper: default
   - SciSpacyPipeline: default
   - StanzaPipeline: default
   - AbbreviationFinderStep: default

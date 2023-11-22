@@ -1,8 +1,3 @@
 _target_: kazu.language.string_similarity_scorers.SapbertStringSimilarityScorer
-sapbert: ${PLSapbertModel}
-trainer:
-  _target_: pytorch_lightning.Trainer
-  enable_progress_bar: False
-  accelerator: "cpu"
-  logger: False
+sapbert: ${SapbertHelper}
 cache_size: ${cache_sizes.SapbertStringSimilarityScorer_cache_size}
