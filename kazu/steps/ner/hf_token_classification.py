@@ -1,10 +1,9 @@
 import logging
+from collections.abc import Iterable, Callable
 from functools import partial
 from typing import Optional, cast
-from collections.abc import Iterable, Callable
 
 import torch
-from pytorch_lightning import Trainer
 from torch import Tensor, sigmoid, softmax
 from torch.utils.data import DataLoader
 from transformers import (
@@ -20,9 +19,8 @@ from transformers.file_utils import PaddingStrategy
 from kazu.data.data import Document, Section
 from kazu.data.pytorch import HFDataset
 from kazu.steps import Step, document_batch_step
-from kazu.steps.ner.hf_lightning_wrappers import PLAutoModelForTokenClassification
-from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
+from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
@@ -43,7 +41,6 @@ class TransformersModelForTokenClassificationNerStep(Step):
         batch_size: int,
         stride: int,
         max_sequence_length: int,
-        trainer: Trainer,
         labels: list[str],
         detect_subspans: bool = False,
         threshold: Optional[float] = None,
@@ -56,7 +53,6 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param batch_size: batch size for dataloader
         :param stride: passed to HF tokenizers (for splitting long docs)
         :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
-        :param trainer:
         :param detect_subspans: attempt to detect nested entities (threshold must be configured)
         :param threshold: the confidence threshold used to detect nested entities
         :param entity_splitter: to detect non-contiguous entities if provided
@@ -76,9 +72,9 @@ class TransformersModelForTokenClassificationNerStep(Step):
         self.tokeniser: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
             path, config=self.config
         )
-        self.model = AutoModelForTokenClassification.from_pretrained(path, config=self.config)
-        self.model = PLAutoModelForTokenClassification(self.model).eval()
-        self.trainer = trainer
+        self.model = AutoModelForTokenClassification.from_pretrained(
+            path, config=self.config
+        ).eval()
         self.activation_fn = cast(
             Callable[[Tensor], Tensor], sigmoid if detect_subspans else partial(softmax, dim=-1)
         )
@@ -117,15 +113,9 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param loader:
         :return:
         """
-        results = torch.cat(
-            [
-                x.logits  # type: ignore[union-attr]
-                for x in self.trainer.predict(  # type: ignore[union-attr]
-                    model=self.model, dataloaders=loader, return_predictions=True
-                )
-            ]
-        )
-        return self.activation_fn(results)
+        with torch.no_grad():
+            results = torch.cat(tuple(self.model(**batch).logits for batch in loader))
+            return self.activation_fn(results)
 
     def get_dataloader(self, docs: list[Document]) -> tuple[DataLoader, dict[int, Section]]:
         """Get a dataloader from a List of :class:`kazu.data.data.Document`. Collation
