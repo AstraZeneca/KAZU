@@ -1,8 +1,6 @@
 import dataclasses
 
 import pytest
-from hydra.utils import instantiate
-from pytorch_lightning import Trainer
 
 from kazu.data.data import (
     Document,
@@ -237,11 +235,7 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
     kazu_test_config, set_up_disease_mapping_test_case, text, ent_match, target_string
 ):
 
-    sapbert_model = instantiate(kazu_test_config.PLSapbertModel)
-    string_scorer = SapbertStringSimilarityScorer(
-        sapbert=sapbert_model,
-        trainer=Trainer(enable_progress_bar=False, accelerator="cpu", logger=False),
-    )
+    string_scorer = SapbertStringSimilarityScorer(model_path=kazu_test_config.SapBertHelper.path)
 
     terms, parser = set_up_disease_mapping_test_case
     terms_with_scores = set()

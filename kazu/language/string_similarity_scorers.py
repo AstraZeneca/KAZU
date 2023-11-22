@@ -2,14 +2,13 @@ import re
 from collections import Counter
 from typing import Protocol
 
-from cachetools import LFUCache
-from pytorch_lightning import Trainer
 from rapidfuzz import fuzz
 from torch import Tensor, cosine_similarity
+from cachetools import LFUCache
 
 from kazu.data.data import NumericMetric
-from kazu.linking.sapbert.train import PLSapbertModel
 from kazu.utils.utils import Singleton
+from kazu.utils.sapbert import SapBertHelper
 
 
 class StringSimilarityScorer(Protocol):
@@ -96,14 +95,12 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
     """Note this is an implementation of the StringSimilarityScorer Protocol, but as a
     Singleton we can't inherit it."""
 
-    def __init__(self, sapbert: PLSapbertModel, trainer: Trainer, cache_size: int = 1000):
+    def __init__(self, sapbert: SapBertHelper, cache_size: int = 1000):
         """
 
-        :param sapbert: model to use
-        :param trainer: trainer to use
+        :param model_path: path to model to use
         :param cache_size: cache size, to prevent repeated calls to sapbert for the same string
         """
-        self.trainer = trainer
         self.sapbert = sapbert
         self.embedding_cache: LFUCache[str, Tensor] = LFUCache(maxsize=cache_size)
 
@@ -115,7 +112,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
         query_embedding = self.embedding_cache.get(query_term)
         if ref_embedding is None and query_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
-                [reference_term, query_term], batch_size=2, trainer=self.trainer
+                [reference_term, query_term], batch_size=2
             )
             ref_embedding = embeddings[0]
             query_embedding = embeddings[1]
@@ -123,13 +120,15 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
             self.embedding_cache[query_term] = query_embedding
         elif ref_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
-                [reference_term], batch_size=1, trainer=self.trainer
+                [reference_term],
+                batch_size=1,
             )
             ref_embedding = embeddings[0]
             self.embedding_cache[reference_term] = ref_embedding
         elif query_embedding is None:
             embeddings = self.sapbert.get_embeddings_for_strings(
-                [query_term], batch_size=1, trainer=self.trainer
+                [query_term],
+                batch_size=1,
             )
             query_embedding = embeddings[0]
             self.embedding_cache[query_term] = query_embedding
