@@ -1,3 +1,4 @@
+import pytest
 from hydra.utils import instantiate
 
 from kazu.data.data import Document
@@ -29,6 +30,9 @@ def test_generates_correct_spans(kazu_test_config):
     assert sent_spans[1].start == 29 and sent_spans[1].end == 63
 
 
+@pytest.mark.skip(
+    reason="ExplosionStringMatchingStep is semi deprecated - not in default model pack so not built, making this test extrememly slow."
+)
 @requires_model_pack
 def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     st_step: Step = instantiate(kazu_test_config.StanzaStep)
@@ -48,6 +52,9 @@ def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     assert len(ex_failures) == 1
 
 
+@pytest.mark.skip(
+    reason="ExplosionStringMatchingStep is semi deprecated - not in default model pack so not built, making this test extrememly slow."
+)
 @requires_model_pack
 def test_equivalent_to_explosion_for_simple_sents(kazu_test_config):
     st_step: Step = instantiate(kazu_test_config.StanzaStep)
