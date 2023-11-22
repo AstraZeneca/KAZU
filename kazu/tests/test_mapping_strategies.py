@@ -1,6 +1,7 @@
 import dataclasses
 
 import pytest
+from hydra.utils import instantiate
 
 from kazu.data.data import (
     Document,
@@ -234,8 +235,8 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
 def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
     kazu_test_config, set_up_disease_mapping_test_case, text, ent_match, target_string
 ):
-
-    string_scorer = SapbertStringSimilarityScorer(model_path=kazu_test_config.SapBertHelper.path)
+    sapbert_helper = instantiate(kazu_test_config.SapbertHelper)
+    string_scorer = SapbertStringSimilarityScorer(sapbert=sapbert_helper)
 
     terms, parser = set_up_disease_mapping_test_case
     terms_with_scores = set()
