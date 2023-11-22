@@ -16,20 +16,17 @@ from pytorch_lightning.utilities.types import (
     EVAL_DATALOADERS,
     EPOCH_OUTPUT,
 )
+from tokenizers import Encoding
 from torch import optim
 from torch.utils.data import DataLoader, Dataset
 from transformers import (
-    AutoConfig,
-    AutoTokenizer,
-    AutoModel,
     BatchEncoding,
     PreTrainedTokenizerBase,
-    DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
-from tokenizers import Encoding
 
 from kazu.utils.constants import HYDRA_VERSION_BASE
+from kazu.utils.sapbert import SapBertHelper
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +40,9 @@ class SapbertDataCollatorWithPadding:
     max_length: Optional[int] = None
     pad_to_multiple_of: Optional[int] = None
 
-    def __call__(self, features: list) -> tuple[BatchEncoding, BatchEncoding]:
+    def __call__(
+        self, features: list[dict[str, BatchEncoding]]
+    ) -> tuple[BatchEncoding, BatchEncoding]:
         query_toks1 = [x["query_toks1"] for x in features]
         query_toks1_enc = self.tokenizer.pad(
             query_toks1,
@@ -62,45 +61,6 @@ class SapbertDataCollatorWithPadding:
         )
 
         return query_toks1_enc, query_toks2_enc
-
-
-def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
-    """Get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST.
-
-    :param tokenizer:
-    :return:
-    """
-    collate_func = DataCollatorWithPadding(tokenizer=tokenizer, padding=PaddingStrategy.LONGEST)
-    return collate_func
-
-
-class HFSapbertInferenceDataset(Dataset):
-    """A dataset to be used for inferencing.
-
-    In addition to standard BERT  encodings, this uses an 'indices' encoding that can be
-    used to track the vector index of an embedding. This is needed in a multi GPU
-    environment
-    """
-
-    def __getitem__(self, index: int) -> dict[str, Any]:
-        query_toks1 = {
-            "input_ids": self.encodings.data["input_ids"][index],
-            "token_type_ids": self.encodings.data["token_type_ids"][index],
-            "attention_mask": self.encodings.data["attention_mask"][index],
-            "indices": self.encodings.data["indices"][index],
-        }
-        return query_toks1
-
-    def __init__(self, encodings: BatchEncoding):
-        """Simple implementation of IterableDataset, producing HF tokenizer input_id.
-
-        :param encodings:
-        """
-        self.encodings = encodings
-
-    def __len__(self):
-        encodings = cast(list[Encoding], self.encodings.encodings)
-        return len(encodings)
 
 
 class HFSapbertPairwiseDataset(Dataset):
@@ -147,41 +107,6 @@ class SapbertTrainingParams(BaseModel):
     train_file: str  # a parquet file with three columns - syn1, syn2 and id
     train_batch_size: int
     num_workers: int  # passed to dataloaders
-
-
-def get_embedding_dataloader_from_strings(
-    texts: list[str],
-    tokenizer: PreTrainedTokenizerBase,
-    batch_size: int,
-    num_workers: int,
-    max_length: int = 50,
-) -> DataLoader:
-    """Get a dataloader with dataset HFSapbertInferenceDataset and
-    DataCollatorWithPadding. This should be used to generate embeddings for strings of
-    interest.
-
-    :param texts: strings to use in the dataset
-    :param tokenizer:
-    :param batch_size:
-    :param num_workers:
-    :param max_length:
-    :return:
-    """
-    indices = [i for i in range(len(texts))]
-    # padding handled by collate func
-    batch_encodings = tokenizer(
-        texts, padding=PaddingStrategy.MAX_LENGTH, max_length=max_length, truncation=True
-    )
-    batch_encodings["indices"] = indices
-    dataset = HFSapbertInferenceDataset(batch_encodings)
-    collate_func = init_hf_collate_fn(tokenizer)
-    loader = DataLoader(
-        dataset=dataset,
-        batch_size=batch_size,
-        collate_fn=collate_func,
-        num_workers=num_workers,
-    )
-    return loader
 
 
 class SapbertEvaluationDataset(NamedTuple):
@@ -323,10 +248,7 @@ class PLSapbertModel(LightningModule):
         """
 
         super().__init__(*args, **kwargs)
-
-        self.config = AutoConfig.from_pretrained(model_name_or_path)
-        self.tokeniser = AutoTokenizer.from_pretrained(model_name_or_path, config=self.config)
-        self.model = AutoModel.from_pretrained(model_name_or_path, config=self.config)
+        self.sapbert_helper = SapBertHelper(model_name_or_path)
         self.sapbert_evaluation_manager = sapbert_evaluation_manager
         self.sapbert_training_params = sapbert_training_params
         if sapbert_training_params is not None:
@@ -365,14 +287,7 @@ class PLSapbertModel(LightningModule):
             the location of the embedding
         :return:
         """
-        indices = batch.pop("indices")
-        batch_embeddings = self.model(**batch)
-        batch_embeddings = batch_embeddings.last_hidden_state[:, 0, :]  # cls token
-        # put index as dict key so we can realign the embedding space
-        return {
-            index.item(): batch_embeddings[[batch_index], :]
-            for batch_index, index in enumerate(indices)
-        }
+        return self.sapbert_helper.get_prediction_from_batch(self.sapbert_helper.model, batch)
 
     def training_step(self, batch: Any, batch_idx: int, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
         """Implementation of
@@ -405,7 +320,7 @@ class PLSapbertModel(LightningModule):
         train_set = HFSapbertPairwiseDataset(
             labels=labels, encodings_1=encodings_1, encodings_2=encodings_2
         )
-        train_loader = torch.utils.data.DataLoader(
+        train_loader = DataLoader(
             train_set,
             batch_size=self.sapbert_training_params.train_batch_size,
             shuffle=True,
@@ -425,15 +340,13 @@ class PLSapbertModel(LightningModule):
         assert self.sapbert_evaluation_manager is not None
         assert self.sapbert_training_params is not None
         for query_source, ontology_source in self.sapbert_evaluation_manager.datasets.values():
-            query_dataloader = get_embedding_dataloader_from_strings(
+            query_dataloader = self.sapbert_helper.get_embedding_dataloader_from_strings(
                 texts=query_source["default_label"].tolist(),
-                tokenizer=self.tokeniser,
                 batch_size=self.sapbert_training_params.train_batch_size,
                 num_workers=self.sapbert_training_params.num_workers,
             )
-            ontology_dataloader = get_embedding_dataloader_from_strings(
+            ontology_dataloader = self.sapbert_helper.get_embedding_dataloader_from_strings(
                 texts=ontology_source["default_label"].tolist(),
-                tokenizer=self.tokeniser,
                 batch_size=self.sapbert_training_params.train_batch_size,
                 num_workers=self.sapbert_training_params.num_workers,
             )
@@ -455,22 +368,6 @@ class PLSapbertModel(LightningModule):
         :external+pytorch_lightning:ref:`LightningModule.predict_step
         </common/lightning_module.rst#predict-step>`\\ ."""
         return self(batch)
-
-    def get_embeddings(self, output: list[dict[int, torch.Tensor]]) -> torch.Tensor:
-        """Get a tensor of embeddings in original order.
-
-        :param output: int is the original index of the input (i.e. what comes out of
-            self.forward)
-        :return:
-        """
-        full_dict = {}
-        for batch in output:
-            full_dict.update(batch)
-        if len(full_dict) > 1:
-            embedding = torch.squeeze(torch.cat(list(full_dict.values())))
-        else:
-            embedding = torch.cat(list(full_dict.values()))
-        return embedding
 
     def validation_epoch_end(self, outputs: Union[EPOCH_OUTPUT, list[EPOCH_OUTPUT]]) -> None:
         """Lightning override generate new embeddings for each
@@ -526,42 +423,6 @@ class PLSapbertModel(LightningModule):
             result["acc{}".format(i + 1)] = hit / len(queries)
 
         return result
-
-    def get_embeddings_for_strings(
-        self, texts: list[str], trainer: Optional[Trainer] = None, batch_size: Optional[int] = None
-    ) -> torch.Tensor:
-        """For a list of strings, generate embeddings.
-
-        This is a convenience function for users, as we need to carry out these steps
-        several times in the codebase.
-
-        :param texts:
-        :param trainer: an optional PL Trainer to use. If not specified, uses the
-            default one
-        :param batch_size: optional batch size to use. If not specified, use 16
-        :return: a 2d tensor of embeddings
-        """
-        if trainer is None:
-            trainer = Trainer(enable_progress_bar=False, logger=False)
-        if batch_size is None:
-            batch_size = 16
-
-        loader = get_embedding_dataloader_from_strings(texts, self.tokeniser, batch_size, 0)
-        results = self.get_embeddings_from_dataloader(loader, trainer)
-        return results
-
-    def get_embeddings_from_dataloader(self, loader: DataLoader, trainer: Trainer) -> torch.Tensor:
-        """Get the cls token output from all data in a dataloader as a 2d tensor.
-
-        :param loader:
-        :param trainer: the PL Trainer to use
-        :return: 2d tensor of cls  output
-        """
-        self.eval()
-        predictions = trainer.predict(model=self, dataloaders=loader, return_predictions=True)
-        predictions = cast(list[dict[int, torch.Tensor]], predictions)
-        results = self.get_embeddings(predictions)
-        return results
 
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../../conf", config_name="config")
