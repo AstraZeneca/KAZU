@@ -292,15 +292,16 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
 
         return best_equiv_id_sets
 
+
 class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
-    """Prefer ids where the default label matches the entity string (after normalisation).
+    """Prefer ids where the default label matches the entity string (after
+    normalisation).
 
     .. note::
        This strategy is intended to be used with
        :class:`kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy`
        with :attr:`~kazu.steps.linking.post_processing.mapping_strategies.strategies.MappingStrategy.disambiguation_essential`
        set to True.
-
     """
 
     def __init__(self, confidence: DisambiguationConfidence):
