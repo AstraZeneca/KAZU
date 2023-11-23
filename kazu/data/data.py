@@ -1053,6 +1053,9 @@ class CuratedTerm:
         }
 
     @property
-    def control_aspects(self):
-        """A tuple of attributes that describe how this term behaves."""
+    def control_aspects(self) -> tuple[CuratedTermBehaviour, bool, Optional[AssociatedIdSets]]:
+        """A tuple of attributes that describe how this term behaves.
+
+        :returns: :attr:`.behaviour`, :attr:`.case_sensitive`, :attr:`associated_id_sets`
+        """
         return self.behaviour, self.case_sensitive, self.associated_id_sets

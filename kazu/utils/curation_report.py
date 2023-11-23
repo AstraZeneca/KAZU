@@ -20,7 +20,7 @@ _NOVEL_TERMS_FILENAME = "_novel_terms.jsonl"
 
 CURATION_REPORT_INSTRUCTIONS = f"""The subdirectories contain various jsonl files of how the current set of CuratedTerms map to the configured ontology.
 {_MIGRATED_TERMS_FILENAME}: terms that are compatible with the configured version of the ontology
-{_MODIFIED_TERMS_FILENAME}: terms that match but only if case is not considered. Since only one set of behavioursa exist between the original CuratedTerm and the new match, these CuratedTerms have been migrated to the new match.
+{_MODIFIED_TERMS_FILENAME}: terms that match but only if case is not considered. Since only one set of behaviours exist between the original CuratedTerm and the new match, these CuratedTerms have been migrated to the new match.
 {_CASE_WARNING_TERMS_FILENAME}: terms that match if case is not considered, but with multiple candidates in the new Ontology. These need to be recurated.
 {_OBSOLETE_TERMS_FILENAME}: terms from the set of CuratedTerms that are now obsolete and can be removed.
 {_NOVEL_TERMS_FILENAME}: terms from the Ontology that are novel and need to be curated.
@@ -78,7 +78,7 @@ class _OntologyUpgradeReport:
         # terms that don't appear in the ontology, but have been manually added
         self.extra_ontology_terms: set[CuratedTerm] = set()
 
-        # terms that match only if case not considered
+        # terms that match only if case not considered, but with multiple candidates in the new Ontology.
         self.failed_migrations: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
 
         # terms that no longer appear in the ontology
@@ -141,6 +141,8 @@ class _OntologyUpgradeReport:
                         ]
                     )
                 )
+                if len(matched_generated_terms_ci_minus_already_handled_ones) == 0:
+                    continue
                 # we can only migrate a term if there is only a single set of behaviours from the original curation
                 human_behaviour_set = set(x.control_aspects for x in existing_terms)
                 if len(human_behaviour_set) == 1:
@@ -180,7 +182,7 @@ class _OntologyUpgradeReport:
     def write_curation_report(
         self, output_path: Path, parser_name: str, prefix: str, curation_file_name: str
     ) -> None:
-        results_dir = Path(output_path).joinpath("curation_reports").joinpath(parser_name)
+        results_dir = output_path.joinpath("curation_reports").joinpath(parser_name)
         results_dir.mkdir(exist_ok=True, parents=True)
         with results_dir.joinpath(f"{prefix}{_MIGRATED_TERMS_FILENAME}").open(mode="w") as f:
             for curation in self.matched_curations:
