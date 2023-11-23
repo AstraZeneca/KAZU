@@ -185,7 +185,12 @@ class MappingStrategy(ABC):
         pass
 
     def disambiguate_if_required(
-        self, filtered_terms: set[SynonymTermWithMetrics], document: Document, parser_name: str
+        self,
+        filtered_terms: set[SynonymTermWithMetrics],
+        document: Document,
+        parser_name: str,
+        ent_match: str,
+        ent_match_norm: str,
     ) -> tuple[set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
         """Applies disambiguation strategies if configured, and either
         len(filtered_terms) > 1 or any of the filtered_terms are ambiguous. If ids are
@@ -195,6 +200,8 @@ class MappingStrategy(ABC):
         :param filtered_terms: terms to disambiguate
         :param document: originating Document
         :param parser_name: parser name associated with these terms
+        :param ent_match: string of entity to be disambiguated
+        :param ent_match_norm: normalised string of entity to be disambiguated
         :return:
         """
 
@@ -211,7 +218,11 @@ class MappingStrategy(ABC):
             assert self.disambiguation_strategies is not None
             for strategy in self.disambiguation_strategies:
                 filtered_id_sets = strategy(
-                    id_sets=all_id_sets, document=document, parser_name=parser_name
+                    id_sets=all_id_sets,
+                    document=document,
+                    parser_name=parser_name,
+                    ent_match=ent_match,
+                    ent_match_norm=ent_match_norm,
                 )
                 if len(filtered_id_sets) == 1:
                     return filtered_id_sets, strategy.__class__.__name__, strategy.confidence
@@ -249,7 +260,13 @@ class MappingStrategy(ABC):
             id_sets,
             successful_disambiguation_strategy,
             disambiguation_confidence,
-        ) = self.disambiguate_if_required(filtered_terms, document, parser_name)
+        ) = self.disambiguate_if_required(
+            filtered_terms,
+            document,
+            parser_name,
+            ent_match=ent_match,
+            ent_match_norm=ent_match_norm,
+        )
         yield from MappingFactory.create_mapping_from_id_sets(
             id_sets=id_sets,
             parser_name=parser_name,

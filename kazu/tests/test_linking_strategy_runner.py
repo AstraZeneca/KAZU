@@ -95,7 +95,12 @@ class TestDoNothingDisambiguationStrategy(DisambiguationStrategy):
         pass
 
     def disambiguate(
-        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+        self,
+        id_sets: set[EquivalentIdSet],
+        document: Document,
+        parser_name: str,
+        ent_match: Optional[str] = None,
+        ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
         return set()
 
@@ -112,7 +117,12 @@ class TestDisambiguationStrategy(DisambiguationStrategy):
         self.expected_id = self.temp_id
 
     def disambiguate(
-        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+        self,
+        id_sets: set[EquivalentIdSet],
+        document: Document,
+        parser_name: str,
+        ent_match: Optional[str] = None,
+        ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
         return set(id_set for id_set in id_sets if self.expected_id in id_set.ids)
 
