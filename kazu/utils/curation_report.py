@@ -1,5 +1,6 @@
 import argparse
 import dataclasses
+import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -362,4 +363,7 @@ if __name__ == "__main__":
         required=True,
         help="""Path to the model pack that contains the updated ontology(s) and the original curations.""",
     )
-    run_curation_report(parser.parse_args().model_pack_path)
+    path: Path = parser.parse_args().model_pack_path
+    print(f"setting KAZU_MODEL_PACK to {path}")
+    os.environ["KAZU_MODEL_PACK"] = str(path.absolute())
+    run_curation_report(path)
