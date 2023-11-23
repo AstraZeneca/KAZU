@@ -283,8 +283,8 @@ def run_curation_report(model_pack_path: Path) -> None:
                 "hydra/hydra_logging=none",
             ],
         )
-        for parser_name in cfg["ontologies"]["parsers"]:
-            curations_path = Path(cfg["ontologies"]["parsers"][parser_name]["curations_path"])
+        for parser_name, parser_cfg in cfg.ontologies.parsers.items():
+            curations_path = parser_cfg.curations_path
 
             existing_source_term_curations = set()
             existing_generated_curations = set()
@@ -296,9 +296,9 @@ def run_curation_report(model_pack_path: Path) -> None:
 
             new_source_term_curations = set()
             new_generated_curations = set()
-            with open_dict(cfg):
-                cfg["ontologies"]["parsers"][parser_name]["curations_path"] = None
-                parser = instantiate(cfg["ontologies"]["parsers"][parser_name], _convert_="all")
+            with open_dict(parser_cfg):
+                parser_cfg.curations_path = None
+                parser = instantiate(parser_cfg, _convert_="all")
                 for generated_curated_term in parser.populate_databases(
                     return_curations=True, force=True
                 ):
