@@ -20,6 +20,8 @@ from kazu.database.in_memory_db import (
     NormalisedSynonymStr,
 )
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
+from kazu.ontology_preprocessing.base import DEFAULT_LABEL
+from kazu.utils.string_normalizer import StringNormalizer
 
 logger = logging.getLogger(__name__)
 
@@ -289,3 +291,50 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
                     best_equiv_id_sets.add(id_set)
 
         return best_equiv_id_sets
+
+class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
+    """Prefer ids where the default label matches the entity string (after normalisation).
+
+    .. note::
+       This strategy is intended to be used with
+       :class:`kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy`
+       with :attr:`~kazu.steps.linking.post_processing.mapping_strategies.strategies.MappingStrategy.disambiguation_essential`
+       set to True.
+
+    """
+
+    def __init__(self, confidence: DisambiguationConfidence):
+        super().__init__(confidence)
+        self.metadata_db = MetadataDatabase()
+
+    def prepare(self, document: Document) -> None:
+        pass
+
+    def disambiguate(
+        self,
+        id_sets: set[EquivalentIdSet],
+        document: Document,
+        parser_name: str,
+        ent_match: Optional[str] = None,
+        ent_match_norm: Optional[str] = None,
+    ) -> set[EquivalentIdSet]:
+        entity_class = self.metadata_db.parser_name_to_ent_class[parser_name]
+        disambiguated_id_set = set()
+        for equiv_id_set in id_sets:
+            for idx, source in equiv_id_set.ids_and_source:
+                default_label_norm = StringNormalizer.normalize(
+                    self.metadata_db.get_by_idx(idx=idx, name=parser_name)[DEFAULT_LABEL],
+                    entity_class=entity_class,
+                )
+                if default_label_norm == ent_match_norm:
+                    disambiguated_id_set.add(
+                        (
+                            idx,
+                            source,
+                        )
+                    )
+
+        if len(disambiguated_id_set) == 0:
+            return set()
+        else:
+            return {EquivalentIdSet(ids_and_source=frozenset(disambiguated_id_set))}
