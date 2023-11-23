@@ -91,12 +91,9 @@ class _OntologyUpgradeReport:
         self,
     ) -> None:
 
-        for existing_term_string_case_sensitive in list(
-            self.existing_curations_case_sensitive.keys()
+        for existing_term_string_case_sensitive, existing_terms in list(
+            self.existing_curations_case_sensitive.items()
         ):
-            existing_terms = self.existing_curations_case_sensitive[
-                existing_term_string_case_sensitive
-            ]
             matched_generated_terms = self.incoming_curations_case_sensitive.pop(
                 existing_term_string_case_sensitive, None
             )
