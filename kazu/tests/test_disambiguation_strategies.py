@@ -9,18 +9,21 @@ from kazu.data.data import (
     Entity,
     EquivalentIdAggregationStrategy,
     EquivalentIdSet,
+    SynonymTermWithMetrics,
 )
-from kazu.database.in_memory_db import MetadataDatabase
+from kazu.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer
 from kazu.steps.linking.post_processing.disambiguation.strategies import (
     DisambiguationStrategy,
     DefinedElsewhereInDocumentDisambiguationStrategy,
     TfIdfDisambiguationStrategy,
     AnnotationLevelDisambiguationStrategy,
+    PreferDefaultLabelMatchDisambiguationStrategy,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
+from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
@@ -30,18 +33,22 @@ def check_ids_are_represented(
     strategy: DisambiguationStrategy,
     doc: Document,
     parser: DummyParser,
-    ents_to_tests: list[Entity],
+    entity_to_test: Entity,
 ):
     strategy.prepare(doc)
     all_id_sets: set[EquivalentIdSet] = set(
         chain.from_iterable(
-            term.associated_id_sets
-            for ent in ents_to_tests
-            for term in ent.syn_term_to_synonym_terms.values()
+            term.associated_id_sets for term in entity_to_test.syn_term_to_synonym_terms.values()
         )
     )
     disambiguated_id_sets = list(
-        strategy.disambiguate(id_sets=all_id_sets, document=doc, parser_name=parser.name)
+        strategy.disambiguate(
+            id_sets=all_id_sets,
+            document=doc,
+            parser_name=parser.name,
+            ent_match=entity_to_test.match,
+            ent_match_norm=entity_to_test.match_norm,
+        )
     )
     assert len(disambiguated_id_sets) == len(ids_to_check)
     for idx in ids_to_check:
@@ -91,7 +98,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
 
     # first check no mappings are produced until we add the 'good' mapping info
     check_ids_are_represented(
-        ids_to_check=set(), strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+        ids_to_check=set(), strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
     )
 
     # now add a good mapping, that should be selected from the set of terms
@@ -114,7 +121,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
 
     doc = create_doc_with_ents([autoantip27_ent, p27_ent])
     check_ids_are_represented(
-        ids_to_check={"3"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+        ids_to_check={"3"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
     )
 
     #     finally, we'll add another entity with a relevant mapping. Since two relevant entities with mappings now occur in
@@ -147,7 +154,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     doc = create_doc_with_ents([autoantip27_ent, p27_ent, cdkn1b_ent])
 
     check_ids_are_represented(
-        ids_to_check={"3", "1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+        ids_to_check={"3", "1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
     )
 
 
@@ -192,7 +199,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case, mock_build_vectoriser_cache)
     )
 
     check_ids_are_represented(
-        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
     )
 
 
@@ -221,7 +228,7 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
             meta_dict["annotation_score"] = 5
     strategy = AnnotationLevelDisambiguationStrategy(DisambiguationConfidence.POSSIBLE)
     check_ids_are_represented(
-        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[cdkn1b_ent]
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=cdkn1b_ent
     )
 
     # now repeat with equal scores
@@ -235,5 +242,62 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
         strategy=strategy,
         doc=doc,
         parser=parser,
-        ents_to_tests=[cdkn1b_ent],
+        entity_to_test=cdkn1b_ent,
+    )
+
+
+def test_PreferDefaultLabelMatchDisambiguationStrategy(set_up_p27_test_case):
+    dummy_data = {
+        IDX: ["1", "1", "1", "2", "2", "2", "3", "3", "3"],
+        DEFAULT_LABEL: [
+            "CDKN1B",
+            "CDKN1B",
+            "CDKN1B",
+            "PAK2",
+            "PAK2",
+            "PAK2",
+            "ZNRD2",
+            "ZNRD2",
+            "ZNRD2",
+        ],
+        SYN: [
+            "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
+            "CDKN1B",
+            "p27",
+            "PAK-2p27",
+            "p27",
+            "PAK2",
+            "CDKN1B",  # this label is ambiguous, but it's not the default one, so IDX 2 and 3 should be eliminated
+            "ZNRD2",
+            "p27",
+        ],
+        MAPPING_TYPE: ["", "", "", "", "", "", "", "", ""],
+    }
+    parser = DummyParser(
+        data=dummy_data, name="test_default_label_strategy", source="test_default_label_strategy"
+    )
+    parser.populate_databases()
+    terms_with_metrics = set(
+        SynonymTermWithMetrics.from_synonym_term(term)
+        for term in SynonymDatabase().get_all(parser.name).values()
+    )
+
+    text = "CDKN1B is confused in this test,but with this strategy we want the id where CDKN1B is the default label"
+    doc = Document.create_simple_document(text)
+    cdkn1b_ent = Entity.load_contiguous_entity(
+        start=0,
+        end=len(text),
+        match="CDKN1B",
+        entity_class=parser.entity_class,
+        namespace="test",
+    )
+    cdkn1b_ent.update_terms(terms_with_metrics)
+    doc.sections[0].entities.append(cdkn1b_ent)
+
+    strategy = PreferDefaultLabelMatchDisambiguationStrategy(
+        confidence=DisambiguationConfidence.PROBABLE,
+    )
+
+    check_ids_are_represented(
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=cdkn1b_ent
     )
