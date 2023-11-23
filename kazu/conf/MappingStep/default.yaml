@@ -132,6 +132,10 @@ strategy_runner:
       default_strategies:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           confidence: ${confidence.string_matching_highly_likely}
+          disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+          disambiguation_essential: true
+        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+          confidence: ${confidence.string_matching_highly_likely}
           disambiguation_strategies: ${DisambiguationStrategies.default}
 
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
@@ -142,8 +146,16 @@ strategy_runner:
         drug:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.default}
         gene:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
@@ -159,6 +171,10 @@ strategy_runner:
         disease:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.default}
 
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchWithEmbeddingConfirmationStringMatchingStrategy
@@ -167,6 +183,10 @@ strategy_runner:
             symbolic_only: False
             complex_string_scorer: ${SapbertStringSimilarityScorer}
         cell_line:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
@@ -182,6 +202,10 @@ strategy_runner:
       _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
       stop_on_success: True
       default_strategies:
+        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+          confidence: ${confidence.string_matching_highly_likely}
+          disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+          disambiguation_essential: true
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: ${confidence.string_matching_highly_likely}
