@@ -193,6 +193,28 @@ class _OntologyUpgradeReport:
                 for curation in terms:
                     f.write(f"{curation.to_json()}\n")
 
+    @classmethod
+    def build_match_and_write_report(
+        cls,
+        existing_curations: set[CuratedTerm],
+        curations_from_new_ontology_version: set[CuratedTerm],
+        output_path: Path,
+        parser_name: str,
+        prefix: str,
+        curation_file_name: str,
+    ) -> None:
+        report = cls(
+            existing_curations=existing_curations,
+            curations_from_new_ontology_version=curations_from_new_ontology_version,
+        )
+        report.match_existing_terms_to_new_terms()
+        report.write_curation_report(
+            output_path=output_path,
+            parser_name=parser_name,
+            prefix=prefix,
+            curation_file_name=curation_file_name,
+        )
+
     def write_curation_report(
         self, output_path: Path, parser_name: str, prefix: str, curation_file_name: str
     ) -> None:
@@ -284,7 +306,7 @@ def run_curation_report(model_pack_path: Path) -> None:
             ],
         )
         for parser_name, parser_cfg in cfg.ontologies.parsers.items():
-            curations_path = parser_cfg.curations_path
+            curations_path = Path(parser_cfg.curations_path)
 
             existing_source_term_curations = set()
             existing_generated_curations = set()
@@ -307,26 +329,20 @@ def run_curation_report(model_pack_path: Path) -> None:
                     else:
                         new_generated_curations.add(generated_curated_term)
 
-            original_terms_report = _OntologyUpgradeReport(
+            # original terms report
+            _OntologyUpgradeReport.build_match_and_write_report(
                 existing_curations=existing_source_term_curations,
                 curations_from_new_ontology_version=new_source_term_curations,
-            )
-            original_terms_report.match_existing_terms_to_new_terms()
-            original_terms_report.write_curation_report(
                 output_path=model_pack_path,
                 parser_name=parser_name,
                 prefix=_SOURCE_TERMS_PREFIX,
                 curation_file_name=curations_path.name,
             )
 
-            generated_terms_report = _OntologyUpgradeReport(
+            # generated terms report
+            _OntologyUpgradeReport.build_match_and_write_report(
                 existing_curations=existing_generated_curations,
                 curations_from_new_ontology_version=new_generated_curations,
-            )
-
-            generated_terms_report.match_existing_terms_to_new_terms()
-
-            generated_terms_report.write_curation_report(
                 output_path=model_pack_path,
                 parser_name=parser_name,
                 prefix=_GENERATED_TERMS_PREFIX,
