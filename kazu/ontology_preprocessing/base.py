@@ -1106,7 +1106,7 @@ class OntologyParser(ABC):
         logger.info("populating database for %s from source", self.name)
         metadata = self.export_metadata(self.name)
         # metadata db needs to be populated before call to export_synonym_terms
-        self.metadata_db.add_parser(self.name, metadata)
+        self.metadata_db.add_parser(self.name, self.entity_class, metadata)
         intermediate_synonym_terms = self.export_synonym_terms(self.name)
         maybe_ner_curations, final_syn_terms = self.process_curations(intermediate_synonym_terms)
         self.parsed_dataframe = None  # clear the reference to save memory
@@ -1141,7 +1141,7 @@ class OntologyParser(ABC):
 
         if self.name not in self.synonym_db.loaded_parsers:
             logger.info("populating database for %s from cache", self.name)
-            self.metadata_db.add_parser(self.name, metadata)
+            self.metadata_db.add_parser(self.name, self.entity_class, metadata)
             self.synonym_db.add(self.name, final_syn_terms)
 
         return maybe_curations if return_curations else None

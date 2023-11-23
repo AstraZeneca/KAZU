@@ -31,18 +31,21 @@ class MetadataDatabase(metaclass=Singleton):
     def __init__(self):
         self._database: dict[ParserName, dict[Idx, Metadata]] = {}
         self._keys_lst: dict[ParserName, list[Idx]] = {}
-        self.loaded_parsers: set[str] = set()
+        self.parser_name_to_ent_class: dict[str, str] = {}
 
-    def add_parser(self, name: ParserName, metadata: dict[Idx, Metadata]) -> None:
+    def add_parser(
+        self, name: ParserName, entity_class: str, metadata: dict[Idx, Metadata]
+    ) -> None:
         """Add metadata to the ontology. Note, metadata is assumed to be static, and
         global. Calling this function will override any existing entries with associated
         with the keys in the metadata dict.
 
         :param name: name of ontology to add to
+        :param entity_class: entity class this parser maps to
         :param metadata: dict in format {idx:metadata}
         :return:
         """
-        self.loaded_parsers.add(name)
+        self.parser_name_to_ent_class[name] = entity_class
         if name in self._database:
             logger.info(
                 f"parser {name} already present in metadata database - will override existing parser data."
