@@ -177,38 +177,47 @@ class _OntologyUpgradeReport:
                 else:
                     self.novel_terms[term.source_term].add(term)
 
+    @staticmethod
+    def _write_unsorted_curation_set(path: Path, curation_set: set[CuratedTerm]) -> None:
+        with path.open(mode="w") as f:
+            for curation in curation_set:
+                f.write(f"{curation.to_json()}\n")
+
+    @staticmethod
+    def _write_curations_shortest_synonyms_first(
+        path: Path, curations: dict[str, set[CuratedTerm]]
+    ) -> None:
+        with path.open(mode="w") as f:
+            by_len = sorted(curations.items(), key=lambda x: len(x[0]), reverse=False)
+            for _term_str, terms in by_len:
+                for curation in terms:
+                    f.write(f"{curation.to_json()}\n")
+
     def write_curation_report(
         self, output_path: Path, parser_name: str, prefix: str, curation_file_name: str
     ) -> None:
         results_dir = output_path.joinpath("curation_reports").joinpath(parser_name)
         results_dir.mkdir(exist_ok=True, parents=True)
-        with results_dir.joinpath(f"{prefix}{_MIGRATED_TERMS_FILENAME}").open(mode="w") as f:
-            for curation in self.matched_curations:
-                f.write(f"{curation.to_json()}\n")
-        with results_dir.joinpath(f"{prefix}{_EXTRA_ONTOLOGY_TERMS_FILENAME}").open(mode="w") as f:
-            for curation in self.extra_ontology_terms:
-                f.write(f"{curation.to_json()}\n")
-        with results_dir.joinpath(f"{prefix}{_MODIFIED_TERMS_FILENAME}").open(mode="w") as f:
-            for curation in self.modified_curations:
-                f.write(f"{curation.to_json()}\n")
-        with results_dir.joinpath(f"{prefix}{_CASE_WARNING_TERMS_FILENAME}").open(mode="w") as f:
-            by_len = sorted(self.failed_migrations.keys(), key=lambda x: len(x), reverse=False)
-            for term_str in by_len:
-                terms = self.failed_migrations[term_str]
-                for curation in terms:
-                    f.write(f"{curation.to_json()}\n")
-        with results_dir.joinpath(f"{prefix}{_OBSOLETE_TERMS_FILENAME}").open(mode="w") as f:
-            by_len = sorted(self.obsolete_terms.keys(), key=lambda x: len(x), reverse=False)
-            for term_str in by_len:
-                terms = self.obsolete_terms[term_str]
-                for curation in terms:
-                    f.write(f"{curation.to_json()}\n")
-        with results_dir.joinpath(f"{prefix}{_NOVEL_TERMS_FILENAME}").open(mode="w") as f:
-            by_len = sorted(self.novel_terms.keys(), key=lambda x: len(x), reverse=False)
-            for term_str in by_len:
-                terms = self.novel_terms[term_str]
-                for curation in terms:
-                    f.write(f"{curation.to_json()}\n")
+        self._write_unsorted_curation_set(
+            results_dir.joinpath(f"{prefix}{_MIGRATED_TERMS_FILENAME}"), self.matched_curations
+        )
+        self._write_unsorted_curation_set(
+            results_dir.joinpath(f"{prefix}{_EXTRA_ONTOLOGY_TERMS_FILENAME}"),
+            self.extra_ontology_terms,
+        )
+        self._write_unsorted_curation_set(
+            results_dir.joinpath(f"{prefix}{_MODIFIED_TERMS_FILENAME}"), self.modified_curations
+        )
+
+        self._write_curations_shortest_synonyms_first(
+            results_dir.joinpath(f"{prefix}{_CASE_WARNING_TERMS_FILENAME}"), self.failed_migrations
+        )
+        self._write_curations_shortest_synonyms_first(
+            results_dir.joinpath(f"{prefix}{_OBSOLETE_TERMS_FILENAME}"), self.obsolete_terms
+        )
+        self._write_curations_shortest_synonyms_first(
+            results_dir.joinpath(f"{prefix}{_NOVEL_TERMS_FILENAME}"), self.novel_terms
+        )
         with results_dir.joinpath("instructions.txt").open(mode="w") as f:
             f.write(CURATION_REPORT_INSTRUCTIONS + curation_file_name)
 
@@ -324,6 +333,7 @@ def run_curation_report(model_pack_path: Path) -> None:
                 curation_file_name=curations_path.name,
             )
             kazu_disk_cache.clear()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
