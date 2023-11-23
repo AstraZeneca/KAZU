@@ -11,12 +11,14 @@ Others are aimed to provide flexibly for a user across a format, such as
 If you do not find a parser that meets your needs, please see
 :ref:`writing-a-custom-parser`.
 """
-
+import copy
+import itertools
 import json
 import logging
 import os
 import re
 import sqlite3
+from collections import defaultdict
 from functools import cache
 from pathlib import Path
 from typing import cast, Any, Optional, Union, overload
@@ -86,47 +88,168 @@ class JsonLinesOntologyParser(OntologyParser):
 
 
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
-    # Just use IDs that are in MONDO, since that's all people in general care about.
-    # if we want to expand this out, other sources are:
-    # "OGMS", "FBbt", "Orphanet", "EFO", "OTAR"
-    # but we did have these in previously, and EFO introduced a lot of noise as it
-    # has non-disease terms like 'dose' that occur frequently.
-    # we could make the allowed sources a config option but we don't need to configure
-    # currently, and easy to change later (and provide the current value as a default if
-    # not present in config)
-    allowed_sources = {"MONDO", "HP"}
+    """Parser for OpenTargets Disease release.
+
+    Some things to bear in mind when using this parser:
+
+    OpenTargets has a lot of entities in its disease dataset, not all of which are diseases. Here,
+    we use the allowed_therapeutic_areas argument to describe which specific therapeutic areas
+    a given instance of this parser should use. See https://platform-docs.opentargets.org/disease-or-phenotype
+    for more info.
+    """
+
+    DF_XREF_FIELD_NAME = "dbXRefs"
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        allowed_therapeutic_areas: Iterable[str],
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations_path: Optional[str] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+    ):
+        """
+
+        :param in_path:
+        :param entity_class:
+        :param name:
+        :param allowed_therapeutic_areas: areas to use in this instance
+        :param string_scorer:
+        :param synonym_merge_threshold:
+        :param data_origin:
+        :param synonym_generator:
+        :param curations_path:
+        :param global_actions:
+        """
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            curations_path=curations_path,
+            global_actions=global_actions,
+        )
+        self.allowed_therapeutic_areas = set(allowed_therapeutic_areas)
 
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
+
+    def score_and_group_ids(
+            self,
+            ids_and_source: IdsAndSource,
+            is_symbolic: bool,
+    ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
+        """Group disease IDs via cross reference.
+
+        :param ids_and_source:
+        :param is_symbolic:
+        :return:
+        """
+        if len(ids_and_source)==1:
+            return super().score_and_group_ids(ids_and_source=ids_and_source,is_symbolic=is_symbolic)
+
+        meta_db = MetadataDatabase()
+        unmapped_ids_and_sources = copy.deepcopy(ids_and_source)
+
+        # look up all cross references in the DB
+        xref_lookup = {}
+        for idx_and_source in ids_and_source:
+            xref_set = set(meta_db.get_by_idx(name=self.name, idx=idx_and_source[0])[self.DF_XREF_FIELD_NAME])
+            # we also need to add in the OT default one, that needs some parsing as is in a slightly different
+            # format
+            xref_set.add(idx_and_source[0].replace('_',':'))
+            xref_lookup[idx_and_source] = xref_set
+
+
+        # now group by the intersection of each set of xrefs, and create a set for each
+        groups = defaultdict(set)
+        for (idx_and_source1,xref_set1),(idx_and_source2,xref_set2) in itertools.combinations(xref_lookup.items(),r=2):
+            matched_xrefs = frozenset(xref_set1.intersection(xref_set2))
+            if len(matched_xrefs)>0:
+                try:
+                    unmapped_ids_and_sources.remove(idx_and_source1)
+                except KeyError:
+                    pass
+                try:
+                    unmapped_ids_and_sources.remove(idx_and_source2)
+                except KeyError:
+                    pass
+                groups[matched_xrefs].add(idx_and_source1)
+                groups[matched_xrefs].add(idx_and_source2)
+
+
+        if len(groups)>1 and len(set.intersection(*groups.values()))>0:
+            # for this set of ids, xref mappings are confused between two or more subsets
+            # so fall back to default method
+            return super().score_and_group_ids(ids_and_source=ids_and_source,is_symbolic=is_symbolic)
+
+
+        # now add in any remaining unmapped ids as seperate groups
+        groups_list = list(groups.values())
+        for unmapped_ids_and_source in unmapped_ids_and_sources:
+            groups_list.append([unmapped_ids_and_source])
+
+        assoc_id_sets: set[EquivalentIdSet] = set()
+        for grouped_ids_and_source in groups_list:
+            assoc_id_sets.add(
+                EquivalentIdSet(
+                    ids_and_source=frozenset(
+                        (
+                            grouped_idx,
+                            source,
+                        )
+                        for grouped_idx, source in grouped_ids_and_source
+                    )
+                )
+            )
+        return frozenset(assoc_id_sets), EquivalentIdAggregationStrategy.RESOLVED_BY_XREF
+
+
 
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
         # we ignore related syns for now until we decide how the system should handle them
         for json_dict in jsons_gen:
-            idx = self.look_for_mondo(json_dict["id"], json_dict.get("dbXRefs", []))
-            if any(allowed_source in idx for allowed_source in self.allowed_sources):
-                synonyms = json_dict.get("synonyms", {})
-                exact_syns = synonyms.get("hasExactSynonym", [])
-                exact_syns.append(json_dict["name"])
-                def_label = json_dict["name"]
-                dbXRefs = json_dict.get("dbXRefs", [])
-                for syn in exact_syns:
-                    yield {
-                        SYN: syn,
-                        MAPPING_TYPE: "hasExactSynonym",
-                        DEFAULT_LABEL: def_label,
-                        IDX: idx,
-                        "dbXRefs": dbXRefs,
-                    }
+            default_label: str = json_dict["name"]
 
-    def look_for_mondo(self, ot_id: str, db_xrefs: list[str]) -> str:
-        if "MONDO" in ot_id:
-            return ot_id
-        for x in db_xrefs:
-            if "MONDO" in x:
-                return x.replace(":", "_")
-        return ot_id
+            # skip top level therapeutic areas
+            if json_dict.get("ontology", {}).get("isTherapeuticArea"):
+                continue
+
+            if set(json_dict.get("therapeuticAreas", ())).isdisjoint(
+                self.allowed_therapeutic_areas
+            ):
+                logger.debug("skipping  entry: %s", json_dict)
+                continue
+
+            idx = json_dict["id"]
+            dbXRefs = json_dict.get("dbXRefs", [])
+            yield {
+                SYN: default_label,
+                MAPPING_TYPE: "name",
+                DEFAULT_LABEL: default_label,
+                IDX: idx,
+                "dbXRefs": dbXRefs,
+            }
+            synonyms = json_dict.get("synonyms", {})
+            exact_syns = synonyms.get("hasExactSynonym", [])
+            for syn in exact_syns:
+                yield {
+                    SYN: syn,
+                    MAPPING_TYPE: "hasExactSynonym",
+                    DEFAULT_LABEL: default_label,
+                    IDX: idx,
+                    "dbXRefs": dbXRefs,
+                }
 
 
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):

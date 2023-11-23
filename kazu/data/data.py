@@ -140,6 +140,7 @@ class EquivalentIdAggregationStrategy(AutoNameEnum):
     UNAMBIGUOUS = auto()
     MERGED_AS_NON_SYMBOLIC = auto()  # used when non-symbolic synonyms are merged
     MODIFIED_BY_CURATION = auto()
+    RESOLVED_BY_XREF = auto()
 
 
 # this is frozen below, but for use in typehints elsewhere the mutable version is
