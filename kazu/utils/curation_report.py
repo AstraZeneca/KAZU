@@ -1,3 +1,4 @@
+import argparse
 import dataclasses
 from collections import defaultdict
 from pathlib import Path
@@ -323,3 +324,16 @@ def run_curation_report(model_pack_path: Path) -> None:
                 curation_file_name=curations_path.name,
             )
             kazu_disk_cache.clear()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="write a curation report to explore and update curated terms between different ontology versions."
+    )
+
+    parser.add_argument(
+        "--model_pack_path",
+        type=Path,
+        required=True,
+        help="""Path to the model pack that contains the updated ontology(s) and the original curations.""",
+    )
+    run_curation_report(parser.parse_args().model_pack_path)
