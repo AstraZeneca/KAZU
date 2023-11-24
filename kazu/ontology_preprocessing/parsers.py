@@ -493,9 +493,12 @@ class RDFGraphParser(OntologyParser):
         else:
             return rdflib.URIRef(pred)
 
+    @staticmethod
+    def parse_to_graph(in_path: str) -> rdflib.Graph:
+        return rdflib.Graph().parse(in_path)
+
     def parse_to_dataframe(self) -> pd.DataFrame:
-        g = rdflib.Graph()
-        g.parse(self.in_path)
+        g = self.parse_to_graph(self.in_path)
         default_labels = []
         iris = []
         syns = []
