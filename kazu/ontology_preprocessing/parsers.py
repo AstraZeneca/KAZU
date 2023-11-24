@@ -46,7 +46,6 @@ from kazu.ontology_preprocessing.base import (
     IdsAndSource,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
-from kazu.utils.utils import PathLike
 from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
@@ -593,8 +592,7 @@ class SKOSXLGraphParser(RDFGraphParser):
         )
 
 
-class GeneOntologyParser(OntologyParser):
-    _uri_regex = re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$")
+class GeneOntologyParser(RDFGraphParser):
 
     instances: set[str] = set()
     instances_in_dbs: set[str] = set()
@@ -604,11 +602,12 @@ class GeneOntologyParser(OntologyParser):
         in_path: str,
         entity_class: str,
         name: str,
-        query: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
@@ -616,76 +615,70 @@ class GeneOntologyParser(OntologyParser):
             in_path=in_path,
             entity_class=entity_class,
             name=name,
+            uri_regex=re.compile("^http://purl.obolibrary.org/obo/GO_[0-9]+$"),
+            synonym_predicates=(
+                rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"),
+            ),
             string_scorer=string_scorer,
             synonym_merge_threshold=synonym_merge_threshold,
             data_origin=data_origin,
             synonym_generator=synonym_generator,
+            include_entity_patterns=include_entity_patterns,
+            exclude_entity_patterns=exclude_entity_patterns,
             curations_path=curations_path,
             global_actions=global_actions,
         )
         self.instances.add(name)
-        self.query = query
 
     def populate_databases(
         self, force: bool = False, return_curations: bool = False
     ) -> Optional[list[CuratedTerm]]:
+        """Cached version of :meth:`RDFGraphParser.parse_to_graph`.
+
+        .. |GO_caching_comment| replace::
+            Cached due to the expense of parsing Gene Ontology from scratch
+            (otherwise we end up doing this 3 times in the public model pack).
+
+        |GO_caching_comment|
+        """
         curations = super().populate_databases(force=force, return_curations=return_curations)
         self.instances_in_dbs.add(self.name)
 
         if self.instances_in_dbs >= self.instances:
             # all existing instances are in the database, so we can free up
             # the memory used by the cached parsed gene ontology, which is significant.
-            self.load_go.cache_clear()
+            self.parse_to_graph.cache_clear()
         return curations
+
+    @staticmethod
+    @cache
+    def parse_to_graph(in_path: str) -> rdflib.Graph:
+        """Cached version of :meth:`RDFGraphParser.parse_to_graph`.
+
+        |GO_caching_comment|
+        """
+        # needs to provide explicit arguments because this is a staticmethod
+        return super(GeneOntologyParser, GeneOntologyParser).parse_to_graph(in_path)
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        """A modification of :meth:`RDFGraphParser.parse_to_dataframe`.
+
+        The only difference from the overriden method is that this drops entities where
+        the default label contains 'obsolete', as these are no longer relevant for Gene
+        Ontology NER/Entity Linking.
+        """
+        df = super().parse_to_dataframe()
+        df = df.drop(df.index[df[DEFAULT_LABEL].str.contains("obsolete")])
+        return df
 
     def __del__(self):
         GeneOntologyParser.instances.discard(self.name)
 
-    @staticmethod
-    @cache
-    def load_go(in_path: PathLike) -> rdflib.Graph:
-        g = rdflib.Graph()
-        g.parse(in_path)
-        return g
-
-    def find_kb(self, string: str) -> str:
-        return self.name
-
-    def parse_to_dataframe(self) -> pd.DataFrame:
-        g = self.load_go(self.in_path)
-        result = g.query(self.query)
-        default_labels = []
-        iris = []
-        syns = []
-        mapping_type = []
-
-        # there seems to be a bug in rdflib that means the iterator sometimes exits early unless we convert to list first
-        # type cast is necessary because iterating over an rdflib query result gives different types depending on the kind
-        # of query, so rdflib gives a Union here, but we know it should be a ResultRow because we know we should have a
-        # select query
-        list_res = cast(list[rdflib.query.ResultRow], list(result))
-        for row in list_res:
-            idx = str(row.goid)
-            label = str(row.label)
-            if "obsolete" in label:
-                logger.debug("skipping obsolete id: %s, %s", idx, label)
-                continue
-            if self._uri_regex.match(idx):
-                default_labels.append(label)
-                iris.append(idx)
-                syns.append(str(row.synonym))
-                mapping_type.append("hasExactSynonym")
-        df = pd.DataFrame.from_dict(
-            {DEFAULT_LABEL: default_labels, IDX: iris, SYN: syns, MAPPING_TYPE: mapping_type}
-        )
-        default_labels_df = df[[IDX, DEFAULT_LABEL]].drop_duplicates().copy()
-        default_labels_df[SYN] = default_labels_df[DEFAULT_LABEL]
-        default_labels_df[MAPPING_TYPE] = "label"
-
-        return pd.concat([df, default_labels_df])
-
 
 class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
+    """A subclass of :class:`GeneOntologyParser` that filters to only the
+    ``biological_process`` namespace."""
+
     def __init__(
         self,
         in_path: str,
@@ -708,24 +701,20 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             name=name,
             curations_path=curations_path,
             global_actions=global_actions,
-            query="""
-                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                    PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                    SELECT DISTINCT ?goid ?label ?synonym
-                            WHERE {
-
-                                ?goid oboinowl:hasExactSynonym ?synonym .
-                                ?goid rdfs:label ?label .
-                                ?goid oboinowl:hasOBONamespace "biological_process" .
-
-                  }
-            """,
+            include_entity_patterns=[
+                (
+                    rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasOBONamespace"),
+                    rdflib.Literal("biological_process"),
+                )
+            ],
+            exclude_entity_patterns=[],
         )
 
 
 class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
+    """A subclass of :class:`GeneOntologyParser` that filters to only the
+    ``molecular_function`` namespace."""
+
     def __init__(
         self,
         in_path: str,
@@ -748,24 +737,20 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             name=name,
             curations_path=curations_path,
             global_actions=global_actions,
-            query="""
-                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                    PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                    SELECT DISTINCT ?goid ?label ?synonym
-                            WHERE {
-
-                                ?goid oboinowl:hasExactSynonym ?synonym .
-                                ?goid rdfs:label ?label .
-                                ?goid oboinowl:hasOBONamespace "molecular_function".
-
-                    }
-            """,
+            include_entity_patterns=[
+                (
+                    rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasOBONamespace"),
+                    rdflib.Literal("molecular_function"),
+                )
+            ],
+            exclude_entity_patterns=[],
         )
 
 
 class CellularComponentGeneOntologyParser(GeneOntologyParser):
+    """A subclass of :class:`GeneOntologyParser` that filters to only the
+    ``cellular_component`` namespace."""
+
     def __init__(
         self,
         in_path: str,
@@ -788,20 +773,13 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             name=name,
             curations_path=curations_path,
             global_actions=global_actions,
-            query="""
-                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                    PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
-
-                    SELECT DISTINCT ?goid ?label ?synonym
-                            WHERE {
-
-                                ?goid oboinowl:hasExactSynonym ?synonym .
-                                ?goid rdfs:label ?label .
-                                ?goid oboinowl:hasOBONamespace "cellular_component" .
-
-                    }
-            """,
+            include_entity_patterns=[
+                (
+                    rdflib.URIRef("http://www.geneontology.org/formats/oboInOwl#hasOBONamespace"),
+                    rdflib.Literal("cellular_component"),
+                )
+            ],
+            exclude_entity_patterns=[],
         )
 
 
