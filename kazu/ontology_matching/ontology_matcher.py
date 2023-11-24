@@ -7,6 +7,7 @@ from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
 from typing import Any, Union, Optional, cast
+from warnings import warn
 
 import spacy
 import srsly
@@ -147,13 +148,13 @@ class OntologyMatcher:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
-    def create_phrasematchers_using_curations(
+    def create_phrasematchers(
         self, parsers: list[OntologyParser]
     ) -> tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
-        """Create spaCy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\
-        s based on :class:`.CuratedTerm`\\ s.
+        """Create spaCy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\s.
 
-        Curations are produced by :py:meth:`.OntologyParser.populate_databases`\\ method
+        Curations are produced by :py:meth:`.OntologyParser.populate_databases`\\ method.
+
         :param parsers:
         :return:
         """
@@ -222,6 +223,24 @@ class OntologyMatcher:
         self.strict_matcher = strict_matcher if len(strict_matcher) != 0 else None
         self.lowercase_matcher = lowercase_matcher if len(lowercase_matcher) != 0 else None
         return self.strict_matcher, self.lowercase_matcher
+
+    def create_phrasematchers_using_curations(
+        self, parsers: list[OntologyParser]
+    ) -> tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
+        """Deprecated alias for :meth:`~.create_phrasematchers`.
+
+        .. warning::
+
+           Deprecated - use :meth:`~.create_phrasematchers` instead.
+
+           This function was renamed to :meth:`~.create_phrasematchers`,
+           as the 'curations' part had become confusing.
+        """
+        warn(
+            "create_phrasematchers_using_curations has been renamed to create_phrasematchers for increased clarity. Use the new name instead",
+            DeprecationWarning,
+        )
+        return self.create_phrasematchers(parsers)
 
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
