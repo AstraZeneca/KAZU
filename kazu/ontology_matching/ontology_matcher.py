@@ -163,9 +163,9 @@ class OntologyMatcher:
         self.set_labels(parser.entity_class for parser in parsers)
         strict_matcher = PhraseMatcher(self.nlp.vocab, attr="ORTH")
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
-        logger.info("ontology matcher build triggered. Forcing database repopulation.")
+        logger.info("ontology matcher build triggered.")
         for parser in parsers:
-            parser_curations = parser.populate_databases(force=True, return_curations=True)
+            parser_curations = parser.populate_databases(return_curations=True)
             if parser_curations is None:
                 logger.warning(
                     "tried to create PhraseMatchers from Curations for parser %s, but none have been provided",
