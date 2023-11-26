@@ -394,6 +394,7 @@ RdfRef = Union[rdflib.paths.Path, rdflib.term.Node, str]
 # but there's apparently no way of type hinting
 # 'any iterable of length two where the items have these types'
 PredicateAndValue = tuple[RdfRef, rdflib.term.Node]
+EntityFilteringPatterns = Optional[Iterable[PredicateAndValue]]
 
 
 class RDFGraphParser(OntologyParser):
@@ -418,8 +419,8 @@ class RDFGraphParser(OntologyParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        include_entity_patterns: EntityFilteringPatterns = None,
+        exclude_entity_patterns: EntityFilteringPatterns = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
         label_predicate: RdfRef = rdflib.RDFS.label,
@@ -568,8 +569,8 @@ class SKOSXLGraphParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        include_entity_patterns: EntityFilteringPatterns = None,
+        exclude_entity_patterns: EntityFilteringPatterns = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
         label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
@@ -606,8 +607,8 @@ class GeneOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        include_entity_patterns: EntityFilteringPatterns = None,
+        exclude_entity_patterns: EntityFilteringPatterns = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
@@ -1293,8 +1294,8 @@ class CLOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        include_entity_patterns: EntityFilteringPatterns = None,
+        exclude_entity_patterns: EntityFilteringPatterns = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
@@ -1504,8 +1505,8 @@ class StatoParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
-        include_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
-        exclude_entity_patterns: Optional[Iterable[PredicateAndValue]] = None,
+        include_entity_patterns: EntityFilteringPatterns = None,
+        exclude_entity_patterns: EntityFilteringPatterns = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
     ):
