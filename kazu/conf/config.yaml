@@ -4,6 +4,10 @@ defaults:
       - ot_target
       - ot_disease
       - ot_molecule
+      - ot_bio_proc
+      - ot_phenotype
+#      - ot_measurement # curations are currently low quality
+      - ot_medical_proc
       - cellosaurus
       - chembl
       - cl
@@ -13,7 +17,7 @@ defaults:
       - go_cc
       - hgnc_gene_family
       - mondo
-      - hpo
+#      - hpo # superceded by ot_phenotype subset
       - stato
       - uberon
   - SapbertHelper: default
