@@ -1,11 +1,10 @@
 import logging
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, Any
 from collections.abc import Iterable
 
 from kazu.data.data import (
     SynonymTerm,
-    SimpleValue,
     EquivalentIdAggregationStrategy,
     AssociatedIdSets,
 )
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 ParserName = str
 Idx = str
 NormalisedSynonymStr = str
-Metadata = dict[str, SimpleValue]
+Metadata = dict[str, Any]
 
 
 class MetadataDatabase(metaclass=Singleton):
