@@ -143,37 +143,42 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         return string.split("_")[0]
 
     def score_and_group_ids(
-            self,
-            ids_and_source: IdsAndSource,
-            is_symbolic: bool,
+        self,
+        ids_and_source: IdsAndSource,
+        is_symbolic: bool,
     ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
-        """Group disease IDs via cross reference.
+        """Group disease IDs via cross-reference.
 
         :param ids_and_source:
         :param is_symbolic:
         :return:
         """
-        if len(ids_and_source)==1:
-            return super().score_and_group_ids(ids_and_source=ids_and_source,is_symbolic=is_symbolic)
+        if len(ids_and_source) == 1:
+            return super().score_and_group_ids(
+                ids_and_source=ids_and_source, is_symbolic=is_symbolic
+            )
 
         meta_db = MetadataDatabase()
         unmapped_ids_and_sources = copy.deepcopy(ids_and_source)
 
-        # look up all cross references in the DB
+        # look up all cross-references in the DB
         xref_lookup = {}
         for idx_and_source in ids_and_source:
-            xref_set = set(meta_db.get_by_idx(name=self.name, idx=idx_and_source[0])[self.DF_XREF_FIELD_NAME])
+            xref_set = set(
+                meta_db.get_by_idx(name=self.name, idx=idx_and_source[0])[self.DF_XREF_FIELD_NAME]
+            )
             # we also need to add in the OT default one, that needs some parsing as is in a slightly different
             # format
-            xref_set.add(idx_and_source[0].replace('_',':'))
+            xref_set.add(idx_and_source[0].replace("_", ":"))
             xref_lookup[idx_and_source] = xref_set
-
 
         # now group by the intersection of each set of xrefs, and create a set for each
         groups = defaultdict(set)
-        for (idx_and_source1,xref_set1),(idx_and_source2,xref_set2) in itertools.combinations(xref_lookup.items(),r=2):
+        for (idx_and_source1, xref_set1), (idx_and_source2, xref_set2) in itertools.combinations(
+            xref_lookup.items(), r=2
+        ):
             matched_xrefs = frozenset(xref_set1.intersection(xref_set2))
-            if len(matched_xrefs)>0:
+            if len(matched_xrefs) > 0:
                 try:
                     unmapped_ids_and_sources.remove(idx_and_source1)
                 except KeyError:
@@ -185,17 +190,17 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                 groups[matched_xrefs].add(idx_and_source1)
                 groups[matched_xrefs].add(idx_and_source2)
 
-
-        if len(groups)>1 and len(set.intersection(*groups.values()))>0:
+        if len(groups) > 1 and len(set.intersection(*groups.values())) > 0:
             # for this set of ids, xref mappings are confused between two or more subsets
             # so fall back to default method
-            return super().score_and_group_ids(ids_and_source=ids_and_source,is_symbolic=is_symbolic)
+            return super().score_and_group_ids(
+                ids_and_source=ids_and_source, is_symbolic=is_symbolic
+            )
 
-
-        # now add in any remaining unmapped ids as seperate groups
+        # now add in any remaining unmapped ids as separate groups
         groups_list = list(groups.values())
-        for unmapped_ids_and_source in unmapped_ids_and_sources:
-            groups_list.append([unmapped_ids_and_source])
+        for unmapped_id_and_source in unmapped_ids_and_sources:
+            groups_list.append({unmapped_id_and_source})
 
         assoc_id_sets: set[EquivalentIdSet] = set()
         for grouped_ids_and_source in groups_list:
@@ -211,8 +216,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                 )
             )
         return frozenset(assoc_id_sets), EquivalentIdAggregationStrategy.RESOLVED_BY_XREF
-
-
 
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[dict[str, Any]]
