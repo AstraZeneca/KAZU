@@ -3,28 +3,7 @@ _target_: kazu.steps.linking.post_processing.mapping_step.MappingStep
 parsers: ${oc.dict.values:ontologies.parsers}
 strategy_runner:
   _target_: kazu.steps.linking.post_processing.strategy_runner.StrategyRunner
-  cross_ref_managers:
-    - _target_: kazu.steps.linking.post_processing.xref_manager.OxoCrossReferenceManager
-      # this stops parameters that are themselves dictionaries from becoming Structured Configs, which breaks behaviour at runtime.
-      _convert_: 'partial'
-      oxo_kazu_name_mapping:
-        MONDO: MONDO
-        HP: HP
-      uri_prefixes:
-        MONDO: http://purl.obolibrary.org/obo/MONDO_
-        HP: http://purl.obolibrary.org/obo/HP_
-      oxo_query:
-        MONDO:
-          - HP
-        HP:
-          - MONDO
-      source_to_parser_metadata_lookup:
-        MONDO: ${ontologies.parsers.mondo_parser.name}
-        HP: ${ontologies.parsers.hpo_parser.name}
-      path:
-        _target_: pathlib.Path
-        _args_:
-          - ${oc.env:KAZU_MODEL_PACK}/mapping_step/oxo_dump
+  cross_ref_managers: ~
   symbolic_strategies:
 
     HIGHLY_LIKELY:
