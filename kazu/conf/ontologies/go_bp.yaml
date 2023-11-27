@@ -11,6 +11,6 @@ parsers:
     data_origin: '2023-10-09'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
-    entity_class: go_bp
+    entity_class: biological_process
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
     global_actions: ${global_actions}
