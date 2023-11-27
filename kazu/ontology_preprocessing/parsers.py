@@ -138,6 +138,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             global_actions=global_actions,
         )
         self.allowed_therapeutic_areas = set(allowed_therapeutic_areas)
+        self.metadata_db = MetadataDatabase()
 
     def find_kb(self, string: str) -> str:
         return string.split("_")[0]
@@ -158,14 +159,15 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                 ids_and_source=ids_and_source, is_symbolic=is_symbolic
             )
 
-        meta_db = MetadataDatabase()
         unmapped_ids_and_sources = copy.deepcopy(ids_and_source)
 
         # look up all cross-references in the DB
         xref_lookup = {}
         for idx_and_source in ids_and_source:
             xref_set = set(
-                meta_db.get_by_idx(name=self.name, idx=idx_and_source[0])[self.DF_XREF_FIELD_NAME]
+                self.metadata_db.get_by_idx(name=self.name, idx=idx_and_source[0])[
+                    self.DF_XREF_FIELD_NAME
+                ]
             )
             # we also need to add in the OT default one, that needs some parsing as is in a slightly different
             # format
