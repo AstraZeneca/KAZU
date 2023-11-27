@@ -14,3 +14,26 @@ parsers:
     entity_class: disease
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
     global_actions: ${global_actions}
+    allowed_therapeutic_areas:
+      - 'MONDO_0024458'
+      - 'OTAR_0000006'
+      - 'MONDO_0002025'
+      - 'EFO_0001379'
+      - 'EFO_0009690'
+      - 'EFO_0000540'
+      - 'EFO_0005741'
+      - 'EFO_0000319'
+      - 'EFO_0009605'
+      - 'MONDO_0045024'
+      - 'OTAR_0000018'
+      - 'OTAR_0000020'
+      - 'EFO_0010285'
+      - 'OTAR_0000010'
+      - 'EFO_0005803'
+      - 'EFO_0005932'
+      - 'OTAR_0000009'
+      - 'MONDO_0021205'
+      - 'OTAR_0000017'
+      - 'EFO_0010282'
+      - 'OTAR_0000014'
+      - 'EFO_0000618'

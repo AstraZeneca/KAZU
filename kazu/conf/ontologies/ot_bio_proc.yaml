@@ -1,0 +1,18 @@
+indices:
+  ot_bio_proc_index:
+    _target_: kazu.utils.link_index.DictionaryIndex
+    parser: ${ontologies.parsers.ot_bio_proc_parser}
+    boolean_scorers: ${StringScorers.go}
+parsers:
+  ot_bio_proc_parser:
+    name: OPENTARGETS_BIOLOGICAL_PROC
+    _target_: kazu.ontology_preprocessing.parsers.OpenTargetsDiseaseOntologyParser
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
+    data_origin: '23.09'
+    string_scorer: ${SapbertStringSimilarityScorer}
+    synonym_generator: ${SynonymGeneration.default}
+    entity_class: biological_process
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    global_actions: ${global_actions}
+    allowed_therapeutic_areas:
+      - 'GO_0008150'
