@@ -297,7 +297,7 @@ class AnnotationLevelDisambiguationStrategy(DisambiguationStrategy):
 
 
 class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
-    """Prefer ids where the default label matches the entity string (after
+    """Prefer ids where the entity match string is the default label (after
     normalisation).
 
     .. note::
