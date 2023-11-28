@@ -123,10 +123,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
             ref_embedding = embeddings[0]
             self.embedding_cache[reference_term] = ref_embedding
         elif query_embedding is None:
-            embeddings = self.sapbert.get_embeddings_for_strings(
-                [query_term],
-                batch_size=1,
-            )
+            embeddings = self.sapbert.get_embeddings_for_strings([query_term], batch_size=1)
             query_embedding = embeddings[0]
             self.embedding_cache[query_term] = query_embedding
 
