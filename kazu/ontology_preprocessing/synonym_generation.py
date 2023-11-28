@@ -36,11 +36,8 @@ class SynonymGenerator(ABC):
         return self.call(synonym_str)
 
     def __call__(self, strings_to_mutate: set[str]) -> set[str]:
-        """Takes a set of strings, and returns a set of tuples of the generated
-        string and the original string.
-
-        The original string is always included in the output.
-        """
+        """Takes a set of strings, and returns a set containing the generated
+        and original strings."""
 
         result: set[str] = set()
         for string_to_mutate in tqdm(
@@ -68,10 +65,13 @@ class CombinatorialSynonymGenerator:
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
     def __call__(self, curated_terms: set[CuratedTerm]) -> set[CuratedTerm]:
-        """Takes a set of strings, and returns a set of tuples of the generated
-        string and the original string.
+        """Takes a set of :class:`~.CuratedTerm`\\s, and returns both original
+        ``CuratedTerm``\\s and new ``CuratedTerm``\\s generated from them.
 
-        :param synonyms:
+        The new ``CuratedTerm``\\s inherit the case sensitivity and the mention confidence
+        of the original.
+
+        :param curated_terms:
         :return:
         """
         synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
