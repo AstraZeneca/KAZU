@@ -62,11 +62,14 @@ class DisambiguationStrategy(ABC):
         ent_match: Optional[str] = None,
         ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
-        """Subset a set of :class:`.EquivalentIdSet`\\ .
+        """Select a subset of :class:`.EquivalentIdSet`\\.
 
-        :param id_sets:
-        :param document:
-        :param parser_name:
+        :param id_sets: disambiguation result should be based on these id_sets -
+            either a standard subset, or subset based on modified :class:`.EquivalentIdSet`
+        :param document: source document
+        :param parser_name: name of parser that the id_set comes from
+        :param ent_match: matched entity string
+        :param ent_match_norm: normalised version of entity string
         :return:
         """
         pass
