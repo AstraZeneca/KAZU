@@ -109,10 +109,10 @@ class SapBertHelper(metaclass=Singleton):
 
         indices = batch.pop("indices")
         batch_embeddings = model(**batch)
-        batch_embeddings = batch_embeddings.last_hidden_state[:, 0, :]  # cls token
+        cls_tokens = batch_embeddings.last_hidden_state[:, 0, :]
         # put index as dict key so we can realign the embedding space
         return {
-            index.item(): batch_embeddings[[batch_index], :]
+            index.item(): cls_tokens[[batch_index], :]
             for batch_index, index in enumerate(indices)
         }
 
