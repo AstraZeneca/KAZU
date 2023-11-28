@@ -64,7 +64,7 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
         """
         if not encodings.is_fast:
             raise TypeError(
-                "Your encoding come from a 'slow' tokenizer, only 'fast' tokenizers are supported."
+                "Your encodings come from a 'slow' tokenizer, only 'fast' tokenizers are supported."
             )
         self.encodings: _BatchEncodingFastTokenized = encodings
 
