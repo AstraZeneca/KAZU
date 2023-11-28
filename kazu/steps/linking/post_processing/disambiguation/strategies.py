@@ -303,7 +303,7 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
     .. note::
        This strategy is intended to be used with
        :class:`kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy`
-       with the ``disambiguation_essential` argument
+       with the ``disambiguation_essential`` argument
        set to ``True``.
     """
 
@@ -322,6 +322,21 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
         ent_match: Optional[str] = None,
         ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
+        """
+
+        .. warning::
+           Unlike most disambiguation strategies, this one doesn't subset the provided
+           :class:`.EquivalentIdSet`\\'s, but generates new ones. This may cause confusing behaviour
+           during debugging.
+
+
+        :param id_sets:
+        :param document:
+        :param parser_name:
+        :param ent_match:
+        :param ent_match_norm:
+        :return:
+        """
         entity_class = self.metadata_db.parser_name_to_ent_class[parser_name]
         disambiguated_id_set = set()
         for equiv_id_set in id_sets:
