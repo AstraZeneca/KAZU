@@ -246,7 +246,7 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
     )
 
 
-def test_PreferDefaultLabelMatchDisambiguationStrategy(set_up_p27_test_case):
+def test_PreferDefaultLabelMatchDisambiguationStrategy():
     dummy_data = {
         IDX: ["1", "1", "1", "2", "2", "2", "3", "3", "3"],
         DEFAULT_LABEL: [
