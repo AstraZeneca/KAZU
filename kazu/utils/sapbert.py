@@ -112,8 +112,7 @@ class SapBertHelper(metaclass=Singleton):
         cls_tokens = batch_embeddings.last_hidden_state[:, 0, :]
         # put index as dict key so we can realign the embedding space
         return {
-            index.item(): cls_tokens[[batch_index], :]
-            for batch_index, index in enumerate(indices)
+            index.item(): cls_tokens[[batch_index], :] for batch_index, index in enumerate(indices)
         }
 
     def get_embedding_dataloader_from_strings(
