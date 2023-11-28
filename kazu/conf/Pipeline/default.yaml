@@ -9,6 +9,8 @@ steps:
   - ${AbbreviationFinderStep}
   - ${CleanupStep}
   - ${MergeOverlappingEntsStep}
+failure_handler:
+  - _target_: kazu.pipeline.pipeline.FailedDocsLogHandler
 step_groups:
   ner_only:
     - _target_: kazu.steps.joint_ner_and_linking.memory_efficient_string_matching.MemoryEfficientStringMatchingStep.namespace
