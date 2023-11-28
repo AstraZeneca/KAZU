@@ -9,13 +9,6 @@ import torch
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from pydantic import BaseModel
-from pytorch_lightning import Trainer, LightningModule
-from pytorch_lightning.utilities.types import (
-    STEP_OUTPUT,
-    TRAIN_DATALOADERS,
-    EVAL_DATALOADERS,
-    EPOCH_OUTPUT,
-)
 from tokenizers import Encoding
 from torch import optim
 from torch.utils.data import DataLoader, Dataset
@@ -24,6 +17,22 @@ from transformers import (
     PreTrainedTokenizerBase,
 )
 from transformers.file_utils import PaddingStrategy
+
+try:
+    from pytorch_metric_learning import miners, losses
+    from pytorch_lightning import Trainer, LightningModule
+    from pytorch_lightning.utilities.types import (
+        STEP_OUTPUT,
+        TRAIN_DATALOADERS,
+        EVAL_DATALOADERS,
+        EPOCH_OUTPUT,
+    )
+except ImportError as e:
+    raise ImportError(
+        "Running the SapBERT model training code requires several additional dependencies to be installed.\n"
+        "We recommend running 'pip install kazu[model-training]' to get all model training"
+        " dependencies."
+    ) from e
 
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.utils.sapbert import SapBertHelper
@@ -252,14 +261,6 @@ class PLSapbertModel(LightningModule):
         self.sapbert_evaluation_manager = sapbert_evaluation_manager
         self.sapbert_training_params = sapbert_training_params
         if sapbert_training_params is not None:
-            try:
-                from pytorch_metric_learning import miners, losses
-            except ImportError as e:
-                raise ImportError(
-                    "Running the SapBERT model training code requires pytorch_metric_learning to be installed.\n"
-                    "We recommend running 'pip install kazu[model-training]' to get all model training"
-                    " dependencies."
-                ) from e
             self.loss = losses.MultiSimilarityLoss(alpha=1, beta=60, base=0.5)
             self.miner = miners.TripletMarginMiner(
                 margin=sapbert_training_params.miner_margin,
