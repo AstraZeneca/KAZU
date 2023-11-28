@@ -258,6 +258,7 @@ class PLSapbertModel(LightningModule):
 
         super().__init__(*args, **kwargs)
         self.sapbert_helper = SapBertHelper(model_name_or_path)
+        self.model = self.sapbert_helper.model
         self.sapbert_evaluation_manager = sapbert_evaluation_manager
         self.sapbert_training_params = sapbert_training_params
         if sapbert_training_params is not None:
@@ -288,7 +289,7 @@ class PLSapbertModel(LightningModule):
             the location of the embedding
         :return:
         """
-        return self.sapbert_helper.get_prediction_from_batch(self.sapbert_helper.model, batch)
+        return self.sapbert_helper.get_prediction_from_batch(self.model, batch)
 
     def training_step(self, batch: Any, batch_idx: int, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
         """Implementation of
