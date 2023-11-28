@@ -304,7 +304,7 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
        This strategy is intended to be used with
        :class:`kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy`
        with the ``disambiguation_essential` argument
-       set to True.
+       set to ``True``.
     """
 
     def __init__(self, confidence: DisambiguationConfidence):
