@@ -98,7 +98,7 @@ class SapbertStringSimilarityScorer(metaclass=Singleton):
     def __init__(self, sapbert: SapBertHelper, cache_size: int = 1000):
         """
 
-        :param model_path: path to model to use
+        :param sapbert: The sapbert model to use
         :param cache_size: cache size, to prevent repeated calls to sapbert for the same string
         """
         self.sapbert = sapbert

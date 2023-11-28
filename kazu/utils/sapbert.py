@@ -35,7 +35,7 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
 
     In addition to standard BERT  encodings, this uses an 'indices' encoding that can be
     used to track the vector index of an embedding. This is needed in a multi GPU
-    environment
+    environment.
     """
 
     def __getitem__(self, index: int) -> dict[str, Tensor]:
