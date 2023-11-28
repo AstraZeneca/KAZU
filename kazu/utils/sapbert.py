@@ -222,8 +222,9 @@ class SapBertHelper(metaclass=Singleton):
         max_length: int = 50,
     ) -> DataLoader[BatchEncoding]:
         """Get a dataloader with dataset :class:`.HFSapbertInferenceDataset` and
-        DataCollatorWithPadding. This should be used to generate embeddings for strings
-        of interest.
+        DataCollatorWithPadding.
+
+        This should be used to generate embeddings for strings of interest.
 
         :param texts: strings to use in the dataset
         :param batch_size:
