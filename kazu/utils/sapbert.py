@@ -10,7 +10,6 @@ from transformers import (
     AutoTokenizer,
     AutoModel,
     BatchEncoding,
-    PreTrainedTokenizerBase,
     DataCollatorWithPadding,
 )
 from transformers.file_utils import PaddingStrategy
@@ -46,16 +45,6 @@ class _BatchEncodingFastTokenized(Protocol):
     @property
     def data(self) -> _BatchEncodingData:
         raise NotImplementedError
-
-
-def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
-    """Get a standard HF DataCollatorWithPadding, with padding=PaddingStrategy.LONGEST.
-
-    :param tokenizer:
-    :return:
-    """
-    collate_func = DataCollatorWithPadding(tokenizer=tokenizer, padding=PaddingStrategy.LONGEST)
-    return collate_func
 
 
 class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
@@ -239,11 +228,12 @@ class SapBertHelper(metaclass=Singleton):
         )
         batch_encodings["indices"] = indices
         dataset = HFSapbertInferenceDataset(batch_encodings)
-        collate_func = init_hf_collate_fn(self.tokenizer)
         loader = DataLoader(
             dataset=dataset,
             batch_size=batch_size,
-            collate_fn=collate_func,
+            collate_fn=DataCollatorWithPadding(
+                tokenizer=self.tokenizer, padding=PaddingStrategy.LONGEST
+            ),
             num_workers=num_workers,
         )
         return loader
