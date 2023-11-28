@@ -93,7 +93,73 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
 
 
 class SapBertHelper(metaclass=Singleton):
-    """Helper class to wrap useful SapBert inference functions."""
+    """Helper class to wrap useful SapBert inference functions.
+
+    Original source:
+
+    https://github.com/cambridgeltl/sapbert
+
+    Licensed under MIT
+
+    Copyright (c) Facebook, Inc. and its affiliates.
+
+    .. raw:: html
+
+        <details>
+        <summary>Full License</summary>
+
+    MIT License
+
+    Copyright (c) Facebook, Inc. and its affiliates.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+    .. raw:: html
+
+        </details>
+
+    Paper:
+
+    | Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, and Nigel Collier. 2021.
+    | `Self-alignment pretraining for biomedical entity representations. <https://www.aclweb.org/anthology/2021.naacl-main.334.pdf>`_
+    | In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pages 4228–4238.
+
+    .. raw:: html
+
+        <details>
+        <summary>Bibtex Citation Details</summary>
+
+    .. code:: bibtex
+
+        @inproceedings{liu2021self,
+            title={Self-Alignment Pretraining for Biomedical Entity Representations},
+            author={Liu, Fangyu and Shareghi, Ehsan and Meng, Zaiqiao and Basaldella, Marco and Collier, Nigel},
+            booktitle={Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+            pages={4228--4238},
+            month = jun,
+            year={2021}
+        }
+
+    .. raw:: html
+
+        </details>
+    """
 
     def __init__(self, path: str):
         """
