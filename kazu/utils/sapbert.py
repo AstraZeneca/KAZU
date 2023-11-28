@@ -38,6 +38,13 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
     environment.
     """
 
+    def __init__(self, encodings: BatchEncoding):
+        """Simple implementation of IterableDataset, producing HF tokenizer input_id.
+
+        :param encodings:
+        """
+        self.encodings = encodings
+
     def __getitem__(self, index: int) -> dict[str, Tensor]:
         query_toks1 = {
             "input_ids": self.encodings.data["input_ids"][index],
@@ -46,13 +53,6 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
             "indices": self.encodings.data["indices"][index],
         }
         return query_toks1
-
-    def __init__(self, encodings: BatchEncoding):
-        """Simple implementation of IterableDataset, producing HF tokenizer input_id.
-
-        :param encodings:
-        """
-        self.encodings = encodings
 
     def __len__(self) -> int:
         encodings = cast(list[Encoding], self.encodings.encodings)
