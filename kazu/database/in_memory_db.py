@@ -33,6 +33,10 @@ class MetadataDatabase(metaclass=Singleton):
         self._keys_lst: dict[ParserName, list[Idx]] = {}
         self.parser_name_to_ent_class: dict[str, str] = {}
 
+    @property
+    def loaded_parsers(self) -> set[ParserName]:
+        return set(self.parser_name_to_ent_class.keys())
+
     def add_parser(
         self, name: ParserName, entity_class: str, metadata: dict[Idx, Metadata]
     ) -> None:
