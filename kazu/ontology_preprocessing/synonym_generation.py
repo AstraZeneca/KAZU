@@ -93,17 +93,17 @@ class CombinatorialSynonymGenerator:
                 # run the generator
                 for curation in list(all_syns):
 
-                    new_terms: set[str] = generator({curation.curated_synonym})
+                    new_terms = generator({curation.curated_synonym})
+                    new_terms.discard(curation.curated_synonym)
                     for term in new_terms:
-                        if term != curation.curated_synonym:
-                            new_curated_term = dataclasses.replace(
-                                curation,
-                                source_term=curation.curated_synonym,
-                                curated_synonym=term,
-                                behaviour=CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
-                            )
-                            generated_results.add(new_curated_term)
-                            all_syns.add(new_curated_term)
+                        new_curated_term = dataclasses.replace(
+                            curation,
+                            source_term=curation.curated_synonym,
+                            curated_synonym=term,
+                            behaviour=CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
+                        )
+                        generated_results.add(new_curated_term)
+                        all_syns.add(new_curated_term)
 
         for generator in self.synonym_generators:
             generator.generate_synonyms.cache_clear()
