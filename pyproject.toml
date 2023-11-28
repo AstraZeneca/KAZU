@@ -85,7 +85,6 @@ dev = [
   "blacken-docs",
   "flake8",
   "mypy",
-  "docsig>=0.40.0",  # this is the first version that supports checking __init__ docstrings
   "vulture",
   "bump2version",
   "pre-commit",

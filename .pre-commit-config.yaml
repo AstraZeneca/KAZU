@@ -40,16 +40,16 @@ repos:
     require_serial: true
     minimum_pre_commit_version: '2.9.2'
 
-  - id: docsig
-    name: docsig
-    entry: docsig
-    language: python
-
 - repo: https://github.com/PyCQA/docformatter
   rev: v1.7.5
   hooks:
     - id: docformatter
       additional_dependencies: [tomli]
+
+- repo: https://github.com/jshwi/docsig
+  rev: v0.43.0
+  hooks:
+    - id: docsig
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.1.0
