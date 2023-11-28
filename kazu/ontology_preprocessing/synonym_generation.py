@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 class SynonymGenerator(ABC):
     @abstractmethod
     def call(self, synonym_str: str) -> set[str]:
-        """Implementations should override this method to generate new strings
-        from an input string."""
+        """Implementations should override this method to generate new strings from an
+        input string."""
         pass
 
     @functools.cache
@@ -36,8 +36,8 @@ class SynonymGenerator(ABC):
         return self.call(synonym_str)
 
     def __call__(self, strings_to_mutate: set[str]) -> set[str]:
-        """Takes a set of strings, and returns a set containing the generated
-        and original strings."""
+        """Takes a set of strings, and returns a set containing the generated and
+        original strings."""
 
         result: set[str] = set()
         for string_to_mutate in tqdm(
@@ -59,7 +59,8 @@ class SynonymGenerator(ABC):
 
 
 class CombinatorialSynonymGenerator:
-    """For every permutation of modifiers, generate a list of syns, then aggregate at the end."""
+    """For every permutation of modifiers, generate a list of syns, then aggregate at
+    the end."""
 
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
