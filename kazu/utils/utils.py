@@ -31,11 +31,11 @@ def string_to_putative_curation(term_string: str, entity_class: str) -> CuratedT
     this term should be handled by Kazu - You will probably want to
     change these in some cases, depending on your use case.
 
-    This should only be used with original ontology terms (not generated)
+    This should only be used with original ontology terms (not generated).
 
-    :param term_string: forms the curated_synonym attribute of the resulting term
+    :param term_string: becomes the :attr:`~.CuratedTerm.curated_synonym` of the result
     :param entity_class: used to determine whether the string is symbolic or not, and
-        thus it's default case sensitivity behaviour
+        thus its default case sensitivity behaviour
     :return:
     """
 
