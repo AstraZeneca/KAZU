@@ -303,7 +303,7 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
     .. note::
        This strategy is intended to be used with
        :class:`kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy`
-       with :attr:`~kazu.steps.linking.post_processing.mapping_strategies.strategies.MappingStrategy.disambiguation_essential`
+       with the ``disambiguation_essential` argument
        set to True.
     """
 
