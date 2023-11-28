@@ -1,5 +1,5 @@
 import logging
-from typing import cast
+from typing import TypedDict, Protocol
 
 import torch
 from tokenizers import Encoding
@@ -18,6 +18,34 @@ from transformers.file_utils import PaddingStrategy
 from kazu.utils.utils import Singleton
 
 logger = logging.getLogger(__name__)
+
+
+class _BatchEncodingData(TypedDict):
+    """Necessary because transformers doesn't distribute type information.
+
+    We've only declared the properties we need currently, there may be more.
+    """
+
+    input_ids: dict[int, Tensor]
+    token_type_ids: dict[int, Tensor]
+    attention_mask: dict[int, Tensor]
+    indices: dict[int, Tensor]
+
+
+class _BatchEncodingFastTokenized(Protocol):
+    """Necessary because transformers doesn't distribute type information.
+
+    Also, we want to be able to say we know this was encoded with a fast tokenizer, so
+    encodings won't be None.
+    """
+
+    @property
+    def encodings(self) -> list[Encoding]:
+        raise NotImplementedError
+
+    @property
+    def data(self) -> _BatchEncodingData:
+        raise NotImplementedError
 
 
 def init_hf_collate_fn(tokenizer: PreTrainedTokenizerBase) -> DataCollatorWithPadding:
@@ -41,9 +69,18 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
     def __init__(self, encodings: BatchEncoding):
         """Simple implementation of IterableDataset, producing HF tokenizer input_id.
 
-        :param encodings:
+        :param encodings: Expected to be produced by a :class:`transformers.PreTrainedTokenizerFast`.
+            'slow' tokenizers (:class:`transformers.PreTrainedTokenizer`) store their encodings
+            differently and so won't work with this class as-is.
         """
-        self.encodings = encodings
+        if not encodings.is_fast:
+            raise TypeError(
+                "Your encoding come from a 'slow' tokenizer, only 'fast' tokenizers are supported."
+            )
+        self.encodings: _BatchEncodingFastTokenized = encodings
+
+    def __len__(self) -> int:
+        return len(self.encodings.encodings)
 
     def __getitem__(self, index: int) -> dict[str, Tensor]:
         query_toks1 = {
@@ -53,10 +90,6 @@ class HFSapbertInferenceDataset(Dataset[dict[str, Tensor]]):
             "indices": self.encodings.data["indices"][index],
         }
         return query_toks1
-
-    def __len__(self) -> int:
-        encodings = cast(list[Encoding], self.encodings.encodings)
-        return len(encodings)
 
 
 class SapBertHelper(metaclass=Singleton):
