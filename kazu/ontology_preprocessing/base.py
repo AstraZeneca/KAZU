@@ -1047,12 +1047,12 @@ class OntologyParser(ABC):
                         entity_class=self.entity_class,
                     )
                 )
-                if self.synonym_generator is not None:
-                    logger.warning(
-                        "%s is configured to use synonym generators. This may result in noisy NER performance.",
-                        self.name,
-                    )
-                    curations_set.update(self.synonym_generator(curations_set))
+            if self.synonym_generator is not None:
+                logger.warning(
+                    "%s is configured to use synonym generators. This may result in noisy NER performance.",
+                    self.name,
+                )
+                curations_set.update(self.synonym_generator(curations_set))
             curations = list(curations_set)
 
         else:
