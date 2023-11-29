@@ -39,17 +39,13 @@ def string_to_putative_curation(term_string: str, entity_class: str) -> CuratedT
     :return:
     """
 
-    if len(term_string) == 1:
-        behaviour = CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
-    else:
-        behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
     is_symbolic = StringNormalizer.classify_symbolic(term_string, entity_class)
     conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
     return CuratedTerm(
         curated_synonym=term_string,
         mention_confidence=conf,
         case_sensitive=is_symbolic,
-        behaviour=behaviour,
+        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         source_term=None,
     )
 
