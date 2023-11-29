@@ -26,11 +26,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
-
       - name: create venv and install dependencies
         run: |
           rm -r /tmp/kazu-env || true
