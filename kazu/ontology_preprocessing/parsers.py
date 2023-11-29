@@ -594,6 +594,21 @@ class SKOSXLGraphParser(RDFGraphParser):
 
 
 class GeneOntologyParser(RDFGraphParser):
+    """A parser for the `Gene Ontology <https://geneontology.org>`_.
+
+    Differences from its parent class :class:`~.RDFGraphParser`:
+
+    1. Specify an appropriate ``uri_regex`` and ``synonym_predicates`` for the Gene Ontology.
+    2. Drop entities with a defalt label containing ``obsolete`` - see :meth:`~.parse_to_dataframe`.
+    3. Cache the parsing of the rdf file, since we have multiple parsers that use different parts of the ontology,
+       so this saves re-parsing the source file multiple times, which is a signficant cost as the file is very large
+       and parsing rdf is expensive.
+
+    Subclasses of this class like :class:`~.BiologicalProcessGeneOntologyParser` filter
+    to a specific 'namespace' within the Gene Ontology. These are present as a convenience
+    and for discoverability. It is straightforward to configure a ``GeneOntologyParser``
+    instance to filter to a namespace without subclassing - see the implementation of
+    :class:`~.BiologicalProcessGeneOntologyParser` for details."""
 
     instances: set[str] = set()
     instances_in_dbs: set[str] = set()
