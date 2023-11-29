@@ -23,6 +23,7 @@ from kazu.ontology_preprocessing.base import (
     load_global_actions,
     CurationException,
 )
+from kazu.ontology_preprocessing.parsers import GeneOntologyParser
 from kazu.tests.utils import DummyParser, write_curations
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import Singleton
@@ -400,3 +401,36 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
             curations=[curation1, curation2],
             parser_data_includes_target_synonym=True,
         )
+
+
+def test_gene_ontology_caching(tmp_path):
+    micro_graph = """
+@prefix : <https://www.example.org> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:some_ent a owl:Class ;
+    rdfs:label "My cool entity" .
+"""
+    graph_path = tmp_path / "input_file.ttl"
+    with open(graph_path, mode="w") as outf:
+        outf.write(micro_graph)
+
+    starting_cache_info = GeneOntologyParser.parse_to_graph.cache_info()
+    assert (
+        starting_cache_info.hits == starting_cache_info.misses == starting_cache_info.currsize == 0
+    )
+    GeneOntologyParser.parse_to_graph(str(graph_path))
+    cache_info_post_initial_parse = GeneOntologyParser.parse_to_graph.cache_info()
+    assert cache_info_post_initial_parse.currsize == cache_info_post_initial_parse.misses == 1
+
+    # remove the file, for extra assurance it's not re-read
+    graph_path.unlink()
+    GeneOntologyParser.parse_to_graph(str(graph_path))
+    cache_info_after_second_parse = GeneOntologyParser.parse_to_graph.cache_info()
+    assert (
+        cache_info_after_second_parse.hits
+        == cache_info_after_second_parse.misses
+        == cache_info_after_second_parse.currsize
+        == 1
+    )
