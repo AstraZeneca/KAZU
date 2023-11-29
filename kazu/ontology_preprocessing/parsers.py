@@ -495,6 +495,12 @@ class RDFGraphParser(OntologyParser):
 
     @staticmethod
     def parse_to_graph(in_path: str) -> rdflib.Graph:
+        """Parse the given input path using `rdflib <https://rdflib.readthedocs.io/en/stable/index.html>`_.
+
+        Called by :meth:`~.RDFGraphParser.parse_to_dataframe`, this is a separate method to allow
+        overriding to tweak the parsing process, such as adding caching
+        (as in :meth:`~.GeneOntologyParser.parse_to_graph`).
+        """
         return rdflib.Graph().parse(in_path)
 
     def parse_to_dataframe(self) -> pd.DataFrame:
