@@ -6,6 +6,6 @@ ent_class_preferred_order:
   - anatomy
   - cell_line
   - cell_type
-  - go_bp
-  - go_mf
-  - go_cc
+  - biological_process
+  - molecular_function
+  - cellular_component
