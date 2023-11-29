@@ -649,13 +649,11 @@ class GeneOntologyParser(RDFGraphParser):
     def populate_databases(
         self, force: bool = False, return_curations: bool = False
     ) -> Optional[list[CuratedTerm]]:
-        """Cached version of :meth:`RDFGraphParser.parse_to_graph`.
+        """Modified version of :meth:`RDFGraphParser.parse_to_graph` to handle caching.
 
-        .. |GO_caching_comment| replace::
-            Cached due to the expense of parsing Gene Ontology from scratch
-            (otherwise we end up doing this 3 times in the public model pack).
-
-        |GO_caching_comment|
+        We have custom logic here to clear the caching on :meth:`~.parse_to_graph`,
+        because the size of this cached graph is quite large in memory, and otherwise stays
+        in continued usage throughout the runtime of kazu.
         """
         curations = super().populate_databases(force=force, return_curations=return_curations)
         self.instances_in_dbs.add(self.name)
@@ -671,7 +669,8 @@ class GeneOntologyParser(RDFGraphParser):
     def parse_to_graph(in_path: str) -> rdflib.Graph:
         """Cached version of :meth:`RDFGraphParser.parse_to_graph`.
 
-        |GO_caching_comment|
+        Cached due to the expense of parsing Gene Ontology from scratch (otherwise we
+        end up doing this 3 times in the public model pack).
         """
         # needs to provide explicit arguments because this is a staticmethod
         return super(GeneOntologyParser, GeneOntologyParser).parse_to_graph(in_path)
