@@ -11,6 +11,7 @@ from typing import Optional, cast
 
 import ray
 from hydra import initialize_config_dir, compose
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from kazu import __version__ as kazu_version
@@ -37,6 +38,9 @@ class BuildConfiguration:
     #: This will be set automatically based on the values of the other fields,
     #: it's not available to set when instantiating the class.
     requires_resources: bool = field(init=False)
+    #: A list of strings to run through the pipeline after the model
+    #: pack is built. If any exceptions are detected, the build will fail
+    sanity_test_strings: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if len(self.resources) > 0:
@@ -133,7 +137,7 @@ class ModelPackBuilder:
                 config_name="config",
                 overrides=["hydra/job_logging=none", "hydra/hydra_logging=none"],
             )
-            ModelPackBuilder.build_caches(cfg)
+            self.build_caches_and_run_sanity_checks(cfg)
             if not self.skip_tests:
                 # our annotations expect URI stripping, so if cleanup actions
                 # are specified, ensure this is configured.
@@ -262,16 +266,24 @@ class ModelPackBuilder:
             ["zip", "-r", model_pack_name, model_pack_name_with_version], cwd=parent_directory
         )
 
-    @staticmethod
-    def build_caches(cfg: DictConfig) -> None:
+    def build_caches_and_run_sanity_checks(self, cfg: DictConfig) -> None:
         """Execute all processed required to build model pack caches.
 
         :param cfg:
         :return:
         """
-        from kazu.pipeline import load_steps_and_log_memory_usage
+        from kazu.pipeline.pipeline import Pipeline
+        from kazu.data.data import Document, PROCESSING_EXCEPTION
 
-        load_steps_and_log_memory_usage(cfg)
+        pipeline: Pipeline = instantiate(cfg.Pipeline)
+        for test_string in self.build_config.sanity_test_strings:
+            doc = Document.create_simple_document(test_string)
+            pipeline([doc])
+            if PROCESSING_EXCEPTION in doc.metadata:
+                raise RuntimeError(
+                    f"Model pack configuration raised a processing exception on the string {test_string}. "
+                    f"Exception: {doc.metadata[PROCESSING_EXCEPTION]}"
+                )
 
     def report_tested_dependencies(self):
         dependencies = subprocess.check_output("pip freeze --exclude-editable", shell=True).decode(
