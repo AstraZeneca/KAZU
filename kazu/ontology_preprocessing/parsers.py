@@ -679,7 +679,7 @@ class GeneOntologyParser(RDFGraphParser):
         """A modification of :meth:`RDFGraphParser.parse_to_dataframe`.
 
         The only difference from the overriden method is that this drops entities where
-        the default label contains 'obsolete', as these are no longer relevant for Gene
+        the default label contains ``obsolete``, as these are no longer relevant for Gene
         Ontology NER/Entity Linking.
         """
         df = super().parse_to_dataframe()
