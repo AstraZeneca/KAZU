@@ -150,6 +150,9 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     ) -> tuple[AssociatedIdSets, EquivalentIdAggregationStrategy]:
         """Group disease IDs via cross-reference.
 
+        Falls back to superclass implementation if any xrefs are inconsistently
+        described.
+
         :param ids_and_source:
         :param is_symbolic:
         :return:
@@ -174,23 +177,18 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             xref_set.add(idx_and_source[0].replace("_", ":"))
             xref_lookup[idx_and_source] = xref_set
 
-        # now group by the intersection of each set of xrefs, and create a set for each
+        # now do a pair-wise comparison of the xrefs attached to each ID, and map the idx_and_source
+        # to the intersection
         groups = defaultdict(set)
         for (idx_and_source1, xref_set1), (idx_and_source2, xref_set2) in itertools.combinations(
             xref_lookup.items(), r=2
         ):
             matched_xrefs = frozenset(xref_set1.intersection(xref_set2))
             if len(matched_xrefs) > 0:
-                try:
-                    unmapped_ids_and_sources.remove(idx_and_source1)
-                except KeyError:
-                    pass
-                try:
-                    unmapped_ids_and_sources.remove(idx_and_source2)
-                except KeyError:
-                    pass
                 groups[matched_xrefs].add(idx_and_source1)
                 groups[matched_xrefs].add(idx_and_source2)
+                unmapped_ids_and_sources.discard(idx_and_source1)
+                unmapped_ids_and_sources.discard(idx_and_source2)
 
         if len(groups) > 1 and len(set.intersection(*groups.values())) > 0:
             # for this set of ids, xref mappings are confused between two or more subsets
