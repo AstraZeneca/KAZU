@@ -12,6 +12,7 @@ from kazu.steps.step import ParserDependentStep
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.curated_term_tools import filter_curations_for_ner
 from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
+from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
 
@@ -120,34 +121,51 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
             matched_text = original_text[start_index : end_index + 1]
             if self._word_is_valid(start_index, end_index, starts, ends):
 
-                for entity_info, parser_name_set in ontology_dict.items():
-                    (
-                        entity_class,
-                        confidence,
-                        case_sensitive,
-                        term_norm,
-                        original_case,
-                    ) = entity_info
-                    # filter out cases where we've specified we only want exact matches, but we only have a lowercase match
-                    if not self._case_matches(
-                        actual_match=matched_text,
-                        original_casing=original_case,
-                        case_sensitive=case_sensitive,
-                    ):
-                        continue
-                    terms = [
-                        SynonymTermWithMetrics.from_synonym_term(
-                            self.synonym_db.get(parser_name, term_norm), exact_match=True
+                for entity_class, entity_info_groups in sort_then_group(
+                    ontology_dict.keys(), key_func=lambda x: x[0]
+                ):
+                    terms: set[SynonymTermWithMetrics] = set()
+                    confidences: dict[str, MentionConfidence] = {}
+                    for entity_info in entity_info_groups:
+                        (
+                            _,
+                            confidence,
+                            case_sensitive,
+                            term_norm,
+                            original_case,
+                        ) = entity_info
+
+                        parser_name_set = ontology_dict[entity_info]
+
+                        # filter out cases where we've specified we only want exact matches, but we only have a lowercase match
+                        if not self._case_matches(
+                            actual_match=matched_text,
+                            original_casing=original_case,
+                            case_sensitive=case_sensitive,
+                        ):
+                            continue
+
+                        for parser_name in parser_name_set:
+                            confidences[parser_name] = confidence
+                            terms.add(
+                                SynonymTermWithMetrics.from_synonym_term(
+                                    self.synonym_db.get(parser_name, term_norm), exact_match=True
+                                )
+                            )
+
+                    confidence_set = set(confidences.values())
+                    chosen_conf = max(confidence_set)
+                    if len(confidence_set) > 1:
+                        logger.warning(
+                            f"confidences conflict between parsers for {matched_text}: {confidences}. The maximum will be selected ({chosen_conf})"
                         )
-                        for parser_name in parser_name_set
-                    ]
                     e = Entity.load_contiguous_entity(
                         start=start_index,
                         end=end_index + 1,
                         match=matched_text,
                         entity_class=entity_class,
                         namespace=self.namespace(),
-                        mention_confidence=confidence,
+                        mention_confidence=chosen_conf,
                     )
                     e.update_terms(terms)
                     entities.append(e)
