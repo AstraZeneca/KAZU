@@ -1,5 +1,8 @@
+import pytest
 from kazu.tests.utils import DummyParser
 from kazu.utils.link_index import DictionaryIndex
+
+pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
 
 def test_DictionaryIndex():

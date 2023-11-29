@@ -1,5 +1,6 @@
 from itertools import chain
 
+import pytest
 from kazu.data.data import (
     Document,
     Mapping,
@@ -20,6 +21,8 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 from kazu.tests.utils import DummyParser
 from kazu.utils.utils import Singleton
+
+pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
 
 def check_ids_are_represented(

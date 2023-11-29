@@ -39,7 +39,7 @@ def populate_databases() -> tuple[DummyParser, DummyParser]:
     parser1 = DummyParser(name="test_parser1", source="test_parser1")
     parser2 = DummyParser(name="test_parser2", source="test_parser2")
     for parser in [parser1, parser2]:
-        parser.populate_databases()
+        parser.populate_databases(force=True)
     return parser1, parser2
 
 
@@ -410,7 +410,7 @@ def check_mappings_from_ents(
     assert not expected_ids, message
 
 
-def test_StrategyRunner(populate_databases):
+def test_StrategyRunner(mock_kazu_disk_cache_on_parsers, populate_databases):
     expected_id_groups, test_groups = build_and_execute_runner(populate_databases)
     message = (
         "first test: the entity has a single term from a single parser."

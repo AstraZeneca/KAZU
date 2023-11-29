@@ -24,6 +24,8 @@ from kazu.tests.utils import DummyParser, requires_model_pack
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.string_normalizer import StringNormalizer
 
+pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
+
 
 @pytest.fixture(scope="session")
 def set_up_disease_mapping_test_case() -> tuple[set[SynonymTermWithMetrics], DummyParser]:
