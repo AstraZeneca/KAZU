@@ -167,6 +167,61 @@ as described in the Model Pack section above.
 
 You can now inspect the doc object, and explore what entities were detected on each section.
 
+The above code snippet sets up you code as a Hydra application - which allows you a great deal
+of flexibility to re-configure many parts of kazu via command line overrides. See the `Hydra docs <https://hydra.cc/docs/intro/>`_
+for more detail on this.
+
+Using Kazu in a non-Hydra application
+-------------------------------------
+
+Sometimes, you will not want your overall application to be a Hydra application - for example, if
+you wish to build a different command-line experience for your application, and have no need for
+command-line overrides of the Kazu config. In which case, the following code will suit you better:
+
+.. testcode::
+    :skipif: kazu_model_pack_missing
+
+    from hydra import compose, initialize_config_dir
+    from hydra.utils import instantiate
+
+    from kazu.data.data import Document
+    from kazu.pipeline import Pipeline
+    from kazu.utils.constants import HYDRA_VERSION_BASE
+    from pathlib import Path
+    import os
+
+    # the hydra config is kept in the model pack
+    cdir = Path(os.environ["KAZU_MODEL_PACK"]).joinpath("conf")
+
+
+    def kazu_test():
+        with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)):
+            cfg = compose(config_name="config")
+        pipeline: Pipeline = instantiate(cfg.Pipeline)
+        text = "EGFR mutations are often implicated in lung cancer"
+        doc = Document.create_simple_document(text)
+        pipeline([doc])
+        print(f"{doc.sections[0].text}")
+
+
+    if __name__ == "__main__":
+        kazu_test()
+
+.. As above, this hidden block is needed because the above testcode block doesn't actually run kazu_test -
+   since __name__ is "builtins", not "__main__" when run by sphinx.ext.doctest.
+
+.. testcode::
+    :skipif: kazu_model_pack_missing
+    :hide:
+
+    kazu_test()
+
+.. testoutput::
+    :hide:
+    :skipif: kazu_model_pack_missing
+
+    EGFR mutations are often implicated in lung cancer
+
 Running Steps
 -------------
 Components are wrapped as instances of :class:`kazu.steps.step.Step`.
