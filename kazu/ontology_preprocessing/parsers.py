@@ -188,12 +188,15 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
                 unmapped_ids_and_sources.discard(idx_and_source1)
                 unmapped_ids_and_sources.discard(idx_and_source2)
 
-        if len(groups) > 1 and len(set.intersection(*groups.values())) > 0:
-            # for this set of ids, xref mappings are confused between two or more subsets
-            # so fall back to default method
-            return super().score_and_group_ids(
-                ids_and_source=ids_and_source, is_symbolic=is_symbolic
-            )
+        if len(groups) > 1:
+            for set_1, set_2 in itertools.combinations(groups.values(), r=2):
+                if not set_1.isdisjoint(set_2):
+
+                    # for this set of ids, xref mappings are confused between two or more subsets
+                    # so fall back to default method
+                    return super().score_and_group_ids(
+                        ids_and_source=ids_and_source, is_symbolic=is_symbolic
+                    )
 
         # now add in any remaining unmapped ids as separate groups
         groups_list = list(groups.values())
