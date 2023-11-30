@@ -90,10 +90,8 @@ class JsonLinesOntologyParser(OntologyParser):
 class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
     """Parser for OpenTargets Disease release.
 
-    Some things to bear in mind when using this parser:
-
     OpenTargets has a lot of entities in its disease dataset, not all of which are diseases. Here,
-    we use the allowed_therapeutic_areas argument to describe which specific therapeutic areas
+    we use the ``allowed_therapeutic_areas`` argument to describe which specific therapeutic areas
     a given instance of this parser should use. See https://platform-docs.opentargets.org/disease-or-phenotype
     for more info.
     """
