@@ -30,9 +30,9 @@ Our recommended workflow is as follows:
                 "gene": "green",
                 "species": "purple",
                 "anatomy": "pink",
-                "go_mf": "grey",
-                "go_cc": "blue",
-                "go_bp": "brown",
+                "molecular_function": "grey",
+                "cellular_component": "blue",
+                "biological_process": "brown",
             }
         )
 
