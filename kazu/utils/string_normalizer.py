@@ -1,5 +1,6 @@
 import re
 from os import getenv
+from warnings import warn
 
 import regex
 from functools import lru_cache
@@ -574,11 +575,25 @@ class GildaUtils:
     def replace_dashes(cls, s: str, rep: str = "-") -> str:
         """Replace all types of dashes in a given string with a given replacement.
 
+        .. warning::
+
+           Deprecated - kazu now uses :meth:`~.split_on_dashes_or_space` instead.
+
+           The new method is more efficient for the way kazu uses it in this class,
+           and the implementation of this is trivial enough that we do not
+           consider it worth keeping for kazu users who may be using the method.
+           If you are using this and don't want to see it go, please
+           `open a GitHub issue <https://github.com/AstraZeneca/KAZU/issues/new>`_.
+
         :param s: The string in which all types of dashes should be replaced.
         :param rep: The string with which dashes should be replaced. By default, the
             plain ASCII dash (-) is used.
         :return: The string in which dashes have been replaced.
         """
+        warn(
+            "create_phrasematchers_using_curations has been renamed to create_phrasematchers for increased clarity. Use the new name instead",
+            DeprecationWarning,
+        )
         for d in DASHES:
             s = s.replace(d, rep)
         return s
