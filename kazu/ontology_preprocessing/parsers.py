@@ -207,13 +207,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         for grouped_ids_and_source in groups_list:
             assoc_id_sets.add(
                 EquivalentIdSet(
-                    ids_and_source=frozenset(
-                        (
-                            grouped_idx,
-                            source,
-                        )
-                        for grouped_idx, source in grouped_ids_and_source
-                    )
+                    ids_and_source=frozenset(grouped_ids_and_source)
                 )
             )
         return frozenset(assoc_id_sets), EquivalentIdAggregationStrategy.RESOLVED_BY_XREF
