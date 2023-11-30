@@ -153,22 +153,27 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                                 )
                             )
 
-                    confidence_set = set(confidences.values())
-                    chosen_conf = max(confidence_set)
-                    if len(confidence_set) > 1:
-                        logger.warning(
-                            f"confidences conflict between parsers for {matched_text}: {confidences}. The maximum will be selected ({chosen_conf})"
+                    if len(terms) > 0:
+
+                        confidence_set = set(confidences.values())
+                        if len(confidence_set) > 1:
+                            chosen_conf = max(confidence_set)
+                            logger.warning(
+                                f"confidences conflict between parsers for {matched_text}: {confidences}. The maximum will be selected ({chosen_conf})"
+                            )
+                        else:
+                            chosen_conf = next(iter(confidence_set))
+
+                        e = Entity.load_contiguous_entity(
+                            start=start_index,
+                            end=end_index + 1,
+                            match=matched_text,
+                            entity_class=entity_class,
+                            namespace=self.namespace(),
+                            mention_confidence=chosen_conf,
                         )
-                    e = Entity.load_contiguous_entity(
-                        start=start_index,
-                        end=end_index + 1,
-                        match=matched_text,
-                        entity_class=entity_class,
-                        namespace=self.namespace(),
-                        mention_confidence=chosen_conf,
-                    )
-                    e.update_terms(terms)
-                    entities.append(e)
+                        e.update_terms(terms)
+                        entities.append(e)
         return entities
 
     @document_iterating_step
