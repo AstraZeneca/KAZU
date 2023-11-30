@@ -116,7 +116,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         :param in_path:
         :param entity_class:
         :param name:
-        :param allowed_therapeutic_areas: areas to use in this instance
+        :param allowed_therapeutic_areas: areas to use in this instance. These are IDs in OpenTargets' format, like ``MONDO_0024458``.
         :param string_scorer:
         :param synonym_merge_threshold:
         :param data_origin:
@@ -226,7 +226,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             if set(json_dict.get("therapeuticAreas", ())).isdisjoint(
                 self.allowed_therapeutic_areas
             ):
-                logger.debug("skipping  entry: %s", json_dict)
+                logger.debug("skipping entry not included in allowed_therapeutic_areas: %s", json_dict)
                 continue
 
             idx = json_dict["id"]
