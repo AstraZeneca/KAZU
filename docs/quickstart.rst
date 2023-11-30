@@ -111,8 +111,7 @@ Processing your first document
 Make sure you've installed Kazu correctly as above, and have set the ``KAZU_MODEL_PACK`` variable
 as described in the Model Pack section above.
 
-.. testcode::
-    :skipif: kazu_model_pack_missing
+.. code-block:: python
 
     import hydra
     from hydra.utils import instantiate
@@ -141,29 +140,6 @@ as described in the Model Pack section above.
     if __name__ == "__main__":
         kazu_test()
 
-
-.. This hidden block is needed because the above testcode block doesn't actually run kazu_test -
-   since __name__ is "builtins", not "__main__" when run by sphinx.ext.doctest.
-
-   In the below block, we have to use initialize_config_dir to provide the config to kazu_test,
-   otherwise Hydra uses argparse, which sphinx isn't expecting, so we get a strange looking error.
-
-.. testcode::
-    :skipif: kazu_model_pack_missing
-    :hide:
-
-    from hydra import initialize_config_dir, compose
-
-    with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(cdir)):
-        cfg = compose(config_name="config")
-
-    kazu_test(cfg)
-
-.. testoutput::
-    :hide:
-    :skipif: kazu_model_pack_missing
-
-    EGFR mutations are often implicated in lung cancer
 
 You can now inspect the doc object, and explore what entities were detected on each section.
 
@@ -207,8 +183,14 @@ command-line overrides of the Kazu config. In which case, the following code wil
     if __name__ == "__main__":
         kazu_test()
 
-.. As above, this hidden block is needed because the above testcode block doesn't actually run kazu_test -
-   since __name__ is "builtins", not "__main__" when run by sphinx.ext.doctest.
+.. This hidden block is needed because the above testcode block doesn't actually run ``kazu_test`` -
+   since ``__name__`` is "builtins", not "__main__" when run by sphinx.ext.doctest.
+
+   We test this version and not the version with ``@hydra.main``, because running the ``kazu_test```
+   annotated with ``@hydra.main`` causes Hydra to trigger argparse, which Sphinx isn't expecting,
+   so we get a strange error, unless we sneakily instantatiate the config with ``initialize_config_dir```
+   anyway, so testing that doesn't really add anything over just testing the 'non-hydra-app' version,
+   other than doubling the time taken to test.
 
 .. testcode::
     :skipif: kazu_model_pack_missing
