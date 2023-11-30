@@ -17,7 +17,6 @@ defaults:
       - go_cc
       - hgnc_gene_family
       - mondo
-#      - hpo # superceded by ot_phenotype subset
       - stato
       - uberon
   - SapbertHelper: default
