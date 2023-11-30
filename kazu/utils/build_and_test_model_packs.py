@@ -39,7 +39,7 @@ class BuildConfiguration:
     #: it's not available to set when instantiating the class.
     requires_resources: bool = field(init=False)
     #: A list of strings to run through the pipeline after the model
-    #: pack is built. If any exceptions are detected, the build will fail
+    #: pack is built. If any exceptions are detected, the build will fail.
     sanity_test_strings: list[str] = field(default_factory=list)
 
     def __post_init__(self):
