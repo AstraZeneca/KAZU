@@ -2,7 +2,7 @@ indices:
   go_cc_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.go_cc_parser}
-    boolean_scorers: ${StringScorers.go}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   go_cc_parser:
     _target_: kazu.ontology_preprocessing.parsers.CellularComponentGeneOntologyParser

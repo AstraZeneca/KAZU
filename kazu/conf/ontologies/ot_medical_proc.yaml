@@ -2,7 +2,7 @@ indices:
   ot_med_proc_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.ot_med_proc_parser}
-    boolean_scorers: ${StringScorers.disease}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   ot_med_proc_parser:
     name: OPENTARGETS_MEDICAL_PROC

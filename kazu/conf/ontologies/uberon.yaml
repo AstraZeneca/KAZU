@@ -2,7 +2,7 @@ indices:
   uberon_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.uberon_parser}
-    boolean_scorers: ${StringScorers.anatomy}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   uberon_parser:
     _target_: kazu.ontology_preprocessing.parsers.UberonOntologyParser

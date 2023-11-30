@@ -2,7 +2,7 @@ indices:
   chembl_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.chembl_parser}
-    boolean_scorers: ${StringScorers.drug}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   chembl_parser:
     _target_: kazu.ontology_preprocessing.parsers.ChemblOntologyParser

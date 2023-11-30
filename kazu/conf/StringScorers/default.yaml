@@ -7,16 +7,8 @@ gene:
       - PSEUDOGENE
       - RECEPTOR
   - _target_: kazu.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
-drug:
+number_match_only:
   - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
 disease:
   - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
   - _target_: kazu.language.string_similarity_scorers.EntitySubtypeStringSimilarityScorer
-anatomy:
-  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-cell_line:
-  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-cell_type:
-  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer
-go:
-  - _target_: kazu.language.string_similarity_scorers.NumberMatchStringSimilarityScorer

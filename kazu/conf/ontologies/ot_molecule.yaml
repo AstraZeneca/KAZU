@@ -2,7 +2,7 @@ indices:
   ot_molecule_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.ot_molecule_parser}
-    boolean_scorers: ${StringScorers.drug}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   ot_molecule_parser:
     _target_: kazu.ontology_preprocessing.parsers.OpenTargetsMoleculeOntologyParser

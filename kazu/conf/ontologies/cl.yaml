@@ -2,7 +2,7 @@ indices:
   cl_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.cl_parser}
-    boolean_scorers: ${StringScorers.cell_line}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   cl_parser:
     _target_: kazu.ontology_preprocessing.parsers.CLOntologyParser

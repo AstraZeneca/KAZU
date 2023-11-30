@@ -2,7 +2,7 @@ indices:
   go_mf_index:
     _target_: kazu.utils.link_index.DictionaryIndex
     parser: ${ontologies.parsers.go_mf_parser}
-    boolean_scorers: ${StringScorers.go}
+    boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   go_mf_parser:
     _target_: kazu.ontology_preprocessing.parsers.MolecularFunctionGeneOntologyParser
