@@ -135,8 +135,6 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                             original_case,
                         ) = entity_info
 
-                        parser_name_set = ontology_dict[entity_info]
-
                         # filter out cases where we've specified we only want exact matches, but we only have a lowercase match
                         if not self._case_matches(
                             actual_match=matched_text,
@@ -144,6 +142,8 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                             case_sensitive=case_sensitive,
                         ):
                             continue
+
+                        parser_name_set = ontology_dict[entity_info]
 
                         for parser_name in parser_name_set:
                             confidences[parser_name] = confidence
@@ -155,14 +155,11 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
                     if len(terms) > 0:
 
-                        confidence_set = set(confidences.values())
-                        if len(confidence_set) > 1:
-                            chosen_conf = max(confidence_set)
+                        confidence_values = confidences.values()
+                        if len(confidence_values) > 1:
+                            chosen_conf = max(confidence_values)
                             logger.warning(
                                 f"confidences conflict between parsers for {matched_text}: {confidences}. The maximum will be selected ({chosen_conf})"
-                            )
-                        else:
-                            chosen_conf = next(iter(confidence_set))
 
                         e = Entity.load_contiguous_entity(
                             start=start_index,
