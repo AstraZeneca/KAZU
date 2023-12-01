@@ -160,6 +160,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                         if len(confidence_values) > 1:
                             logger.warning(
                                 f"confidences conflict between parsers for {matched_text}: {confidences}. The maximum will be selected ({chosen_conf})"
+                            )
 
                         e = Entity.load_contiguous_entity(
                             start=start_index,
