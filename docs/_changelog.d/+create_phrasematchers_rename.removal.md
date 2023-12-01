@@ -1,1 +1,0 @@
-Renamed `create_phrasematchers_using_curations` method of `OntologyMatcher` to `create_phrasematchers`. The old name will continue to work until kazu 1.6, but using it will produce a `DeprecationWarning`.

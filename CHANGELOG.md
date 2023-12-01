@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.4.0 - 2023-12-01
+
+
+### Features
+
+- Added new curation_report.py to assist in upgrading ontologies between versions
+- New disambiguation strategy to prefer mappings that have a default label that matches an entity.
+- The OpenTargetsDiseaseOntologyParser has been heavily reworked, so that it uses the therapeutic_area concept to decide what records should be included. This has in turn yielded the subsets: measurement, medical_procedure, biological_process and phenotype. The measurement configuration is currently disabled as it requires heavy curation of the underlying strings. In addition, the OpenTargetsDiseaseOntologyParser now supports a custom ID grouping method, to make use of cross references.
+
+### Bugfixes
+
+- MemoryEfficientStringMatchingStep now only produces a single entity per class where multiple curations exist with different cases.
+- Previously, the `tested_dependencies.txt` file in the model packs included an editable install of kazu, which wasn't intended.
+  We now exclude kazu from that output.
+- Speed up model pack builds for model packs using `ExplosionStringMatchingStep`, by fixing a bug that caused the parsers to be populated twice in this case.
+
+### Deprecations and Removals
+
+- Removed pytorch-lightning as a dependency. The signatures of SapbertStringSimilarityScorer and TransformersModelForTokenClassificationNerStep have changed
+- Renamed `create_phrasematchers_using_curations` method of `OntologyMatcher` to `create_phrasematchers`. The old name will continue to work until kazu 1.6, but using it will produce a `DeprecationWarning`.
+- `MetadataDatabase.add_parser` now requires an `entity_class`.
+  This enables correct string normalisation in the `MappingStep` for the new disambiguation strategy.
+
+
 ## 1.3.2 - 2023-11-21
 
 
