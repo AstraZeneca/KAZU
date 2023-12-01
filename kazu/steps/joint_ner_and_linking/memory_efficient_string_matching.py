@@ -125,7 +125,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                     ontology_dict.keys(), key_func=lambda x: x[0]
                 ):
                     terms: set[SynonymTermWithMetrics] = set()
-                    confidences: dict[str, MentionConfidence] = {}
+                    confidences: defaultdict[str, set[MentionConfidence]] = defaultdict(set)
                     for entity_info in entity_info_groups:
                         (
                             _,
@@ -146,7 +146,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                         parser_name_set = ontology_dict[entity_info]
 
                         for parser_name in parser_name_set:
-                            confidences[parser_name] = confidence
+                            confidences[parser_name].add(confidence)
                             terms.add(
                                 SynonymTermWithMetrics.from_synonym_term(
                                     self.synonym_db.get(parser_name, term_norm), exact_match=True
@@ -155,9 +155,9 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
                     if len(terms) > 0:
 
-                        confidence_values = confidences.values()
+                        confidence_values = {max(conf_set) for conf_set in confidences.values()}
+                        chosen_conf = max(confidence_values)
                         if len(confidence_values) > 1:
-                            chosen_conf = max(confidence_values)
                             logger.warning(
                                 f"confidences conflict between parsers for {matched_text}: {confidences}. The maximum will be selected ({chosen_conf})"
 
