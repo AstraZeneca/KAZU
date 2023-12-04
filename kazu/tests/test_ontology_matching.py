@@ -2,11 +2,9 @@ from typing import Any
 
 import pytest
 import spacy
+
 from kazu.data.data import (
-    CuratedTerm,
     MentionConfidence,
-    CuratedTermBehaviour,
-    EquivalentIdSet,
 )
 from kazu.ontology_matching.assemble_pipeline import main as assemble_pipeline
 from kazu.ontology_matching.ontology_matcher import OntologyMatcher
@@ -17,6 +15,13 @@ from kazu.ontology_preprocessing.base import (
     MAPPING_TYPE,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.tests.string_matching_utils import (
+    PARAM_NAMES,
+    PARAM_VALUES,
+    FIRST_MOCK_PARSER,
+    SECOND_MOCK_PARSER,
+    MatchOntologyData,
+)
 from kazu.tests.utils import DummyParser, write_curations
 from kazu.utils.spacy_pipeline import SPACY_DEFAULT_INFIXES
 from kazu.utils.utils import Singleton
@@ -50,311 +55,15 @@ example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42
     This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
-FIRST_MOCK_PARSER = "first_mock_parser"
-SECOND_MOCK_PARSER = "second_mock_parser"
-COMPLEX_7_DISEASE_ALPHA_NORM = "COMPLEX 7 DISEASE ALPHA"
-TARGET_IDX = "http://my.fake.ontology/complex_disease_123"
-ENT_TYPE_1 = "ent_type_1"
-ENT_TYPE_2 = "ent_type_2"
-PARSER_1_DEFAULT_DATA = {
-    IDX: [
-        "http://my.fake.ontology/synonym_term_id_123",
-        TARGET_IDX,
-        TARGET_IDX,
-        "http://my.fake.ontology_amongst_id_123",
-        "http://my.fake.ontology_amongst_id_124",
-    ],
-    DEFAULT_LABEL: [
-        "SynonymTerm",
-        "SynonymTerm",
-        "Complex Disease Alpha VII",
-        "Amongst",
-        "Amongst Us",
-    ],
-    SYN: [
-        "SynonymTerm",
-        "SynonymTerm",
-        "complexVII disease\u03B1",
-        "amongst",
-        "amongst us",
-    ],
-    MAPPING_TYPE: ["test", "test", "test", "test", "test"],
-}
 
-PARSER_2_DEFAULT_DATA = {
-    IDX: [
-        "http://my.fake.ontology/synonym_term_id_123",
-        "http://my.fake.ontology/synonym_term_id_456",
-        TARGET_IDX,
-        "http://my.fake.ontology_amongst_id_123",
-    ],
-    DEFAULT_LABEL: [
-        "SynonymTerm",
-        "SynonymTerm",
-        "Complex Disease Alpha VII",
-        "Amongst",
-    ],
-    SYN: ["SynonymTerm", "SynonymTerm", "complexVII disease\u03B1", "amongst"],
-    MAPPING_TYPE: ["test", "test", "test", "test"],
-}
-
-
-@pytest.mark.parametrize(
-    (
-        "parser_1_curations",
-        "parser_2_curations",
-        "match_len",
-        "match_texts",
-        "match_ontology_dicts",
-        "parser_1_data",
-        "parser_2_data",
-    ),
-    [
-        pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            2,
-            {"ComplexVII Disease\u03B1"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-                {
-                    ENT_TYPE_2: {
-                        (
-                            SECOND_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
-            PARSER_1_DEFAULT_DATA,
-            PARSER_2_DEFAULT_DATA,
-            id="Two curated case insensitive terms from two parsers Both should hit",
-        ),
-        pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                )
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=True,
-                )
-            ],
-            1,
-            {"ComplexVII Disease\u03B1"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
-            PARSER_1_DEFAULT_DATA,
-            PARSER_2_DEFAULT_DATA,
-            id="Two curated terms from two parsers One should hit to test case sensitivity",
-        ),
-        pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            FIRST_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="complexVII disease\u03B1",
-                    behaviour=CuratedTermBehaviour.IGNORE,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            1,
-            {"ComplexVII Disease\u03B1"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            COMPLEX_7_DISEASE_ALPHA_NORM,
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
-            PARSER_1_DEFAULT_DATA,
-            PARSER_2_DEFAULT_DATA,
-            id="Two curated terms from two parsers One should hit to test ignore logic",
-        ),
-        pytest.param(
-            [
-                CuratedTerm(
-                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    curated_synonym="This sentence is just to test",
-                    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-                    associated_id_sets=frozenset(
-                        [
-                            EquivalentIdSet(
-                                ids_and_source=frozenset(
-                                    [
-                                        (
-                                            TARGET_IDX,
-                                            SECOND_MOCK_PARSER,
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    ),
-                    case_sensitive=False,
-                ),
-            ],
-            [],
-            1,
-            {"This sentence is just to test"},
-            [
-                {
-                    ENT_TYPE_1: {
-                        (
-                            FIRST_MOCK_PARSER,
-                            "THIS SENTENCE IS JUST TO TEST",
-                            str(MentionConfidence.HIGHLY_LIKELY.value),
-                        )
-                    }
-                },
-            ],
-            PARSER_1_DEFAULT_DATA,
-            PARSER_2_DEFAULT_DATA,
-            id="One curated term with a novel synonym This should be added to the synonym DB and hit",
-        ),
-    ],
-)
+@pytest.mark.parametrize(PARAM_NAMES, PARAM_VALUES)
 def test_pipeline_build_from_parsers_and_curated_list(
     tmp_path,
     parser_1_curations,
     parser_2_curations,
     match_len,
     match_texts,
-    match_ontology_dicts,
+    match_ontology_data,
     parser_1_data,
     parser_2_data,
 ):
@@ -389,11 +98,11 @@ def test_pipeline_build_from_parsers_and_curated_list(
 
     doc = nlp(example_text)
     matches = doc.spans[TEST_SPAN_KEY]
-    assert_matches(matches, match_len, match_texts, match_ontology_dicts)
+    assert_matches(matches, match_len, match_texts, match_ontology_data)
     nlp2 = spacy.load(TEST_OUTPUT_DIR)
     doc2 = nlp2(example_text)
     matches2 = doc2.spans[TEST_SPAN_KEY]
-    assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
+    assert_matches(matches2, match_len, match_texts, match_ontology_data)
 
     assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
         (m.start_char, m.end_char, m.text) for m in matches
@@ -476,54 +185,49 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         "ComplexVII Disease\u03B1",
         "amongst",
     }
-    match_ontology_dicts = [
-        {"ent_type_1": {("first_mock_parser", "Q42_SYN", str(MentionConfidence.POSSIBLE.value))}},
-        {"ent_type_1": {("first_mock_parser", "Q42_SYN", str(MentionConfidence.POSSIBLE.value))}},
-        {"ent_type_2": {("second_mock_parser", "Q8_SYN", str(MentionConfidence.POSSIBLE.value))}},
-        {
-            "ent_type_3": {
-                ("third_mock_parser", "SYNONYMTERM", str(MentionConfidence.POSSIBLE.value))
-            }
-        },
-        {
-            "ent_type_3": {
-                (
-                    "third_mock_parser",
-                    "COMPLEX 7 DISEASE ALPHA",
-                    str(MentionConfidence.PROBABLE.value),
-                )
-            }
-        },
-        {
-            "ent_type_3": {
-                (
-                    "third_mock_parser",
-                    "COMPLEX 7 DISEASE ALPHA",
-                    str(MentionConfidence.PROBABLE.value),
-                )
-            }
-        },
-        {"ent_type_3": {("third_mock_parser", "AMONGST", str(MentionConfidence.PROBABLE.value))}},
-    ]
+    match_ontology_data = {
+        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.POSSIBLE),
+        ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.POSSIBLE),
+        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.POSSIBLE),
+        ("ent_type_3", "third_mock_parser", "COMPLEX 7 DISEASE ALPHA", MentionConfidence.PROBABLE),
+        ("ent_type_3", "third_mock_parser", "AMONGST", MentionConfidence.PROBABLE),
+    }
 
-    assert_matches(matches, match_len, match_texts, match_ontology_dicts)
+    assert_matches(matches, match_len, match_texts, match_ontology_data)
 
     nlp2 = spacy.load(TEST_OUTPUT_DIR)
 
     doc2 = nlp2(example_text)
     matches2 = doc2.spans[TEST_SPAN_KEY]
 
-    assert_matches(matches2, match_len, match_texts, match_ontology_dicts)
+    assert_matches(matches2, match_len, match_texts, match_ontology_data)
 
     assert set((m.start_char, m.end_char, m.text) for m in matches2) == set(
         (m.start_char, m.end_char, m.text) for m in matches
     )
 
 
-def assert_matches(matches, match_len, match_texts, match_ontology_dicts):
-    assert len(matches) == match_len
-    assert set(m.text for m in matches) == match_texts
-    assert [m._.ontology_dict_ for m in matches] == match_ontology_dicts
+def convert_spacy_spans_to_match_ontology_data(
+    spans: spacy.tokens.SpanGroup,
+) -> MatchOntologyData:
+    return set(
+        (ent_class, hit[0], hit[1], MentionConfidence(int(hit[2])))
+        for m in spans
+        for ent_class, item in m._.ontology_dict_.items()
+        for hit in item
+    )
+
+
+def assert_matches(
+    spans: spacy.tokens.SpanGroup,
+    match_len: int,
+    match_texts: set[str],
+    match_ontology_data: MatchOntologyData,
+) -> None:
+    assert len(spans) == match_len
+    assert set(s.text for s in spans) == match_texts
+    converted_matches = convert_spacy_spans_to_match_ontology_data(spans)
+    assert converted_matches == match_ontology_data
 
 
 def test_no_spacy_tokenization_update():
