@@ -1,1 +1,0 @@
-Removed pytorch-lightning as a dependency. The signatures of SapbertStringSimilarityScorer and TransformersModelForTokenClassificationNerStep have changed
