@@ -150,9 +150,15 @@ for more detail on this.
 Using Kazu in a non-Hydra application
 -------------------------------------
 
-Sometimes, you will not want your overall application to be a Hydra application - for example, if
-you wish to build a different command-line experience for your application, and have no need for
-command-line overrides of the Kazu config. In which case, the following code will suit you better:
+Sometimes, you will not want your overall application to be a Hydra application, where Hydra handles
+the command line argument parsing.
+
+For example, you may wish to build a different command-line experience for your application and have no need for
+command-line overrides of the Kazu config. Alternatively, you want to embed Kazu components into another codebase,
+and still want Hydra to manage their configuration.
+
+Instead, you can instantiate Kazu objects using Hydra without making your whole program a 'Hydra application' by using
+the `hydra compose API <https://hydra.cc/docs/advanced/compose_api/>`_\ :
 
 .. testcode::
     :skipif: kazu_model_pack_missing
