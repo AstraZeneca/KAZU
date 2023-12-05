@@ -165,15 +165,15 @@ def convert_entities_to_match_ontology_data(
 ) -> MatchOntologyData:
     res = set()
     for e in entities:
-        syn_term = next(iter(e.syn_term_to_synonym_terms))
-        res.add(
-            (
-                e.entity_class,
-                syn_term.parser_name,
-                syn_term.term_norm,
-                e.mention_confidence,
+        for syn_term in e.syn_term_to_synonym_terms:
+            res.add(
+                (
+                    e.entity_class,
+                    syn_term.parser_name,
+                    syn_term.term_norm,
+                    e.mention_confidence,
+                )
             )
-        )
     return res
 
 
