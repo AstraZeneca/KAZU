@@ -89,10 +89,10 @@ class TfIdfScorer(metaclass=Singleton):
 
 class GildaTfIdfScorer(metaclass=Singleton):
     """This class uses a single TFIDF model for 'Gilda-inspired' method of
-    disambiguation. It uses a pretrained TF-IDF model, and contexual text
-    mapped to knowledgebase identifiers (such as wikipedia descriptions of the
-    entity). The sparse matrices of these contexts are then compared cosine
-    wise with a target matrix to determine the most likely identifier.
+    disambiguation. It uses a pretrained TF-IDF model, and contexual text mapped to
+    knowledgebase identifiers (such as wikipedia descriptions of the entity). The sparse
+    matrices of these contexts are then compared cosine wise with a target matrix to
+    determine the most likely identifier.
 
     Context matrices are kept in a disk cache until needed, with only a sample held in memory.
     The size of this in memory cache can be controlled with the
@@ -198,13 +198,14 @@ class GildaTfIdfScorer(metaclass=Singleton):
     def __call__(
         self, context_vec: np.ndarray, id_sets: set[EquivalentIdSet], parser_name: str
     ) -> Iterable[tuple[str, float]]:
-        """Given a context vector, yield the most likely identifiers and their
-        score from the given set of identifiers.
+        """Given a context vector, yield the most likely identifiers and their score
+        from the given set of identifiers.
 
         :param context_vec:
         :param id_sets:
         :param parser_name:
-        :return: identifier strings and scores, starting with the string with the best score
+        :return: identifier strings and scores, starting with the string with the best
+            score
         """
         idx_to_vec = {}
         for equiv_id_set in id_sets:
