@@ -19,6 +19,7 @@ from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
     MemoryEfficientStringMatchingStep,
 )
 from kazu.tests.string_matching_utils import (
+    STRINGMATCHING_EXAMPLE_TEXT,
     STRINGMATCHING_PARAM_NAMES,
     STRINGMATCHING_PARAM_VALUES,
     FIRST_MOCK_PARSER,
@@ -38,9 +39,6 @@ pytestmark = pytest.mark.usefixtures(
     "mock_kazu_disk_cache_on_parsers", "mock_build_fast_string_matcher_cache"
 )
 
-example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
-    This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
-    like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 max_mention_test_case = StringMatchingTestCase(
     id="Both curations for same string and entity class Hit should get higher MentionConfidence",
@@ -117,7 +115,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         data=parser_2_data,
     )
     step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2])
-    success, _failed = step([Document.create_simple_document(example_text)])
+    success, _failed = step([Document.create_simple_document(STRINGMATCHING_EXAMPLE_TEXT)])
     entities = success[0].get_entities()
     assert_matches(entities, match_len, match_texts, match_ontology_data)
 
@@ -179,7 +177,7 @@ def test_pipeline_build_from_parsers_alone():
     )
 
     step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2, parser_3])
-    success, _failed = step([Document.create_simple_document(example_text)])
+    success, _failed = step([Document.create_simple_document(STRINGMATCHING_EXAMPLE_TEXT)])
     entities = success[0].get_entities()
 
     match_len = 7
@@ -231,7 +229,7 @@ def assert_matches(
     match_ontology_data: MatchOntologyData,
 ) -> None:
     for e in entities:
-        assert e.match == example_text[e.start : e.end]
+        assert e.match == STRINGMATCHING_EXAMPLE_TEXT[e.start : e.end]
     assert len(entities) == match_len
     assert set(e.match for e in entities) == match_texts
     converted_matches = convert_entities_to_match_ontology_data(entities)

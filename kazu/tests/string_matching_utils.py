@@ -129,6 +129,11 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
 MatchOntologyData = set[tuple[EntityClass, ParserName, NormalisedSynonymStr, MentionConfidence]]
 
 
+STRINGMATCHING_EXAMPLE_TEXT = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
+    This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
+    like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
+
+
 @dataclasses.dataclass
 class StringMatchingTestCase:
     id: str

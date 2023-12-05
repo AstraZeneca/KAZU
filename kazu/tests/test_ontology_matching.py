@@ -16,6 +16,7 @@ from kazu.ontology_preprocessing.base import (
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.string_matching_utils import (
+    STRINGMATCHING_EXAMPLE_TEXT,
     STRINGMATCHING_PARAM_NAMES,
     STRINGMATCHING_PARAM_VALUES,
     FIRST_MOCK_PARSER,
@@ -49,11 +50,6 @@ def test_initialize():
     nlp.initialize()
     assert ontology_matcher.nr_strict_rules == 0
     assert ontology_matcher.nr_lowercase_rules == 0
-
-
-example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
-    This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
-    like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
 @pytest.mark.parametrize(STRINGMATCHING_PARAM_NAMES, STRINGMATCHING_PARAM_VALUES)
@@ -98,11 +94,11 @@ def test_pipeline_build_from_parsers_and_curated_list(
         span_key=TEST_SPAN_KEY,
     )
 
-    doc = nlp(example_text)
+    doc = nlp(STRINGMATCHING_EXAMPLE_TEXT)
     matches = doc.spans[TEST_SPAN_KEY]
     assert_matches(matches, match_len, match_texts, match_ontology_data)
     nlp2 = spacy.load(TEST_OUTPUT_DIR)
-    doc2 = nlp2(example_text)
+    doc2 = nlp2(STRINGMATCHING_EXAMPLE_TEXT)
     matches2 = doc2.spans[TEST_SPAN_KEY]
     assert_matches(matches2, match_len, match_texts, match_ontology_data)
 
@@ -175,7 +171,7 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         span_key=TEST_SPAN_KEY,
     )
 
-    doc = nlp(example_text)
+    doc = nlp(STRINGMATCHING_EXAMPLE_TEXT)
     matches = doc.spans[TEST_SPAN_KEY]
 
     match_len = 7
@@ -199,7 +195,7 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
 
     nlp2 = spacy.load(TEST_OUTPUT_DIR)
 
-    doc2 = nlp2(example_text)
+    doc2 = nlp2(STRINGMATCHING_EXAMPLE_TEXT)
     matches2 = doc2.spans[TEST_SPAN_KEY]
 
     assert_matches(matches2, match_len, match_texts, match_ontology_data)
