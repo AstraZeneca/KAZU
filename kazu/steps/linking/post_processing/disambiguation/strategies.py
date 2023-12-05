@@ -328,14 +328,18 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
             if best_set is None:
                 best_set = this_set
                 best_score = score
+            elif best_set is this_set:
+                # a lower scoring ID is associated with the same set[EquivalentIDSet]
+                continue
             else:
-                if this_set is best_set:  # type: ignore[unreachable] # not sure why mypy thinks this is unreachable?
-                    continue
+                # we've gotten to the first ID that's actually different
+                # to the one with the best score
+                if (best_score - score) < self.context_threshold_delta:
+                    # delta is insufficient, consider disambiguation to have failed
+                    return set()
                 else:
-                    if (best_score - score) < self.context_threshold_delta:
-                        return set()
-                    else:
-                        return best_set
+                    # the first ID's score is sufficiently above all others
+                    return best_set
         # Code should never reach this, but it's required anyway
         return set()
 
