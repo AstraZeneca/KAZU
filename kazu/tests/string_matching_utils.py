@@ -134,8 +134,12 @@ class StringMatchingTestCase:
     match_len: int
     match_texts: set[str]
     match_ontology_data: MatchOntologyData
-    parser_1_data: dict[str, list[str]]
-    parser_2_data: dict[str, list[str]]
+    parser_1_data: dict[str, list[str]] = dataclasses.field(
+        default_factory=lambda: PARSER_1_DEFAULT_DATA
+    )
+    parser_2_data: dict[str, list[str]] = dataclasses.field(
+        default_factory=lambda: PARSER_2_DEFAULT_DATA
+    )
 
 
 # this gives us back the field names defined above, in the same order (and skipping 'id')
@@ -162,8 +166,6 @@ TESTCASES = [
                 MentionConfidence.HIGHLY_LIKELY,
             ),
         },
-        parser_1_data=PARSER_1_DEFAULT_DATA,
-        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
     StringMatchingTestCase(
         id="Two curated terms from two parsers One should hit to test case sensitivity",
@@ -181,8 +183,6 @@ TESTCASES = [
                 MentionConfidence.HIGHLY_LIKELY,
             )
         },
-        parser_1_data=PARSER_1_DEFAULT_DATA,
-        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
     StringMatchingTestCase(
         id="Two curated terms from two parsers One should hit to test ignore logic",
@@ -202,8 +202,6 @@ TESTCASES = [
                 MentionConfidence.HIGHLY_LIKELY,
             )
         },
-        parser_1_data=PARSER_1_DEFAULT_DATA,
-        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
     StringMatchingTestCase(
         id="One curated term with a novel synonym This should be added to the synonym DB and hit",
@@ -224,8 +222,6 @@ TESTCASES = [
                 MentionConfidence.HIGHLY_LIKELY,
             )
         },
-        parser_1_data=PARSER_1_DEFAULT_DATA,
-        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
 ]
 
