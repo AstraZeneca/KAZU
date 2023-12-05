@@ -205,11 +205,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 
         assoc_id_sets: set[EquivalentIdSet] = set()
         for grouped_ids_and_source in groups_list:
-            assoc_id_sets.add(
-                EquivalentIdSet(
-                    ids_and_source=frozenset(grouped_ids_and_source)
-                )
-            )
+            assoc_id_sets.add(EquivalentIdSet(ids_and_source=frozenset(grouped_ids_and_source)))
         return frozenset(assoc_id_sets), EquivalentIdAggregationStrategy.RESOLVED_BY_XREF
 
     def json_dict_to_parser_records(
@@ -226,7 +222,9 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             if set(json_dict.get("therapeuticAreas", ())).isdisjoint(
                 self.allowed_therapeutic_areas
             ):
-                logger.debug("skipping entry not included in allowed_therapeutic_areas: %s", json_dict)
+                logger.debug(
+                    "skipping entry not included in allowed_therapeutic_areas: %s", json_dict
+                )
                 continue
 
             idx = json_dict["id"]
