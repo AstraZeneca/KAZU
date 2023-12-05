@@ -21,7 +21,10 @@ from kazu.tests.utils import CONFIG_DIR, DummyParser
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.server import start, stop
 from kazu.utils.caching import kazu_disk_cache
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer, GildaTfIdfScorer
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
+    TfIdfScorer,
+    GildaTfIdfScorer,
+)
 from kazu.utils.utils import Singleton
 from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
     MemoryEfficientStringMatchingStep,
