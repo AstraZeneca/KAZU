@@ -18,6 +18,9 @@ import dataclasses
 
 import pytest
 
+# internal import, but we only use it for type annotation
+from _pytest.mark import ParameterSet
+
 from kazu.data.data import (
     CuratedTerm,
     MentionConfidence,
@@ -227,7 +230,9 @@ TESTCASES = [
     ),
 ]
 
-PARAM_VALUES = [
-    pytest.param(*tuple(getattr(tc, fieldname) for fieldname in PARAM_NAMES), id=tc.id)
-    for tc in TESTCASES
-]
+
+def convert_test_case_to_param(tc: StringMatchingTestCase) -> ParameterSet:
+    return pytest.param(*tuple(getattr(tc, fieldname) for fieldname in PARAM_NAMES), id=tc.id)
+
+
+PARAM_VALUES = [convert_test_case_to_param(tc) for tc in TESTCASES]

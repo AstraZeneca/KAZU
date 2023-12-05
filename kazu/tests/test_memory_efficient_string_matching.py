@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+import dataclasses
 
 import pytest
 
@@ -22,7 +23,13 @@ from kazu.tests.string_matching_utils import (
     PARAM_VALUES,
     FIRST_MOCK_PARSER,
     SECOND_MOCK_PARSER,
+    FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+    SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+    ENT_TYPE_1,
+    COMPLEX_7_DISEASE_ALPHA_NORM,
     MatchOntologyData,
+    StringMatchingTestCase,
+    convert_test_case_to_param,
 )
 from kazu.tests.utils import DummyParser, write_curations
 from kazu.utils.utils import Singleton
@@ -35,8 +42,46 @@ example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42
     This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
+max_mention_test_case = StringMatchingTestCase(
+    id="Both curations for same string and entity class Hit should get higher MentionConfidence",
+    parser_1_curations=[
+        dataclasses.replace(
+            FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+            mention_confidence=MentionConfidence.PROBABLE,
+        ),
+    ],
+    parser_2_curations=[
+        dataclasses.replace(
+            SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+            case_sensitive=True,
+            curated_synonym="ComplexVII Disease\u03B1",
+        ),
+    ],
+    match_len=1,
+    match_texts={"ComplexVII Disease\u03B1"},
+    match_ontology_data={
+        (
+            ENT_TYPE_1,
+            FIRST_MOCK_PARSER,
+            COMPLEX_7_DISEASE_ALPHA_NORM,
+            MentionConfidence.HIGHLY_LIKELY,
+        ),
+        (
+            ENT_TYPE_1,
+            SECOND_MOCK_PARSER,
+            COMPLEX_7_DISEASE_ALPHA_NORM,
+            MentionConfidence.HIGHLY_LIKELY,
+        ),
+    },
+    # they need to be the same entity type
+    # to get aggregated together
+    parser_2_ent_type=ENT_TYPE_1,
+)
 
-@pytest.mark.parametrize(PARAM_NAMES, PARAM_VALUES)
+mem_efficient_param_values = PARAM_VALUES + [convert_test_case_to_param(max_mention_test_case)]
+
+
+@pytest.mark.parametrize(PARAM_NAMES, mem_efficient_param_values)
 def test_pipeline_build_from_parsers_and_curated_list(
     tmp_path,
     parser_1_curations,
