@@ -206,6 +206,6 @@ def mock_build_fast_string_matcher_cache(monkeypatch):
 def mock_build_gilda_vectoriser_cache(monkeypatch):
     monkeypatch.setattr(
         GildaTfIdfScorer,
-        "calculate_id_vectors",
-        GildaTfIdfScorer.calculate_id_vectors.__wrapped__,  # type: ignore[attr-defined]
+        "_calculate_id_vectors",
+        GildaTfIdfScorer._calculate_id_vectors.__wrapped__,  # type: ignore[attr-defined]
     )
