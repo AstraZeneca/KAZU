@@ -1,12 +1,11 @@
 import functools
 import json
 import logging
+import pickle
 from os import getenv
 from pathlib import Path
 from typing import cast, Optional
 from collections.abc import Iterable
-
-import joblib
 import numpy as np
 from kazu.data.data import EquivalentIdSet
 from kazu.database.in_memory_db import SynonymDatabase
@@ -157,7 +156,8 @@ class GildaTfIdfScorer(metaclass=Singleton):
         """
         self.model_path = model_path
         self.contexts_path = contexts_path
-        self.vectorizer: TfidfVectorizer = joblib.load(model_path)
+        with open(model_path, mode="rb") as f:
+            self.vectorizer: TfidfVectorizer = pickle.load(f)
         contexts_path_as_path = Path(contexts_path)
         self._calculate_id_vectors(
             directory=contexts_path_as_path.parent, filename=contexts_path_as_path.name
