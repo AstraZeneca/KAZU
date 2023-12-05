@@ -180,7 +180,8 @@ module = [
     "py4j.*",
     "diskcache.*",
     "rdkit.*",
-    "ahocorasick.*"
+    "ahocorasick.*",
+    "scipy.*"
 ]
 ignore_missing_imports = true
 
