@@ -12,6 +12,7 @@ from kazu.data.data import EquivalentIdSet
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.utils import create_char_ngrams, create_word_ngrams, Singleton
+from scipy.sparse import csr_matrix, vstack
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -194,16 +195,6 @@ class GildaTfIdfScorer(metaclass=Singleton):
             kazu_disk_cache.get(self._cache_key(parser_name=parser_name, idx=idx)),
         )
 
-    def _id_context_score(self, parser_name: str, context_vec: np.ndarray, idx: str) -> float:
-        maybe_idx_vec = self._in_memory_disk_cache(parser_name=parser_name, idx=idx)
-        if maybe_idx_vec is None:
-            return 0.0
-        else:
-            return cast(
-                float,
-                cosine_similarity(context_vec, maybe_idx_vec).item(),
-            )
-
     def __call__(
         self, context_vec: np.ndarray, id_sets: set[EquivalentIdSet], parser_name: str
     ) -> Iterable[tuple[str, float]]:
@@ -215,18 +206,21 @@ class GildaTfIdfScorer(metaclass=Singleton):
         :param parser_name:
         :return: identifier strings and scores, starting with the string with the best score
         """
-        scores = []
+        idx_to_vec = {}
         for equiv_id_set in id_sets:
             for idx in equiv_id_set.ids:
-                similarity = self._id_context_score(
-                    parser_name=parser_name, context_vec=context_vec, idx=idx
-                )
-                scores.append(
-                    (
-                        idx,
-                        similarity,
+                maybe_id_vec = self._in_memory_disk_cache(parser_name=parser_name, idx=idx)
+                if maybe_id_vec is not None:
+                    idx_to_vec[idx] = maybe_id_vec
+                else:
+                    idx_to_vec[idx] = csr_matrix(
+                        (0, self.vectorizer.max_features), dtype=np.float64
                     )
-                )
 
-        for score in sorted(scores, key=lambda x: x[1], reverse=True):
-            yield score
+        idx_lst = list(idx_to_vec.keys())
+        scores = -(cosine_similarity(context_vec, vstack(idx_to_vec.values())).squeeze())
+        neighbours = scores.argsort()
+        distances = scores[neighbours]
+        for neighbour, score in zip(neighbours, distances):
+            term = idx_lst[neighbour]
+            yield term, -score
