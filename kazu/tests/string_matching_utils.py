@@ -140,6 +140,8 @@ class StringMatchingTestCase:
     parser_2_data: dict[str, list[str]] = dataclasses.field(
         default_factory=lambda: PARSER_2_DEFAULT_DATA
     )
+    parser_1_ent_type: str = ENT_TYPE_1
+    parser_2_ent_type: str = ENT_TYPE_2
 
 
 # this gives us back the field names defined above, in the same order (and skipping 'id')

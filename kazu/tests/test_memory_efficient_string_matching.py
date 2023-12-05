@@ -46,6 +46,8 @@ def test_pipeline_build_from_parsers_and_curated_list(
     match_ontology_data,
     parser_1_data,
     parser_2_data,
+    parser_1_ent_type,
+    parser_2_ent_type,
 ):
 
     Singleton.clear_all()
@@ -55,14 +57,14 @@ def test_pipeline_build_from_parsers_and_curated_list(
     write_curations(path=TEST_CURATIONS_PATH_PARSER_2, terms=parser_2_curations)
     parser_1 = DummyParser(
         name=FIRST_MOCK_PARSER,
-        entity_class="ent_type_1",
+        entity_class=parser_1_ent_type,
         source=FIRST_MOCK_PARSER,
         curations_path=str(TEST_CURATIONS_PATH_PARSER_1),
         data=parser_1_data,
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
-        entity_class="ent_type_2",
+        entity_class=parser_2_ent_type,
         source=SECOND_MOCK_PARSER,
         curations_path=str(TEST_CURATIONS_PATH_PARSER_2),
         data=parser_2_data,
