@@ -143,7 +143,7 @@ as described in the Model Pack section above.
 
 You can now inspect the doc object, and explore what entities were detected on each section.
 
-The above code snippet sets up you code as a Hydra application - which allows you a great deal
+The above code snippet sets up your code as a Hydra application - which allows you a great deal
 of flexibility to re-configure many parts of kazu via command line overrides. See the `Hydra docs <https://hydra.cc/docs/intro/>`_
 for more detail on this.
 
