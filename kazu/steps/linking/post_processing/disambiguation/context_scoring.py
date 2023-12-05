@@ -98,6 +98,11 @@ class GildaTfIdfScorer(metaclass=Singleton):
     The size of this in memory cache can be controlled with the
     ``KAZU_GILDA_TFIDF_DISAMBIGUATION_IN_MEMORY_CACHE_SIZE`` env variable.
 
+    .. caution::
+       If no context is available, the ID automatically scores 0.0.
+       The downside of this is that any ids without a context automatically
+       appear at the bottom of any rankings.
+
     Original Credit:
 
     https://github.com/indralab/gilda
@@ -191,10 +196,6 @@ class GildaTfIdfScorer(metaclass=Singleton):
 
     def _id_context_score(self, parser_name: str, context_vec: np.ndarray, idx: str) -> float:
         maybe_idx_vec = self._in_memory_disk_cache(parser_name=parser_name, idx=idx)
-        # if no context is available, the ID automatically scores 0.0
-        # the downside of this is that any ids without a context automatically
-        # appear at the bottom of any rankings
-
         if maybe_idx_vec is None:
             return 0.0
         else:
