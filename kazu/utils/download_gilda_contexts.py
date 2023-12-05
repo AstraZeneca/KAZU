@@ -15,7 +15,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import unquote
 
 from diskcache import Cache
@@ -24,7 +24,7 @@ from pandas import Index
 from tqdm import tqdm
 
 try:
-    import mwparserfromhell  # type: ignore[import-not-found] # this is ignored as not a project dependency
+    import mwparserfromhell  # type: ignore[import-not-found,unused-ignore] # this is ignored as not a project dependency
 except ImportError:
     raise ImportError("this script requires mwparserfromhell to be installed")
 
@@ -89,16 +89,16 @@ proxies: dict[str, str] = {}
 @dataclasses.dataclass
 class WikipediaEnsemblMapping:
     ensembl_gene_id: str
-    ensembl_protein_ids: set = dataclasses.field(default_factory=set)
-    wiki_gene_ids: set = dataclasses.field(default_factory=set)
-    wiki_protein_ids: set = dataclasses.field(default_factory=set)
-    wiki_gene_urls_to_text: dict = dataclasses.field(default_factory=dict)
-    wiki_protein_urls_to_text: dict = dataclasses.field(default_factory=dict)
+    ensembl_protein_ids: set[str] = dataclasses.field(default_factory=set)
+    wiki_gene_ids: set[str] = dataclasses.field(default_factory=set)
+    wiki_protein_ids: set[str] = dataclasses.field(default_factory=set)
+    wiki_gene_urls_to_text: dict[str, Optional[str]] = dataclasses.field(default_factory=dict)
+    wiki_protein_urls_to_text: dict[str, Optional[str]] = dataclasses.field(default_factory=dict)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(id(self))
 
-    def get_context(self):
+    def get_context(self) -> Optional[str]:
         items = []
         for x in self.wiki_gene_urls_to_text.values():
             if x is not None:
