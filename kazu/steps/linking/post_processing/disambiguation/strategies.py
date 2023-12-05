@@ -280,7 +280,7 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
     def prepare(self, document: Document) -> None:
         """Build document representations by parser names here, and store in a
         dict.
-        
+
         This method is cached so we don't need to call it multiple times
         per document.
 
@@ -310,13 +310,13 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
         self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
     ) -> set[EquivalentIdSet]:
 
-        idx_to_set = defaultdict(set)
+        idx_to_set: defaultdict[str, set[EquivalentIdSet]] = defaultdict(set)
         for id_set in id_sets:
             for idx in id_set.ids:
                 idx_to_set[idx].add(id_set)
 
         best_score = 0.0
-        best_set = None
+        best_set: Optional[set[EquivalentIdSet]] = None
         for idx, score in self.scorer(
             context_vec=self.doc_vector,
             parser_name=parser_name,
