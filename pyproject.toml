@@ -182,7 +182,8 @@ module = [
     "diskcache.*",
     "rdkit.*",
     "ahocorasick.*",
-    "scipy.*"
+    "scipy.*",
+    "mwparserfromhell.*"
 ]
 ignore_missing_imports = true
 
