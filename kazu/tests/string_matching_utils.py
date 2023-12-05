@@ -148,7 +148,9 @@ class StringMatchingTestCase:
 
 
 # this gives us back the field names defined above, in the same order (and skipping 'id')
-PARAM_NAMES = tuple(field.name for field in dataclasses.fields(StringMatchingTestCase)[1:])
+STRINGMATCHING_PARAM_NAMES = tuple(
+    field.name for field in dataclasses.fields(StringMatchingTestCase)[1:]
+)
 
 TESTCASES = [
     StringMatchingTestCase(
@@ -232,7 +234,9 @@ TESTCASES = [
 
 
 def convert_test_case_to_param(tc: StringMatchingTestCase) -> ParameterSet:
-    return pytest.param(*tuple(getattr(tc, fieldname) for fieldname in PARAM_NAMES), id=tc.id)
+    return pytest.param(
+        *tuple(getattr(tc, fieldname) for fieldname in STRINGMATCHING_PARAM_NAMES), id=tc.id
+    )
 
 
-PARAM_VALUES = [convert_test_case_to_param(tc) for tc in TESTCASES]
+STRINGMATCHING_PARAM_VALUES = [convert_test_case_to_param(tc) for tc in TESTCASES]

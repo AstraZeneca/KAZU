@@ -16,8 +16,8 @@ from kazu.ontology_preprocessing.base import (
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.tests.string_matching_utils import (
-    PARAM_NAMES,
-    PARAM_VALUES,
+    STRINGMATCHING_PARAM_NAMES,
+    STRINGMATCHING_PARAM_VALUES,
     FIRST_MOCK_PARSER,
     SECOND_MOCK_PARSER,
     MatchOntologyData,
@@ -56,7 +56,7 @@ example_text = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
-@pytest.mark.parametrize(PARAM_NAMES, PARAM_VALUES)
+@pytest.mark.parametrize(STRINGMATCHING_PARAM_NAMES, STRINGMATCHING_PARAM_VALUES)
 def test_pipeline_build_from_parsers_and_curated_list(
     tmp_path,
     parser_1_curations,

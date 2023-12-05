@@ -19,8 +19,8 @@ from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
     MemoryEfficientStringMatchingStep,
 )
 from kazu.tests.string_matching_utils import (
-    PARAM_NAMES,
-    PARAM_VALUES,
+    STRINGMATCHING_PARAM_NAMES,
+    STRINGMATCHING_PARAM_VALUES,
     FIRST_MOCK_PARSER,
     SECOND_MOCK_PARSER,
     FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
@@ -78,10 +78,12 @@ max_mention_test_case = StringMatchingTestCase(
     parser_2_ent_type=ENT_TYPE_1,
 )
 
-mem_efficient_param_values = PARAM_VALUES + [convert_test_case_to_param(max_mention_test_case)]
+mem_efficient_param_values = STRINGMATCHING_PARAM_VALUES + [
+    convert_test_case_to_param(max_mention_test_case)
+]
 
 
-@pytest.mark.parametrize(PARAM_NAMES, mem_efficient_param_values)
+@pytest.mark.parametrize(STRINGMATCHING_PARAM_NAMES, mem_efficient_param_values)
 def test_pipeline_build_from_parsers_and_curated_list(
     tmp_path,
     parser_1_curations,
