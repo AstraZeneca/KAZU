@@ -24,7 +24,7 @@ from pandas import Index
 from tqdm import tqdm
 
 try:
-    import mwparserfromhell  # type: ignore[import] # this is ignored as not a project dependency
+    import mwparserfromhell  # type: ignore[import-not-found] # this is ignored as not a project dependency
 except ImportError:
     raise ImportError("this script requires mwparserfromhell to be installed")
 
