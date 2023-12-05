@@ -19,7 +19,10 @@ from kazu.database.in_memory_db import (
     SynonymDatabase,
     NormalisedSynonymStr,
 )
-from kazu.steps.linking.post_processing.disambiguation.context_scoring import TfIdfScorer, GildaTfIdfScorer
+from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
+    TfIdfScorer,
+    GildaTfIdfScorer,
+)
 from kazu.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.utils.string_normalizer import StringNormalizer
 
@@ -278,11 +281,9 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
 
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document) -> None:
-        """Build document representations by parser names here, and store in a
-        dict.
+        """Build document representations by parser names here, and store in a dict.
 
-        This method is cached so we don't need to call it multiple times
-        per document.
+        This method is cached so we don't need to call it multiple times per document.
 
         :param document:
         :return:
@@ -296,8 +297,8 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
     def cacheable_build_document_representation(
         scorer: GildaTfIdfScorer, doc: Document
     ) -> np.ndarray:
-        """Static cached method, so we don't need to recalculate document
-        representation between different instances of this class.
+        """Static cached method, so we don't need to recalculate document representation
+        between different instances of this class.
 
         :param scorer:
         :param doc:
@@ -307,7 +308,12 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
         return cast(np.ndarray, scorer.vectorizer.transform([doc_string]))
 
     def disambiguate(
-        self, id_sets: set[EquivalentIdSet], document: Document, parser_name: str
+        self,
+        id_sets: set[EquivalentIdSet],
+        document: Document,
+        parser_name: str,
+        ent_match: Optional[str] = None,
+        ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
 
         idx_to_set: defaultdict[str, set[EquivalentIdSet]] = defaultdict(set)
