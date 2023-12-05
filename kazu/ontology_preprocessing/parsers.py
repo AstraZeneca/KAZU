@@ -203,10 +203,11 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         for unmapped_id_and_source in unmapped_ids_and_sources:
             groups_list.append({unmapped_id_and_source})
 
-        assoc_id_sets: set[EquivalentIdSet] = set()
-        for grouped_ids_and_source in groups_list:
-            assoc_id_sets.add(EquivalentIdSet(ids_and_source=frozenset(grouped_ids_and_source)))
-        return frozenset(assoc_id_sets), EquivalentIdAggregationStrategy.RESOLVED_BY_XREF
+        assoc_id_sets = frozenset(
+            EquivalentIdSet(ids_and_source=frozenset(grouped_ids_and_source))
+            for grouped_ids_and_source in groups_list
+        )
+        return assoc_id_sets, EquivalentIdAggregationStrategy.RESOLVED_BY_XREF
 
     def json_dict_to_parser_records(
         self, jsons_gen: Iterable[dict[str, Any]]
