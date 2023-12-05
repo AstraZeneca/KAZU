@@ -1,6 +1,9 @@
+import json
+from collections import defaultdict
 from itertools import chain
 
 import pytest
+from hydra.utils import instantiate
 from kazu.data.data import (
     Document,
     Mapping,
@@ -16,6 +19,7 @@ from kazu.database.in_memory_db import SynonymDatabase
 from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     TfIdfScorer,
+    GildaTfIdfScorer,
 )
 from kazu.steps.linking.post_processing.disambiguation.strategies import (
     DisambiguationStrategy,
@@ -23,9 +27,10 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
     TfIdfDisambiguationStrategy,
     AnnotationLevelDisambiguationStrategy,
     PreferDefaultLabelMatchDisambiguationStrategy,
+    GildaTfIdfDisambiguationStrategy,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
-from kazu.tests.utils import DummyParser
+from kazu.tests.utils import DummyParser, requires_model_pack
 from kazu.utils.utils import Singleton
 
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
@@ -368,5 +373,5 @@ def test_GildaTfIdfContextStrategy(
     doc.sections[0].entities.append(p27_ent)
 
     check_ids_are_represented(
-        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, ents_to_tests=[p27_ent]
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
     )
