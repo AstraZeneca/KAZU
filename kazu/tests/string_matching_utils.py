@@ -35,9 +35,6 @@ from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
     EntityClass,
 )
 
-# type hint used to test both string matching methods - not used in this file itself.
-MatchOntologyData = set[tuple[EntityClass, ParserName, NormalisedSynonymStr, MentionConfidence]]
-
 FIRST_MOCK_PARSER = "first_mock_parser"
 SECOND_MOCK_PARSER = "second_mock_parser"
 COMPLEX_7_DISEASE_ALPHA_NORM = "COMPLEX 7 DISEASE ALPHA"
@@ -126,23 +123,32 @@ SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
 )
 
 
-PARAM_NAMES = (
-    "parser_1_curations",
-    "parser_2_curations",
-    "match_len",
-    "match_texts",
-    "match_ontology_data",
-    "parser_1_data",
-    "parser_2_data",
-)
+MatchOntologyData = set[tuple[EntityClass, ParserName, NormalisedSynonymStr, MentionConfidence]]
 
-PARAM_VALUES = [
-    pytest.param(
-        [FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        [SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        2,
-        {"ComplexVII Disease\u03B1"},
-        {
+
+@dataclasses.dataclass
+class StringMatchingTestCase:
+    id: str
+    parser_1_curations: list[CuratedTerm]
+    parser_2_curations: list[CuratedTerm]
+    match_len: int
+    match_texts: set[str]
+    match_ontology_data: MatchOntologyData
+    parser_1_data: dict[str, list[str]]
+    parser_2_data: dict[str, list[str]]
+
+
+# this gives us back the field names defined above, in the same order (and skipping 'id')
+PARAM_NAMES = tuple(field.name for field in dataclasses.fields(StringMatchingTestCase)[1:])
+
+TESTCASES = [
+    StringMatchingTestCase(
+        id="Two curated case insensitive terms from two parsers Both should hit",
+        parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+        parser_2_curations=[SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+        match_len=2,
+        match_texts={"ComplexVII Disease\u03B1"},
+        match_ontology_data={
             (
                 ENT_TYPE_1,
                 FIRST_MOCK_PARSER,
@@ -156,16 +162,18 @@ PARAM_VALUES = [
                 MentionConfidence.HIGHLY_LIKELY,
             ),
         },
-        PARSER_1_DEFAULT_DATA,
-        PARSER_2_DEFAULT_DATA,
-        id="Two curated case insensitive terms from two parsers Both should hit",
+        parser_1_data=PARSER_1_DEFAULT_DATA,
+        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
-    pytest.param(
-        [FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        [dataclasses.replace(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, case_sensitive=True)],
-        1,
-        {"ComplexVII Disease\u03B1"},
-        {
+    StringMatchingTestCase(
+        id="Two curated terms from two parsers One should hit to test case sensitivity",
+        parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+        parser_2_curations=[
+            dataclasses.replace(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, case_sensitive=True)
+        ],
+        match_len=1,
+        match_texts={"ComplexVII Disease\u03B1"},
+        match_ontology_data={
             (
                 ENT_TYPE_1,
                 FIRST_MOCK_PARSER,
@@ -173,20 +181,20 @@ PARAM_VALUES = [
                 MentionConfidence.HIGHLY_LIKELY,
             )
         },
-        PARSER_1_DEFAULT_DATA,
-        PARSER_2_DEFAULT_DATA,
-        id="Two curated terms from two parsers One should hit to test case sensitivity",
+        parser_1_data=PARSER_1_DEFAULT_DATA,
+        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
-    pytest.param(
-        [FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        [
+    StringMatchingTestCase(
+        id="Two curated terms from two parsers One should hit to test ignore logic",
+        parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+        parser_2_curations=[
             dataclasses.replace(
                 SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, behaviour=CuratedTermBehaviour.IGNORE
             )
         ],
-        1,
-        {"ComplexVII Disease\u03B1"},
-        {
+        match_len=1,
+        match_texts={"ComplexVII Disease\u03B1"},
+        match_ontology_data={
             (
                 ENT_TYPE_1,
                 FIRST_MOCK_PARSER,
@@ -194,21 +202,21 @@ PARAM_VALUES = [
                 MentionConfidence.HIGHLY_LIKELY,
             )
         },
-        PARSER_1_DEFAULT_DATA,
-        PARSER_2_DEFAULT_DATA,
-        id="Two curated terms from two parsers One should hit to test ignore logic",
+        parser_1_data=PARSER_1_DEFAULT_DATA,
+        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
-    pytest.param(
-        [
+    StringMatchingTestCase(
+        id="One curated term with a novel synonym This should be added to the synonym DB and hit",
+        parser_1_curations=[
             dataclasses.replace(
                 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
                 curated_synonym="This sentence is just to test",
             )
         ],
-        [],
-        1,
-        {"This sentence is just to test"},
-        {
+        parser_2_curations=[],
+        match_len=1,
+        match_texts={"This sentence is just to test"},
+        match_ontology_data={
             (
                 ENT_TYPE_1,
                 FIRST_MOCK_PARSER,
@@ -216,8 +224,12 @@ PARAM_VALUES = [
                 MentionConfidence.HIGHLY_LIKELY,
             )
         },
-        PARSER_1_DEFAULT_DATA,
-        PARSER_2_DEFAULT_DATA,
-        id="One curated term with a novel synonym This should be added to the synonym DB and hit",
+        parser_1_data=PARSER_1_DEFAULT_DATA,
+        parser_2_data=PARSER_2_DEFAULT_DATA,
     ),
+]
+
+PARAM_VALUES = [
+    pytest.param(*tuple(getattr(tc, fieldname) for fieldname in PARAM_NAMES), id=tc.id)
+    for tc in TESTCASES
 ]
