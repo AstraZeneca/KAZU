@@ -63,6 +63,11 @@ jobs:
           pip install --upgrade --upgrade-strategy eager --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
           pip install "${WHEEL_PATH}[dev]" --cache-dir $PIP_CACHE_DIR --upgrade --upgrade-strategy eager
 
+      - name: Check precommit
+        run: |
+          . /tmp/kazu-env/bin/activate
+          pre-commit run --all-files
+
       - name: Build model pack caches and test (with acceptance tests)
         id: model_pack_cache_build_and_test
         run: |
