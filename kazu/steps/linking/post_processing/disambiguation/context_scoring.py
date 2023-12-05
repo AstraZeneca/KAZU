@@ -90,18 +90,45 @@ class GildaTfIdfScorer(metaclass=Singleton):
     """This class uses a single TFIDF model for 'Gilda-inspired' method of
     disambiguation. It uses a pretrained TF-IDF model, and contexual text
     mapped to knowledgebase identifiers (such as wikipedia descriptions of the
-    entity). The sparse matricies of these contexts are then compared cosine
+    entity). The sparse matrices of these contexts are then compared cosine
     wise with a target matrix to determine the most likely identifier.
 
     Context matrices are kept in a disk cache until needed, with only a sample held in memory.
     The size of this in memory cache can be controlled with the
-    KAZU_GILDA_TFIDF_DISAMBIGUATION_IN_MEMORY_CACHE_SIZE env variable
+    ``KAZU_GILDA_TFIDF_DISAMBIGUATION_IN_MEMORY_CACHE_SIZE`` env variable.
 
-    original credit:
+    Original Credit:
 
-    Gyori, Benjamin & Hoyt, Charles & Steppi, Albert. (2021).
-    Gilda: biomedical entity text normalization with machine-learned disambiguation as a service.
-    10.1101/2021.09.10.459803.
+    https://github.com/indralab/gilda
+
+    Paper:
+
+    | Benjamin M Gyori, Charles Tapley Hoyt, and Albert Steppi. 2022.
+    | `Gilda: biomedical entity text normalization with machine-learned disambiguation as a service. <https://doi.org/10.1093/bioadv/vbac034>`_
+    | Bioinformatics Advances. Vbac034.
+
+    .. raw:: html
+
+        <details>
+        <summary>Bibtex Citation Details</summary>
+
+    .. code:: bibtex
+
+        @article{gyori2022gilda,
+            author = {Gyori, Benjamin M and Hoyt, Charles Tapley and Steppi, Albert},
+            title = "{{Gilda: biomedical entity text normalization with machine-learned disambiguation as a service}}",
+            journal = {Bioinformatics Advances},
+            year = {2022},
+            month = {05},
+            issn = {2635-0041},
+            doi = {10.1093/bioadv/vbac034},
+            url = {https://doi.org/10.1093/bioadv/vbac034},
+            note = {vbac034}
+        }
+
+    .. raw:: html
+
+        </details>
 
     It's a singleton, so that the model can be accessed in multiple locations without the need to
     load it into memory multiple times.
@@ -113,12 +140,11 @@ class GildaTfIdfScorer(metaclass=Singleton):
     def __init__(self, contexts_path: str, model_path: str):
         """
 
-        :param contexts_path: json file in the
-            .. code-block::
+        :param contexts_path: json file in the format:
 
-                {<parser name>:
-                    {<idx>:<context string>}
-                }
+            .. code-block:: python
+
+                {"<parser name>": {"<idx>": "<context string>"}}
 
         :param model_path: path to a pretrained :class:`sklearn.feature_extraction.text.TfidfVectorizer` model
         """
@@ -158,7 +184,7 @@ class GildaTfIdfScorer(metaclass=Singleton):
     def _id_context_score(self, parser_name: str, context_vec: np.ndarray, idx: str) -> float:
         maybe_idx_vec = self._in_memory_disk_cache(parser_name=parser_name, idx=idx)
         # if no context is available, the ID automatically scores 0.0
-        # the downside of this is that any id's without a context automatically
+        # the downside of this is that any ids without a context automatically
         # appear at the bottom of any rankings
 
         if maybe_idx_vec is None:
@@ -178,7 +204,7 @@ class GildaTfIdfScorer(metaclass=Singleton):
         :param context_vec:
         :param id_sets:
         :param parser_name:
-        :return: identifier string and score
+        :return: identifier strings and scores, starting with the string with the best score
         """
         scores = []
         for equiv_id_set in id_sets:

@@ -1,6 +1,6 @@
 """This script does the following things:
 
-1. Query Enembl to get gene to protein ID maps
+1. Query Ensembl to get gene to protein ID maps
 2. Query wikidata sparql to get a list of wikidata ids to Ensembl gene or Ensembl protein IDs
 3. Query wikidata api to get a list of wikipedia page urls with the wikidata IDs from 2
 4. Query Wikipedia API to get page content for each page from 3

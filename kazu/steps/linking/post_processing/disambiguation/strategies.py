@@ -269,7 +269,7 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
 
         :param confidence:
         :param scorer:
-        :param context_threshold_delta: If the maximum delta between the top two :class:`.EquivalentIdSet`\\'s is below this
+        :param context_threshold_delta: If the maximum delta between the top two :class:`.EquivalentIdSet`\\ s is below this
             value, assume disambiguation has failed
         """
         super().__init__(confidence)
@@ -279,7 +279,9 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_DOCUMENT_CACHE_SIZE", 1)))
     def prepare(self, document: Document) -> None:
         """Build document representations by parser names here, and store in a
-        dict. This method is cached so we don't need to call it multiple times
+        dict.
+        
+        This method is cached so we don't need to call it multiple times
         per document.
 
         :param document:
