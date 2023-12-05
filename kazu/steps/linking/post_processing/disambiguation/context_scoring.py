@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 from os import getenv
+from pathlib import Path
 from typing import cast, Optional
 from collections.abc import Iterable
 
@@ -151,20 +152,27 @@ class GildaTfIdfScorer(metaclass=Singleton):
         self.model_path = model_path
         self.contexts_path = contexts_path
         self.vectorizer: TfidfVectorizer = joblib.load(model_path)
-        self._calculate_id_vectors(self.contexts_path)
+        contexts_path_as_path = Path(contexts_path)
+        self._calculate_id_vectors(
+            directory=contexts_path_as_path.parent, filename=contexts_path_as_path.name
+        )
 
-    @kazu_disk_cache.memoize(ignore={0})
-    def _calculate_id_vectors(self, contexts_path: str) -> None:
+    @kazu_disk_cache.memoize(ignore={0, 1})
+    def _calculate_id_vectors(self, directory: Path, filename: str) -> None:
         """Calculate the TF-IDF vectors for the file of contexts.
 
         This method is disk cached - since we don't want every
         single one in memory at runtime, we keep them on disk
         until needed.
 
-        :param contexts_path:
+        Note that the directory and filename are specified seperately,
+        so that disk caching works correctly on different machines.
+
+        :param directory: Directory containing contexts file
+        :param filename: contexts json file (see __init__ for format)
         :return:
         """
-        with open(contexts_path, mode="r") as f:
+        with directory.joinpath(filename).open(mode="r") as f:
             data: dict[str, dict[str, str]] = json.load(f)
         for parser_name, ids_and_contexts_dict in data.items():
             mat = self.vectorizer.transform(list(ids_and_contexts_dict.values()))
