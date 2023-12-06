@@ -2,8 +2,8 @@ name: Check For dead code
 
 on:
   schedule:
-    # every Monday at 9:00, see https://crontab.guru/#0_9_*_*_1
-    - cron: '0 9 * * 1'
+    # At 09:00 on day 1 of the month, see https://crontab.guru/#0_9_1_*_*
+    - cron: '0 9 1 * *'
 
   workflow_dispatch:
 
