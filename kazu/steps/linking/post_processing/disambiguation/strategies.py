@@ -89,8 +89,7 @@ class DisambiguationStrategy(ABC):
 class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     """
     1. look for entities on the document that have mappings
-    2. see if any of these mappings correspond to any ids in the :class:`.EquivalentIdSet` on each
-       hit
+    2. filter the incoming set of :class:`.EquivalentIdSet` based on these mappings
     """
 
     def __init__(self, confidence: DisambiguationConfidence):
@@ -126,14 +125,16 @@ class DefinedElsewhereInDocumentDisambiguationStrategy(DisambiguationStrategy):
     ) -> set[EquivalentIdSet]:
         found_id_sets = set()
         for id_set in id_sets:
+            filtered_equivalent_id_set_items = set()
             for idx, source in id_set.ids_and_source:
                 if (
                     parser_name,
                     source,
                     idx,
                 ) in self.mapped_ids:
-                    found_id_sets.add(id_set)
-                    break
+                    filtered_equivalent_id_set_items.add((idx, source))
+            if len(filtered_equivalent_id_set_items) > 0:
+                found_id_sets.add(EquivalentIdSet(frozenset(filtered_equivalent_id_set_items)))
         return found_id_sets
 
 
