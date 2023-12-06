@@ -3,6 +3,7 @@ from typing import Protocol, Optional
 from collections.abc import Iterable, Callable
 import urllib
 
+from kazu.database.in_memory_db import MetadataDatabase
 from kazu.data.data import (
     Document,
     Entity,
@@ -10,8 +11,10 @@ from kazu.data.data import (
     StringMatchConfidence,
     DisambiguationConfidence,
     MentionConfidence,
+    KazuConfigurationError,
 )
 from kazu.steps import Step, document_iterating_step
+from kazu.utils.grouping import sort_then_group
 
 EntityFilterFn = Callable[[Entity], bool]
 MappingFilterFn = Callable[[Mapping], bool]
@@ -129,6 +132,57 @@ class StripMappingURIsAction:
                 else:
                     new_mappings.add(dataclasses.replace(mapping, idx=self._strip_uri(mapping.idx)))
             entity.mappings = new_mappings
+
+
+class DropMappingsByParserNameRankAction(CleanupAction):
+    """Removes instances of :class:`.Mapping` based upon some preferential order of
+    parsers.
+
+    Useful if you want to filter results based upon some predefined hierarchy of importance,
+    for entity classes mapping to multiple parsers. For instance, you may prefer Meddra
+    entities over Mondo ones, but will accept Mondo ones if Meddra mappings aren't
+    available.
+
+    .. caution::
+       To ensure this class is configured correctly, ensure that all
+       the parsers you intend to use with it have populated the metadata
+       database first. See :meth:`~.OntologyParser.populate_databases`\\.
+    """
+
+    def __init__(
+        self,
+        entity_class_to_parser_name_rank: dict[str, list[str]],
+    ):
+        """
+
+        :param entity_class_to_parser_name_rank: For a given entity class, only retain the mappings from the first parser
+            that an entity has mappings for, based on list ordering (first is preferred).
+        """
+        self.entity_class_to_parser_name_rank = entity_class_to_parser_name_rank
+        for entity_class, parser_name_lists in self.entity_class_to_parser_name_rank.items():
+            maybe_loaded_parsers = MetadataDatabase().entity_class_to_parser_names.get(
+                entity_class, None
+            )
+            if maybe_loaded_parsers is None:
+                raise KazuConfigurationError(
+                    f"{self.__class__.__name__} is configured for {entity_class} but no parsers have been loaded for this class"
+                )
+            for parser_name in parser_name_lists:
+                if parser_name not in maybe_loaded_parsers:
+                    raise KazuConfigurationError(
+                        f"{self.__class__.__name__} is configured for {entity_class} but {parser_name} is not ranked (current rankings: {parser_name_lists}"
+                    )
+
+    def cleanup(self, doc: Document) -> None:
+        for entity in doc.get_entities():
+            ranks_to_consider = self.entity_class_to_parser_name_rank.get(entity.entity_class)
+            if ranks_to_consider is not None:
+                for _, mappings in sort_then_group(
+                    entity.mappings, key_func=lambda x: ranks_to_consider.index(x.parser_name)
+                ):
+                    entity.mappings = set(mappings)
+                    # only consider the top rank
+                    break
 
 
 class CleanupStep(Step):

@@ -1,6 +1,13 @@
 import dataclasses
+from collections import defaultdict
 
-from kazu.steps.other.cleanup import CleanupStep, StripMappingURIsAction
+import pytest
+from kazu.database.in_memory_db import MetadataDatabase
+from kazu.steps.other.cleanup import (
+    CleanupStep,
+    StripMappingURIsAction,
+    DropMappingsByParserNameRankAction,
+)
 from kazu.data.data import (
     Document,
     Entity,
@@ -9,10 +16,12 @@ from kazu.data.data import (
     MentionConfidence,
     StringMatchConfidence,
     DisambiguationConfidence,
+    KazuConfigurationError,
 )
 from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
 
 from hydra.utils import instantiate
+from kazu.utils.utils import Singleton
 
 doc_text = "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
 "ABC9 is picked up by a different NER step and also not mapped."
@@ -180,6 +189,29 @@ def test_uri_stripping_all_parsers(override_kazu_test_config):
 
 def test_uri_stripping_only_some_parsers():
     action = StripMappingURIsAction(parsers_to_strip=["mondo", "clo"])
+    (
+        asthma_mapping_mondo,
+        asthma_mapping_other_ont,
+        doc,
+        hsc0054_mapping_clo,
+        hsc0054_mapping_other_ont,
+    ) = set_up_simple_cleanup_test_case()
+
+    assert len(doc.get_entities()) == 2
+    action.cleanup(doc)
+    asthma_ent = doc.get_entities()[0]
+    assert asthma_ent.mappings == {
+        dataclasses.replace(asthma_mapping_mondo, idx="MONDO_0004979"),
+        asthma_mapping_other_ont,
+    }
+    hsc0054_ent = doc.get_entities()[1]
+    assert hsc0054_ent.mappings == {
+        dataclasses.replace(hsc0054_mapping_clo, idx="CLO_0051085"),
+        hsc0054_mapping_other_ont,
+    }
+
+
+def set_up_simple_cleanup_test_case():
     doc = Document.create_simple_document("Asthma is in mondo and HSC0054 is a cell line in CLO.")
     asthma_mapping_mondo = Mapping(
         default_label="Asthma",
@@ -203,7 +235,6 @@ def test_uri_stripping_only_some_parsers():
         disambiguation_strategy=None,
     )
     hsc0054_mapping_other_ont = dataclasses.replace(hsc0054_mapping_clo, parser_name="not_clo")
-
     ents = [
         Entity.load_contiguous_entity(
             start=0,
@@ -223,19 +254,80 @@ def test_uri_stripping_only_some_parsers():
         ),
     ]
     doc.sections[0].entities.extend(ents)
-
-    assert len(doc.get_entities()) == 2
-    action.cleanup(doc)
-    asthma_ent = doc.get_entities()[0]
-    assert asthma_ent.mappings == {
-        dataclasses.replace(asthma_mapping_mondo, idx="MONDO_0004979"),
+    return (
+        asthma_mapping_mondo,
         asthma_mapping_other_ont,
-    }
-    hsc0054_ent = doc.get_entities()[1]
-    assert hsc0054_ent.mappings == {
-        dataclasses.replace(hsc0054_mapping_clo, idx="CLO_0051085"),
+        doc,
+        hsc0054_mapping_clo,
         hsc0054_mapping_other_ont,
-    }
+    )
+
+
+def test_drop_by_parser_name_rank():
+    (
+        asthma_mapping_mondo,
+        asthma_mapping_other_ont,
+        doc,
+        hsc0054_mapping_clo,
+        hsc0054_mapping_other_ont,
+    ) = set_up_simple_cleanup_test_case()
+
+    Singleton.clear_all()
+
+    entity_class_to_parser_names_override = defaultdict(set)
+    entity_class_to_parser_names_override["disease"].update(
+        {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name}
+    )
+    entity_class_to_parser_names_override["cell_line"].update(
+        {hsc0054_mapping_clo.parser_name, hsc0054_mapping_other_ont.parser_name}
+    )
+    MetadataDatabase().entity_class_to_parser_names = entity_class_to_parser_names_override
+
+    action = DropMappingsByParserNameRankAction(
+        entity_class_to_parser_name_rank={
+            "disease": [asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name],
+            "cell_line": [hsc0054_mapping_other_ont.parser_name, hsc0054_mapping_clo.parser_name],
+        }
+    )
+    action.cleanup(doc)
+    for entity in doc.get_entities():
+        if entity.entity_class == "disease":
+            assert entity.mappings == {asthma_mapping_mondo}
+        else:
+            assert entity.mappings == {hsc0054_mapping_other_ont}
+
+
+def test_drop_by_parser_name_rank_throws_exception_on_misconfiguration():
+    Singleton.clear_all()
+
+    (
+        asthma_mapping_mondo,
+        asthma_mapping_other_ont,
+        doc,
+        hsc0054_mapping_clo,
+        hsc0054_mapping_other_ont,
+    ) = set_up_simple_cleanup_test_case()
+    Singleton.clear_all()
+    entity_class_to_parser_names_override = defaultdict(set)
+    entity_class_to_parser_names_override["disease"].update(
+        {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name}
+    )
+    entity_class_to_parser_names_override["cell_line"].update(
+        {hsc0054_mapping_clo.parser_name}
+    )  # this is deliberately missing the hsc0054_mapping_other_ont parser name
+    MetadataDatabase().entity_class_to_parser_names = entity_class_to_parser_names_override
+
+    with pytest.raises(KazuConfigurationError):
+        action = DropMappingsByParserNameRankAction(
+            entity_class_to_parser_name_rank={
+                "disease": [asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name],
+                "cell_line": [
+                    hsc0054_mapping_other_ont.parser_name,
+                    hsc0054_mapping_clo.parser_name,
+                ],
+            }
+        )
+        action.cleanup(doc)
 
 
 def test_cleanup_step():
