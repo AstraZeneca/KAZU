@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
 from os import getenv
-from typing import Optional
+from typing import Optional, cast
+from collections.abc import Iterable
 
 import numpy as np
 from kazu.data.data import (
@@ -24,6 +25,8 @@ from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     GildaTfIdfScorer,
 )
 from kazu.utils.string_normalizer import StringNormalizer
+from kazu.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.utils.grouping import sort_then_group
 from scipy.sparse import csr_matrix
 
 logger = logging.getLogger(__name__)
@@ -442,3 +445,54 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
             return set()
         else:
             return {EquivalentIdSet(ids_and_source=frozenset(disambiguated_id_set))}
+
+
+class PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(DisambiguationStrategy):
+    """Prefer ids where the entity match string is nearest to the default label (as per
+    the configured :class:`.StringSimilarityScorer`\\)."""
+
+    def __init__(
+        self, complex_string_scorer: StringSimilarityScorer, confidence: DisambiguationConfidence
+    ):
+        super().__init__(confidence)
+        self.complex_string_scorer = complex_string_scorer
+        self.metadata_db = MetadataDatabase()
+
+    def prepare(self, document: Document) -> None:
+        pass
+
+    def disambiguate(
+        self,
+        id_sets: set[EquivalentIdSet],
+        document: Document,
+        parser_name: str,
+        ent_match: Optional[str] = None,
+        ent_match_norm: Optional[str] = None,
+    ) -> set[EquivalentIdSet]:
+
+        ent_match = cast(str, ent_match)
+        idx_and_scores: set[tuple[tuple[str, str], float]] = set()
+        for equiv_id_set in id_sets:
+
+            for idx, source in equiv_id_set.ids_and_source:
+                default_label = self.metadata_db.get_by_idx(idx=idx, name=parser_name)[
+                    DEFAULT_LABEL
+                ]
+                score = self.complex_string_scorer(ent_match, default_label)
+                idx_and_scores.add(
+                    (
+                        (
+                            idx,
+                            source,
+                        ),
+                        score,
+                    )
+                )
+
+        for score, items in sort_then_group(
+            idx_and_scores, key_func=lambda x: -x[1]
+        ):  # negative operand for highest score first
+            # return on first, as we're only interested in top hit
+            return {EquivalentIdSet(ids_and_source=frozenset(item[0] for item in items))}
+
+        return set()

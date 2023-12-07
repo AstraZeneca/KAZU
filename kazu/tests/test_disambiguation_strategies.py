@@ -13,8 +13,7 @@ from kazu.data.data import (
     EquivalentIdSet,
     SynonymTermWithMetrics,
 )
-from kazu.database.in_memory_db import MetadataDatabase
-from kazu.database.in_memory_db import SynonymDatabase
+from kazu.database.in_memory_db import MetadataDatabase,SynonymDatabase
 from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     TfIdfScorer,
@@ -369,4 +368,54 @@ It is often referred to as a cell cycle inhibitor protein because its major func
 
     check_ids_are_represented(
         ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
+    )
+
+
+@requires_model_pack
+def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(override_kazu_test_config):
+
+    dummy_data = {
+        IDX: ["1", "2", "3"],
+        DEFAULT_LABEL: [
+            "breast cancer",
+            "lung cancer",
+            "mouth cancer",
+        ],
+        SYN: [
+            "breast carcinoma",
+            "breast carcinoma",
+            "breast carcinoma",
+        ],
+        MAPPING_TYPE: ["", "", ""],
+    }
+    parser = DummyParser(
+        data=dummy_data,
+        name="test_prefer_nearest_embedding",
+        source="test_prefer_nearest_embedding",
+        entity_class="disease",
+    )
+    parser.populate_databases()
+    terms_with_metrics = set(
+        SynonymTermWithMetrics.from_synonym_term(term)
+        for term in SynonymDatabase().get_all(parser.name).values()
+    )
+
+    text = "breast carcinoma and breast cancer are related."
+    doc = Document.create_simple_document(text)
+    bc_ent = Entity.load_contiguous_entity(
+        start=0,
+        end=len(text),
+        match="breast cancer",
+        entity_class=parser.entity_class,
+        namespace="test",
+    )
+    bc_ent.update_terms(terms_with_metrics)
+    doc.sections[0].entities.append(bc_ent)
+
+    kazu_test_config = override_kazu_test_config(overrides=["DisambiguationStrategies=test"])
+
+    strategy = instantiate(kazu_test_config.DisambiguationStrategies.prefer_nearest_embedding)
+
+    check_ids_are_represented(
+        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=bc_ent
     )
