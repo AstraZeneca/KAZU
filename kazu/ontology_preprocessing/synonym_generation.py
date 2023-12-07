@@ -40,11 +40,7 @@ class SynonymGenerator(ABC):
         original strings."""
 
         result: set[str] = set()
-        for string_to_mutate in tqdm(
-            strings_to_mutate,
-            total=len(strings_to_mutate),
-            desc=f"generating synonyms for {self.__class__.__name__}",
-        ):
+        for string_to_mutate in strings_to_mutate:
             result.add(string_to_mutate)
             generated_synonym_strings = self.generate_synonyms(string_to_mutate)
             for generated_syn in generated_synonym_strings:
@@ -91,8 +87,12 @@ class CombinatorialSynonymGenerator:
                 permutation_list,
             )
             for generator in permutation_list:
-                # run the generator
-                for curation in list(all_syns):
+                # run the generator. We call list here as we modify the original list
+                for curation in tqdm(
+                    list(all_syns),
+                    total=len(all_syns),
+                    desc=f"generating synonyms for {generator.__class__.__name__}",
+                ):
 
                     new_terms = generator({curation.curated_synonym})
                     new_terms.discard(curation.curated_synonym)
