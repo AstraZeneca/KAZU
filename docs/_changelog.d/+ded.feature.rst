@@ -1,0 +1,1 @@
+DefinedElsewhereInDocumentDisambiguationStrategy has slightly changed, so that it will only return mappings that were found elsewhere in the document, rather than the whole EquivalentIdSet where those ids were contained
