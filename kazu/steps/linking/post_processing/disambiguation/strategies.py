@@ -30,8 +30,14 @@ logger = logging.getLogger(__name__)
 
 
 class DisambiguationStrategy(ABC):
-    """The job of a DisambiguationStrategy is to filter a Set of
-    :class:`.EquivalentIdSet` into a (hopefully) smaller set.
+    """The job of a DisambiguationStrategy is to produce a Set of
+    :class:`.EquivalentIdSet`\\.
+
+    .. warning::
+       The :class:`.EquivalentIdSet`\\s produced needn't map to those contained within
+       :attr:`~.SynonymTerm.associated_id_set`\\. This may cause confusing behaviour
+       during debugging.
+
 
     A :meth:`prepare` method is available, which can be cached in the
     event of any duplicated preprocessing work that may be required (see
@@ -415,21 +421,7 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
         ent_match: Optional[str] = None,
         ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
-        """
 
-        .. warning::
-           Unlike most disambiguation strategies, this one doesn't subset the provided
-           :class:`.EquivalentIdSet`\\'s, but generates new ones. This may cause confusing behaviour
-           during debugging.
-
-
-        :param id_sets:
-        :param document:
-        :param parser_name:
-        :param ent_match:
-        :param ent_match_norm:
-        :return:
-        """
         entity_class = self.metadata_db.parser_name_to_ent_class[parser_name]
         disambiguated_id_set = set()
         for equiv_id_set in id_sets:
