@@ -14,3 +14,16 @@ parsers:
     entity_class: gene
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
     global_actions: ${global_actions}
+    excluded_biotypes:
+      - "Mt_rRNA"
+      - "Mt_tRNA"
+      - "misc_RNA"
+      - "rRNA"
+      - "scRNA"
+      - "snRNA"
+      - "snoRNA"
+      - "ribozyme"
+      - "sRNA"
+      - "scaRNA"
+      - "TEC"
+      - ""

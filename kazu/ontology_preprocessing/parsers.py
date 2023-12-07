@@ -251,8 +251,18 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 
 
 class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
+    """Parser for the OT Target dataset.
 
-    annotation_fields = {
+    .. note:: Automatically ignored records
+
+       Since there are many thousands of ensembl IDs that reference uninteresting
+       genomic locations, we will likely never see them in natural language.
+       Therefore, we automatically filter records that do not have an approved
+       symbol defined. In addition, this class allows one to filter biotypes they're
+       not interested in.
+    """
+
+    ANNOTATION_FIELDS = {
         "subcellularLocations",
         "tractability",
         "constraint",
@@ -264,6 +274,48 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         "pathways",
         "targetClass",
     }
+
+    def __init__(
+        self,
+        in_path: str,
+        entity_class: str,
+        name: str,
+        excluded_biotypes: Optional[Iterable[str]] = None,
+        string_scorer: Optional[StringSimilarityScorer] = None,
+        synonym_merge_threshold: float = 0.70,
+        data_origin: str = "unknown",
+        synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        curations_path: Optional[str] = None,
+        global_actions: Optional[GlobalParserActions] = None,
+    ):
+        """
+
+        :param in_path:
+        :param entity_class:
+        :param name:
+        :param excluded_biotypes: if specified, ignore these biotypes. Note that an empty string "" is a biotype in OT
+            for some reason...
+        :param string_scorer:
+        :param synonym_merge_threshold:
+        :param data_origin:
+        :param synonym_generator:
+        :param curations_path:
+        :param global_actions:
+        """
+        super().__init__(
+            in_path=in_path,
+            entity_class=entity_class,
+            name=name,
+            string_scorer=string_scorer,
+            synonym_merge_threshold=synonym_merge_threshold,
+            data_origin=data_origin,
+            synonym_generator=synonym_generator,
+            curations_path=curations_path,
+            global_actions=global_actions,
+        )
+        self.excluded_biotypes: Optional[set[str]] = (
+            set(excluded_biotypes) if excluded_biotypes else None
+        )
 
     def score_and_group_ids(
         self,
@@ -310,15 +362,17 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
         for json_dict in jsons_gen:
-            # due to a bug in OT data, TEC genes have "gene" as a synonym. Since they're uninteresting, we just filter
-            # them
-            biotype = json_dict.get("biotype")
-            if biotype == "" or biotype == "tec" or json_dict["id"] == json_dict["approvedSymbol"]:
+            if self.excluded_biotypes is not None:
+                if json_dict.get("biotype") in self.excluded_biotypes:
+                    continue
+
+            # if no approved symbol is assigned, ignore the record
+            if json_dict["id"] == json_dict["approvedSymbol"]:
                 continue
 
             annotation_score = sum(
                 1
-                for annotation_field in self.annotation_fields
+                for annotation_field in self.ANNOTATION_FIELDS
                 if len(json_dict.get(annotation_field, [])) > 0
             )
 
