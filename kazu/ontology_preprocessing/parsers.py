@@ -259,7 +259,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
        genomic locations, we will likely never see them in natural language.
        Therefore, we automatically filter records that do not have an approved
        symbol defined. In addition, this class allows one to filter biotypes they're
-       not interested in.
+       not interested in using the ``excluded_biotypes`` argument of the constructor.
     """
 
     ANNOTATION_FIELDS = {
