@@ -41,12 +41,6 @@ jobs:
           pip install --upgrade --upgrade-strategy eager --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
           pip install -e ."[dev]" --cache-dir $PIP_CACHE_DIR --upgrade --upgrade-strategy eager
 
-
-      - name: Check precommit
-        run: |
-          . /tmp/kazu-env/bin/activate
-          pre-commit run --all-files
-
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -86,7 +80,10 @@ jobs:
           # build sphinx html and run doctests
           # this needs to be after the model pack build because they depend on the
           # model pack being present for doctests that load the full pipeline.
-          # build the html as well in case of sphinx issues, which will error here.
+          # We've already built the html docs in the pre-commit and docs
+          # check, but doctest can only be done here. It seems worth it to double
+          # check and build the html target while sphinx is running, just in case
+          # it interacts weirdly with the model pack build somehow.
           make -C docs html doctest
 
           # need to call twice, for NFS bug

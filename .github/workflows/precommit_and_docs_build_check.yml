@@ -1,0 +1,54 @@
+name: Pre-commit and docs build check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pre-commit-and-docs:
+    # don't run on our public repo, because we expect to use self-hosted
+    # runners during internal development, which would break the public
+    # runs. We will resolve this as part of moving to 'public-only'
+    # development.
+    if: github.repository != 'AstraZeneca/KAZU'
+    runs-on: [self-hosted]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9" ]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: create venv and install dependencies
+        run: |
+          rm -r /tmp/kazu-env || true
+
+          PIP_CACHE_DIR=$(pip cache dir)
+          echo "pip cache dir is "${PIP_CACHE_DIR}
+          python -m venv /tmp/kazu-env
+          . /tmp/kazu-env/bin/activate
+          python -m pip install --upgrade pip
+          pip install --upgrade --upgrade-strategy eager --index-url https://download.pytorch.org/whl/cpu "torch>=2.0.0"
+          pip install -e ."[dev]" --cache-dir $PIP_CACHE_DIR --upgrade --upgrade-strategy eager
+
+      - name: Check precommit
+        run: |
+          . /tmp/kazu-env/bin/activate
+          pre-commit run --all-files
+
+      - name: Check docs build successfully
+        # still run even if the pre-commit fails, so we
+        # have the output on if the docs build succeeded or not
+        if: '!cancelled()'
+        run: |
+          . /tmp/kazu-env/bin/activate
+          make -C docs html
+          # need to call twice, for NFS bug
+          rm -r /tmp/kazu-env || true
+          rm -r /tmp/kazu-env || true
