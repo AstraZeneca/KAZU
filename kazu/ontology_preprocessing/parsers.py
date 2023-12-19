@@ -27,6 +27,8 @@ from urllib import parse
 
 import pandas as pd
 import rdflib
+import packaging.version
+
 from kazu.database.in_memory_db import MetadataDatabase
 
 from kazu.data.data import (
@@ -1495,7 +1497,16 @@ class ATCDrugClassificationParser(TabularOntologyParser):
     levels_to_ignore = {"1", "2", "3"}
 
     def parse_to_dataframe(self) -> pd.DataFrame:
-        df = self._raw_dataframe.applymap(str.strip)
+        # the name of this function changed from applymap to just map in pandas 2.1.0
+        # and the old name deprecated. A change in pandas-stubs broke mypy for us. Given that
+        # we're otherwise compatible with pandas >=1.0.0, it seemed worth preserving compatibility
+        # for this one ugly block of code.
+        _pandas_map_function_name = (
+            "map"
+            if packaging.version.parse(pd.__version__) >= packaging.version.parse("2.1.0rc0")
+            else "applymap"
+        )
+        df: pd.DataFrame = getattr(self._raw_dataframe, _pandas_map_function_name)(str.strip)
         res_df = pd.DataFrame()
         # for some reason, the level and description codes are merged, so we need to fix this here
         res_df[[MAPPING_TYPE, DEFAULT_LABEL]] = df.apply(
