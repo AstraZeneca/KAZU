@@ -1495,9 +1495,9 @@ class ATCDrugClassificationParser(TabularOntologyParser):
     levels_to_ignore = {"1", "2", "3"}
 
     def parse_to_dataframe(self) -> pd.DataFrame:
-        # for some reason, the level and description codes are merged, so we need to fix this here
         df = self._raw_dataframe.applymap(str.strip)
         res_df = pd.DataFrame()
+        # for some reason, the level and description codes are merged, so we need to fix this here
         res_df[[MAPPING_TYPE, DEFAULT_LABEL]] = df.apply(
             lambda row: [row["level_and_description"][0], row["level_and_description"][1:]],
             axis=1,
