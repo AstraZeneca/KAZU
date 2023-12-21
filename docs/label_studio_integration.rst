@@ -9,7 +9,8 @@ Our recommended workflow is as follows:
 
 1) pre-annotate your documents with Kazu
 
-   .. include:: pipeline_example.rst
+   .. literalinclude:: pipeline_example.py
+      :language: python
 
 2) load your annotations into Label Studio
 

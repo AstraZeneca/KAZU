@@ -14,7 +14,7 @@ select = B,C,E,F,W,T4
 per-file-ignores =
 	kazu/**/__init__.py:F401,E501
 	# undefined `docs` variable because we it's a docs example to run after
-	# pipeline_example.rst , where docs is defined.
+	# pipeline_example.py , where docs is defined.
 	# we don't want to ignore inline as it makes the docs ugly, and
 	# mypy will pick up any new undefined names (mypy doesn't complain
 	# because we still type hint `docs` in this file).
