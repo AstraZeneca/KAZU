@@ -48,7 +48,11 @@ changelog = "https://astrazeneca.github.io/KAZU/changelog.html"
 
 [project.optional-dependencies]
 webserver = [
-  "fastapi<0.99.0",  # newer than this breaks our 'examples' in the Swagger page
+  # the behaviour of declaring 'examples' for a FastAPI parameter changed in 0.99.0
+  # in a way that broke our docs.
+  # A new way was added in 0.103.0 , and we can handle both versions older than 0.99.0 and 0.103.0 or newer.
+  # However, releases in between don't work.
+  "fastapi!=0.99.0,!=0.99.1,!=0.100.0b1,!=0.100.0b2,!=0.100.0b3,!=0.100.0,!=0.100.1,!=0.101.0,!=0.101.1,!=0.102.0",
   "pydantic<2.0",
   "ray[serve]>=1.10.0,<2.5",
   "PyJWT>=2.0.0",

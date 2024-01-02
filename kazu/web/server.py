@@ -1,11 +1,13 @@
 import logging
 import time
+import packaging.version
 from typing import Any, Union, Optional
 from collections.abc import Callable
 
 import hydra
 import ray
 from fastapi import Depends, FastAPI, HTTPException, Body
+from fastapi import __version__ as fastapi_version
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
@@ -25,6 +27,11 @@ from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.routes import KAZU
 from kazu.web.ls_web_utils import LSWebUtils
 
+
+if packaging.version.parse(fastapi_version) < packaging.version.parse("0.99.0"):
+    _OPENAPI_EXAMPLES_FIELD = "examples"
+else:
+    _OPENAPI_EXAMPLES_FIELD = "openapi_examples"
 
 description = """
 Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
@@ -374,7 +381,12 @@ class KazuWebAPI:
         self,
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
+        doc_collection: DocumentCollection = Body(
+            **{_OPENAPI_EXAMPLES_FIELD: document_collection_examples}  # type:ignore[arg-type]
+            # type ignore is needed because the dict unwrapping means mypy doesn't know
+            # which argument is being used, and therefore what type
+            # it should have.
+        ),
     ) -> JSONResponse:
         """Run NER and Linking over the input document or documents.
 
@@ -413,7 +425,10 @@ class KazuWebAPI:
         self,
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
+        doc_collection: DocumentCollection = Body(
+            **{_OPENAPI_EXAMPLES_FIELD: document_collection_examples}  # type:ignore[arg-type]
+            # type ignore as above
+        ),
     ) -> JSONResponse:
         """Call only steps that do Named Entity Recognition (NER).
 
@@ -430,7 +445,10 @@ class KazuWebAPI:
         entity_class: str,
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-        doc_collection: DocumentCollection = Body(examples=linking_only_examples),
+        doc_collection: DocumentCollection = Body(
+            **{_OPENAPI_EXAMPLES_FIELD: document_collection_examples}  # type:ignore[arg-type]
+            # type ignore as above
+        ),
     ) -> JSONResponse:
         """Call only steps that do Entity Linking (EL). Also known as 'entity
         normalization'.
@@ -528,7 +546,10 @@ class KazuWebAPI:
         step_group: str,
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
-        doc_collection: DocumentCollection = Body(examples=document_collection_examples),
+        doc_collection: DocumentCollection = Body(
+            **{_OPENAPI_EXAMPLES_FIELD: document_collection_examples}  # type:ignore[arg-type]
+            # type ignore as above
+        ),
     ) -> JSONResponse:
         """Run the pipeline with a specific step group.
 
