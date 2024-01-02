@@ -2,5 +2,5 @@ defaults:
   - local
 
 ui:
-  baseURL: "/"
+  baseURL: "/ui"
   staticFilesPath: ${oc.env:BUILT_FRONTEND_PATH}

@@ -1,10 +1,41 @@
 import logging
+import os
 import time
 import packaging.version
 from typing import Any, Union, Optional
 from collections.abc import Callable
 
 import hydra
+
+KAZU_WEBSERVER_SPINUP_TIMEOUT = os.environ.setdefault(
+    "RAY_SERVE_PROXY_READY_CHECK_TIMEOUT_S", "120"
+)
+"""A timeout limit for spinning up the kazu server, including pipeline load time.
+
+Defaults to 2 minutes, but will read the ``RAY_SERVE_PROXY_READY_CHECK_TIMEOUT_S``
+environment variable and use that value if present.
+
+If you have a custom pipeline that is very slow to spin up, you may need to increase this timeout.
+If this is the case, you will get an error like::
+
+   ray.exceptions.RayActorError: The actor died unexpectedly before finishing this task.
+           class_name: HTTPProxyActor
+           actor_id: d241a36c326e982cac79013101000000
+           pid: 274
+           name: SERVE_CONTROLLER_ACTOR:FmBUWo:SERVE_PROXY_ACTOR-71c5a59a2c003ba52ae3f190e537d552af676c9d895ad98c7942cfe0
+           namespace: serve
+           ip: 172.29.34.98
+   The actor is dead because it was killed by `ray.kill`
+
+.. note::
+
+   Normally we provide options to control environment variables within the hydra config,
+   but unfortunately we can't set this with hydra because ray reads this at import time.
+
+   Attempts to work around this with local imports interfere with the ray
+   serve/FastAPI integration and break the server.
+"""
+
 import ray
 from fastapi import Depends, FastAPI, HTTPException, Body
 from fastapi import __version__ as fastapi_version
@@ -18,13 +49,12 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 from ray import serve
 from starlette.requests import HTTPConnection, Request
-from starlette.responses import RedirectResponse
 
 from kazu import __version__ as kazu_version
 from kazu.data.data import Document, Entity
 from kazu.pipeline import Pipeline, PipelineValueError
 from kazu.utils.constants import HYDRA_VERSION_BASE
-from kazu.web.routes import KAZU
+from kazu.web.routes import KAZU, API
 from kazu.web.ls_web_utils import LSWebUtils
 
 
@@ -50,6 +80,9 @@ app = FastAPI(
         "name": "Apache 2.0",
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
+    docs_url=f"/{API}/docs",
+    openapi_url=f"/{API}/openapi.json",
+    redoc_url=f"/{API}/redoc",
 )
 
 
@@ -307,12 +340,12 @@ class SingleEntityDocumentConverter:
         return self.entity_free_doc_collection.__len__()
 
 
-@serve.deployment(route_prefix="/api")
+@serve.deployment
 @serve.ingress(app)
 class KazuWebAPI:
     """Web app to serve results."""
 
-    deploy: Callable
+    bind: Callable
 
     def __init__(self, cfg: DictConfig):
         """
@@ -331,18 +364,26 @@ class KazuWebAPI:
             # sugar for doing this, so this is a *fairly* reasonable
             # thing to do.
 
+        if (ui_conf := cfg.ray.get("ui")) is not None:
+            app.mount(
+                ui_conf.baseURL,
+                StaticFiles(directory=ui_conf.staticFilesPath, html=True),
+                name="static-ui-content",
+            )
+
     @app.get("/")
+    @app.get(f"/{API}")
     def get(self):
         logger.info("received request to root /")
         return "Welcome to KAZU."
 
-    @app.get("/steps")
+    @app.get(f"/{API}/steps")
     def steps(self, request: Request) -> JSONResponse:
         """Get a list of the steps in the the deployed pipeline."""
         log_request_to_path_with_prefix(request)
         return JSONResponse(content=list(self.pipeline._namespace_to_step))
 
-    @app.get("/step_groups")
+    @app.get(f"/{API}/step_groups")
     def step_groups(self, request: Request) -> JSONResponse:
         """Get the step groups configured in the deployed pipeline, (including showing
         the steps in each group)."""
@@ -376,7 +417,7 @@ class KazuWebAPI:
             raise HTTPException(status_code=422, detail=e.args[0]) from e
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
-    @app.post(f"/{KAZU}/ner_and_linking")
+    @app.post(f"/{API}/{KAZU}/ner_and_linking")
     def ner_and_linking(
         self,
         request: Request,
@@ -396,7 +437,7 @@ class KazuWebAPI:
             doc_collection=doc_collection, request=request, step_namespaces=None
         )
 
-    @app.post(f"/{KAZU}/custom_pipeline_steps")
+    @app.post(f"/{API}/{KAZU}/custom_pipeline_steps")
     def custom_pipeline_steps(
         self,
         request: Request,
@@ -420,7 +461,7 @@ class KazuWebAPI:
             step_namespaces=steps,
         )
 
-    @app.post(f"/{KAZU}/ner_only")
+    @app.post(f"/{API}/{KAZU}/ner_only")
     def ner_only(
         self,
         request: Request,
@@ -439,7 +480,7 @@ class KazuWebAPI:
             doc_collection=doc_collection, request=request, step_group="ner_only"
         )
 
-    @app.post(f"/{KAZU}/linking_only")
+    @app.post(f"/{API}/{KAZU}/linking_only")
     def linking_only(
         self,
         entity_class: str,
@@ -471,7 +512,7 @@ class KazuWebAPI:
         )
 
     # To be removed, after we check how often it gets called after being 'hidden'
-    @app.post(f"/{KAZU}", deprecated=True)
+    @app.post(f"/{API}/{KAZU}", deprecated=True)
     def ner(
         self,
         doc: WebDocument,
@@ -494,7 +535,7 @@ class KazuWebAPI:
         return JSONResponse(content=resp_dict)
 
     # To be removed, after we check how often it gets called after being 'hidden'
-    @app.post(f"/{KAZU}/batch", deprecated=True)
+    @app.post(f"/{API}/{KAZU}/batch", deprecated=True)
     def batch_ner(
         self,
         docs: list[WebDocument],
@@ -520,7 +561,7 @@ class KazuWebAPI:
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
-    @app.post(f"/{KAZU}/ls-annotations")
+    @app.post(f"/{API}/{KAZU}/ls-annotations")
     def ls_annotations(self, doc: WebDocument, request: Request) -> JSONResponse:
         """Provide LabelStudio annotations from the kazu results on the given document.
 
@@ -540,7 +581,7 @@ class KazuWebAPI:
 
     # Note: this needs to be defined last so that we don't try and
     # interpret the ls-annotations or batch API calls as step groups.
-    @app.post(f"/{KAZU}/{{step_group}}")
+    @app.post(f"/{API}/{KAZU}/{{step_group}}")
     def step_group(
         self,
         step_group: str,
@@ -567,24 +608,6 @@ class KazuWebAPI:
         )
 
 
-@serve.deployment(route_prefix="/ui")
-@serve.ingress(app)
-class KazuWebUI:
-
-    deploy: Callable
-
-    def __init__(self, ui_cfg: DictConfig):
-        app.mount(
-            ui_cfg.baseURL,
-            StaticFiles(directory=ui_cfg.staticFilesPath, html=True),
-            name="static-ui-content",
-        )
-
-    @app.get("/")
-    def root(self) -> RedirectResponse:
-        return RedirectResponse("/ui/index.html")
-
-
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
     """Deploy the web app to Ray Serve.
@@ -596,14 +619,7 @@ def start(cfg: DictConfig) -> None:
     call(cfg.ray.init)
     call(cfg.ray.serve)
 
-    KazuWebAPI.deploy(cfg)
-    if (ui_conf := cfg.ray.get("ui")) is not None:
-        KazuWebUI.deploy(ui_conf)
-
-    if not cfg.ray.serve.detached:
-        while True:
-            logger.info(serve.list_deployments())
-            time.sleep(600)
+    serve.run(KazuWebAPI.bind(cfg))
 
 
 def stop():
@@ -614,3 +630,11 @@ def stop():
 
 if __name__ == "__main__":
     start()
+
+    # for compatibility - list_deployments was removed in 2.8,
+    # 'status' play a similar role in 2.7 onwards
+    deployment_status_method_name = "status" if hasattr(serve, "status") else "list_deployments"
+    while True:
+        deployment_status_method = getattr(serve, deployment_status_method_name)
+        logger.info(deployment_status_method())
+        time.sleep(600)

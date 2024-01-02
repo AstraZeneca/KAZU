@@ -7,7 +7,7 @@ init:
 serve:
   _convert_: all # http_options needs to be a dictionary, not a DictConfig
   _target_: ray.serve.api.start
-  detached: False
+  detached: True
   http_options:
     # Bind on 0.0.0.0 to expose the HTTP server on external IPs.
     host: 0.0.0.0

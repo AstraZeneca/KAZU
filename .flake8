@@ -19,3 +19,5 @@ per-file-ignores =
 	# mypy will pick up any new undefined names (mypy doesn't complain
 	# because we still type hint `docs` in this file).
 	docs/label_studio_create_project.py:F821
+	# we have to run a line before some of the imports for a ray constant
+	kazu/web/server.py:E402

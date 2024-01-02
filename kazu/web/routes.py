@@ -1,4 +1,5 @@
 KAZU = "kazu"
+API = "api"
 NO_AUTH_ENDPOINTS = [
     "/api",
     "/api/",

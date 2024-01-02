@@ -54,7 +54,7 @@ webserver = [
   # However, releases in between don't work.
   "fastapi!=0.99.0,!=0.99.1,!=0.100.0b1,!=0.100.0b2,!=0.100.0b3,!=0.100.0,!=0.100.1,!=0.101.0,!=0.101.1,!=0.102.0",
   "pydantic<2.0",
-  "ray[serve]>=1.10.0,<2.5",
+  "ray[serve]>=2.0.0",
   "PyJWT>=2.0.0",
   ]
 typed = [
