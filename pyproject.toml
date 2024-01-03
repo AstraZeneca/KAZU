@@ -40,6 +40,7 @@ dependencies = [
   "psutil>=5.3.0",
   "cachetools>=5.2.0",
   "diskcache>=5.4.0",
+  "cattrs>=23.2.0",
   "tqdm"
 ]
 

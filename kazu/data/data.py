@@ -24,6 +24,8 @@ from collections.abc import Iterable
 
 import bson
 from bson import json_util
+import cattrs.preconf.json
+import cattrs.strategies
 from numpy import ndarray, float32, float16
 
 from kazu.utils.string_normalizer import StringNormalizer
@@ -87,6 +89,19 @@ class MentionConfidence(IntEnum):
     PROBABLE = 50
     POSSIBLE = 10  # high degree of uncertainty
     IGNORE = 0  # do not use this mention for NER
+
+    # TODO: stop using the class method strategy?
+    def _unstructure(self) -> str:
+        """Custom cattrs unstructuring function.
+
+        Use the enum name rather than the value, as the name is more human readable.
+        """
+
+        return self.name
+
+    @classmethod
+    def _structure(cls, name: str) -> "MentionConfidence":
+        return cls[name]
 
 
 class StringMatchConfidence(AutoNameEnum):
@@ -521,6 +536,16 @@ class Section:
         default=None, hash=False, init=False
     )  # hidden implem. to prevent overwriting existing sentence spans
 
+    @classmethod
+    def _structure(cls, data: dict[str, JsonEncodable], conv: cattrs.Converter) -> "Section":
+        sentence_spans = cast(Optional[tuple[CharSpan, ...]], data.pop("sentence_spans", None))
+        # not sure if recursive and therefore doesn't work?
+        section = conv.structure_attrs_fromdict(data, Section)
+        if sentence_spans is not None:
+            converted_sentence_spans = (conv.structure(csp, CharSpan) for csp in sentence_spans)
+            section.sentence_spans = converted_sentence_spans
+        return section
+
     @property
     def sentence_spans(self) -> Iterable[CharSpan]:
         if self._sentence_spans is not None:
@@ -668,6 +693,74 @@ class ConversionException(Exception):
     pass
 
 
+_json_converter = cattrs.preconf.json.make_converter()
+
+# 'external' to kazu datatypes
+_json_converter.register_unstructure_hook(float16, lambda v: v.item())
+_json_converter.register_structure_hook(float16, lambda v, _: float16(v))
+_json_converter.register_unstructure_hook(float32, lambda v: v.item())
+_json_converter.register_structure_hook(float32, lambda v, _: float16(v))
+_json_converter.register_unstructure_hook(ndarray, lambda v: v.tolist())
+# note: this could result in a change in the dtype (e.g. float vs int and precision)
+# from the 'original' if roundtripped. This doesn't seem like a deal breaker for
+# what we're using it for.
+_json_converter.register_structure_hook(ndarray, lambda v, _: ndarray(v))
+_json_converter.register_unstructure_hook(bson.ObjectId, lambda v: json_util.default(v))
+_json_converter.register_structure_hook(bson.ObjectId, lambda v, _: json_util.object_hook(v))
+
+_json_converter.register_structure_hook(MentionConfidence, lambda v, _: MentionConfidence[v])
+_json_converter.register_unstructure_hook(MentionConfidence, lambda v: v.name)
+
+_json_converter.register_unstructure_hook(
+    Section,
+    cattrs.gen.make_dict_unstructure_fn(
+        Section,
+        _json_converter,
+        _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
+    ),
+)
+
+_json_converter.register_unstructure_hook(
+    Entity,
+    cattrs.gen.make_dict_unstructure_fn(
+        Entity,
+        _json_converter,
+        syn_term_to_synonym_terms=cattrs.gen.override(
+            rename="synonym_terms",
+            unstruct_hook=lambda v: [_json_converter.unstructure(x) for x in v.values()],
+        ),
+        _cattrs_include_init_false=True,
+    ),
+)
+
+
+def _syn_term_to_synonym_terms_struct_hook(
+    synonym_terms: list[dict[str, JsonEncodable]], _: type
+) -> dict[SynonymTermWithMetrics, SynonymTermWithMetrics]:
+    syn_terms = (_json_converter.structure(x, SynonymTermWithMetrics) for x in synonym_terms)
+    return {st: st for st in syn_terms}
+
+
+_json_converter.register_structure_hook(
+    Entity,
+    cattrs.gen.make_dict_structure_fn(
+        Entity,
+        _json_converter,
+        syn_term_to_synonym_terms=cattrs.gen.override(
+            rename="synonym_terms", struct_hook=_syn_term_to_synonym_terms_struct_hook
+        ),
+    ),
+)
+
+
+cattrs.strategies.use_class_methods(_json_converter, "_structure", "_unstructure")
+
+# to work around https://github.com/python-attrs/cattrs/issues/479
+_json_converter.register_structure_hook(
+    MentionConfidence, lambda v, _: MentionConfidence._structure(v)
+)
+
+
 class DocumentJsonUtils:
 
     atomic_types = (int, float, str, bool, type(None))
@@ -697,6 +790,10 @@ class DocumentJsonUtils:
                 section_dict["entities"] = ents_to_keep
 
         return doc_json_dict
+
+    @classmethod
+    def doc_to_json_dict_cattrs_backed(cls, doc: Document) -> dict[str, JsonEncodable]:
+        return cast(dict[str, JsonEncodable], _json_converter.unstructure(doc))
 
     @classmethod
     def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonEncodable]:
