@@ -83,7 +83,6 @@ wiki_etiquette_headers = {
     "Accept-Encoding": "gzip",
     "user_agent": "Kazu (https://github.com/AstraZeneca/KAZU)",
 }
-proxies: dict[str, str] = {}
 
 
 @dataclasses.dataclass
@@ -111,11 +110,13 @@ class WikipediaEnsemblMapping:
         return None
 
 
-@cache.memoize()
-def get_sparql_df(query: str) -> pd.DataFrame:
+@cache.memoize(ignore={1})
+def get_sparql_df(query: str, proxies: dict[str, str]) -> pd.DataFrame:
     print(f"downloading wikidata ids for \n{query}")
     r = requests.get(
-        WIKIDATA_SPARQL_URL, params={"format": "json", "query": query}, proxies=proxies
+        WIKIDATA_SPARQL_URL,
+        params={"format": "json", "query": query},
+        proxies=proxies,
     )
     data = r.json()
     columns = data["head"]["vars"]
@@ -129,8 +130,8 @@ def get_sparql_df(query: str) -> pd.DataFrame:
     return pd.DataFrame.from_records(items, columns=columns)
 
 
-@cache.memoize()
-def get_biomart_gene_to_protein() -> pd.DataFrame:
+@cache.memoize(ignore={0})
+def get_biomart_gene_to_protein(proxies: dict[str, str]) -> pd.DataFrame:
     print("downloading Ensembl gene protein mappings")
     r = requests.get(BIOMART_URL, params={"query": BIOMART_GENE_TO_PROTEIN_QUERY}, proxies=proxies)
     df = pd.read_csv(StringIO(r.text))
@@ -144,8 +145,10 @@ def divide_chunks(items: list[str]) -> Iterable[list[str]]:
         yield items[i : i + 50]
 
 
-@cache.memoize()
-def retry_wiki_with_maxlag(url: str, params: dict[str, str]) -> dict[str, Any]:
+@cache.memoize(ignore={2})
+def retry_wiki_with_maxlag(
+    url: str, params: dict[str, str], proxies: dict[str, str]
+) -> dict[str, Any]:
     s = requests.Session()
     s.mount("http://", HTTPAdapter(max_retries=get_retry()))
     count = 1
@@ -165,9 +168,9 @@ def retry_wiki_with_maxlag(url: str, params: dict[str, str]) -> dict[str, Any]:
             count += 1
 
 
-@cache.memoize(ignore={0, 1})
+@cache.memoize(ignore={0, 1, 2})
 def get_wikipedia_url_from_wikidata_id(
-    df_genes: pd.DataFrame, df_proteins: pd.DataFrame
+    df_genes: pd.DataFrame, df_proteins: pd.DataFrame, proxies: dict[str, str]
 ) -> defaultdict[str, set[str]]:
     print("downloading wikipedia urls")
     wikidata_ids = set(df_genes["itemLabel"].tolist())
@@ -184,7 +187,7 @@ def get_wikipedia_url_from_wikidata_id(
             "format": "json",
             "maxlag": "3",
         }
-        json_response = retry_wiki_with_maxlag(url=WIKIDATA_API_URL, params=params)
+        json_response = retry_wiki_with_maxlag(url=WIKIDATA_API_URL, params=params, proxies=proxies)
         entities = json_response.get("entities")
         if entities:
             for idx in wikidata_ids:
@@ -201,8 +204,8 @@ def get_wikipedia_url_from_wikidata_id(
     return result
 
 
-@cache.memoize(ignore={0})
-def get_wikipedia_contents_from_urls(urls: set[str]) -> dict[str, str]:
+@cache.memoize(ignore={0, 1})
+def get_wikipedia_contents_from_urls(urls: set[str], proxies: dict[str, str]) -> dict[str, str]:
     print("downloading wikipedia page contents")
     chunks = list(divide_chunks(sorted(urls)))
     # ignore these sections as they add noise
@@ -219,7 +222,9 @@ def get_wikipedia_contents_from_urls(urls: set[str]) -> dict[str, str]:
             "format": "json",
             "maxlag": "3",
         }
-        json_response = retry_wiki_with_maxlag(url=WIKIPEDIA_API_URL, params=params)
+        json_response = retry_wiki_with_maxlag(
+            url=WIKIPEDIA_API_URL, params=params, proxies=proxies
+        )
         query = json_response["query"]
         normalised = {x["to"]: x["from"] for x in query.get("normalized", [])}
         for page_id, page in query["pages"].items():
@@ -292,26 +297,26 @@ def create_wiki_mappings(
     return set(mappings_by_gene.values())
 
 
-def extract_open_targets(path: Path) -> None:
-    ensembl_gene_to_protein_mappings = get_biomart_gene_to_protein()
+def extract_open_targets(path: Path, proxies: dict[str, str]) -> None:
+    ensembl_gene_to_protein_mappings = get_biomart_gene_to_protein(proxies)
 
-    gene_df = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_GENE)
+    gene_df = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_GENE, proxies)
 
-    protein_df = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_PROTEIN)
+    protein_df = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_PROTEIN, proxies)
 
     # filter by human prefixes
     gene_df_humans = gene_df[gene_df.Ensembl_gene_ID.str.startswith("ENSG")].copy()
     protein_df_humans = protein_df[protein_df.Ensembl_protein_ID.str.startswith("ENSP")].copy()
 
     wikidata_id_to_wikipedia_urls = get_wikipedia_url_from_wikidata_id(
-        gene_df_humans, protein_df_humans
+        gene_df_humans, protein_df_humans, proxies
     )
 
     wiki_urls = set()
     for url_set in wikidata_id_to_wikipedia_urls.values():
         wiki_urls.update(url_set)
 
-    page_name_to_text = get_wikipedia_contents_from_urls(wiki_urls)
+    page_name_to_text = get_wikipedia_contents_from_urls(wiki_urls, proxies)
 
     mappings = create_wiki_mappings(
         gene_df=gene_df_humans,
@@ -371,6 +376,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    proxies: dict[str, str] = {}
     if args.clear_cache:
         cache.clear()
     if args.http_proxy:
@@ -378,4 +384,4 @@ if __name__ == "__main__":
     if args.https_proxy:
         proxies["https"] = args.https_proxy
     if args.parser_name == "OPENTARGETS_TARGET":
-        extract_open_targets(args.output_path)
+        extract_open_targets(args.output_path, proxies)
