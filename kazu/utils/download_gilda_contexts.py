@@ -357,7 +357,10 @@ if __name__ == "__main__":
         help="parser to download contexts for",
     )
     parser.add_argument(
-        "--output_path", required=True, type=Path, help="path to write results to. If this "
+        "--output_path",
+        required=True,
+        type=Path,
+        help="Path to write results to. If this path exists, the script will attempt to override only the contexts for the specified parser name.",
     )
     parser.add_argument(
         "--clear_cache",
