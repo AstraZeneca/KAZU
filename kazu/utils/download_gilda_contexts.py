@@ -71,6 +71,9 @@ BIOMART_GENE_TO_PROTEIN_QUERY = r"""<?xml version="1.0" encoding="UTF-8"?>
     </Dataset>
 </Query>"""
 
+# wikidata allows up to 50 ids per request
+WIKIPEDIA_API_CHUNK_SIZE = 50
+
 
 def get_retry() -> Retry:
     return Retry(
@@ -140,9 +143,8 @@ def get_biomart_gene_to_protein(proxies: dict[str, str]) -> pd.DataFrame:
 
 
 def divide_chunks(items: list[str]) -> Iterable[list[str]]:
-    # wikidata allows up to 50 ids per request
-    for i in range(0, len(items), 50):
-        yield items[i : i + 50]
+    for i in range(0, len(items), WIKIPEDIA_API_CHUNK_SIZE):
+        yield items[i : i + WIKIPEDIA_API_CHUNK_SIZE]
 
 
 @cache.memoize(ignore={2})
@@ -207,11 +209,14 @@ def get_wikipedia_url_from_wikidata_id(
 @cache.memoize(ignore={0, 1})
 def get_wikipedia_contents_from_urls(urls: set[str], proxies: dict[str, str]) -> dict[str, str]:
     print("downloading wikipedia page contents")
-    chunks = list(divide_chunks(sorted(urls)))
+    len_urls = len(urls)
+    len_chunks = len_urls // WIKIPEDIA_API_CHUNK_SIZE + bool(len_urls % WIKIPEDIA_API_CHUNK_SIZE)
     # ignore these sections as they add noise
     exclude_sections = {"further reading", "references", "external links"}
     results = {}
-    for i, chunk in tqdm(enumerate(chunks), total=len(chunks)):
+    for chunk in tqdm(divide_chunks(sorted(urls)), total=len_chunks):
+
+        # for i, chunk in tqdm(enumerate(chunks), total=len(chunks)):
 
         params = {
             "action": "query",
