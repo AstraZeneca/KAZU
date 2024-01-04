@@ -984,11 +984,9 @@ class CuratedTerm:
     #: this should be set to None, so that a novel term_norm is calculated
     source_term: Optional[str] = None
     #: results of any autocuration decisions
-    autocuration_results: Optional[dict[str, str]] = field(
-        default_factory=lambda: None, compare=False
-    )
+    autocuration_results: Optional[dict[str, str]] = field(default=None, compare=False)
     #: human readable comments about this curation decision
-    comment: Optional[str] = field(default_factory=lambda: None, compare=False)
+    comment: Optional[str] = field(default=None, compare=False)
 
     def __post_init__(self):
         # data validation
