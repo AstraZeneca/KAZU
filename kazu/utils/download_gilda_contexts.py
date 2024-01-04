@@ -317,9 +317,7 @@ def extract_open_targets(path: Path, proxies: dict[str, str]) -> None:
         gene_df_humans, protein_df_humans, proxies
     )
 
-    wiki_urls = set()
-    for url_set in wikidata_id_to_wikipedia_urls.values():
-        wiki_urls.update(url_set)
+    wiki_urls = set().union(wikidata_id_to_wikipedia_urls.values())
 
     page_name_to_text = get_wikipedia_contents_from_urls(wiki_urls, proxies)
 
