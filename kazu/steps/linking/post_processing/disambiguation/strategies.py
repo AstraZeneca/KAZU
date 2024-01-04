@@ -2,12 +2,11 @@ import functools
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from os import getenv
-from typing import Optional, cast
 from collections.abc import Iterable
+from os import getenv
+from typing import Optional
 
 import numpy as np
-
 from kazu.data.data import (
     Document,
     EquivalentIdSet,
@@ -19,12 +18,13 @@ from kazu.database.in_memory_db import (
     SynonymDatabase,
     NormalisedSynonymStr,
 )
+from kazu.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     TfIdfScorer,
     GildaTfIdfScorer,
 )
-from kazu.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.utils.string_normalizer import StringNormalizer
+from scipy.sparse import csr_matrix
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +199,7 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE", 20)))
     def cacheable_build_document_representation(
         scorer: TfIdfScorer, doc: Document, parsers: frozenset[str]
-    ) -> dict[str, np.ndarray]:
+    ) -> dict[str, csr_matrix]:
         """Static cached method, so we don't need to recalculate document representation
         between different instances of this class.
 
@@ -296,7 +296,7 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
     @functools.lru_cache(maxsize=int(getenv("KAZU_TFIDF_DISAMBIGUATION_CACHE_SIZE", 20)))
     def cacheable_build_document_representation(
         scorer: GildaTfIdfScorer, doc: Document
-    ) -> np.ndarray:
+    ) -> csr_matrix:
         """Static cached method, so we don't need to recalculate document representation
         between different instances of this class.
 
@@ -305,7 +305,7 @@ class GildaTfIdfDisambiguationStrategy(DisambiguationStrategy):
         :return:
         """
         doc_string = " ".join(x.text for x in doc.sections)
-        return cast(np.ndarray, scorer.vectorizer.transform([doc_string]))
+        return scorer.vectorizer.transform([doc_string])
 
     def disambiguate(
         self,

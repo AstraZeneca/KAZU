@@ -189,9 +189,9 @@ class GildaTfIdfScorer(metaclass=Singleton):
     @functools.lru_cache(
         maxsize=int(getenv("KAZU_GILDA_TFIDF_DISAMBIGUATION_IN_MEMORY_CACHE_SIZE", 200))
     )
-    def _in_memory_disk_cache(self, parser_name: str, idx: str) -> Optional[np.ndarray]:
+    def _in_memory_disk_cache(self, parser_name: str, idx: str) -> Optional[csr_matrix]:
         return cast(
-            Optional[np.ndarray],
+            Optional[csr_matrix],
             kazu_disk_cache.get(self._cache_key(parser_name=parser_name, idx=idx)),
         )
 
