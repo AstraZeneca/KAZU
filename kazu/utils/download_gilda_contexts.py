@@ -162,7 +162,7 @@ def retry_wiki_with_maxlag(
         elif not error.get("code") == "maxlag":
             raise Exception(f"unknown API error: {json_response}")
         else:
-            wait_for = count * backoff
+            wait_for = int(response.headers.get("Retry-After", count * backoff))
             print(f"wiki api awaiting maxlag: backoff {wait_for}")
             time.sleep(wait_for)
             count += 1
