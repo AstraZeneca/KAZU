@@ -1,5 +1,4 @@
 import json
-from collections import defaultdict
 from itertools import chain
 
 import pytest
@@ -320,27 +319,23 @@ def test_GildaTfIdfContextStrategy(
         Singleton._instances.pop(GildaTfIdfScorer)
 
     terms, parser = set_up_p27_test_case
-    temp_data_file_name = "p27_disamb_test.json"
-    data: defaultdict[str, dict[str, str]] = defaultdict(dict)
-    json_path = tmp_path.joinpath(temp_data_file_name)
-    with json_path.open(mode="w") as f:
-        ids = {
-            idx
-            for term in terms
-            for equiv_id_set in term.associated_id_sets
-            for idx in equiv_id_set.ids
+    json_path = tmp_path.joinpath("p27_disamb_test.json")
+    data: dict[str, dict[str, str]] = {
+        parser.name: {
+            "1": """Cyclin-dependent kinase inhibitor 1B (p27Kip1) is an enzyme inhibitor that in humans is encoded by the CDKN1B gene.[5]
+It encodes a protein which belongs to the Cip/Kip family of cyclin dependent kinase (Cdk) inhibitor proteins.
+The encoded protein binds to and prevents the activation of cyclin E-CDK2 or cyclin D-CDK4 complexes, and thus controls the cell cycle progression at G1.
+It is often referred to as a cell cycle inhibitor protein because its major function is to stop or slow down the cell division cycle."""
         }
-        for idx in ids:
-            if idx == "1":
-                data[parser.name][
-                    idx
-                ] = """Cyclin-dependent kinase inhibitor 1B (p27Kip1) is an enzyme inhibitor that in humans is encoded by the CDKN1B gene.[5]
- It encodes a protein which belongs to the Cip/Kip family of cyclin dependent kinase (Cdk) inhibitor proteins.
- The encoded protein binds to and prevents the activation of cyclin E-CDK2 or cyclin D-CDK4 complexes, and thus controls the cell cycle progression at G1.
- It is often referred to as a cell cycle inhibitor protein because its major function is to stop or slow down the cell division cycle."""
-            else:
-                data[parser.name][idx] = "this is not relevant"
+    }
 
+    for term in terms:
+        for equiv_id_set in term.associated_id_sets:
+            for idx in equiv_id_set.ids:
+                if idx != "1":
+                    data[parser.name][idx] = "this is not relevant"
+
+    with json_path.open(mode="w") as f:
         json.dump(data, f)
 
     cfg = override_kazu_test_config(
