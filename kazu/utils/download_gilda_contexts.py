@@ -74,6 +74,8 @@ BIOMART_GENE_TO_PROTEIN_QUERY = r"""<?xml version="1.0" encoding="UTF-8"?>
 # wikidata allows up to 50 ids per request
 WIKIPEDIA_API_CHUNK_SIZE = 50
 
+WIKIPEDIA_URL_PREFIX = "https://en.wikipedia.org/wiki/"
+
 
 def get_retry() -> Retry:
     return Retry(
@@ -285,7 +287,7 @@ def create_wiki_mappings(
             mapping.wiki_gene_ids.add(wiki_id)
             wikipedia_urls = wikidata_id_to_wikipedia_urls.get(wiki_id, set())
             for wikipedia_url in wikipedia_urls:
-                page_name = wikipedia_url.replace("https://en.wikipedia.org/wiki/", "")
+                page_name = wikipedia_url.replace(WIKIPEDIA_URL_PREFIX, "")
                 mapping.wiki_gene_urls_to_text[wikipedia_url] = wikipage_to_text.get(page_name)
     print("mapping wikipedia protein text to ensembl genes")
     for i, row in tqdm(protein_df.iterrows(), total=protein_df.shape[0]):
@@ -296,7 +298,7 @@ def create_wiki_mappings(
             mapping.wiki_protein_ids.add(wiki_id)
             wikipedia_urls = wikidata_id_to_wikipedia_urls.get(wiki_id, set())
             for wikipedia_url in wikipedia_urls:
-                page_name = wikipedia_url.replace("https://en.wikipedia.org/wiki/", "")
+                page_name = wikipedia_url.replace(WIKIPEDIA_URL_PREFIX, "")
                 mapping.wiki_protein_urls_to_text[wikipedia_url] = wikipage_to_text.get(page_name)
 
     return set(mappings_by_gene.values())
