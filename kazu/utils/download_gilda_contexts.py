@@ -48,6 +48,7 @@ SELECT DISTINCT ?item ?itemLabel ?Ensembl_gene_ID WHERE {
     }
   }
   OPTIONAL { ?item wdt:P594 ?Ensembl_gene_ID. }
+  FILTER STRSTARTS(?Ensembl_gene_ID, "ENSG")
 }"""
 WIKIDATA_SPARQL_ENSEMBL_PROTEIN = r"""
 SELECT DISTINCT ?item ?itemLabel ?Ensembl_protein_ID WHERE {
@@ -59,6 +60,7 @@ SELECT DISTINCT ?item ?itemLabel ?Ensembl_protein_ID WHERE {
     }
   }
   OPTIONAL { ?item wdt:P705 ?Ensembl_protein_ID. }
+  FILTER STRSTARTS(?Ensembl_protein_ID, "ENSP")
 }"""
 
 
@@ -307,13 +309,9 @@ def create_wiki_mappings(
 def extract_open_targets(path: Path, proxies: dict[str, str]) -> None:
     ensembl_gene_to_protein_mappings = get_biomart_gene_to_protein(proxies)
 
-    gene_df = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_GENE, proxies)
+    gene_df_humans = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_GENE, proxies)
 
-    protein_df = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_PROTEIN, proxies)
-
-    # filter by human prefixes
-    gene_df_humans = gene_df[gene_df.Ensembl_gene_ID.str.startswith("ENSG")].copy()
-    protein_df_humans = protein_df[protein_df.Ensembl_protein_ID.str.startswith("ENSP")].copy()
+    protein_df_humans = get_sparql_df(WIKIDATA_SPARQL_ENSEMBL_PROTEIN, proxies)
 
     wikidata_id_to_wikipedia_urls = get_wikipedia_url_from_wikidata_id(
         gene_df_humans, protein_df_humans, proxies
