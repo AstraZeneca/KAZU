@@ -344,7 +344,8 @@ It is often referred to as a cell cycle inhibitor protein because its major func
         ]
     )
 
-    strategy: GildaTfIdfDisambiguationStrategy = instantiate(cfg.DisambiguationStrategies.gene[1])
+    strategy = instantiate(cfg.DisambiguationStrategies.gene[1])
+    assert isinstance(strategy, GildaTfIdfDisambiguationStrategy)
 
     text = "p27 is often confused, but in this context it's CDKN1B"
     doc = Document.create_simple_document(text)
