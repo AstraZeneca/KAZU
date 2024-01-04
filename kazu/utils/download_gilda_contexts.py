@@ -232,7 +232,7 @@ def get_wikipedia_contents_from_urls(urls: set[str], proxies: dict[str, str]) ->
         )
         query = json_response["query"]
         normalised = {x["to"]: x["from"] for x in query.get("normalized", [])}
-        for page_id, page in query["pages"].items():
+        for page in query["pages"].values():
             title = page["title"]
             norm_title = normalised.get(title, title)
             for revision in page["revisions"]:
