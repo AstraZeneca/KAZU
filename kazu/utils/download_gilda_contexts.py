@@ -182,10 +182,10 @@ def get_wikipedia_url_from_wikidata_id(
     wikidata_ids = set(df_genes["itemLabel"].tolist())
     wikidata_ids.update(df_proteins["itemLabel"].tolist())
 
-    chunks = list(divide_chunks(sorted(wikidata_ids)))
-
+    len_ids = len(wikidata_ids)
+    len_chunks = len_ids // WIKIPEDIA_API_CHUNK_SIZE + bool(len_ids % WIKIPEDIA_API_CHUNK_SIZE)
     result = defaultdict(set)
-    for i, chunk in tqdm(enumerate(chunks), total=len(chunks)):
+    for chunk in tqdm(divide_chunks(sorted(wikidata_ids)), total=len_chunks):
         params = {
             "action": "wbgetentities",
             "props": "sitelinks/urls",
