@@ -467,7 +467,7 @@ class KazuWebAPI:
         request: Request,
         token: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme),
         doc_collection: DocumentCollection = Body(
-            **{_OPENAPI_EXAMPLES_FIELD: document_collection_examples}  # type:ignore[arg-type]
+            **{_OPENAPI_EXAMPLES_FIELD: linking_only_examples}  # type:ignore[arg-type]
             # type ignore as above
         ),
     ) -> JSONResponse:
