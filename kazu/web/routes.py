@@ -7,6 +7,8 @@ NO_AUTH_ENDPOINTS = [
     f"/{API}/docs",
     f"/{API}/openapi.json",
     f"/{API}/{KAZU}/ls-annotations",
+    f"/{API}/steps",
+    f"/{API}/step_groups",
 ]
 NO_AUTH_DIRS = [
     # nothing under /ui requires auth
