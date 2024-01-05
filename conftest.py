@@ -127,14 +127,11 @@ def make_label_studio_manager():
 
 
 @pytest.fixture(scope="function")
-def ray_server(override_kazu_test_config):
+def ray_server(kazu_test_config):
     # clear any residual singleton info, as ray runs separate processes and
     # hanging resources can cause OOM
     Singleton.clear_all()
-    cfg = override_kazu_test_config(
-        overrides=["ray=local", "ray.serve.detached=true"],
-    )
-    start(cfg)
+    start(kazu_test_config)
     yield {}
     stop()
 
@@ -146,7 +143,7 @@ def ray_server_with_jwt_auth(override_kazu_test_config):
     Singleton.clear_all()
     os.environ["KAZU_JWT_KEY"] = "this secret key is not secret"
     cfg = override_kazu_test_config(
-        overrides=["ray=local", "ray.serve.detached=true", "Middlewares=jwt"],
+        overrides=["Middlewares=jwt"],
     )
     start(cfg)
     yield {
