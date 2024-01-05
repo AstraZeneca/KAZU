@@ -126,29 +126,26 @@ def make_label_studio_manager():
     return _make_label_studio_manager
 
 
-@pytest.fixture(scope="function")
-def ray_server(kazu_test_config):
+@pytest.fixture(scope="module", params=[False, True])
+def ray_server(override_kazu_test_config, request):
     # clear any residual singleton info, as ray runs separate processes and
     # hanging resources can cause OOM
     Singleton.clear_all()
-    start(kazu_test_config)
-    yield {}
-    stop()
-
-
-@pytest.fixture(scope="function")
-def ray_server_with_jwt_auth(override_kazu_test_config):
-    # clear any residual singleton info, as ray runs separate processes and
-    # hanging resources can cause OOM
-    Singleton.clear_all()
-    os.environ["KAZU_JWT_KEY"] = "this secret key is not secret"
+    if request.param:
+        # we want jwt auth
+        os.environ["KAZU_JWT_KEY"] = "this secret key is not secret"
+        headers = {
+            "Authorization": f'Bearer {jwt.encode({"username": "user"}, os.environ["KAZU_JWT_KEY"], algorithm="HS256")}'
+        }
+        overrides = ["Middlewares=jwt"]
+    else:
+        headers = {}
+        overrides = []
     cfg = override_kazu_test_config(
-        overrides=["Middlewares=jwt"],
+        overrides=overrides,
     )
     start(cfg)
-    yield {
-        "Authorization": f'Bearer {jwt.encode({"username": "user"}, os.environ["KAZU_JWT_KEY"], algorithm="HS256")}'
-    }
+    yield headers
     stop()
 
 

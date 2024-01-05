@@ -1,73 +1,85 @@
 import pytest
 import requests
+from omegaconf import DictConfig
 
 from kazu.tests.utils import requires_model_pack
-from kazu.web.routes import KAZU
+from kazu.web.routes import KAZU, API
 
 
-@requires_model_pack
-def test_single_document(ray_server, kazu_test_config):
+_single_single_document_json = {"text": "EGFR is an important gene in breast cancer"}
+
+_multi_document_example_json = [
+    _single_single_document_json,
+    {
+        "sections": {
+            "sec1": "hello this is the first section",
+            "sec2": "the second section mentions BRCA1",
+        }
+    },
+]
+
+pytestmark = requires_model_pack
+
+
+@pytest.fixture(scope="module")
+def api_base_url(kazu_test_config: DictConfig) -> str:
+    return f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/{API}/{KAZU}"
+
+
+def test_single_document(ray_server, api_base_url):
     data = requests.post(
-        f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/api/{KAZU}/ner_and_linking",
-        json={"text": "EGFR is an important gene in breast cancer"},
+        f"{api_base_url}/ner_and_linking",
+        json=_single_single_document_json,
+        headers=ray_server,
     ).json()
     document = data[0]
     section = document["sections"][0]
     assert len(section["entities"]) > 0
     assert section["entities"][0]["match"] == "EGFR"
 
+
+def test_single_doc_deprecated_api(ray_server, api_base_url):
     # this is for the old, deprecated API - we still want to check it works until we remove it
     data = requests.post(
-        f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/api/{KAZU}",
-        json={"text": "EGFR is an important gene in breast cancer"},
+        api_base_url,
+        json=_single_single_document_json,
+        headers=ray_server,
     ).json()
     section = data["sections"][0]
     assert len(section["entities"]) > 0
     assert section["entities"][0]["match"] == "EGFR"
 
 
-@requires_model_pack
-@pytest.mark.parametrize(
-    (
-        "server_type",
-        "should_fail_auth",
-    ),
-    [
-        pytest.param("ray_server", False),
-        pytest.param("ray_server_with_jwt_auth", False),
-        pytest.param("ray_server_with_jwt_auth", True),
-    ],
-)
-def test_multiple_documents(server_type, should_fail_auth, request, kazu_test_config):
-    headers = request.getfixturevalue(server_type)
-    if should_fail_auth:
-        headers = {}
+# ner_and_linking is the new api, batch is the old deprecated api, but we still
+# want to check that it works as expected
+@pytest.mark.parametrize("endpoint", ["ner_and_linking", "batch"])
+def test_multiple_documents(endpoint, ray_server, api_base_url):
+    url = f"{api_base_url}/{endpoint}"
 
-    # ner_and_linking is the new api, batch is the old deprecated api, but we still
-    # want to check that it works as expected
-    for final_part_of_path in (f"{KAZU}/ner_and_linking", f"{KAZU}/batch"):
-        print(final_part_of_path)
+    response = requests.post(
+        url,
+        headers=ray_server,
+        json=_multi_document_example_json,
+    )
+
+    data = response.json()
+    print(data)
+    doc0_section0 = data[0]["sections"][0]
+    assert len(doc0_section0["entities"]) > 0
+    assert doc0_section0["entities"][0]["match"] == "EGFR"
+
+    doc1_section1 = data[1]["sections"][1]
+    assert doc1_section1["entities"][0]["match"] == "BRCA1"
+
+
+@pytest.mark.parametrize("endpoint", ["ner_and_linking", "batch"])
+def test_failed_auth(endpoint, ray_server, api_base_url):
+    if ray_server:  # if it's not an empty dict, it requires auth
+        url = f"{api_base_url}/{endpoint}"
+
         response = requests.post(
-            f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/api/{final_part_of_path}",
-            headers=headers,
-            json=[
-                {"text": "EGFR is an important gene in breast cancer"},
-                {
-                    "sections": {
-                        "sec1": "hello this is the first section",
-                        "sec2": "the second section mentions BRCA1",
-                    }
-                },
-            ],
+            url,
+            headers={},
+            json=_multi_document_example_json,
         )
-        if should_fail_auth:
-            assert response.status_code == 401
-        else:
-            data = response.json()
-            print(data)
-            doc0_section0 = data[0]["sections"][0]
-            assert len(doc0_section0["entities"]) > 0
-            assert doc0_section0["entities"][0]["match"] == "EGFR"
-
-            doc1_section1 = data[1]["sections"][1]
-            assert doc1_section1["entities"][0]["match"] == "BRCA1"
+        assert response.status_code == 401
