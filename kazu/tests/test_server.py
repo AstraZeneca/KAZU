@@ -65,7 +65,6 @@ def test_multiple_documents(endpoint, ray_server, api_base_url):
     )
 
     data = response.json()
-    print(data)
     doc0_section0 = Document.from_dict(data[0]).sections[0]
     assert len(doc0_section0.entities) > 0
     assert doc0_section0.entities[0].match == "EGFR"
