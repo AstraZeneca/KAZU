@@ -2,6 +2,7 @@ import pytest
 import requests
 from omegaconf import DictConfig
 
+from kazu.data.data import Document
 from kazu.tests.utils import requires_model_pack
 from kazu.web.routes import KAZU, API
 
@@ -32,10 +33,10 @@ def test_single_document(ray_server, api_base_url):
         json=_single_single_document_json,
         headers=ray_server,
     ).json()
-    document = data[0]
-    section = document["sections"][0]
-    assert len(section["entities"]) > 0
-    assert section["entities"][0]["match"] == "EGFR"
+    document = Document.from_dict(data[0])
+    section = document.sections[0]
+    assert len(section.entities) > 0
+    assert section.entities[0].match == "EGFR"
 
 
 def test_single_doc_deprecated_api(ray_server, api_base_url):
@@ -45,9 +46,10 @@ def test_single_doc_deprecated_api(ray_server, api_base_url):
         json=_single_single_document_json,
         headers=ray_server,
     ).json()
-    section = data["sections"][0]
-    assert len(section["entities"]) > 0
-    assert section["entities"][0]["match"] == "EGFR"
+    document = Document.from_dict(data)
+    section = document.sections[0]
+    assert len(section.entities) > 0
+    assert section.entities[0].match == "EGFR"
 
 
 # ner_and_linking is the new api, batch is the old deprecated api, but we still
@@ -64,12 +66,12 @@ def test_multiple_documents(endpoint, ray_server, api_base_url):
 
     data = response.json()
     print(data)
-    doc0_section0 = data[0]["sections"][0]
-    assert len(doc0_section0["entities"]) > 0
-    assert doc0_section0["entities"][0]["match"] == "EGFR"
+    doc0_section0 = Document.from_dict(data[0]).sections[0]
+    assert len(doc0_section0.entities) > 0
+    assert doc0_section0.entities[0].match == "EGFR"
 
-    doc1_section1 = data[1]["sections"][1]
-    assert doc1_section1["entities"][0]["match"] == "BRCA1"
+    doc1_section1 = Document.from_dict(data[1]).sections[1]
+    assert doc1_section1.entities[0].match == "BRCA1"
 
 
 @pytest.mark.parametrize("endpoint", ["ner_and_linking", "batch"])
