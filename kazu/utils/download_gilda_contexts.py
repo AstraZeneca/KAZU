@@ -122,19 +122,11 @@ def get_sparql_df(query: str, proxies: dict[str, str]) -> pd.DataFrame:
     print(f"downloading wikidata ids for \n{query}")
     r = requests.get(
         WIKIDATA_SPARQL_URL,
-        params={"format": "json", "query": query},
+        params={"query": query},
+        headers={"Accept": "text/csv"},
         proxies=proxies,
     )
-    data = r.json()
-    columns = data["head"]["vars"]
-    items = []
-    for item in data["results"]["bindings"]:
-        datapoint = []
-        for col_name in columns:
-            datapoint.append(item.get(col_name, {}).get("value"))
-        items.append(datapoint)
-
-    return pd.DataFrame.from_records(items, columns=columns)
+    return pd.read_csv(StringIO(r.content.decode("utf-8")))
 
 
 @cache.memoize(ignore={0})
