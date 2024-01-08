@@ -49,15 +49,12 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.default}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.default}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
-            disambiguation_strategies: ${DisambiguationStrategies.gene}
-
+            disambiguation_strategies: ${DisambiguationStrategies.default}
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
             confidence: ${confidence.string_matching_possible}
             disambiguation_strategies: ${DisambiguationStrategies.default}
