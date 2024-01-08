@@ -381,6 +381,7 @@ class KazuWebAPI:
 
     @app.get("/")
     @app.get(f"/{API}")
+    @app.get(f"/{API}/")
     def get(self):
         logger.info("received request to root /")
         return "Welcome to KAZU."
