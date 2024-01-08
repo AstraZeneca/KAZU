@@ -322,10 +322,7 @@ class SingleEntityDocumentConverter:
             for section in doc.sections:
                 section.entities = [
                     Entity.load_contiguous_entity(
-                        # NOTE: our mapping logic is currently very dependent on the namespace
-                        # I think though that we intend to get away from this with the 'mention_confidence' attribute
-                        # on Entity and Curation
-                        namespace="TransformersModelForTokenClassificationNerStep",
+                        namespace="KAZUAPILinkingOnlyRequest",
                         match=section.text,
                         entity_class=self.entity_class,
                         start=0,
