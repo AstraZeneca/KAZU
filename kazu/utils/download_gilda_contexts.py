@@ -217,7 +217,7 @@ def get_wikipedia_contents_from_urls(urls: set[str], proxies: dict[str, str]) ->
         params = {
             "action": "query",
             "prop": "revisions",
-            "titles": "|".join(x.replace("https://en.wikipedia.org/wiki/", "") for x in chunk),
+            "titles": "|".join(x.removeprefix(WIKIPEDIA_URL_PREFIX) for x in chunk),
             "rvprop": ["content"],
             "rvslots": ["main"],
             "format": "json",
@@ -281,7 +281,7 @@ def create_wiki_mappings(
             mapping.wiki_gene_ids.add(wiki_id)
             wikipedia_urls = wikidata_id_to_wikipedia_urls.get(wiki_id, set())
             for wikipedia_url in wikipedia_urls:
-                page_name = wikipedia_url.replace(WIKIPEDIA_URL_PREFIX, "")
+                page_name = wikipedia_url.removeprefix(WIKIPEDIA_URL_PREFIX)
                 mapping.wiki_gene_urls_to_text[wikipedia_url] = wikipage_to_text.get(page_name)
     print("mapping wikipedia protein text to ensembl genes")
     for i, row in tqdm(protein_df.iterrows(), total=protein_df.shape[0]):
@@ -292,7 +292,7 @@ def create_wiki_mappings(
             mapping.wiki_protein_ids.add(wiki_id)
             wikipedia_urls = wikidata_id_to_wikipedia_urls.get(wiki_id, set())
             for wikipedia_url in wikipedia_urls:
-                page_name = wikipedia_url.replace(WIKIPEDIA_URL_PREFIX, "")
+                page_name = wikipedia_url.removeprefix(WIKIPEDIA_URL_PREFIX)
                 mapping.wiki_protein_urls_to_text[wikipedia_url] = wikipage_to_text.get(page_name)
 
     return set(mappings_by_gene.values())
