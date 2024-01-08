@@ -54,7 +54,7 @@ from kazu import __version__ as kazu_version
 from kazu.data.data import Document, Entity
 from kazu.pipeline import Pipeline, PipelineValueError
 from kazu.utils.constants import HYDRA_VERSION_BASE
-from kazu.web.routes import KAZU, API
+from kazu.web.routes import KAZU, API, API_DOCS_URLS
 from kazu.web.ls_web_utils import LSWebUtils
 
 
@@ -80,9 +80,7 @@ app = FastAPI(
         "name": "Apache 2.0",
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
-    docs_url=f"/{API}/docs",
-    openapi_url=f"/{API}/openapi.json",
-    redoc_url=f"/{API}/redoc",
+    **API_DOCS_URLS,
 )
 
 
