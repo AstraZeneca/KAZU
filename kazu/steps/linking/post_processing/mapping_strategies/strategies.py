@@ -255,27 +255,27 @@ class MappingStrategy(ABC):
             terms=terms,
             parser_name=parser_name,
         )
-
-        (
-            id_sets,
-            successful_disambiguation_strategy,
-            disambiguation_confidence,
-        ) = self.disambiguate_if_required(
-            filtered_terms,
-            document,
-            parser_name,
-            ent_match=ent_match,
-            ent_match_norm=ent_match_norm,
-        )
-        yield from MappingFactory.create_mapping_from_id_sets(
-            id_sets=id_sets,
-            parser_name=parser_name,
-            string_match_confidence=self.confidence,
-            disambiguation_confidence=disambiguation_confidence,
-            additional_metadata=None,
-            string_match_strategy=self.__class__.__name__,
-            disambiguation_strategy=successful_disambiguation_strategy,
-        )
+        if filtered_terms:
+            (
+                id_sets,
+                successful_disambiguation_strategy,
+                disambiguation_confidence,
+            ) = self.disambiguate_if_required(
+                filtered_terms,
+                document,
+                parser_name,
+                ent_match=ent_match,
+                ent_match_norm=ent_match_norm,
+            )
+            yield from MappingFactory.create_mapping_from_id_sets(
+                id_sets=id_sets,
+                parser_name=parser_name,
+                string_match_confidence=self.confidence,
+                disambiguation_confidence=disambiguation_confidence,
+                additional_metadata=None,
+                string_match_strategy=self.__class__.__name__,
+                disambiguation_strategy=successful_disambiguation_strategy,
+            )
 
 
 class ExactMatchMappingStrategy(MappingStrategy):
