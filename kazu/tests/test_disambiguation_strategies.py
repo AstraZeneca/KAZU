@@ -315,8 +315,7 @@ def test_GildaTfIdfContextStrategy(
     set_up_p27_test_case, tmp_path, override_kazu_test_config, mock_build_gilda_vectoriser_cache
 ):
 
-    if GildaTfIdfScorer in Singleton._instances:
-        Singleton._instances.pop(GildaTfIdfScorer)
+    Singleton._instances.pop(GildaTfIdfScorer, None)
 
     terms, parser = set_up_p27_test_case
     json_path = tmp_path.joinpath("p27_disamb_test.json")
