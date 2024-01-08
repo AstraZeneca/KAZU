@@ -2,18 +2,20 @@ import functools
 import json
 import logging
 import pickle
+from collections.abc import Iterable
 from os import getenv
 from pathlib import Path
 from typing import cast, Optional
-from collections.abc import Iterable
+
 import numpy as np
+from scipy.sparse import csr_matrix, vstack
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.utils.extmath import safe_sparse_dot
+
 from kazu.data.data import EquivalentIdSet
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.utils import create_char_ngrams, create_word_ngrams, Singleton
-from scipy.sparse import csr_matrix, vstack
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -217,11 +219,15 @@ class GildaTfIdfScorer(metaclass=Singleton):
                     idx_to_vec[idx] = csr_matrix(
                         (0, self.vectorizer.max_features), dtype=np.float64
                     )
-
-        idx_lst = list(idx_to_vec.keys())
-        scores = -(cosine_similarity(context_vec, vstack(idx_to_vec.values())).squeeze())
-        neighbours = scores.argsort()
-        distances = scores[neighbours]
-        for neighbour, score in zip(neighbours, distances):
-            term = idx_lst[neighbour]
-            yield term, -score
+        if idx_to_vec:
+            idx_lst = list(idx_to_vec.keys())
+            scores = -(
+                safe_sparse_dot(
+                    context_vec, vstack(idx_to_vec.values()).T, dense_output=True
+                ).squeeze()
+            )
+            neighbours = scores.argsort()
+            distances = scores[neighbours]
+            for neighbour, score in zip(neighbours, distances):
+                term = idx_lst[neighbour]
+                yield term, -score
