@@ -13,15 +13,12 @@ strategy_runner:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           confidence: ${confidence.string_matching_highly_likely}
           disambiguation_strategies: ${DisambiguationStrategies.default}
-
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
           confidence: ${confidence.string_matching_probable}
           disambiguation_strategies: ${DisambiguationStrategies.default}
-
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
           confidence: ${confidence.string_matching_probable}
           disambiguation_strategies: ${DisambiguationStrategies.default}
-
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
           confidence: ${confidence.string_matching_possible}
           disambiguation_strategies: ${DisambiguationStrategies.default}
@@ -30,16 +27,17 @@ strategy_runner:
         gene:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
             confidence: ${confidence.string_matching_possible}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
@@ -67,11 +65,9 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
@@ -84,7 +80,14 @@ strategy_runner:
           disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: ${confidence.string_matching_highly_likely}
       ent_class_strategies:
-        _target_: builtins.dict
+        gene:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
 
     POSSIBLE:
       _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
@@ -113,7 +116,6 @@ strategy_runner:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           confidence: ${confidence.string_matching_highly_likely}
           disambiguation_strategies: ${DisambiguationStrategies.default}
-
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
           confidence: ${confidence.string_matching_possible}
           disambiguation_strategies: ${DisambiguationStrategies.default}
@@ -135,11 +137,9 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
@@ -152,7 +152,6 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.default}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchWithEmbeddingConfirmationStringMatchingStrategy
             confidence: ${confidence.string_matching_possible}
             disambiguation_strategies: ${DisambiguationStrategies.default}
@@ -166,11 +165,9 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
@@ -185,8 +182,16 @@ strategy_runner:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
           disambiguation_strategies: ${DisambiguationStrategies.default}
           confidence: ${confidence.string_matching_highly_likely}
+
       ent_class_strategies:
-        _target_: builtins.dict
+        gene:
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.prefer_default_label}
+            disambiguation_essential: true
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
+            confidence: ${confidence.string_matching_highly_likely}
+            disambiguation_strategies: ${DisambiguationStrategies.gene}
 
     POSSIBLE:
       _target_: kazu.steps.linking.post_processing.strategy_runner.ConfidenceLevelStrategyExecution
