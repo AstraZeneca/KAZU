@@ -8,11 +8,11 @@ from collections.abc import Callable
 import hydra
 
 KAZU_WEBSERVER_SPINUP_TIMEOUT = os.environ.setdefault(
-    "RAY_SERVE_PROXY_READY_CHECK_TIMEOUT_S", "120"
+    "RAY_SERVE_PROXY_READY_CHECK_TIMEOUT_S", "180"
 )
 """A timeout limit for spinning up the kazu server, including pipeline load time.
 
-Defaults to 2 minutes, but will read the ``RAY_SERVE_PROXY_READY_CHECK_TIMEOUT_S``
+Defaults to 3 minutes, but will read the ``RAY_SERVE_PROXY_READY_CHECK_TIMEOUT_S``
 environment variable and use that value if present.
 
 If you have a custom pipeline that is very slow to spin up, you may need to increase this timeout.
