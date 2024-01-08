@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 
 from kazu.data.data import Document
 from kazu.tests.utils import requires_model_pack
-from kazu.web.routes import KAZU, API
+from kazu.web.routes import KAZU, API, NER_AND_LINKING, BATCH
 
 
 _single_single_document_json = {"text": "EGFR is an important gene in breast cancer"}
@@ -23,13 +23,13 @@ pytestmark = requires_model_pack
 
 
 @pytest.fixture(scope="module")
-def api_base_url(kazu_test_config: DictConfig) -> str:
-    return f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}/{API}/{KAZU}"
+def api_root_url(kazu_test_config: DictConfig) -> str:
+    return f"http://127.0.0.1:{kazu_test_config.ray.serve.http_options.port}"
 
 
-def test_single_document(ray_server, api_base_url):
+def test_single_document(ray_server, api_root_url):
     data = requests.post(
-        f"{api_base_url}/ner_and_linking",
+        f"{api_root_url}{NER_AND_LINKING}",
         json=_single_single_document_json,
         headers=ray_server,
     ).json()
@@ -39,10 +39,10 @@ def test_single_document(ray_server, api_base_url):
     assert section.entities[0].match == "EGFR"
 
 
-def test_single_doc_deprecated_api(ray_server, api_base_url):
+def test_single_doc_deprecated_api(ray_server, api_root_url):
     # this is for the old, deprecated API - we still want to check it works until we remove it
     data = requests.post(
-        api_base_url,
+        f"{api_root_url}/{API}/{KAZU}",
         json=_single_single_document_json,
         headers=ray_server,
     ).json()
@@ -54,9 +54,9 @@ def test_single_doc_deprecated_api(ray_server, api_base_url):
 
 # ner_and_linking is the new api, batch is the old deprecated api, but we still
 # want to check that it works as expected
-@pytest.mark.parametrize("endpoint", ["ner_and_linking", "batch"])
-def test_multiple_documents(endpoint, ray_server, api_base_url):
-    url = f"{api_base_url}/{endpoint}"
+@pytest.mark.parametrize("endpoint", [NER_AND_LINKING, BATCH])
+def test_multiple_documents(endpoint, ray_server, api_root_url):
+    url = f"{api_root_url}{endpoint}"
 
     response = requests.post(
         url,
@@ -73,10 +73,10 @@ def test_multiple_documents(endpoint, ray_server, api_base_url):
     assert doc1_section1.entities[0].match == "BRCA1"
 
 
-@pytest.mark.parametrize("endpoint", ["ner_and_linking", "batch"])
-def test_failed_auth(endpoint, ray_server, api_base_url):
+@pytest.mark.parametrize("endpoint", [NER_AND_LINKING, BATCH])
+def test_failed_auth(endpoint, ray_server, api_root_url):
     if ray_server:  # if it's not an empty dict, it requires auth
-        url = f"{api_base_url}/{endpoint}"
+        url = f"{api_root_url}{endpoint}"
 
         response = requests.post(
             url,

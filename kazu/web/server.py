@@ -54,7 +54,20 @@ from kazu import __version__ as kazu_version
 from kazu.data.data import Document, Entity
 from kazu.pipeline import Pipeline, PipelineValueError
 from kazu.utils.constants import HYDRA_VERSION_BASE
-from kazu.web.routes import KAZU, API, API_DOCS_URLS
+from kazu.web.routes import (
+    KAZU,
+    API,
+    API_DOCS_URLS,
+    STEPS,
+    STEP_GROUPS,
+    NER_AND_LINKING,
+    CUSTOM_PIPELINE_STEPS,
+    NER_ONLY,
+    LINKING_ONLY,
+    BATCH,
+    LS_ANNOTATIONS,
+    STEP_GROUP_WITH_VAR,
+)
 from kazu.web.ls_web_utils import LSWebUtils
 
 
@@ -372,13 +385,13 @@ class KazuWebAPI:
         logger.info("received request to root /")
         return "Welcome to KAZU."
 
-    @app.get(f"/{API}/steps")
+    @app.get(STEPS)
     def steps(self, request: Request) -> JSONResponse:
         """Get a list of the steps in the the deployed pipeline."""
         log_request_to_path_with_prefix(request)
         return JSONResponse(content=list(self.pipeline._namespace_to_step))
 
-    @app.get(f"/{API}/step_groups")
+    @app.get(STEP_GROUPS)
     def step_groups(self, request: Request) -> JSONResponse:
         """Get the step groups configured in the deployed pipeline, (including showing
         the steps in each group)."""
@@ -412,7 +425,7 @@ class KazuWebAPI:
             raise HTTPException(status_code=422, detail=e.args[0]) from e
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
-    @app.post(f"/{API}/{KAZU}/ner_and_linking")
+    @app.post(NER_AND_LINKING)
     def ner_and_linking(
         self,
         request: Request,
@@ -432,7 +445,7 @@ class KazuWebAPI:
             doc_collection=doc_collection, request=request, step_namespaces=None
         )
 
-    @app.post(f"/{API}/{KAZU}/custom_pipeline_steps")
+    @app.post(CUSTOM_PIPELINE_STEPS)
     def custom_pipeline_steps(
         self,
         request: Request,
@@ -456,7 +469,7 @@ class KazuWebAPI:
             step_namespaces=steps,
         )
 
-    @app.post(f"/{API}/{KAZU}/ner_only")
+    @app.post(NER_ONLY)
     def ner_only(
         self,
         request: Request,
@@ -475,7 +488,7 @@ class KazuWebAPI:
             doc_collection=doc_collection, request=request, step_group="ner_only"
         )
 
-    @app.post(f"/{API}/{KAZU}/linking_only")
+    @app.post(LINKING_ONLY)
     def linking_only(
         self,
         entity_class: str,
@@ -530,7 +543,7 @@ class KazuWebAPI:
         return JSONResponse(content=resp_dict)
 
     # To be removed, after we check how often it gets called after being 'hidden'
-    @app.post(f"/{API}/{KAZU}/batch", deprecated=True)
+    @app.post(BATCH, deprecated=True)
     def batch_ner(
         self,
         docs: list[WebDocument],
@@ -556,7 +569,7 @@ class KazuWebAPI:
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
         return JSONResponse(content=[res.as_minified_dict() for res in result])
 
-    @app.post(f"/{API}/{KAZU}/ls-annotations")
+    @app.post(LS_ANNOTATIONS)
     def ls_annotations(self, doc: WebDocument, request: Request) -> JSONResponse:
         """Provide LabelStudio annotations from the kazu results on the given document.
 
@@ -576,7 +589,7 @@ class KazuWebAPI:
 
     # Note: this needs to be defined last so that we don't try and
     # interpret the ls-annotations or batch API calls as step groups.
-    @app.post(f"/{API}/{KAZU}/{{step_group}}")
+    @app.post(STEP_GROUP_WITH_VAR)
     def step_group(
         self,
         step_group: str,
