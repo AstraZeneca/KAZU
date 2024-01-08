@@ -4,7 +4,7 @@ Quickstart
 Installation
 ------------
 
-Python version 3.9 or higher is required (tested with Python 3.9).
+Python version 3.9 or higher is required (tested with Python 3.11).
 
 Installing Pytorch (prerequisite)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
