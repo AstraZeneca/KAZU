@@ -313,9 +313,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
         )
-        self.excluded_biotypes: Optional[set[str]] = (
-            set(excluded_biotypes) if excluded_biotypes else None
-        )
+        self.excluded_biotypes: set[str] = set(excluded_biotypes) if excluded_biotypes else set()
 
     def score_and_group_ids(
         self,
@@ -362,9 +360,8 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         self, jsons_gen: Iterable[dict[str, Any]]
     ) -> Iterable[dict[str, Any]]:
         for json_dict in jsons_gen:
-            if self.excluded_biotypes is not None:
-                if json_dict.get("biotype") in self.excluded_biotypes:
-                    continue
+            if json_dict.get("biotype") in self.excluded_biotypes:
+                continue
 
             # if no approved symbol is assigned, ignore the record
             if json_dict["id"] == json_dict["approvedSymbol"]:
