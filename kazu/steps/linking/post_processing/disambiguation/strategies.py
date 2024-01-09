@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
 from os import getenv
-from typing import Optional, cast
+from typing import Optional
 from collections.abc import Iterable
 
 import numpy as np
@@ -449,7 +449,12 @@ class PreferDefaultLabelMatchDisambiguationStrategy(DisambiguationStrategy):
 
 class PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(DisambiguationStrategy):
     """Prefer ids where the entity match string is nearest to the default label (as per
-    the configured :class:`.StringSimilarityScorer`\\)."""
+    the configured :class:`.StringSimilarityScorer`\\).
+
+    In the case where multiple ID's share the same nearest embedding distance, multiple
+    IDs will be returned. This can happen if there are two ids that share the same
+    default label.
+    """
 
     def __init__(
         self, complex_string_scorer: StringSimilarityScorer, confidence: DisambiguationConfidence
