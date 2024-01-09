@@ -25,6 +25,7 @@ from kazu.steps.linking.post_processing.disambiguation.strategies import (
     TfIdfDisambiguationStrategy,
     AnnotationLevelDisambiguationStrategy,
     PreferDefaultLabelMatchDisambiguationStrategy,
+    PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy,
     GildaTfIdfDisambiguationStrategy,
 )
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
@@ -372,7 +373,7 @@ It is often referred to as a cell cycle inhibitor protein because its major func
 
 
 @requires_model_pack
-def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(override_kazu_test_config):
+def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(kazu_test_config):
 
     dummy_data = {
         IDX: ["1", "2", "3"],
@@ -412,9 +413,10 @@ def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(override_kaz
     bc_ent.update_terms(terms_with_metrics)
     doc.sections[0].entities.append(bc_ent)
 
-    kazu_test_config = override_kazu_test_config(overrides=["DisambiguationStrategies=test"])
-
-    strategy = instantiate(kazu_test_config.DisambiguationStrategies.prefer_nearest_embedding)
+    strategy = PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(
+        confidence=DisambiguationConfidence.HIGHLY_LIKELY,
+        complex_string_scorer=instantiate(kazu_test_config.SapbertStringSimilarityScorer),
+    )
 
     check_ids_are_represented(
         ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=bc_ent
