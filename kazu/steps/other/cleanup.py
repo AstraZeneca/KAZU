@@ -159,7 +159,7 @@ class DropMappingsByParserNameRankAction(CleanupAction):
             that an entity has mappings for, based on list ordering (first is preferred).
         """
         self.entity_class_to_parser_name_rank = entity_class_to_parser_name_rank
-        for entity_class, parser_name_lists in self.entity_class_to_parser_name_rank.items():
+        for entity_class, parser_names in self.entity_class_to_parser_name_rank.items():
             maybe_loaded_parsers = MetadataDatabase().entity_class_to_parser_names.get(
                 entity_class, None
             )
@@ -167,10 +167,10 @@ class DropMappingsByParserNameRankAction(CleanupAction):
                 raise KazuConfigurationError(
                     f"{self.__class__.__name__} is configured for {entity_class} but no parsers have been loaded for this class"
                 )
-            for parser_name in parser_name_lists:
+            for parser_name in parser_names:
                 if parser_name not in maybe_loaded_parsers:
                     raise KazuConfigurationError(
-                        f"{self.__class__.__name__} is configured for {entity_class} but {parser_name} is not ranked (current rankings: {parser_name_lists}"
+                        f"{self.__class__.__name__} is configured for {entity_class} but {parser_name} is not ranked (current rankings: {parser_names}"
                     )
 
     def cleanup(self, doc: Document) -> None:
