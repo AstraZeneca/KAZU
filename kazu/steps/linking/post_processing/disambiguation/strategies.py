@@ -470,7 +470,9 @@ class PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(DisambiguationS
         ent_match_norm: Optional[str] = None,
     ) -> set[EquivalentIdSet]:
 
-        ent_match = cast(str, ent_match)
+        assert (
+            ent_match is not None
+        ), "ent_match is None, but this strategy requires it to function."
         idx_and_scores: set[tuple[tuple[str, str], float]] = set()
         for equiv_id_set in id_sets:
 
