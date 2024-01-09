@@ -418,6 +418,21 @@ def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(kazu_test_co
         complex_string_scorer=instantiate(kazu_test_config.SapbertStringSimilarityScorer),
     )
 
-    check_ids_are_represented(
-        ids_to_check={"1"}, strategy=strategy, doc=doc, parser=parser, entity_to_test=bc_ent
+    strategy.prepare(doc)
+    all_id_sets: set[EquivalentIdSet] = set(
+        chain.from_iterable(
+            term.associated_id_sets for term in bc_ent.syn_term_to_synonym_terms.values()
+        )
     )
+
+    disambiguated_id_sets = list(
+        strategy.disambiguate(
+            id_sets=all_id_sets,
+            document=doc,
+            parser_name=parser.name,
+            ent_match=bc_ent.match,
+            ent_match_norm=bc_ent.match_norm,
+        )
+    )
+    assert len(disambiguated_id_sets) == 1
+    assert disambiguated_id_sets[0].ids == {"1"}
