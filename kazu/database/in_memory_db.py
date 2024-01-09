@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from copy import deepcopy
 from typing import Optional, Any
 from collections.abc import Iterable
@@ -32,7 +31,6 @@ class MetadataDatabase(metaclass=Singleton):
         self._database: dict[ParserName, dict[Idx, Metadata]] = {}
         self._keys_lst: dict[ParserName, list[Idx]] = {}
         self.parser_name_to_ent_class: dict[str, str] = {}
-        self.entity_class_to_parser_names: defaultdict[str, set[str]] = defaultdict(set)
 
     @property
     def loaded_parsers(self) -> set[ParserName]:
@@ -51,7 +49,6 @@ class MetadataDatabase(metaclass=Singleton):
         :return:
         """
         self.parser_name_to_ent_class[name] = entity_class
-        self.entity_class_to_parser_names[entity_class].add(name)
         if name in self._database:
             logger.info(
                 f"parser {name} already present in metadata database - will override existing parser data."
