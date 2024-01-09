@@ -1,9 +1,9 @@
 import dataclasses
-from typing import Protocol, Optional
-from collections.abc import Iterable, Callable
+import logging
 import urllib
+from collections.abc import Iterable, Callable
+from typing import Protocol, Optional
 
-from kazu.database.in_memory_db import MetadataDatabase
 from kazu.data.data import (
     Document,
     Entity,
@@ -11,13 +11,14 @@ from kazu.data.data import (
     StringMatchConfidence,
     DisambiguationConfidence,
     MentionConfidence,
-    KazuConfigurationError,
 )
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.grouping import sort_then_group
 
 EntityFilterFn = Callable[[Entity], bool]
 MappingFilterFn = Callable[[Mapping], bool]
+
+logger = logging.getLogger(__name__)
 
 
 class CleanupAction(Protocol):
@@ -159,30 +160,25 @@ class DropMappingsByParserNameRankAction(CleanupAction):
             that an entity has mappings for, based on list ordering (first is preferred).
         """
         self.entity_class_to_parser_name_rank = entity_class_to_parser_name_rank
-        for entity_class, parser_names in self.entity_class_to_parser_name_rank.items():
-            maybe_loaded_parsers = MetadataDatabase().entity_class_to_parser_names.get(
-                entity_class, None
-            )
-            if maybe_loaded_parsers is None:
-                raise KazuConfigurationError(
-                    f"{self.__class__.__name__} is configured for {entity_class} but no parsers have been loaded for this class"
-                )
-            for parser_name in parser_names:
-                if parser_name not in maybe_loaded_parsers:
-                    raise KazuConfigurationError(
-                        f"{self.__class__.__name__} is configured for {entity_class} but {parser_name} is not ranked (current rankings: {parser_names}"
-                    )
 
     def cleanup(self, doc: Document) -> None:
         for entity in doc.get_entities():
             ranks_to_consider = self.entity_class_to_parser_name_rank.get(entity.entity_class)
             if ranks_to_consider is not None:
-                for _, mappings in sort_then_group(
-                    entity.mappings, key_func=lambda x: ranks_to_consider.index(x.parser_name)
-                ):
-                    entity.mappings = set(mappings)
-                    # only consider the top rank
-                    break
+                try:
+                    for _, mappings in sort_then_group(
+                        entity.mappings, key_func=lambda x: ranks_to_consider.index(x.parser_name)
+                    ):
+                        entity.mappings = set(mappings)
+                        # only consider the top rank
+                        break
+                except IndexError as e:
+                    logger.exception(
+                        "Tried to cleanup mappings for %s, but at least one mapping has a parser_name that has not been configured with a rank. Mappings: %s ",
+                        entity,
+                        entity.mappings,
+                    )
+                    raise e
 
 
 class CleanupStep(Step):

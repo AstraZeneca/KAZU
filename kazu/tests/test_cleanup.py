@@ -1,13 +1,7 @@
 import dataclasses
 from collections import defaultdict
 
-import pytest
-from kazu.database.in_memory_db import MetadataDatabase
-from kazu.steps.other.cleanup import (
-    CleanupStep,
-    StripMappingURIsAction,
-    DropMappingsByParserNameRankAction,
-)
+from hydra.utils import instantiate
 from kazu.data.data import (
     Document,
     Entity,
@@ -16,11 +10,14 @@ from kazu.data.data import (
     MentionConfidence,
     StringMatchConfidence,
     DisambiguationConfidence,
-    KazuConfigurationError,
 )
+from kazu.database.in_memory_db import MetadataDatabase
 from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
-
-from hydra.utils import instantiate
+from kazu.steps.other.cleanup import (
+    CleanupStep,
+    StripMappingURIsAction,
+    DropMappingsByParserNameRankAction,
+)
 from kazu.utils.utils import Singleton
 
 doc_text = "XYZ1 is picked up as entity by explosion step but not mapped to a kb."
@@ -296,43 +293,6 @@ def test_drop_by_parser_name_rank():
             assert entity.mappings == {asthma_mapping_mondo}
         else:
             assert entity.mappings == {hsc0054_mapping_other_ont}
-
-
-def test_drop_by_parser_name_rank_throws_exception_on_misconfiguration():
-    Singleton.clear_all()
-
-    (
-        asthma_mapping_mondo,
-        asthma_mapping_other_ont,
-        doc,
-        hsc0054_mapping_clo,
-        hsc0054_mapping_other_ont,
-    ) = set_up_simple_cleanup_test_case()
-    Singleton.clear_all()
-
-    entity_class_to_parser_names_override = defaultdict(
-        set,
-        {
-            "disease": {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name},
-            "cell_line": {
-                hsc0054_mapping_clo.parser_name
-            },  # this is deliberately missing the hsc0054_mapping_other_ont parser name
-        },
-    )
-
-    MetadataDatabase().entity_class_to_parser_names = entity_class_to_parser_names_override
-
-    with pytest.raises(KazuConfigurationError):
-        action = DropMappingsByParserNameRankAction(
-            entity_class_to_parser_name_rank={
-                "disease": [asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name],
-                "cell_line": [
-                    hsc0054_mapping_other_ont.parser_name,
-                    hsc0054_mapping_clo.parser_name,
-                ],
-            }
-        )
-        action.cleanup(doc)
 
 
 def test_cleanup_step():
