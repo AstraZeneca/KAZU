@@ -274,13 +274,14 @@ def test_drop_by_parser_name_rank():
 
     Singleton.clear_all()
 
-    entity_class_to_parser_names_override = defaultdict(set)
-    entity_class_to_parser_names_override["disease"].update(
-        {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name}
+    entity_class_to_parser_names_override = defaultdict(
+        set,
+        {
+            "disease": {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name},
+            "cell_line": {hsc0054_mapping_clo.parser_name, hsc0054_mapping_other_ont.parser_name},
+        },
     )
-    entity_class_to_parser_names_override["cell_line"].update(
-        {hsc0054_mapping_clo.parser_name, hsc0054_mapping_other_ont.parser_name}
-    )
+
     MetadataDatabase().entity_class_to_parser_names = entity_class_to_parser_names_override
 
     action = DropMappingsByParserNameRankAction(
@@ -308,13 +309,17 @@ def test_drop_by_parser_name_rank_throws_exception_on_misconfiguration():
         hsc0054_mapping_other_ont,
     ) = set_up_simple_cleanup_test_case()
     Singleton.clear_all()
-    entity_class_to_parser_names_override = defaultdict(set)
-    entity_class_to_parser_names_override["disease"].update(
-        {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name}
+
+    entity_class_to_parser_names_override = defaultdict(
+        set,
+        {
+            "disease": {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name},
+            "cell_line": {
+                hsc0054_mapping_clo.parser_name
+            },  # this is deliberately missing the hsc0054_mapping_other_ont parser name
+        },
     )
-    entity_class_to_parser_names_override["cell_line"].update(
-        {hsc0054_mapping_clo.parser_name}
-    )  # this is deliberately missing the hsc0054_mapping_other_ont parser name
+
     MetadataDatabase().entity_class_to_parser_names = entity_class_to_parser_names_override
 
     with pytest.raises(KazuConfigurationError):
