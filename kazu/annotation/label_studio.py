@@ -48,10 +48,10 @@ class KazuToLabelStudioConverter:
 
     @classmethod
     def convert_multiple_docs_to_tasks(cls, docs: Iterable[set[Document]]) -> Iterable[dict]:
-        """If you want to utilise multiple annotation views in label studio,
-        you can supply an iterable of sets of kazu documents annotated by
-        different pipelines. The entity information from each will be added to
-        an independent annotation set in label studio.
+        """If you want to utilise multiple annotation views in label studio, you can
+        supply an iterable of sets of kazu documents annotated by different pipelines.
+        The entity information from each will be added to an independent annotation set
+        in label studio.
 
         :param docs:
         :return:
@@ -555,8 +555,9 @@ class LabelStudioManager:
         """Update the view of a label studio project.
 
         :param view:
-        :param docs: either a list of kazu documents, or a list of a set of kazu documents. If using the latter,
-            each document in the set should be identical, apart from the entity information. Each documents entity
+        :param docs: either a list of kazu documents, or a list of a set of kazu
+            documents. If using the latter, each document in the set should be
+            identical, apart from the entity information. Each documents entity
             information will form a seperate annotation set in label studio.
         :return:
         """
@@ -590,8 +591,9 @@ class LabelStudioManager:
     def update_tasks(self, docs):
         """Add tasks to a label studio project.
 
-        :param docs: either a list of kazu documents, or a list of a set of kazu documents. If using the latter,
-            each document in the set should be identical, apart from the entity information. Each documents entity
+        :param docs: either a list of kazu documents, or a list of a set of kazu
+            documents. If using the latter, each document in the set should be
+            identical, apart from the entity information. Each documents entity
             information will form a seperate annotation set in label studio.
         :return:
         """
