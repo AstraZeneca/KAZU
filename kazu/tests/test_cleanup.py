@@ -271,15 +271,6 @@ def test_drop_by_parser_name_rank():
 
     Singleton.clear_all()
 
-    entity_class_to_parser_names_override = defaultdict(
-        set,
-        {
-            "disease": {asthma_mapping_mondo.parser_name, asthma_mapping_other_ont.parser_name},
-            "cell_line": {hsc0054_mapping_clo.parser_name, hsc0054_mapping_other_ont.parser_name},
-        },
-    )
-
-    MetadataDatabase().entity_class_to_parser_names = entity_class_to_parser_names_override
 
     action = DropMappingsByParserNameRankAction(
         entity_class_to_parser_name_rank={
