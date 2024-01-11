@@ -13,7 +13,7 @@ from kazu.data.data import (
     EquivalentIdSet,
     SynonymTermWithMetrics,
 )
-from kazu.database.in_memory_db import MetadataDatabase,SynonymDatabase
+from kazu.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     TfIdfScorer,
