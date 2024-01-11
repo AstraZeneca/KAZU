@@ -1,5 +1,4 @@
 import dataclasses
-from collections import defaultdict
 
 from hydra.utils import instantiate
 from kazu.data.data import (
@@ -11,7 +10,6 @@ from kazu.data.data import (
     StringMatchConfidence,
     DisambiguationConfidence,
 )
-from kazu.database.in_memory_db import MetadataDatabase
 from kazu.steps.joint_ner_and_linking.explosion import ExplosionStringMatchingStep
 from kazu.steps.other.cleanup import (
     CleanupStep,
@@ -270,7 +268,6 @@ def test_drop_by_parser_name_rank():
     ) = set_up_simple_cleanup_test_case()
 
     Singleton.clear_all()
-
 
     action = DropMappingsByParserNameRankAction(
         entity_class_to_parser_name_rank={
