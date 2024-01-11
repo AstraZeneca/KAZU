@@ -5,7 +5,6 @@ from collections import defaultdict
 from collections.abc import Iterable
 from os import getenv
 from typing import Optional
-from collections.abc import Iterable
 
 import numpy as np
 from kazu.data.data import (
@@ -19,14 +18,14 @@ from kazu.database.in_memory_db import (
     SynonymDatabase,
     NormalisedSynonymStr,
 )
+from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.base import DEFAULT_LABEL
 from kazu.steps.linking.post_processing.disambiguation.context_scoring import (
     TfIdfScorer,
     GildaTfIdfScorer,
 )
-from kazu.utils.string_normalizer import StringNormalizer
-from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.utils.grouping import sort_then_group
+from kazu.utils.string_normalizer import StringNormalizer
 from scipy.sparse import csr_matrix
 
 logger = logging.getLogger(__name__)
