@@ -37,7 +37,7 @@ class DisambiguationStrategy(ABC):
 
     .. warning::
        The :class:`.EquivalentIdSet`\\s produced needn't map to those contained within
-       :attr:`~.SynonymTerm.associated_id_set`\\. This may cause confusing behaviour
+       :attr:`~.SynonymTerm.associated_id_sets`\\. This may cause confusing behaviour
        during debugging.
 
 
