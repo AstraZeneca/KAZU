@@ -86,6 +86,7 @@ class MentionConfidence(IntEnum):
     HIGHLY_LIKELY = 100  # almost certain to be correct
     PROBABLE = 50
     POSSIBLE = 10  # high degree of uncertainty
+    IGNORE = 0  # do not use this mention for NER
 
 
 class StringMatchConfidence(AutoNameEnum):
