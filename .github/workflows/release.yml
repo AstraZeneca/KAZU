@@ -64,7 +64,7 @@ jobs:
 
       - name: Check precommit
         run: |
-          . /tmp/kazu-env/bin/activate
+          . kazu-env/bin/activate
           pre-commit run --all-files
 
       - name: Build model pack caches and test (with acceptance tests)
