@@ -26,6 +26,7 @@ from kazu.data.data import (
     MentionConfidence,
     CuratedTermBehaviour,
     EquivalentIdSet,
+    MentionForm,
 )
 from kazu.database.in_memory_db import ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import (
@@ -87,8 +88,15 @@ PARSER_2_DEFAULT_DATA = {
 }
 
 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = CuratedTerm(
-    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-    curated_synonym="complexVII disease\u03B1",
+    original_forms=frozenset(
+        [
+            MentionForm(
+                mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                string="complexVII disease\u03B1",
+                case_sensitive=False,
+            )
+        ]
+    ),
     behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
     associated_id_sets=frozenset(
         [
@@ -104,7 +112,6 @@ FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = CuratedTerm(
             )
         ]
     ),
-    case_sensitive=False,
 )
 
 SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
@@ -183,7 +190,17 @@ TESTCASES = [
         id="Two curated terms from two parsers One should hit to test case sensitivity",
         parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
         parser_2_curations=[
-            dataclasses.replace(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, case_sensitive=True)
+            dataclasses.replace(
+                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+                original_forms=frozenset(
+                    [
+                        dataclasses.replace(
+                            next(iter(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
+                            case_sensitive=True,
+                        )
+                    ]
+                ),
+            )
         ],
         match_len=1,
         match_texts={"ComplexVII Disease\u03B1"},
@@ -220,7 +237,14 @@ TESTCASES = [
         parser_1_curations=[
             dataclasses.replace(
                 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-                curated_synonym="This sentence is just to test",
+                original_forms=frozenset(
+                    [
+                        dataclasses.replace(
+                            next(iter(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
+                            string="This sentence is just to test",
+                        )
+                    ]
+                ),
             )
         ],
         parser_2_curations=[],

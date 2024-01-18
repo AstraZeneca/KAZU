@@ -23,7 +23,7 @@ from kazu.tests.string_matching_utils import (
     SECOND_MOCK_PARSER,
     MatchOntologyData,
 )
-from kazu.tests.utils import DummyParser, write_curations
+from kazu.tests.utils import DummyParser, write_curations, ignore_all_by_default_autocurator_factory
 from kazu.utils.spacy_pipeline import SPACY_DEFAULT_INFIXES
 from kazu.utils.utils import Singleton
 from spacy.lang.en import English
@@ -77,6 +77,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         source=FIRST_MOCK_PARSER,
         curations_path=str(TEST_CURATIONS_PATH_PARSER_1),
         data=parser_1_data,
+        autocurator=ignore_all_by_default_autocurator_factory(),
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
@@ -84,6 +85,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         source=SECOND_MOCK_PARSER,
         curations_path=str(TEST_CURATIONS_PATH_PARSER_2),
         data=parser_2_data,
+        autocurator=ignore_all_by_default_autocurator_factory(),
     )
     TEST_SPAN_KEY = "my_hits"
     TEST_OUTPUT_DIR = tmp_path / "ontology_pipeline"
@@ -184,9 +186,9 @@ def test_pipeline_build_from_parsers_alone(tmp_path):
         "amongst",
     }
     match_ontology_data = {
-        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.POSSIBLE),
-        ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.POSSIBLE),
-        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.POSSIBLE),
+        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.PROBABLE),
+        ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.PROBABLE),
+        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.PROBABLE),
         ("ent_type_3", "third_mock_parser", "COMPLEX 7 DISEASE ALPHA", MentionConfidence.PROBABLE),
         ("ent_type_3", "third_mock_parser", "AMONGST", MentionConfidence.PROBABLE),
     }

@@ -1,4 +1,6 @@
+import dataclasses
 import json
+import tempfile
 from os import getenv
 from pathlib import Path
 from typing import Optional
@@ -12,6 +14,7 @@ from kazu.data.data import (
     GlobalParserActions,
     CuratedTerm,
     DocumentJsonUtils,
+    MentionConfidence,
 )
 from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.base import (
@@ -22,6 +25,7 @@ from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.ontology_preprocessing.autocuration import AutoCurationAction, AutoCurator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -81,9 +85,33 @@ class DummyParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         source: str = "test_parser",
         data: Optional[dict[str, list[str]]] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
+        """
+
+        :param in_path: A dummy parser should always be called with an empty subdirectory
+            for in_path, so that the parser defaults file is properly generated
+        :param entity_class:
+        :param name:
+        :param string_scorer:
+        :param synonym_merge_threshold:
+        :param data_origin:
+        :param synonym_generator:
+        :param source:
+        :param data:
+        :param autocurator:
+        :param curations_path:
+        :param global_actions:
+        :param run_upgrade_report:
+        :param run_curation_report:
+        """
+        if in_path == "":
+            temp_parent = tempfile.mkdtemp()
+            in_path = tempfile.mkdtemp(dir=temp_parent)
         super().__init__(
             in_path,
             entity_class,
@@ -94,6 +122,9 @@ class DummyParser(OntologyParser):
             synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
         self.source = source
         if data is not None:
@@ -148,3 +179,28 @@ def write_curations(path: Path, terms: list[CuratedTerm]):
     with open(path, "w") as f:
         for curation in terms:
             f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
+
+
+# for the purposes of testing, we set up an autocurator class that tells the parsers to set the default behaviour of terms to 'IGNORE'
+class IgnoreAllAutoCurationAction(AutoCurationAction):
+    def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
+        original_forms_mod = set()
+        alternative_forms_mod = set()
+        for form in curated_term.original_forms:
+            original_forms_mod.add(
+                dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
+            )
+        for form in curated_term.alternative_forms:
+            alternative_forms_mod.add(
+                dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
+            )
+
+        return dataclasses.replace(
+            curated_term,
+            original_forms=frozenset(original_forms_mod),
+            alternative_forms=frozenset(alternative_forms_mod),
+        )
+
+
+def ignore_all_by_default_autocurator_factory() -> AutoCurator:
+    return AutoCurator([IgnoreAllAutoCurationAction()])

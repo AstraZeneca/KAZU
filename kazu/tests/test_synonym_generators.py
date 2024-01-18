@@ -3,7 +3,7 @@ from sys import maxunicode
 from typing import Union
 
 import pytest
-from kazu.data.data import CuratedTerm, MentionConfidence, CuratedTermBehaviour
+from kazu.data.data import CuratedTerm, MentionConfidence, CuratedTermBehaviour, MentionForm
 from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
@@ -25,17 +25,25 @@ def check_generator_result(
 ):
     if isinstance(generator, CombinatorialSynonymGenerator):
         curated_term = CuratedTerm(
-            curated_synonym=input_str,
-            mention_confidence=MentionConfidence.PROBABLE,
-            case_sensitive=False,
+            original_forms=frozenset(
+                [
+                    MentionForm(
+                        string=input_str,
+                        mention_confidence=MentionConfidence.PROBABLE,
+                        case_sensitive=False,
+                    )
+                ]
+            ),
             behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         )
-        generated_terms = set(generator({curated_term}))
-        new_syns = {term.curated_synonym for term in generated_terms}
+        generated_terms = generator({curated_term})
+        new_syns: set[str] = set()
+        for term in generated_terms:
+            new_syns.update(term.all_strings())
         new_syns.add(input_str)
 
     else:
-        new_syns = set(generator({input_str}))
+        new_syns = generator({input_str})
     assert new_syns == expected_syns
 
 

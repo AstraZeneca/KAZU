@@ -1,8 +1,7 @@
-from collections.abc import Iterable
 import dataclasses
+from collections.abc import Iterable
 
 import pytest
-
 from kazu.data.data import (
     MentionConfidence,
     Document,
@@ -32,7 +31,7 @@ from kazu.tests.string_matching_utils import (
     StringMatchingTestCase,
     convert_test_case_to_param,
 )
-from kazu.tests.utils import DummyParser, write_curations
+from kazu.tests.utils import DummyParser, write_curations, ignore_all_by_default_autocurator_factory
 from kazu.utils.utils import Singleton
 
 pytestmark = pytest.mark.usefixtures(
@@ -45,14 +44,28 @@ max_mention_test_case = StringMatchingTestCase(
     parser_1_curations=[
         dataclasses.replace(
             FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-            mention_confidence=MentionConfidence.PROBABLE,
+            original_forms=frozenset(
+                [
+                    dataclasses.replace(
+                        next(iter(FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
+                        mention_confidence=MentionConfidence.PROBABLE,
+                    )
+                ]
+            ),
         ),
     ],
     parser_2_curations=[
         dataclasses.replace(
             SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-            case_sensitive=True,
-            curated_synonym="ComplexVII Disease\u03B1",
+            original_forms=frozenset(
+                [
+                    dataclasses.replace(
+                        next(iter(FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
+                        case_sensitive=True,
+                        string="ComplexVII Disease\u03B1",
+                    )
+                ]
+            ),
         ),
     ],
     match_len=1,
@@ -100,12 +113,14 @@ def test_pipeline_build_from_parsers_and_curated_list(
     TEST_CURATIONS_PATH_PARSER_2 = tmp_path / "parser2_curated_terms.jsonl"
     write_curations(path=TEST_CURATIONS_PATH_PARSER_1, terms=parser_1_curations)
     write_curations(path=TEST_CURATIONS_PATH_PARSER_2, terms=parser_2_curations)
+
     parser_1 = DummyParser(
         name=FIRST_MOCK_PARSER,
         entity_class=parser_1_ent_type,
         source=FIRST_MOCK_PARSER,
         curations_path=str(TEST_CURATIONS_PATH_PARSER_1),
         data=parser_1_data,
+        autocurator=ignore_all_by_default_autocurator_factory(),
     )
     parser_2 = DummyParser(
         name="second_mock_parser",
@@ -113,6 +128,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         source=SECOND_MOCK_PARSER,
         curations_path=str(TEST_CURATIONS_PATH_PARSER_2),
         data=parser_2_data,
+        autocurator=ignore_all_by_default_autocurator_factory(),
     )
     step = MemoryEfficientStringMatchingStep(parsers=[parser_1, parser_2])
     success, _failed = step([Document.create_simple_document(STRINGMATCHING_EXAMPLE_TEXT)])
@@ -120,7 +136,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
     assert_matches(entities, match_len, match_texts, match_ontology_data)
 
 
-def test_pipeline_build_from_parsers_alone():
+def test_pipeline_build_from_parsers_alone(tmp_path):
     Singleton.clear_all()
     parser_1 = DummyParser(
         name="first_mock_parser",
@@ -190,9 +206,9 @@ def test_pipeline_build_from_parsers_alone():
         "amongst",
     }
     match_ontology_data = {
-        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.POSSIBLE),
-        ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.POSSIBLE),
-        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.POSSIBLE),
+        ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.PROBABLE),
+        ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.PROBABLE),
+        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.PROBABLE),
         (
             "ent_type_3",
             "third_mock_parser",
