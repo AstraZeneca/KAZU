@@ -828,8 +828,6 @@ class CuratedTermBehaviour(AutoNameEnum):
     #: do not use this term as a linking target. Normally, you would use this for a term you want to remove
     #: from the underlying ontology (e.g. a 'bad' synonym). If the term does not exist, has no effect
     DROP_SYNONYM_TERM_FOR_LINKING = auto()
-    #: used if the containing Curation has source_term !=None, in which case all behaviours are inherited
-    INHERIT_FROM_SOURCE_TERM = auto()
 
 
 class ParserBehaviour(AutoNameEnum):
@@ -907,12 +905,29 @@ class GlobalParserActions:
 
 
 @dataclass(frozen=True)
-class CuratedTerm:
-    """A CuratedTerm is a means to modify the behaviour of a specific
-    :class:`.SynonymTerm`.
+class MentionForm:
+    string: str
+    case_sensitive: bool
+    mention_confidence: MentionConfidence
 
-    This can affect both the behaviour of :class:`kazu.ontology_preprocessing.base.OntologyParser`,
-    and dictionary based NER.
+
+@dataclass(frozen=True)
+class CuratedTerm:
+    """A CuratedTerm represents the behaviour of a specific :class:`.SynonymTerm` within
+    an Ontology. For each SynonymTerm, a default CuratedTerm is produced with its
+    behaviour determined by an instance of
+    :class:`kazu.ontology_preprocessing.autocuration.AutoCurator` and the
+    :class:`kazu.ontology_preprocessing.curation_utils.CuratedTermConflictAnalyser`\\.
+
+    .. note::
+
+       This is typically handled by the internals of :class:`kazu.ontology_preprocessing.base.OntologyParser`\\.
+       However, CuratedTerms can also be used of override the default behaviour of a parser. See :ref:`ontology_parser`
+       for a more detailed guide
+
+
+
+    The configuration of a CuratedTerm will affect both NER and Linking aspects of Kazu:
 
     Example 1:
 
@@ -922,11 +937,16 @@ class CuratedTerm:
     .. code-block:: python
 
         CuratedTerm(
-            curated_synonym="ALL",
-            case_sensitive=True,
+            original_forms=frozenset(
+                [
+                    MentionForm(
+                        string="ALL",
+                        mention_confidence=MentionConfidence.POSSIBLE,
+                        case_sensitive=True,
+                    )
+                ]
+            ),
             behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
-            associated_id_sets=None,
-            mention_confidence=MentionConfidence.POSSIBLE,
         )
 
 
@@ -940,62 +960,78 @@ class CuratedTerm:
     .. code-block:: python
 
         CuratedTerm(
-            curated_synonym="LH",
-            case_sensitive=True,
-            behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+            original_forms=frozenset(
+                [
+                    MentionForm(
+                        string="LH",
+                        mention_confidence=MentionConfidence.POSSIBLE,
+                        case_sensitive=True,
+                    )
+                ]
+            ),
             associated_id_sets=frozenset((EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)),
-            mention_confidence=MentionConfidence.POSSIBLE,
+            behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         )
 
     Example 3:
 
     A :class:`.SynonymTerm` has an alternative synonym not referenced in the underlying ontology, and we want to add it.
-    We want it to inherit all the behaviour from the original term
 
     .. code-block:: python
 
         CuratedTerm(
-            curated_synonym="breast carcinoma",
-            case_sensitive=True,
-            source_term="breast cancer",
-            behaviour=CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
-            mention_confidence=MentionConfidence.POSSIBLE,
+            original_forms=frozenset(
+                [
+                    MentionForm(
+                        string="breast carcinoma",
+                        mention_confidence=MentionConfidence.POSSIBLE,
+                        case_sensitive=True,
+                    )
+                ]
+            ),
+            associated_id_sets=frozenset((EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)),
+            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         )
     """
 
-    curated_synonym: str
-    mention_confidence: MentionConfidence
+    #: Original versions of this term, exactly as specified in the source ontology. These should all normalise to the same string
+    original_forms: frozenset[MentionForm]
+    #: The intended behaviour for this term.
     behaviour: CuratedTermBehaviour
-    case_sensitive: bool
+    #: Alternatives for this mention created by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\. Note that these are always automatically generated, and should not be manually edited.
+    alternative_forms: frozenset[MentionForm] = field(default_factory=frozenset)
     #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
     _id: bson.ObjectId = field(default_factory=bson.ObjectId, compare=False)
-    #: The original term that is used as a 'seed' term for this curation.
-    #: note, this is used for NER to determine how linking is performed. If you also
-    #: want to use this curation as a linking target for non-dictionary based NER processes,
-    #: or the term is identical to the one used in the source ontology,
-    #: this should be set to None, so that a novel term_norm is calculated
-    source_term: Optional[str] = None
     #: results of any autocuration decisions
     autocuration_results: Optional[dict[str, str]] = field(default=None, compare=False)
     #: human readable comments about this curation decision
     comment: Optional[str] = field(default=None, compare=False)
 
     def __post_init__(self):
-        # data validation
-        if not isinstance(self.curated_synonym, str):
-            raise ValueError(f"curated_synonym should be a string, {self}")
-        if self.source_term is not None and self.behaviour not in {
-            CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
-            CuratedTermBehaviour.IGNORE,
-        }:
-            raise ValueError(
-                f"inherited term detected. Only {CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM} or {CuratedTermBehaviour.IGNORE} are allowed, {self}"
-            )
+        cs_forms = defaultdict(set)
+        ci_forms = defaultdict(set)
+        for form in self.active_ner_forms():
+            if form.case_sensitive:
+                cs_forms[form.string].add(form.mention_confidence)
+            else:
+                ci_forms[form.string.lower()].add(form.mention_confidence)
+        for cs_form, cs_confidences in ci_forms.items():
+            ci_confidences = ci_forms.get(cs_form.lower(), {MentionConfidence.POSSIBLE})
+            if min(ci_confidences) < min(cs_confidences):
+                raise RuntimeError(f"case sensitive conflict, {self}")
 
     def term_norm_for_linking(self, entity_class: str) -> str:
-        norm_target = self.curated_synonym if self.source_term is None else self.source_term
-        return StringNormalizer.normalize(norm_target, entity_class)
+        norms = set(
+            StringNormalizer.normalize(form.string, entity_class) for form in self.original_forms
+        )
+        if len(norms) == 1:
+            term_norm = next(iter(norms))
+            return term_norm
+        else:
+            raise RuntimeError(
+                f"multiple term norms produced by {self}. This curation should be seperated into two or more seperate items."
+            )
 
     @classmethod
     def from_json(cls, json_str: str) -> "CuratedTerm":
@@ -1016,14 +1052,30 @@ class CuratedTerm:
 
             frozen_assoc_id_sets = frozenset(assoc_id_sets)
 
+        original_forms = frozenset(
+            MentionForm(
+                string=form_json_dict["string"],
+                case_sensitive=form_json_dict["case_sensitive"],
+                mention_confidence=MentionConfidence[form_json_dict["mention_confidence"]],
+            )
+            for form_json_dict in json_dict["original_forms"]
+        )
+
+        alternative_forms = frozenset(
+            MentionForm(
+                string=form_json_dict["string"],
+                case_sensitive=form_json_dict["case_sensitive"],
+                mention_confidence=MentionConfidence[form_json_dict["mention_confidence"]],
+            )
+            for form_json_dict in json_dict["alternative_forms"]
+        )
+
         return cls(
-            mention_confidence=MentionConfidence[json_dict["mention_confidence"]],
             behaviour=CuratedTermBehaviour(json_dict["behaviour"]),
             associated_id_sets=frozen_assoc_id_sets,
-            case_sensitive=json_dict["case_sensitive"],
-            curated_synonym=json_dict["curated_synonym"],
-            source_term=json_dict["source_term"],
             _id=json_dict.get("_id", bson.ObjectId()),
+            original_forms=original_forms,
+            alternative_forms=alternative_forms,
         )
 
     def to_dict(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
@@ -1046,13 +1098,25 @@ class CuratedTerm:
             CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         }
 
-    @property
-    def control_aspects(self) -> tuple[CuratedTermBehaviour, bool, Optional[AssociatedIdSets]]:
-        """A tuple of attributes that describe how this term behaves.
+    def all_forms(self) -> Iterable[MentionForm]:
+        for form in self.original_forms.union(self.alternative_forms):
+            yield form
 
-        :returns: :attr:`.behaviour`, :attr:`.case_sensitive`, :attr:`associated_id_sets`
-        """
-        return self.behaviour, self.case_sensitive, self.associated_id_sets
+    def all_strings(self) -> Iterable[str]:
+        for form in self.all_forms():
+            yield form.string
+
+    def active_ner_forms(self) -> Iterable[MentionForm]:
+        if self.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
+            for form in self.original_forms.union(self.alternative_forms):
+                if form.mention_confidence is not MentionConfidence.IGNORE:
+                    yield form
+
+    def active_linking_forms(self) -> Iterable[MentionForm]:
+        if self.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
+            for form in self.original_forms.union(self.alternative_forms):
+                if form.mention_confidence is not MentionConfidence.IGNORE:
+                    yield form
 
 
 class KazuConfigurationError(Exception):
