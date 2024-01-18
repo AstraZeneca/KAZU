@@ -3,16 +3,14 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 import ahocorasick
-
 from kazu.data.data import Document, Entity, SynonymTermWithMetrics, MentionConfidence
 from kazu.database.in_memory_db import SynonymDatabase, ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
 from kazu.steps.step import ParserDependentStep
 from kazu.utils.caching import kazu_disk_cache
-from kazu.utils.curated_term_tools import filter_curations_for_ner
-from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
 from kazu.utils.grouping import sort_then_group
+from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -66,19 +64,20 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 )
                 continue
 
-            for curation in filter_curations_for_ner(parser_curations, parser):
+            for curation in parser_curations:
                 # a curation can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
                 term_norm = curation.term_norm_for_linking(parser.entity_class)
-                entity_key = (
-                    parser.entity_class,
-                    curation.mention_confidence,
-                    curation.case_sensitive,
-                    term_norm,
-                    curation.curated_synonym,
-                )
-                key_to_ontology_info[curation.curated_synonym.lower()][entity_key].add(parser.name)
+                for form in curation.active_ner_forms():
+                    entity_key = (
+                        parser.entity_class,
+                        form.mention_confidence,
+                        form.case_sensitive,
+                        term_norm,
+                        form.string,
+                    )
+                    key_to_ontology_info[form.string.lower()][entity_key].add(parser.name)
 
         if len(key_to_ontology_info) > 0:
             case_insensitive_automaton = ahocorasick.Automaton()

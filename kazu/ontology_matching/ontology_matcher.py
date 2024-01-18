@@ -19,7 +19,6 @@ from spacy.util import SimpleFrozenList
 from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
-from kazu.utils.curated_term_tools import filter_curations_for_ner
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.utils import PathLike
 
@@ -183,37 +182,36 @@ class OntologyMatcher:
                 )
                 continue
 
-            curations_for_ner = set(filter_curations_for_ner(parser_curations, parser))
-
             # deduplicating match id's and patterns saves memory in the spacy pipeline
             match_ids_and_strings_cs = set()
             match_ids_and_strings_ci = set()
-            for curation in curations_for_ner:
+            for curation in parser_curations:
                 # a curation can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
                 term_norm = curation.term_norm_for_linking(parser.entity_class)
-                match_id = (
-                    parser.name
-                    + self.match_id_sep
-                    + term_norm
-                    + self.match_id_sep
-                    + str(curation.mention_confidence.value)
-                )
-                if curation.case_sensitive:
-                    match_ids_and_strings_cs.add(
-                        (
-                            match_id,
-                            curation.curated_synonym,
-                        )
+                for form in curation.active_ner_forms():
+                    match_id = (
+                        parser.name
+                        + self.match_id_sep
+                        + term_norm
+                        + self.match_id_sep
+                        + str(form.mention_confidence.value)
                     )
-                else:
-                    match_ids_and_strings_ci.add(
-                        (
-                            match_id,
-                            curation.curated_synonym.lower(),
+                    if form.case_sensitive:
+                        match_ids_and_strings_cs.add(
+                            (
+                                match_id,
+                                form.string,
+                            )
                         )
-                    )
+                    else:
+                        match_ids_and_strings_ci.add(
+                            (
+                                match_id,
+                                form.string.lower(),
+                            )
+                        )
 
             for match_id, match_str in match_ids_and_strings_cs:
                 strict_matcher.add(match_id, [self.nlp.tokenizer(match_str)])
