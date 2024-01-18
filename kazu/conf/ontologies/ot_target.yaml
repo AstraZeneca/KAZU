@@ -27,3 +27,12 @@ parsers:
       - "scaRNA"
       - "TEC"
       - ""
+    autocurator:
+      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
+      actions:
+        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
+          entity_class: ${ontologies.parsers.ot_target_parser.entity_class}
+        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
+          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
+        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
+          min_len: 2

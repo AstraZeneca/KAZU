@@ -14,3 +14,12 @@ parsers:
     entity_class: anatomy
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
     global_actions: ${global_actions}
+    autocurator:
+      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
+      actions:
+        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
+          entity_class: ${ontologies.parsers.uberon_parser.entity_class}
+        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
+          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
+        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
+          min_len: 2
