@@ -67,7 +67,6 @@ class ModelPackBuilder:
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
-        generate_curation_report: bool = False,
     ):
         """A ModelPackBuilder is a helper class to assist in the building of a model
         pack.
@@ -88,9 +87,7 @@ class ModelPackBuilder:
         :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
-        :param generate_curation_report: should the curation report be run?
         """
-        self.generate_curation_report = generate_curation_report
         if logging_config_path is not None:
             fileConfig(logging_config_path)
         self.logger = logging.getLogger(__name__)
@@ -118,17 +115,6 @@ class ModelPackBuilder:
         self.model_pack_build_path.mkdir()
         self.apply_merge_configurations()
         self.clear_cached_resources_from_model_pack_dir()
-
-        if self.generate_curation_report:
-            # local import so the cache is correctly configured with KAZU_MODEL_PACK
-            from kazu.utils.curation_report import run_curation_report
-            from kazu.utils.utils import Singleton
-
-            self.logger.info("running curation report at %s", self.model_pack_build_path)
-            run_curation_report(self.model_pack_build_path)
-            # needed as the report will interfere with the cache
-            self.clear_cached_resources_from_model_pack_dir()
-            Singleton.clear_all()
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
         from kazu.utils.constants import HYDRA_VERSION_BASE
         from kazu.steps.other.cleanup import StripMappingURIsAction
@@ -310,7 +296,6 @@ def build_all_model_packs(
     skip_tests: bool,
     logging_config_path: Optional[Path],
     max_parallel_build: Optional[int],
-    generate_curation_report: bool = False,
     debug: bool = False,
     ray_timeout: Optional[float] = DEFAULT_RAY_TIMEOUT,
 ) -> None:
@@ -324,7 +309,6 @@ def build_all_model_packs(
     :param logging_config_path: passed to logging.config.fileConfig
     :param max_parallel_build: build at most this many model packs simultaneously. If
         None, use all available CPUs
-    :param generate_curation_report: Should the curation report be run?
     :param debug: Disables Ray parallelization, enabling the use of debugger tools
     :param ray_timeout: A timeout for Ray to complete model pack building within. Defaults to :attr:`~DEFAULT_RAY_TIMEOUT`
     :return:
@@ -361,7 +345,6 @@ def build_all_model_packs(
             target_model_pack_path=model_pack_path,
             build_dir=output_dir,
             skip_tests=skip_tests,
-            generate_curation_report=generate_curation_report,
         )
         if not debug:
             futures.append(cast(ray.ObjectRef, builder.build_model_pack.remote()))
@@ -472,12 +455,6 @@ paths in a model packs build_config.json.
         help="build at most this many model packs simultaneously. If None, use all available CPUs",
     )
     parser.add_argument(
-        "--generate_curation_report",
-        action="store_true",
-        help="When building the model packs, run a curation report. This is useful when upgrading ontologies, to observe which curations are now obsolete, "
-        "and what new terms are available in the ontology upgrade. Warning - as this runs all synonym generation routines, it is slow!",
-    )
-    parser.add_argument(
         "--debug",
         action="store_true",
         help="Disables Ray parallelization, enabling the use of debugger tools",
@@ -498,7 +475,6 @@ paths in a model packs build_config.json.
         skip_tests=args.skip_tests,
         logging_config_path=args.logging_config_path,
         max_parallel_build=args.max_parallel_build,
-        generate_curation_report=args.generate_curation_report,
         debug=args.debug,
         ray_timeout=args.ray_timeout,
     )
