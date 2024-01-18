@@ -11,11 +11,12 @@ from kazu.data.data import (
     CuratedTermBehaviour,
     MentionConfidence,
     SynonymTerm,
+    MentionForm,
 )
-from kazu.utils.string_normalizer import StringNormalizer
 from transformers import BatchEncoding, PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import TruncationStrategy
+from kazu.utils.grouping import sort_then_group
 
 logger = logging.getLogger(__name__)
 
@@ -24,30 +25,32 @@ def extract_term_strings_from_synonym_terms(synonym_terms: set[SynonymTerm]) -> 
     return {term_str for syn_term in synonym_terms for term_str in syn_term.terms}
 
 
-def string_to_putative_curation(term_string: str, entity_class: str) -> CuratedTerm:
-    """Create a :class:`.CuratedTerm` from a string.
-
-    Uses some simple heuristics to suggest basic rules for how
-    this term should be handled by Kazu - You will probably want to
-    change these in some cases, depending on your use case.
-
-    This should only be used with original ontology terms (not generated).
-
-    :param term_string: becomes the :attr:`~.CuratedTerm.curated_synonym` of the result
-    :param entity_class: used to determine whether the string is symbolic or not, and
-        thus its default case sensitivity behaviour
-    :return:
+def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
     """
 
-    is_symbolic = StringNormalizer.classify_symbolic(term_string, entity_class)
-    conf = MentionConfidence.POSSIBLE if is_symbolic else MentionConfidence.PROBABLE
-    return CuratedTerm(
-        curated_synonym=term_string,
-        mention_confidence=conf,
-        case_sensitive=is_symbolic,
-        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-        source_term=None,
-    )
+
+    :param terms:
+    :return:
+    """
+    result = set()
+    for term_norm, terms in sort_then_group(terms, key_func=lambda x: x.term_norm):
+        alts = set()
+        for term in terms:
+            for term_str in term.terms:
+                alts.add(
+                    MentionForm(
+                        string=term_str,
+                        case_sensitive=False,
+                        mention_confidence=MentionConfidence.PROBABLE,
+                    )
+                )
+        result.add(
+            CuratedTerm(
+                original_forms=frozenset(alts),
+                behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+            )
+        )
+    return result
 
 
 def find_document_from_entity(docs: list[Document], entity: Entity) -> Document:
