@@ -42,6 +42,7 @@ jobs:
           hatch version $KAZU_NEW_VERSION_SEGMENT
           echo "KAZU_NEW_VERSION=$(hatch version)" >> $GITHUB_ENV
 
+          # if hatch build is not working, try removing ~/.config/hatch and ~/.local/share/hatch
           hatch build
 
           PIP_CACHE_DIR=$(pip cache dir)
