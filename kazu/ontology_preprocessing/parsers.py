@@ -49,6 +49,7 @@ from kazu.ontology_preprocessing.base import (
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.grouping import sort_then_group
+from kazu.ontology_preprocessing.autocuration import AutoCurator
 
 logger = logging.getLogger(__name__)
 
@@ -109,8 +110,11 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         """
 
@@ -122,8 +126,11 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         :param synonym_merge_threshold:
         :param data_origin:
         :param synonym_generator:
+        :param autocurator:
         :param curations_path:
         :param global_actions:
+        :param run_upgrade_report:
+        :param run_curation_report:
         """
         super().__init__(
             in_path=in_path,
@@ -135,6 +142,9 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             synonym_generator=synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
         self.allowed_therapeutic_areas = set(allowed_therapeutic_areas)
         self.metadata_db = MetadataDatabase()
@@ -285,8 +295,11 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         """
 
@@ -299,8 +312,11 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         :param synonym_merge_threshold:
         :param data_origin:
         :param synonym_generator:
+        :param autocurator:
         :param curations_path:
         :param global_actions:
+        :param run_upgrade_report:
+        :param run_curation_report:
         """
         super().__init__(
             in_path=in_path,
@@ -312,6 +328,9 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             synonym_generator=synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
         self.excluded_biotypes: set[str] = set(excluded_biotypes) if excluded_biotypes else set()
 
@@ -474,8 +493,11 @@ class RDFGraphParser(OntologyParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
         label_predicate: RdfRef = rdflib.RDFS.label,
     ):
         super().__init__(
@@ -488,6 +510,9 @@ class RDFGraphParser(OntologyParser):
             synonym_generator=synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -630,8 +655,11 @@ class SKOSXLGraphParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
         label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
     ):
         super().__init__(
@@ -649,6 +677,9 @@ class SKOSXLGraphParser(RDFGraphParser):
             curations_path=curations_path,
             global_actions=global_actions,
             label_predicate=label_predicate,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
 
@@ -683,8 +714,11 @@ class GeneOntologyParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -702,6 +736,9 @@ class GeneOntologyParser(RDFGraphParser):
             exclude_entity_patterns=exclude_entity_patterns,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
         self.instances.add(name)
 
@@ -762,8 +799,11 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -782,6 +822,9 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
                 )
             ],
             exclude_entity_patterns=[],
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
 
@@ -798,8 +841,11 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -818,6 +864,9 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
                 )
             ],
             exclude_entity_patterns=[],
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
 
@@ -834,8 +883,11 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -854,6 +906,9 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
                 )
             ],
             exclude_entity_patterns=[],
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
 
@@ -870,8 +925,11 @@ class UberonOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
 
         super().__init__(
@@ -888,6 +946,9 @@ class UberonOntologyParser(RDFGraphParser):
             synonym_generator=synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -966,8 +1027,11 @@ class HGNCGeneOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -979,6 +1043,9 @@ class HGNCGeneOntologyParser(OntologyParser):
             name=name,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1089,8 +1156,11 @@ class CLOOntologyParser(RDFGraphParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -1106,6 +1176,9 @@ class CLOOntologyParser(RDFGraphParser):
             synonym_generator=synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1216,8 +1289,11 @@ class MeddraOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
         exclude_socs: Iterable[str] = (
             "Surgical and medical procedures",
             "Social circumstances",
@@ -1234,6 +1310,9 @@ class MeddraOntologyParser(OntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             name=name,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
         self.exclude_socs = exclude_socs
@@ -1369,8 +1448,11 @@ class CLOntologyParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
 
         super().__init__(
@@ -1389,6 +1471,9 @@ class CLOntologyParser(RDFGraphParser):
             exclude_entity_patterns=exclude_entity_patterns,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1463,8 +1548,11 @@ class TabularOntologyParser(OntologyParser):
         synonym_merge_threshold: float = 0.7,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
         **kwargs: Any,
     ):
         """
@@ -1476,8 +1564,11 @@ class TabularOntologyParser(OntologyParser):
         :param synonym_merge_threshold:
         :param data_origin:
         :param synonym_generator:
+        :param autocurator:
         :param curations_path:
         :param global_actions:
+        :param run_upgrade_report:
+        :param run_curation_report:
         :param kwargs: passed to pandas.read_csv
         """
         super().__init__(
@@ -1490,6 +1581,9 @@ class TabularOntologyParser(OntologyParser):
             synonym_generator=synonym_generator,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
         self._raw_dataframe: pd.DataFrame = pd.read_csv(self.in_path, **kwargs)
 
@@ -1523,8 +1617,11 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         synonym_merge_threshold: float = 0.70,
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -1543,6 +1640,9 @@ class ATCDrugClassificationParser(TabularOntologyParser):
             # removing this results in the same behaviour, but
             # pandas logs a warning.
             engine="python",
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
     levels_to_ignore = {"1", "2", "3"}
@@ -1589,8 +1689,11 @@ class StatoParser(RDFGraphParser):
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
+        autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        run_upgrade_report: bool = False,
+        run_curation_report: bool = False,
     ):
 
         super().__init__(
@@ -1607,6 +1710,9 @@ class StatoParser(RDFGraphParser):
             exclude_entity_patterns=exclude_entity_patterns,
             curations_path=curations_path,
             global_actions=global_actions,
+            autocurator=autocurator,
+            run_upgrade_report=run_upgrade_report,
+            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
