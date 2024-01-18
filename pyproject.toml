@@ -51,7 +51,10 @@ webserver = [
   # in a way that broke our docs.
   # A new way was added in 0.103.0 , and we can handle both versions older than 0.99.0 and 0.103.0 or newer.
   # However, releases in between don't work.
-  "fastapi!=0.99.0,!=0.99.1,!=0.100.0b1,!=0.100.0b2,!=0.100.0b3,!=0.100.0,!=0.100.1,!=0.101.0,!=0.101.1,!=0.102.0",
+  #  "fastapi!=0.99.0,!=0.99.1,!=0.100.0b1,!=0.100.0b2,!=0.100.0b3,!=0.100.0,!=0.100.1,!=0.101.0,!=0.101.1,!=0.102.0",
+  # UPDATE: 0.109.0 also no longer works. It seems like there's some incompatibility with ray serve here, so pinning to
+  # last known good version
+  "fastapi==0.108.0",
   "pydantic<2.0",
   "ray[serve]>=2.0.0",
   "PyJWT>=2.0.0",
