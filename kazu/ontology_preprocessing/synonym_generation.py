@@ -1,4 +1,3 @@
-import copy
 import dataclasses
 import functools
 import itertools
@@ -10,7 +9,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Optional
 
-from kazu.data.data import CuratedTerm, CuratedTermBehaviour
+from kazu.data.data import CuratedTerm, MentionForm
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike
@@ -75,41 +74,53 @@ class CombinatorialSynonymGenerator:
         logger.info(
             "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
         )
-
-        generated_results: set[CuratedTerm] = set()
+        final_results: defaultdict[CuratedTerm, set[MentionForm]] = defaultdict(set)
+        original_strings = {
+            form.string for term in curated_terms for form in term.active_ner_forms()
+        }
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original terms
-            all_syns = copy.deepcopy(curated_terms)
             logger.info(
                 "running permutation set %s of %s. Permutations: %s",
                 i + 1,
                 len(synonym_gen_permutations),
                 permutation_list,
             )
+            generated_results: defaultdict[CuratedTerm, set[MentionForm]] = defaultdict(set)
             for generator in permutation_list:
                 # run the generator. We call list here as we modify the original list
                 for curation in tqdm(
-                    list(all_syns),
-                    total=len(all_syns),
+                    list(curated_terms),
+                    total=len(curated_terms),
                     desc=f"generating synonyms for {generator.__class__.__name__}",
                 ):
 
-                    new_terms = generator({curation.curated_synonym})
-                    new_terms.discard(curation.curated_synonym)
-                    for term in new_terms:
-                        new_curated_term = dataclasses.replace(
-                            curation,
-                            source_term=curation.curated_synonym,
-                            curated_synonym=term,
-                            behaviour=CuratedTermBehaviour.INHERIT_FROM_SOURCE_TERM,
-                        )
-                        generated_results.add(new_curated_term)
-                        all_syns.add(new_curated_term)
+                    for form in list(generated_results.get(curation, curation.active_ner_forms())):
+                        new_strings = generator({form.string})
+                        for string in new_strings:
+                            if string in original_strings:
+                                logger.debug("ignoring pre-existing string: %s", string)
+                                continue
+                            alternative_form = MentionForm(
+                                string=string,
+                                case_sensitive=form.case_sensitive,
+                                mention_confidence=form.mention_confidence,
+                            )
+                            generated_results[curation].add(alternative_form)
+            for curation in curated_terms:
+                final_results[curation].update(generated_results[curation])
 
         for generator in self.synonym_generators:
             generator.generate_synonyms.cache_clear()
 
-        return generated_results
+        new_curations = set()
+
+        for curation, alternative_forms in final_results.items():
+            new_curations.add(
+                dataclasses.replace(curation, alternative_forms=frozenset(alternative_forms))
+            )
+
+        return new_curations
 
 
 # TODO: this isn't used currently - do we want to try and refine it
