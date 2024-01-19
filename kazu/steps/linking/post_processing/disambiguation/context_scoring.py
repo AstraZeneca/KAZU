@@ -164,6 +164,7 @@ class GildaTfIdfScorer(metaclass=Singleton):
         self._calculate_id_vectors(
             directory=contexts_path_as_path.parent, filename=contexts_path_as_path.name
         )
+        self.null_vector = self.vectorizer.transform([""])
 
     @kazu_disk_cache.memoize(ignore={0, 1})
     def _calculate_id_vectors(self, directory: Path, filename: str) -> None:
@@ -216,9 +217,7 @@ class GildaTfIdfScorer(metaclass=Singleton):
                 if maybe_id_vec is not None:
                     idx_to_vec[idx] = maybe_id_vec
                 else:
-                    idx_to_vec[idx] = csr_matrix(
-                        (0, self.vectorizer.max_features), dtype=np.float64
-                    )
+                    idx_to_vec[idx] = self.null_vector
         if idx_to_vec:
             idx_lst = list(idx_to_vec.keys())
             scores = -(
