@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.5.0 - 2024-01-19
+
+
+### Features
+
+- Added new cleanup action: DropMappingsByParserNameRankAction
+- Added new disambiguation strategy: PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy.
+- DefinedElsewhereInDocumentDisambiguationStrategy has slightly changed, so that it will only return mappings that were found elsewhere in the document, rather than the whole EquivalentIdSet where those ids were contained
+- New disambiguation methodology GildaTfIdfDisambiguationStrategy.
+- OpenTargetsTargetOntologyParser now has a biotype filter parameter.
+
+### Deprecations and Removals
+
+- Deprecated `GildaUtils.replace_dashes` in favour of `GildaUtils.split_on_dashes_or_space`, as the latter improves efficiency in Kazu.
+  `GildaUtils.replace_dashes` will continue to work until kazu 1.6, but using it will produce a `DeprecationWarning`.
+  Please [open a GitHub issue](https://github.com/AstraZeneca/KAZU/issues/new) if you wish this to remain.
+
+
 ## 1.4.0 - 2023-12-01
 
 

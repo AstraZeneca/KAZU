@@ -1,1 +1,0 @@
-Added new disambiguation strategy: PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy.
