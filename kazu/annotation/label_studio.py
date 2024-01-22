@@ -443,15 +443,23 @@ class LabelStudioManager:
         # but typing-requests doesn't allow this.
         headers: Optional[CollectionsMapping[str, Union[str, bytes]]],
         url: str = "http://localhost:8080",
+        # default is slightly bigger than a multiple of 3, as recommended:
+        # https://requests.readthedocs.io/en/latest/user/advanced/#timeouts
+        server_connect_timeout: float = 3.05,
     ):
         self.project_name = project_name
         self.headers = headers
         self.url = url
+        self.server_connect_timeout = server_connect_timeout
 
     @cached_property
     def project_id(self) -> int:
         projects_url = f"{self.url}/api/projects"
-        projects_resp = requests.get(projects_url, headers=self.headers)
+        projects_resp = requests.get(
+            projects_url,
+            headers=self.headers,
+            timeout=(self.server_connect_timeout, self.server_connect_timeout * 5),
+        )
 
         if not projects_resp.ok:
             raise HTTPError(
@@ -479,7 +487,9 @@ class LabelStudioManager:
     def delete_project_if_exists(self):
         try:
             resp = requests.delete(
-                f"{self.url}/api/projects/{self.project_id}", headers=self.headers
+                f"{self.url}/api/projects/{self.project_id}",
+                headers=self.headers,
+                timeout=(self.server_connect_timeout, None),
             )
             if resp.status_code != 204:
                 resp.raise_for_status()
@@ -493,7 +503,12 @@ class LabelStudioManager:
         payload = {"title": self.project_name}
 
         try:
-            resp = requests.post(f"{self.url}/api/projects", json=payload, headers=self.headers)
+            resp = requests.post(
+                f"{self.url}/api/projects",
+                json=payload,
+                headers=self.headers,
+                timeout=(self.server_connect_timeout, None),
+            )
             if resp.status_code != 201:
                 resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -506,7 +521,10 @@ class LabelStudioManager:
 
         try:
             resp = requests.patch(
-                f"{self.url}/api/projects/{self.project_id}", json=payload, headers=self.headers
+                f"{self.url}/api/projects/{self.project_id}",
+                json=payload,
+                headers=self.headers,
+                timeout=(self.server_connect_timeout, None),
             )
             if resp.status_code not in {200, 201}:
                 resp.raise_for_status()
@@ -521,6 +539,7 @@ class LabelStudioManager:
                 f"{self.url}/api/projects/{self.project_id}/import",
                 json=tasks,
                 headers=self.headers,
+                timeout=(self.server_connect_timeout, None),
             )
             if resp.status_code not in {200, 201}:
                 resp.raise_for_status()
@@ -532,6 +551,7 @@ class LabelStudioManager:
         tasks = requests.get(
             f"{self.url}/api/tasks?page_size=1000000&project={self.project_id}",
             headers=self.headers,
+            timeout=(self.server_connect_timeout, None),
         ).json()
         ids = [task["id"] for task in tasks["tasks"]]
         return self.get_tasks(ids)
@@ -543,6 +563,7 @@ class LabelStudioManager:
                 requests.get(
                     f"{self.url}/api/tasks/{idx}?project={self.project_id}",
                     headers=self.headers,
+                    timeout=(self.server_connect_timeout, None),
                 ).json()
             )
         return task_data
