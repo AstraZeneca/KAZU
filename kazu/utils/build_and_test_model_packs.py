@@ -367,9 +367,19 @@ def build_all_model_packs(
 
 
 def wait_for_model_pack_completion(futures: list[ray.ObjectRef]) -> list[ray.ObjectRef]:
+    if len(futures) == 0:
+        logging.warning(
+            "wait_for_model_pack_completion called with empty futures - nothing to wait on!"
+        )
+        return []
     # Returns the first ObjectRef that is ready.
     finished, futures = ray.wait(futures, num_returns=1, timeout=180.0 * 60.0)
-    result = ray.get(finished[0])
+    try:
+        result = ray.get(finished[0])
+    except IndexError:
+        raise RuntimeError(
+            "Ray timed out waiting on a model pack to complete building. This means it took over 180 minutes, so something is likely wrong/broken."
+        )
     print(f"model pack {result} build complete")
     return futures
 
