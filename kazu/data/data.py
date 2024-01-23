@@ -704,19 +704,13 @@ class DocumentJsonUtils:
 
     @classmethod
     def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonEncodable]:
-        """.. without the override below, it fails to find NoneType and JsonEncodable.
+        """.. without the override below, it fails to find JsonEncodable.
 
         ..
-          JsonEncodable failure is because it's recursive, but sphinx tries to
+          JsonEncodable failure is because it's recursively defined, but sphinx tries to
           expand it out, so this doesn't work.
-          Note we used to have a non-recursive (but over-accepting) definition
-          of JsonEncodable anyway, so that isn't the key blocker here (as we
-          could have kept that definition and been happy enough).
-          The NoneType failure is due to an issue with Sphinx handling builtins
-          - see https://github.com/sphinx-doc/sphinx/issues/11571 as it used
-          to work while using typing.Dict instead of the builtin dict.
-          Switching to show JsonEncodable instead as it's simpler to write this
-          override, plus I think more readable for users.
+
+          A manual override isn't too hard, and is readable for users.
           An alternative would be to attempt to use Sphinx's
           autodoc_type_aliases
           https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_type_aliases
