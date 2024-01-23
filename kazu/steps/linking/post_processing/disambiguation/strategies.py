@@ -497,7 +497,7 @@ class PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(DisambiguationS
 
         result: set[EquivalentIdSet] = set()
         for score, items in sort_then_group(
-            idx_and_scores, key_func=lambda x: -x[1]
+            idx_and_scores, key_func=lambda x: x[1], reverse=True
         ):  # negative operand for highest score first
             # return on first, as we're only interested in top hit
             result.add(EquivalentIdSet(ids_and_source=frozenset(item[0] for item in items)))

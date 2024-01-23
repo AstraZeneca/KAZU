@@ -22,7 +22,7 @@ as the keys must support comparison in order to be sorted using :func:`sorted`\\
 
 
 def sort_then_group(
-    items: Iterable[Item], key_func: Callable[[Item], Key]
+    items: Iterable[Item], key_func: Callable[[Item], Key], reverse: bool = False
 ) -> Iterable[tuple[Key, Iterable[Item]]]:
-    sorted_items = sorted(items, key=key_func)
+    sorted_items = sorted(items, key=key_func, reverse=reverse)
     yield from groupby(sorted_items, key=key_func)
