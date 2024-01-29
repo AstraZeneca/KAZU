@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 1.5.1 - 2024-01-29
+
+
+### Bugfixes
+
+- Pinned scipy to <1.12.0 due to breaking API change.
+
+
 ## 1.5.0 - 2024-01-19
 
 
