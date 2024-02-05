@@ -352,6 +352,17 @@ class OntologyParser(ABC):
                 )
                 self.parsed_dataframe = self.parsed_dataframe[~missing_expected_values_mask]
 
+            null_values_per_column = self.parsed_dataframe.isna().any(axis="index")
+            columns_with_null_values = list(null_values_per_column[null_values_per_column].index)
+            if len(columns_with_null_values) > 0:
+                logger.warning(
+                    "Some metadata columns have empty values for %s. This is permitted, but if you write custom code to read 'extra' metadata columns"
+                    " and depend on the property always being populated, you will likely get errors. Either ensure you can handle this field being 'null',"
+                    " or clean the underlying ontology to ensure the value is always populated. Affected columns: \n\n%s",
+                    self.name,
+                    columns_with_null_values,
+                )
+
     @kazu_disk_cache.memoize(ignore={0})
     def export_metadata(self, parser_name: str) -> dict[str, dict[str, SimpleValue]]:
         """Export the metadata from the ontology.
