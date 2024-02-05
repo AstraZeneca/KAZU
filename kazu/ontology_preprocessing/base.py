@@ -337,6 +337,20 @@ class OntologyParser(ABC):
                 pd.isnull(self.parsed_dataframe[DEFAULT_LABEL])
             ]
             rows_without_default_label[DEFAULT_LABEL] = rows_without_default_label[IDX]
+            columns_that_should_never_be_empty = [
+                IDX
+            ] + OntologyParser.minimum_metadata_column_names
+            missing_expected_values_mask = (
+                self.parsed_dataframe[columns_that_should_never_be_empty].isna().any(axis="columns")
+            )
+
+            if missing_expected_values_mask.any():
+                logger.warning(
+                    "The parsed dataframe for %s contains missing values expected for metadata. The relevant rows (i.e. entities) will be dropped and ignored: \n\n%s",
+                    self.name,
+                    self.parsed_dataframe[missing_expected_values_mask].to_string(),
+                )
+                self.parsed_dataframe = self.parsed_dataframe[~missing_expected_values_mask]
 
     @kazu_disk_cache.memoize(ignore={0})
     def export_metadata(self, parser_name: str) -> dict[str, dict[str, SimpleValue]]:
@@ -353,9 +367,6 @@ class OntologyParser(ABC):
         metadata_columns = metadata_columns.drop([MAPPING_TYPE, SYN])
         metadata_df = self.parsed_dataframe[metadata_columns]
         metadata_df = metadata_df.drop_duplicates(subset=[IDX])
-        metadata_df = metadata_df.dropna(
-            axis=0, subset=["idx"] + OntologyParser.minimum_metadata_column_names
-        )
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
