@@ -16,6 +16,10 @@ from omegaconf import DictConfig
 
 from kazu import __version__ as kazu_version
 
+#: A default timeout in seconds for Ray to finish building the model packs within.
+#: This is equal to 3 hours
+DEFAULT_RAY_TIMEOUT = 180.0 * 60
+
 
 @dataclass
 class BuildConfiguration:
@@ -308,6 +312,7 @@ def build_all_model_packs(
     max_parallel_build: Optional[int],
     generate_curation_report: bool = False,
     debug: bool = False,
+    ray_timeout: Optional[float] = DEFAULT_RAY_TIMEOUT,
 ) -> None:
     """Build multiple model packs.
 
@@ -321,6 +326,7 @@ def build_all_model_packs(
         None, use all available CPUs
     :param generate_curation_report: Should the curation report be run?
     :param debug: Disables Ray parallelization, enabling the use of debugger tools
+    :param ray_timeout: A timeout for Ray to complete model pack building within. Defaults to :attr:`~DEFAULT_RAY_TIMEOUT`
     :return:
     """
     if not output_dir.is_dir():
@@ -340,6 +346,7 @@ def build_all_model_packs(
         max_parallel_build_int = (
             max_parallel_build if max_parallel_build is not None else ray.cluster_resources()["CPU"]
         )
+        timeout = ray_timeout if ray_timeout is not None else DEFAULT_RAY_TIMEOUT
         builder_creator = ModelPackBuilderActor.remote  # type: ignore[attr-defined]
     else:
         builder_creator = ModelPackBuilder
@@ -359,21 +366,23 @@ def build_all_model_packs(
         if not debug:
             futures.append(cast(ray.ObjectRef, builder.build_model_pack.remote()))
             while len(futures) >= max_parallel_build_int:
-                futures = wait_for_model_pack_completion(futures)
+                futures = wait_for_model_pack_completion(futures, timeout)
         else:
             builder.build_model_pack()
     while len(futures) != 0:
-        futures = wait_for_model_pack_completion(futures)
+        futures = wait_for_model_pack_completion(futures, timeout)
 
 
-def wait_for_model_pack_completion(futures: list[ray.ObjectRef]) -> list[ray.ObjectRef]:
+def wait_for_model_pack_completion(
+    futures: list[ray.ObjectRef], timeout: float = DEFAULT_RAY_TIMEOUT
+) -> list[ray.ObjectRef]:
     if len(futures) == 0:
         logging.warning(
             "wait_for_model_pack_completion called with empty futures - nothing to wait on!"
         )
         return []
     # Returns the first ObjectRef that is ready.
-    finished, futures = ray.wait(futures, num_returns=1, timeout=180.0 * 60.0)
+    finished, futures = ray.wait(futures, num_returns=1, timeout=timeout)
     try:
         result = ray.get(finished[0])
     except IndexError:
@@ -473,6 +482,11 @@ paths in a model packs build_config.json.
         action="store_true",
         help="Disables Ray parallelization, enabling the use of debugger tools",
     )
+    parser.add_argument(
+        "--ray_timeout",
+        type=float,
+        required=False,
+    )
 
     args = parser.parse_args()
 
@@ -486,4 +500,5 @@ paths in a model packs build_config.json.
         max_parallel_build=args.max_parallel_build,
         generate_curation_report=args.generate_curation_report,
         debug=args.debug,
+        ray_timeout=args.ray_timeout,
     )
