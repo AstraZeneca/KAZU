@@ -914,7 +914,9 @@ class MentionForm:
 @dataclass(frozen=True)
 class CuratedTerm:
     """A CuratedTerm represents the behaviour of a specific :class:`.SynonymTerm` within
-    an Ontology. For each SynonymTerm, a default CuratedTerm is produced with its
+    an Ontology.
+
+    For each SynonymTerm, a default CuratedTerm is produced with its
     behaviour determined by an instance of
     :class:`kazu.ontology_preprocessing.autocuration.AutoCurator` and the
     :class:`kazu.ontology_preprocessing.curation_utils.CuratedTermConflictAnalyser`\\.
@@ -922,10 +924,8 @@ class CuratedTerm:
     .. note::
 
        This is typically handled by the internals of :class:`kazu.ontology_preprocessing.base.OntologyParser`\\.
-       However, CuratedTerms can also be used of override the default behaviour of a parser. See :ref:`ontology_parser`
-       for a more detailed guide
-
-
+       However, CuratedTerms can also be used to override the default behaviour of a parser. See :ref:`ontology_parser`
+       for a more detailed guide.
 
     The configuration of a CuratedTerm will affect both NER and Linking aspects of Kazu:
 
@@ -994,16 +994,16 @@ class CuratedTerm:
         )
     """
 
-    #: Original versions of this term, exactly as specified in the source ontology. These should all normalise to the same string
+    #: Original versions of this term, exactly as specified in the source ontology. These should all normalise to the same string.
     original_forms: frozenset[MentionForm]
     #: The intended behaviour for this term.
     behaviour: CuratedTermBehaviour
-    #: Alternatives for this mention created by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\. Note that these are always automatically generated, and should not be manually edited.
+    #: Alternative forms of the original versions of this term created by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\. Note that these are always automatically generated, and should not be manually edited.
     alternative_forms: frozenset[MentionForm] = field(default_factory=frozenset)
     #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
     _id: bson.ObjectId = field(default_factory=bson.ObjectId, compare=False)
-    #: results of any autocuration decisions
+    #: results of any decisions by the :class:`kazu.ontology_preprocessing.autocuration.AutoCurator`
     autocuration_results: Optional[dict[str, str]] = field(default=None, compare=False)
     #: human readable comments about this curation decision
     comment: Optional[str] = field(default=None, compare=False)
@@ -1019,7 +1019,7 @@ class CuratedTerm:
         for cs_form, cs_confidences in ci_forms.items():
             ci_confidences = ci_forms.get(cs_form.lower(), {MentionConfidence.POSSIBLE})
             if min(ci_confidences) < min(cs_confidences):
-                raise RuntimeError(f"case sensitive conflict, {self}")
+                raise RuntimeError(f"case sensitive conflict: {self}")
 
     def term_norm_for_linking(self, entity_class: str) -> str:
         norms = set(

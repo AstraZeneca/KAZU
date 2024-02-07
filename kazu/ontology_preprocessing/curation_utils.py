@@ -125,7 +125,7 @@ class CuratedTermConflictAnalyser:
         """
 
         :param entity_class: entity class that this set belongs to
-        :param autofix: should any conflicts be automatically fixed, such that the
+        :param autofix: Should any conflicts be automatically fixed, such that the
             behaviour is consistent within this set? Note that this does not guarantee that
             the optimal behaviour for a conflict is preserved.
         """
@@ -141,7 +141,7 @@ class CuratedTermConflictAnalyser:
 
         Conflicts can occur for the following reasons:
 
-        1) If two or more curations normalise to the same NormalisedSynonymStr,
+        1) If two or more curations normalise to the same string,
            but have different :class:`kazu.data.data.CuratedTermBehaviour`\\.
 
         2) If two or more curations normalise to the same value,
@@ -153,14 +153,14 @@ class CuratedTermConflictAnalyser:
            cannot have a higher mention confidence value than a case-sensitive one for
            the same string.
 
-
         :param curations:
         :param path: if provided, write a report to this location of the conflicts that occur
-        :return: a tuple of results:
-            clean_curations (those without conflicts),
-            merged_curations (those that can be safely merged without affecting behaviour),
-            normalisation_conflicts (curations that conflict on normalisation value
-            case_conflicts (curations that conflict on case)
+        :return: | a tuple of results:
+            |
+            | clean_curations (those without conflicts),
+            | merged_curations (those that can be safely merged without affecting behaviour),
+            | normalisation_conflicts (curations that conflict on normalisation value),
+            | case_conflicts (curations that conflict on case)
         :raises CurationError: if one or more curations produce multiple normalised values
         """
 
@@ -200,8 +200,11 @@ class CuratedTermConflictAnalyser:
         """Fix conflicts in curations by producing a new set of curations with
         consistent behaviour.
 
-        This ensures that there are no case sensitivity/mention confidence, associated
-        id set or curated term behaviour conflicts.
+        This ensures that there are no conflicts regarding any of these properties:
+
+        * the combination of case sensitivity and mention confidence
+        * associated id set
+        * curated term behaviour
 
         :param curation_conflicts:
         :return:
@@ -652,7 +655,7 @@ class CurationProcessor:
         Drop any :class:`.SynonymTerm`\\ s with no remaining ID after removal.
 
         :param id_to_drop:
-        :return: counter of :class:`.CurationModificationResult`
+        :return:
         """
 
         terms_to_modify = self._terms_by_id.get(id_to_drop, set())

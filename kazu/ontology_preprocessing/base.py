@@ -128,14 +128,15 @@ class OntologyParser(ABC):
             based NER matching
         :param autocurator: optional :class:`~.AutoCurator`. An AutoCurator contains a series of heuristics that
             determines what the default behaviour for a :class:`~.SynonymTerm` should be. For example, "Ignore
-            any strings shorter than two characters or longer than 50 characters", or "use case "
+            any strings shorter than two characters or longer than 50 characters", or "use case sensitive matching when
+            the SynonymTerm is symbolic"
         :param curations_path: path to jsonl file of :class:`~.CuratedTerm`\\s to override the defaults of the parser.
         :param global_actions: path to json file of :class:`~.GlobalParserActions` to apply to the parser.
         :param run_upgrade_report: Use when upgrading the version of the underlying data. When True, reports novel and
             obsolete terms in the model pack directory. Note that this will overwrite the default
             :class:`~.CuratedTerm`\\s associated with this parser in the model pack.
         :param run_curation_report: Use when adjusting the human curations. When True, creates a report in the model
-            pack directory describing various aspects of the curation set, such as as no-op curations,
+            pack directory describing various aspects of the curation set, such as no-op curations,
             case sensitivity/mention confidence conflicts etc.
         """
 

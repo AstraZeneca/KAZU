@@ -93,7 +93,7 @@ class DummyParser(OntologyParser):
     ):
         """
 
-        :param in_path: A dummy parser should always be called with an empty subdirectory
+        :param in_path: A dummy parser should always be called with an empty directory
             for in_path, so that the parser defaults file is properly generated
         :param entity_class:
         :param name:

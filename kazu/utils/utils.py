@@ -28,7 +28,6 @@ def extract_term_strings_from_synonym_terms(synonym_terms: set[SynonymTerm]) -> 
 def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
     """
 
-
     :param terms:
     :return:
     """
