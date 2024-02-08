@@ -1,7 +1,6 @@
 import dataclasses
 from typing import Iterable, Protocol
 
-import pandas as pd
 from kazu.data.data import CuratedTerm, MentionConfidence, CuratedTermBehaviour
 from kazu.utils.string_normalizer import StringNormalizer
 
