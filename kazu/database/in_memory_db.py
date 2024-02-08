@@ -85,7 +85,7 @@ class SynonymDatabase(metaclass=Singleton):
         self._associated_id_sets_by_id: dict[ParserName, dict[str, set[AssociatedIdSets]]] = {}
         self.loaded_parsers: set[ParserName] = set()
 
-    def add(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> None:
+    def add_parser(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> None:
         """Add synonyms to the database.
 
         :param name: name of ontology to add to

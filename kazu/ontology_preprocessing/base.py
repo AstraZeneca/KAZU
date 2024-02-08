@@ -622,7 +622,7 @@ class OntologyParser(ABC):
         maybe_ner_curations, final_syn_terms = self.process_curations(intermediate_synonym_terms)
         self.parsed_dataframe = None  # clear the reference to save memory
 
-        self.synonym_db.add(self.name, final_syn_terms)
+        self.synonym_db.add_parser(self.name, final_syn_terms)
         return maybe_ner_curations, metadata, final_syn_terms
 
     def populate_databases(
@@ -653,7 +653,7 @@ class OntologyParser(ABC):
         if self.name not in self.synonym_db.loaded_parsers:
             logger.info("populating database for %s from cache", self.name)
             self.metadata_db.add_parser(self.name, self.entity_class, metadata)
-            self.synonym_db.add(self.name, final_syn_terms)
+            self.synonym_db.add_parser(self.name, final_syn_terms)
 
         return maybe_curations if return_curations else None
 
