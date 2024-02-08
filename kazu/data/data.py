@@ -1112,12 +1112,6 @@ class CuratedTerm:
                 if form.mention_confidence is not MentionConfidence.IGNORE:
                     yield form
 
-    def active_linking_forms(self) -> Iterable[MentionForm]:
-        if self.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
-            for form in self.original_forms.union(self.alternative_forms):
-                if form.mention_confidence is not MentionConfidence.IGNORE:
-                    yield form
-
 
 class KazuConfigurationError(Exception):
     pass
