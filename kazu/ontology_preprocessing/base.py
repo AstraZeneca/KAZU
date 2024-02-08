@@ -401,15 +401,14 @@ class OntologyParser(ABC):
             )
             return autocuration_set_clean
 
+        elif self.curations_path.exists():
+            logger.info(
+                "%s curations file found",
+                self.name,
+            )
+            human_curation_set = load_curated_terms(self.curations_path)
         else:
-            if self.curations_path.exists():
-                logger.info(
-                    "%s curations file found",
-                    self.name,
-                )
-                human_curation_set = load_curated_terms(self.curations_path)
-            else:
-                raise RuntimeError(f"curations not found for {self.name} at {self.curations_path}")
+            raise RuntimeError(f"curations not found for {self.name} at {self.curations_path}")
 
         if not self.run_curation_report:
             curation_report_path = None
