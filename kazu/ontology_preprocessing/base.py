@@ -53,8 +53,8 @@ MAPPING_TYPE = "mapping_type"
 DATA_ORIGIN = "data_origin"
 
 
+_ONTOLOGY_UPGRADE_REPORT_DIR = "_ontology_upgrade_report"
 _ONTOLOGY_DEFAULTS_FILENAME = "_defaults.jsonl"
-_ONTOLOGY_UPGRADE_REPORT = "_ontology_upgrade_report"
 _CURATION_REPORT_FILENAME = "_curation_report"
 
 
@@ -465,7 +465,7 @@ class OntologyParser(ABC):
         )
 
         upgrade_report_path = as_path(self.in_path).parent.joinpath(
-            f"{self.name}{_ONTOLOGY_UPGRADE_REPORT}"
+            f"{self.name}{_ONTOLOGY_UPGRADE_REPORT_DIR}"
         )
         logger.info(
             "%s generating new version defaults",
