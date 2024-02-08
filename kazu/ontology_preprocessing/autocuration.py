@@ -34,7 +34,8 @@ class SymbolicToCaseSensitiveAction(AutoCurationAction):
 
 class IsCommmonWord(AutoCurationAction):
     def __init__(self, path: str):
-        self.common_words = set(pd.read_csv(path, sep="\t", header=None).values.flatten())
+        with open(path, mode="r") as inf:
+            self.common_words = {line.rstrip() for line in inf.readlines()}
 
     def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
         is_common = set()
