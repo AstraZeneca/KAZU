@@ -25,16 +25,11 @@ def test_should_cause_intercuration_case_conflict():
 
     conflict_analyser = CuratedTermConflictAnalyser("test")
 
-    (
-        good_curations,
-        merged_curations,
-        detected_norm_conflicts,
-        detected_case_conflicts,
-    ) = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
-    assert len(good_curations) == 0
-    assert len(merged_curations) == 0
-    assert len(detected_norm_conflicts) == 0
-    assert case_conflicted_curation_set in detected_case_conflicts
+    curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
+    assert len(curation_report.clean_curations) == 0
+    assert len(curation_report.merged_curations) == 0
+    assert len(curation_report.normalisation_conflicts) == 0
+    assert case_conflicted_curation_set in curation_report.case_conflicts
 
 
 def test_should_merge():
@@ -64,18 +59,15 @@ def test_should_merge():
 
     conflict_analyser = CuratedTermConflictAnalyser("test")
 
-    (
-        good_curations,
-        merged_curations,
-        detected_norm_conflicts,
-        detected_case_conflicts,
-    ) = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
-    assert len(good_curations) == 1
-    assert len(merged_curations) == 1
-    assert set(expected_merged_forms) == set(next(iter(good_curations)).active_ner_forms())
+    curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
+    assert len(curation_report.clean_curations) == 1
+    assert len(curation_report.merged_curations) == 1
+    assert set(expected_merged_forms) == set(
+        next(iter(curation_report.clean_curations)).active_ner_forms()
+    )
 
-    assert len(detected_norm_conflicts) == 0
-    assert len(detected_case_conflicts) == 0
+    assert len(curation_report.normalisation_conflicts) == 0
+    assert len(curation_report.case_conflicts) == 0
 
 
 def test_should_cause_intracuration_case_conflict():
@@ -105,16 +97,11 @@ def test_should_cause_intracuration_case_conflict():
 
     conflict_analyser = CuratedTermConflictAnalyser("test")
 
-    (
-        good_curations,
-        merged_curations,
-        detected_norm_conflicts,
-        detected_case_conflicts,
-    ) = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
-    assert len(good_curations) == 0
-    assert len(merged_curations) == 1
-    assert len(detected_norm_conflicts) == 0
-    assert len(detected_case_conflicts) == 1
+    curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
+    assert len(curation_report.clean_curations) == 0
+    assert len(curation_report.merged_curations) == 1
+    assert len(curation_report.normalisation_conflicts) == 0
+    assert len(curation_report.case_conflicts) == 1
     # the element of the detected_case_conflicts set will be a merged curation, so the original ones should have
     # been removed
-    assert case_conflicted_curation_set not in detected_case_conflicts
+    assert case_conflicted_curation_set not in curation_report.case_conflicts

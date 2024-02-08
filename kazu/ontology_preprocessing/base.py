@@ -439,34 +439,32 @@ class OntologyParser(ABC):
         # set autofix to false so that issues are reported
         conflict_analyser = CuratedTermConflictAnalyser(self.entity_class, autofix=False)
 
-        (
-            human_good_curations,
-            _,
-            human_detected_norm_conflicts,
-            human_detected_case_conflicts,
-        ) = conflict_analyser.verify_curation_set_integrity(
+        human_curation_report = conflict_analyser.verify_curation_set_integrity(
             human_curation_set, path=human_curation_set_report_path
         )
 
-        if len(human_detected_norm_conflicts) > 0 or len(human_detected_case_conflicts) > 0:
+        if (
+            len(human_curation_report.normalisation_conflicts) > 0
+            or len(human_curation_report.case_conflicts) > 0
+        ):
             raise CurationError(
                 f"{self.name} conflicts detected in human curation set. Fix these before continuing (see "
                 f"{human_curation_set_report_path})"
             )
 
         merged_set = conflict_analyser.merge_human_and_auto_curations(
-            human_curations=human_good_curations,
+            human_curations=human_curation_report.clean_curations,
             autocurations=autocuration_set_clean,
             path=curation_report_path,
         )
 
-        human_and_autocuration_set_merged_clean_curations = (
+        human_and_autocuration_set_merged_curation_report = (
             conflict_analyser.verify_curation_set_integrity(
                 merged_set, path=human_and_autocuration_set_conflict_report_path
-            )[0]
+            )
         )
 
-        return human_and_autocuration_set_merged_clean_curations
+        return human_and_autocuration_set_merged_curation_report.clean_curations
 
     def generate_clean_default_curations(
         self, terms: set[SynonymTerm], upgrade_report: bool = False
@@ -488,7 +486,7 @@ class OntologyParser(ABC):
         conflict_analyser = CuratedTermConflictAnalyser(self.entity_class, autofix=True)
         new_version_autocuration_set_clean = conflict_analyser.verify_curation_set_integrity(
             new_version_autocuration_set
-        )[0]
+        ).clean_curations
 
         if upgrade_report:
             if not self.ontology_autocuration_set_path.exists():

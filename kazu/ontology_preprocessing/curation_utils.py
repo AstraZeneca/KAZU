@@ -112,6 +112,18 @@ def load_global_actions(
     return global_actions
 
 
+@dataclasses.dataclass
+class CurationSetIntegrityReport:
+    #: Terms with no conflicts
+    clean_curations: set[CuratedTerm]
+    #: Terms that can be safely merged without affecting behaviour
+    merged_curations: set[CuratedTerm]
+    #: Terms that conflict on normalisation value
+    normalisation_conflicts: set[frozenset[CuratedTerm]]
+    #: Terms that conflict on case
+    case_conflicts: set[frozenset[CuratedTerm]]
+
+
 class CuratedTermConflictAnalyser:
     """Find and potentially fix conflicting behaviour in a set of
     :class:`kazu.data.data.CuratedTerm`\\s."""
@@ -134,9 +146,7 @@ class CuratedTermConflictAnalyser:
 
     def verify_curation_set_integrity(
         self, curations: set[CuratedTerm], path: Optional[PathLike] = None
-    ) -> tuple[
-        set[CuratedTerm], set[CuratedTerm], set[frozenset[CuratedTerm]], set[frozenset[CuratedTerm]]
-    ]:
+    ) -> CurationSetIntegrityReport:
         """Verify that a set of terms has consistent behaviour.
 
         Conflicts can occur for the following reasons:
@@ -155,12 +165,7 @@ class CuratedTermConflictAnalyser:
 
         :param curations:
         :param path: if provided, write a report to this location of the conflicts that occur
-        :return: | a tuple of results:
-            |
-            | clean_curations (those without conflicts),
-            | merged_curations (those that can be safely merged without affecting behaviour),
-            | normalisation_conflicts (curations that conflict on normalisation value),
-            | case_conflicts (curations that conflict on case)
+        :return:
         :raises CurationError: if one or more curations produce multiple normalised values
         """
 
@@ -192,7 +197,12 @@ class CuratedTermConflictAnalyser:
                 case_conflicts, clean_curations, merged_curations, normalisation_conflicts, path
             )
 
-        return clean_curations, merged_curations, normalisation_conflicts, case_conflicts
+        return CurationSetIntegrityReport(
+            clean_curations=clean_curations,
+            merged_curations=merged_curations,
+            normalisation_conflicts=normalisation_conflicts,
+            case_conflicts=case_conflicts,
+        )
 
     def autofix_curations(
         self, curation_conflicts: set[frozenset[CuratedTerm]]
