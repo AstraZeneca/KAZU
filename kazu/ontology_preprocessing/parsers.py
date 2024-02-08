@@ -50,6 +50,7 @@ from kazu.ontology_preprocessing.base import (
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.utils.grouping import sort_then_group
 from kazu.ontology_preprocessing.autocuration import AutoCurator
+from kazu.utils.utils import PathLike
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +64,8 @@ class JsonLinesOntologyParser(OntologyParser):
     :meth:`~.json_dict_to_parser_records`.
     """
 
-    def read(self, path: str) -> Iterable[dict[str, Any]]:
-        for json_path in Path(path).glob("*.json"):
+    def read(self, path: Path) -> Iterable[dict[str, Any]]:
+        for json_path in path.glob("*.json"):
             with json_path.open(mode="r") as f:
                 for line in f:
                     yield json.loads(line)
@@ -102,7 +103,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         allowed_therapeutic_areas: Iterable[str],
@@ -111,7 +112,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -287,7 +288,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         excluded_biotypes: Optional[Iterable[str]] = None,
@@ -296,7 +297,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -482,7 +483,7 @@ class RDFGraphParser(OntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         uri_regex: Union[str, re.Pattern],
@@ -494,7 +495,7 @@ class RDFGraphParser(OntologyParser):
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -572,7 +573,7 @@ class RDFGraphParser(OntologyParser):
             return rdflib.URIRef(pred)
 
     @staticmethod
-    def parse_to_graph(in_path: str) -> rdflib.Graph:
+    def parse_to_graph(in_path: Path) -> rdflib.Graph:
         """Parse the given input path using `rdflib <https://rdflib.readthedocs.io/en/stable/index.html>`_.
 
         Called by :meth:`~.RDFGraphParser.parse_to_dataframe`, this is a separate method to allow
@@ -644,7 +645,7 @@ class SKOSXLGraphParser(RDFGraphParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         uri_regex: Union[str, re.Pattern],
@@ -656,7 +657,7 @@ class SKOSXLGraphParser(RDFGraphParser):
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -705,7 +706,7 @@ class GeneOntologyParser(RDFGraphParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -715,7 +716,7 @@ class GeneOntologyParser(RDFGraphParser):
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -792,7 +793,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -800,7 +801,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -834,7 +835,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -842,7 +843,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -876,7 +877,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -884,7 +885,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -918,7 +919,7 @@ class UberonOntologyParser(RDFGraphParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -926,7 +927,7 @@ class UberonOntologyParser(RDFGraphParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1020,7 +1021,7 @@ class HGNCGeneOntologyParser(OntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1028,7 +1029,7 @@ class HGNCGeneOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1149,7 +1150,7 @@ class CLOOntologyParser(RDFGraphParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1157,7 +1158,7 @@ class CLOOntologyParser(RDFGraphParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1282,7 +1283,7 @@ class MeddraOntologyParser(OntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1290,7 +1291,7 @@ class MeddraOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1439,7 +1440,7 @@ class CLOntologyParser(RDFGraphParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1449,7 +1450,7 @@ class CLOntologyParser(RDFGraphParser):
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1541,7 +1542,7 @@ class TabularOntologyParser(OntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1549,7 +1550,7 @@ class TabularOntologyParser(OntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1610,7 +1611,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1618,7 +1619,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -1680,7 +1681,7 @@ class StatoParser(RDFGraphParser):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -1690,7 +1691,7 @@ class StatoParser(RDFGraphParser):
         include_entity_patterns: EntityFilteringPatterns = None,
         exclude_entity_patterns: EntityFilteringPatterns = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,

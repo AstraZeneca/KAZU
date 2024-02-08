@@ -1,7 +1,6 @@
 import logging
 import shutil
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import cast, Optional
 
 import pandas as pd
@@ -34,6 +33,7 @@ from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import (
     as_path,
     syn_terms_to_curations,
+    PathLike,
 )
 
 logger = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ class OntologyParser(ABC):
 
     def __init__(
         self,
-        in_path: str,
+        in_path: PathLike,
         entity_class: str,
         name: str,
         string_scorer: Optional[StringSimilarityScorer] = None,
@@ -105,7 +105,7 @@ class OntologyParser(ABC):
         data_origin: str = "unknown",
         synonym_generator: Optional[CombinatorialSynonymGenerator] = None,
         autocurator: Optional[AutoCurator] = None,
-        curations_path: Optional[str] = None,
+        curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
         run_curation_report: bool = False,
@@ -140,10 +140,10 @@ class OntologyParser(ABC):
             case sensitivity/mention confidence conflicts etc.
         """
 
-        self.in_path = in_path
+        self.in_path = as_path(in_path)
         self.entity_class = entity_class
         self.name = name
-        self.ontology_autocuration_set_path = Path(self.in_path).parent.joinpath(
+        self.ontology_autocuration_set_path = self.in_path.parent.joinpath(
             f"{self.name}{_ONTOLOGY_DEFAULTS_FILENAME}"
         )
         if string_scorer is None:
