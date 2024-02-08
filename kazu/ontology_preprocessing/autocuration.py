@@ -16,15 +16,18 @@ class SymbolicToCaseSensitiveAction(AutoCurationAction):
         self.entity_class = entity_class
 
     def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
-        is_symbolic = set()
-        new_forms = set()
-        for form in curated_term.original_forms:
-            is_symbolic.add(
-                StringNormalizer.classify_symbolic(form.string, entity_class=self.entity_class)
+        all_symbolic = all(
+            StringNormalizer.classify_symbolic(form.string, entity_class=self.entity_class)
+            for form in curated_term.original_forms
+        )
+        if all_symbolic:
+            return dataclasses.replace(
+                curated_term,
+                original_forms=frozenset(
+                    dataclasses.replace(form, case_sensitive=True)
+                    for form in curated_term.original_forms
+                ),
             )
-            new_forms.add(dataclasses.replace(form, case_sensitive=True))
-        if all(is_symbolic):
-            return dataclasses.replace(curated_term, original_forms=frozenset(new_forms))
         else:
             return curated_term
 
