@@ -140,7 +140,6 @@ class OntologyParser(ABC):
             case sensitivity/mention confidence conflicts etc.
         """
 
-        self.run_curation_report = run_curation_report
         self.in_path = in_path
         self.entity_class = entity_class
         self.name = name
@@ -158,10 +157,11 @@ class OntologyParser(ABC):
         self.autocurator = autocurator
         self.curations_path = as_path(curations_path) if curations_path is not None else None
         self.global_actions = global_actions
+        self.run_upgrade_report = run_upgrade_report
+        self.run_curation_report = run_curation_report
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()
-        self.run_upgrade_report = run_upgrade_report
 
     @abstractmethod
     def find_kb(self, string: str) -> str:
