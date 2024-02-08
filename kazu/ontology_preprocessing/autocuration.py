@@ -8,7 +8,7 @@ from kazu.utils.string_normalizer import StringNormalizer
 
 class AutoCurationAction(Protocol):
     def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
-        pass
+        raise NotImplementedError
 
 
 class SymbolicToCaseSensitiveAction(AutoCurationAction):
