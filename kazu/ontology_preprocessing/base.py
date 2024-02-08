@@ -1,6 +1,7 @@
 import logging
 import shutil
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import cast, Optional
 
 import pandas as pd
@@ -368,9 +369,14 @@ class OntologyParser(ABC):
                 "%s ontology defaults not found, so it will be created",
                 self.name,
             )
-            self.build_upgrade_report(terms)
+            clean_curations = self.generate_clean_default_curations(
+                terms, upgrade_report=self.run_upgrade_report
+            )
 
-        clean_curations = self.build_curation_report()
+        else:
+            clean_curations = None
+
+        clean_curations = self.build_curation_report(clean_curations)
 
         curation_processor = CurationProcessor(
             global_actions=self.global_actions,
@@ -381,8 +387,13 @@ class OntologyParser(ABC):
         )
         return curation_processor.export_curations_and_final_terms()
 
-    def build_curation_report(self) -> set[CuratedTerm]:
-        autocuration_set_clean = load_curated_terms(self.ontology_autocuration_set_path)
+    def build_curation_report(
+        self, maybe_autocuration_set_clean: Optional[set[CuratedTerm]]
+    ) -> set[CuratedTerm]:
+        if maybe_autocuration_set_clean is None:
+            autocuration_set_clean = load_curated_terms(self.ontology_autocuration_set_path)
+        else:
+            autocuration_set_clean = maybe_autocuration_set_clean
         if self.curations_path is None:
             logger.warning(
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
@@ -458,20 +469,21 @@ class OntologyParser(ABC):
 
         return human_and_autocuration_set_merged_clean_curations
 
-    def build_upgrade_report(self, terms: set[SynonymTerm]) -> set[CuratedTerm]:
+    def generate_clean_default_curations(
+        self, terms: set[SynonymTerm], upgrade_report: bool = False
+    ) -> set[CuratedTerm]:
+        """
+
+        :param terms:
+        :param upgrade_report:
+        :return:
+        """
         logger.info(
-            "%s ontology upgrade report triggered. This may take some time.",
+            "%s clean default curation build triggered. This may take some time.",
             self.name,
         )
 
-        upgrade_report_path = as_path(self.in_path).parent.joinpath(
-            f"{self.name}{_ONTOLOGY_UPGRADE_REPORT_DIR}"
-        )
-        logger.info(
-            "%s generating new version defaults",
-            self.name,
-        )
-        new_version_autocuration_set = self.generate_default_curations(terms)
+        new_version_autocuration_set = self._generate_dirty_default_curations(terms)
 
         # autofix is true, to ensure a clean set of curations
         conflict_analyser = CuratedTermConflictAnalyser(self.entity_class, autofix=True)
@@ -479,32 +491,16 @@ class OntologyParser(ABC):
             new_version_autocuration_set
         )[0]
 
-        if not self.ontology_autocuration_set_path.exists():
-            logger.info(
-                "%s previous version autocuration set not found. A diff will not be generated.",
-                self.name,
-            )
-            previous_version_autocuration_set_clean = None
-        else:
-            if upgrade_report_path.exists():
-                shutil.rmtree(upgrade_report_path)
-
-            upgrade_report_path.mkdir()
-            logger.info(
-                "%s loading previous version autocuration set",
-                self.name,
-            )
-            previous_version_autocuration_set_clean = load_curated_terms(
-                self.ontology_autocuration_set_path
-            )
-            backup_path = upgrade_report_path.joinpath(
-                "old_" + self.ontology_autocuration_set_path.name
-            )
-            logger.info(
-                "%s backing up previous version autocuration set to to %s", self.name, backup_path
-            )
-
-            dump_curated_terms(previous_version_autocuration_set_clean, backup_path)
+        if upgrade_report:
+            if not self.ontology_autocuration_set_path.exists():
+                raise RuntimeError(
+                    f"{self.name} previous version autocuration set not found. A diff will not be generated.",
+                )
+            else:
+                upgrade_report_path = self._create_upgrade_report_path()
+                previous_version_autocuration_set_clean = self._back_up_previous_curation_file(
+                    upgrade_report_path
+                )
 
         # note, this should run after we've loaded/backed up the previous version set, if required!
         logger.info(
@@ -516,13 +512,12 @@ class OntologyParser(ABC):
             new_version_autocuration_set_clean, self.ontology_autocuration_set_path, force=True
         )
 
-        if previous_version_autocuration_set_clean is not None:
+        if upgrade_report:
             logger.info(
                 "%s writing novel/obsolete terms after upgrade to %s",
                 self.name,
                 upgrade_report_path,
             )
-
             novel_set = new_version_autocuration_set_clean.difference(
                 previous_version_autocuration_set_clean
             )
@@ -533,17 +528,52 @@ class OntologyParser(ABC):
                     force=True,
                 )
 
-            obsolete_set = previous_version_autocuration_set_clean.difference(novel_set)
-            if obsolete_set:
-                dump_curated_terms(
-                    obsolete_set,
-                    upgrade_report_path.joinpath("obsolete_autocuration_terms.jsonl"),
-                    force=True,
-                )
+                obsolete_set = previous_version_autocuration_set_clean.difference(novel_set)
+                if obsolete_set:
+                    dump_curated_terms(
+                        obsolete_set,
+                        upgrade_report_path.joinpath("obsolete_autocuration_terms.jsonl"),
+                        force=True,
+                    )
 
         return new_version_autocuration_set_clean
 
-    def generate_default_curations(self, terms: set[SynonymTerm]) -> set[CuratedTerm]:
+    def _create_upgrade_report_path(self) -> Path:
+        upgrade_report_path = as_path(self.in_path).parent.joinpath(
+            f"{self.name}{_ONTOLOGY_UPGRADE_REPORT_DIR}"
+        )
+        if upgrade_report_path.exists():
+            shutil.rmtree(upgrade_report_path)
+
+        upgrade_report_path.mkdir()
+        return upgrade_report_path
+
+    def _back_up_previous_curation_file(self, upgrade_report_path: Path) -> set[CuratedTerm]:
+        logger.info(
+            "%s loading previous version autocuration set",
+            self.name,
+        )
+        previous_version_autocuration_set_clean = load_curated_terms(
+            self.ontology_autocuration_set_path
+        )
+        backup_path = upgrade_report_path.joinpath(
+            "old_" + self.ontology_autocuration_set_path.name
+        )
+        logger.info(
+            "%s backing up previous version autocuration set to to %s",
+            self.name,
+            backup_path,
+        )
+
+        dump_curated_terms(previous_version_autocuration_set_clean, backup_path)
+        return previous_version_autocuration_set_clean
+
+    def _generate_dirty_default_curations(self, terms: set[SynonymTerm]) -> set[CuratedTerm]:
+        """Dirty curations come directly from a set of :class:`.SynonymTerm`\\, and are
+        optionally further modified by synonym generation and autocuration routines.
+
+        They are not guaranteed to be conflict free - hence why they are 'dirty'.
+        """
         default_term_set = syn_terms_to_curations(terms)
         if self.synonym_generator is not None:
             logger.info(
