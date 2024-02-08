@@ -40,6 +40,6 @@ def main(
     }
     ontology_matcher = nlp.add_pipe("ontology_matcher", config=config)
     assert isinstance(ontology_matcher, OntologyMatcher)
-    ontology_matcher.create_phrasematchers_using_curations(parsers)
+    ontology_matcher.create_phrasematchers(parsers)
     nlp.to_disk(output_dir)
     return nlp
