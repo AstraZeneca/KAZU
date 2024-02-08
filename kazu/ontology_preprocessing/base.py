@@ -577,7 +577,7 @@ class OntologyParser(ABC):
                 "%s synonym generation configuration detected",
                 self.name,
             )
-            default_term_set = set(self.synonym_generator(default_term_set))
+            default_term_set = self.synonym_generator(default_term_set)
         if self.autocurator is not None:
             logger.info(
                 "%s autocuration configuration detected",
