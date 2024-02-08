@@ -12,7 +12,6 @@ parsers:
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.gene}
     entity_class: gene
-#    run_upgrade_report: true
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
     global_actions: ${global_actions}
     autocurator:
