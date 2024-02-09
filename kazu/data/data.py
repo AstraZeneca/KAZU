@@ -198,10 +198,9 @@ class Mapping:
     def from_dict(mapping_dict: dict) -> "Mapping":
         """|from_dict_note|"""
         string_match_confidence = StringMatchConfidence[mapping_dict.pop("string_match_confidence")]
+        dis_conf_value = mapping_dict.pop("disambiguation_confidence", None)
         disambiguation_confidence = (
-            DisambiguationConfidence[mapping_dict.pop("disambiguation_confidence")]
-            if mapping_dict.get("disambiguation_confidence") is not None
-            else None
+            DisambiguationConfidence[dis_conf_value] if dis_conf_value is not None else None
         )
         return Mapping(
             string_match_confidence=string_match_confidence,
