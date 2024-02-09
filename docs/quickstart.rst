@@ -137,10 +137,11 @@ The below code assumes a standard ``.py`` file (or console), if you wish to use 
         doc = Document.create_simple_document(text)
         pipeline([doc])
         print(f"{doc.sections[0].text}")
+        return doc
 
 
     if __name__ == "__main__":
-        kazu_test()
+        doc = kazu_test()
 
 
 You can now inspect the doc object, and explore what entities were detected on each section.
@@ -190,10 +191,11 @@ the `hydra compose API <https://hydra.cc/docs/advanced/compose_api/>`_\ :
         doc = Document.create_simple_document(text)
         pipeline([doc])
         print(f"{doc.sections[0].text}")
+        return doc
 
 
     if __name__ == "__main__":
-        kazu_test()
+        doc = kazu_test()
 
 Note that if running the above code in a Jupyter notebook, the ``if __name__ == "__main__":`` check is redundant
 (though it still behaves as expected) and you can just run ``kazu_test()`` directly in a cell of the notebook.
