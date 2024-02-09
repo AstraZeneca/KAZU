@@ -192,7 +192,7 @@ class Mapping:
     #: | generic metadata
     #: |
     #: | |metadata_s11n_warn|
-    metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
+    metadata: dict = field(default_factory=dict, hash=False)
 
     @staticmethod
     def from_dict(mapping_dict: dict) -> "Mapping":
@@ -329,7 +329,7 @@ class Entity:
     #: | generic metadata
     #: |
     #: | |metadata_s11n_warn|
-    metadata: dict[Any, Any] = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
     start: int = field(init=False)
     end: int = field(init=False)
     match_norm: str = field(init=False)
@@ -515,7 +515,7 @@ class Section:
     #: | generic metadata
     #: |
     #: | |metadata_s11n_warn|
-    metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
+    metadata: dict = field(default_factory=dict, hash=False)
     #: entities detected in this section
     entities: list[Entity] = field(default_factory=list, hash=False)
     _sentence_spans: Optional[tuple[CharSpan, ...]] = field(
@@ -575,7 +575,7 @@ class Document:
     #: | generic metadata
     #: |
     #: | |metadata_s11n_warn|
-    metadata: dict[Any, Any] = field(default_factory=dict, hash=False)
+    metadata: dict = field(default_factory=dict, hash=False)
 
     def __str__(self):
         return f"idx: {self.idx}"
