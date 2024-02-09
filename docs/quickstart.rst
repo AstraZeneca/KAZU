@@ -111,6 +111,8 @@ Processing your first document
 Make sure you've installed Kazu correctly as above, and have set the ``KAZU_MODEL_PACK`` variable
 as described in the Model Pack section above.
 
+The below code assumes a standard ``.py`` file (or console), if you wish to use a notebook, see the below section.
+
 .. code-block:: python
 
     import hydra
@@ -147,15 +149,19 @@ The above code snippet sets up your code as a Hydra application - which allows y
 of flexibility to re-configure many parts of kazu via command line overrides. See the `Hydra docs <https://hydra.cc/docs/intro/>`_
 for more detail on this.
 
-Using Kazu in a non-Hydra application
--------------------------------------
+Using Kazu in a notebook or other non-Hydra application
+-------------------------------------------------------
 
 Sometimes, you will not want your overall application to be a Hydra application, where Hydra handles
 the command line argument parsing.
 
-For example, you may wish to build a different command-line experience for your application and have no need for
-command-line overrides of the Kazu config. Alternatively, you want to embed Kazu components into another codebase,
-and still want Hydra to manage their configuration.
+In some cases like running with a notebook, using Hydra to handle the argument parsing isn't possible at all (see
+`This Hydra issue <https://github.com/facebookresearch/hydra/issues/2025>`_ for details with a Jupyter notebook).
+
+You may not want Hydra to control command line argument parsing in other scenarios either. For example, you may wish to
+build a different command-line experience for your application and have no need for command-line overrides of the Kazu
+config. Alternatively, you want to embed Kazu components into another codebase, and still want Hydra to manage the
+configuration of the Kazu components.
 
 Instead, you can instantiate Kazu objects using Hydra without making your whole program a 'Hydra application' by using
 the `hydra compose API <https://hydra.cc/docs/advanced/compose_api/>`_\ :
@@ -188,6 +194,9 @@ the `hydra compose API <https://hydra.cc/docs/advanced/compose_api/>`_\ :
 
     if __name__ == "__main__":
         kazu_test()
+
+Note that if running the above code in a Jupyter notebook, the ``if __name__ == "__main__":`` check is redundant
+(though it still behaves as expected) and you can just run ``kazu_test()`` directly in a cell of the notebook.
 
 .. This hidden block is needed because the above testcode block doesn't actually run ``kazu_test`` -
    since ``__name__`` is "builtins", not "__main__" when run by sphinx.ext.doctest.
