@@ -90,19 +90,6 @@ class MentionConfidence(IntEnum):
     POSSIBLE = 10  # high degree of uncertainty
     IGNORE = 0  # do not use this mention for NER
 
-    # TODO: stop using the class method strategy?
-    def _unstructure(self) -> str:
-        """Custom cattrs unstructuring function.
-
-        Use the enum name rather than the value, as the name is more human readable.
-        """
-
-        return self.name
-
-    @classmethod
-    def _structure(cls, name: str) -> "MentionConfidence":
-        return cls[name]
-
 
 class StringMatchConfidence(AutoNameEnum):
     HIGHLY_LIKELY = auto()  # almost certain to be correct
@@ -536,16 +523,6 @@ class Section:
         default=None, hash=False, init=False
     )  # hidden implem. to prevent overwriting existing sentence spans
 
-    @classmethod
-    def _structure(cls, data: dict[str, JsonEncodable], conv: cattrs.Converter) -> "Section":
-        sentence_spans = cast(Optional[tuple[CharSpan, ...]], data.pop("sentence_spans", None))
-        # not sure if recursive and therefore doesn't work?
-        section = conv.structure_attrs_fromdict(data, Section)
-        if sentence_spans is not None:
-            converted_sentence_spans = (conv.structure(csp, CharSpan) for csp in sentence_spans)
-            section.sentence_spans = converted_sentence_spans
-        return section
-
     @property
     def sentence_spans(self) -> Iterable[CharSpan]:
         if self._sentence_spans is not None:
@@ -712,15 +689,6 @@ _json_converter.register_structure_hook(MentionConfidence, lambda v, _: MentionC
 _json_converter.register_unstructure_hook(MentionConfidence, lambda v: v.name)
 
 _json_converter.register_unstructure_hook(
-    Section,
-    cattrs.gen.make_dict_unstructure_fn(
-        Section,
-        _json_converter,
-        _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
-    ),
-)
-
-_json_converter.register_unstructure_hook(
     Entity,
     cattrs.gen.make_dict_unstructure_fn(
         Entity,
@@ -729,6 +697,16 @@ _json_converter.register_unstructure_hook(
             rename="synonym_terms",
             unstruct_hook=lambda v: [_json_converter.unstructure(x) for x in v.values()],
         ),
+        _cattrs_include_init_false=True,
+    ),
+)
+
+_json_converter.register_unstructure_hook(
+    Section,
+    cattrs.gen.make_dict_unstructure_fn(
+        Section,
+        _json_converter,
+        _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
         _cattrs_include_init_false=True,
     ),
 )
@@ -752,12 +730,20 @@ _json_converter.register_structure_hook(
     ),
 )
 
-
-cattrs.strategies.use_class_methods(_json_converter, "_structure", "_unstructure")
-
-# to work around https://github.com/python-attrs/cattrs/issues/479
 _json_converter.register_structure_hook(
-    MentionConfidence, lambda v, _: MentionConfidence._structure(v)
+    Section,
+    cattrs.gen.make_dict_structure_fn(
+        Section,
+        _json_converter,
+        _sentence_spans=cattrs.gen.override(
+            rename="sentence_spans",
+            # needed because cattrs by default ignores init=False fields
+            omit=False,
+            struct_hook=lambda v, _: (
+                None if len(v) == 0 else tuple(_json_converter.structure(x, CharSpan) for x in v)
+            ),
+        ),
+    ),
 )
 
 
