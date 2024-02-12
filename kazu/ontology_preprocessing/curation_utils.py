@@ -333,53 +333,54 @@ class CuratedTermConflictAnalyser:
         normalisation_conflicts = set()
         merged_curations = set()
         for term_norm, potentially_conflicting_curations in curations_by_term_norm.items():
-            if len(potentially_conflicting_curations) > 1:
-                # uh ho we have a normalisation/behaviour/id set conflict. If we can't merge, report an error
-                original_forms_merged: set[MentionForm] = set()
-                generated_forms_merged: set[MentionForm] = set()
-                associated_id_sets_this_term_norm: set[frozenset[EquivalentIdSet]] = set()
-                comments = []
-                behaviours = set()
-                for conflicted_curation in potentially_conflicting_curations:
+            if len(potentially_conflicting_curations) == 1:
+                # no conflict
+                continue
 
-                    behaviours.add(conflicted_curation.behaviour)
-                    original_forms_merged.update(conflicted_curation.original_forms)
-                    generated_forms_merged.update(conflicted_curation.alternative_forms)
-                    if conflicted_curation.associated_id_sets is not None:
-                        associated_id_sets_this_term_norm.add(
-                            conflicted_curation.associated_id_sets
-                        )
-                    if conflicted_curation.comment is not None:
-                        comments.append(conflicted_curation.comment)
-                    for form in conflicted_curation.all_forms():
-                        # remove conflicted forms from the working 'good' list
-                        maybe_good_curations_by_syn_lower[form.string.lower()].discard(
-                            conflicted_curation
-                        )
+            # uh ho we have a normalisation/behaviour/id set conflict. If we can't merge, report an error
+            original_forms_merged: set[MentionForm] = set()
+            generated_forms_merged: set[MentionForm] = set()
+            associated_id_sets_this_term_norm: set[frozenset[EquivalentIdSet]] = set()
+            comments = []
+            behaviours = set()
+            for conflicted_curation in potentially_conflicting_curations:
 
-                if len(behaviours) > 1 or len(associated_id_sets_this_term_norm) > 1:
-                    # uh ho - behaviours/id set clash. Add to norm conflicts
-                    normalisation_conflicts.add(frozenset(potentially_conflicting_curations))
-                else:
-                    # merge the curations
-                    merged_curation = CuratedTerm(
-                        behaviour=next(iter(behaviours)),
-                        original_forms=frozenset(original_forms_merged),
-                        alternative_forms=frozenset(generated_forms_merged),
-                        associated_id_sets=next(iter(associated_id_sets_this_term_norm))
-                        if len(associated_id_sets_this_term_norm) == 1
-                        else None,
-                        comment="\n".join(comments) if len(comments) > 0 else None,
+                behaviours.add(conflicted_curation.behaviour)
+                original_forms_merged.update(conflicted_curation.original_forms)
+                generated_forms_merged.update(conflicted_curation.alternative_forms)
+                if conflicted_curation.associated_id_sets is not None:
+                    associated_id_sets_this_term_norm.add(conflicted_curation.associated_id_sets)
+                if conflicted_curation.comment is not None:
+                    comments.append(conflicted_curation.comment)
+                for form in conflicted_curation.all_forms():
+                    # remove conflicted forms from the working 'good' list
+                    maybe_good_curations_by_syn_lower[form.string.lower()].discard(
+                        conflicted_curation
                     )
-                    merged_curations.add(merged_curation)
-                    # update the maybe good curations with the merged curation data
-                    for form in merged_curation.active_ner_forms():
-                        maybe_good_curations_by_syn_lower[form.string.lower()].add(merged_curation)
-                    logger.warning(
-                        "duplicate curation set merged. term norm: %s, conflicts: %s",
-                        term_norm,
-                        potentially_conflicting_curations,
-                    )
+
+            if len(behaviours) > 1 or len(associated_id_sets_this_term_norm) > 1:
+                # uh ho - behaviours/id set clash. Add to norm conflicts
+                normalisation_conflicts.add(frozenset(potentially_conflicting_curations))
+            else:
+                # merge the curations
+                merged_curation = CuratedTerm(
+                    behaviour=next(iter(behaviours)),
+                    original_forms=frozenset(original_forms_merged),
+                    alternative_forms=frozenset(generated_forms_merged),
+                    associated_id_sets=next(iter(associated_id_sets_this_term_norm))
+                    if len(associated_id_sets_this_term_norm) == 1
+                    else None,
+                    comment="\n".join(comments) if len(comments) > 0 else None,
+                )
+                merged_curations.add(merged_curation)
+                # update the maybe good curations with the merged curation data
+                for form in merged_curation.active_ner_forms():
+                    maybe_good_curations_by_syn_lower[form.string.lower()].add(merged_curation)
+                logger.warning(
+                    "duplicate curation set merged. term norm: %s, conflicts: %s",
+                    term_norm,
+                    potentially_conflicting_curations,
+                )
         return merged_curations, normalisation_conflicts
 
     def _group_curations_and_check_for_normalisation_consistency_errors(
