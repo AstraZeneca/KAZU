@@ -390,12 +390,10 @@ class CuratedTermConflictAnalyser:
         maybe_good_curations_by_syn_lower: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
         normalisation_errors = set()
         for curation in curations:
-            term_norms_this_term = set()
-            for original_form in curation.original_forms:
-                term_norm = StringNormalizer.normalize(
-                    original_form.string, entity_class=self.entity_class
-                )
-                term_norms_this_term.add(term_norm)
+            term_norms_this_term = set(
+                StringNormalizer.normalize(original_form.string, entity_class=self.entity_class)
+                for original_form in curation.original_forms
+            )
             if len(term_norms_this_term) > 1:
                 normalisation_errors.add(curation)
             term_norm = next(iter(term_norms_this_term))
