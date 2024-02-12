@@ -135,7 +135,7 @@ class CuratedTermConflictAnalyser:
     def __init__(self, entity_class: str, autofix: bool = False):
         """
 
-        :param entity_class: entity class that this set belongs to
+        :param entity_class: entity class that this analyzer will handle
         :param autofix: Should any conflicts be automatically fixed, such that the
             behaviour is consistent within this set? Note that this does not guarantee that
             the optimal behaviour for a conflict is preserved.
