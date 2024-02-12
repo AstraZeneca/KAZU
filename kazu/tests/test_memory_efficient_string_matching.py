@@ -134,7 +134,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
     assert_matches(entities, match_len, match_texts, match_ontology_data)
 
 
-def test_pipeline_build_from_parsers_alone(tmp_path):
+def test_pipeline_build_from_parsers_alone():
     Singleton.clear_all()
     parser_1 = DummyParser(
         name="first_mock_parser",
