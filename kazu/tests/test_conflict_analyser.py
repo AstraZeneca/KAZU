@@ -1,8 +1,10 @@
+import pytest
 from kazu.data.data import CuratedTerm, MentionForm, MentionConfidence, CuratedTermBehaviour
 from kazu.ontology_preprocessing.base import CuratedTermConflictAnalyser
 
 
-def test_should_cause_intercuration_case_conflict():
+@pytest.mark.parametrize("autofix", [True, False])
+def test_should_cause_intercuration_case_conflict(autofix):
     case_conflicted_curation_set = {
         CuratedTerm(
             original_forms=frozenset(
@@ -14,7 +16,7 @@ def test_should_cause_intercuration_case_conflict():
                     ),
                     MentionForm(
                         string="Hello",
-                        mention_confidence=MentionConfidence.POSSIBLE,
+                        mention_confidence=MentionConfidence.PROBABLE,
                         case_sensitive=False,
                     ),
                 ]
@@ -23,54 +25,24 @@ def test_should_cause_intercuration_case_conflict():
         )
     }
 
-    conflict_analyser = CuratedTermConflictAnalyser("test")
+    conflict_analyser = CuratedTermConflictAnalyser("test", autofix=autofix)
 
     curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
-    assert len(curation_report.clean_curations) == 0
-    assert len(curation_report.merged_curations) == 0
-    assert len(curation_report.normalisation_conflicts) == 0
-    assert case_conflicted_curation_set in curation_report.case_conflicts
+
+    if autofix:
+        assert len(curation_report.clean_curations) == 1
+        assert len(curation_report.merged_curations) == 0
+        assert len(curation_report.normalisation_conflicts) == 0
+        assert len(curation_report.case_conflicts) == 0
+    else:
+        assert len(curation_report.clean_curations) == 0
+        assert len(curation_report.merged_curations) == 0
+        assert len(curation_report.normalisation_conflicts) == 0
+        assert case_conflicted_curation_set in curation_report.case_conflicts
 
 
-def test_should_merge():
-    expected_merged_forms = [
-        MentionForm(
-            string="hello",
-            mention_confidence=MentionConfidence.POSSIBLE,
-            case_sensitive=True,
-        ),
-        MentionForm(
-            string="Hello",
-            mention_confidence=MentionConfidence.PROBABLE,
-            case_sensitive=False,
-        ),
-    ]
-
-    case_conflicted_curation_set = {
-        CuratedTerm(
-            original_forms=frozenset([expected_merged_forms[0]]),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-        ),
-        CuratedTerm(
-            original_forms=frozenset([expected_merged_forms[1]]),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-        ),
-    }
-
-    conflict_analyser = CuratedTermConflictAnalyser("test")
-
-    curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
-    assert len(curation_report.clean_curations) == 1
-    assert len(curation_report.merged_curations) == 1
-    assert set(expected_merged_forms) == set(
-        next(iter(curation_report.clean_curations)).active_ner_forms()
-    )
-
-    assert len(curation_report.normalisation_conflicts) == 0
-    assert len(curation_report.case_conflicts) == 0
-
-
-def test_should_cause_intracuration_case_conflict():
+@pytest.mark.parametrize("autofix", [True, False])
+def test_should_merge(autofix):
     expected_merged_forms = [
         MentionForm(
             string="hello",
@@ -95,13 +67,64 @@ def test_should_cause_intracuration_case_conflict():
         ),
     }
 
-    conflict_analyser = CuratedTermConflictAnalyser("test")
+    conflict_analyser = CuratedTermConflictAnalyser("test", autofix=autofix)
 
     curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
-    assert len(curation_report.clean_curations) == 0
-    assert len(curation_report.merged_curations) == 1
-    assert len(curation_report.normalisation_conflicts) == 0
-    assert len(curation_report.case_conflicts) == 1
-    # the element of the detected_case_conflicts set will be a merged curation, so the original ones should have
-    # been removed
-    assert case_conflicted_curation_set not in curation_report.case_conflicts
+
+    if autofix:
+        assert len(curation_report.clean_curations) == 1
+        assert len(curation_report.merged_curations) == 1
+        assert len(curation_report.normalisation_conflicts) == 0
+        assert len(curation_report.case_conflicts) == 0
+    else:
+        assert len(curation_report.clean_curations) == 1
+        assert len(curation_report.merged_curations) == 1
+        assert set(expected_merged_forms) == set(
+            next(iter(curation_report.clean_curations)).active_ner_forms()
+        )
+        assert len(curation_report.normalisation_conflicts) == 0
+        assert len(curation_report.case_conflicts) == 0
+
+
+@pytest.mark.parametrize("autofix", [True, False])
+def test_should_cause_intracuration_case_conflict(autofix):
+    expected_merged_forms = [
+        MentionForm(
+            string="hello",
+            mention_confidence=MentionConfidence.PROBABLE,
+            case_sensitive=True,
+        ),
+        MentionForm(
+            string="Hello",
+            mention_confidence=MentionConfidence.PROBABLE,
+            case_sensitive=False,
+        ),
+    ]
+
+    case_conflicted_curation_set = {
+        CuratedTerm(
+            original_forms=frozenset([expected_merged_forms[0]]),
+            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        ),
+        CuratedTerm(
+            original_forms=frozenset([expected_merged_forms[1]]),
+            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        ),
+    }
+
+    conflict_analyser = CuratedTermConflictAnalyser("test", autofix=autofix)
+
+    curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
+    if autofix:
+        assert len(curation_report.clean_curations) == 1
+        assert len(curation_report.merged_curations) == 1
+        assert len(curation_report.normalisation_conflicts) == 0
+        assert len(curation_report.case_conflicts) == 0
+    else:
+        assert len(curation_report.clean_curations) == 0
+        assert len(curation_report.merged_curations) == 1
+        assert len(curation_report.normalisation_conflicts) == 0
+        assert len(curation_report.case_conflicts) == 1
+        # the element of the detected_case_conflicts set will be a merged curation, so the original ones should have
+        # been removed
+        assert case_conflicted_curation_set not in curation_report.case_conflicts
