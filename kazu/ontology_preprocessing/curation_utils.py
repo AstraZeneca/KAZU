@@ -86,13 +86,12 @@ def dump_curated_term_subsets(
     curations_path = as_path(path)
     if curations_path.exists() and not force:
         raise ValueError(f"file already exists at {path}")
-    else:
 
-        with curations_path.open(mode="w") as jsonlf:
-            for curation_set in terms:
-                for curation in curation_set:
-                    jsonlf.write(curation.to_json() + "\n")
-                jsonlf.write("\n\n")
+    with curations_path.open(mode="w") as jsonlf:
+        for curation_set in terms:
+            for curation in curation_set:
+                jsonlf.write(curation.to_json() + "\n")
+            jsonlf.write("\n\n")
 
 
 def load_global_actions(
