@@ -171,12 +171,12 @@ class CuratedTermConflictAnalyser:
         (
             curations_by_term_norm,
             maybe_good_curations_by_syn_lower,
-        ) = self._group_curations_and_check_for_normalisation_errors(curations)
+        ) = self._group_curations_and_check_for_normalisation_consistency_errors(curations)
 
         (
             merged_curations,
             normalisation_conflicts,
-        ) = self._check_for_normalisation_conflicts_and_merge_if_possible(
+        ) = self._check_for_normalised_behaviour_conflicts_and_merge_if_possible(
             curations_by_term_norm, maybe_good_curations_by_syn_lower
         )
 
@@ -329,7 +329,7 @@ class CuratedTermConflictAnalyser:
 
         return case_conflicts, clean_curations
 
-    def _check_for_normalisation_conflicts_and_merge_if_possible(
+    def _check_for_normalised_behaviour_conflicts_and_merge_if_possible(
         self,
         curations_by_term_norm: defaultdict[str, set[CuratedTerm]],
         maybe_good_curations_by_syn_lower: defaultdict[str, set[CuratedTerm]],
@@ -386,7 +386,7 @@ class CuratedTermConflictAnalyser:
                     )
         return merged_curations, normalisation_conflicts
 
-    def _group_curations_and_check_for_normalisation_errors(
+    def _group_curations_and_check_for_normalisation_consistency_errors(
         self, curations: set[CuratedTerm]
     ) -> tuple[defaultdict[str, set[CuratedTerm]], defaultdict[str, set[CuratedTerm]],]:
         curations_by_term_norm: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
