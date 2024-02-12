@@ -421,10 +421,10 @@ class CuratedTermConflictAnalyser:
 
         for form_string, cs_confidences in cs_conf_lookup.items():
             ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(form_string.lower(), set())
-            if len(ci_confidences) > 1 or (
+            if (
                 len(ci_confidences) > 0
                 and len(cs_confidences) > 0
-                and min(ci_confidences) < min(cs_confidences)
+                and min(cs_confidences) <= min(ci_confidences)
             ):
                 return True
         return False
