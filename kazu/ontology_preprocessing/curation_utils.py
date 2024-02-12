@@ -566,14 +566,15 @@ class CurationProcessor:
         self.curations = set(curations)
         self.dropped_keys: set[NormalisedSynonymStr] = set()
 
-    def curation_sort_key(self, curated_term: CuratedTerm) -> tuple[int, bool]:
+    @classmethod
+    def curation_sort_key(cls, curated_term: CuratedTerm) -> tuple[int, bool]:
         """Determines the order curations are processed in.
 
         We use associated_id_sets as a key, so that any overrides will be processed
         after any original behaviours
         """
         return (
-            self._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
+            cls._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
             curated_term.associated_id_sets is not None,
         )
 
