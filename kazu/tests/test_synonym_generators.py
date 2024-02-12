@@ -37,10 +37,7 @@ def check_generator_result(
             behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         )
         generated_terms = generator({curated_term})
-        new_syns: set[str] = set()
-        for term in generated_terms:
-            new_syns.update(term.all_strings())
-        new_syns.add(input_str)
+        new_syns = {s for term in generated_terms for s in term.all_strings()}
 
     else:
         new_syns = generator({input_str})
