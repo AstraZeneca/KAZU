@@ -193,12 +193,8 @@ TESTCASES = [
             dataclasses.replace(
                 SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
                 original_forms=frozenset(
-                    [
-                        dataclasses.replace(
-                            next(iter(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
-                            case_sensitive=True,
-                        )
-                    ]
+                    dataclasses.replace(orig_form, case_sensitive=True)
+                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
                 ),
             )
         ],
@@ -238,12 +234,8 @@ TESTCASES = [
             dataclasses.replace(
                 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
                 original_forms=frozenset(
-                    [
-                        dataclasses.replace(
-                            next(iter(SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
-                            string="This sentence is just to test",
-                        )
-                    ]
+                    dataclasses.replace(orig_form, string="This sentence is just to test")
+                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
                 ),
             )
         ],
