@@ -405,7 +405,7 @@ class CuratedTermConflictAnalyser:
             raise CurationError(
                 "One or more curations contain original forms that no longer normalise to the same value. This"
                 " can happen if the implementation of the StringNormalizer has changed. Please correct the following"
-                "curations: " + "\n".join(curation.to_json() for curation in normalisation_errors)
+                " curations:\n" + "\n".join(curation.to_json() for curation in normalisation_errors)
             )
         return curations_by_term_norm, maybe_good_curations_by_syn_lower
 
