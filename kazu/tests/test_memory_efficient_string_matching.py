@@ -54,9 +54,11 @@ max_mention_test_case = StringMatchingTestCase(
         dataclasses.replace(
             SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
             original_forms=frozenset(
+                # technically we don't need to specify mention_confidence=MentionConfidence.HIGHLY_LIKELY
+                # as it is the default. However, it's clearer if we do
                 dataclasses.replace(
                     form,
-                    mention_confidence=MentionConfidence.PROBABLE,
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     case_sensitive=True,
                     string="ComplexVII Disease\u03B1",
                 )
