@@ -61,11 +61,8 @@ class CombinatorialSynonymGenerator:
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
     def __call__(self, curated_terms: set[CuratedTerm]) -> set[CuratedTerm]:
-        """Takes a set of :class:`~.CuratedTerm`\\s, and returns both original
-        ``CuratedTerm``\\s and new ``CuratedTerm``\\s generated from them.
-
-        The new ``CuratedTerm``\\s inherit the case sensitivity and the mention confidence
-        of the original.
+        """Takes a set of :class:`~.CuratedTerm`\\s, and returns a new set of
+        ``CuratedTerm``\\s with generated synonyms added as `alternative_forms`.
 
         :param curated_terms:
         :return:
