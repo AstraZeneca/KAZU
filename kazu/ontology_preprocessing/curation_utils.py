@@ -289,11 +289,7 @@ class CuratedTermConflictAnalyser:
         path: PathLike,
     ) -> None:
         report_path = as_path(path)
-        if report_path.exists():
-            if not report_path.is_dir():
-                raise RuntimeError(f"{report_path} exists and is not a directory")
-        else:
-            report_path.mkdir(parents=True)
+        report_path.mkdir(parents=True, exists_ok=True)
         path_to_curations: dict[str, set[CuratedTerm]] = {
             self.CLEAN_CURATIONS_FN: clean_curations,
             self.MERGED_CURATIONS_FN: merged_curations,
