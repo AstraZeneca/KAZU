@@ -45,12 +45,8 @@ max_mention_test_case = StringMatchingTestCase(
         dataclasses.replace(
             FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
             original_forms=frozenset(
-                [
-                    dataclasses.replace(
-                        next(iter(FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
-                        mention_confidence=MentionConfidence.PROBABLE,
-                    )
-                ]
+                dataclasses.replace(form, mention_confidence=MentionConfidence.PROBABLE)
+                for form in FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
             ),
         ),
     ],
@@ -58,15 +54,15 @@ max_mention_test_case = StringMatchingTestCase(
         dataclasses.replace(
             SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
             original_forms=frozenset(
-                [
-                    dataclasses.replace(
-                        next(iter(FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms)),
-                        case_sensitive=True,
-                        string="ComplexVII Disease\u03B1",
-                    )
-                ]
+                dataclasses.replace(
+                    form,
+                    mention_confidence=MentionConfidence.PROBABLE,
+                    case_sensitive=True,
+                    string="ComplexVII Disease\u03B1",
+                )
+                for form in FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
             ),
-        ),
+        )
     ],
     match_len=1,
     match_texts={"ComplexVII Disease\u03B1"},
