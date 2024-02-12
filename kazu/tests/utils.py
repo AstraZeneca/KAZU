@@ -26,7 +26,7 @@ from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
-from kazu.ontology_preprocessing.autocuration import AutoCurationAction, AutoCurator
+from kazu.ontology_preprocessing.autocuration import AutoCurator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -184,26 +184,20 @@ def write_curations(path: Path, terms: list[CuratedTerm]):
             f.write(json.dumps(DocumentJsonUtils.obj_to_dict_repr(curation)) + "\n")
 
 
-# for the purposes of testing, we set up an autocurator class that tells the parsers to set the default behaviour of terms to 'IGNORE'
-class IgnoreAllAutoCurationAction(AutoCurationAction):
-    def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
-        original_forms_mod = set()
-        alternative_forms_mod = set()
-        for form in curated_term.original_forms:
-            original_forms_mod.add(
-                dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
-            )
-        for form in curated_term.alternative_forms:
-            alternative_forms_mod.add(
-                dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
-            )
-
-        return dataclasses.replace(
-            curated_term,
-            original_forms=frozenset(original_forms_mod),
-            alternative_forms=frozenset(alternative_forms_mod),
-        )
+# for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of terms to 'IGNORE'
+def ignore_all_action(curated_term: CuratedTerm) -> CuratedTerm:
+    return dataclasses.replace(
+        curated_term,
+        original_forms=frozenset(
+            dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
+            for form in curated_term.original_forms
+        ),
+        alternative_forms=frozenset(
+            dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
+            for form in curated_term.alternative_forms
+        ),
+    )
 
 
 def ignore_all_by_default_autocurator_factory() -> AutoCurator:
-    return AutoCurator([IgnoreAllAutoCurationAction()])
+    return AutoCurator([ignore_all_action])
