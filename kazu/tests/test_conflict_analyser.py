@@ -4,7 +4,7 @@ from kazu.ontology_preprocessing.base import CuratedTermConflictAnalyser
 
 
 @pytest.mark.parametrize("autofix", [True, False])
-def test_should_cause_intercuration_case_conflict(autofix):
+def test_case_conflict_within_single_curation(autofix):
     case_conflicted_curation_set = {
         CuratedTerm(
             original_forms=frozenset(
@@ -42,7 +42,7 @@ def test_should_cause_intercuration_case_conflict(autofix):
 
 
 @pytest.mark.parametrize("autofix", [True, False])
-def test_should_merge(autofix):
+def test_conflict_analyser_should_merge_curations(autofix):
     expected_merged_forms = [
         MentionForm(
             string="hello",
@@ -71,23 +71,17 @@ def test_should_merge(autofix):
 
     curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
 
-    if autofix:
-        assert len(curation_report.clean_curations) == 1
-        assert len(curation_report.merged_curations) == 1
-        assert len(curation_report.normalisation_conflicts) == 0
-        assert len(curation_report.case_conflicts) == 0
-    else:
-        assert len(curation_report.clean_curations) == 1
-        assert len(curation_report.merged_curations) == 1
-        assert set(expected_merged_forms) == set(
-            next(iter(curation_report.clean_curations)).active_ner_forms()
-        )
-        assert len(curation_report.normalisation_conflicts) == 0
-        assert len(curation_report.case_conflicts) == 0
+    assert len(curation_report.clean_curations) == 1
+    assert len(curation_report.merged_curations) == 1
+    assert len(curation_report.normalisation_conflicts) == 0
+    assert len(curation_report.case_conflicts) == 0
+    assert set(expected_merged_forms) == set(
+        next(iter(curation_report.clean_curations)).active_ner_forms()
+    )
 
 
 @pytest.mark.parametrize("autofix", [True, False])
-def test_should_cause_intracuration_case_conflict(autofix):
+def test_case_conflict_across_multiple_curations(autofix):
     expected_merged_forms = [
         MentionForm(
             string="hello",
