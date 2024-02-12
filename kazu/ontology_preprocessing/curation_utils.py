@@ -775,33 +775,16 @@ class CurationProcessor:
 
     def _process_curation_action(self, curation: CuratedTerm) -> CuratedTerm:
 
-        term_norm = curation.term_norm_for_linking(self.entity_class)
-        terms = {form.string for form in curation.original_forms}
         if curation.behaviour is CuratedTermBehaviour.IGNORE:
             logger.debug("curation ignored: %s for %s", curation, self.parser_name)
         elif curation.behaviour is CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
-            self._drop_synonym_term(term_norm)
+            self._drop_synonym_term(curation.term_norm_for_linking(self.entity_class))
         elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
-            self._attempt_to_add_database_entry_for_curation(
-                curation_associated_id_set=curation.associated_id_sets,
-                terms=terms,
-                curation_term_norm=term_norm,
+            self._attempt_to_add_database_entry_for_curated_term(
+                curation,
             )
-
         elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
-            self._attempt_to_add_database_entry_for_curation(
-                curation_associated_id_set=curation.associated_id_sets,
-                terms=terms,
-                curation_term_norm=term_norm,
-            )
-            term_for_this_curation = self._terms_by_term_norm.get(term_norm)
-            if term_for_this_curation is None:
-                logger.warning(
-                    "CuratedTerm %s is invalid: "
-                    "requires an identifier but none was found. It may have been removed by another curation, or not exist in the underlying data sourcee.",
-                    curation,
-                )
-                return dataclasses.replace(curation, behaviour=CuratedTermBehaviour.IGNORE)
+            self._attempt_to_add_database_entry_for_curated_term(curation)
         else:
             raise ValueError(f"unknown behaviour for parser {self.parser_name}, {curation}")
         return curation
@@ -874,11 +857,9 @@ class CurationProcessor:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
         return None
 
-    def _attempt_to_add_database_entry_for_curation(
+    def _attempt_to_add_database_entry_for_curated_term(
         self,
-        curation_term_norm: NormalisedSynonymStr,
-        curation_associated_id_set: Optional[AssociatedIdSets],
-        terms: set[str],
+        curated_term: CuratedTerm,
     ) -> Literal[
         CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
     ]:
@@ -887,7 +868,7 @@ class CurationProcessor:
 
         Notes:
 
-        If a term_norm already exists in self._terms_by_term_norm that matches 'curation_term_norm',
+        If a term_norm already exists in self._terms_by_term_norm that matches 'curated_term.term_norm_for_linking',
         this method will check to see if the 'curation_associated_id_set' matches the existing terms
         :class:`.AssociatedIdSets`\\.
 
@@ -897,21 +878,20 @@ class CurationProcessor:
         If the term_norm does not exist, this method will create a new :class:`~kazu.data.data.SynonymTerm`
         with the provided :class:`.AssociatedIdSets`\\.
 
-        :param curation_term_norm:
-        :param curation_associated_id_set:
-        :param terms:
+        :param curated_term:
         :return:
         """
         log_prefix = "%(parser_name)s attempting to create synonym term for <%(synonym)s> term_norm: <%(term_norm)s> IDs: %(ids)s}"
+        term_norm = curated_term.term_norm_for_linking(self.entity_class)
         log_formatting_dict: dict[str, Any] = {
             "parser_name": self.parser_name,
-            "synonym": terms,
-            "term_norm": curation_term_norm,
-            "ids": curation_associated_id_set,
+            "term_norm": term_norm,
+            "curated_term": curated_term,
         }
 
         # look up the term norm in the db
-        maybe_existing_synonym_term = self._terms_by_term_norm.get(curation_term_norm)
+        maybe_existing_synonym_term = self._terms_by_term_norm.get(term_norm)
+        curation_associated_id_set = curated_term.associated_id_sets
         if curation_associated_id_set is None and maybe_existing_synonym_term is not None:
             logger.debug(
                 log_prefix
@@ -933,7 +913,7 @@ class CurationProcessor:
         if len(curation_associated_id_set) == 0:
             logger.debug(
                 "all ids removed by global action for %s,  Parser name: %s",
-                terms,
+                curated_term,
                 self.parser_name,
             )
             return CurationModificationResult.NO_ACTION
@@ -977,11 +957,12 @@ class CurationProcessor:
                     )
         if len(curation_associated_id_set) > 0:
             is_symbolic = any(
-                StringNormalizer.classify_symbolic(term, self.entity_class) for term in terms
+                StringNormalizer.classify_symbolic(form.string, self.entity_class)
+                for form in curated_term.original_forms
             )
             new_term = SynonymTerm(
-                term_norm=curation_term_norm,
-                terms=frozenset(terms),
+                term_norm=term_norm,
+                terms=frozenset(term.string for term in curated_term.original_forms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
                 associated_id_sets=curation_associated_id_set,
