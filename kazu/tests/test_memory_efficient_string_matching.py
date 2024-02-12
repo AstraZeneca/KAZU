@@ -60,7 +60,7 @@ max_mention_test_case = StringMatchingTestCase(
                     case_sensitive=True,
                     string="ComplexVII Disease\u03B1",
                 )
-                for form in FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
+                for form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
             ),
         )
     ],
