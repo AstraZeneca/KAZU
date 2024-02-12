@@ -110,12 +110,10 @@ class CombinatorialSynonymGenerator:
         for generator in self.synonym_generators:
             generator.generate_synonyms.cache_clear()
 
-        new_curations = set()
-
-        for curation, alternative_forms in final_results.items():
-            new_curations.add(
-                dataclasses.replace(curation, alternative_forms=frozenset(alternative_forms))
-            )
+        new_curations = {
+            dataclasses.replace(curation, alternative_forms=frozenset(alternative_forms))
+            for curation, alternative_forms in final_results.items()
+        }
 
         return new_curations
 
