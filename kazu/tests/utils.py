@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import os
 import tempfile
 from os import getenv
 from pathlib import Path
@@ -112,6 +113,8 @@ class DummyParser(OntologyParser):
         if in_path == "":
             temp_parent = tempfile.mkdtemp()
             in_path = tempfile.mkdtemp(dir=temp_parent)
+        elif len(os.listdir(in_path)) != 0:
+            raise ValueError("DummyParser used with non-empty directory. This is problematic")
         super().__init__(
             in_path,
             entity_class,
