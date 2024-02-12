@@ -173,6 +173,8 @@ class CuratedTermConflictAnalyser:
             maybe_good_curations_by_syn_lower,
         ) = self._group_curations_and_check_for_normalisation_consistency_errors(curations)
 
+        # note, this method updates the maybe_good_curations_by_syn_lower dict, so we
+        # don't need to update clean_curations with merged_curations lower down
         (
             merged_curations,
             normalisation_conflicts,
