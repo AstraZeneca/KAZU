@@ -289,7 +289,7 @@ class CuratedTermConflictAnalyser:
         path: PathLike,
     ) -> None:
         report_path = as_path(path)
-        report_path.mkdir(parents=True, exists_ok=True)
+        report_path.mkdir(parents=True, exist_ok=True)
         path_to_curations: dict[str, set[CuratedTerm]] = {
             self.CLEAN_CURATIONS_FN: clean_curations,
             self.MERGED_CURATIONS_FN: merged_curations,
