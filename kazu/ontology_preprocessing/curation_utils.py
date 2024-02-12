@@ -317,11 +317,11 @@ class CuratedTermConflictAnalyser:
         clean_curations = set()
         for potential_conflict_set in list(maybe_good_curations_by_syn_lower.values()):
 
-            if not self._curation_set_has_case_conflicts(potential_conflict_set):
-                clean_curations.update(potential_conflict_set)
-            else:
+            if self._curation_set_has_case_conflicts(potential_conflict_set):
                 # uh ho - we have multiple identical forms attached to different curations
                 case_conflicts.add(frozenset(potential_conflict_set))
+            else:
+                clean_curations.update(potential_conflict_set)
 
         return case_conflicts, clean_curations
 
