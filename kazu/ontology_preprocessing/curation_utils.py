@@ -379,7 +379,7 @@ class CuratedTermConflictAnalyser:
                 for form in merged_curation.active_ner_forms():
                     maybe_good_curations_by_syn_lower[form.string.lower()].add(merged_curation)
                 logger.warning(
-                    "duplicate curation set merged. term norm: %s, conflicts: %s",
+                    "duplicate curation set merged. term norm: %s, conflicts:\n%s",
                     term_norm,
                     potentially_conflicting_curations,
                 )
