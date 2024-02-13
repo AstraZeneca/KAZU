@@ -457,6 +457,9 @@ class CuratedTermConflictAnalyser:
         """Merge a set of human curations with a set of automatically generated
         curations, preferring the human set where possible.
 
+        Note that the output is not guaranteed to be conflict free - consider calling
+        :meth:`~.verify_curation_set_integrity`.
+
         :param human_curations:
         :param autocurations:
         :param path: if provided, report any curations with discrepancies (such as where
