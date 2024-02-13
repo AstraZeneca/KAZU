@@ -200,4 +200,10 @@ def ignore_all_action(curated_term: CuratedTerm) -> CuratedTerm:
 
 
 def ignore_all_by_default_autocurator_factory() -> AutoCurator:
+    """When testing the behaviour of human :class:`CuratedTerm`, remember that 'default'
+    curations are always generated from a parser.
+
+    To ensure these do not interfere with our test, we need an autocurator function to
+    disable them.
+    """
     return AutoCurator([ignore_all_action])
