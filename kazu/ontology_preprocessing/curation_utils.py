@@ -473,6 +473,8 @@ class CuratedTermConflictAnalyser:
                 # check the set of strings are equivalent. Otherwise new ones may have been created by syn generation
                 if set(form.string for form in maybe_human_curation.original_forms) != set(
                     form.string for form in default_curation.original_forms
+                ) or set(form.string for form in maybe_human_curation.alternative_forms) != set(
+                    form.string for form in default_curation.alternative_forms
                 ):
                     curations_with_discrepancies.add(
                         frozenset([maybe_human_curation, default_curation])

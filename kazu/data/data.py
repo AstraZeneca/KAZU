@@ -998,7 +998,7 @@ class CuratedTerm:
     original_forms: frozenset[MentionForm]
     #: The intended behaviour for this term.
     behaviour: CuratedTermBehaviour
-    #: Alternative forms of the original versions of this term created by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\. Note that these are always automatically generated, and should not be manually edited.
+    #: Alternative forms of the original versions of this term created by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\.
     alternative_forms: frozenset[MentionForm] = field(default_factory=frozenset)
     #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
