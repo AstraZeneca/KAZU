@@ -176,6 +176,7 @@ class CuratedTermConflictAnalyser:
         # note, this method updates the maybe_good_curations_by_syn_lower dict, so we
         # don't need to update clean_curations with merged_curations lower down
         (
+            maybe_good_curations_by_syn_lower,
             merged_curations,
             normalisation_conflicts,
         ) = self._check_for_normalised_behaviour_conflicts_and_merge_if_possible(
@@ -331,7 +332,23 @@ class CuratedTermConflictAnalyser:
         self,
         curations_by_term_norm: defaultdict[str, set[CuratedTerm]],
         maybe_good_curations_by_syn_lower: defaultdict[str, set[CuratedTerm]],
-    ) -> tuple[set[CuratedTerm], set[frozenset[CuratedTerm]]]:
+    ) -> tuple[defaultdict[str, set[CuratedTerm]], set[CuratedTerm], set[frozenset[CuratedTerm]]]:
+        """Find behaviour conflicts in the curation set indexed by term_norm, and remove
+        them from the curation set indexed by syn_lower.
+
+        If curations can be merged, without causing conflicts, they will be, resulting
+        in a new curation and the destruction of the originals.
+
+        This method modifies the maybe_good_curations_by_syn_lower dictionary, with
+        conflicts and merged curations removed, and newly created curations (from
+        merged) added.
+
+        :param curations_by_term_norm:
+        :param maybe_good_curations_by_syn_lower:
+        :return: modified maybe_good_curations_by_syn_lower, a set of newly created
+            merged curations and a set of sets of conflicts.
+        """
+
         normalisation_conflicts = set()
         merged_curations = set()
         for term_norm, potentially_conflicting_curations in curations_by_term_norm.items():
@@ -383,7 +400,7 @@ class CuratedTermConflictAnalyser:
                     term_norm,
                     potentially_conflicting_curations,
                 )
-        return merged_curations, normalisation_conflicts
+        return maybe_good_curations_by_syn_lower, merged_curations, normalisation_conflicts
 
     def _group_curations_and_check_for_normalisation_consistency_errors(
         self, curations: set[CuratedTerm]
