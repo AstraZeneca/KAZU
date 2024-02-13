@@ -429,6 +429,26 @@ class CuratedTermConflictAnalyser:
         return curations_by_term_norm, maybe_good_curations_by_syn_lower
 
     def _curation_set_has_case_conflicts(self, curations: set[CuratedTerm]) -> bool:
+        """Checks for case conflicts in a set of curations.
+
+        Intended behaviour is to allow different cases to produce different
+        confidences based on confidence rank. A case-sensitive rank must always
+        be higher than a case-insensitive rank, or a conflict will occur.
+
+        For example, the following situation should be supported:
+
+        "eGFR" -> ci and IGNORE
+        "EGFR" -> cs and POSSIBLE
+        "Egfr" -> cs and PROBABLE
+
+        ...while the following situation is conflicted:
+
+        "eGFR" -> ci and PROBABLE
+        "Egfr" -> cs and POSSIBLE
+
+        :param curations:
+        :return:
+        """
         cs_conf_lookup = defaultdict(set)
         ci_conf_lookup = defaultdict(set)
         for curation in curations:
