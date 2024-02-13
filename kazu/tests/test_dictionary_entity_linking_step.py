@@ -4,7 +4,7 @@ from kazu.tests.utils import DummyParser
 
 
 def test_skips_prelinked_entities(tmp_path, mock_kazu_disk_cache_on_parsers):
-    parser = DummyParser(str(tmp_path / "dummy_parser"), entity_class="int")
+    parser = DummyParser(in_path="", entity_class="int")
     parser.populate_databases(force=True)
     index = DictionaryIndex(parser)
     mock_skip_namespace = "mock_skip_namespace"
