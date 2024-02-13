@@ -115,7 +115,8 @@ def load_global_actions(
 class CurationSetIntegrityReport:
     #: Terms with no conflicts
     clean_curations: set[CuratedTerm]
-    #: Terms that can be safely merged without affecting behaviour
+    #: Terms that can be safely merged without affecting :class:`.CuratedTermBehaviour`. However,
+    #: may still conflict on :class:`.MentionConfidence` and/or case sensitivity
     merged_curations: set[CuratedTerm]
     #: Terms that conflict on normalisation value
     normalisation_conflicts: set[frozenset[CuratedTerm]]
