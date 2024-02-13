@@ -21,10 +21,6 @@ from kazu.utils.grouping import sort_then_group
 logger = logging.getLogger(__name__)
 
 
-def extract_term_strings_from_synonym_terms(synonym_terms: set[SynonymTerm]) -> set[str]:
-    return {term_str for syn_term in synonym_terms for term_str in syn_term.terms}
-
-
 def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
     """
 
