@@ -913,7 +913,7 @@ class CurationProcessor:
         :param curated_term:
         :return:
         """
-        log_prefix = "%(parser_name)s attempting to create synonym term for <%(synonym)s> term_norm: <%(term_norm)s> IDs: %(ids)s}"
+        log_prefix = "%(parser_name)s attempting to create synonym term for term_norm: <%(term_norm)s> curated_term: %(curated_term)s"
         term_norm = curated_term.term_norm_for_linking(self.entity_class)
         log_formatting_dict: dict[str, Any] = {
             "parser_name": self.parser_name,
