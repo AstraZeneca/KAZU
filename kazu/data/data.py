@@ -817,8 +817,6 @@ SimpleValue = Union[NumericMetric, str]
 
 
 class CuratedTermBehaviour(AutoNameEnum):
-    #: do nothing. Useful if you want to catalogue a term as "I've looked at this but don't want to use it for NER"
-    IGNORE = auto()
     #: use the term for both dictionary based NER and as a linking target.
     ADD_FOR_NER_AND_LINKING = auto()
     #: use the term only as a linking target. Note, this is not required if the term is already in the

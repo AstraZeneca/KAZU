@@ -210,11 +210,12 @@ TESTCASES = [
         },
     ),
     StringMatchingTestCase(
-        id="Two curated terms from two parsers One should hit to test ignore logic",
+        id="Two curated terms from two parsers One should hit to test ADD_FOR_LINKING_ONLY logic",
         parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
         parser_2_curations=[
             dataclasses.replace(
-                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM, behaviour=CuratedTermBehaviour.IGNORE
+                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+                behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
             )
         ],
         match_len=1,

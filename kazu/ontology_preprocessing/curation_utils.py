@@ -254,8 +254,6 @@ class CuratedTermConflictAnalyser:
                 chosen_behaviour = CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
             elif CuratedTermBehaviour.ADD_FOR_LINKING_ONLY in behaviours:
                 chosen_behaviour = CuratedTermBehaviour.ADD_FOR_LINKING_ONLY
-            elif CuratedTermBehaviour.IGNORE in behaviours:
-                chosen_behaviour = CuratedTermBehaviour.IGNORE
             else:
                 chosen_behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
 
@@ -570,7 +568,6 @@ class CurationProcessor:
 
     # curations are applied in the following order
     CURATION_APPLY_ORDER = (
-        CuratedTermBehaviour.IGNORE,
         CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
@@ -812,9 +809,7 @@ class CurationProcessor:
 
     def _process_curation_action(self, curation: CuratedTerm) -> CuratedTerm:
 
-        if curation.behaviour is CuratedTermBehaviour.IGNORE:
-            logger.debug("curation ignored: %s for %s", curation, self.parser_name)
-        elif curation.behaviour is CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
+        if curation.behaviour is CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
             self._drop_synonym_term(curation.term_norm_for_linking(self.entity_class))
         elif curation.behaviour is CuratedTermBehaviour.ADD_FOR_LINKING_ONLY:
             self._attempt_to_add_database_entry_for_curated_term(
