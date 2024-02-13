@@ -228,8 +228,8 @@ Instead, it's preferable to curate the ontology, specifying:
 
 In addition, there are the following considerations:
 
-5) Many strings have multiple equally relevant forms/synonyms that can be automatically generated. How can we
-    ensure we are using those for NER/linking as well?
+5) Many strings have multiple equally relevant forms/synonyms that aren't documented in the underlying ontology, but
+    can be automatically generated. How can we ensure we are using those for NER/linking as well?
 6) If the ontology is large, it's probably not practical to review every string - there could be 10 000s.
     Therefore, can we employ heuristics to automatically curate some/all of the strings for us?
 7) Usually, ontologies are not static. They undergo revisions, in which new strings are added, obsolete ones removed
@@ -250,10 +250,10 @@ Point 8 is handled by the :class:`.CuratedTermConflictAnalyser` class (and contr
 The flow of an ontology parser to handling the underlying strings is as follows:
 
 1) On first initialisation, the set of :class:`.SynonymTerm`s an ontology produces is converted into a set of
-    :class:`.CuratedTerm`.
+    :class:`.CuratedTerm`. This happens via :func:`.syn_terms_to_curations`
 2) If configured, the :class:`.CombinatorialSynonymGenerator` is executed to generate additional forms
     for each :class:`.CuratedTerm`.
-3) If configured, the :class:`.Autocurator` is executed to set the default behaviour for each :class:`.CuratedTerm`
+3) If configured, the :class:`.Autocurator` is executed to adjust the default behaviour for each :class:`.CuratedTerm`
 4) The final set of the automatically generated :class:`.CuratedTerm`s is serialised in the model pack. This
     is required when upgrading to a new version of the ontology, and can also be used as the basis for human curations
     (supplied via a seperate file to the `curations_path` argument to :class:`.OntologyParser`
@@ -261,10 +261,13 @@ The flow of an ontology parser to handling the underlying strings is as follows:
     to determine whether any additional human curations will cause a conflict. Therefore, the
     :class:`.CuratedTermConflictAnalyser` will run each time the :meth:`.OntologyParser.populate_databases` method is
     called (once per python process, or as long as `force=True`). This will throw an exception in the case of conflicts,
-    describing the human curations that need to be adjusted.
+    describing the human curations that need to be adjusted. When the human :class:`.CuratedTerm` are consistent, they
+    will override their automatically generated equivalents, ensuring the human curated behaviour takes precedent over
+    the automatically curated version. If `run_curation_report` is set on :class:`.OntologyParser`, a report will be
+    generated alongside the ontology file that describe what human curations are obsolete/broken/superfluous.
 6) Finally, when upgrading an ontology, the serialised set of automatically produced :class:`.CuratedTerm` from step 4
-    is used to compare the new and old ontologies, migrating terms where possible and describing obsolete curations (both
-    automatically generated and human). The results are summarised in a report inside the Kazu model pack, alongside the
+    is used to compare the new and old ontologies, migrating terms where possible and describing the differences
+    between the old and the new versions. The results are summarised in a report inside the Kazu model pack, alongside the
     original ontology input data.
 
 To explore the other capabilities of the :class:`.OntologyParser`, such as synonym generation and ID filtering, please
