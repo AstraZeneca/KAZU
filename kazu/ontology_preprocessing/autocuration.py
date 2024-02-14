@@ -26,6 +26,10 @@ class SymbolicToCaseSensitiveAction(AutoCurationAction):
                     dataclasses.replace(form, case_sensitive=True)
                     for form in curated_term.original_forms
                 ),
+                alternative_forms=frozenset(
+                    dataclasses.replace(form, case_sensitive=True)
+                    for form in curated_term.alternative_forms
+                ),
             )
         else:
             return curated_term
@@ -66,6 +70,77 @@ class MinLength(AutoCurationAction):
                 )
 
         return curated_term
+
+
+class MaxLength(AutoCurationAction):
+    """Drop terms that exceed a maximum string length."""
+
+    def __init__(self, max_len: int = 60):
+        self.max_len = max_len
+
+    def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
+        for form in curated_term.original_forms:
+            if len(form.string) > self.max_len:
+                return dataclasses.replace(
+                    curated_term, behaviour=CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+                )
+
+        return curated_term
+
+
+def is_upper_case_word_to_case_insensitive(curated_term: CuratedTerm) -> CuratedTerm:
+    """Make strings composed of all alphabetical characters case-insensitive.
+
+    Some data sources use all-caps strings for nouns that can be considered case-
+    insensitive (e.g. Chembl).
+
+    :param curated_term:
+    :return:
+    """
+
+    for form in curated_term.original_forms:
+        for char in form.string:
+            if char.isupper() and char.isalpha():
+                continue
+            else:
+                return curated_term
+    return dataclasses.replace(
+        curated_term,
+        original_forms=frozenset(
+            dataclasses.replace(form, case_sensitive=False) for form in curated_term.original_forms
+        ),
+        alternative_forms=frozenset(
+            dataclasses.replace(form, case_sensitive=False)
+            for form in curated_term.alternative_forms
+        ),
+    )
+
+
+def reverse_camel_case_to_case_sensitive(curated_term: CuratedTerm) -> CuratedTerm:
+    """If a form is reverse camel case, then it should be case-sensitive.
+
+    E.g. "eGFR" vs "EGFR".
+
+    :param curated_term:
+    :return:
+    """
+    for form in curated_term.original_forms:
+        try:
+            if form.string[0].islower() and form.string[1].isupper():
+                return dataclasses.replace(
+                    curated_term,
+                    original_forms=frozenset(
+                        dataclasses.replace(form, case_sensitive=True)
+                        for form in curated_term.original_forms
+                    ),
+                    alternative_forms=frozenset(
+                        dataclasses.replace(form, case_sensitive=True)
+                        for form in curated_term.alternative_forms
+                    ),
+                )
+        except IndexError:
+            pass
+    return curated_term
 
 
 class AutoCurator:
