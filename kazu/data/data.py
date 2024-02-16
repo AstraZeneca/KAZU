@@ -208,6 +208,10 @@ class Mapping:
             **mapping_dict,
         )
 
+    @staticmethod
+    def from_dict_cattrs(mapping_dict: dict) -> "Mapping":
+        return _json_converter.structure(mapping_dict, Mapping)
+
 
 NumericMetric = Union[bool, int, float]
 
@@ -306,6 +310,10 @@ class SynonymTermWithMetrics(SynonymTerm):
             aggregated_by=aggregated_by,
             **term_dict,
         )
+
+    @staticmethod
+    def from_dict_cattrs(term_dict: dict) -> "SynonymTermWithMetrics":
+        return _json_converter.structure(term_dict, SynonymTermWithMetrics)
 
 
 @dataclass
@@ -500,6 +508,10 @@ class Entity:
             **entity_dict,
         )
 
+    @staticmethod
+    def from_dict_cattrs(entity_dict: dict) -> "Entity":
+        return _json_converter.structure(entity_dict, Entity)
+
 
 @dataclass(unsafe_hash=True)
 class Section:
@@ -562,6 +574,10 @@ class Section:
         section.entities = [Entity.from_dict(x) for x in section_dict.get("entities", [])]
         return section
 
+    @staticmethod
+    def from_dict_cattrs(section_dict: dict) -> "Section":
+        return _json_converter.structure(section_dict, Section)
+
 
 @dataclass(unsafe_hash=True)
 class Document:
@@ -605,8 +621,35 @@ class Document:
         )
         return json.dumps(as_dict, **kwargs)
 
+    def json_cattrs_initial(
+        self,
+        drop_unmapped_ents: bool = False,
+        drop_terms: bool = False,
+        **kwargs: Any,
+    ) -> str:
+        """Custom encoder needed to handle serialisation issues with our data model.
+
+        :param drop_unmapped_ents: drop any entities that have no mappings
+        :param drop_terms: drop the synonym term dict field
+        :param kwargs: additional kwargs passed to json.dumps
+        :return:
+        """
+        as_dict = self.as_minified_dict_cattrs(
+            drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
+        )
+        return json.dumps(as_dict, **kwargs)
+
     def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> dict:
         as_dict = DocumentJsonUtils.doc_to_json_dict(self)
+        as_dict = DocumentJsonUtils.minify_json_dict(
+            as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
+        )
+        return DocumentJsonUtils.remove_empty_elements(as_dict)
+
+    def as_minified_dict_cattrs(
+        self, drop_unmapped_ents: bool = False, drop_terms: bool = False
+    ) -> dict:
+        as_dict: dict = _json_converter.unstructure(self)
         as_dict = DocumentJsonUtils.minify_json_dict(
             as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
         )
@@ -653,8 +696,16 @@ class Document:
         return Document(**doc_args)
 
     @staticmethod
+    def from_dict_cattrs(document_dict: dict) -> "Document":
+        return _json_converter.structure(document_dict, Document)
+
+    @staticmethod
     def from_json(json_str: str) -> "Document":
         return Document.from_dict(json.loads(json_str))
+
+    @staticmethod
+    def from_json_cattrs(json_str: str) -> "Document":
+        return Document.from_dict_cattrs(json.loads(json_str))
 
 
 T = TypeVar("T")
@@ -942,6 +993,10 @@ class ParserAction:
             },
         )
 
+    @classmethod
+    def from_json_cattrs(cls, json_dict: dict) -> "ParserAction":
+        return _json_converter.structure(json_dict, ParserAction)
+
     def __post_init__(self):
         if len(self.parser_to_target_id_mappings) == 0:
             raise ValueError(
@@ -980,6 +1035,10 @@ class GlobalParserActions:
         return cls(
             actions=[ParserAction.from_json(x) for x in json_dict["actions"]],
         )
+
+    @classmethod
+    def from_json_cattrs(cls, json_dict: dict) -> "GlobalParserActions":
+        return _json_converter.structure(json_dict, GlobalParserActions)
 
 
 @dataclass(frozen=True)
@@ -1118,6 +1177,11 @@ class CuratedTerm:
         json_dict = json_util.loads(json_str)
         return cls.from_dict(json_dict)
 
+    @staticmethod
+    def from_json_cattrs(json_str: str) -> "CuratedTerm":
+        json_dict = json_util.loads(json_str)
+        return CuratedTerm.from_dict_cattrs(json_dict)
+
     @classmethod
     def from_dict(cls, json_dict: dict) -> "CuratedTerm":
         """|from_dict_note|"""
@@ -1158,14 +1222,29 @@ class CuratedTerm:
             alternative_forms=alternative_forms,
         )
 
+    @classmethod
+    def from_dict_cattrs(cls, json_dict: dict) -> "CuratedTerm":
+        return _json_converter.structure(json_dict, CuratedTerm)
+
     def to_dict(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
         as_dict = cast(dict[str, Any], DocumentJsonUtils.obj_to_dict_repr(self))
         if preserve_structured_object_id:
             as_dict["_id"] = self._id
         return as_dict
 
+    def to_dict_cattrs(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
+        as_dict: dict[str, Any] = _json_converter.unstructure(self)
+        if preserve_structured_object_id:
+            as_dict["_id"] = self._id
+        return as_dict
+
     def to_json(self) -> str:
         as_json = self.to_dict(False)
+        assert isinstance(as_json, dict)
+        return json.dumps(as_json)
+
+    def to_json_cattrs(self) -> str:
+        as_json = self.to_dict_cattrs(False)
         assert isinstance(as_json, dict)
         return json.dumps(as_json)
 

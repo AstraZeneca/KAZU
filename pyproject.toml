@@ -103,6 +103,7 @@ dev = [
   "pytest-mock",
   "pytest-cov",
   "pytest-timeout",
+  "hypothesis",
   "sphinx>=7.2",
   "myst_parser",
   "furo>=2023.08.17",
