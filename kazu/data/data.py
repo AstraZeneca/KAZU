@@ -197,19 +197,6 @@ class Mapping:
     @staticmethod
     def from_dict(mapping_dict: dict) -> "Mapping":
         """|from_dict_note|"""
-        string_match_confidence = StringMatchConfidence[mapping_dict.pop("string_match_confidence")]
-        dis_conf_value = mapping_dict.pop("disambiguation_confidence", None)
-        disambiguation_confidence = (
-            DisambiguationConfidence[dis_conf_value] if dis_conf_value is not None else None
-        )
-        return Mapping(
-            string_match_confidence=string_match_confidence,
-            disambiguation_confidence=disambiguation_confidence,
-            **mapping_dict,
-        )
-
-    @staticmethod
-    def from_dict_cattrs(mapping_dict: dict) -> "Mapping":
         return _json_converter.structure(mapping_dict, Mapping)
 
 
@@ -291,28 +278,6 @@ class SynonymTermWithMetrics(SynonymTerm):
     @staticmethod
     def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
         """|from_dict_note|"""
-        terms = frozenset(term_dict.pop("terms", ()))
-        associated_id_sets = set()
-        for equiv_id_dict in term_dict.pop("associated_id_sets", ()):
-            associated_id_sets.add(
-                EquivalentIdSet(
-                    ids_and_source=frozenset(
-                        tuple(ids_and_source) for ids_and_source in equiv_id_dict["ids_and_source"]
-                    )
-                )
-            )
-        mapping_types = frozenset(term_dict.pop("mapping_types", ()))
-        aggregated_by = EquivalentIdAggregationStrategy(term_dict.pop("aggregated_by"))
-        return SynonymTermWithMetrics(
-            terms=terms,
-            associated_id_sets=frozenset(associated_id_sets),
-            mapping_types=mapping_types,
-            aggregated_by=aggregated_by,
-            **term_dict,
-        )
-
-    @staticmethod
-    def from_dict_cattrs(term_dict: dict) -> "SynonymTermWithMetrics":
         return _json_converter.structure(term_dict, SynonymTermWithMetrics)
 
 
@@ -488,28 +453,6 @@ class Entity:
     @staticmethod
     def from_dict(entity_dict: dict) -> "Entity":
         """|from_dict_note|"""
-        entity_dict.pop("start")
-        entity_dict.pop("end")
-        entity_dict.pop("match_norm")
-        synonym_terms_dict = {
-            (syn_term := SynonymTermWithMetrics.from_dict(term)): syn_term
-            for term in entity_dict.pop("synonym_terms", ())
-        }
-        mappings = {
-            Mapping.from_dict(mapping_dict) for mapping_dict in entity_dict.pop("mappings", ())
-        }
-        spans = frozenset(CharSpan(**x) for x in entity_dict.pop("spans", []))
-        mention_confidence = MentionConfidence[entity_dict.pop("mention_confidence")]
-        return Entity(
-            syn_term_to_synonym_terms=synonym_terms_dict,
-            spans=spans,
-            mappings=mappings,
-            mention_confidence=mention_confidence,
-            **entity_dict,
-        )
-
-    @staticmethod
-    def from_dict_cattrs(entity_dict: dict) -> "Entity":
         return _json_converter.structure(entity_dict, Entity)
 
 
@@ -564,18 +507,6 @@ class Section:
     @staticmethod
     def from_dict(section_dict: dict) -> "Section":
         """|from_dict_note|"""
-        section = Section(
-            name=section_dict["name"],
-            text=section_dict["text"],
-            metadata=section_dict.get("metadata", {}),
-        )
-        if (dict_sent_spans := section_dict.get("sentence_spans")) is not None:
-            section.sentence_spans = [CharSpan(**x) for x in dict_sent_spans]
-        section.entities = [Entity.from_dict(x) for x in section_dict.get("entities", [])]
-        return section
-
-    @staticmethod
-    def from_dict_cattrs(section_dict: dict) -> "Section":
         return _json_converter.structure(section_dict, Section)
 
 
@@ -621,34 +552,7 @@ class Document:
         )
         return json.dumps(as_dict, **kwargs)
 
-    def json_cattrs_initial(
-        self,
-        drop_unmapped_ents: bool = False,
-        drop_terms: bool = False,
-        **kwargs: Any,
-    ) -> str:
-        """Custom encoder needed to handle serialisation issues with our data model.
-
-        :param drop_unmapped_ents: drop any entities that have no mappings
-        :param drop_terms: drop the synonym term dict field
-        :param kwargs: additional kwargs passed to json.dumps
-        :return:
-        """
-        as_dict = self.as_minified_dict_cattrs(
-            drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
-        )
-        return json.dumps(as_dict, **kwargs)
-
     def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> dict:
-        as_dict = DocumentJsonUtils.doc_to_json_dict(self)
-        as_dict = DocumentJsonUtils.minify_json_dict(
-            as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
-        )
-        return DocumentJsonUtils.remove_empty_elements(as_dict)
-
-    def as_minified_dict_cattrs(
-        self, drop_unmapped_ents: bool = False, drop_terms: bool = False
-    ) -> dict:
         as_dict: dict = _json_converter.unstructure(self)
         as_dict = DocumentJsonUtils.minify_json_dict(
             as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
@@ -686,26 +590,11 @@ class Document:
     @staticmethod
     def from_dict(document_dict: dict) -> "Document":
         """|from_dict_note|"""
-        sections = [
-            Section.from_dict(section_dict) for section_dict in document_dict.get("sections", [])
-        ]
-        doc_args = {"sections": sections, "metadata": document_dict.get("metadata", {})}
-        doc_id = document_dict.get("idx")
-        if doc_id is not None:
-            doc_args["idx"] = doc_id
-        return Document(**doc_args)
-
-    @staticmethod
-    def from_dict_cattrs(document_dict: dict) -> "Document":
         return _json_converter.structure(document_dict, Document)
 
     @staticmethod
     def from_json(json_str: str) -> "Document":
         return Document.from_dict(json.loads(json_str))
-
-    @staticmethod
-    def from_json_cattrs(json_str: str) -> "Document":
-        return Document.from_dict_cattrs(json.loads(json_str))
 
 
 T = TypeVar("T")
@@ -829,10 +718,6 @@ class DocumentJsonUtils:
         return doc_json_dict
 
     @classmethod
-    def doc_to_json_dict_cattrs_backed(cls, doc: Document) -> dict[str, JsonEncodable]:
-        return cast(dict[str, JsonEncodable], _json_converter.unstructure(doc))
-
-    @classmethod
     def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonEncodable]:
         """.. without the override below, it fails to find JsonEncodable.
 
@@ -852,7 +737,7 @@ class DocumentJsonUtils:
         :return:
         :rtype: :class:`dict`\\ [:class:`str`\\ , :py:data:`~kazu.data.data.JsonEncodable`]
         """
-        return {k: DocumentJsonUtils.obj_to_dict_repr(v) for k, v in doc.__dict__.items()}
+        return cast(dict[str, JsonEncodable], _json_converter.unstructure(doc))
 
     @classmethod
     def obj_to_dict_repr(cls, obj: Any) -> JsonEncodable:
@@ -984,17 +869,11 @@ class ParserAction:
     behaviour: ParserBehaviour
     parser_to_target_id_mappings: dict[str, set[str]] = field(default_factory=dict)
 
-    @classmethod
-    def from_json(cls, json_dict: dict) -> "ParserAction":
-        return cls(
-            behaviour=ParserBehaviour(json_dict["behaviour"]),
-            parser_to_target_id_mappings={
-                k: set(v) for k, v in json_dict["parser_to_target_id_mappings"].items()
-            },
-        )
+    # TODO: this should be called `from_dict` rather than `from_json` for symmetry
+    # check if this applies to any other functions.
 
     @classmethod
-    def from_json_cattrs(cls, json_dict: dict) -> "ParserAction":
+    def from_json(cls, json_dict: dict) -> "ParserAction":
         return _json_converter.structure(json_dict, ParserAction)
 
     def __post_init__(self):
@@ -1030,14 +909,11 @@ class GlobalParserActions:
         """
         yield from self._parser_name_to_action.get(parser_name, [])
 
-    @classmethod
-    def from_json(cls, json_dict: dict) -> "GlobalParserActions":
-        return cls(
-            actions=[ParserAction.from_json(x) for x in json_dict["actions"]],
-        )
+    # TODO: this should be called `from_dict` rather than `from_json` for symmetry
+    # check if this applies to any other functions.
 
     @classmethod
-    def from_json_cattrs(cls, json_dict: dict) -> "GlobalParserActions":
+    def from_json(cls, json_dict: dict) -> "GlobalParserActions":
         return _json_converter.structure(json_dict, GlobalParserActions)
 
 
@@ -1172,67 +1048,17 @@ class CuratedTerm:
                 f"multiple term norms produced by {self}. This curation should be seperated into two or more seperate items."
             )
 
-    @classmethod
-    def from_json(cls, json_str: str) -> "CuratedTerm":
-        json_dict = json_util.loads(json_str)
-        return cls.from_dict(json_dict)
-
     @staticmethod
-    def from_json_cattrs(json_str: str) -> "CuratedTerm":
+    def from_json(json_str: str) -> "CuratedTerm":
         json_dict = json_util.loads(json_str)
-        return CuratedTerm.from_dict_cattrs(json_dict)
+        return CuratedTerm.from_dict(json_dict)
 
     @classmethod
     def from_dict(cls, json_dict: dict) -> "CuratedTerm":
         """|from_dict_note|"""
-        if json_dict["associated_id_sets"] is None:
-            frozen_assoc_id_sets = None
-        else:
-            assoc_id_sets = set()
-            for equiv_id_set in json_dict["associated_id_sets"]:
-                ids = frozenset((idx, source) for idx, source in equiv_id_set["ids_and_source"])
-                equiv_id_set = EquivalentIdSet(ids)
-                assoc_id_sets.add(equiv_id_set)
-
-            frozen_assoc_id_sets = frozenset(assoc_id_sets)
-
-        original_forms = frozenset(
-            MentionForm(
-                string=form_json_dict["string"],
-                case_sensitive=form_json_dict["case_sensitive"],
-                mention_confidence=MentionConfidence[form_json_dict["mention_confidence"]],
-            )
-            for form_json_dict in json_dict["original_forms"]
-        )
-
-        alternative_forms = frozenset(
-            MentionForm(
-                string=form_json_dict["string"],
-                case_sensitive=form_json_dict["case_sensitive"],
-                mention_confidence=MentionConfidence[form_json_dict["mention_confidence"]],
-            )
-            for form_json_dict in json_dict["alternative_forms"]
-        )
-
-        return cls(
-            behaviour=CuratedTermBehaviour(json_dict["behaviour"]),
-            associated_id_sets=frozen_assoc_id_sets,
-            _id=json_dict.get("_id", bson.ObjectId()),
-            original_forms=original_forms,
-            alternative_forms=alternative_forms,
-        )
-
-    @classmethod
-    def from_dict_cattrs(cls, json_dict: dict) -> "CuratedTerm":
         return _json_converter.structure(json_dict, CuratedTerm)
 
     def to_dict(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
-        as_dict = cast(dict[str, Any], DocumentJsonUtils.obj_to_dict_repr(self))
-        if preserve_structured_object_id:
-            as_dict["_id"] = self._id
-        return as_dict
-
-    def to_dict_cattrs(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
         as_dict: dict[str, Any] = _json_converter.unstructure(self)
         if preserve_structured_object_id:
             as_dict["_id"] = self._id
@@ -1240,11 +1066,6 @@ class CuratedTerm:
 
     def to_json(self) -> str:
         as_json = self.to_dict(False)
-        assert isinstance(as_json, dict)
-        return json.dumps(as_json)
-
-    def to_json_cattrs(self) -> str:
-        as_json = self.to_dict_cattrs(False)
         assert isinstance(as_json, dict)
         return json.dumps(as_json)
 

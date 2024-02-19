@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from hypothesis import given, settings, strategies as st
 import bson
 
@@ -121,72 +119,3 @@ def test_round_trip_document_structuring(doc: Document):
         section.entities = []
 
     assert doc == restructured
-
-
-comparable_serializable_types_with_from_dict_method = (
-    t for t in comparable_serializable_types if getattr(t, "from_dict", None)
-)
-comparable_from_dict_class_strategy = st.one_of(
-    *(st.from_type(t) for t in comparable_serializable_types_with_from_dict_method)
-)
-
-
-@given(instance=comparable_from_dict_class_strategy)
-def test_equivalence_of_cattrs_to_old_methods_comparible_classes(instance):
-    d = _json_converter.unstructure(instance)
-    # necessary because the old `from_dict` mutates d and we otherwise get errors!
-    d2 = deepcopy(d)
-    assert type(instance).from_dict(d) == type(instance).from_dict_cattrs(d2)
-
-
-@given(instance=st.one_of(st.from_type(ParserAction), st.from_type(GlobalParserActions)))
-@settings(max_examples=200)  # 100 for each class
-def test_equivalence_of_cattrs_to_old_methods_parser_actions(instance):
-    """This needs its own test because the old methods use 'from_json' here rather than
-    from_dict as above.
-
-    This is probably something that should be changed for symmetry with the above
-    classes.
-    """
-    d = _json_converter.unstructure(instance)
-    # necessary because the old `from_dict` mutates d and we otherwise get errors!
-    d2 = deepcopy(d)
-    assert type(instance).from_json(d) == type(instance).from_json_cattrs(d2)
-
-
-@given(ent=...)
-def test_equivalence_of_cattrs_to_old_methods_entity(ent: Entity):
-    d = _json_converter.unstructure(ent)
-    # as above with mutation - same for below functions too
-    d2 = deepcopy(d)
-    assert compare_entities(Entity.from_dict(d), Entity.from_dict_cattrs(d2))
-
-
-@given(sec=...)
-def test_equivalence_of_cattrs_to_old_methods_section(sec: Section):
-    d = _json_converter.unstructure(sec)
-    d2 = deepcopy(d)
-    restructured_old = Section.from_dict(d)
-    restructed_cattrs = Section.from_dict_cattrs(d2)
-    for e1, e2 in zip(restructured_old.entities, restructed_cattrs.entities):
-        assert compare_entities(e1, e2)
-    restructured_old.entities = []
-    restructed_cattrs.entities = []
-    assert restructured_old == restructed_cattrs
-
-
-@given(doc=...)
-def test_equivalence_of_cattrs_to_old_methods_document(doc: Document):
-    d = _json_converter.unstructure(doc)
-    d2 = deepcopy(d)
-    restructured_old = Document.from_dict(d)
-    restructed_cattrs = Document.from_dict_cattrs(d2)
-    for e1, e2 in zip(restructured_old.get_entities(), restructed_cattrs.get_entities()):
-        assert compare_entities(e1, e2)
-
-    for section in restructured_old.sections:
-        section.entities = []
-    for section in restructed_cattrs.sections:
-        section.entities = []
-
-    assert restructured_old == restructed_cattrs
