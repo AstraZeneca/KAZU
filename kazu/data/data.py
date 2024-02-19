@@ -869,11 +869,8 @@ class ParserAction:
     behaviour: ParserBehaviour
     parser_to_target_id_mappings: dict[str, set[str]] = field(default_factory=dict)
 
-    # TODO: this should be called `from_dict` rather than `from_json` for symmetry
-    # check if this applies to any other functions.
-
     @classmethod
-    def from_json(cls, json_dict: dict) -> "ParserAction":
+    def from_dict(cls, json_dict: dict) -> "ParserAction":
         return _json_converter.structure(json_dict, ParserAction)
 
     def __post_init__(self):
@@ -909,11 +906,8 @@ class GlobalParserActions:
         """
         yield from self._parser_name_to_action.get(parser_name, [])
 
-    # TODO: this should be called `from_dict` rather than `from_json` for symmetry
-    # check if this applies to any other functions.
-
     @classmethod
-    def from_json(cls, json_dict: dict) -> "GlobalParserActions":
+    def from_dict(cls, json_dict: dict) -> "GlobalParserActions":
         return _json_converter.structure(json_dict, GlobalParserActions)
 
 
