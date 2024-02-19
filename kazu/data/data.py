@@ -557,7 +557,8 @@ class Section:
             text=section_dict["text"],
             metadata=section_dict.get("metadata", {}),
         )
-        section.sentence_spans = [CharSpan(**x) for x in section_dict.get("sentence_spans", [])]
+        if (dict_sent_spans := section_dict.get("sentence_spans")) is not None:
+            section.sentence_spans = [CharSpan(**x) for x in dict_sent_spans]
         section.entities = [Entity.from_dict(x) for x in section_dict.get("entities", [])]
         return section
 
