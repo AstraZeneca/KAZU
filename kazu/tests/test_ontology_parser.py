@@ -7,13 +7,13 @@ import pytest
 from kazu.data.data import (
     CuratedTerm,
     MentionConfidence,
-    DocumentJsonUtils,
     ParserAction,
     EquivalentIdSet,
     ParserBehaviour,
     GlobalParserActions,
     CuratedTermBehaviour,
     MentionForm,
+    _json_converter,
 )
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.ontology_preprocessing.base import (
@@ -80,7 +80,7 @@ def setup_databases(
     if global_actions is not None:
         global_actions_path = base_path.joinpath("global_actions.json")
         with open(global_actions_path, "w") as f:
-            f.writelines(json.dumps(DocumentJsonUtils.obj_to_dict_repr(global_actions)) + "\n")
+            f.writelines(json.dumps(_json_converter.unstructure(global_actions)) + "\n")
 
     if parser_data_includes_target_synonym:
         assert (

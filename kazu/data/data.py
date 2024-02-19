@@ -16,10 +16,9 @@ import uuid
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import datetime, date
 from enum import Enum, auto, IntEnum
 from math import inf
-from typing import Any, Optional, Union, overload, TypeVar, cast
+from typing import Any, Optional, Union, overload, TypeVar
 from collections.abc import Iterable
 
 import bson
@@ -611,10 +610,6 @@ argument.
 """
 
 
-class ConversionException(Exception):
-    pass
-
-
 _json_converter = cattrs.preconf.json.make_converter()
 
 # 'external' to kazu datatypes
@@ -693,10 +688,6 @@ _json_converter.register_structure_hook(
 
 
 class DocumentJsonUtils:
-
-    atomic_types = (int, float, str, bool, type(None))
-    listlike_types = (list, tuple, set, frozenset)
-
     @staticmethod
     def minify_json_dict(
         doc_json_dict: dict[str, Any],
@@ -721,79 +712,6 @@ class DocumentJsonUtils:
                 section_dict["entities"] = ents_to_keep
 
         return doc_json_dict
-
-    @classmethod
-    def doc_to_json_dict(cls, doc: Document) -> dict[str, JsonEncodable]:
-        """.. without the override below, it fails to find JsonEncodable.
-
-        ..
-          JsonEncodable failure is because it's recursively defined, but sphinx tries to
-          expand it out, so this doesn't work.
-
-          A manual override isn't too hard, and is readable for users.
-          An alternative would be to attempt to use Sphinx's
-          autodoc_type_aliases
-          https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_type_aliases
-          but this requires doing ``from __future__ import annotations`` which
-          could break pydantic stuff and have wider codebase implications, so
-          this would be a potentially larger piece of work for not much gain.
-
-        :param doc:
-        :return:
-        :rtype: :class:`dict`\\ [:class:`str`\\ , :py:data:`~kazu.data.data.JsonEncodable`]
-        """
-        return cast(dict[str, JsonEncodable], _json_converter.unstructure(doc))
-
-    @classmethod
-    def obj_to_dict_repr(cls, obj: Any) -> JsonEncodable:
-        """.. without the override below, it fails to find JsonEncodable, as above.
-
-        :param obj:
-        :return:
-        :rtype: :py:data:`~kazu.data.data.JsonEncodable`
-        """
-        if isinstance(obj, Enum):
-            return obj.name
-        elif isinstance(obj, cls.atomic_types):
-            return obj
-        elif isinstance(obj, (float16, float32)):  # type: ignore[misc]
-            return obj.item()
-        elif isinstance(obj, cls.listlike_types):
-            return [cls.obj_to_dict_repr(elem) for elem in obj]
-        elif isinstance(obj, ndarray):
-            l: list = obj.tolist()
-            return l
-        elif dataclasses.is_dataclass(obj):
-            return cls.obj_to_dict_repr(obj.__dict__)
-        elif isinstance(obj, dict):
-            processed_dict_pairs = (cls._preprocess_dict_pair(pair) for pair in obj.items())
-            return {k: cls.obj_to_dict_repr(v) for k, v in processed_dict_pairs}
-        elif isinstance(obj, (datetime, date)):
-            s: str = obj.isoformat()
-            return s
-        elif isinstance(obj, bson.ObjectId):
-            # we know this is actually a dict[str, str]
-            # but because dict is invariant (see
-            # https://mypy.readthedocs.io/en/stable/generics.html#variance-of-generic-types )
-            # mypy will reject returning a dict[str, str] when it wants a
-            # dict[str, JsonEncodable]
-            d: dict[str, JsonEncodable] = json_util.default(obj)
-            return d
-        else:
-            raise ConversionException(f"Unknown object type: {type(obj)}")
-
-    @classmethod
-    def _preprocess_dict_pair(cls, kv_pair: tuple[Any, Any]) -> tuple[str, JsonEncodable]:
-        # note that sphinx would fail to generate docs for this function due to
-        # the JsonEncodable in the return, but this method is 'private' due to
-        # the leading '_', so no docs are currently generated.
-        k, v = kv_pair
-        if k == "_sentence_spans":
-            return "sentence_spans", list(v)
-        elif k == "syn_term_to_synonym_terms":
-            return "synonym_terms", list(v.values())
-        else:
-            return k, v
 
     @overload
     @staticmethod
