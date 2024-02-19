@@ -235,6 +235,11 @@ class SynonymTerm:
     def is_ambiguous(self) -> bool:
         return len(self.associated_id_sets) > 1
 
+    @staticmethod
+    def from_dict(term_dict: dict) -> "SynonymTerm":
+        """|from_dict_note|"""
+        return _json_converter.structure(term_dict, SynonymTerm)
+
 
 @dataclass(frozen=True, eq=True)
 class SynonymTermWithMetrics(SynonymTerm):
