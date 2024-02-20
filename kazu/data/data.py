@@ -967,7 +967,7 @@ class CuratedTerm:
 
     @staticmethod
     def from_json(json_str: str) -> "CuratedTerm":
-        json_dict = json_util.loads(json_str)
+        json_dict = json.loads(json_str)
         return CuratedTerm.from_dict(json_dict)
 
     @classmethod
