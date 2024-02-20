@@ -225,10 +225,10 @@ class SynonymTerm:
     #: is the term symbolic? Determined by the OntologyParser
     is_symbolic: bool
     associated_id_sets: AssociatedIdSets
-    #: mapping type metadata
-    mapping_types: frozenset[str] = field(hash=False)
     #: aggregation strategy, determined by the ontology parser
     aggregated_by: EquivalentIdAggregationStrategy = field(hash=False, compare=False)
+    #: mapping type metadata
+    mapping_types: frozenset[str] = field(hash=False, default_factory=frozenset)
 
     @property
     def is_ambiguous(self) -> bool:

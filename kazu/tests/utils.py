@@ -183,7 +183,6 @@ def make_dummy_synonym_term(
         ),
         aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
         is_symbolic=True,
-        mapping_types=frozenset(),
     )
 
 

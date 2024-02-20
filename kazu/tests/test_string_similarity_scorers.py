@@ -104,5 +104,4 @@ def make_term_for_scorer_test(synonyms: Sequence[str]) -> SynonymTerm:
         parser_name="test",
         aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
         is_symbolic=False,
-        mapping_types=frozenset(),
     )
