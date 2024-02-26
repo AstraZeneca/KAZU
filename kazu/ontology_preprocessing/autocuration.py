@@ -37,11 +37,10 @@ class IsCommmonWord(AutoCurationAction):
             self.common_words = {line.rstrip() for line in inf.readlines()}
 
     def __call__(self, curated_term: CuratedTerm) -> CuratedTerm:
-        found_common = []
-        for form in curated_term.original_forms:
-            found_common.append(
-                all(word in self.common_words for word in form.string.lower().split(" "))
-            )
+        found_common = (
+            all(word in self.common_words for word in form.string.lower().split())
+            for form in curated_term.original_forms
+        )
 
         if any(found_common):
             return dataclasses.replace(
