@@ -3,7 +3,7 @@ from kazu.data.data import Entity, Document
 from kazu.tests.utils import DummyParser
 
 
-def test_skips_prelinked_entities(tmp_path, mock_kazu_disk_cache_on_parsers):
+def test_skips_prelinked_entities(mock_kazu_disk_cache_on_parsers):
     parser = DummyParser(in_path="", entity_class="int")
     parser.populate_databases(force=True)
     index = DictionaryIndex(parser)
