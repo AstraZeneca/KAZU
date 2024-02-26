@@ -230,7 +230,7 @@ In addition, there are the following considerations:
 
 5) Many strings have multiple equally relevant forms/synonyms that aren't documented in the underlying ontology, but
    can be automatically generated. How can we ensure we are using those for NER/linking as well?
-6) If the ontology is large, it's probably not practical to review every string - there could be 10 000s.
+6) If the ontology is large, it's probably not practical to review every string - there could be 10,000s.
    Therefore, can we employ heuristics to automatically curate some/all of the strings for us?
 7) Usually, ontologies are not static. They undergo revisions, in which new strings are added, obsolete ones removed
    and existing ones change. Even with autocuration techniques, some manual review will probably be necessary. How can
