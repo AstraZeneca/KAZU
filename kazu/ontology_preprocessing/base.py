@@ -553,7 +553,7 @@ class OntologyParser(ABC):
             "old_" + self.ontology_autocuration_set_path.name
         )
         logger.info(
-            "%s backing up previous version autocuration set to to %s",
+            "%s backing up previous version autocuration set to %s",
             self.name,
             backup_path,
         )
