@@ -365,10 +365,6 @@ class OntologyParser(ABC):
         self, terms: set[SynonymTerm]
     ) -> tuple[Optional[list[CuratedTerm]], set[SynonymTerm]]:
         if not self.ontology_autocuration_set_path.exists() or self.run_upgrade_report:
-            logger.info(
-                "%s ontology defaults not found, so it will be created",
-                self.name,
-            )
             clean_curations = self.generate_clean_default_curations(
                 terms, upgrade_report=self.run_upgrade_report
             )
