@@ -211,8 +211,8 @@ Finally, when we want to use our new parser, we need to give it information abou
 
 That's it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.
 
-Using an Ontology for dictionary based matching
--------------------------------------------------
+Using "CuratedTerm" for dictionary based matching and/or to modify an Ontology's behaviour
+--------------------------------------------------------------------------------------------
 
 The data sources that Kazu users tend to concern themselves with are often a rich source of nouns that can be accurately used for
 dictionary based string matching. Naively, we might think it is sufficient to simply take all of the entity labels from an
