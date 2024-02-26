@@ -491,7 +491,7 @@ class OntologyParser(ABC):
         if upgrade_report:
             if not self.ontology_autocuration_set_path.exists():
                 raise RuntimeError(
-                    f"{self.name} previous version autocuration set not found. A diff will not be generated.",
+                    f"{self.name} previous version autocuration set not found when asked to build upgrade report, so comparison is not possible.",
                 )
             else:
                 upgrade_report_path = self._create_upgrade_report_path()
