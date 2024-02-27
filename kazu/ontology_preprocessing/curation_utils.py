@@ -169,37 +169,35 @@ class CuratedTermConflictAnalyser:
         :raises CurationError: if one or more curations produce multiple normalised values
         """
 
+        curations = set(curations)
         (
-            curations_by_term_norm,
-            maybe_good_curations_by_syn_lower,
-        ) = self._group_curations_and_check_for_normalisation_consistency_errors(curations)
-
-        (
-            merged_curations_by_syn_lower,
+            merged_curations,
+            eliminated_curations,
             normalisation_conflicts,
-        ) = self._check_for_normalised_behaviour_conflicts_and_merge_if_possible(
-            curations_by_term_norm
-        )
+        ) = self.check_for_normalised_behaviour_conflicts_and_merge_if_possible(curations)
 
-        # update the working set of terms with the merged form
-        maybe_good_curations_by_syn_lower.update(merged_curations_by_syn_lower)
-
-        case_conflicts, clean_curations = self._check_for_case_conflicts_across_curations(
-            maybe_good_curations_by_syn_lower
-        )
-
+        curations.difference_update(eliminated_curations)
+        curations.update(merged_curations)
+        # remove the conflicts from the working set
+        for conflict_set in normalisation_conflicts:
+            curations.difference_update(conflict_set)
         if self.autofix:
+
             logger.info("Curations will be automatically fixed")
-            clean_curations.update(self.autofix_curations(normalisation_conflicts))
+            # add the fixed curations to the merged set
+            merged_curations.update(self.autofix_curations(normalisation_conflicts))
+            curations.update(merged_curations)
+            case_conflicts, clean_curations = self.check_for_case_conflicts_across_curations(
+                curations
+            )
             clean_curations.update(self.autofix_curations(case_conflicts))
             normalisation_conflicts = set()
             case_conflicts = set()
+        else:
+            case_conflicts, clean_curations = self.check_for_case_conflicts_across_curations(
+                curations
+            )
 
-        merged_curations = set(
-            curation
-            for curationset in merged_curations_by_syn_lower.values()
-            for curation in curationset
-        )
         if path is not None:
 
             self._write_integrity_report(
@@ -241,7 +239,7 @@ class CuratedTermConflictAnalyser:
                 original_forms_by_term_norm[term_norm].update(curation.original_forms)
                 alt_forms_by_term_norm[term_norm].update(curation.alternative_forms)
                 behaviours.add(curation.behaviour)
-                for form in curation.active_ner_forms():
+                for form in curation.all_forms():
                     form_string_lower_to_confidence[form.string.lower()].add(
                         form.mention_confidence
                     )
@@ -318,37 +316,66 @@ class CuratedTermConflictAnalyser:
                         for curation in curation_set:
                             f.write(curation.to_json() + "\n")
 
-    def _check_for_case_conflicts_across_curations(
-        self, maybe_good_curations_by_syn_lower: defaultdict[str, set[CuratedTerm]]
+    @staticmethod
+    def check_for_case_conflicts_across_curations(
+        curations: set[CuratedTerm],
     ) -> tuple[set[frozenset[CuratedTerm]], set[CuratedTerm]]:
-        case_conflicts = set()
-        clean_curations = set()
-        for potential_conflict_set in list(maybe_good_curations_by_syn_lower.values()):
+        """Find conflicts in case sensitivity within a set of curations.
 
-            if self._curation_set_has_case_conflicts(potential_conflict_set):
+        Conflicts can occur when strings differ by case sensitivity, and a
+        case-insensitive form will produce a :class:`.MentionConfidence`
+        of equal or higher rank than a case-sensitive one.
+
+        :param curations:
+        :return: a set of conflicted subsets, and a set of clean terms.
+        """
+
+        maybe_good_curations_by_active_form_lower = defaultdict(set)
+        for curation in curations:
+            for form in curation.all_forms():
+                maybe_good_curations_by_active_form_lower[form.string.lower()].add(curation)
+
+        all_conflicts = set()
+        case_conflict_subsets = set()
+        clean_curations = set()
+        for potential_conflict_set in list(maybe_good_curations_by_active_form_lower.values()):
+
+            if CuratedTermConflictAnalyser._curation_set_has_case_conflicts(potential_conflict_set):
                 # uh ho - we have multiple identical forms attached to different curations
-                case_conflicts.add(frozenset(potential_conflict_set))
+                case_conflict_subsets.add(frozenset(potential_conflict_set))
+                all_conflicts.update(potential_conflict_set)
             else:
                 clean_curations.update(potential_conflict_set)
 
-        return case_conflicts, clean_curations
+        # there are scenarios wherein a case conflict can occur transitively.
+        # Therefore, we need to eliminate from the clean curations any conflicted ones
+        clean_curations.difference_update(all_conflicts)
 
-    def _check_for_normalised_behaviour_conflicts_and_merge_if_possible(
-        self, curations_by_term_norm: defaultdict[str, set[CuratedTerm]]
-    ) -> tuple[defaultdict[str, set[CuratedTerm]], set[frozenset[CuratedTerm]]]:
+        return case_conflict_subsets, clean_curations
+
+    def check_for_normalised_behaviour_conflicts_and_merge_if_possible(
+        self, curations: set[CuratedTerm]
+    ) -> tuple[set[CuratedTerm], set[CuratedTerm], set[frozenset[CuratedTerm]]]:
         """Find behaviour conflicts in the curation set indexed by term_norm.
 
-        If curations can be merged without causing conflicts, they will be added to the
-        resulting dictionary of newly merged terms by term norm. If not, they will be
-        added to a set of conflicting terms.
+        If possible, curations will be merged. If not, they will be added to a set of
+        conflicting terms.
 
-        :param curations_by_term_norm:
-        :return: dictionary of merged terms by term norm, and a set of sets of
-            conflicts.
+        :param curations:
+        :return: A set of newly created merged curations, a set of curations eliminated
+            through the merge, and a set of curation subsets that conflict and cannot be
+            merged,
         """
 
+        curations_by_term_norm = (
+            self._group_curations_by_term_norm_and_check_for_normalisation_consistency_errors(
+                curations
+            )
+        )
+
         normalisation_conflicts = set()
-        newly_merged_curations_by_syn_lower = defaultdict(set)
+        merged_curations = set()
+        eliminated_curations = set()
         for term_norm, potentially_conflicting_curations in curations_by_term_norm.items():
             if len(potentially_conflicting_curations) == 1:
                 # no conflict
@@ -384,20 +411,21 @@ class CuratedTermConflictAnalyser:
                     else None,
                     comment="\n".join(comments) if len(comments) > 0 else None,
                 )
-                for form in merged_curation.active_ner_forms():
-                    newly_merged_curations_by_syn_lower[form.string.lower()].add(merged_curation)
+                merged_curations.add(merged_curation)
+
                 logger.warning(
-                    "duplicate curation set merged. term norm: %s, conflicts:\n%s",
+                    "duplicate curation set merged. term norm: %s, conflicts:\n%s\n merged to: %s",
                     term_norm,
                     potentially_conflicting_curations,
+                    merged_curation,
                 )
-        return newly_merged_curations_by_syn_lower, normalisation_conflicts
+                eliminated_curations.update(potentially_conflicting_curations)
+        return merged_curations, eliminated_curations, normalisation_conflicts
 
-    def _group_curations_and_check_for_normalisation_consistency_errors(
+    def _group_curations_by_term_norm_and_check_for_normalisation_consistency_errors(
         self, curations: set[CuratedTerm]
-    ) -> tuple[defaultdict[str, set[CuratedTerm]], defaultdict[str, set[CuratedTerm]],]:
+    ) -> defaultdict[str, set[CuratedTerm]]:
         curations_by_term_norm: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
-        maybe_good_curations_by_syn_lower: defaultdict[str, set[CuratedTerm]] = defaultdict(set)
         normalisation_errors = set()
         for curation in curations:
             term_norms_this_term = set(
@@ -408,8 +436,6 @@ class CuratedTermConflictAnalyser:
                 normalisation_errors.add(curation)
             term_norm = next(iter(term_norms_this_term))
             curations_by_term_norm[term_norm].add(curation)
-            for form in curation.all_forms():
-                maybe_good_curations_by_syn_lower[form.string.lower()].add(curation)
         if normalisation_errors:
             # This should never be thrown by automatically generated curations
             raise CurationError(
@@ -417,9 +443,10 @@ class CuratedTermConflictAnalyser:
                 " can happen if the implementation of the StringNormalizer has changed. Please correct the following"
                 " curations:\n" + "\n".join(curation.to_json() for curation in normalisation_errors)
             )
-        return curations_by_term_norm, maybe_good_curations_by_syn_lower
+        return curations_by_term_norm
 
-    def _curation_set_has_case_conflicts(self, curations: set[CuratedTerm]) -> bool:
+    @staticmethod
+    def _curation_set_has_case_conflicts(curations: set[CuratedTerm]) -> bool:
         """Checks for case conflicts in a set of curations.
 
         Intended behaviour is to allow different cases to produce different
