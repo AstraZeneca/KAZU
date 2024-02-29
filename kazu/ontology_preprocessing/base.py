@@ -358,7 +358,7 @@ class OntologyParser(ABC):
             if len(columns_with_null_values) > 0:
                 logger.warning(
                     "Some metadata columns have empty values for %s. This is permitted, but if you write custom code to read 'extra' metadata columns"
-                    " and depend on the property always being populated, you will likely get errors. Either ensure you can handle this field being 'null',"
+                    " and depend on the property always being populated, you will likely get errors. Either ensure you can handle this field being 'None',"
                     " or clean the underlying ontology to ensure the value is always populated. Affected columns: \n\n%s",
                     self.name,
                     columns_with_null_values,
