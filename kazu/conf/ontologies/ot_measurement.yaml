@@ -25,3 +25,7 @@ parsers:
           path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
         - _target_: kazu.ontology_preprocessing.autocuration.MinLength
           min_len: 2
+        - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
+          max_len: 60
+        - _target_: hydra.utils.get_method
+          path: kazu.ontology_preprocessing.autocuration.reverse_camel_case_to_case_sensitive
