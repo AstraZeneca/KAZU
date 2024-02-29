@@ -212,8 +212,6 @@ def get_wikipedia_contents_from_urls(urls: set[str], proxies: dict[str, str]) ->
     results = {}
     for chunk in tqdm(divide_chunks(sorted(urls)), total=len_chunks):
 
-        # for i, chunk in tqdm(enumerate(chunks), total=len(chunks)):
-
         params = {
             "action": "query",
             "prop": "revisions",
