@@ -159,6 +159,7 @@ class ModelPackBuilder:
                 if self.build_config.run_acceptance_tests:
                     execute_full_pipeline_acceptance_test(cfg)
             self.report_tested_dependencies()
+            self.report_global_curation_conflicts(cfg)
             if self.zip_pack:
                 self.zip_model_pack()
 
@@ -281,6 +282,32 @@ class ModelPackBuilder:
         )
         with self.model_pack_build_path.joinpath("tested_dependencies.txt").open(mode="w") as f:
             f.write(dependencies)
+
+    def report_global_curation_conflicts(self, cfg: DictConfig) -> None:
+
+        curation_to_parser_name = {}
+        for parser in instantiate(cfg.ontologies.parsers).values():
+            for curation in parser.populate_databases(return_curations=True):
+                curation_to_parser_name[curation] = parser.name
+
+        from kazu.ontology_preprocessing.curation_utils import (
+            CuratedTermConflictAnalyser,
+        )
+
+        (
+            case_conflicts,
+            clean_curations,
+        ) = CuratedTermConflictAnalyser.check_for_case_conflicts_across_curations(
+            set(curation_to_parser_name.keys())
+        )
+
+        curations_path = self.model_pack_build_path.joinpath("global_case_conflicts.txt")
+        with curations_path.open(mode="w") as jsonlf:
+            for conflict_set in case_conflicts:
+                for curation in conflict_set:
+                    jsonlf.write(curation_to_parser_name[curation] + "\n")
+                    jsonlf.write(curation.to_json() + "\n")
+                jsonlf.write("\n\n")
 
 
 @ray.remote(num_cpus=1)
