@@ -345,12 +345,13 @@ class OntologyParser(ABC):
             )
 
             if missing_expected_values_mask.any():
-                logger.warning(
-                    "The parsed dataframe for %s contains missing values expected for metadata. The relevant rows (i.e. entities) will be dropped and ignored: \n\n%s",
-                    self.name,
-                    self.parsed_dataframe[missing_expected_values_mask].to_string(),
+                raise ValueError(
+                    "The parsed dataframe for %s contains missing values expected for metadata. The relevant rows (i.e. entities) will be dropped and ignored: \n\n%s"
+                    % self.name,
+                    self.parsed_dataframe[missing_expected_values_mask].to_string(
+                        max_rows=40, max_cols=10
+                    ),
                 )
-                self.parsed_dataframe = self.parsed_dataframe[~missing_expected_values_mask]
 
             null_values_per_column = self.parsed_dataframe.isna().any(axis="index")
             columns_with_null_values = list(null_values_per_column[null_values_per_column].index)
