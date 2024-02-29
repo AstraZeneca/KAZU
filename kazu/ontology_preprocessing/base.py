@@ -354,7 +354,7 @@ class OntologyParser(ABC):
                 )
 
             null_values_per_column = self.parsed_dataframe.isna().any(axis="index")
-            columns_with_null_values = list(null_values_per_column[null_values_per_column].index)
+            columns_with_null_values = null_values_per_column[null_values_per_column].index
             if len(columns_with_null_values) > 0:
                 logger.warning(
                     "Some metadata columns have empty values for %s. This is permitted, but if you write custom code to read 'extra' metadata columns"
