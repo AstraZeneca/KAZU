@@ -184,9 +184,10 @@ class CuratedTermConflictAnalyser:
         if self.autofix:
 
             logger.info("Curations will be automatically fixed")
+            autofixed_curations_from_conflicts = self.autofix_curations(normalisation_conflicts)
             # add the fixed curations to the merged set
-            merged_curations.update(self.autofix_curations(normalisation_conflicts))
-            curations.update(merged_curations)
+            merged_curations.update(autofixed_curations_from_conflicts)
+            curations.update(autofixed_curations_from_conflicts)
             case_conflicts, clean_curations = self.check_for_case_conflicts_across_curations(
                 curations
             )
