@@ -124,14 +124,16 @@ def test_case_conflict_across_multiple_curations(autofix):
 
 @pytest.mark.parametrize("autofix", [True, False])
 def test_normalisation_and_case_conflict_resolution(autofix):
+    """In this test, we check that simultaneous normalisation and case conflicts are
+    appropriately handled.
 
-    # In this test, we check that simultaneous normalisation and case conflicts are appropriately handled.
-    #
-    # The mergable_curation_set contains two terms that normalise to the same value and should be merged into a
-    # new curated term. However, the unmergable_curation is classified as symbolic by the string normaliser,
-    # and doesn't produce an equal normalisation value, and therefore won't be merged.
-    # The resulting new curation will now conflict on case with unmergable_curation, and should be resolved
-    # as per the value of autofix
+    The mergable_curation_set contains two terms that normalise to the same value and
+    should be merged into a new curated term. However, the unmergable_curation is
+    classified as symbolic by the string normaliser, and doesn't produce an equal
+    normalisation value, and therefore won't be merged. The resulting new curation will
+    now conflict on case with unmergable_curation, and should be resolved as per the
+    value of autofix.
+    """
 
     ner_and_linking_curation_mergeable_1 = CuratedTerm(
         original_forms=frozenset(
