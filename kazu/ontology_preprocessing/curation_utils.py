@@ -339,7 +339,7 @@ class CuratedTermConflictAnalyser:
         all_conflicts = set()
         case_conflict_subsets = set()
         clean_curations = set()
-        for potential_conflict_set in list(maybe_good_curations_by_active_form_lower.values()):
+        for potential_conflict_set in maybe_good_curations_by_active_form_lower.values():
 
             if CuratedTermConflictAnalyser._curation_set_has_case_conflicts(potential_conflict_set):
                 # uh ho - we have multiple identical forms attached to different curations
