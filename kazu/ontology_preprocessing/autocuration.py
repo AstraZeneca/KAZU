@@ -53,6 +53,10 @@ class IsCommmonWord(AutoCurationAction):
                     dataclasses.replace(form, mention_confidence=MentionConfidence.POSSIBLE)
                     for form in curated_term.original_forms
                 ),
+                alternative_forms=frozenset(
+                    dataclasses.replace(form, mention_confidence=MentionConfidence.POSSIBLE)
+                    for form in curated_term.alternative_forms
+                ),
             )
         else:
             return curated_term
