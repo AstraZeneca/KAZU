@@ -87,8 +87,7 @@ class CombinatorialSynonymGenerator:
             for generator in permutation_list:
                 # run the generator. We call list here as we modify the original list
                 for curation in tqdm(
-                    list(curated_terms),
-                    total=len(curated_terms),
+                    curated_terms,
                     desc=f"generating synonyms for {generator.__class__.__name__}",
                 ):
 
