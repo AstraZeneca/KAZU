@@ -108,14 +108,13 @@ def test_round_trip_section_structuring(sec: Section):
 
 @given(doc=...)
 def test_round_trip_document_structuring(doc: Document):
-    d = _json_converter.unstructure(doc)
-    restructured = _json_converter.structure(d, Document)
-    for e1, e2 in zip(doc.get_entities(), restructured.get_entities()):
+    d = doc.from_json(doc.json())
+    for e1, e2 in zip(doc.get_entities(), d.get_entities()):
         assert compare_entities(e1, e2)
 
     for section in doc.sections:
         section.entities = []
-    for section in restructured.sections:
+    for section in d.sections:
         section.entities = []
 
-    assert doc == restructured
+    assert doc == d
