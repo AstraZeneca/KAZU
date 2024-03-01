@@ -108,7 +108,7 @@ def test_round_trip_section_structuring(sec: Section):
 
 @given(doc=...)
 def test_round_trip_document_structuring(doc: Document):
-    d = doc.from_json(doc.json())
+    d = doc.from_json(doc.to_json())
     for e1, e2 in zip(doc.get_entities(), d.get_entities()):
         assert compare_entities(e1, e2)
 

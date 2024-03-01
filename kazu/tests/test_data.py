@@ -55,7 +55,7 @@ def test_serialisation():
         CharSpan(start=0, end=28),
         CharSpan(start=29, end=50),
     ]
-    json_str = original_doc.json()
+    json_str = original_doc.to_json()
     # ensure this is valid json
     json_doc = json.loads(json_str)
     assert type(json_doc["sections"][0]["sentence_spans"]) is list

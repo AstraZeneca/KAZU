@@ -101,7 +101,7 @@ class FailedDocsFileHandler(FailedDocsHandler):
             step_logging_dir.mkdir(parents=True, exist_ok=True)
 
             for doc in docs:
-                serialisable_doc = doc.json()
+                serialisable_doc = doc.to_json()
                 doc_id = doc.idx
                 doc_path = step_logging_dir.joinpath(doc_id + ".json")
                 doc_error_path = step_logging_dir.joinpath(doc_id + "_error.txt")

@@ -53,7 +53,7 @@ def test_full_pipeline_and_serialisation(kazu_test_config):
     doc = Document.create_simple_document("EGFR is an important gene in breast cancer")
     doc = pipeline([doc])[0]
     with tempfile.TemporaryFile(mode="w") as f:
-        f.write(doc.json())
+        f.write(doc.to_json())
 
 
 class MetadataTaggingStep(Step):

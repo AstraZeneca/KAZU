@@ -23,11 +23,11 @@ As :class:`~.Document`\ s are the key containers of data processed by (or to be
 processed by) Kazu, we focus on the (de)serialization of this container, to and from
 json format.
 
-:meth:`.Document.json` is the key method here for serialization,
+:meth:`.Document.to_json` is the key method here for serialization,
 and :meth:`.Document.from_json` for deserialization.
 
 :class:`~.Document` and other classes that can be stored on :class:`~.Document` have
 a :meth:`~.Document.from_dict` method.
 
 These ``from_dict`` methods all expect dictionaries in the format produced by
-:meth:`.Document.json` when serializing a document.
+:meth:`.Document.to_json` when serializing a document.

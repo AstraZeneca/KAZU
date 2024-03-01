@@ -538,7 +538,7 @@ class Document:
             entities.extend(section.entities)
         return entities
 
-    def json(
+    def to_json(
         self,
         drop_unmapped_ents: bool = False,
         drop_terms: bool = False,
