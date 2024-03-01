@@ -544,11 +544,14 @@ class Document:
         drop_terms: bool = False,
         **kwargs: Any,
     ) -> str:
-        """Custom encoder needed to handle serialisation issues with our data model.
+        """Convert to json string using :meth:`~.as_minified_dict`.
+
+        The two specified arguments are passed through to :meth:`~.as_minified_dict`,
+        kwargs is passed through to :func:`json.dumps`.
 
         :param drop_unmapped_ents: drop any entities that have no mappings
         :param drop_terms: drop the synonym term dict field
-        :param kwargs: additional kwargs passed to json.dumps
+        :param kwargs: additional kwargs passed to :func:`json.dumps`.
         :return:
         """
         as_dict = self.as_minified_dict(
@@ -557,6 +560,17 @@ class Document:
         return json.dumps(as_dict, **kwargs)
 
     def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> dict:
+        """Convert the Document to a ``dict`` and 'minify'.
+
+        This function 'minifies' in a couple of ways:
+
+        1. Providing arguments that allow you to drop some parts of the Document that may be irrelevant to you.
+        2. General 'minification' by removing 'empty' parts of the ``dict``.
+
+        :param drop_unmapped_ents: drop any entities that have no mappings
+        :param drop_terms: drop the synonym term dict field
+        :return:
+        """
         as_dict: dict = _json_converter.unstructure(self)
         as_dict = DocumentJsonUtils.minify_json_dict(
             as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
