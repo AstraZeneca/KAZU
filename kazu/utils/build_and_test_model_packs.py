@@ -298,7 +298,7 @@ class ModelPackBuilder:
             case_conflicts,
             clean_curations,
         ) = CuratedTermConflictAnalyser.check_for_case_conflicts_across_curations(
-            set(curation_to_parser_name.keys())
+            curation_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 
         curations_path = self.model_pack_build_path.joinpath("global_case_conflicts.txt")
