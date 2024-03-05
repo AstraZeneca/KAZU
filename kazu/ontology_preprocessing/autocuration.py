@@ -102,22 +102,20 @@ def is_upper_case_word_to_case_insensitive(curated_term: CuratedTerm) -> Curated
     :return:
     """
 
-    for form in curated_term.original_forms:
-        for char in form.string:
-            if char.isupper() and char.isalpha():
-                continue
-            else:
-                return curated_term
-    return dataclasses.replace(
-        curated_term,
-        original_forms=frozenset(
-            dataclasses.replace(form, case_sensitive=False) for form in curated_term.original_forms
-        ),
-        alternative_forms=frozenset(
-            dataclasses.replace(form, case_sensitive=False)
-            for form in curated_term.alternative_forms
-        ),
-    )
+    if all(form.string.isupper() and form.string.isalpha() for form in curated_term.original_forms):
+        return dataclasses.replace(
+            curated_term,
+            original_forms=frozenset(
+                dataclasses.replace(form, case_sensitive=False)
+                for form in curated_term.original_forms
+            ),
+            alternative_forms=frozenset(
+                dataclasses.replace(form, case_sensitive=False)
+                for form in curated_term.alternative_forms
+            ),
+        )
+    else:
+        return curated_term
 
 
 def initial_lowercase_then_upper_to_case_sensitive(curated_term: CuratedTerm) -> CuratedTerm:
