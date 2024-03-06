@@ -14,7 +14,6 @@ import dataclasses
 import json
 import uuid
 from collections import defaultdict
-from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum, auto, IntEnum
 from math import inf
@@ -540,41 +539,20 @@ class Document:
 
     def to_json(
         self,
-        drop_unmapped_ents: bool = False,
-        drop_terms: bool = False,
         **kwargs: Any,
     ) -> str:
         """Convert to json string.
 
-        The two specified arguments are passed through to :meth:`~.as_minified_dict`,
-        kwargs is passed through to :func:`json.dumps`.
-
-        :param drop_unmapped_ents: drop any entities that have no mappings
-        :param drop_terms: drop the synonym term dict field
-        :param kwargs: additional kwargs passed to :func:`json.dumps`.
+        :param kwargs: passed through to :func:`json.dumps`.
         :return:
         """
-        as_dict = self.as_minified_dict(
-            drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
-        )
-        return json.dumps(as_dict, **kwargs)
+        return _json_converter.dumps(self, **kwargs)
 
-    def as_minified_dict(self, drop_unmapped_ents: bool = False, drop_terms: bool = False) -> dict:
-        """Convert the Document to a ``dict`` and 'minify'.
-
-        This function 'minifies' in a couple of ways:
-
-        1. Providing arguments that allow you to drop some parts of the Document that may be irrelevant to you.
-        2. General 'minification' by removing 'empty' parts of the ``dict``.
-
-        :param drop_unmapped_ents: drop any entities that have no mappings
-        :param drop_terms: drop the synonym term dict field
-        :return:
-        """
-        as_dict: dict = _json_converter.unstructure(self)
-        return DocumentJsonUtils.minify_json_dict(
-            as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
-        )
+    def to_dict(self) -> dict:
+        """Convert the Document to a ``dict``."""
+        # type ignore needed because cattrs says this could be 'any', but we know more specifically it will be a
+        # json-encodable dict
+        return _json_converter.unstructure(self)  # type: ignore[no-any-return]
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
@@ -693,33 +671,6 @@ _json_converter.register_structure_hook(
         _cattrs_include_init_false=True,
     ),
 )
-
-
-class DocumentJsonUtils:
-    @staticmethod
-    def minify_json_dict(
-        doc_json_dict: dict[str, Any],
-        drop_unmapped_ents: bool = False,
-        drop_terms: bool = False,
-        in_place: bool = True,
-    ) -> dict:
-        doc_json_dict = doc_json_dict if in_place else deepcopy(doc_json_dict)
-
-        if drop_unmapped_ents or drop_terms:
-            for section_dict in doc_json_dict["sections"]:
-                section_entities = section_dict["entities"]
-                ents_to_keep = list(
-                    filter(lambda _ent: _ent["mappings"], section_entities)
-                    if drop_unmapped_ents
-                    else section_entities
-                )
-                if drop_terms:
-                    for ent in ents_to_keep:
-                        ent["synonym_terms"].clear()
-
-                section_dict["entities"] = ents_to_keep
-
-        return doc_json_dict
 
 
 SimpleValue = Union[NumericMetric, str]

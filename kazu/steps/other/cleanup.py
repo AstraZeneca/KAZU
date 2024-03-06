@@ -91,6 +91,16 @@ class DropUnmappedEntityFilter:
             )
 
 
+class SynonymTermRemovalCleanupAction:
+    def __init__(self):
+        pass
+
+    def cleanup(self, doc: Document) -> None:
+        for section in doc.sections:
+            for ent in section.entities:
+                ent.syn_term_to_synonym_terms.clear()
+
+
 class StripMappingURIsAction:
     """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part of the
     URI.

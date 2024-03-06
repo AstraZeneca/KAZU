@@ -424,7 +424,7 @@ class KazuWebAPI:
             )
         except PipelineValueError as e:
             raise HTTPException(status_code=422, detail=e.args[0]) from e
-        return JSONResponse(content=[res.as_minified_dict() for res in result])
+        return JSONResponse(content=[res.to_dict() for res in result])
 
     @app.post(NER_AND_LINKING)
     def ner_and_linking(
@@ -540,7 +540,7 @@ class KazuWebAPI:
         logger.info(id_log_prefix + "Request to kazu endpoint")
         logger.info(id_log_prefix + "Document: %s", doc)
         result = self.pipeline([doc.to_kazu_document()])
-        resp_dict = result[0].as_minified_dict()
+        resp_dict = result[0].to_dict()
         return JSONResponse(content=resp_dict)
 
     # To be removed, after we check how often it gets called after being 'hidden'
@@ -568,7 +568,7 @@ class KazuWebAPI:
         logger.info(id_log_prefix + "Request to kazu/batch endpoint")
         logger.info(id_log_prefix + "Documents sent: %s", len(docs))
         result = self.pipeline([doc.to_kazu_document() for doc in docs])
-        return JSONResponse(content=[res.as_minified_dict() for res in result])
+        return JSONResponse(content=[res.to_dict() for res in result])
 
     @app.post(LS_ANNOTATIONS)
     def ls_annotations(self, doc: WebDocument, request: Request) -> JSONResponse:
@@ -585,7 +585,7 @@ class KazuWebAPI:
         result = self.pipeline([doc.to_kazu_document()])[0]
         ls_view, ls_tasks = self.ls_web_utils.kazu_doc_to_ls(result)
         return JSONResponse(
-            content={"ls_view": ls_view, "ls_tasks": ls_tasks, "doc": result.as_minified_dict()}
+            content={"ls_view": ls_view, "ls_tasks": ls_tasks, "doc": result.to_dict()}
         )
 
     # Note: this needs to be defined last so that we don't try and
