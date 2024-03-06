@@ -137,11 +137,12 @@ The below code assumes a standard ``.py`` file (or console), if you wish to use 
         doc = Document.create_simple_document(text)
         pipeline([doc])
         print(f"{doc.sections[0].text}")
-        return doc
+        # add other manipulation of the document here or a breakpoint() call
+        # for interactive exploration.
 
 
     if __name__ == "__main__":
-        doc = kazu_test()
+        kazu_test()
 
 
 You can now inspect the doc object, and explore what entities were detected on each section.
