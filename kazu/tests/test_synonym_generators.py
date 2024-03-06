@@ -40,7 +40,7 @@ def check_generator_result(
         new_syns = {s for term in generated_terms for s in term.all_strings()}
 
     else:
-        new_syns = generator({input_str})
+        new_syns = generator(input_str)
     assert new_syns == expected_syns
 
 

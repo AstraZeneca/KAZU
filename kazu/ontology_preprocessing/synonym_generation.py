@@ -21,36 +21,23 @@ logger = logging.getLogger(__name__)
 
 class SynonymGenerator(ABC):
     @abstractmethod
-    def call(self, synonym_str: str) -> set[str]:
+    def call(self, string_to_mutate: str) -> set[str]:
         """Implementations should override this method to generate new strings from an
         input string."""
         pass
 
     @functools.cache
-    def generate_synonyms(self, synonym_str: str) -> set[str]:
-        """Cached wrapper around :meth:`.SynonymGenerator.call`\\.
+    def __call__(self, string_to_mutate: str) -> set[str]:
+        """Takes a string, and returns a set containing the original and generated
+        strings.
 
-        Caching prevents recomputation of redundant strings.
+        Caching prevents re-computation of redundant strings.
+
+        :param string_to_mutate:
+        :return:
         """
-        return self.call(synonym_str)
 
-    def __call__(self, strings_to_mutate: set[str]) -> set[str]:
-        """Takes a set of strings, and returns a set containing the generated and
-        original strings."""
-
-        result: set[str] = set()
-        for string_to_mutate in strings_to_mutate:
-            result.add(string_to_mutate)
-            generated_synonym_strings = self.generate_synonyms(string_to_mutate)
-            for generated_syn in generated_synonym_strings:
-                if generated_syn in result:
-                    logger.debug(
-                        "generated synonym %s has already been generated",
-                        generated_syn,
-                    )
-                else:
-                    result.add(generated_syn)
-        return result
+        return self.call(string_to_mutate).union({string_to_mutate})
 
 
 class CombinatorialSynonymGenerator:
@@ -92,7 +79,7 @@ class CombinatorialSynonymGenerator:
                 ):
 
                     for form in list(generated_results.get(curation, curation.active_ner_forms())):
-                        new_strings = generator({form.string})
+                        new_strings = generator(form.string)
                         for string in new_strings:
                             if string in original_strings:
                                 logger.debug("ignoring pre-existing string: %s", string)
@@ -107,7 +94,7 @@ class CombinatorialSynonymGenerator:
                 final_results[curation].update(generated_results[curation])
 
         for generator in self.synonym_generators:
-            generator.generate_synonyms.cache_clear()
+            generator.__call__.cache_clear()
 
         new_curations = {
             dataclasses.replace(curation, alternative_forms=frozenset(alternative_forms))
