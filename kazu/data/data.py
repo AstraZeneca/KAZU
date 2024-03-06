@@ -38,9 +38,9 @@ ENTITY_OUTSIDE_SYMBOL = "O"
 PROCESSING_EXCEPTION = "PROCESSING_EXCEPTION"
 
 
-JsonEncodable = Optional[
-    Union[dict[str, "JsonEncodable"], list["JsonEncodable"], int, float, bool, str]
-]
+NumericMetric = Union[bool, int, float]
+SimpleValue = Union[NumericMetric, str]
+JsonEncodable = Optional[Union[dict[str, "JsonEncodable"], list["JsonEncodable"], SimpleValue]]
 """Represents a json-encodable object.
 
 Note that because :class:`dict` is invariant, there can be issues with
@@ -197,8 +197,6 @@ class Mapping:
         """|from_dict_note|"""
         return _json_converter.structure(mapping_dict, Mapping)
 
-
-NumericMetric = Union[bool, int, float]
 
 AssociatedIdSets = frozenset[EquivalentIdSet]
 """A frozen set of :class:`.EquivalentIdSet`"""
@@ -671,9 +669,6 @@ _json_converter.register_structure_hook(
         _cattrs_include_init_false=True,
     ),
 )
-
-
-SimpleValue = Union[NumericMetric, str]
 
 
 class CuratedTermBehaviour(AutoNameEnum):
