@@ -299,6 +299,7 @@ class Entity:
     #: # namespace of the :class:`~.Step` that produced this instance
     namespace: str
     mention_confidence: MentionConfidence = MentionConfidence.HIGHLY_LIKELY
+    _id: str = field(default_factory=lambda: uuid.uuid4().hex)
     mappings: set[Mapping] = field(default_factory=set)
     #: | generic metadata
     #: |
@@ -321,12 +322,6 @@ class Entity:
                 self.syn_term_to_synonym_terms[new_term] = new_term
             else:
                 self.syn_term_to_synonym_terms[term] = term
-
-    def __hash__(self):
-        return id(self)
-
-    def __eq__(self, other):
-        return id(self) == id(other)
 
     def calc_starts_and_ends(self) -> tuple[int, int]:
         earliest_start = inf
