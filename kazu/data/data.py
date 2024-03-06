@@ -614,7 +614,7 @@ class Document:
         return Document.from_dict(json.loads(json_str))
 
 
-_json_converter = cattrs.preconf.json.make_converter(omit_if_default=True)
+_json_converter = cattrs.preconf.json.make_converter(omit_if_default=True, forbid_extra_keys=True)
 
 # 'external' to kazu datatypes
 _json_converter.register_unstructure_hook(float16, lambda v: v.item())
@@ -673,6 +673,7 @@ _json_converter.register_structure_hook(
         syn_term_to_synonym_terms=cattrs.gen.override(
             rename="synonym_terms", struct_hook=_syn_term_to_synonym_terms_struct_hook
         ),
+        _cattrs_include_init_false=True,
     ),
 )
 
@@ -689,6 +690,7 @@ _json_converter.register_structure_hook(
                 None if len(v) == 0 else tuple(_json_converter.structure(x, CharSpan) for x in v)
             ),
         ),
+        _cattrs_include_init_false=True,
     ),
 )
 
