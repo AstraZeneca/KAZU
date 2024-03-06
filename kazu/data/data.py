@@ -18,7 +18,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum, auto, IntEnum
 from math import inf
-from typing import Any, Optional, Union, overload, TypeVar
+from typing import Any, Optional, Union
 from collections.abc import Iterable
 
 import bson
@@ -544,7 +544,7 @@ class Document:
         drop_terms: bool = False,
         **kwargs: Any,
     ) -> str:
-        """Convert to json string using :meth:`~.as_minified_dict`.
+        """Convert to json string.
 
         The two specified arguments are passed through to :meth:`~.as_minified_dict`,
         kwargs is passed through to :func:`json.dumps`.
@@ -572,10 +572,9 @@ class Document:
         :return:
         """
         as_dict: dict = _json_converter.unstructure(self)
-        as_dict = DocumentJsonUtils.minify_json_dict(
+        return DocumentJsonUtils.minify_json_dict(
             as_dict, drop_unmapped_ents=drop_unmapped_ents, drop_terms=drop_terms
         )
-        return DocumentJsonUtils.remove_empty_elements(as_dict)
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
@@ -615,16 +614,7 @@ class Document:
         return Document.from_dict(json.loads(json_str))
 
 
-T = TypeVar("T")
-"""A TypeVar.
-
-Currently used in :func:`~DocumentJsonUtils.remove_empty_elements` to
-signal that the function will return the same type as the input
-argument.
-"""
-
-
-_json_converter = cattrs.preconf.json.make_converter()
+_json_converter = cattrs.preconf.json.make_converter(omit_if_default=True)
 
 # 'external' to kazu datatypes
 _json_converter.register_unstructure_hook(float16, lambda v: v.item())
@@ -652,6 +642,7 @@ _json_converter.register_unstructure_hook(
             unstruct_hook=lambda v: [_json_converter.unstructure(x) for x in v.values()],
         ),
         _cattrs_include_init_false=True,
+        _cattrs_omit_if_default=True,
     ),
 )
 
@@ -662,6 +653,7 @@ _json_converter.register_unstructure_hook(
         _json_converter,
         _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
         _cattrs_include_init_false=True,
+        _cattrs_omit_if_default=True,
     ),
 )
 
@@ -726,44 +718,6 @@ class DocumentJsonUtils:
                 section_dict["entities"] = ents_to_keep
 
         return doc_json_dict
-
-    @overload
-    @staticmethod
-    def remove_empty_elements(d: dict) -> dict:
-        pass
-
-    @overload
-    @staticmethod
-    def remove_empty_elements(d: list) -> list:
-        pass
-
-    @overload
-    @staticmethod
-    def remove_empty_elements(d: T) -> T:
-        pass
-
-    @staticmethod
-    def remove_empty_elements(d):
-        """Recursively remove empty lists, empty dicts, or None elements from a
-        dictionary."""
-        if not isinstance(d, (dict, list)):
-            return d
-        elif isinstance(d, list):
-            return [
-                v
-                for v in (DocumentJsonUtils.remove_empty_elements(v) for v in d)
-                if not DocumentJsonUtils.empty(v)
-            ]
-        else:
-            return {
-                k: v
-                for k, v in ((k, DocumentJsonUtils.remove_empty_elements(v)) for k, v in d.items())
-                if not DocumentJsonUtils.empty(v)
-            }
-
-    @staticmethod
-    def empty(x: Any) -> bool:
-        return x is None or x == {} or x == []
 
 
 SimpleValue = Union[NumericMetric, str]
