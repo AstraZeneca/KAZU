@@ -15,6 +15,12 @@ from kazu.data.data import (
     CharSpan,
     ParserAction,
     GlobalParserActions,
+    MentionConfidence,
+    StringMatchConfidence,
+    DisambiguationConfidence,
+    EquivalentIdAggregationStrategy,
+    CuratedTermBehaviour,
+    ParserBehaviour,
     _json_converter,
     _initialize_json_converter,
 )
@@ -102,9 +108,9 @@ oid_strat = st.builds(bson.ObjectId, oid=oid_arg_strat)
 st.register_type_strategy(bson.ObjectId, oid_strat)
 
 # needed, otherwise the __post_init__ throws an error in calc_starts_and_ends when the set of spans is empty.
-st.register_type_strategy(
-    Entity, st.builds(Entity, spans=st.frozensets(st.builds(CharSpan), min_size=1))
-)
+valid_spans_for_entity = st.frozensets(st.builds(CharSpan), min_size=1)
+
+st.register_type_strategy(Entity, st.builds(Entity, spans=valid_spans_for_entity))
 
 # needed, otherwise the __post_init__ throws an error for length 0 parser_to_target_id_mappings
 # or if a set of the target_id_mappings is empty.
@@ -152,6 +158,46 @@ def test_comparable_class_round_trip_structuring(instance):
     d = converter.unstructure(instance)
     restructured = converter.structure(d, type(instance))
     assert instance == restructured
+
+
+# we could test these with the round trip test, but they're all included in other classes above, so testing those is sufficient
+enums = (
+    MentionConfidence,
+    StringMatchConfidence,
+    DisambiguationConfidence,
+    EquivalentIdAggregationStrategy,
+    CuratedTermBehaviour,
+    ParserBehaviour,
+)
+
+# this doesn't cover everything imaginable, because it doesn't do e.g. where the a value is itself a dictionary of strings to a list of dictionaries of....
+# but it's enough to prove that the relevant classes are covered.
+valid_json_metadata = st.dictionaries(
+    keys=st.text(), values=st.one_of(*(st.from_type(t) for t in all_serializable_types + enums))
+)
+
+class_with_complex_metadata = st.one_of(
+    st.builds(Mapping, metadata=valid_json_metadata),
+    # spans as above - unfortunately we have to repeat it here.
+    st.builds(Entity, metadata=valid_json_metadata, spans=valid_spans_for_entity),
+    st.builds(Section, metadata=valid_json_metadata),
+    st.builds(Document, metadata=valid_json_metadata),
+)
+
+
+@given(instance=class_with_complex_metadata)
+@settings(max_examples=400)
+def test_complex_metadata_roundtrip(instance):
+    """Custom max examples because really we want to test all the different types as
+    much as a single 'normal' test, for which the default is 100.
+
+    Note that we test that we can roundtrip, but don't assert that they're the same
+    here: that's because cattrs doesn't know how to handle the untyped metadata: dict
+    by default, so you just get dicts back when structuring. See the discussion
+    in `docs/datamodel.rst`.
+    """
+    d = _json_converter.unstructure(instance)
+    _json_converter.structure(d, type(instance))
 
 
 @given(...)
