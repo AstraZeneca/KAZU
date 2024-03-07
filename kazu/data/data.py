@@ -3,9 +3,11 @@
 See the page linked above for a quick introduction to the key concepts.
 
 .. |metadata_s11n_warn| replace::
-   Note that storing objects here that don't straightforwardly
-   convert to and from json may cause problems for (de)serialization.
-   See :ref:`data-serialization` for more details.
+
+   Note that storing objects here that Kazu can't
+   convert to and from json will cause problems for (de)serialization.
+   See :ref:`deserialize-generic-metadata` for details.
+
 
 .. |from_dict_note| replace:: See :ref:`data-serialization`.
 """
