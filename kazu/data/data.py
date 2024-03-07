@@ -603,8 +603,8 @@ def _initialize_json_converter(testing: bool = False) -> cattrs.preconf.json.Jso
     _json_converter.register_unstructure_hook(bson.ObjectId, lambda v: json_util.default(v))
     _json_converter.register_structure_hook(bson.ObjectId, lambda v, _: json_util.object_hook(v))
 
-    _json_converter.register_structure_hook(MentionConfidence, lambda v, _: MentionConfidence[v])
     _json_converter.register_unstructure_hook(MentionConfidence, lambda v: v.name)
+    _json_converter.register_structure_hook(MentionConfidence, lambda v, _: MentionConfidence[v])
 
     _json_converter.register_unstructure_hook(
         Entity,
