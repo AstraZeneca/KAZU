@@ -16,6 +16,7 @@ from kazu.data.data import (
     GlobalParserActions,
     ParserBehaviour,
     _json_converter,
+    _initialize_json_converter,
 )
 
 hex_string_len_24_strat = st.text(
@@ -47,7 +48,7 @@ st.register_type_strategy(
 )
 
 
-comparable_serializable_types = (
+simply_serializable_types = (
     CharSpan,
     EquivalentIdSet,
     Mapping,
@@ -58,63 +59,44 @@ comparable_serializable_types = (
     ParserAction,
     GlobalParserActions,
     ParserBehaviour,
+    Entity,
+    Section,
+    Document,
 )
-comparable_class_strategy = st.one_of(*(st.from_type(t) for t in comparable_serializable_types))
+
+entity_and_containers = (Entity, Section, Document)
+all_serializable_types = simply_serializable_types + entity_and_containers
+
+comparable_class_strategy = st.one_of(*(st.from_type(t) for t in all_serializable_types))
+
+
+testing_json_converter = _initialize_json_converter(testing=True)
 
 
 @given(instance=comparable_class_strategy)
-@settings(max_examples=100 * len(comparable_serializable_types))
+@settings(max_examples=100 * len(all_serializable_types))
 def test_comparable_class_round_trip_structuring(instance):
     """Custom max examples because really we want to test all the different types as
     much as a single 'normal' test, for which the default is 100."""
-    d = _json_converter.unstructure(instance)
-    restructured = _json_converter.structure(d, type(instance))
+    converter = (
+        testing_json_converter if type(instance) in entity_and_containers else _json_converter
+    )
+    d = converter.unstructure(instance)
+    restructured = converter.structure(d, type(instance))
     assert instance == restructured
 
 
-def compare_entities(e1: Entity, e2: Entity) -> bool:
-    """`Entity` has a custom __eq__ so that only the exact same entities are equal to
-    one another.
-
-    This is for hashing behaviour when creating sets/dictionaries of entities so that behaviour is as expected
-    and we don't accidentally 'merge' two entities that should be different just because they contain the same data.
-
-    #### TODO: discuss with Richard - can we just add an `_id` field on Entity with a uuid default factory? If we
-    #### did this, I think correct hashing/eq behaviour as is currently would just fall out, it's more visible, and
-    #### the tests here can be simpler.
-
-    Therefore to compare them, we have to compare their contents explicitly - using `__dict__` works.
-    """
-    return e1.__dict__ == e2.__dict__
-
-
-@given(ent=...)
-def test_round_trip_entity_structuring(ent: Entity):
-    d = _json_converter.unstructure(ent)
-    restructured = _json_converter.structure(d, Entity)
-    assert compare_entities(ent, restructured)
-
-
-@given(sec=...)
-def test_round_trip_section_structuring(sec: Section):
-    d = _json_converter.unstructure(sec)
-    restructured = _json_converter.structure(d, Section)
-    for e1, e2 in zip(sec.entities, restructured.entities):
-        assert compare_entities(e1, e2)
-    sec.entities = []
-    restructured.entities = []
-    assert sec == restructured
-
-
 @given(doc=...)
-def test_round_trip_document_structuring(doc: Document):
-    d = doc.from_json(doc.to_json())
-    for e1, e2 in zip(doc.get_entities(), d.get_entities()):
-        assert compare_entities(e1, e2)
+def test_document_converter_testing_vs_production(doc: Document):
+    """Ensure that the 'testing' cattrs converter only differs as expected.
 
-    for section in doc.sections:
-        section.entities = []
-    for section in d.sections:
-        section.entities = []
+    Just test Document, not Section or Entity, since Document contains Sections, which
+    contain entities.
+    """
+    d = _json_converter.unstructure(doc)
+    d2 = testing_json_converter.unstructure(doc)
+    for sec in d2.get("sections", []):
+        for ent in sec.get("entities", []):
+            del ent["_id"]
 
-    assert doc == d
+    assert d == d2

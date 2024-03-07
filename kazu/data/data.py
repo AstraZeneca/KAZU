@@ -585,85 +585,96 @@ class Document:
         return Document.from_dict(json.loads(json_str))
 
 
-_json_converter = cattrs.preconf.json.make_converter(omit_if_default=True, forbid_extra_keys=True)
+def _initialize_json_converter(testing: bool = False) -> cattrs.preconf.json.JsonConverter:
+    _json_converter = cattrs.preconf.json.make_converter(
+        omit_if_default=True, forbid_extra_keys=True
+    )
 
-# 'external' to kazu datatypes
-_json_converter.register_unstructure_hook(float16, lambda v: v.item())
-_json_converter.register_structure_hook(float16, lambda v, _: float16(v))
-_json_converter.register_unstructure_hook(float32, lambda v: v.item())
-_json_converter.register_structure_hook(float32, lambda v, _: float16(v))
-_json_converter.register_unstructure_hook(ndarray, lambda v: v.tolist())
-# note: this could result in a change in the dtype (e.g. float vs int and precision)
-# from the 'original' if roundtripped. This doesn't seem like a deal breaker for
-# what we're using it for.
-_json_converter.register_structure_hook(ndarray, lambda v, _: ndarray(v))
-_json_converter.register_unstructure_hook(bson.ObjectId, lambda v: json_util.default(v))
-_json_converter.register_structure_hook(bson.ObjectId, lambda v, _: json_util.object_hook(v))
+    # 'external' to kazu datatypes
+    _json_converter.register_unstructure_hook(float16, lambda v: v.item())
+    _json_converter.register_structure_hook(float16, lambda v, _: float16(v))
+    _json_converter.register_unstructure_hook(float32, lambda v: v.item())
+    _json_converter.register_structure_hook(float32, lambda v, _: float16(v))
+    _json_converter.register_unstructure_hook(ndarray, lambda v: v.tolist())
+    # note: this could result in a change in the dtype (e.g. float vs int and precision)
+    # from the 'original' if roundtripped. This doesn't seem like a deal breaker for
+    # what we're using it for.
+    _json_converter.register_structure_hook(ndarray, lambda v, _: ndarray(v))
+    _json_converter.register_unstructure_hook(bson.ObjectId, lambda v: json_util.default(v))
+    _json_converter.register_structure_hook(bson.ObjectId, lambda v, _: json_util.object_hook(v))
 
-_json_converter.register_structure_hook(MentionConfidence, lambda v, _: MentionConfidence[v])
-_json_converter.register_unstructure_hook(MentionConfidence, lambda v: v.name)
+    _json_converter.register_structure_hook(MentionConfidence, lambda v, _: MentionConfidence[v])
+    _json_converter.register_unstructure_hook(MentionConfidence, lambda v: v.name)
 
-_json_converter.register_unstructure_hook(
-    Entity,
-    cattrs.gen.make_dict_unstructure_fn(
+    _json_converter.register_unstructure_hook(
         Entity,
-        _json_converter,
-        syn_term_to_synonym_terms=cattrs.gen.override(
-            rename="synonym_terms",
-            unstruct_hook=lambda v: [_json_converter.unstructure(x) for x in v.values()],
-        ),
-        _cattrs_include_init_false=True,
-        _cattrs_omit_if_default=True,
-    ),
-)
-
-_json_converter.register_unstructure_hook(
-    Section,
-    cattrs.gen.make_dict_unstructure_fn(
-        Section,
-        _json_converter,
-        _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
-        _cattrs_include_init_false=True,
-        _cattrs_omit_if_default=True,
-    ),
-)
-
-
-def _syn_term_to_synonym_terms_struct_hook(
-    synonym_terms: list[dict[str, JsonEncodable]], _: type
-) -> dict[SynonymTermWithMetrics, SynonymTermWithMetrics]:
-    syn_terms = (_json_converter.structure(x, SynonymTermWithMetrics) for x in synonym_terms)
-    return {st: st for st in syn_terms}
-
-
-_json_converter.register_structure_hook(
-    Entity,
-    cattrs.gen.make_dict_structure_fn(
-        Entity,
-        _json_converter,
-        syn_term_to_synonym_terms=cattrs.gen.override(
-            rename="synonym_terms", struct_hook=_syn_term_to_synonym_terms_struct_hook
-        ),
-        _cattrs_include_init_false=True,
-    ),
-)
-
-_json_converter.register_structure_hook(
-    Section,
-    cattrs.gen.make_dict_structure_fn(
-        Section,
-        _json_converter,
-        _sentence_spans=cattrs.gen.override(
-            rename="sentence_spans",
-            # needed because cattrs by default ignores init=False fields
-            omit=False,
-            struct_hook=lambda v, _: (
-                None if len(v) == 0 else tuple(_json_converter.structure(x, CharSpan) for x in v)
+        cattrs.gen.make_dict_unstructure_fn(
+            Entity,
+            _json_converter,
+            syn_term_to_synonym_terms=cattrs.gen.override(
+                rename="synonym_terms",
+                unstruct_hook=lambda v: [_json_converter.unstructure(x) for x in v.values()],
             ),
+            # omit the `_id` if we're not testing, as it's an 'internal' field
+            # that users won't want to see in serialized output by default,
+            # and it will add to the output size.
+            _id=cattrs.gen.override(omit=not testing),
+            _cattrs_include_init_false=True,
+            _cattrs_omit_if_default=True,
         ),
-        _cattrs_include_init_false=True,
-    ),
-)
+    )
+
+    _json_converter.register_unstructure_hook(
+        Section,
+        cattrs.gen.make_dict_unstructure_fn(
+            Section,
+            _json_converter,
+            _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
+            _cattrs_include_init_false=True,
+            _cattrs_omit_if_default=True,
+        ),
+    )
+
+    def _syn_term_to_synonym_terms_struct_hook(
+        synonym_terms: list[dict[str, JsonEncodable]], _: type
+    ) -> dict[SynonymTermWithMetrics, SynonymTermWithMetrics]:
+        syn_terms = (_json_converter.structure(x, SynonymTermWithMetrics) for x in synonym_terms)
+        return {st: st for st in syn_terms}
+
+    _json_converter.register_structure_hook(
+        Entity,
+        cattrs.gen.make_dict_structure_fn(
+            Entity,
+            _json_converter,
+            syn_term_to_synonym_terms=cattrs.gen.override(
+                rename="synonym_terms", struct_hook=_syn_term_to_synonym_terms_struct_hook
+            ),
+            _cattrs_include_init_false=True,
+        ),
+    )
+
+    _json_converter.register_structure_hook(
+        Section,
+        cattrs.gen.make_dict_structure_fn(
+            Section,
+            _json_converter,
+            _sentence_spans=cattrs.gen.override(
+                rename="sentence_spans",
+                # needed because cattrs by default ignores init=False fields
+                omit=False,
+                struct_hook=lambda v, _: (
+                    None
+                    if len(v) == 0
+                    else tuple(_json_converter.structure(x, CharSpan) for x in v)
+                ),
+            ),
+            _cattrs_include_init_false=True,
+        ),
+    )
+    return _json_converter
+
+
+_json_converter = _initialize_json_converter(testing=False)
 
 
 class CuratedTermBehaviour(AutoNameEnum):
