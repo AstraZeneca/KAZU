@@ -159,7 +159,7 @@ def test_comparable_class_round_trip_structuring(instance):
     assert instance == restructured
 
 
-@given(doc=...)
+@given(...)
 def test_document_converter_testing_vs_production(doc: Document):
     """Ensure that the 'testing' cattrs converter only differs as expected.
 
