@@ -15,7 +15,6 @@ from kazu.data.data import (
     CharSpan,
     ParserAction,
     GlobalParserActions,
-    ParserBehaviour,
     _json_converter,
     _initialize_json_converter,
 )
@@ -132,7 +131,6 @@ simply_serializable_types = (
     CuratedTerm,
     ParserAction,
     GlobalParserActions,
-    ParserBehaviour,
     Entity,
     Section,
     Document,
