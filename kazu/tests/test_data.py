@@ -131,9 +131,6 @@ simply_serializable_types = (
     CuratedTerm,
     ParserAction,
     GlobalParserActions,
-    Entity,
-    Section,
-    Document,
 )
 
 entity_and_containers = (Entity, Section, Document)
