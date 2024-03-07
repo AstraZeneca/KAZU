@@ -7,9 +7,6 @@ See the page linked above for a quick introduction to the key concepts.
    Note that storing objects here that Kazu can't
    convert to and from json will cause problems for (de)serialization.
    See :ref:`deserialize-generic-metadata` for details.
-
-
-.. |from_dict_note| replace:: See :ref:`data-serialization`.
 """
 
 import dataclasses
@@ -196,7 +193,6 @@ class Mapping:
 
     @staticmethod
     def from_dict(mapping_dict: dict) -> "Mapping":
-        """|from_dict_note|"""
         return _json_converter.structure(mapping_dict, Mapping)
 
 
@@ -235,7 +231,6 @@ class SynonymTerm:
 
     @staticmethod
     def from_dict(term_dict: dict) -> "SynonymTerm":
-        """|from_dict_note|"""
         return _json_converter.structure(term_dict, SynonymTerm)
 
 
@@ -280,7 +275,6 @@ class SynonymTermWithMetrics(SynonymTerm):
 
     @staticmethod
     def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
-        """|from_dict_note|"""
         return _json_converter.structure(term_dict, SynonymTermWithMetrics)
 
 
@@ -450,7 +444,6 @@ class Entity:
 
     @staticmethod
     def from_dict(entity_dict: dict) -> "Entity":
-        """|from_dict_note|"""
         return _json_converter.structure(entity_dict, Entity)
 
 
@@ -504,7 +497,6 @@ class Section:
 
     @staticmethod
     def from_dict(section_dict: dict) -> "Section":
-        """|from_dict_note|"""
         return _json_converter.structure(section_dict, Section)
 
 
@@ -579,7 +571,6 @@ class Document:
 
     @staticmethod
     def from_dict(document_dict: dict) -> "Document":
-        """|from_dict_note|"""
         return _json_converter.structure(document_dict, Document)
 
     @staticmethod
@@ -896,7 +887,6 @@ class CuratedTerm:
 
     @classmethod
     def from_dict(cls, json_dict: dict) -> "CuratedTerm":
-        """|from_dict_note|"""
         return _json_converter.structure(json_dict, CuratedTerm)
 
     def to_dict(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
