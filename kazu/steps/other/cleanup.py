@@ -11,6 +11,7 @@ from kazu.data.data import (
     StringMatchConfidence,
     DisambiguationConfidence,
     MentionConfidence,
+    KazuConfigurationError,
 )
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.grouping import sort_then_group
@@ -182,13 +183,10 @@ class DropMappingsByParserNameRankAction(CleanupAction):
                         entity.mappings = set(mappings)
                         # only consider the top rank
                         break
-                except IndexError as e:
-                    logger.exception(
-                        "Tried to cleanup mappings for %s, but at least one mapping has a parser_name that has not been configured with a rank. Mappings: %s ",
-                        entity,
-                        entity.mappings,
+                except IndexError:
+                    raise KazuConfigurationError(
+                        f"Tried to cleanup mappings for {entity}, but at least one mapping has a parser_name that has not been configured with a rank. Mappings: {entity.mappings}"
                     )
-                    raise e
 
 
 class CleanupStep(Step):
