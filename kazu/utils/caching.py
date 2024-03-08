@@ -56,7 +56,7 @@ class CacheProtocol(Protocol):
     def __exit__(self, *exception: Exception) -> None:
         raise NotImplementedError
 
-    def get(self, key: str, raw: Optional[bool] = False) -> Any:
+    def get(self, key: str) -> Any:
         raise NotImplementedError
 
 
