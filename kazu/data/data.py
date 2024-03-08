@@ -636,10 +636,7 @@ class Document:
         return cls(sections=sections)
 
     def __len__(self):
-        length = 0
-        for section in self.sections:
-            length += len(section.text)
-        return length
+        return sum(len(section.text) for section in self.sections)
 
     @staticmethod
     def from_dict(document_dict: dict) -> "Document":
