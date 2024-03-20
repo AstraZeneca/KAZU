@@ -9,10 +9,7 @@ on:
 
 jobs:
   dead-code-check:
-    # don't run on our public repo, because we already run in our internal repo
-    # during development.
-    if: github.repository != 'AstraZeneca/KAZU'
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
     steps:

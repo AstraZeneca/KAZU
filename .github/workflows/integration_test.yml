@@ -15,7 +15,7 @@ on:
 jobs:
   model-pack-tests:
     if: github.event.review.state == 'approved' || github.event_name == 'workflow_dispatch'
-    runs-on: [self-hosted, has-model-pack]
+    runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
     steps:

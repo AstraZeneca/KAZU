@@ -9,7 +9,7 @@ on:
 
 jobs:
   release_new_version:
-    runs-on: [self-hosted, has-model-pack]
+    runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
     steps:
