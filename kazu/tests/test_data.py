@@ -127,6 +127,23 @@ st.register_type_strategy(
 )
 
 
+@st.composite
+def add_sent_spans(draw, s: Section):
+    sent_spans = draw(
+        # min_size=1 needed because if you pass an empty list, the 'omit_default_values' behaviour
+        # we've configured for cattrs means that it is restructured into None, so the test would fail,
+        # but this behaviour is fine.
+        st.one_of(st.none(), (st.lists(elements=st.builds(CharSpan), unique=True, min_size=1)))
+    )
+    if sent_spans is not None:
+        s.sentence_spans = sent_spans
+    return s
+
+
+# needed, as _sentence_spans is `init=False`, so otherwise, it's always None
+st.register_type_strategy(Section, st.builds(Section).flatmap(add_sent_spans))
+
+
 simply_serializable_types = (
     CharSpan,
     EquivalentIdSet,
