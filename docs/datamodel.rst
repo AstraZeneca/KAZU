@@ -26,6 +26,11 @@ and :meth:`.Document.from_json` for deserialization.
 :class:`~.Document` and other classes that can be stored on :class:`~.Document` have
 a :meth:`~.Document.from_dict` method.
 
+.. note::
+   Under the hood, Kazu uses `cattrs <https://catt.rs/en/stable/index.html>`_ for its (de)serialization,
+   so if you are already familiar with ``cattrs``, you may prefer to use :attr:`kazu.data.data.kazu_json_converter`
+   directly instead.
+
 .. _deserialize-generic-metadata:
 
 (De)serialization and generic metadata fields
@@ -82,13 +87,13 @@ However, you can work around this with cattrs by deserializing the metadata sect
 
 .. testcode::
 
-    from kazu.data.data import _json_converter
+    from kazu.data.data import kazu_json_converter
 
     # continuing from above
-    doc_dict["metadata"] = _json_converter.structure(
+    doc_dict["metadata"] = kazu_json_converter.structure(
         doc_dict["metadata"], dict[str, Section]
     )
-    reloaded_doc = _json_converter.structure(doc_dict, Document)
+    reloaded_doc = kazu_json_converter.structure(doc_dict, Document)
 
     print(reloaded_doc == doc)
 
@@ -97,6 +102,3 @@ Produces (as expected):
 .. testoutput::
 
     True
-
-If you do find yourself doing this, please `open an issue on our GitHub repo <https://github.com/AstraZeneca/KAZU/issues/new>`_ and let us know how you're using this - it may mean
-we should expose ``_json_converter`` 'publicly' or find another way to make this easier for users!

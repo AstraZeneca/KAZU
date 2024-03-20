@@ -193,7 +193,7 @@ class Mapping:
 
     @staticmethod
     def from_dict(mapping_dict: dict) -> "Mapping":
-        return _json_converter.structure(mapping_dict, Mapping)
+        return kazu_json_converter.structure(mapping_dict, Mapping)
 
 
 AssociatedIdSets = frozenset[EquivalentIdSet]
@@ -231,7 +231,7 @@ class SynonymTerm:
 
     @staticmethod
     def from_dict(term_dict: dict) -> "SynonymTerm":
-        return _json_converter.structure(term_dict, SynonymTerm)
+        return kazu_json_converter.structure(term_dict, SynonymTerm)
 
 
 @dataclass(frozen=True, eq=True)
@@ -275,7 +275,7 @@ class SynonymTermWithMetrics(SynonymTerm):
 
     @staticmethod
     def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
-        return _json_converter.structure(term_dict, SynonymTermWithMetrics)
+        return kazu_json_converter.structure(term_dict, SynonymTermWithMetrics)
 
 
 @dataclass
@@ -444,7 +444,7 @@ class Entity:
 
     @staticmethod
     def from_dict(entity_dict: dict) -> "Entity":
-        return _json_converter.structure(entity_dict, Entity)
+        return kazu_json_converter.structure(entity_dict, Entity)
 
 
 @dataclass(unsafe_hash=True)
@@ -497,7 +497,7 @@ class Section:
 
     @staticmethod
     def from_dict(section_dict: dict) -> "Section":
-        return _json_converter.structure(section_dict, Section)
+        return kazu_json_converter.structure(section_dict, Section)
 
 
 @dataclass(unsafe_hash=True)
@@ -533,13 +533,13 @@ class Document:
         :param kwargs: passed through to :func:`json.dumps`.
         :return:
         """
-        return _json_converter.dumps(self, **kwargs)
+        return kazu_json_converter.dumps(self, **kwargs)
 
     def to_dict(self) -> dict:
         """Convert the Document to a ``dict``."""
         # type ignore needed because cattrs says this could be 'any', but we know more specifically it will be a
         # json-encodable dict
-        return _json_converter.unstructure(self)  # type: ignore[no-any-return]
+        return kazu_json_converter.unstructure(self)  # type: ignore[no-any-return]
 
     @classmethod
     def create_simple_document(cls, text: str) -> "Document":
@@ -571,7 +571,7 @@ class Document:
 
     @staticmethod
     def from_dict(document_dict: dict) -> "Document":
-        return _json_converter.structure(document_dict, Document)
+        return kazu_json_converter.structure(document_dict, Document)
 
     @staticmethod
     def from_json(json_str: str) -> "Document":
@@ -663,7 +663,18 @@ def _initialize_json_converter(testing: bool = False) -> cattrs.preconf.json.Jso
     return json_conv
 
 
-_json_converter = _initialize_json_converter(testing=False)
+kazu_json_converter = _initialize_json_converter(testing=False)
+"""A `cattrs Converter <https://catt.rs/en/stable/converters.html>`_
+configured for converting Kazu's datamodel into json.
+
+If you are not familiar with ``cattrs``, don't worry: you can just
+use methods on the kazu classes like :meth:`Document.from_dict` and
+:meth:`Document.from_dict`, and you will likely never need to use or understand
+``kazu_json_converter``.
+
+If you are familiar with cattrs, you may prefer to use the ``structure``, ``unstructure``,
+``dumps`` and ``loads`` methods of ``kazu_json_converter`` directly.
+"""
 
 
 class CuratedTermBehaviour(AutoNameEnum):
@@ -705,7 +716,7 @@ class ParserAction:
 
     @classmethod
     def from_dict(cls, json_dict: dict) -> "ParserAction":
-        return _json_converter.structure(json_dict, ParserAction)
+        return kazu_json_converter.structure(json_dict, ParserAction)
 
     def __post_init__(self):
         if len(self.parser_to_target_id_mappings) == 0:
@@ -742,7 +753,7 @@ class GlobalParserActions:
 
     @classmethod
     def from_dict(cls, json_dict: dict) -> "GlobalParserActions":
-        return _json_converter.structure(json_dict, GlobalParserActions)
+        return kazu_json_converter.structure(json_dict, GlobalParserActions)
 
 
 @dataclass(frozen=True)
@@ -883,10 +894,10 @@ class CuratedTerm:
 
     @classmethod
     def from_dict(cls, json_dict: dict) -> "CuratedTerm":
-        return _json_converter.structure(json_dict, CuratedTerm)
+        return kazu_json_converter.structure(json_dict, CuratedTerm)
 
     def to_dict(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
-        as_dict: dict[str, Any] = _json_converter.unstructure(self)
+        as_dict: dict[str, Any] = kazu_json_converter.unstructure(self)
         if preserve_structured_object_id:
             as_dict["_id"] = self._id
         return as_dict

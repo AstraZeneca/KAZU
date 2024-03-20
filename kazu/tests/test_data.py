@@ -21,7 +21,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     CuratedTermBehaviour,
     ParserBehaviour,
-    _json_converter,
+    kazu_json_converter,
     _initialize_json_converter,
 )
 from kazu.tests.utils import make_dummy_synonym_term
@@ -170,7 +170,7 @@ def test_comparable_class_round_trip_structuring(instance):
     """Custom max examples because really we want to test all the different types as
     much as a single 'normal' test, for which the default is 100."""
     converter = (
-        testing_json_converter if type(instance) in entity_and_containers else _json_converter
+        testing_json_converter if type(instance) in entity_and_containers else kazu_json_converter
     )
     d = converter.unstructure(instance)
     restructured = converter.structure(d, type(instance))
@@ -215,8 +215,8 @@ def test_complex_metadata_roundtrip(instance):
     by default, so you just get dicts back when structuring. See the discussion
     in `docs/datamodel.rst`.
     """
-    d = _json_converter.unstructure(instance)
-    _json_converter.structure(d, type(instance))
+    d = kazu_json_converter.unstructure(instance)
+    kazu_json_converter.structure(d, type(instance))
 
 
 @given(...)
@@ -226,7 +226,7 @@ def test_document_converter_testing_vs_production(doc: Document):
     Just test Document, not Section or Entity, since Document contains Sections, which
     contain entities.
     """
-    d = _json_converter.unstructure(doc)
+    d = kazu_json_converter.unstructure(doc)
     d2 = testing_json_converter.unstructure(doc)
     for sec in d2.get("sections", []):
         for ent in sec.get("entities", []):
