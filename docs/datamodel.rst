@@ -90,4 +90,4 @@ Produces (as expected):
     True
 
 If you do find yourself doing this, please `open an issue on our GitHub repo <https://github.com/AstraZeneca/KAZU/issues/new>`_ and let us know how you're using this - it may mean
-we should make expose ``_json_converter`` 'publicly' or find another way to make this easier for users!
+we should expose ``_json_converter`` 'publicly' or find another way to make this easier for users!
