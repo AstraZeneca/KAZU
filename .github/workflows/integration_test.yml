@@ -64,6 +64,8 @@ jobs:
 
           # random suffix to prevent clashes with other runs
           export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
+          export KAZU_LOGGING_CONF=$GITHUB_WORKSPACE"/kazu/utils/model_pack_build_logging.conf"
+
 
           mkdir $MODEL_PACK_BUILD_PATH
 
@@ -74,6 +76,7 @@ jobs:
           --model_packs_to_build kazu_model_pack_public \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH \
           --skip_tests \
+          --logging_config_path $KAZU_LOGGING_CONF \
           --debug
 
           export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
