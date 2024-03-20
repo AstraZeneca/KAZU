@@ -1009,6 +1009,8 @@ class CuratedTerm:
     def __post_init__(self):
         cs_forms = defaultdict(set)
         ci_forms = defaultdict(set)
+        if len(self.original_forms) == 0:
+            raise ValueError(f"no forms for: {self}")
         for form in self.active_ner_forms():
             if form.case_sensitive:
                 cs_forms[form.string].add(form.mention_confidence)
