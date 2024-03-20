@@ -1,0 +1,10 @@
+{
+  "requires_base_config": true,
+  "resources": {},
+  "run_acceptance_tests": true,
+  "run_consistency_checks": true,
+  "has_own_config": false,
+  "sanity_test_strings": [
+    "EGFR mutations are implicated in many forms of cancer."
+  ]
+}

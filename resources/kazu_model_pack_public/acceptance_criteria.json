@@ -1,0 +1,12 @@
+{
+  "NER_THRESHOLDS": {
+    "gene": {"precision": 0.80, "recall": 0.80},
+    "disease": {"precision": 0.70, "recall": 0.80},
+    "drug": {"precision": 0.80, "recall": 0.80}
+  },
+  "LINKING_THRESHOLDS": {
+    "MONDO": {"precision": 0.60, "recall": 0.60},
+    "CHEMBL": {"precision": 0.80, "recall": 0.80},
+    "ENSEMBL": {"precision": 0.80, "recall": 0.80}
+  }
+}
