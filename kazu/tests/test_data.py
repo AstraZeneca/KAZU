@@ -187,7 +187,7 @@ enums = (
     ParserBehaviour,
 )
 
-# this doesn't cover everything imaginable, because it doesn't do e.g. where the a value is itself a dictionary of strings to a list of dictionaries of....
+# this doesn't cover everything imaginable, because it doesn't do e.g. where a value is itself a dictionary of strings to a list of dictionaries of....
 # but it's enough to prove that the relevant classes are covered.
 valid_json_metadata = st.dictionaries(
     keys=st.text(), values=st.one_of(*(st.from_type(t) for t in all_serializable_types + enums))
