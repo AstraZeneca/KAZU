@@ -31,6 +31,15 @@ a :meth:`~.Document.from_dict` method.
 (De)serialization and generic metadata fields
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. note::
+   This is only relevant to advanced users, who are:
+
+   - Modifying the pipeline or parsers so that they have custom metadata on some of Kazu's classes
+   - Using custom metadata that isn't json-encodable 'natively' by Python
+   - Want to both serialize and de-serialize this custom metadata and get back the same structured objects
+
+   If this isn't you, skip this section!
+
 Some of Kazu's classes allow for a generic ``metadata`` dictionary on them. Since this allows storing
 arbitrary Python objects in this field, this can potentially break the ability to write to json and back.
 
