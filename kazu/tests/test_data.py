@@ -189,6 +189,8 @@ enums = (
 
 # this doesn't cover everything imaginable, because it doesn't do e.g. where a value is itself a dictionary of strings to a list of dictionaries of....
 # but it's enough to prove that the relevant classes are covered.
+# We can actually do everything using st.recursive, but it makes the test take 7/8 seconds longer,
+# and really we'll mostly testing cattrs at that point, not our code.
 valid_json_metadata = st.dictionaries(
     keys=st.text(), values=st.one_of(*(st.from_type(t) for t in all_serializable_types + enums))
 )
