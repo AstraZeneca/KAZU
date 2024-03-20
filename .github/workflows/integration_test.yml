@@ -10,7 +10,7 @@ on:
       resources_path:
         description: path to resources on the runner, to build model pack
         required: true
-        default: resources/kazu_model_pack_public
+        default: resources/
 
 jobs:
   model-pack-tests:
@@ -95,4 +95,4 @@ jobs:
           rm -r $MODEL_PACK_BUILD_PATH || true
         env:
           # this sets the envvar to input.resources_path if it's present (i.e. a manual run), otherwise (automated run) to the final path
-          KAZU_MODEL_PACK_BUILD_RESOURCES_PATH: ${{ inputs.resources_path && inputs.resources_path || 'resources/kazu_model_pack_public' }}
+          KAZU_MODEL_PACK_BUILD_RESOURCES_PATH: ${{ inputs.resources_path && inputs.resources_path || 'resources/' }}
