@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import logging
+import shutil
 from collections import defaultdict, Counter
 from collections.abc import Iterable
 from enum import auto
@@ -29,7 +30,6 @@ from kazu.utils.utils import (
     as_path,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -40,58 +40,73 @@ class CurationError(Exception):
 def load_curated_terms(
     path: PathLike,
 ) -> set[CuratedTerm]:
-    """Load :class:`kazu.data.data.CuratedTerm`\\ s from a file path.
+    """Load :class:`kazu.data.data.CuratedTerm`\\ s from a file path or directory.
 
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
+    :param path: path to a jsonl file or directory of jsonl files that map to :class:`kazu.data.data.CuratedTerm`
+    :return:
+    """
+    curations_path = as_path(path)
+    curations = set()
+    if curations_path.exists():
+        if curations_path.is_dir():
+            for f in curations_path.iterdir():
+                with f.open(mode="r") as jsonlf:
+                    for line in jsonlf:
+                        curations.add(CuratedTerm.from_json(line))
+        else:
+            with curations_path.open(mode="r") as jsonlf:
+                for line in jsonlf:
+                    curations.add(CuratedTerm.from_json(line))
+
+    else:
+        raise ValueError(f"curations do not exist or is not a directory at {path}")
+    return curations
+
+
+def _term_sort_reduce(term1: CuratedTerm) -> tuple[int, str]:
+    result = set()
+    for form in term1.original_forms:
+        result.add(
+            (
+                len(form.string),
+                form.string,
+            )
+        )
+    return min(result)
+
+
+def batch(iterable: Iterable[CuratedTerm], n: int = 1) -> Iterable[list[CuratedTerm]]:
+    lst = sorted(iterable, key=_term_sort_reduce)
+    length = len(lst)
+    for ndx in range(0, length, n):
+        yield lst[ndx : min(ndx + n, length)]
+
+
+def dump_curated_terms(
+    terms: Iterable[CuratedTerm], path: PathLike, force: bool = False, split_at: int = 10000
+) -> None:
+    """Dump an iterable of :class:`kazu.data.data.CuratedTerm`\\s to the file system.
+
+    :param terms: terms to dump
+    :param path: path to a directory of json lines files that map to :class:`kazu.data.data.CuratedTerm`
+    :param force: override existing directory, if it exists
+    :param split_at: number of lines per partition
     :return:
     """
     curations_path = as_path(path)
     if curations_path.exists():
-        with curations_path.open(mode="r") as jsonlf:
-            curations = {CuratedTerm.from_json(line) for line in jsonlf}
-    else:
-        raise ValueError(f"curations do not exist at {path}")
-    return curations
+        if not curations_path.is_dir():
+            raise ValueError(f"file already exists at {path} and is not a directory")
+        elif not force:
+            raise ValueError(f"directory already exists at {path}")
+        else:
+            shutil.rmtree(curations_path)
 
-
-def dump_curated_terms(terms: Iterable[CuratedTerm], path: PathLike, force: bool = False) -> None:
-    """Dump an iterable of :class:`kazu.data.data.CuratedTerm`\\s to the file system.
-
-    :param terms: terms to dump
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
-    :param force: override existing file, if it exists
-    :return:
-    """
-    curations_path = as_path(path)
-    if curations_path.exists() and not force:
-        raise ValueError(f"file already exists at {path}")
-    else:
-
-        with curations_path.open(mode="w") as jsonlf:
-            for curation in terms:
+    curations_path.mkdir(parents=True)
+    for i, terms_partition in enumerate(batch(terms, n=split_at)):
+        with curations_path.joinpath(f"{i}.jsonl").open(mode="w") as jsonlf:
+            for curation in terms_partition:
                 jsonlf.write(curation.to_json() + "\n")
-
-
-def dump_curated_term_subsets(
-    terms: Iterable[frozenset[CuratedTerm]], path: PathLike, force: bool = False
-) -> None:
-    """Dump an iterable of sets of :class:`kazu.data.data.CuratedTerm`\\s to the file
-    system.
-
-    :param terms: terms to dump
-    :param path: path to json lines file that map to :class:`kazu.data.data.CuratedTerm`
-    :param force: override existing file, if it exists
-    :return:
-    """
-    curations_path = as_path(path)
-    if curations_path.exists() and not force:
-        raise ValueError(f"file already exists at {path}")
-
-    with curations_path.open(mode="w") as jsonlf:
-        for curation_set in terms:
-            for curation in curation_set:
-                jsonlf.write(curation.to_json() + "\n")
-            jsonlf.write("\n\n")
 
 
 def load_global_actions(
@@ -536,7 +551,10 @@ class CuratedTermConflictAnalyser:
                     form.string for form in default_curation.alternative_forms
                 ):
                     curations_with_discrepancies.add(
-                        frozenset([maybe_human_curation, default_curation])
+                        (
+                            maybe_human_curation,
+                            default_curation,
+                        )
                     )
 
         # add any remaining to the obsolete set, unless they're additional
@@ -567,11 +585,18 @@ class CuratedTermConflictAnalyser:
                     force=True,
                 )
             if curations_with_discrepancies:
-                dump_curated_term_subsets(
-                    curations_with_discrepancies,
-                    path_.joinpath("human_curations_with_form_discrepancies_set.jsonl"),
-                    force=True,
-                )
+                with path_.joinpath("human_curations_with_form_discrepancies_set.jsonl").open(
+                    mode="w"
+                ) as jsonlf:
+                    for (
+                        human_curation,
+                        default_curation,
+                    ) in curations_with_discrepancies:
+                        jsonlf.write("HUMAN:" + "\n")
+                        jsonlf.write(human_curation.to_json() + "\n")
+                        jsonlf.write("DEFAULT:" + "\n")
+                        jsonlf.write(default_curation.to_json() + "\n")
+                        jsonlf.write("\n\n")
 
         return set(working_dict.values())
 
