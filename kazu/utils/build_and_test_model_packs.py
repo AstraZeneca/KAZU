@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import subprocess
+from collections import defaultdict
 from dataclasses import dataclass, field
 from logging.config import fileConfig
 from pathlib import Path
@@ -304,10 +305,12 @@ class ModelPackBuilder:
         curations_path = self.model_pack_build_path.joinpath("global_case_conflicts.txt")
         with curations_path.open(mode="w") as jsonlf:
             for conflict_set in case_conflicts:
+                result = defaultdict(list)
                 for curation in conflict_set:
-                    jsonlf.write(curation_to_parser_name[curation] + "\n")
-                    jsonlf.write(curation.to_json() + "\n")
-                jsonlf.write("\n\n")
+                    result[curation_to_parser_name[curation]].append(
+                        curation.to_dict(preserve_structured_object_id=False)
+                    )
+                jsonlf.write(json.dumps(result) + "\n")
 
 
 @ray.remote(num_cpus=1)
