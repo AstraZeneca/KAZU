@@ -280,11 +280,7 @@ def analyse_full_pipeline(
     )
 
 
-@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../", config_name="conf")
-def check_annotation_consistency(cfg):
-
-    manager = instantiate(cfg.LabelStudioManager)
-    docs = manager.export_from_ls()
+def analyse_annotation_consistency(docs: list[Document]) -> None:
     all_ents: list[Entity] = []
     ent_to_task_lookup: dict[Entity, str] = {}  # used for reporting task id that may have issues
     for doc in docs:
@@ -306,6 +302,14 @@ def check_annotation_consistency(cfg):
     print(f"{len(messages)} tasks with issues:\n")
     for doc_id in sorted(messages):
         print(f"\ntask id: {doc_id}\n" + "*" * 20 + "\n" + "\n".join(messages[doc_id]))
+
+
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../", config_name="conf")
+def check_annotation_consistency(cfg):
+
+    manager = instantiate(cfg.LabelStudioManager)
+    docs = manager.export_from_ls()
+    analyse_annotation_consistency(docs)
 
 
 def check_ent_match_abnormalities(
