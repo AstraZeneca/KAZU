@@ -8,7 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from logging.config import fileConfig
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional, cast, Any
 
 import ray
 from hydra import initialize_config_dir, compose
@@ -37,6 +37,8 @@ class BuildConfiguration:
     has_own_config: bool
     #: should acceptance tests be run?
     run_acceptance_tests: bool = False
+    #: if run_acceptance_tests, path to serialised label studio tasks.
+    acceptance_test_json_path: Optional[str] = None
     #: should consistency checks be run on the gold standard?
     run_consistency_checks: bool = False
     #: Whether resources (e.g. model binaries) are required to build this model pack
@@ -52,6 +54,10 @@ class BuildConfiguration:
             self.requires_resources = True
         else:
             self.requires_resources = False
+        if self.run_acceptance_tests and self.acceptance_test_json_path is None:
+            raise ValueError(
+                f"acceptance_test_json_path must be specified if run_acceptance_tests==True. Current value is: {self.acceptance_test_json_path}"
+            )
 
 
 class ModelPackBuildError(Exception):
@@ -128,7 +134,7 @@ class ModelPackBuilder:
                 config_name="config",
                 overrides=["hydra/job_logging=none", "hydra/hydra_logging=none"],
             )
-            self.build_caches_and_run_sanity_checks(cfg)
+            pipeline = self.build_caches_and_run_sanity_checks(cfg)
             if not self.skip_tests:
                 # our annotations expect URI stripping, so if cleanup actions
                 # are specified, ensure this is configured.
@@ -151,14 +157,22 @@ class ModelPackBuilder:
 
                 # local import so the cache is correctly configured with KAZU_MODEL_PACK
                 from kazu.annotation.acceptance_test import (
-                    execute_full_pipeline_acceptance_test,
-                    check_annotation_consistency,
+                    analyse_full_pipeline,
+                    analyse_annotation_consistency,
+                    acceptance_criteria,
                 )
+                from kazu.annotation.label_studio import LSToKazuConversion
 
+                assert self.build_config.acceptance_test_json_path is not None
+                with self.model_pack_build_path.joinpath(
+                    self.build_config.acceptance_test_json_path
+                ).open(mode="r") as f:
+                    docs_json = json.load(f)
+                    docs = LSToKazuConversion.convert_tasks_to_docs(docs_json)
                 if self.build_config.run_consistency_checks:
-                    check_annotation_consistency(cfg)
+                    analyse_annotation_consistency(docs)
                 if self.build_config.run_acceptance_tests:
-                    execute_full_pipeline_acceptance_test(cfg)
+                    analyse_full_pipeline(pipeline, docs, acceptance_criteria=acceptance_criteria())
             self.report_tested_dependencies()
             self.report_global_curation_conflicts(cfg)
             if self.zip_pack:
@@ -258,7 +272,9 @@ class ModelPackBuilder:
             ["zip", "-r", model_pack_name, model_pack_name_with_version], cwd=parent_directory
         )
 
-    def build_caches_and_run_sanity_checks(self, cfg: DictConfig) -> None:
+    def build_caches_and_run_sanity_checks(
+        self, cfg: DictConfig
+    ) -> Any:  # we can't specify the Pipeline return type as we can't use top level imports in this file
         """Execute all processed required to build model pack caches.
 
         :param cfg:
@@ -276,6 +292,7 @@ class ModelPackBuilder:
                     f"Model pack configuration raised a processing exception on the string {test_string}. "
                     f"Exception: {doc.metadata[PROCESSING_EXCEPTION]}"
                 )
+        return pipeline
 
     def report_tested_dependencies(self):
         dependencies = subprocess.check_output("pip freeze --exclude-editable", shell=True).decode(
