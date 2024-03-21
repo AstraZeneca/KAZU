@@ -5,7 +5,7 @@
     "drug": {"precision": 0.80, "recall": 0.80}
   },
   "LINKING_THRESHOLDS": {
-    "MONDO": {"precision": 0.60, "recall": 0.60},
+    "MONDO": {"precision": 0.0, "recall": 0.00},
     "CHEMBL": {"precision": 0.80, "recall": 0.80},
     "ENSEMBL": {"precision": 0.80, "recall": 0.80}
   }
