@@ -43,6 +43,15 @@ requires_model_pack = pytest.mark.skipif(
     getenv("KAZU_MODEL_PACK") is None, reason=SKIP_MESSAGE_NO_MODEL_PACK
 )
 
+SKIP_MESSAGE_SERVER_TESTS = """Server tests with Ray Serve are somewhat flaky, due to the small
+size of /dev/shm on hosted github CI runners. This causes swapping, and tests to time out. Therefore,
+skip these tests if the env variable SKIP_KAZU_SERVER_TESTS is set.
+"""
+
+maybe_skip_server_tests = pytest.mark.skipif(
+    getenv("SKIP_KAZU_SERVER_TESTS") is not None, reason=SKIP_MESSAGE_SERVER_TESTS
+)
+
 
 SKIP_MESSAGE_NO_LABEL_STUDIO = """Skipping acceptance test as either LS_PROJECT_NAME, LS_URL_PORT \
 or LS_TOKEN are not provided as an environment variable.
