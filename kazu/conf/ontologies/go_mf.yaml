@@ -12,7 +12,7 @@ parsers:
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: molecular_function
-    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
     global_actions: ${global_actions}
     autocurator:
       _target_: kazu.ontology_preprocessing.autocuration.AutoCurator

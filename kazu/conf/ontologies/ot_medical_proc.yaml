@@ -12,7 +12,7 @@ parsers:
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: medical_procedure
-    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.json
+    curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
     global_actions: ${global_actions}
     allowed_therapeutic_areas:
       - 'EFO_0002571'
