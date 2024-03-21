@@ -42,7 +42,6 @@ defaults:
   - SapbertStringSimilarityScorer: default
   - CleanupStep: default
   - CleanupActions: default
-  - LabelStudioManager: default
   - LSWebUtils: default
   - Middlewares: default
   - RulesBasedEntityClassDisambiguationFilterStep: default
