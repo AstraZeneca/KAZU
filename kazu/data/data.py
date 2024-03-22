@@ -873,7 +873,7 @@ class CuratedTerm:
         for cs_form, cs_confidences in ci_forms.items():
             ci_confidences = ci_forms.get(cs_form.lower(), {MentionConfidence.POSSIBLE})
             if min(ci_confidences) < min(cs_confidences):
-                raise RuntimeError(f"case sensitive conflict: {self}")
+                raise ValueError(f"case sensitive conflict: {self}")
 
     def term_norm_for_linking(self, entity_class: str) -> str:
         norms = set(
