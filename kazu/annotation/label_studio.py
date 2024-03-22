@@ -1,8 +1,8 @@
-import functools
 import logging
 from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
+from itertools import chain
 from typing import Any, Optional, Union, cast, overload
 from collections.abc import Iterable
 from collections.abc import (
@@ -28,17 +28,6 @@ logger = logging.getLogger(__name__)
 _TAX_NAME = "taxonomy"
 
 
-def _merge_task_dicts(task_list_1: list[dict], task_list_2: list[dict]) -> list[dict]:
-    results = []
-    for task_1, task2 in zip(task_list_1, task_list_2):
-        assert task_1["data"] == task2["data"], "task data does not match"
-        result = {}
-        result.update(task_1)
-        result["annotations"].extend(task2["annotations"])
-        results.append(result)
-    return results
-
-
 class KazuToLabelStudioConverter:
     """Converts a Kazu :class:`.Document` into Label Studio tasks.
 
@@ -56,11 +45,24 @@ class KazuToLabelStudioConverter:
         :param docs:
         :return:
         """
-        for doc_list in docs:
-            task_list = []
-            for doc in doc_list:
-                task_list.append(list(cls.convert_single_doc_to_tasks(doc)))
-            yield from functools.reduce(_merge_task_dicts, task_list)
+        for differently_annotated_parallel_docs in docs:
+            all_tasks = (
+                cls.convert_single_doc_to_tasks(doc) for doc in differently_annotated_parallel_docs
+            )
+            for parallel_tasks in zip(*all_tasks, strict=True):
+                first_task = parallel_tasks[0]
+                other_tasks = parallel_tasks[1:]
+                assert all(
+                    task["data"] == first_task["data"] for task in other_tasks
+                ), "task data does not match"
+                result = {}
+                result.update(first_task)
+                # Annotations on LabelStudio tasks are a list of sets of independent annotations.
+                # The extend here results in a list with a set of annotations for every original doc,
+                # which is what we want to signal to label studio 'this task has been annotated differently
+                # by several different annotation processes
+                result["annotations"].extend(chain(t["annotations"] for t in other_tasks))
+                yield result
 
     @classmethod
     def convert_single_doc_to_tasks(cls, doc: Document) -> Iterable[dict]:
