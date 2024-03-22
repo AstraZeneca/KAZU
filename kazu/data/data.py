@@ -278,7 +278,7 @@ class SynonymTermWithMetrics(SynonymTerm):
         return kazu_json_converter.structure(term_dict, SynonymTermWithMetrics)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Entity:
     """A :class:`kazu.data.data.Entity` is a container for information about a
     single entity detected within a :class:`kazu.data.data.Section`\\ .
@@ -296,16 +296,16 @@ class Entity:
     namespace: str
     mention_confidence: MentionConfidence = MentionConfidence.HIGHLY_LIKELY
     _id: str = field(default_factory=lambda: uuid.uuid4().hex)
-    mappings: set[Mapping] = field(default_factory=set)
+    mappings: set[Mapping] = field(default_factory=set, hash=False)
     #: | generic metadata
     #: |
     #: | |metadata_s11n_warn|
-    metadata: dict = field(default_factory=dict)
-    start: int = field(init=False)
-    end: int = field(init=False)
-    match_norm: str = field(init=False)
+    metadata: dict = field(default_factory=dict, hash=False)
+    start: int = field(init=False, hash=False)
+    end: int = field(init=False, hash=False)
+    match_norm: str = field(init=False, hash=False)
     syn_term_to_synonym_terms: dict[SynonymTermWithMetrics, SynonymTermWithMetrics] = field(
-        default_factory=dict
+        default_factory=dict, hash=False
     )
 
     def update_terms(self, terms: Iterable[SynonymTermWithMetrics]) -> None:
