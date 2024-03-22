@@ -8,7 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from logging.config import fileConfig
 from pathlib import Path
-from typing import Optional, cast, Any
+from typing import Optional, cast, TYPE_CHECKING
 
 import ray
 from hydra import initialize_config_dir, compose
@@ -272,13 +272,14 @@ class ModelPackBuilder:
             ["zip", "-r", model_pack_name, model_pack_name_with_version], cwd=parent_directory
         )
 
-    def build_caches_and_run_sanity_checks(
-        self, cfg: DictConfig
-    ) -> Any:  # we can't specify the Pipeline return type as we can't use top level imports in this file
+    if TYPE_CHECKING:
+        from kazu.pipeline.pipeline import Pipeline
+
+    def build_caches_and_run_sanity_checks(self, cfg: DictConfig) -> "Pipeline":
         """Execute all processed required to build model pack caches.
 
         :param cfg:
-        :return:
+        :return: pipeline that was used to run sanity checks
         """
         from kazu.pipeline.pipeline import Pipeline
         from kazu.data.data import Document, PROCESSING_EXCEPTION
