@@ -1,4 +1,6 @@
-import copy
+import dataclasses
+import uuid
+
 from kazu.data.data import Document, Entity
 from kazu.steps.linking.entity_class_disambiguation import (
     EntityClassDisambiguationStep,
@@ -86,8 +88,8 @@ def test_same_entity_with_same_span_in_multiple_sections():
         namespace="test",
     )
 
-    ucb_company_ent_section_b = copy.deepcopy(ucb_company_ent_section_a)
-    ucb_anatomy_ent_section_b = copy.deepcopy(ucb_anatomy_ent_section_a)
+    ucb_company_ent_section_b = dataclasses.replace(ucb_company_ent_section_a, _id=uuid.uuid4().hex)
+    ucb_anatomy_ent_section_b = dataclasses.replace(ucb_anatomy_ent_section_a, _id=uuid.uuid4().hex)
 
     doc.sections[0].entities.extend([ucb_company_ent_section_a, ucb_anatomy_ent_section_a])
     doc.sections[1].entities.extend([ucb_company_ent_section_b, ucb_anatomy_ent_section_b])
