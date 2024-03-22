@@ -79,7 +79,7 @@ def batch(iterable: Iterable[CuratedTerm], n: int = 1) -> Iterable[list[CuratedT
     lst = sorted(iterable, key=_term_sort_reduce)
     length = len(lst)
     for ndx in range(0, length, n):
-        yield lst[ndx : min(ndx + n, length)]
+        yield lst[ndx : ndx + n]
 
 
 def dump_curated_terms(
