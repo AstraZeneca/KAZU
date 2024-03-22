@@ -46,33 +46,20 @@ def load_curated_terms(
     :return:
     """
     curations_path = as_path(path)
-    curations = set()
-    if curations_path.exists():
-        if curations_path.is_dir():
-            for f in curations_path.iterdir():
-                with f.open(mode="r") as jsonlf:
-                    for line in jsonlf:
-                        curations.add(CuratedTerm.from_json(line))
-        else:
-            with curations_path.open(mode="r") as jsonlf:
-                for line in jsonlf:
-                    curations.add(CuratedTerm.from_json(line))
+    curations: set[CuratedTerm] = set()
+    if not curations_path.exists():
+        raise ValueError(f"curations file does not exist at: {path}")
 
-    else:
-        raise ValueError(f"curations do not exist or is not a directory at {path}")
+    files = curations_path.iterdir() if curations_path.is_dir() else (curations_path,)
+    for f in files:
+        with f.open(mode="r") as jsonlf:
+            curations.update(CuratedTerm.from_json(line) for line in jsonlf)
+
     return curations
 
 
 def _term_sort_reduce(term: CuratedTerm) -> tuple[int, str]:
-    result = set()
-    for form in term.original_forms:
-        result.add(
-            (
-                len(form.string),
-                form.string,
-            )
-        )
-    return min(result)
+    return min((len(form.string), form.string) for form in term.original_forms)
 
 
 def batch(iterable: Iterable[CuratedTerm], n: int = 1) -> Iterable[list[CuratedTerm]]:
