@@ -63,9 +63,9 @@ def load_curated_terms(
     return curations
 
 
-def _term_sort_reduce(term1: CuratedTerm) -> tuple[int, str]:
+def _term_sort_reduce(term: CuratedTerm) -> tuple[int, str]:
     result = set()
-    for form in term1.original_forms:
+    for form in term.original_forms:
         result.add(
             (
                 len(form.string),
