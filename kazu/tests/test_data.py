@@ -1,4 +1,4 @@
-from hypothesis import given, settings, strategies as st
+from hypothesis import assume, given, settings, strategies as st
 import bson
 import pytest
 
@@ -125,6 +125,43 @@ st.register_type_strategy(
         ),
     ),
 )
+
+
+@st.composite
+def curated_term_strat_no_conflict(
+    draw: st.DrawFn, _curated_term_class: type[CuratedTerm], /, *args, **kwargs
+) -> CuratedTerm:
+    """This strategy ensures no error is raised in CuratedTerm.__post__init__ .
+
+    Ensuring `original_forms` is of min_size 1 is one key here, but the other
+    is handling case conflicts. We do this by handling any ValueErrors and 'assuming' them
+    away with hypothesis.
+
+    One annoying side affect here is that when we 'register' this as a type strategy,
+    for some reason it takes the class `CuratedTerm` as the second argument, after `draw`.
+    We don't need this in the function body, but we need to handle it, otherwise it gets
+    passed through in the other args to st.builds (which we do want for flexibility).
+
+    Also mypy/hypothesis' type hints wants the first two args to be positional only
+    apparently, hence the `/`.
+    """
+    try:
+        ct = draw(
+            st.builds(
+                CuratedTerm,
+                original_forms=st.frozensets(elements=st.builds(MentionForm), min_size=1),
+                *args,
+                **kwargs,
+            )
+        )
+        conflict = False
+    except ValueError:
+        conflict = True
+    assume(not conflict)
+    return ct
+
+
+st.register_type_strategy(CuratedTerm, curated_term_strat_no_conflict)
 
 
 @st.composite
