@@ -20,6 +20,7 @@ from kazu import __version__ as kazu_version
 #: A default timeout in seconds for Ray to finish building the model packs within.
 #: This is equal to 3 hours
 DEFAULT_RAY_TIMEOUT = 180.0 * 60
+GLOBAL_CONFLICT_REPORT_FN = "global_string_match_conflicts.txt"
 
 
 @dataclass
@@ -56,7 +57,8 @@ class BuildConfiguration:
             self.requires_resources = False
         if self.run_acceptance_tests and self.acceptance_test_json_path is None:
             raise ValueError(
-                f"acceptance_test_json_path must be specified if run_acceptance_tests==True. Current value is: {self.acceptance_test_json_path}"
+                f"acceptance_test_json_path must be specified if run_acceptance_tests==True. "
+                f"Current value is: {self.acceptance_test_json_path}"
             )
 
 
@@ -74,6 +76,7 @@ class ModelPackBuilder:
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
+        run_global_string_match_conflict_report: bool,
     ):
         """A ModelPackBuilder is a helper class to assist in the building of a model
         pack.
@@ -94,6 +97,7 @@ class ModelPackBuilder:
         :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
+        :param run_global_string_match_conflict_report: Checks the strings associated configured for string matching across each parser, and reports any inconsistencies.
         """
         if logging_config_path is not None:
             fileConfig(logging_config_path)
@@ -107,6 +111,7 @@ class ModelPackBuilder:
         self.model_pack_build_path = self.build_dir.joinpath(self.target_model_pack_path.name)
         os.environ["KAZU_MODEL_PACK"] = str(self.model_pack_build_path)
         self.build_config = self.load_build_configuration()
+        self.run_global_string_match_conflict_report = run_global_string_match_conflict_report
 
     def __repr__(self):
         """For nice log messages."""
@@ -174,7 +179,8 @@ class ModelPackBuilder:
                 if self.build_config.run_acceptance_tests:
                     analyse_full_pipeline(pipeline, docs, acceptance_criteria=acceptance_criteria())
             self.report_tested_dependencies()
-            self.report_global_curation_conflicts(cfg)
+            if self.run_global_string_match_conflict_report:
+                self.create_global_string_match_conflict_report(cfg)
             if self.zip_pack:
                 self.zip_model_pack()
 
@@ -302,7 +308,7 @@ class ModelPackBuilder:
         with self.model_pack_build_path.joinpath("tested_dependencies.txt").open(mode="w") as f:
             f.write(dependencies)
 
-    def report_global_curation_conflicts(self, cfg: DictConfig) -> None:
+    def create_global_string_match_conflict_report(self, cfg: DictConfig) -> None:
 
         curation_to_parser_name = {}
         for parser in instantiate(cfg.ontologies.parsers).values():
@@ -320,7 +326,7 @@ class ModelPackBuilder:
             curation_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 
-        curations_path = self.model_pack_build_path.joinpath("global_case_conflicts.txt")
+        curations_path = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_FN)
         with curations_path.open(mode="w") as jsonlf:
             for conflict_set in case_conflicts:
                 result = defaultdict(list)
@@ -346,6 +352,7 @@ def build_all_model_packs(
     max_parallel_build: Optional[int],
     debug: bool = False,
     ray_timeout: Optional[float] = DEFAULT_RAY_TIMEOUT,
+    run_global_string_match_conflict_report: bool = False,
 ) -> None:
     """Build multiple model packs.
 
@@ -359,6 +366,8 @@ def build_all_model_packs(
         None, use all available CPUs
     :param debug: Disables Ray parallelization, enabling the use of debugger tools
     :param ray_timeout: A timeout for Ray to complete model pack building within. Defaults to :attr:`~DEFAULT_RAY_TIMEOUT`
+    :param run_global_string_match_conflict_report: Checks the strings associated configured for string matching across
+        each parser, and reports any inconsistencies.
     :return:
     """
     if not output_dir.is_dir():
@@ -393,6 +402,7 @@ def build_all_model_packs(
             target_model_pack_path=model_pack_path,
             build_dir=output_dir,
             skip_tests=skip_tests,
+            run_global_string_match_conflict_report=run_global_string_match_conflict_report,
         )
         if not debug:
             futures.append(cast(ray.ObjectRef, builder.build_model_pack.remote()))
@@ -512,6 +522,13 @@ paths in a model packs build_config.json.
         type=float,
         required=False,
     )
+    parser.add_argument(
+        "--run_global_string_match_conflict_report",
+        action="store_true",
+        help="Checks the strings associated configured for string matching across each parser,"
+        f" and reports any inconsistencies. These are reported in a file called {GLOBAL_CONFLICT_REPORT_FN}"
+        " in the model pack root. WARNING: this may cause a spike in memory usage.",
+    )
 
     args = parser.parse_args()
 
@@ -525,4 +542,5 @@ paths in a model packs build_config.json.
         max_parallel_build=args.max_parallel_build,
         debug=args.debug,
         ray_timeout=args.ray_timeout,
+        run_global_string_match_conflict_report=args.run_global_string_match_conflict_report,
     )
