@@ -69,15 +69,15 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
                 term_norm = curation.term_norm_for_linking(parser.entity_class)
-                for form in curation.active_ner_forms():
+                for syn in curation.active_ner_synonyms():
                     entity_key = (
                         parser.entity_class,
-                        form.mention_confidence,
-                        form.case_sensitive,
+                        syn.mention_confidence,
+                        syn.case_sensitive,
                         term_norm,
-                        form.string,
+                        syn.string,
                     )
-                    key_to_ontology_info[form.string.lower()][entity_key].add(parser.name)
+                    key_to_ontology_info[syn.string.lower()][entity_key].add(parser.name)
 
         if len(key_to_ontology_info) > 0:
             case_insensitive_automaton = ahocorasick.Automaton()

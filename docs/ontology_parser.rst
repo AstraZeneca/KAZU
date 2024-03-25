@@ -242,7 +242,7 @@ In addition, there are the following considerations:
     Prior to Kazu 2.0, the internal curation system of Kazu was cumbersome to use/explain. We recommend upgrading to
     Kazu 2.0 or later as soon as possible.
 
-Points 1-4 above are handled by the :class:`.CuratedTerm` concept and :class:`.MentionForm` concept. Point 5 is handled by
+Points 1-4 above are handled by the :class:`.CuratedTerm` concept and :class:`.Synonym` concept. Point 5 is handled by
 the :class:`.CombinatorialSynonymGenerator` class. Point 6 is handled by the :class:`.AutoCurator` class. Point 7 is
 handled by :meth:`.OntologyParser.generate_clean_default_curations` (and controlled by the ``run_upgrade_report`` flag).
 Point 8 is handled by the :class:`.CuratedTermConflictAnalyser` class (and controlled by the ``run_curation_report`` flag).

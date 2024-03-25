@@ -214,7 +214,7 @@ class StrategyRunner:
     def group_entities_by_symbolism(
         entities: Iterable[Entity],
     ) -> tuple[list[Entity], list[Entity]]:
-        """Groups entities into symbolic and non-symbolic forms, so they can be
+        """Groups entities into symbolic and non-symbolic lists, so they can be
         processed separately.
 
         :param entities:

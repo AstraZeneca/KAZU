@@ -189,26 +189,26 @@ class OntologyMatcher:
                 # since the string normalizer's output depends on the entity class.
                 # Also, a curation may exist in multiple SynonymTerm.terms
                 term_norm = curation.term_norm_for_linking(parser.entity_class)
-                for form in curation.active_ner_forms():
+                for syn in curation.active_ner_synonyms():
                     match_id = (
                         parser.name
                         + self.match_id_sep
                         + term_norm
                         + self.match_id_sep
-                        + str(form.mention_confidence.value)
+                        + str(syn.mention_confidence.value)
                     )
-                    if form.case_sensitive:
+                    if syn.case_sensitive:
                         match_ids_and_strings_cs.add(
                             (
                                 match_id,
-                                form.string,
+                                syn.string,
                             )
                         )
                     else:
                         match_ids_and_strings_ci.add(
                             (
                                 match_id,
-                                form.string.lower(),
+                                syn.string.lower(),
                             )
                         )
 

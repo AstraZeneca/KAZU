@@ -12,7 +12,7 @@ from kazu.data.data import (
     ParserBehaviour,
     GlobalParserActions,
     CuratedTermBehaviour,
-    MentionForm,
+    Synonym,
     kazu_json_converter,
 )
 from kazu.database.in_memory_db import SynonymDatabase
@@ -130,9 +130,9 @@ def setup_databases(
 
 def test_should_add_synonym_term_to_parser(tmp_path):
     curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -197,9 +197,9 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
         ]
     )
     curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -248,9 +248,9 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
 def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
     override_id = "I do not exist"
     curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -289,9 +289,9 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
 
 def test_should_override_id_set(tmp_path):
     curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -330,9 +330,9 @@ def test_should_override_id_set(tmp_path):
 
 def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
     curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -367,9 +367,9 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 
 def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
     curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -390,9 +390,9 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
 
 def test_conflicting_overrides_in_associated_id_sets(tmp_path):
     curation1 = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,
@@ -416,9 +416,9 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
         ),
     )
     curation2 = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     string=TARGET_SYNONYM,
                     case_sensitive=False,

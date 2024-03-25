@@ -10,7 +10,7 @@ from kazu.data.data import (
     Entity,
     Section,
     Document,
-    MentionForm,
+    Synonym,
     CuratedTerm,
     CharSpan,
     ParserAction,
@@ -133,7 +133,7 @@ def curated_term_strat_no_conflict(
 ) -> CuratedTerm:
     """This strategy ensures no error is raised in CuratedTerm.__post__init__ .
 
-    Ensuring `original_forms` is of min_size 1 is one key here, but the other
+    Ensuring `original_synonyms` is of min_size 1 is one key here, but the other
     is handling case conflicts. We do this by handling any ValueErrors and 'assuming' them
     away with hypothesis.
 
@@ -149,7 +149,7 @@ def curated_term_strat_no_conflict(
         ct = draw(
             st.builds(
                 CuratedTerm,
-                original_forms=st.frozensets(elements=st.builds(MentionForm), min_size=1),
+                original_synonyms=st.frozensets(elements=st.builds(Synonym), min_size=1),
                 *args,
                 **kwargs,
             )
@@ -187,7 +187,7 @@ simply_serializable_types = (
     Mapping,
     SynonymTerm,
     SynonymTermWithMetrics,
-    MentionForm,
+    Synonym,
     CuratedTerm,
     ParserAction,
     GlobalParserActions,

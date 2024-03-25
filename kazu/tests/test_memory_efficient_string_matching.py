@@ -44,25 +44,25 @@ max_mention_test_case = StringMatchingTestCase(
     parser_1_curations=[
         dataclasses.replace(
             FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-            original_forms=frozenset(
-                dataclasses.replace(form, mention_confidence=MentionConfidence.PROBABLE)
-                for form in FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
+            original_synonyms=frozenset(
+                dataclasses.replace(syn, mention_confidence=MentionConfidence.PROBABLE)
+                for syn in FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
             ),
         ),
     ],
     parser_2_curations=[
         dataclasses.replace(
             SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-            original_forms=frozenset(
+            original_synonyms=frozenset(
                 # technically we don't need to specify mention_confidence=MentionConfidence.HIGHLY_LIKELY
                 # as it is the default. However, it's clearer if we do
                 dataclasses.replace(
-                    form,
+                    syn,
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     case_sensitive=True,
                     string="ComplexVII Disease\u03B1",
                 )
-                for form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
+                for syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
             ),
         )
     ],

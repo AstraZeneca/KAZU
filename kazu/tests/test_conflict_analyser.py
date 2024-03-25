@@ -1,5 +1,5 @@
 import pytest
-from kazu.data.data import CuratedTerm, MentionForm, MentionConfidence, CuratedTermBehaviour
+from kazu.data.data import CuratedTerm, Synonym, MentionConfidence, CuratedTermBehaviour
 from kazu.ontology_preprocessing.base import CuratedTermConflictAnalyser
 
 
@@ -7,14 +7,14 @@ from kazu.ontology_preprocessing.base import CuratedTermConflictAnalyser
 def test_case_conflict_within_single_curation(autofix):
     case_conflicted_curation_set = {
         CuratedTerm(
-            original_forms=frozenset(
+            original_synonyms=frozenset(
                 [
-                    MentionForm(
+                    Synonym(
                         string="hello",
                         mention_confidence=MentionConfidence.PROBABLE,
                         case_sensitive=True,
                     ),
-                    MentionForm(
+                    Synonym(
                         string="Hello",
                         mention_confidence=MentionConfidence.PROBABLE,
                         case_sensitive=False,
@@ -44,12 +44,12 @@ def test_case_conflict_within_single_curation(autofix):
 @pytest.mark.parametrize("autofix", [True, False])
 def test_conflict_analyser_should_merge_curations(autofix):
     expected_merged_forms = [
-        MentionForm(
+        Synonym(
             string="hello",
             mention_confidence=MentionConfidence.PROBABLE,
             case_sensitive=True,
         ),
-        MentionForm(
+        Synonym(
             string="Hello",
             mention_confidence=MentionConfidence.POSSIBLE,
             case_sensitive=False,
@@ -58,11 +58,11 @@ def test_conflict_analyser_should_merge_curations(autofix):
 
     case_conflicted_curation_set = {
         CuratedTerm(
-            original_forms=frozenset([expected_merged_forms[0]]),
+            original_synonyms=frozenset([expected_merged_forms[0]]),
             behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
         CuratedTerm(
-            original_forms=frozenset([expected_merged_forms[1]]),
+            original_synonyms=frozenset([expected_merged_forms[1]]),
             behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
     }
@@ -76,19 +76,19 @@ def test_conflict_analyser_should_merge_curations(autofix):
     assert len(curation_report.normalisation_conflicts) == 0
     assert len(curation_report.case_conflicts) == 0
     assert set(expected_merged_forms) == set(
-        next(iter(curation_report.clean_curations)).active_ner_forms()
+        next(iter(curation_report.clean_curations)).active_ner_synonyms()
     )
 
 
 @pytest.mark.parametrize("autofix", [True, False])
 def test_case_conflict_across_multiple_curations(autofix):
     expected_merged_forms = [
-        MentionForm(
+        Synonym(
             string="hello",
             mention_confidence=MentionConfidence.PROBABLE,
             case_sensitive=True,
         ),
-        MentionForm(
+        Synonym(
             string="Hello",
             mention_confidence=MentionConfidence.PROBABLE,
             case_sensitive=False,
@@ -97,11 +97,11 @@ def test_case_conflict_across_multiple_curations(autofix):
 
     case_conflicted_curation_set = {
         CuratedTerm(
-            original_forms=frozenset([expected_merged_forms[0]]),
+            original_synonyms=frozenset([expected_merged_forms[0]]),
             behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
         CuratedTerm(
-            original_forms=frozenset([expected_merged_forms[1]]),
+            original_synonyms=frozenset([expected_merged_forms[1]]),
             behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
     }
@@ -136,9 +136,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
     """
 
     ner_and_linking_curation_mergeable_1 = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     string="Estrogens, conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=True,
@@ -148,9 +148,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
     )
     ner_and_linking_curation_mergeable_2 = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     string="Estrogens,conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=True,
@@ -161,9 +161,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
     )
 
     linking_only_curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     string="Estrogens ,conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=True,
@@ -174,9 +174,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
     )
 
     drop_curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     string="Estrogens, conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=False,
@@ -186,9 +186,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         behaviour=CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
     )
     case_conflict_curation = CuratedTerm(
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             [
-                MentionForm(
+                Synonym(
                     string="ESTROGENS, CONJUGATED SYNTHETIC A",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=False,

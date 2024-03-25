@@ -757,7 +757,7 @@ class GlobalParserActions:
 
 
 @dataclass(frozen=True)
-class MentionForm:
+class Synonym:
     string: str
     case_sensitive: bool
     mention_confidence: MentionConfidence
@@ -789,9 +789,9 @@ class CuratedTerm:
     .. code-block:: python
 
         CuratedTerm(
-            original_forms=frozenset(
+            original_synonyms=frozenset(
                 [
-                    MentionForm(
+                    Synonym(
                         string="ALL",
                         mention_confidence=MentionConfidence.POSSIBLE,
                         case_sensitive=True,
@@ -812,9 +812,9 @@ class CuratedTerm:
     .. code-block:: python
 
         CuratedTerm(
-            original_forms=frozenset(
+            original_synonyms=frozenset(
                 [
-                    MentionForm(
+                    Synonym(
                         string="LH",
                         mention_confidence=MentionConfidence.POSSIBLE,
                         case_sensitive=True,
@@ -832,9 +832,9 @@ class CuratedTerm:
     .. code-block:: python
 
         CuratedTerm(
-            original_forms=frozenset(
+            original_synonyms=frozenset(
                 [
-                    MentionForm(
+                    Synonym(
                         string="breast carcinoma",
                         mention_confidence=MentionConfidence.POSSIBLE,
                         case_sensitive=True,
@@ -847,11 +847,11 @@ class CuratedTerm:
     """
 
     #: Original versions of this term, exactly as specified in the source ontology. These should all normalise to the same string.
-    original_forms: frozenset[MentionForm]
+    original_synonyms: frozenset[Synonym]
     #: The intended behaviour for this term.
     behaviour: CuratedTermBehaviour
-    #: Alternative forms of the original versions of this term created by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\.
-    alternative_forms: frozenset[MentionForm] = field(default_factory=frozenset)
+    #: Alternative synonyms generated from the originals by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\.
+    alternative_synonyms: frozenset[Synonym] = field(default_factory=frozenset)
     #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
     _id: bson.ObjectId = field(default_factory=bson.ObjectId, compare=False)
@@ -861,23 +861,23 @@ class CuratedTerm:
     comment: Optional[str] = field(default=None, compare=False)
 
     def __post_init__(self):
-        cs_forms = defaultdict(set)
-        ci_forms = defaultdict(set)
-        if len(self.original_forms) == 0:
-            raise ValueError(f"no forms for: {self}")
-        for form in self.active_ner_forms():
-            if form.case_sensitive:
-                cs_forms[form.string].add(form.mention_confidence)
+        cs_syns = defaultdict(set)
+        ci_syns = defaultdict(set)
+        if len(self.original_synonyms) == 0:
+            raise ValueError(f"no synonyms for: {self}")
+        for syn in self.active_ner_synonyms():
+            if syn.case_sensitive:
+                cs_syns[syn.string].add(syn.mention_confidence)
             else:
-                ci_forms[form.string.lower()].add(form.mention_confidence)
-        for cs_form, cs_confidences in ci_forms.items():
-            ci_confidences = ci_forms.get(cs_form.lower(), {MentionConfidence.POSSIBLE})
+                ci_syns[syn.string.lower()].add(syn.mention_confidence)
+        for cs_syn, cs_confidences in ci_syns.items():
+            ci_confidences = ci_syns.get(cs_syn.lower(), {MentionConfidence.POSSIBLE})
             if min(ci_confidences) < min(cs_confidences):
                 raise ValueError(f"case sensitive conflict: {self}")
 
     def term_norm_for_linking(self, entity_class: str) -> str:
         norms = set(
-            StringNormalizer.normalize(form.string, entity_class) for form in self.original_forms
+            StringNormalizer.normalize(syn.string, entity_class) for syn in self.original_synonyms
         )
         if len(norms) == 1:
             term_norm = next(iter(norms))
@@ -916,19 +916,19 @@ class CuratedTerm:
             CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
         }
 
-    def all_forms(self) -> Iterable[MentionForm]:
-        for form in self.original_forms.union(self.alternative_forms):
-            yield form
+    def all_synonyms(self) -> Iterable[Synonym]:
+        for syn in self.original_synonyms.union(self.alternative_synonyms):
+            yield syn
 
     def all_strings(self) -> Iterable[str]:
-        for form in self.all_forms():
-            yield form.string
+        for syn in self.all_synonyms():
+            yield syn.string
 
-    def active_ner_forms(self) -> Iterable[MentionForm]:
+    def active_ner_synonyms(self) -> Iterable[Synonym]:
         if self.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
-            for form in self.original_forms.union(self.alternative_forms):
-                if form.mention_confidence is not MentionConfidence.IGNORE:
-                    yield form
+            for syn in self.original_synonyms.union(self.alternative_synonyms):
+                if syn.mention_confidence is not MentionConfidence.IGNORE:
+                    yield syn
 
 
 class KazuConfigurationError(Exception):

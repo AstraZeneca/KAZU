@@ -17,7 +17,7 @@ from kazu.data.data import (
     AssociatedIdSets,
     GlobalParserActions,
     AutoNameEnum,
-    MentionForm,
+    Synonym,
     MentionConfidence,
 )
 from kazu.database.in_memory_db import (
@@ -59,7 +59,7 @@ def load_curated_terms(
 
 
 def _term_sort_reduce(term: CuratedTerm) -> tuple[int, str]:
-    return min((len(form.string), form.string) for form in term.original_forms)
+    return min((len(syn.string), syn.string) for syn in term.original_synonyms)
 
 
 def batch(iterable: Iterable[CuratedTerm], n: int = 1) -> Iterable[list[CuratedTerm]]:
@@ -231,22 +231,20 @@ class CuratedTermConflictAnalyser:
         """
         cleaned_curations = set()
         for conflicted_set in curation_conflicts:
-            original_forms_by_term_norm: defaultdict[str, set[MentionForm]] = defaultdict(set)
-            alt_forms_by_term_norm: defaultdict[str, set[MentionForm]] = defaultdict(set)
+            original_synonyms_by_term_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
+            alt_syns_by_term_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
             case_sensitive = False
-            form_string_lower_to_confidence = defaultdict(set)
+            syn_string_lower_to_confidence = defaultdict(set)
             assoc_id_sets: set[EquivalentIdSet] = set()
             behaviours: set[CuratedTermBehaviour] = set()
             for curation in conflicted_set:
                 term_norm = curation.term_norm_for_linking(self.entity_class)
-                original_forms_by_term_norm[term_norm].update(curation.original_forms)
-                alt_forms_by_term_norm[term_norm].update(curation.alternative_forms)
+                original_synonyms_by_term_norm[term_norm].update(curation.original_synonyms)
+                alt_syns_by_term_norm[term_norm].update(curation.alternative_synonyms)
                 behaviours.add(curation.behaviour)
-                for form in curation.all_forms():
-                    form_string_lower_to_confidence[form.string.lower()].add(
-                        form.mention_confidence
-                    )
-                    if form.case_sensitive:
+                for syn in curation.all_synonyms():
+                    syn_string_lower_to_confidence[syn.string.lower()].add(syn.mention_confidence)
+                    if syn.case_sensitive:
                         case_sensitive = True
                 if curation.associated_id_sets is not None:
                     assoc_id_sets.update(curation.associated_id_sets)
@@ -258,29 +256,29 @@ class CuratedTermConflictAnalyser:
             else:
                 chosen_behaviour = CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING
 
-            for term_norm, mergeable_original_forms in original_forms_by_term_norm.items():
+            for term_norm, mergeable_original_synonyms in original_synonyms_by_term_norm.items():
                 cleaned_curations.add(
                     CuratedTerm(
                         behaviour=chosen_behaviour,
-                        original_forms=frozenset(
+                        original_synonyms=frozenset(
                             dataclasses.replace(
-                                form,
+                                syn,
                                 case_sensitive=case_sensitive,
                                 mention_confidence=min(
-                                    form_string_lower_to_confidence[form.string.lower()]
+                                    syn_string_lower_to_confidence[syn.string.lower()]
                                 ),
                             )
-                            for form in mergeable_original_forms
+                            for syn in mergeable_original_synonyms
                         ),
-                        alternative_forms=frozenset(
+                        alternative_synonyms=frozenset(
                             dataclasses.replace(
-                                form,
+                                syn,
                                 case_sensitive=case_sensitive,
                                 mention_confidence=min(
-                                    form_string_lower_to_confidence[form.string.lower()]
+                                    syn_string_lower_to_confidence[syn.string.lower()]
                                 ),
                             )
-                            for form in alt_forms_by_term_norm.get(term_norm, set())
+                            for syn in alt_syns_by_term_norm.get(term_norm, set())
                         ),
                         associated_id_sets=frozenset(assoc_id_sets)
                         if len(assoc_id_sets) > 0
@@ -326,25 +324,25 @@ class CuratedTermConflictAnalyser:
         """Find conflicts in case sensitivity within a set of curations.
 
         Conflicts can occur when strings differ by case sensitivity, and a
-        case-insensitive form will produce a :class:`.MentionConfidence`
+        case-insensitive synonym will produce a :class:`.MentionConfidence`
         of equal or higher rank than a case-sensitive one.
 
         :param curations:
         :return: a set of conflicted subsets, and a set of clean terms.
         """
 
-        maybe_good_curations_by_active_form_lower = defaultdict(set)
+        maybe_good_curations_by_active_syn_lower = defaultdict(set)
         for curation in curations:
-            for form in curation.all_forms():
-                maybe_good_curations_by_active_form_lower[form.string.lower()].add(curation)
+            for syn in curation.all_synonyms():
+                maybe_good_curations_by_active_syn_lower[syn.string.lower()].add(curation)
 
         all_conflicts = set()
         case_conflict_subsets = set()
         clean_curations = set()
-        for potential_conflict_set in maybe_good_curations_by_active_form_lower.values():
+        for potential_conflict_set in maybe_good_curations_by_active_syn_lower.values():
 
             if CuratedTermConflictAnalyser._curation_set_has_case_conflicts(potential_conflict_set):
-                # uh ho - we have multiple identical forms attached to different curations
+                # uh ho - we have multiple identical synonyms attached to different curations
                 case_conflict_subsets.add(frozenset(potential_conflict_set))
                 all_conflicts.update(potential_conflict_set)
             else:
@@ -385,16 +383,16 @@ class CuratedTermConflictAnalyser:
                 continue
 
             # uh ho we have a normalisation/behaviour/id set conflict. If we can't merge, report an error
-            original_forms_merged: set[MentionForm] = set()
-            generated_forms_merged: set[MentionForm] = set()
+            original_synonyms_merged: set[Synonym] = set()
+            generated_synonyms_merged: set[Synonym] = set()
             associated_id_sets_this_term_norm: set[frozenset[EquivalentIdSet]] = set()
             comments = []
             behaviours = set()
             for conflicted_curation in potentially_conflicting_curations:
 
                 behaviours.add(conflicted_curation.behaviour)
-                original_forms_merged.update(conflicted_curation.original_forms)
-                generated_forms_merged.update(conflicted_curation.alternative_forms)
+                original_synonyms_merged.update(conflicted_curation.original_synonyms)
+                generated_synonyms_merged.update(conflicted_curation.alternative_synonyms)
                 if conflicted_curation.associated_id_sets is not None:
                     associated_id_sets_this_term_norm.add(conflicted_curation.associated_id_sets)
                 if conflicted_curation.comment is not None:
@@ -407,8 +405,8 @@ class CuratedTermConflictAnalyser:
                 # merge the curations
                 merged_curation = CuratedTerm(
                     behaviour=next(iter(behaviours)),
-                    original_forms=frozenset(original_forms_merged),
-                    alternative_forms=frozenset(generated_forms_merged),
+                    original_synonyms=frozenset(original_synonyms_merged),
+                    alternative_synonyms=frozenset(generated_synonyms_merged),
                     associated_id_sets=next(iter(associated_id_sets_this_term_norm))
                     if len(associated_id_sets_this_term_norm) == 1
                     else None,
@@ -432,8 +430,8 @@ class CuratedTermConflictAnalyser:
         normalisation_errors = set()
         for curation in curations:
             term_norms_this_term = set(
-                StringNormalizer.normalize(original_form.string, entity_class=self.entity_class)
-                for original_form in curation.original_forms
+                StringNormalizer.normalize(original_syn.string, entity_class=self.entity_class)
+                for original_syn in curation.original_synonyms
             )
             if len(term_norms_this_term) > 1:
                 normalisation_errors.add(curation)
@@ -442,7 +440,7 @@ class CuratedTermConflictAnalyser:
         if normalisation_errors:
             # This should never be thrown by automatically generated curations
             raise CurationError(
-                "One or more curations contain original forms that no longer normalise to the same value. This"
+                "One or more curations contain original synonyms that no longer normalise to the same value. This"
                 " can happen if the implementation of the StringNormalizer has changed. Please correct the following"
                 " curations:\n" + "\n".join(curation.to_json() for curation in normalisation_errors)
             )
@@ -473,14 +471,14 @@ class CuratedTermConflictAnalyser:
         cs_conf_lookup = defaultdict(set)
         ci_conf_lookup = defaultdict(set)
         for curation in curations:
-            for form in curation.active_ner_forms():
-                if form.case_sensitive:
-                    cs_conf_lookup[form.string].add(form.mention_confidence)
+            for syn in curation.active_ner_synonyms():
+                if syn.case_sensitive:
+                    cs_conf_lookup[syn.string].add(syn.mention_confidence)
                 else:
-                    ci_conf_lookup[form.string.lower()].add(form.mention_confidence)
+                    ci_conf_lookup[syn.string.lower()].add(syn.mention_confidence)
 
-        for form_string, cs_confidences in cs_conf_lookup.items():
-            ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(form_string.lower(), set())
+        for syn_string, cs_confidences in cs_conf_lookup.items():
+            ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(syn_string.lower(), set())
             if (
                 len(ci_confidences) > 0
                 and len(cs_confidences) > 0
@@ -504,7 +502,7 @@ class CuratedTermConflictAnalyser:
         :param human_curations:
         :param autocurations:
         :param path: if provided, report any curations with discrepancies (such as where
-            an automatically generated curation contains more forms than the human
+            an automatically generated curation contains more synonyms than the human
             equivalent). Also report any superfluous and obsolete human curations
         :return:
         """
@@ -532,10 +530,10 @@ class CuratedTermConflictAnalyser:
             else:
                 working_dict[default_term_norm] = maybe_human_curation
                 # check the set of strings are equivalent. Otherwise new ones may have been created by syn generation
-                if set(form.string for form in maybe_human_curation.original_forms) != set(
-                    form.string for form in default_curation.original_forms
-                ) or set(form.string for form in maybe_human_curation.alternative_forms) != set(
-                    form.string for form in default_curation.alternative_forms
+                if set(syn.string for syn in maybe_human_curation.original_synonyms) != set(
+                    syn.string for syn in default_curation.original_synonyms
+                ) or set(syn.string for syn in maybe_human_curation.alternative_synonyms) != set(
+                    syn.string for syn in default_curation.alternative_synonyms
                 ):
                     curations_with_discrepancies.add(
                         (
@@ -572,7 +570,7 @@ class CuratedTermConflictAnalyser:
                     force=True,
                 )
             if curations_with_discrepancies:
-                with path_.joinpath("human_curations_with_form_discrepancies_set.jsonl").open(
+                with path_.joinpath("human_curations_with_synonym_discrepancies_set.jsonl").open(
                     mode="w"
                 ) as jsonlf:
                     for (
@@ -1029,12 +1027,12 @@ class CurationProcessor:
                     )
         if len(curation_associated_id_set) > 0:
             is_symbolic = any(
-                StringNormalizer.classify_symbolic(form.string, self.entity_class)
-                for form in curated_term.original_forms
+                StringNormalizer.classify_symbolic(syn.string, self.entity_class)
+                for syn in curated_term.original_synonyms
             )
             new_term = SynonymTerm(
                 term_norm=term_norm,
-                terms=frozenset(term.string for term in curated_term.original_forms),
+                terms=frozenset(term.string for term in curated_term.original_synonyms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
                 associated_id_sets=curation_associated_id_set,

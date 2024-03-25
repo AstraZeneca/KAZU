@@ -11,7 +11,7 @@ from kazu.data.data import (
     CuratedTermBehaviour,
     MentionConfidence,
     SynonymTerm,
-    MentionForm,
+    Synonym,
 )
 from transformers import BatchEncoding, PreTrainedTokenizerBase
 from transformers.file_utils import PaddingStrategy
@@ -33,7 +33,7 @@ def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
         for term in terms:
             for term_str in term.terms:
                 alts.add(
-                    MentionForm(
+                    Synonym(
                         string=term_str,
                         case_sensitive=False,
                         mention_confidence=MentionConfidence.PROBABLE,
@@ -41,7 +41,7 @@ def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
                 )
         result.add(
             CuratedTerm(
-                original_forms=frozenset(alts),
+                original_synonyms=frozenset(alts),
                 behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
             )
         )

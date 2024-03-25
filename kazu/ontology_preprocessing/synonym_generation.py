@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Optional
 
-from kazu.data.data import CuratedTerm, MentionForm
+from kazu.data.data import CuratedTerm, Synonym
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike
@@ -49,7 +49,7 @@ class CombinatorialSynonymGenerator:
 
     def __call__(self, curated_terms: set[CuratedTerm]) -> set[CuratedTerm]:
         """Takes a set of :class:`~.CuratedTerm`\\s, and returns a new set of
-        ``CuratedTerm``\\s with generated synonyms added as `alternative_forms`.
+        ``CuratedTerm``\\s with generated synonyms added as `alternative_synonyms`.
 
         :param curated_terms:
         :return:
@@ -58,9 +58,9 @@ class CombinatorialSynonymGenerator:
         logger.info(
             "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
         )
-        final_results: defaultdict[CuratedTerm, set[MentionForm]] = defaultdict(set)
+        final_results: defaultdict[CuratedTerm, set[Synonym]] = defaultdict(set)
         original_strings = {
-            form.string for term in curated_terms for form in term.active_ner_forms()
+            syn.string for term in curated_terms for syn in term.active_ner_synonyms()
         }
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original terms
@@ -70,7 +70,7 @@ class CombinatorialSynonymGenerator:
                 len(synonym_gen_permutations),
                 permutation_list,
             )
-            generated_results: defaultdict[CuratedTerm, set[MentionForm]] = defaultdict(set)
+            generated_results: defaultdict[CuratedTerm, set[Synonym]] = defaultdict(set)
             for generator in permutation_list:
                 # run the generator. We call list here as we modify the original list
                 for curation in tqdm(
@@ -78,18 +78,20 @@ class CombinatorialSynonymGenerator:
                     desc=f"generating synonyms for {generator.__class__.__name__}",
                 ):
 
-                    for form in list(generated_results.get(curation, curation.active_ner_forms())):
-                        new_strings = generator(form.string)
+                    for syn in list(
+                        generated_results.get(curation, curation.active_ner_synonyms())
+                    ):
+                        new_strings = generator(syn.string)
                         for string in new_strings:
                             if string in original_strings:
                                 logger.debug("ignoring pre-existing string: %s", string)
                                 continue
-                            alternative_form = MentionForm(
+                            alternative_syn = Synonym(
                                 string=string,
-                                case_sensitive=form.case_sensitive,
-                                mention_confidence=form.mention_confidence,
+                                case_sensitive=syn.case_sensitive,
+                                mention_confidence=syn.mention_confidence,
                             )
-                            generated_results[curation].add(alternative_form)
+                            generated_results[curation].add(alternative_syn)
             for curation in curated_terms:
                 final_results[curation].update(generated_results[curation])
 
@@ -97,8 +99,8 @@ class CombinatorialSynonymGenerator:
             generator.__call__.cache_clear()
 
         new_curations = {
-            dataclasses.replace(curation, alternative_forms=frozenset(alternative_forms))
-            for curation, alternative_forms in final_results.items()
+            dataclasses.replace(curation, alternative_synonyms=frozenset(alternative_synonyms))
+            for curation, alternative_synonyms in final_results.items()
         }
 
         return new_curations

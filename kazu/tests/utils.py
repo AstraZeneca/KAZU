@@ -196,13 +196,13 @@ def write_curations(path: Path, terms: list[CuratedTerm]):
 def ignore_all_action(curated_term: CuratedTerm) -> CuratedTerm:
     return dataclasses.replace(
         curated_term,
-        original_forms=frozenset(
+        original_synonyms=frozenset(
             dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
-            for form in curated_term.original_forms
+            for form in curated_term.original_synonyms
         ),
-        alternative_forms=frozenset(
+        alternative_synonyms=frozenset(
             dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
-            for form in curated_term.alternative_forms
+            for form in curated_term.alternative_synonyms
         ),
     )
 

@@ -26,7 +26,7 @@ from kazu.data.data import (
     MentionConfidence,
     CuratedTermBehaviour,
     EquivalentIdSet,
-    MentionForm,
+    Synonym,
 )
 from kazu.database.in_memory_db import ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import (
@@ -88,9 +88,9 @@ PARSER_2_DEFAULT_DATA = {
 }
 
 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = CuratedTerm(
-    original_forms=frozenset(
+    original_synonyms=frozenset(
         [
-            MentionForm(
+            Synonym(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                 string="complexVII disease\u03B1",
                 case_sensitive=False,
@@ -192,9 +192,9 @@ TESTCASES = [
         parser_2_curations=[
             dataclasses.replace(
                 SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-                original_forms=frozenset(
+                original_synonyms=frozenset(
                     dataclasses.replace(orig_form, case_sensitive=True)
-                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
+                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
                 ),
             )
         ],
@@ -234,9 +234,9 @@ TESTCASES = [
         parser_1_curations=[
             dataclasses.replace(
                 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-                original_forms=frozenset(
+                original_synonyms=frozenset(
                     dataclasses.replace(orig_form, string="This sentence is just to test")
-                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_forms
+                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
                 ),
             )
         ],
