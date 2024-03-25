@@ -211,7 +211,7 @@ Finally, when we want to use our new parser, we need to give it information abou
 
 That's it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.
 
-Using "CuratedTerm" for dictionary based matching and/or to modify an Ontology's behaviour
+Using "OntologyStringResource" for dictionary based matching and/or to modify an Ontology's behaviour
 --------------------------------------------------------------------------------------------
 
 The data sources that Kazu users tend to concern themselves with are often a rich source of nouns that can be accurately used for
@@ -242,30 +242,30 @@ In addition, there are the following considerations:
     Prior to Kazu 2.0, the internal curation system of Kazu was cumbersome to use/explain. We recommend upgrading to
     Kazu 2.0 or later as soon as possible.
 
-Points 1-4 above are handled by the :class:`.CuratedTerm` concept and :class:`.Synonym` concept. Point 5 is handled by
+Points 1-4 above are handled by the :class:`.OntologyStringResource` concept and :class:`.Synonym` concept. Point 5 is handled by
 the :class:`.CombinatorialSynonymGenerator` class. Point 6 is handled by the :class:`.AutoCurator` class. Point 7 is
 handled by :meth:`.OntologyParser.generate_clean_default_curations` (and controlled by the ``run_upgrade_report`` flag).
-Point 8 is handled by the :class:`.CuratedTermConflictAnalyser` class (and controlled by the ``run_curation_report`` flag).
+Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` class (and controlled by the ``run_curation_report`` flag).
 
 The flow of an ontology parser to handling the underlying strings is as follows:
 
 1) On first initialisation, the set of :class:`.SynonymTerm`\s an ontology produces is converted into a set of
-   :class:`.CuratedTerm`. This happens via :func:`.syn_terms_to_curations`.
+   :class:`.OntologyStringResource`. This happens via :func:`.syn_terms_to_curations`.
 2) If configured, the :class:`.CombinatorialSynonymGenerator` is executed to generate additional forms
-   for each :class:`.CuratedTerm`.
-3) If configured, the :class:`.AutoCurator` is executed to adjust the default behaviour for each :class:`.CuratedTerm`.
-4) The final set of the automatically generated :class:`.CuratedTerm`\s is serialised in the model pack. This
+   for each :class:`.OntologyStringResource`.
+3) If configured, the :class:`.AutoCurator` is executed to adjust the default behaviour for each :class:`.OntologyStringResource`.
+4) The final set of the automatically generated :class:`.OntologyStringResource`\s is serialised in the model pack. This
    is required when upgrading to a new version of the ontology, and can also be used as the basis for human curations
    (supplied via a seperate file to the ``curations_path`` argument to :class:`.OntologyParser`).
-5) The automatically generated set of :class:`.CuratedTerm` is guaranteed to be consistent. However, it can be difficult
+5) The automatically generated set of :class:`.OntologyStringResource` is guaranteed to be consistent. However, it can be difficult
    to determine whether any additional human curations will cause a conflict. Therefore, the
-   :class:`.CuratedTermConflictAnalyser` will run each time the :meth:`.OntologyParser.populate_databases` method is
+   :class:`.OntologyStringConflictAnalyser` will run each time the :meth:`.OntologyParser.populate_databases` method is
    called (once per python process, or as long as ``force=True``). This will throw an exception in the case of conflicts,
-   describing the human curations that need to be adjusted. When the human :class:`.CuratedTerm` are consistent, they
+   describing the human curations that need to be adjusted. When the human :class:`.OntologyStringResource` are consistent, they
    will override their automatically generated equivalents, ensuring the human curated behaviour takes precedent over
    the automatically curated version. If ``run_curation_report`` is set on :class:`.OntologyParser`, a report will be
    generated alongside the ontology file that describe what human curations are obsolete/broken/superfluous.
-6) Finally, when upgrading an ontology, the serialised set of automatically produced :class:`.CuratedTerm` from step 4
+6) Finally, when upgrading an ontology, the serialised set of automatically produced :class:`.OntologyStringResource` from step 4
    is used to compare the new and old ontologies, migrating terms where possible and describing the differences
    between the old and the new versions. The results are summarised in a report inside the Kazu model pack, alongside the
    original ontology input data.

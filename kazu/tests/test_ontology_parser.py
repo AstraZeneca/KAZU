@@ -5,13 +5,13 @@ from typing import Optional, Literal
 
 import pytest
 from kazu.data.data import (
-    CuratedTerm,
+    OntologyStringResource,
     MentionConfidence,
     ParserAction,
     EquivalentIdSet,
     ParserBehaviour,
     GlobalParserActions,
-    CuratedTermBehaviour,
+    OntologyStringBehaviour,
     Synonym,
     kazu_json_converter,
 )
@@ -64,7 +64,7 @@ def parser_data_with_split_equiv_id_set():
 
 def setup_databases(
     base_path: Path,
-    curations: Optional[list[CuratedTerm]] = None,
+    curations: Optional[list[OntologyStringResource]] = None,
     global_actions: Optional[GlobalParserActions] = None,
     parser_data_includes_target_synonym: bool = False,
     parser_data_has_split_equiv_id_set: bool = False,
@@ -129,7 +129,7 @@ def setup_databases(
 
 
 def test_should_add_synonym_term_to_parser(tmp_path):
-    curation = CuratedTerm(
+    curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -139,7 +139,7 @@ def test_should_add_synonym_term_to_parser(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -185,7 +185,7 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
 
 def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
     # note, this test is similar to test_should_drop_from_parser_via_general_rule,
-    # although it tests that a CuratedTerm is also affected by a general rule
+    # although it tests that a OntologyStringResource is also affected by a general rule
     global_actions = GlobalParserActions(
         actions=[
             ParserAction(
@@ -196,7 +196,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
             )
         ]
     )
-    curation = CuratedTerm(
+    curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -206,7 +206,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -247,7 +247,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
 
 def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
     override_id = "I do not exist"
-    curation = CuratedTerm(
+    curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -257,7 +257,7 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -288,7 +288,7 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
 
 
 def test_should_override_id_set(tmp_path):
-    curation = CuratedTerm(
+    curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -298,7 +298,7 @@ def test_should_override_id_set(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -329,7 +329,7 @@ def test_should_override_id_set(tmp_path):
 
 
 def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
-    curation = CuratedTerm(
+    curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -339,7 +339,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -366,7 +366,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 
 
 def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
-    curation = CuratedTerm(
+    curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -376,7 +376,7 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
     )
 
     syn_db = setup_databases(
@@ -389,7 +389,7 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
 
 
 def test_conflicting_overrides_in_associated_id_sets(tmp_path):
-    curation1 = CuratedTerm(
+    curation1 = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -399,7 +399,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(
@@ -415,7 +415,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
             ]
         ),
     )
-    curation2 = CuratedTerm(
+    curation2 = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -425,7 +425,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         associated_id_sets=frozenset(
             [
                 EquivalentIdSet(

@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Optional
 
-from kazu.data.data import CuratedTerm, Synonym
+from kazu.data.data import OntologyStringResource, Synonym
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike
@@ -47,9 +47,10 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, curated_terms: set[CuratedTerm]) -> set[CuratedTerm]:
-        """Takes a set of :class:`~.CuratedTerm`\\s, and returns a new set of
-        ``CuratedTerm``\\s with generated synonyms added as `alternative_synonyms`.
+    def __call__(self, curated_terms: set[OntologyStringResource]) -> set[OntologyStringResource]:
+        """Takes a set of :class:`~.OntologyStringResource`\\s, and returns a new set of
+        ``OntologyStringResource``\\s with generated synonyms added as
+        `alternative_synonyms`.
 
         :param curated_terms:
         :return:
@@ -58,7 +59,7 @@ class CombinatorialSynonymGenerator:
         logger.info(
             "Running synonym generation permutations. This may be slow at first, but will speed up as caching takes effect."
         )
-        final_results: defaultdict[CuratedTerm, set[Synonym]] = defaultdict(set)
+        final_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
         original_strings = {
             syn.string for term in curated_terms for syn in term.active_ner_synonyms()
         }
@@ -70,7 +71,7 @@ class CombinatorialSynonymGenerator:
                 len(synonym_gen_permutations),
                 permutation_list,
             )
-            generated_results: defaultdict[CuratedTerm, set[Synonym]] = defaultdict(set)
+            generated_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
             for generator in permutation_list:
                 # run the generator. We call list here as we modify the original list
                 for curation in tqdm(

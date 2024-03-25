@@ -1,12 +1,17 @@
 import pytest
-from kazu.data.data import CuratedTerm, Synonym, MentionConfidence, CuratedTermBehaviour
-from kazu.ontology_preprocessing.base import CuratedTermConflictAnalyser
+from kazu.data.data import (
+    OntologyStringResource,
+    Synonym,
+    MentionConfidence,
+    OntologyStringBehaviour,
+)
+from kazu.ontology_preprocessing.base import OntologyStringConflictAnalyser
 
 
 @pytest.mark.parametrize("autofix", [True, False])
 def test_case_conflict_within_single_curation(autofix):
     case_conflicted_curation_set = {
-        CuratedTerm(
+        OntologyStringResource(
             original_synonyms=frozenset(
                 [
                     Synonym(
@@ -21,11 +26,11 @@ def test_case_conflict_within_single_curation(autofix):
                     ),
                 ]
             ),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         )
     }
 
-    conflict_analyser = CuratedTermConflictAnalyser("test", autofix=autofix)
+    conflict_analyser = OntologyStringConflictAnalyser("test", autofix=autofix)
 
     curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
 
@@ -43,7 +48,7 @@ def test_case_conflict_within_single_curation(autofix):
 
 @pytest.mark.parametrize("autofix", [True, False])
 def test_conflict_analyser_should_merge_curations(autofix):
-    expected_merged_forms = [
+    expected_merged_synonyms = [
         Synonym(
             string="hello",
             mention_confidence=MentionConfidence.PROBABLE,
@@ -57,17 +62,17 @@ def test_conflict_analyser_should_merge_curations(autofix):
     ]
 
     case_conflicted_curation_set = {
-        CuratedTerm(
-            original_synonyms=frozenset([expected_merged_forms[0]]),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        OntologyStringResource(
+            original_synonyms=frozenset([expected_merged_synonyms[0]]),
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
-        CuratedTerm(
-            original_synonyms=frozenset([expected_merged_forms[1]]),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        OntologyStringResource(
+            original_synonyms=frozenset([expected_merged_synonyms[1]]),
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
     }
 
-    conflict_analyser = CuratedTermConflictAnalyser("test", autofix=autofix)
+    conflict_analyser = OntologyStringConflictAnalyser("test", autofix=autofix)
 
     curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
 
@@ -75,14 +80,14 @@ def test_conflict_analyser_should_merge_curations(autofix):
     assert len(curation_report.merged_curations) == 1
     assert len(curation_report.normalisation_conflicts) == 0
     assert len(curation_report.case_conflicts) == 0
-    assert set(expected_merged_forms) == set(
+    assert set(expected_merged_synonyms) == set(
         next(iter(curation_report.clean_curations)).active_ner_synonyms()
     )
 
 
 @pytest.mark.parametrize("autofix", [True, False])
 def test_case_conflict_across_multiple_curations(autofix):
-    expected_merged_forms = [
+    expected_merged_synonyms = [
         Synonym(
             string="hello",
             mention_confidence=MentionConfidence.PROBABLE,
@@ -96,17 +101,17 @@ def test_case_conflict_across_multiple_curations(autofix):
     ]
 
     case_conflicted_curation_set = {
-        CuratedTerm(
-            original_synonyms=frozenset([expected_merged_forms[0]]),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        OntologyStringResource(
+            original_synonyms=frozenset([expected_merged_synonyms[0]]),
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
-        CuratedTerm(
-            original_synonyms=frozenset([expected_merged_forms[1]]),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        OntologyStringResource(
+            original_synonyms=frozenset([expected_merged_synonyms[1]]),
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         ),
     }
 
-    conflict_analyser = CuratedTermConflictAnalyser("test", autofix=autofix)
+    conflict_analyser = OntologyStringConflictAnalyser("test", autofix=autofix)
 
     curation_report = conflict_analyser.verify_curation_set_integrity(case_conflicted_curation_set)
 
@@ -135,7 +140,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
     value of autofix.
     """
 
-    ner_and_linking_curation_mergeable_1 = CuratedTerm(
+    ner_and_linking_curation_mergeable_1 = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -145,9 +150,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
     )
-    ner_and_linking_curation_mergeable_2 = CuratedTerm(
+    ner_and_linking_curation_mergeable_2 = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -157,10 +162,10 @@ def test_normalisation_and_case_conflict_resolution(autofix):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
     )
 
-    linking_only_curation = CuratedTerm(
+    linking_only_curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -170,10 +175,10 @@ def test_normalisation_and_case_conflict_resolution(autofix):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+        behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
     )
 
-    drop_curation = CuratedTerm(
+    drop_curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -183,9 +188,9 @@ def test_normalisation_and_case_conflict_resolution(autofix):
                 ),
             ]
         ),
-        behaviour=CuratedTermBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+        behaviour=OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
     )
-    case_conflict_curation = CuratedTerm(
+    case_conflict_curation = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -195,7 +200,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
                 )
             ]
         ),
-        behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+        behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
     )
 
     # The mergeable_curation_set contains two terms that normalise to the same value and should be merged into a single curation
@@ -207,7 +212,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         case_conflict_curation,
     }
 
-    conflict_analyser = CuratedTermConflictAnalyser("drug", autofix=autofix)
+    conflict_analyser = OntologyStringConflictAnalyser("drug", autofix=autofix)
 
     mergeable_curation_report = conflict_analyser.verify_curation_set_integrity(
         mergeable_curation_set

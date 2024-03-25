@@ -11,7 +11,7 @@ from kazu.data.data import (
     Section,
     Document,
     Synonym,
-    CuratedTerm,
+    OntologyStringResource,
     CharSpan,
     ParserAction,
     GlobalParserActions,
@@ -19,7 +19,7 @@ from kazu.data.data import (
     StringMatchConfidence,
     DisambiguationConfidence,
     EquivalentIdAggregationStrategy,
-    CuratedTermBehaviour,
+    OntologyStringBehaviour,
     ParserBehaviour,
     kazu_json_converter,
     _initialize_json_converter,
@@ -129,16 +129,17 @@ st.register_type_strategy(
 
 @st.composite
 def curated_term_strat_no_conflict(
-    draw: st.DrawFn, _curated_term_class: type[CuratedTerm], /, *args, **kwargs
-) -> CuratedTerm:
-    """This strategy ensures no error is raised in CuratedTerm.__post__init__ .
+    draw: st.DrawFn, _curated_term_class: type[OntologyStringResource], /, *args, **kwargs
+) -> OntologyStringResource:
+    """This strategy ensures no error is raised in OntologyStringResource.__post__init__
+    .
 
     Ensuring `original_synonyms` is of min_size 1 is one key here, but the other
     is handling case conflicts. We do this by handling any ValueErrors and 'assuming' them
     away with hypothesis.
 
     One annoying side affect here is that when we 'register' this as a type strategy,
-    for some reason it takes the class `CuratedTerm` as the second argument, after `draw`.
+    for some reason it takes the class `OntologyStringResource` as the second argument, after `draw`.
     We don't need this in the function body, but we need to handle it, otherwise it gets
     passed through in the other args to st.builds (which we do want for flexibility).
 
@@ -148,7 +149,7 @@ def curated_term_strat_no_conflict(
     try:
         ct = draw(
             st.builds(
-                CuratedTerm,
+                OntologyStringResource,
                 original_synonyms=st.frozensets(elements=st.builds(Synonym), min_size=1),
                 *args,
                 **kwargs,
@@ -161,7 +162,7 @@ def curated_term_strat_no_conflict(
     return ct
 
 
-st.register_type_strategy(CuratedTerm, curated_term_strat_no_conflict)
+st.register_type_strategy(OntologyStringResource, curated_term_strat_no_conflict)
 
 
 @st.composite
@@ -188,7 +189,7 @@ simply_serializable_types = (
     SynonymTerm,
     SynonymTermWithMetrics,
     Synonym,
-    CuratedTerm,
+    OntologyStringResource,
     ParserAction,
     GlobalParserActions,
 )
@@ -220,7 +221,7 @@ enums = (
     StringMatchConfidence,
     DisambiguationConfidence,
     EquivalentIdAggregationStrategy,
-    CuratedTermBehaviour,
+    OntologyStringBehaviour,
     ParserBehaviour,
 )
 

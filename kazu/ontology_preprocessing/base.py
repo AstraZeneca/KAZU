@@ -10,7 +10,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTerm,
     SimpleValue,
-    CuratedTerm,
+    OntologyStringResource,
     AssociatedIdSets,
     GlobalParserActions,
     IdsAndSource,
@@ -23,7 +23,7 @@ from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.autocuration import AutoCurator
 from kazu.ontology_preprocessing.curation_utils import (
     CurationProcessor,
-    CuratedTermConflictAnalyser,
+    OntologyStringConflictAnalyser,
     load_curated_terms,
     dump_curated_terms,
     CurationError,
@@ -131,11 +131,11 @@ class OntologyParser(ABC):
             determines what the default behaviour for a :class:`~.SynonymTerm` should be. For example, "Ignore
             any strings shorter than two characters or longer than 50 characters", or "use case sensitive matching when
             the SynonymTerm is symbolic"
-        :param curations_path: path to jsonl file of :class:`~.CuratedTerm`\\s to override the defaults of the parser.
+        :param curations_path: path to jsonl file of :class:`~.OntologyStringResource`\\s to override the defaults of the parser.
         :param global_actions: path to json file of :class:`~.GlobalParserActions` to apply to the parser.
         :param run_upgrade_report: Use when upgrading the version of the underlying data. When True, reports novel and
             obsolete terms in the model pack directory. Note that this will overwrite the default
-            :class:`~.CuratedTerm`\\s associated with this parser in the model pack.
+            :class:`~.OntologyStringResource`\\s associated with this parser in the model pack.
         :param run_curation_report: Use when adjusting the human curations. When True, creates a report in the model
             pack directory describing various aspects of the curation set, such as no-op curations,
             case sensitivity/mention confidence conflicts etc.
@@ -386,7 +386,7 @@ class OntologyParser(ABC):
 
     def process_curations(
         self, terms: set[SynonymTerm]
-    ) -> tuple[Optional[list[CuratedTerm]], set[SynonymTerm]]:
+    ) -> tuple[Optional[list[OntologyStringResource]], set[SynonymTerm]]:
         if not self.ontology_autocuration_set_path.exists() or self.run_upgrade_report:
             clean_curations = self.generate_clean_default_curations(
                 terms, upgrade_report=self.run_upgrade_report
@@ -407,8 +407,8 @@ class OntologyParser(ABC):
         return curation_processor.export_curations_and_final_terms()
 
     def build_curation_report(
-        self, maybe_autocuration_set_clean: Optional[set[CuratedTerm]]
-    ) -> set[CuratedTerm]:
+        self, maybe_autocuration_set_clean: Optional[set[OntologyStringResource]]
+    ) -> set[OntologyStringResource]:
         if maybe_autocuration_set_clean is None:
             autocuration_set_clean = load_curated_terms(self.ontology_autocuration_set_path)
         else:
@@ -456,7 +456,7 @@ class OntologyParser(ABC):
             )
 
         # set autofix to false so that issues are reported
-        conflict_analyser = CuratedTermConflictAnalyser(self.entity_class, autofix=False)
+        conflict_analyser = OntologyStringConflictAnalyser(self.entity_class, autofix=False)
 
         human_curation_report = conflict_analyser.verify_curation_set_integrity(
             human_curation_set, path=human_curation_set_report_path
@@ -487,7 +487,7 @@ class OntologyParser(ABC):
 
     def generate_clean_default_curations(
         self, terms: set[SynonymTerm], upgrade_report: bool = False
-    ) -> set[CuratedTerm]:
+    ) -> set[OntologyStringResource]:
         """
 
         :param terms:
@@ -502,7 +502,7 @@ class OntologyParser(ABC):
         new_version_autocuration_set = self._generate_dirty_default_curations(terms)
 
         # autofix is true, to ensure a clean set of curations
-        conflict_analyser = CuratedTermConflictAnalyser(self.entity_class, autofix=True)
+        conflict_analyser = OntologyStringConflictAnalyser(self.entity_class, autofix=True)
         new_version_autocuration_set_clean = conflict_analyser.verify_curation_set_integrity(
             new_version_autocuration_set
         ).clean_curations
@@ -564,7 +564,9 @@ class OntologyParser(ABC):
         upgrade_report_path.mkdir()
         return upgrade_report_path
 
-    def _back_up_previous_curation_file(self, upgrade_report_path: Path) -> set[CuratedTerm]:
+    def _back_up_previous_curation_file(
+        self, upgrade_report_path: Path
+    ) -> set[OntologyStringResource]:
         logger.info(
             "%s loading previous version autocuration set",
             self.name,
@@ -584,7 +586,9 @@ class OntologyParser(ABC):
         dump_curated_terms(previous_version_autocuration_set_clean, backup_path)
         return previous_version_autocuration_set_clean
 
-    def _generate_dirty_default_curations(self, terms: set[SynonymTerm]) -> set[CuratedTerm]:
+    def _generate_dirty_default_curations(
+        self, terms: set[SynonymTerm]
+    ) -> set[OntologyStringResource]:
         """Dirty curations come directly from a set of :class:`.SynonymTerm`\\, and are
         optionally further modified by synonym generation and autocuration routines.
 
@@ -629,7 +633,9 @@ class OntologyParser(ABC):
     @kazu_disk_cache.memoize(ignore={0})
     def _populate_databases(
         self, parser_name: str
-    ) -> tuple[Optional[list[CuratedTerm]], dict[str, dict[str, SimpleValue]], set[SynonymTerm]]:
+    ) -> tuple[
+        Optional[list[OntologyStringResource]], dict[str, dict[str, SimpleValue]], set[SynonymTerm]
+    ]:
         """Disk cacheable method that populates all databases.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -650,7 +656,7 @@ class OntologyParser(ABC):
 
     def populate_databases(
         self, force: bool = False, return_curations: bool = False
-    ) -> Optional[list[CuratedTerm]]:
+    ) -> Optional[list[OntologyStringResource]]:
         """Populate the databases with the results of the parser.
 
         Also calculates the term norms associated with any curations (if provided) which

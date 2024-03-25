@@ -22,9 +22,9 @@ import pytest
 from _pytest.mark import ParameterSet
 
 from kazu.data.data import (
-    CuratedTerm,
+    OntologyStringResource,
     MentionConfidence,
-    CuratedTermBehaviour,
+    OntologyStringBehaviour,
     EquivalentIdSet,
     Synonym,
 )
@@ -87,7 +87,7 @@ PARSER_2_DEFAULT_DATA = {
     MAPPING_TYPE: ["test", "test", "test", "test"],
 }
 
-FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = CuratedTerm(
+FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = OntologyStringResource(
     original_synonyms=frozenset(
         [
             Synonym(
@@ -97,7 +97,7 @@ FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = CuratedTerm(
             )
         ]
     ),
-    behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+    behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
     associated_id_sets=frozenset(
         [
             EquivalentIdSet(
@@ -144,8 +144,8 @@ STRINGMATCHING_EXAMPLE_TEXT = """There is a Q42_ID and Q42_syn in this sentence,
 @dataclasses.dataclass
 class StringMatchingTestCase:
     id: str
-    parser_1_curations: list[CuratedTerm]
-    parser_2_curations: list[CuratedTerm]
+    parser_1_curations: list[OntologyStringResource]
+    parser_2_curations: list[OntologyStringResource]
     match_len: int
     match_texts: set[str]
     match_ontology_data: MatchOntologyData
@@ -193,8 +193,8 @@ TESTCASES = [
             dataclasses.replace(
                 SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
                 original_synonyms=frozenset(
-                    dataclasses.replace(orig_form, case_sensitive=True)
-                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
+                    dataclasses.replace(orig_syn, case_sensitive=True)
+                    for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
                 ),
             )
         ],
@@ -215,7 +215,7 @@ TESTCASES = [
         parser_2_curations=[
             dataclasses.replace(
                 SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
-                behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+                behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
             )
         ],
         match_len=1,
@@ -235,8 +235,8 @@ TESTCASES = [
             dataclasses.replace(
                 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
                 original_synonyms=frozenset(
-                    dataclasses.replace(orig_form, string="This sentence is just to test")
-                    for orig_form in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
+                    dataclasses.replace(orig_syn, string="This sentence is just to test")
+                    for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
                 ),
             )
         ],

@@ -316,13 +316,13 @@ class ModelPackBuilder:
                 curation_to_parser_name[curation] = parser.name
 
         from kazu.ontology_preprocessing.curation_utils import (
-            CuratedTermConflictAnalyser,
+            OntologyStringConflictAnalyser,
         )
 
         (
             case_conflicts,
             clean_curations,
-        ) = CuratedTermConflictAnalyser.check_for_case_conflicts_across_curations(
+        ) = OntologyStringConflictAnalyser.check_for_case_conflicts_across_curations(
             curation_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 

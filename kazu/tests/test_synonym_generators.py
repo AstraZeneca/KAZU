@@ -3,7 +3,12 @@ from sys import maxunicode
 from typing import Union
 
 import pytest
-from kazu.data.data import CuratedTerm, MentionConfidence, CuratedTermBehaviour, Synonym
+from kazu.data.data import (
+    OntologyStringResource,
+    MentionConfidence,
+    OntologyStringBehaviour,
+    Synonym,
+)
 from kazu.language.language_phenomena import GREEK_SUBS
 from kazu.ontology_preprocessing.synonym_generation import (
     SeparatorExpansion,
@@ -24,7 +29,7 @@ def check_generator_result(
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
     if isinstance(generator, CombinatorialSynonymGenerator):
-        curated_term = CuratedTerm(
+        curated_term = OntologyStringResource(
             original_synonyms=frozenset(
                 [
                     Synonym(
@@ -34,7 +39,7 @@ def check_generator_result(
                     )
                 ]
             ),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         )
         generated_terms = generator({curated_term})
         new_syns = {s for term in generated_terms for s in term.all_strings()}

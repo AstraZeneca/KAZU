@@ -13,7 +13,7 @@ from kazu.data.data import (
     EquivalentIdAggregationStrategy,
     SynonymTermWithMetrics,
     GlobalParserActions,
-    CuratedTerm,
+    OntologyStringResource,
     MentionConfidence,
     kazu_json_converter,
 )
@@ -186,30 +186,30 @@ def make_dummy_synonym_term(
     )
 
 
-def write_curations(path: Path, terms: list[CuratedTerm]):
+def write_curations(path: Path, terms: list[OntologyStringResource]):
     with open(path, "w") as f:
         for curation in terms:
             f.write(json.dumps(kazu_json_converter.unstructure(curation)) + "\n")
 
 
 # for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of terms to 'IGNORE'
-def ignore_all_action(curated_term: CuratedTerm) -> CuratedTerm:
+def ignore_all_action(curated_term: OntologyStringResource) -> OntologyStringResource:
     return dataclasses.replace(
         curated_term,
         original_synonyms=frozenset(
-            dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
-            for form in curated_term.original_synonyms
+            dataclasses.replace(syn, mention_confidence=MentionConfidence.IGNORE)
+            for syn in curated_term.original_synonyms
         ),
         alternative_synonyms=frozenset(
-            dataclasses.replace(form, mention_confidence=MentionConfidence.IGNORE)
-            for form in curated_term.alternative_synonyms
+            dataclasses.replace(syn, mention_confidence=MentionConfidence.IGNORE)
+            for syn in curated_term.alternative_synonyms
         ),
     )
 
 
 def ignore_all_by_default_autocurator_factory() -> AutoCurator:
-    """When testing the behaviour of human :class:`CuratedTerm`, remember that 'default'
-    curations are always generated from a parser.
+    """When testing the behaviour of human :class:`OntologyStringResource`, remember
+    that 'default' curations are always generated from a parser.
 
     To ensure these do not interfere with our test, we need an autocurator function to
     disable them.

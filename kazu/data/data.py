@@ -677,7 +677,7 @@ If you are familiar with cattrs, you may prefer to use the ``structure``, ``unst
 """
 
 
-class CuratedTermBehaviour(AutoNameEnum):
+class OntologyStringBehaviour(AutoNameEnum):
     #: use the term for both dictionary based NER and as a linking target.
     ADD_FOR_NER_AND_LINKING = auto()
     #: use the term only as a linking target. Note, this is not required if the term is already in the
@@ -700,7 +700,7 @@ class ParserAction:
     :class:`kazu.ontology_preprocessing.base.OntologyParser` in a global sense.
 
     A ParserAction overrides any default behaviour of the parser, and also any conflicts that may occur with
-    :class:`.CuratedTerm`\\s.
+    :class:`.OntologyStringResource`\\s.
 
     These actions are useful for eliminating unwanted behaviour. For example, the root of the Mondo
     ontology is http://purl.obolibrary.org/obo/HP_0000001, which has a default label of 'All'. Since this is
@@ -764,22 +764,22 @@ class Synonym:
 
 
 @dataclass(frozen=True)
-class CuratedTerm:
-    """A CuratedTerm represents the behaviour of a specific :class:`.SynonymTerm` within
-    an Ontology.
+class OntologyStringResource:
+    """A OntologyStringResource represents the behaviour of a specific
+    :class:`.SynonymTerm` within an Ontology.
 
-    For each SynonymTerm, a default CuratedTerm is produced with its
+    For each SynonymTerm, a default OntologyStringResource is produced with its
     behaviour determined by an instance of
     :class:`kazu.ontology_preprocessing.autocuration.AutoCurator` and the
-    :class:`kazu.ontology_preprocessing.curation_utils.CuratedTermConflictAnalyser`\\.
+    :class:`kazu.ontology_preprocessing.curation_utils.OntologyStringResourceConflictAnalyser`\\.
 
     .. note::
 
        This is typically handled by the internals of :class:`kazu.ontology_preprocessing.base.OntologyParser`\\.
-       However, CuratedTerms can also be used to override the default behaviour of a parser. See :ref:`ontology_parser`
+       However, OntologyStringResources can also be used to override the default behaviour of a parser. See :ref:`ontology_parser`
        for a more detailed guide.
 
-    The configuration of a CuratedTerm will affect both NER and Linking aspects of Kazu:
+    The configuration of a OntologyStringResource will affect both NER and Linking aspects of Kazu:
 
     Example 1:
 
@@ -788,7 +788,7 @@ class CuratedTerm:
 
     .. code-block:: python
 
-        CuratedTerm(
+        OntologyStringResource(
             original_synonyms=frozenset(
                 [
                     Synonym(
@@ -798,7 +798,7 @@ class CuratedTerm:
                     )
                 ]
             ),
-            behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+            behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         )
 
 
@@ -807,11 +807,11 @@ class CuratedTerm:
     The string 'LH' is incorrectly identified as a synonym of the PLOD1 (ENSG00000083444) gene, whereas more often than not, it's actually an abbreviation of Lutenising Hormone.
     We therefore want to override the associated_id_sets to LHB (ENSG00000104826, or Lutenising Hormone Subunit Beta)
 
-    The CuratedTerm we therefore want is:
+    The OntologyStringResource we therefore want is:
 
     .. code-block:: python
 
-        CuratedTerm(
+        OntologyStringResource(
             original_synonyms=frozenset(
                 [
                     Synonym(
@@ -822,7 +822,7 @@ class CuratedTerm:
                 ]
             ),
             associated_id_sets=frozenset((EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)),
-            behaviour=CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+            behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         )
 
     Example 3:
@@ -831,7 +831,7 @@ class CuratedTerm:
 
     .. code-block:: python
 
-        CuratedTerm(
+        OntologyStringResource(
             original_synonyms=frozenset(
                 [
                     Synonym(
@@ -842,14 +842,14 @@ class CuratedTerm:
                 ]
             ),
             associated_id_sets=frozenset((EquivalentIdSet(("ENSG00000104826", "ENSEMBL")),)),
-            behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         )
     """
 
     #: Original versions of this term, exactly as specified in the source ontology. These should all normalise to the same string.
     original_synonyms: frozenset[Synonym]
     #: The intended behaviour for this term.
-    behaviour: CuratedTermBehaviour
+    behaviour: OntologyStringBehaviour
     #: Alternative synonyms generated from the originals by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\.
     alternative_synonyms: frozenset[Synonym] = field(default_factory=frozenset)
     #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
@@ -888,13 +888,13 @@ class CuratedTerm:
             )
 
     @staticmethod
-    def from_json(json_str: str) -> "CuratedTerm":
+    def from_json(json_str: str) -> "OntologyStringResource":
         json_dict = json.loads(json_str)
-        return CuratedTerm.from_dict(json_dict)
+        return OntologyStringResource.from_dict(json_dict)
 
     @classmethod
-    def from_dict(cls, json_dict: dict) -> "CuratedTerm":
-        return kazu_json_converter.structure(json_dict, CuratedTerm)
+    def from_dict(cls, json_dict: dict) -> "OntologyStringResource":
+        return kazu_json_converter.structure(json_dict, OntologyStringResource)
 
     def to_dict(self, preserve_structured_object_id: bool = True) -> dict[str, Any]:
         as_dict: dict[str, Any] = kazu_json_converter.unstructure(self)
@@ -912,8 +912,8 @@ class CuratedTerm:
         """True if this term created in addition to the source terms defined in the
         original Ontology."""
         return self.associated_id_sets is not None and self.behaviour in {
-            CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
-            CuratedTermBehaviour.ADD_FOR_LINKING_ONLY,
+            OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
+            OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         }
 
     def all_synonyms(self) -> Iterable[Synonym]:
@@ -925,7 +925,7 @@ class CuratedTerm:
             yield syn.string
 
     def active_ner_synonyms(self) -> Iterable[Synonym]:
-        if self.behaviour is CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING:
+        if self.behaviour is OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING:
             for syn in self.original_synonyms.union(self.alternative_synonyms):
                 if syn.mention_confidence is not MentionConfidence.IGNORE:
                     yield syn

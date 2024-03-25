@@ -34,7 +34,7 @@ from kazu.database.in_memory_db import MetadataDatabase
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
-    CuratedTerm,
+    OntologyStringResource,
     AssociatedIdSets,
     GlobalParserActions,
 )
@@ -745,7 +745,7 @@ class GeneOntologyParser(RDFGraphParser):
 
     def populate_databases(
         self, force: bool = False, return_curations: bool = False
-    ) -> Optional[list[CuratedTerm]]:
+    ) -> Optional[list[OntologyStringResource]]:
         """Modified version of :meth:`RDFGraphParser.parse_to_graph` to handle caching.
 
         We have custom logic here to clear the caching on :meth:`~.parse_to_graph`,

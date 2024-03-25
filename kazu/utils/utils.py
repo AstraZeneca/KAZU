@@ -7,8 +7,8 @@ from kazu.data.data import (
     Document,
     Entity,
     Section,
-    CuratedTerm,
-    CuratedTermBehaviour,
+    OntologyStringResource,
+    OntologyStringBehaviour,
     MentionConfidence,
     SynonymTerm,
     Synonym,
@@ -21,7 +21,7 @@ from kazu.utils.grouping import sort_then_group
 logger = logging.getLogger(__name__)
 
 
-def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
+def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[OntologyStringResource]:
     """
 
     :param terms:
@@ -40,9 +40,9 @@ def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[CuratedTerm]:
                     )
                 )
         result.add(
-            CuratedTerm(
+            OntologyStringResource(
                 original_synonyms=frozenset(alts),
-                behaviour=CuratedTermBehaviour.ADD_FOR_NER_AND_LINKING,
+                behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
             )
         )
     return result
