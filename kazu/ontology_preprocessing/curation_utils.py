@@ -599,7 +599,7 @@ class OntologyStringConflictAnalyser:
         return set(working_dict.values())
 
 
-class CurationModificationResult(AutoNameEnum):
+class LinkingCandidateModificationResult(AutoNameEnum):
     ID_SET_MODIFIED = auto()
     SYNONYM_TERM_ADDED = auto()
     SYNONYM_TERM_DROPPED = auto()
@@ -666,7 +666,8 @@ class OntologyResourceProcessor:
     def _update_term_lookups(
         self, term: SynonymTerm, override: bool
     ) -> Literal[
-        CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
+        LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
+        LinkingCandidateModificationResult.NO_ACTION,
     ]:
 
         safe_to_add = False
@@ -693,9 +694,9 @@ class OntologyResourceProcessor:
             for equiv_ids in term.associated_id_sets:
                 for idx in equiv_ids.ids:
                     self._terms_by_id[idx].add(term)
-            return CurationModificationResult.SYNONYM_TERM_ADDED
+            return LinkingCandidateModificationResult.SYNONYM_TERM_ADDED
         else:
-            return CurationModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.NO_ACTION
 
     def _drop_synonym_term(self, synonym: NormalisedSynonymStr) -> None:
         """Remove a synonym term from the database, so that it cannot be used as a
@@ -735,9 +736,9 @@ class OntologyResourceProcessor:
         self, id_to_drop: Idx
     ) -> Counter[
         Literal[
-            CurationModificationResult.ID_SET_MODIFIED,
-            CurationModificationResult.SYNONYM_TERM_DROPPED,
-            CurationModificationResult.NO_ACTION,
+            LinkingCandidateModificationResult.ID_SET_MODIFIED,
+            LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
+            LinkingCandidateModificationResult.NO_ACTION,
         ]
     ]:
         """Remove a given id from all :class:`.SynonymTerm`\\ s.
@@ -759,9 +760,9 @@ class OntologyResourceProcessor:
     def _drop_id_from_synonym_term(
         self, id_to_drop: Idx, term_to_modify: SynonymTerm
     ) -> Literal[
-        CurationModificationResult.ID_SET_MODIFIED,
-        CurationModificationResult.SYNONYM_TERM_DROPPED,
-        CurationModificationResult.NO_ACTION,
+        LinkingCandidateModificationResult.ID_SET_MODIFIED,
+        LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
+        LinkingCandidateModificationResult.NO_ACTION,
     ]:
         """Remove an id from a given :class:`.SynonymTerm`\\ .
 
@@ -773,7 +774,7 @@ class OntologyResourceProcessor:
             id_to_drop, term_to_modify.associated_id_sets
         )
         if len(new_assoc_id_frozenset.symmetric_difference(term_to_modify.associated_id_sets)) == 0:
-            return CurationModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.NO_ACTION
         else:
             return self._modify_or_drop_synonym_term_after_id_set_change(
                 new_associated_id_sets=new_assoc_id_frozenset, synonym_term=term_to_modify
@@ -805,7 +806,8 @@ class OntologyResourceProcessor:
     def _modify_or_drop_synonym_term_after_id_set_change(
         self, new_associated_id_sets: AssociatedIdSets, synonym_term: SynonymTerm
     ) -> Literal[
-        CurationModificationResult.ID_SET_MODIFIED, CurationModificationResult.SYNONYM_TERM_DROPPED
+        LinkingCandidateModificationResult.ID_SET_MODIFIED,
+        LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
     ]:
         """Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets`
         has changed.
@@ -815,8 +817,8 @@ class OntologyResourceProcessor:
         :return:
         """
         result: Literal[
-            CurationModificationResult.ID_SET_MODIFIED,
-            CurationModificationResult.SYNONYM_TERM_DROPPED,
+            LinkingCandidateModificationResult.ID_SET_MODIFIED,
+            LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
         ]
         if len(new_associated_id_sets) > 0:
             if new_associated_id_sets == synonym_term.associated_id_sets:
@@ -831,12 +833,12 @@ class OntologyResourceProcessor:
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
             add_result = self._update_term_lookups(new_term, True)
-            assert add_result is CurationModificationResult.SYNONYM_TERM_ADDED
-            result = CurationModificationResult.ID_SET_MODIFIED
+            assert add_result is LinkingCandidateModificationResult.SYNONYM_TERM_ADDED
+            result = LinkingCandidateModificationResult.ID_SET_MODIFIED
         else:
             # if there are no longer any id sets associated with the record, remove it completely
             self._drop_synonym_term(synonym_term.term_norm)
-            result = CurationModificationResult.SYNONYM_TERM_DROPPED
+            result = LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED
         return result
 
     def export_resources_and_final_terms(
@@ -888,8 +890,8 @@ class OntologyResourceProcessor:
                 for idx in ids:
                     counter_this_idx = self._drop_id_from_all_synonym_terms(idx)
                     if (
-                        counter_this_idx[CurationModificationResult.ID_SET_MODIFIED]
-                        + counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED]
+                        counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED]
+                        + counter_this_idx[LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED]
                         == 0
                     ):
                         logger.warning("failed to drop %s from %s", idx, self.parser_name)
@@ -898,8 +900,10 @@ class OntologyResourceProcessor:
                             "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
                             idx,
                             self.parser_name,
-                            counter_this_idx[CurationModificationResult.ID_SET_MODIFIED],
-                            counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED],
+                            counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED],
+                            counter_this_idx[
+                                LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED
+                            ],
                         )
 
                         for override_resource_to_modify in set(
@@ -943,7 +947,8 @@ class OntologyResourceProcessor:
         self,
         resource: OntologyStringResource,
     ) -> Literal[
-        CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
+        LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
+        LinkingCandidateModificationResult.NO_ACTION,
     ]:
         """Create a new :class:`~kazu.data.data.SynonymTerm` for the database, or return
         an existing matching one if already present.
@@ -980,7 +985,7 @@ class OntologyResourceProcessor:
                 + " but no associated id set provided, so term will inherit the parser defaults",
                 log_formatting_dict,
             )
-            return CurationModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.NO_ACTION
         elif resource_associated_id_set is None and maybe_existing_synonym_term is None:
             logger.error(
                 log_prefix
@@ -988,7 +993,7 @@ class OntologyResourceProcessor:
                 + " Since no id set was provided, no entry can be created",
                 log_formatting_dict,
             )
-            return CurationModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.NO_ACTION
 
         # resource_associated_id_set is implicitly not None
         assert resource_associated_id_set is not None
@@ -998,7 +1003,7 @@ class OntologyResourceProcessor:
                 resource,
                 self.parser_name,
             )
-            return CurationModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.NO_ACTION
 
         if maybe_existing_synonym_term is not None:
             log_formatting_dict["existing_id_set"] = maybe_existing_synonym_term.associated_id_sets
@@ -1017,7 +1022,7 @@ class OntologyResourceProcessor:
                     + "since this SynonymTerm matches the id_set, no action is required. %(existing_id_set)s",
                     log_formatting_dict,
                 )
-                return CurationModificationResult.NO_ACTION
+                return LinkingCandidateModificationResult.NO_ACTION
             else:
                 logger.debug(
                     log_prefix
@@ -1053,4 +1058,4 @@ class OntologyResourceProcessor:
             )
             return self._update_term_lookups(new_term, True)
         else:
-            return CurationModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.NO_ACTION
