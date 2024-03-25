@@ -250,7 +250,7 @@ Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` class (and co
 The flow of an ontology parser to handling the underlying strings is as follows:
 
 1) On first initialisation, the set of :class:`.SynonymTerm`\s an ontology produces is converted into a set of
-   :class:`.OntologyStringResource`. This happens via :func:`.syn_terms_to_curations`.
+   :class:`.OntologyStringResource`. This happens via :func:`.syn_terms_to_ontology_string_resources`.
 2) If configured, the :class:`.CombinatorialSynonymGenerator` is executed to generate additional forms
    for each :class:`.OntologyStringResource`.
 3) If configured, the :class:`.AutoCurator` is executed to adjust the default behaviour for each :class:`.OntologyStringResource`.

@@ -29,7 +29,7 @@ from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import Singleton
 
 PARSER_1_NAME = "I am the target for actions"
-NOOP_PARSER_NAME = "I am the result of the same parser without curations"
+NOOP_PARSER_NAME = "I am the result of the same parser without human curated resources"
 TARGET_SYNONYM = "hello I'm injected"
 # this should be split by the parser logic into two equivalent_id_sets for the same SynonymTerm
 ID_TO_BE_REMOVED = TARGET_SYNONYM.replace(" ", "-")
@@ -64,7 +64,7 @@ def parser_data_with_split_equiv_id_set():
 
 def setup_databases(
     base_path: Path,
-    curations: Optional[list[OntologyStringResource]] = None,
+    human_curated_resources: Optional[list[OntologyStringResource]] = None,
     global_actions: Optional[GlobalParserActions] = None,
     parser_data_includes_target_synonym: bool = False,
     parser_data_has_split_equiv_id_set: bool = False,
@@ -72,9 +72,9 @@ def setup_databases(
 ) -> SynonymDatabase:
     Singleton.clear_all()
     curations_path = None
-    if curations is not None:
+    if human_curated_resources is not None:
         curations_path = base_path.joinpath("curations.jsonl")
-        write_curations(curations_path, curations)
+        write_curations(curations_path, human_curated_resources)
 
     global_actions_path = None
     if global_actions is not None:
@@ -129,7 +129,7 @@ def setup_databases(
 
 
 def test_should_add_synonym_term_to_parser(tmp_path):
-    curation = OntologyStringResource(
+    resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -156,7 +156,7 @@ def test_should_add_synonym_term_to_parser(tmp_path):
         ),
     )
 
-    syn_db = setup_databases(base_path=tmp_path, curations=[curation])
+    syn_db = setup_databases(base_path=tmp_path, human_curated_resources=[resource])
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME)) + 1
 
@@ -183,7 +183,7 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) + 2 == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
+def test_should_modify_resource_from_parser_via_general_rule(tmp_path):
     # note, this test is similar to test_should_drop_from_parser_via_general_rule,
     # although it tests that a OntologyStringResource is also affected by a general rule
     global_actions = GlobalParserActions(
@@ -196,7 +196,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
             )
         ]
     )
-    curation = OntologyStringResource(
+    resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -234,7 +234,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
     )
     syn_db = setup_databases(
         base_path=tmp_path,
-        curations=[curation],
+        human_curated_resources=[resource],
         global_actions=global_actions,
         parser_data_includes_target_synonym=False,
         noop_parser_curations_style="None",
@@ -247,7 +247,7 @@ def test_should_modify_curation_from_parser_via_general_rule(tmp_path):
 
 def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
     override_id = "I do not exist"
-    curation = OntologyStringResource(
+    resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -276,7 +276,7 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curations=[curation],
+        human_curated_resources=[resource],
         parser_data_includes_target_synonym=True,
     )
 
@@ -288,7 +288,7 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
 
 
 def test_should_override_id_set(tmp_path):
-    curation = OntologyStringResource(
+    resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -317,11 +317,11 @@ def test_should_override_id_set(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curations=[curation],
+        human_curated_resources=[resource],
         parser_data_includes_target_synonym=True,
     )
 
-    term_norm_lookup = curation.term_norm_for_linking(entity_class=ENTITY_CLASS)
+    term_norm_lookup = resource.term_norm_for_linking(entity_class=ENTITY_CLASS)
     assert len(syn_db.get(PARSER_1_NAME, term_norm_lookup).associated_id_sets) == 1
     equiv_id_set = next(iter(syn_db.get(PARSER_1_NAME, term_norm_lookup).associated_id_sets))
     assert "first" not in equiv_id_set.ids
@@ -329,7 +329,7 @@ def test_should_override_id_set(tmp_path):
 
 
 def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
-    curation = OntologyStringResource(
+    resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -358,7 +358,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curations=[curation],
+        human_curated_resources=[resource],
         parser_data_includes_target_synonym=True,
     )
 
@@ -366,7 +366,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
 
 
 def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
-    curation = OntologyStringResource(
+    resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -381,7 +381,7 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
 
     syn_db = setup_databases(
         base_path=tmp_path,
-        curations=[curation],
+        human_curated_resources=[resource],
         parser_data_includes_target_synonym=True,
     )
 
@@ -389,7 +389,7 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
 
 
 def test_conflicting_overrides_in_associated_id_sets(tmp_path):
-    curation1 = OntologyStringResource(
+    resource1 = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -415,7 +415,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
             ]
         ),
     )
-    curation2 = OntologyStringResource(
+    resource2 = OntologyStringResource(
         original_synonyms=frozenset(
             [
                 Synonym(
@@ -444,7 +444,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
     with pytest.raises(CurationError):
         setup_databases(
             base_path=tmp_path,
-            curations=[curation1, curation2],
+            human_curated_resources=[resource1, resource2],
             parser_data_includes_target_synonym=True,
         )
 

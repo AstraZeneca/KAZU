@@ -744,7 +744,7 @@ class GeneOntologyParser(RDFGraphParser):
         self.instances.add(name)
 
     def populate_databases(
-        self, force: bool = False, return_curations: bool = False
+        self, force: bool = False, return_resources: bool = False
     ) -> Optional[list[OntologyStringResource]]:
         """Modified version of :meth:`RDFGraphParser.parse_to_graph` to handle caching.
 
@@ -752,14 +752,14 @@ class GeneOntologyParser(RDFGraphParser):
         because the size of this cached graph is quite large in memory, and otherwise stays
         in continued usage throughout the runtime of kazu.
         """
-        curations = super().populate_databases(force=force, return_curations=return_curations)
+        resources = super().populate_databases(force=force, return_resources=return_resources)
         self.instances_in_dbs.add(self.name)
 
         if self.instances_in_dbs >= self.instances:
             # all existing instances are in the database, so we can free up
             # the memory used by the cached parsed gene ontology, which is significant.
             self.parse_to_graph.cache_clear()
-        return curations
+        return resources
 
     @staticmethod
     @cache

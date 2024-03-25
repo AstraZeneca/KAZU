@@ -21,7 +21,9 @@ from kazu.utils.grouping import sort_then_group
 logger = logging.getLogger(__name__)
 
 
-def syn_terms_to_curations(terms: Iterable[SynonymTerm]) -> set[OntologyStringResource]:
+def syn_terms_to_ontology_string_resources(
+    terms: Iterable[SynonymTerm],
+) -> set[OntologyStringResource]:
     """
 
     :param terms:

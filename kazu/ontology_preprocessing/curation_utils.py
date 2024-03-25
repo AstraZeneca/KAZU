@@ -37,7 +37,7 @@ class CurationError(Exception):
     pass
 
 
-def load_curated_terms(
+def load_ontology_string_resources(
     path: PathLike,
 ) -> set[OntologyStringResource]:
     """Load :class:`kazu.data.data.OntologyStringResource`\\ s from a file path or
@@ -46,17 +46,17 @@ def load_curated_terms(
     :param path: path to a jsonl file or directory of jsonl files that map to :class:`kazu.data.data.OntologyStringResource`
     :return:
     """
-    curations_path = as_path(path)
-    curations: set[OntologyStringResource] = set()
-    if not curations_path.exists():
-        raise ValueError(f"curations file does not exist at: {path}")
+    resources_path = as_path(path)
+    resources: set[OntologyStringResource] = set()
+    if not resources_path.exists():
+        raise ValueError(f"resources file does not exist at: {path}")
 
-    files = curations_path.iterdir() if curations_path.is_dir() else (curations_path,)
+    files = resources_path.iterdir() if resources_path.is_dir() else (resources_path,)
     for f in files:
         with f.open(mode="r") as jsonlf:
-            curations.update(OntologyStringResource.from_json(line) for line in jsonlf)
+            resources.update(OntologyStringResource.from_json(line) for line in jsonlf)
 
-    return curations
+    return resources
 
 
 def _term_sort_reduce(term: OntologyStringResource) -> tuple[int, str]:
@@ -72,7 +72,7 @@ def batch(
         yield lst[ndx : ndx + n]
 
 
-def dump_curated_terms(
+def dump_ontology_string_resources(
     terms: Iterable[OntologyStringResource],
     path: PathLike,
     force: bool = False,
@@ -87,20 +87,20 @@ def dump_curated_terms(
     :param split_at: number of lines per partition
     :return:
     """
-    curations_path = as_path(path)
-    if curations_path.exists():
-        if not curations_path.is_dir():
+    resources_path = as_path(path)
+    if resources_path.exists():
+        if not resources_path.is_dir():
             raise ValueError(f"file already exists at {path} and is not a directory")
         elif not force:
             raise ValueError(f"directory already exists at {path}")
         else:
-            shutil.rmtree(curations_path)
+            shutil.rmtree(resources_path)
 
-    curations_path.mkdir(parents=True)
-    for i, terms_partition in enumerate(batch(terms, n=split_at)):
-        with curations_path.joinpath(f"{i}.jsonl").open(mode="w") as jsonlf:
-            for curation in terms_partition:
-                jsonlf.write(curation.to_json() + "\n")
+    resources_path.mkdir(parents=True)
+    for i, resources_partition in enumerate(batch(terms, n=split_at)):
+        with resources_path.joinpath(f"{i}.jsonl").open(mode="w") as jsonlf:
+            for resource in resources_partition:
+                jsonlf.write(resource.to_json() + "\n")
 
 
 def load_global_actions(
@@ -121,12 +121,12 @@ def load_global_actions(
 
 
 @dataclasses.dataclass
-class CurationSetIntegrityReport:
+class OntologyResourceSetIntegrityReport:
     #: Terms with no conflicts
-    clean_curations: set[OntologyStringResource]
+    clean_resources: set[OntologyStringResource]
     #: Terms that can be safely merged without affecting :class:`.OntologyStringBehaviour`. However,
     #: may still conflict on :class:`.MentionConfidence` and/or case sensitivity
-    merged_curations: set[OntologyStringResource]
+    merged_resources: set[OntologyStringResource]
     #: Terms that conflict on normalisation value
     normalisation_conflicts: set[frozenset[OntologyStringResource]]
     #: Terms that conflict on case
@@ -137,10 +137,10 @@ class OntologyStringConflictAnalyser:
     """Find and potentially fix conflicting behaviour in a set of
     :class:`kazu.data.data.OntologyStringResource`\\s."""
 
-    CLEAN_CURATIONS_FN = "clean_curations.jsonl"
-    MERGED_CURATIONS_FN = "merged_curations.jsonl"
-    NORM_CONFLICT_CURATIONS_FN = "normalisation_conflicts.jsonl"
-    CASE_CONFLICT_CURATIONS_FN = "case_conflicts.jsonl"
+    CLEAN_RESOURCES_FN = "clean_resources.jsonl"
+    MERGED_RESOURCES_FN = "merged_resources.jsonl"
+    NORM_CONFLICT_RESOURCES_FN = "normalisation_conflicts.jsonl"
+    CASE_CONFLICT_RESOURCES_FN = "case_conflicts.jsonl"
 
     def __init__(self, entity_class: str, autofix: bool = False):
         """
@@ -153,108 +153,108 @@ class OntologyStringConflictAnalyser:
         self.entity_class = entity_class
         self.autofix = autofix
 
-    def verify_curation_set_integrity(
-        self, curations: set[OntologyStringResource], path: Optional[PathLike] = None
-    ) -> CurationSetIntegrityReport:
+    def verify_resource_set_integrity(
+        self, resources: set[OntologyStringResource], path: Optional[PathLike] = None
+    ) -> OntologyResourceSetIntegrityReport:
         """Verify that a set of terms has consistent behaviour.
 
         Conflicts can occur for the following reasons:
 
-        1) If two or more curations normalise to the same string,
+        1) If two or more resources normalise to the same string,
            but have different :class:`kazu.data.data.OntologyStringBehaviour`\\.
 
-        2) If two or more curations normalise to the same value,
+        2) If two or more resources normalise to the same value,
            but have different associated ID sets specified, such that one would
            override the other.
 
-        3) If two or more curations have conflicting values for case sensitivity and
-           :class:`kazu.data.data.MentionConfidence`\\. E.g. A case-insensitive curation
+        3) If two or more resources have conflicting values for case sensitivity and
+           :class:`kazu.data.data.MentionConfidence`\\. E.g. A case-insensitive resource
            cannot have a higher mention confidence value than a case-sensitive one for
            the same string.
 
-        :param curations:
+        :param resources:
         :param path: if provided, write a report to this location of the conflicts that occur
         :return:
-        :raises CurationError: if one or more curations produce multiple normalised values
+        :raises CurationError: if one or more resources produce multiple normalised values
         """
 
-        curations = set(curations)
+        resources = set(resources)
         (
-            merged_curations,
-            eliminated_curations,
+            merged_resources,
+            eliminated_resources,
             normalisation_conflicts,
-        ) = self.check_for_normalised_behaviour_conflicts_and_merge_if_possible(curations)
+        ) = self.check_for_normalised_behaviour_conflicts_and_merge_if_possible(resources)
 
-        curations.difference_update(eliminated_curations)
-        curations.update(merged_curations)
+        resources.difference_update(eliminated_resources)
+        resources.update(merged_resources)
         # remove the conflicts from the working set
         for conflict_set in normalisation_conflicts:
-            curations.difference_update(conflict_set)
+            resources.difference_update(conflict_set)
         if self.autofix:
 
-            logger.info("Curations will be automatically fixed")
-            autofixed_curations_from_conflicts = self.autofix_curations(normalisation_conflicts)
-            # add the fixed curations to the merged set
-            merged_curations.update(autofixed_curations_from_conflicts)
-            curations.update(autofixed_curations_from_conflicts)
-            case_conflicts, clean_curations = self.check_for_case_conflicts_across_curations(
-                curations
+            logger.info("Resources will be automatically fixed")
+            autofixed_resources_from_conflicts = self.autofix_resources(normalisation_conflicts)
+            # add the fixed resources to the merged set
+            merged_resources.update(autofixed_resources_from_conflicts)
+            resources.update(autofixed_resources_from_conflicts)
+            case_conflicts, clean_resources = self.check_for_case_conflicts_across_resources(
+                resources
             )
-            clean_curations.update(self.autofix_curations(case_conflicts))
+            clean_resources.update(self.autofix_resources(case_conflicts))
             normalisation_conflicts = set()
             case_conflicts = set()
         else:
-            case_conflicts, clean_curations = self.check_for_case_conflicts_across_curations(
-                curations
+            case_conflicts, clean_resources = self.check_for_case_conflicts_across_resources(
+                resources
             )
 
         if path is not None:
 
             self._write_integrity_report(
-                case_conflicts, clean_curations, merged_curations, normalisation_conflicts, path
+                case_conflicts, clean_resources, merged_resources, normalisation_conflicts, path
             )
 
-        return CurationSetIntegrityReport(
-            clean_curations=clean_curations,
-            merged_curations=merged_curations,
+        return OntologyResourceSetIntegrityReport(
+            clean_resources=clean_resources,
+            merged_resources=merged_resources,
             normalisation_conflicts=normalisation_conflicts,
             case_conflicts=case_conflicts,
         )
 
-    def autofix_curations(
-        self, curation_conflicts: set[frozenset[OntologyStringResource]]
+    def autofix_resources(
+        self, resource_conflicts: set[frozenset[OntologyStringResource]]
     ) -> set[OntologyStringResource]:
-        """Fix conflicts in curations by producing a new set of curations with
+        """Fix conflicts in resources by producing a new set of resources with
         consistent behaviour.
 
         This ensures that there are no conflicts regarding any of these properties:
 
         * the combination of case sensitivity and mention confidence
         * associated id set
-        * curated term behaviour
+        * resource behaviour
 
-        :param curation_conflicts:
+        :param resource_conflicts:
         :return:
         """
-        cleaned_curations = set()
-        for conflicted_set in curation_conflicts:
+        cleaned_resources = set()
+        for conflicted_set in resource_conflicts:
             original_synonyms_by_term_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
             alt_syns_by_term_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
             case_sensitive = False
             syn_string_lower_to_confidence = defaultdict(set)
             assoc_id_sets: set[EquivalentIdSet] = set()
             behaviours: set[OntologyStringBehaviour] = set()
-            for curation in conflicted_set:
-                term_norm = curation.term_norm_for_linking(self.entity_class)
-                original_synonyms_by_term_norm[term_norm].update(curation.original_synonyms)
-                alt_syns_by_term_norm[term_norm].update(curation.alternative_synonyms)
-                behaviours.add(curation.behaviour)
-                for syn in curation.all_synonyms():
+            for resource in conflicted_set:
+                term_norm = resource.term_norm_for_linking(self.entity_class)
+                original_synonyms_by_term_norm[term_norm].update(resource.original_synonyms)
+                alt_syns_by_term_norm[term_norm].update(resource.alternative_synonyms)
+                behaviours.add(resource.behaviour)
+                for syn in resource.all_synonyms():
                     syn_string_lower_to_confidence[syn.string.lower()].add(syn.mention_confidence)
                     if syn.case_sensitive:
                         case_sensitive = True
-                if curation.associated_id_sets is not None:
-                    assoc_id_sets.update(curation.associated_id_sets)
+                if resource.associated_id_sets is not None:
+                    assoc_id_sets.update(resource.associated_id_sets)
 
             if OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING in behaviours:
                 chosen_behaviour = OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
@@ -264,7 +264,7 @@ class OntologyStringConflictAnalyser:
                 chosen_behaviour = OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING
 
             for term_norm, mergeable_original_synonyms in original_synonyms_by_term_norm.items():
-                cleaned_curations.add(
+                cleaned_resources.add(
                     OntologyStringResource(
                         behaviour=chosen_behaviour,
                         original_synonyms=frozenset(
@@ -292,106 +292,106 @@ class OntologyStringConflictAnalyser:
                         else None,
                     )
                 )
-        return cleaned_curations
+        return cleaned_resources
 
     def _write_integrity_report(
         self,
         case_conflicts: set[frozenset[OntologyStringResource]],
-        clean_curations: set[OntologyStringResource],
-        merged_curations: set[OntologyStringResource],
+        clean_resources: set[OntologyStringResource],
+        merged_resources: set[OntologyStringResource],
         normalisation_conflicts: set[frozenset[OntologyStringResource]],
         path: PathLike,
     ) -> None:
         report_path = as_path(path)
         report_path.mkdir(parents=True, exist_ok=True)
-        path_to_curations: dict[str, set[OntologyStringResource]] = {
-            self.CLEAN_CURATIONS_FN: clean_curations,
-            self.MERGED_CURATIONS_FN: merged_curations,
+        path_to_resources: dict[str, set[OntologyStringResource]] = {
+            self.CLEAN_RESOURCES_FN: clean_resources,
+            self.MERGED_RESOURCES_FN: merged_resources,
         }
-        for path_name, curation_data in path_to_curations.items():
-            if curation_data:
+        for path_name, resource_data in path_to_resources.items():
+            if resource_data:
                 with report_path.joinpath(path_name).open(mode="w") as f:
-                    for curation in curation_data:
-                        f.write(curation.to_json() + "\n")
-        path_to_curation_conflicts: dict[str, set[frozenset[OntologyStringResource]]] = {
-            self.NORM_CONFLICT_CURATIONS_FN: normalisation_conflicts,
-            self.CASE_CONFLICT_CURATIONS_FN: case_conflicts,
+                    for resource in resource_data:
+                        f.write(resource.to_json() + "\n")
+        path_to_resource_conflicts: dict[str, set[frozenset[OntologyStringResource]]] = {
+            self.NORM_CONFLICT_RESOURCES_FN: normalisation_conflicts,
+            self.CASE_CONFLICT_RESOURCES_FN: case_conflicts,
         }
-        for path_name, curation_conflict_data in path_to_curation_conflicts.items():
-            if curation_conflict_data:
+        for path_name, resource_conflict_data in path_to_resource_conflicts.items():
+            if resource_conflict_data:
                 with report_path.joinpath(path_name).open(mode="w") as f:
-                    for curation_set in curation_conflict_data:
-                        for curation in curation_set:
-                            f.write(curation.to_json() + "\n")
+                    for resource_set in resource_conflict_data:
+                        for resource in resource_set:
+                            f.write(resource.to_json() + "\n")
 
     @staticmethod
-    def check_for_case_conflicts_across_curations(
-        curations: set[OntologyStringResource],
+    def check_for_case_conflicts_across_resources(
+        resources: set[OntologyStringResource],
     ) -> tuple[set[frozenset[OntologyStringResource]], set[OntologyStringResource]]:
-        """Find conflicts in case sensitivity within a set of curations.
+        """Find conflicts in case sensitivity within a set of resources.
 
         Conflicts can occur when strings differ by case sensitivity, and a
         case-insensitive synonym will produce a :class:`.MentionConfidence`
         of equal or higher rank than a case-sensitive one.
 
-        :param curations:
+        :param resources:
         :return: a set of conflicted subsets, and a set of clean terms.
         """
 
-        maybe_good_curations_by_active_syn_lower = defaultdict(set)
-        for curation in curations:
-            for syn in curation.all_synonyms():
-                maybe_good_curations_by_active_syn_lower[syn.string.lower()].add(curation)
+        maybe_good_resources_by_active_syn_lower = defaultdict(set)
+        for resource in resources:
+            for syn in resource.all_synonyms():
+                maybe_good_resources_by_active_syn_lower[syn.string.lower()].add(resource)
 
         all_conflicts = set()
         case_conflict_subsets = set()
-        clean_curations = set()
-        for potential_conflict_set in maybe_good_curations_by_active_syn_lower.values():
+        clean_resources = set()
+        for potential_conflict_set in maybe_good_resources_by_active_syn_lower.values():
 
-            if OntologyStringConflictAnalyser._curation_set_has_case_conflicts(
+            if OntologyStringConflictAnalyser._resource_set_has_case_conflicts(
                 potential_conflict_set
             ):
-                # uh ho - we have multiple identical synonyms attached to different curations
+                # uh ho - we have multiple identical synonyms attached to different resources
                 case_conflict_subsets.add(frozenset(potential_conflict_set))
                 all_conflicts.update(potential_conflict_set)
             else:
-                clean_curations.update(potential_conflict_set)
+                clean_resources.update(potential_conflict_set)
 
         # there are scenarios wherein a case conflict can occur transitively.
-        # Therefore, we need to eliminate from the clean curations any conflicted ones
-        clean_curations.difference_update(all_conflicts)
+        # Therefore, we need to eliminate from the clean resources any conflicted ones
+        clean_resources.difference_update(all_conflicts)
 
-        return case_conflict_subsets, clean_curations
+        return case_conflict_subsets, clean_resources
 
     def check_for_normalised_behaviour_conflicts_and_merge_if_possible(
-        self, curations: set[OntologyStringResource]
+        self, resources: set[OntologyStringResource]
     ) -> tuple[
         set[OntologyStringResource],
         set[OntologyStringResource],
         set[frozenset[OntologyStringResource]],
     ]:
-        """Find behaviour conflicts in the curation set indexed by term_norm.
+        """Find behaviour conflicts in the resource set indexed by term_norm.
 
-        If possible, curations will be merged. If not, they will be added to a set of
+        If possible, resources will be merged. If not, they will be added to a set of
         conflicting terms.
 
-        :param curations:
-        :return: A set of newly created merged curations, a set of curations eliminated
-            through the merge, and a set of curation subsets that conflict and cannot be
-            merged,
+        :param resources:
+        :return: A set of newly created merged resources, a set of resources eliminated
+            through the merge, and a set of resources subsets that conflict and cannot
+            be merged,
         """
 
-        curations_by_term_norm = (
-            self._group_curations_by_term_norm_and_check_for_normalisation_consistency_errors(
-                curations
+        resources_by_term_norm = (
+            self._group_resources_by_term_norm_and_check_for_normalisation_consistency_errors(
+                resources
             )
         )
 
         normalisation_conflicts = set()
-        merged_curations = set()
-        eliminated_curations = set()
-        for term_norm, potentially_conflicting_curations in curations_by_term_norm.items():
-            if len(potentially_conflicting_curations) == 1:
+        merged_resources = set()
+        eliminated_resources = set()
+        for term_norm, potentially_conflicting_resources in resources_by_term_norm.items():
+            if len(potentially_conflicting_resources) == 1:
                 # no conflict
                 continue
 
@@ -401,22 +401,22 @@ class OntologyStringConflictAnalyser:
             associated_id_sets_this_term_norm: set[frozenset[EquivalentIdSet]] = set()
             comments = []
             behaviours = set()
-            for conflicted_curation in potentially_conflicting_curations:
+            for conflicted_resource in potentially_conflicting_resources:
 
-                behaviours.add(conflicted_curation.behaviour)
-                original_synonyms_merged.update(conflicted_curation.original_synonyms)
-                generated_synonyms_merged.update(conflicted_curation.alternative_synonyms)
-                if conflicted_curation.associated_id_sets is not None:
-                    associated_id_sets_this_term_norm.add(conflicted_curation.associated_id_sets)
-                if conflicted_curation.comment is not None:
-                    comments.append(conflicted_curation.comment)
+                behaviours.add(conflicted_resource.behaviour)
+                original_synonyms_merged.update(conflicted_resource.original_synonyms)
+                generated_synonyms_merged.update(conflicted_resource.alternative_synonyms)
+                if conflicted_resource.associated_id_sets is not None:
+                    associated_id_sets_this_term_norm.add(conflicted_resource.associated_id_sets)
+                if conflicted_resource.comment is not None:
+                    comments.append(conflicted_resource.comment)
 
             if len(behaviours) > 1 or len(associated_id_sets_this_term_norm) > 1:
                 # uh ho - behaviours/id set clash. Add to norm conflicts
-                normalisation_conflicts.add(frozenset(potentially_conflicting_curations))
+                normalisation_conflicts.add(frozenset(potentially_conflicting_resources))
             else:
-                # merge the curations
-                merged_curation = OntologyStringResource(
+                # merge the resources
+                merged_resource = OntologyStringResource(
                     behaviour=next(iter(behaviours)),
                     original_synonyms=frozenset(original_synonyms_merged),
                     alternative_synonyms=frozenset(generated_synonyms_merged),
@@ -425,43 +425,43 @@ class OntologyStringConflictAnalyser:
                     else None,
                     comment="\n".join(comments) if len(comments) > 0 else None,
                 )
-                merged_curations.add(merged_curation)
+                merged_resources.add(merged_resource)
 
                 logger.warning(
-                    "duplicate curation set merged. term norm: %s, conflicts:\n%s\n merged to: %s",
+                    "duplicate resource set merged. term norm: %s, conflicts:\n%s\n merged to: %s",
                     term_norm,
-                    potentially_conflicting_curations,
-                    merged_curation,
+                    potentially_conflicting_resources,
+                    merged_resource,
                 )
-                eliminated_curations.update(potentially_conflicting_curations)
-        return merged_curations, eliminated_curations, normalisation_conflicts
+                eliminated_resources.update(potentially_conflicting_resources)
+        return merged_resources, eliminated_resources, normalisation_conflicts
 
-    def _group_curations_by_term_norm_and_check_for_normalisation_consistency_errors(
-        self, curations: set[OntologyStringResource]
+    def _group_resources_by_term_norm_and_check_for_normalisation_consistency_errors(
+        self, resources: set[OntologyStringResource]
     ) -> defaultdict[str, set[OntologyStringResource]]:
-        curations_by_term_norm: defaultdict[str, set[OntologyStringResource]] = defaultdict(set)
+        resources_by_term_norm: defaultdict[str, set[OntologyStringResource]] = defaultdict(set)
         normalisation_errors = set()
-        for curation in curations:
+        for resource in resources:
             term_norms_this_term = set(
                 StringNormalizer.normalize(original_syn.string, entity_class=self.entity_class)
-                for original_syn in curation.original_synonyms
+                for original_syn in resource.original_synonyms
             )
             if len(term_norms_this_term) > 1:
-                normalisation_errors.add(curation)
+                normalisation_errors.add(resource)
             term_norm = next(iter(term_norms_this_term))
-            curations_by_term_norm[term_norm].add(curation)
+            resources_by_term_norm[term_norm].add(resource)
         if normalisation_errors:
-            # This should never be thrown by automatically generated curations
+            # This should never be thrown by automatically generated resources
             raise CurationError(
-                "One or more curations contain original synonyms that no longer normalise to the same value. This"
+                "One or more OntologyStringResource contains original synonyms that no longer normalise to the same value. This"
                 " can happen if the implementation of the StringNormalizer has changed. Please correct the following"
-                " curations:\n" + "\n".join(curation.to_json() for curation in normalisation_errors)
+                " resources:\n" + "\n".join(resource.to_json() for resource in normalisation_errors)
             )
-        return curations_by_term_norm
+        return resources_by_term_norm
 
     @staticmethod
-    def _curation_set_has_case_conflicts(curations: set[OntologyStringResource]) -> bool:
-        """Checks for case conflicts in a set of curations.
+    def _resource_set_has_case_conflicts(resources: set[OntologyStringResource]) -> bool:
+        """Checks for case conflicts in a set of :class:`.OntologyStringResource`\\ s.
 
         Intended behaviour is to allow different cases to produce different
         confidences based on confidence rank. A case-sensitive rank must always
@@ -478,13 +478,13 @@ class OntologyStringConflictAnalyser:
         "eGFR" -> ci and PROBABLE
         "Egfr" -> cs and POSSIBLE
 
-        :param curations:
+        :param resources:
         :return:
         """
         cs_conf_lookup = defaultdict(set)
         ci_conf_lookup = defaultdict(set)
-        for curation in curations:
-            for syn in curation.active_ner_synonyms():
+        for resource in resources:
+            for syn in resource.active_ner_synonyms():
                 if syn.case_sensitive:
                     cs_conf_lookup[syn.string].add(syn.mention_confidence)
                 else:
@@ -500,58 +500,58 @@ class OntologyStringConflictAnalyser:
                 return True
         return False
 
-    def merge_human_and_auto_curations(
+    def merge_human_and_auto_resources(
         self,
-        human_curations: set[OntologyStringResource],
-        autocurations: set[OntologyStringResource],
+        human_curated_resources: set[OntologyStringResource],
+        autocurated_resources: set[OntologyStringResource],
         path: Optional[PathLike],
     ) -> set[OntologyStringResource]:
-        """Merge a set of human curations with a set of automatically generated
-        curations, preferring the human set where possible.
+        """Merge a set of human curated resources with a set of automatically curated
+        resources, preferring the human set where possible.
 
         Note that the output is not guaranteed to be conflict free - consider calling
-        :meth:`~.verify_curation_set_integrity`.
+        :meth:`~.verify_resource_set_integrity`.
 
-        :param human_curations:
-        :param autocurations:
-        :param path: if provided, report any curations with discrepancies (such as where
-            an automatically generated curation contains more synonyms than the human
-            equivalent). Also report any superfluous and obsolete human curations
+        :param human_curated_resources:
+        :param autocurated_resources:
+        :param path: if provided, report any resources with discrepancies (such as where
+            an automatically curated resource contains more synonyms than the human
+            equivalent). Also report any superfluous and obsolete human curated resources.
         :return:
         """
-        # normalisation errors should have already been checked with self.verify_curation_set_integrity before calling this
+        # normalisation errors should have already been checked with self.verify_resource_set_integrity before calling this
 
         obsolete_human_set = set()
-        curations_with_discrepancies = set()
-        superfluous_human_curations = human_curations.intersection(autocurations)
-        effective_human_curations = human_curations.difference(autocurations)
+        resources_with_discrepancies = set()
+        superfluous_human_curations = human_curated_resources.intersection(autocurated_resources)
+        effective_human_curations = human_curated_resources.difference(autocurated_resources)
         human_by_term_norm = {
-            curation.term_norm_for_linking(self.entity_class): curation
-            for curation in human_curations
+            resource.term_norm_for_linking(self.entity_class): resource
+            for resource in human_curated_resources
         }
         default_by_term_norm = {
-            curation.term_norm_for_linking(self.entity_class): curation
-            for curation in autocurations
+            resource.term_norm_for_linking(self.entity_class): resource
+            for resource in autocurated_resources
         }
 
         working_dict = {}
-        for default_term_norm, default_curation in default_by_term_norm.items():
+        for default_term_norm, default_resource in default_by_term_norm.items():
 
             maybe_human_curation = human_by_term_norm.pop(default_term_norm, None)
             if maybe_human_curation is None:
-                working_dict[default_term_norm] = default_curation
+                working_dict[default_term_norm] = default_resource
             else:
                 working_dict[default_term_norm] = maybe_human_curation
                 # check the set of strings are equivalent. Otherwise new ones may have been created by syn generation
                 if set(syn.string for syn in maybe_human_curation.original_synonyms) != set(
-                    syn.string for syn in default_curation.original_synonyms
+                    syn.string for syn in default_resource.original_synonyms
                 ) or set(syn.string for syn in maybe_human_curation.alternative_synonyms) != set(
-                    syn.string for syn in default_curation.alternative_synonyms
+                    syn.string for syn in default_resource.alternative_synonyms
                 ):
-                    curations_with_discrepancies.add(
+                    resources_with_discrepancies.add(
                         (
                             maybe_human_curation,
-                            default_curation,
+                            default_resource,
                         )
                     )
 
@@ -565,35 +565,35 @@ class OntologyStringConflictAnalyser:
         if path is not None:
             path_ = as_path(path)
             if obsolete_human_set:
-                dump_curated_terms(
+                dump_ontology_string_resources(
                     obsolete_human_set,
                     path_.joinpath("obsolete_human_curations_set.jsonl"),
                     force=True,
                 )
             if superfluous_human_curations:
-                dump_curated_terms(
+                dump_ontology_string_resources(
                     superfluous_human_curations,
                     path_.joinpath("superfluous_human_curations_set.jsonl"),
                     force=True,
                 )
             if effective_human_curations:
-                dump_curated_terms(
+                dump_ontology_string_resources(
                     effective_human_curations,
                     path_.joinpath("effective_human_curations.jsonl"),
                     force=True,
                 )
-            if curations_with_discrepancies:
+            if resources_with_discrepancies:
                 with path_.joinpath("human_curations_with_synonym_discrepancies_set.jsonl").open(
                     mode="w"
                 ) as jsonlf:
                     for (
                         human_curation,
-                        default_curation,
-                    ) in curations_with_discrepancies:
+                        default_resource,
+                    ) in resources_with_discrepancies:
                         jsonlf.write("HUMAN:" + "\n")
                         jsonlf.write(human_curation.to_json() + "\n")
                         jsonlf.write("DEFAULT:" + "\n")
-                        jsonlf.write(default_curation.to_json() + "\n")
+                        jsonlf.write(default_resource.to_json() + "\n")
                         jsonlf.write("\n\n")
 
         return set(working_dict.values())
@@ -606,8 +606,8 @@ class CurationModificationResult(AutoNameEnum):
     NO_ACTION = auto()
 
 
-class CurationProcessor:
-    """A CurationProcessor is responsible for modifying the set of
+class OntologyResourceProcessor:
+    """A OntologyResourceProcessor is responsible for modifying the set of
     :class:`.SynonymTerm`\\s produced by an
     :class:`kazu.ontology_preprocessing.base.OntologyParser` with any relevant
     :class:`.GlobalParserActions` and/or :class:`.OntologyStringResource` associated
@@ -617,20 +617,20 @@ class CurationProcessor:
     internal database representation.
     """
 
-    # curations are applied in the following order
-    CURATION_APPLY_ORDER = (
+    # OntologyStringBehaviours are applied in the following order
+    BEHAVIOUR_APPLICATION_ORDER = (
         OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
         OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
     )
-    _BEHAVIOUR_TO_ORDER_INDEX = {behav: i for i, behav in enumerate(CURATION_APPLY_ORDER)}
+    _BEHAVIOUR_TO_ORDER_INDEX = {behav: i for i, behav in enumerate(BEHAVIOUR_APPLICATION_ORDER)}
 
     def __init__(
         self,
         parser_name: str,
         entity_class: str,
         global_actions: Optional[GlobalParserActions],
-        curations: list[OntologyStringResource],
+        resources: list[OntologyStringResource],
         synonym_terms: set[SynonymTerm],
     ):
         """
@@ -638,7 +638,7 @@ class CurationProcessor:
         :param parser_name: name of parser to process
         :param entity_class: name of parser entity_class to process (typically as passed to :class:`kazu.ontology_preprocessing.base.OntologyParser`\\ )
         :param global_actions:
-        :param curations:
+        :param resources:
         :param synonym_terms:
         """
         self.global_actions = global_actions
@@ -648,19 +648,19 @@ class CurationProcessor:
         self._terms_by_id: defaultdict[Idx, set[SynonymTerm]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
-        self.curations = set(curations)
+        self.resources = set(resources)
         self.dropped_keys: set[NormalisedSynonymStr] = set()
 
     @classmethod
-    def curation_sort_key(cls, curated_term: OntologyStringResource) -> tuple[int, bool]:
-        """Determines the order curations are processed in.
+    def resource_sort_key(cls, resource: OntologyStringResource) -> tuple[int, bool]:
+        """Determines the order resources are processed in.
 
         We use associated_id_sets as a key, so that any overrides will be processed
-        after any original behaviours
+        after any original behaviours.
         """
         return (
-            cls._BEHAVIOUR_TO_ORDER_INDEX[curated_term.behaviour],
-            curated_term.associated_id_sets is not None,
+            cls._BEHAVIOUR_TO_ORDER_INDEX[resource.behaviour],
+            resource.associated_id_sets is not None,
         )
 
     def _update_term_lookups(
@@ -839,7 +839,7 @@ class CurationProcessor:
             result = CurationModificationResult.SYNONYM_TERM_DROPPED
         return result
 
-    def export_curations_and_final_terms(
+    def export_resources_and_final_terms(
         self,
     ) -> tuple[list[OntologyStringResource], set[SynonymTerm]]:
         """Perform any updates required to the synonym terms as specified in the
@@ -851,37 +851,36 @@ class CurationProcessor:
         :return:
         """
         self._process_global_actions()
-        return list(self._process_curations()), set(self._terms_by_term_norm.values())
+        return list(self._process_resources()), set(self._terms_by_term_norm.values())
 
-    def _process_curations(self) -> Iterable[OntologyStringResource]:
-        for curation in sorted(self.curations, key=self.curation_sort_key):
-            curation = self._process_curation_action(curation)
-            yield curation
+    def _process_resources(self) -> Iterable[OntologyStringResource]:
+        for resource in sorted(self.resources, key=self.resource_sort_key):
+            yield self._process_resource_action(resource)
 
-    def _process_curation_action(self, curation: OntologyStringResource) -> OntologyStringResource:
+    def _process_resource_action(self, resource: OntologyStringResource) -> OntologyStringResource:
 
-        if curation.behaviour is OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
-            self._drop_synonym_term(curation.term_norm_for_linking(self.entity_class))
-        elif curation.behaviour is OntologyStringBehaviour.ADD_FOR_LINKING_ONLY:
-            self._attempt_to_add_database_entry_for_curated_term(
-                curation,
+        if resource.behaviour is OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
+            self._drop_synonym_term(resource.term_norm_for_linking(self.entity_class))
+        elif resource.behaviour is OntologyStringBehaviour.ADD_FOR_LINKING_ONLY:
+            self._attempt_to_add_database_entry_for_resource(
+                resource,
             )
-        elif curation.behaviour is OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING:
-            self._attempt_to_add_database_entry_for_curated_term(curation)
+        elif resource.behaviour is OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING:
+            self._attempt_to_add_database_entry_for_resource(resource)
         else:
-            raise ValueError(f"unknown behaviour for parser {self.parser_name}, {curation}")
-        return curation
+            raise ValueError(f"unknown behaviour for parser {self.parser_name}, {resource}")
+        return resource
 
     def _process_global_actions(self) -> None:
         if self.global_actions is None:
             return None
 
-        override_curations_by_id = defaultdict(set)
-        for curation in self.curations:
-            if curation.associated_id_sets is not None:
-                for equiv_id_set in curation.associated_id_sets:
+        override_resources_by_id = defaultdict(set)
+        for resource in self.resources:
+            if resource.associated_id_sets is not None:
+                for equiv_id_set in resource.associated_id_sets:
                     for idx in equiv_id_set.ids:
-                        override_curations_by_id[idx].add(curation)
+                        override_resources_by_id[idx].add(resource)
 
         for action in self.global_actions.parser_behaviour(self.parser_name):
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
@@ -903,46 +902,46 @@ class CurationProcessor:
                             counter_this_idx[CurationModificationResult.SYNONYM_TERM_DROPPED],
                         )
 
-                        for override_curation_to_modify in set(
-                            override_curations_by_id.get(idx, set())
+                        for override_resource_to_modify in set(
+                            override_resources_by_id.get(idx, set())
                         ):
-                            assert override_curation_to_modify.associated_id_sets is not None
+                            assert override_resource_to_modify.associated_id_sets is not None
                             new_associated_id_sets = self._drop_id_from_associated_id_sets(
-                                idx, override_curation_to_modify.associated_id_sets
+                                idx, override_resource_to_modify.associated_id_sets
                             )
                             if len(new_associated_id_sets) == 0:
 
-                                self.curations.remove(override_curation_to_modify)
-                                override_curations_by_id[idx].remove(override_curation_to_modify)
+                                self.resources.remove(override_resource_to_modify)
+                                override_resources_by_id[idx].remove(override_resource_to_modify)
                                 logger.debug(
-                                    "removed curation %s because of global action",
-                                    override_curation_to_modify,
+                                    "removed resource %s because of global action",
+                                    override_resource_to_modify,
                                 )
                             elif (
                                 new_associated_id_sets
-                                != override_curation_to_modify.associated_id_sets
+                                != override_resource_to_modify.associated_id_sets
                             ):
-                                self.curations.remove(override_curation_to_modify)
-                                override_curations_by_id[idx].remove(override_curation_to_modify)
-                                mod_curation = dataclasses.replace(
-                                    override_curation_to_modify,
+                                self.resources.remove(override_resource_to_modify)
+                                override_resources_by_id[idx].remove(override_resource_to_modify)
+                                mod_resource = dataclasses.replace(
+                                    override_resource_to_modify,
                                     associated_id_sets=new_associated_id_sets,
                                 )
-                                self.curations.add(mod_curation)
-                                override_curations_by_id[idx].add(mod_curation)
+                                self.resources.add(mod_resource)
+                                override_resources_by_id[idx].add(mod_resource)
                                 logger.debug(
-                                    "modified curation %s to %s because of global action",
-                                    override_curation_to_modify,
-                                    mod_curation,
+                                    "modified resource %s to %s because of global action",
+                                    override_resource_to_modify,
+                                    mod_resource,
                                 )
 
             else:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
         return None
 
-    def _attempt_to_add_database_entry_for_curated_term(
+    def _attempt_to_add_database_entry_for_resource(
         self,
-        curated_term: OntologyStringResource,
+        resource: OntologyStringResource,
     ) -> Literal[
         CurationModificationResult.SYNONYM_TERM_ADDED, CurationModificationResult.NO_ACTION
     ]:
@@ -951,8 +950,8 @@ class CurationProcessor:
 
         Notes:
 
-        If a term_norm already exists in self._terms_by_term_norm that matches 'curated_term.term_norm_for_linking',
-        this method will check to see if the 'curation_associated_id_set' matches the existing terms
+        If a term_norm already exists in self._terms_by_term_norm that matches 'resource.term_norm_for_linking',
+        this method will check to see if the 'resource_associated_id_set' matches the existing terms
         :class:`.AssociatedIdSets`\\.
 
         If so, no action will be taken. If not, a warning will be logged as adding it
@@ -961,28 +960,28 @@ class CurationProcessor:
         If the term_norm does not exist, this method will create a new :class:`~kazu.data.data.SynonymTerm`
         with the provided :class:`.AssociatedIdSets`\\.
 
-        :param curated_term:
+        :param resource:
         :return:
         """
-        log_prefix = "%(parser_name)s attempting to create synonym term for term_norm: <%(term_norm)s> curated_term: %(curated_term)s"
-        term_norm = curated_term.term_norm_for_linking(self.entity_class)
+        log_prefix = "%(parser_name)s attempting to create synonym term for term_norm: <%(term_norm)s> resource: %(resource)s"
+        term_norm = resource.term_norm_for_linking(self.entity_class)
         log_formatting_dict: dict[str, Any] = {
             "parser_name": self.parser_name,
             "term_norm": term_norm,
-            "curated_term": curated_term,
+            "resource": resource,
         }
 
         # look up the term norm in the db
         maybe_existing_synonym_term = self._terms_by_term_norm.get(term_norm)
-        curation_associated_id_set = curated_term.associated_id_sets
-        if curation_associated_id_set is None and maybe_existing_synonym_term is not None:
+        resource_associated_id_set = resource.associated_id_sets
+        if resource_associated_id_set is None and maybe_existing_synonym_term is not None:
             logger.debug(
                 log_prefix
                 + " but no associated id set provided, so term will inherit the parser defaults",
                 log_formatting_dict,
             )
             return CurationModificationResult.NO_ACTION
-        elif curation_associated_id_set is None and maybe_existing_synonym_term is None:
+        elif resource_associated_id_set is None and maybe_existing_synonym_term is None:
             logger.error(
                 log_prefix
                 + " but term_norm <%(term_norm)s> does not exist in synonym database."
@@ -991,12 +990,12 @@ class CurationProcessor:
             )
             return CurationModificationResult.NO_ACTION
 
-        # curation_associated_id_set is implicitly not None
-        assert curation_associated_id_set is not None
-        if len(curation_associated_id_set) == 0:
+        # resource_associated_id_set is implicitly not None
+        assert resource_associated_id_set is not None
+        if len(resource_associated_id_set) == 0:
             logger.debug(
                 "all ids removed by global action for %s,  Parser name: %s",
-                curated_term,
+                resource,
                 self.parser_name,
             )
             return CurationModificationResult.NO_ACTION
@@ -1006,7 +1005,7 @@ class CurationProcessor:
 
             if (
                 len(
-                    curation_associated_id_set.symmetric_difference(
+                    resource_associated_id_set.symmetric_difference(
                         maybe_existing_synonym_term.associated_id_sets
                     )
                 )
@@ -1027,28 +1026,28 @@ class CurationProcessor:
                 )
 
         # no term exists, or we want to override so one will be made
-        assert curation_associated_id_set is not None
-        for equiv_id_set in set(curation_associated_id_set):
+        assert resource_associated_id_set is not None
+        for equiv_id_set in set(resource_associated_id_set):
             for idx in equiv_id_set.ids:
                 if idx not in self._terms_by_id:
-                    curation_associated_id_set = self._drop_id_from_associated_id_sets(
-                        id_to_drop=idx, associated_id_sets=curation_associated_id_set
+                    resource_associated_id_set = self._drop_id_from_associated_id_sets(
+                        id_to_drop=idx, associated_id_sets=resource_associated_id_set
                     )
                     logger.warning(
                         "Attempted to add term containing %s but this id does not exist in the parser and will be ignored",
                         idx,
                     )
-        if len(curation_associated_id_set) > 0:
+        if len(resource_associated_id_set) > 0:
             is_symbolic = any(
                 StringNormalizer.classify_symbolic(syn.string, self.entity_class)
-                for syn in curated_term.original_synonyms
+                for syn in resource.original_synonyms
             )
             new_term = SynonymTerm(
                 term_norm=term_norm,
-                terms=frozenset(term.string for term in curated_term.original_synonyms),
+                terms=frozenset(term.string for term in resource.original_synonyms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
-                associated_id_sets=curation_associated_id_set,
+                associated_id_sets=resource_associated_id_set,
                 parser_name=self.parser_name,
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )

@@ -29,7 +29,7 @@ def check_generator_result(
     generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
 ):
     if isinstance(generator, CombinatorialSynonymGenerator):
-        curated_term = OntologyStringResource(
+        resource = OntologyStringResource(
             original_synonyms=frozenset(
                 [
                     Synonym(
@@ -41,7 +41,7 @@ def check_generator_result(
             ),
             behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         )
-        generated_terms = generator({curated_term})
+        generated_terms = generator({resource})
         new_syns = {s for term in generated_terms for s in term.all_strings()}
 
     else:

@@ -55,8 +55,8 @@ def test_initialize():
 @pytest.mark.parametrize(STRINGMATCHING_PARAM_NAMES, STRINGMATCHING_PARAM_VALUES)
 def test_pipeline_build_from_parsers_and_curated_list(
     tmp_path,
-    parser_1_curations,
-    parser_2_curations,
+    parser_1_resources,
+    parser_2_resources,
     match_len,
     match_texts,
     match_ontology_data,
@@ -67,15 +67,15 @@ def test_pipeline_build_from_parsers_and_curated_list(
 ):
 
     Singleton.clear_all()
-    TEST_CURATIONS_PATH_PARSER_1 = tmp_path / "parser1_curated_terms.jsonl"
-    TEST_CURATIONS_PATH_PARSER_2 = tmp_path / "parser2_curated_terms.jsonl"
-    write_curations(path=TEST_CURATIONS_PATH_PARSER_1, terms=parser_1_curations)
-    write_curations(path=TEST_CURATIONS_PATH_PARSER_2, terms=parser_2_curations)
+    TEST_RESOURCES_PATH_PARSER_1 = tmp_path / "parser1_resources.jsonl"
+    TEST_RESOURCES_PATH_PARSER_2 = tmp_path / "parser2_resources.jsonl"
+    write_curations(path=TEST_RESOURCES_PATH_PARSER_1, terms=parser_1_resources)
+    write_curations(path=TEST_RESOURCES_PATH_PARSER_2, terms=parser_2_resources)
     parser_1 = DummyParser(
         name=FIRST_MOCK_PARSER,
         entity_class=parser_1_ent_type,
         source=FIRST_MOCK_PARSER,
-        curations_path=str(TEST_CURATIONS_PATH_PARSER_1),
+        curations_path=str(TEST_RESOURCES_PATH_PARSER_1),
         data=parser_1_data,
         autocurator=ignore_all_by_default_autocurator_factory(),
     )
@@ -83,7 +83,7 @@ def test_pipeline_build_from_parsers_and_curated_list(
         name="second_mock_parser",
         entity_class=parser_2_ent_type,
         source=SECOND_MOCK_PARSER,
-        curations_path=str(TEST_CURATIONS_PATH_PARSER_2),
+        curations_path=str(TEST_RESOURCES_PATH_PARSER_2),
         data=parser_2_data,
         autocurator=ignore_all_by_default_autocurator_factory(),
     )

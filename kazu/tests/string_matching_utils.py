@@ -87,7 +87,7 @@ PARSER_2_DEFAULT_DATA = {
     MAPPING_TYPE: ["test", "test", "test", "test"],
 }
 
-FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = OntologyStringResource(
+FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE = OntologyStringResource(
     original_synonyms=frozenset(
         [
             Synonym(
@@ -114,8 +114,8 @@ FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = OntologyStringResource(
     ),
 )
 
-SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM = dataclasses.replace(
-    FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE = dataclasses.replace(
+    FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE,
     associated_id_sets=frozenset(
         [
             EquivalentIdSet(
@@ -144,8 +144,8 @@ STRINGMATCHING_EXAMPLE_TEXT = """There is a Q42_ID and Q42_syn in this sentence,
 @dataclasses.dataclass
 class StringMatchingTestCase:
     id: str
-    parser_1_curations: list[OntologyStringResource]
-    parser_2_curations: list[OntologyStringResource]
+    parser_1_resources: list[OntologyStringResource]
+    parser_2_resources: list[OntologyStringResource]
     match_len: int
     match_texts: set[str]
     match_ontology_data: MatchOntologyData
@@ -166,9 +166,9 @@ STRINGMATCHING_PARAM_NAMES = tuple(
 
 TESTCASES = [
     StringMatchingTestCase(
-        id="Two curated case insensitive terms from two parsers Both should hit",
-        parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        parser_2_curations=[SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
+        id="Two case insensitive terms from two parsers Both should hit",
+        parser_1_resources=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
+        parser_2_resources=[SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
         match_len=2,
         match_texts={"ComplexVII Disease\u03B1"},
         match_ontology_data={
@@ -187,14 +187,14 @@ TESTCASES = [
         },
     ),
     StringMatchingTestCase(
-        id="Two curated terms from two parsers One should hit to test case sensitivity",
-        parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        parser_2_curations=[
+        id="Two resources from two parsers One should hit to test case sensitivity",
+        parser_1_resources=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
+        parser_2_resources=[
             dataclasses.replace(
-                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE,
                 original_synonyms=frozenset(
                     dataclasses.replace(orig_syn, case_sensitive=True)
-                    for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
+                    for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE.original_synonyms
                 ),
             )
         ],
@@ -210,11 +210,11 @@ TESTCASES = [
         },
     ),
     StringMatchingTestCase(
-        id="Two curated terms from two parsers One should hit to test ADD_FOR_LINKING_ONLY logic",
-        parser_1_curations=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM],
-        parser_2_curations=[
+        id="Two resources from two parsers One should hit to test ADD_FOR_LINKING_ONLY logic",
+        parser_1_resources=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
+        parser_2_resources=[
             dataclasses.replace(
-                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+                SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE,
                 behaviour=OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
             )
         ],
@@ -230,17 +230,17 @@ TESTCASES = [
         },
     ),
     StringMatchingTestCase(
-        id="One curated term with a novel synonym This should be added to the synonym DB and hit",
-        parser_1_curations=[
+        id="One resource with a novel synonym This should be added to the synonym DB and hit",
+        parser_1_resources=[
             dataclasses.replace(
-                FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_TERM,
+                FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE,
                 original_synonyms=frozenset(
                     dataclasses.replace(orig_syn, string="This sentence is just to test")
-                    for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_TERM.original_synonyms
+                    for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE.original_synonyms
                 ),
             )
         ],
-        parser_2_curations=[],
+        parser_2_resources=[],
         match_len=1,
         match_texts={"This sentence is just to test"},
         match_ontology_data={

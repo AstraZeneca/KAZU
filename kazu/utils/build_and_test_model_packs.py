@@ -310,10 +310,10 @@ class ModelPackBuilder:
 
     def create_global_string_match_conflict_report(self, cfg: DictConfig) -> None:
 
-        curation_to_parser_name = {}
+        resource_to_parser_name = {}
         for parser in instantiate(cfg.ontologies.parsers).values():
-            for curation in parser.populate_databases(return_curations=True):
-                curation_to_parser_name[curation] = parser.name
+            for resource in parser.populate_databases(return_resources=True):
+                resource_to_parser_name[resource] = parser.name
 
         from kazu.ontology_preprocessing.curation_utils import (
             OntologyStringConflictAnalyser,
@@ -321,18 +321,18 @@ class ModelPackBuilder:
 
         (
             case_conflicts,
-            clean_curations,
-        ) = OntologyStringConflictAnalyser.check_for_case_conflicts_across_curations(
-            curation_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
+            _clean_resources,
+        ) = OntologyStringConflictAnalyser.check_for_case_conflicts_across_resources(
+            resource_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 
-        curations_path = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_FN)
-        with curations_path.open(mode="w") as jsonlf:
+        global_conflict_report_path = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_FN)
+        with global_conflict_report_path.open(mode="w") as jsonlf:
             for conflict_set in case_conflicts:
                 result = defaultdict(list)
-                for curation in conflict_set:
-                    result[curation_to_parser_name[curation]].append(
-                        curation.to_dict(preserve_structured_object_id=False)
+                for resource in conflict_set:
+                    result[resource_to_parser_name[resource]].append(
+                        resource.to_dict(preserve_structured_object_id=False)
                     )
                 jsonlf.write(json.dumps(result) + "\n")
 

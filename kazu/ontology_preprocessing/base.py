@@ -22,10 +22,10 @@ from kazu.database.in_memory_db import (
 from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.autocuration import AutoCurator
 from kazu.ontology_preprocessing.curation_utils import (
-    CurationProcessor,
+    OntologyResourceProcessor,
     OntologyStringConflictAnalyser,
-    load_curated_terms,
-    dump_curated_terms,
+    load_ontology_string_resources,
+    dump_ontology_string_resources,
     CurationError,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
@@ -33,7 +33,7 @@ from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import (
     as_path,
-    syn_terms_to_curations,
+    syn_terms_to_ontology_string_resources,
     PathLike,
 )
 
@@ -131,7 +131,7 @@ class OntologyParser(ABC):
             determines what the default behaviour for a :class:`~.SynonymTerm` should be. For example, "Ignore
             any strings shorter than two characters or longer than 50 characters", or "use case sensitive matching when
             the SynonymTerm is symbolic"
-        :param curations_path: path to jsonl file of :class:`~.OntologyStringResource`\\s to override the defaults of the parser.
+        :param curations_path: path to jsonl file of human-curated :class:`~.OntologyStringResource`\\s to override the defaults of the parser.
         :param global_actions: path to json file of :class:`~.GlobalParserActions` to apply to the parser.
         :param run_upgrade_report: Use when upgrading the version of the underlying data. When True, reports novel and
             obsolete terms in the model pack directory. Note that this will overwrite the default
@@ -144,7 +144,7 @@ class OntologyParser(ABC):
         self.in_path = as_path(in_path)
         self.entity_class = entity_class
         self.name = name
-        self.ontology_autocuration_set_path = self.in_path.parent.joinpath(
+        self.ontology_auto_generated_resources_set_path = self.in_path.parent.joinpath(
             f"{self.name}{_ONTOLOGY_DEFAULTS_FILENAME}"
         )
         if string_scorer is None:
@@ -384,55 +384,57 @@ class OntologyParser(ABC):
         metadata = metadata_df.to_dict(orient="index")
         return cast(dict[str, dict[str, SimpleValue]], metadata)
 
-    def process_curations(
+    def process_resources(
         self, terms: set[SynonymTerm]
     ) -> tuple[Optional[list[OntologyStringResource]], set[SynonymTerm]]:
-        if not self.ontology_autocuration_set_path.exists() or self.run_upgrade_report:
-            clean_curations = self.generate_clean_default_curations(
+        if not self.ontology_auto_generated_resources_set_path.exists() or self.run_upgrade_report:
+            clean_resources = self.generate_clean_default_resources(
                 terms, upgrade_report=self.run_upgrade_report
             )
 
         else:
-            clean_curations = None
+            clean_resources = None
 
-        clean_curations = self.build_curation_report(clean_curations)
+        clean_resources = self.build_curation_report(clean_resources)
 
-        curation_processor = CurationProcessor(
+        curation_processor = OntologyResourceProcessor(
             global_actions=self.global_actions,
-            curations=list(clean_curations),
+            resources=list(clean_resources),
             parser_name=self.name,
             entity_class=self.entity_class,
             synonym_terms=terms,
         )
-        return curation_processor.export_curations_and_final_terms()
+        return curation_processor.export_resources_and_final_terms()
 
     def build_curation_report(
-        self, maybe_autocuration_set_clean: Optional[set[OntologyStringResource]]
+        self, maybe_auto_generated_resources_clean: Optional[set[OntologyStringResource]]
     ) -> set[OntologyStringResource]:
-        if maybe_autocuration_set_clean is None:
-            autocuration_set_clean = load_curated_terms(self.ontology_autocuration_set_path)
+        if maybe_auto_generated_resources_clean is None:
+            auto_generated_resources_clean = load_ontology_string_resources(
+                self.ontology_auto_generated_resources_set_path
+            )
         else:
-            autocuration_set_clean = maybe_autocuration_set_clean
+            auto_generated_resources_clean = maybe_auto_generated_resources_clean
         if self.curations_path is None:
             logger.warning(
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
                 self.name,
             )
-            return autocuration_set_clean
+            return auto_generated_resources_clean
 
         elif self.curations_path.exists():
             logger.info(
                 "%s curations file found",
                 self.name,
             )
-            human_curation_set = load_curated_terms(self.curations_path)
+            human_curation_set = load_ontology_string_resources(self.curations_path)
         else:
             raise RuntimeError(f"curations not found for {self.name} at {self.curations_path}")
 
         if not self.run_curation_report:
             curation_report_path = None
             human_curation_set_report_path = None
-            human_and_autocuration_set_conflict_report_path = None
+            human_and_auto_generated_resources_conflict_report_path = None
         else:
             curation_report_path = as_path(self.in_path).parent.joinpath(
                 f"{self.name}{_CURATION_REPORT_FILENAME}"
@@ -445,20 +447,20 @@ class OntologyParser(ABC):
                 "human_curation_conflict_report"
             )
             human_curation_set_report_path.mkdir()
-            human_and_autocuration_set_conflict_report_path = curation_report_path.joinpath(
+            human_and_auto_generated_resources_conflict_report_path = curation_report_path.joinpath(
                 "active_term_conflict_report"
             )
-            human_and_autocuration_set_conflict_report_path.mkdir()
+            human_and_auto_generated_resources_conflict_report_path.mkdir()
 
             logger.info(
-                "%s reporting discrepancies in human curation set and autocuration set",
+                "%s reporting discrepancies in human curation set and auto generated resources",
                 self.name,
             )
 
         # set autofix to false so that issues are reported
         conflict_analyser = OntologyStringConflictAnalyser(self.entity_class, autofix=False)
 
-        human_curation_report = conflict_analyser.verify_curation_set_integrity(
+        human_curation_report = conflict_analyser.verify_resource_set_integrity(
             human_curation_set, path=human_curation_set_report_path
         )
 
@@ -471,21 +473,21 @@ class OntologyParser(ABC):
                 f"{human_curation_set_report_path})"
             )
 
-        merged_set = conflict_analyser.merge_human_and_auto_curations(
-            human_curations=human_curation_report.clean_curations,
-            autocurations=autocuration_set_clean,
+        merged_set = conflict_analyser.merge_human_and_auto_resources(
+            human_curated_resources=human_curation_report.clean_resources,
+            autocurated_resources=auto_generated_resources_clean,
             path=curation_report_path,
         )
 
-        human_and_autocuration_set_merged_curation_report = (
-            conflict_analyser.verify_curation_set_integrity(
-                merged_set, path=human_and_autocuration_set_conflict_report_path
+        human_and_auto_generated_resources_merged_curation_report = (
+            conflict_analyser.verify_resource_set_integrity(
+                merged_set, path=human_and_auto_generated_resources_conflict_report_path
             )
         )
 
-        return human_and_autocuration_set_merged_curation_report.clean_curations
+        return human_and_auto_generated_resources_merged_curation_report.clean_resources
 
-    def generate_clean_default_curations(
+    def generate_clean_default_resources(
         self, terms: set[SynonymTerm], upgrade_report: bool = False
     ) -> set[OntologyStringResource]:
         """
@@ -495,37 +497,41 @@ class OntologyParser(ABC):
         :return:
         """
         logger.info(
-            "%s clean default curation build triggered. This may take some time.",
+            "%s clean default resources build triggered. This may take some time.",
             self.name,
         )
 
-        new_version_autocuration_set = self._generate_dirty_default_curations(terms)
+        new_version_auto_generated_resources = self._generate_dirty_default_resources(terms)
 
-        # autofix is true, to ensure a clean set of curations
+        # autofix is true, to ensure a clean set of resources
         conflict_analyser = OntologyStringConflictAnalyser(self.entity_class, autofix=True)
-        new_version_autocuration_set_clean = conflict_analyser.verify_curation_set_integrity(
-            new_version_autocuration_set
-        ).clean_curations
+        new_version_auto_generated_resources_clean = (
+            conflict_analyser.verify_resource_set_integrity(
+                new_version_auto_generated_resources
+            ).clean_resources
+        )
 
         if upgrade_report:
-            if not self.ontology_autocuration_set_path.exists():
+            if not self.ontology_auto_generated_resources_set_path.exists():
                 raise RuntimeError(
-                    f"{self.name} previous version autocuration set not found when asked to build upgrade report, so comparison is not possible.",
+                    f"{self.name} previous version autogenerated resources not found when asked to build upgrade report, so comparison is not possible.",
                 )
             else:
                 upgrade_report_path = self._create_upgrade_report_path()
-                previous_version_autocuration_set_clean = self._back_up_previous_curation_file(
-                    upgrade_report_path
+                previous_version_auto_generated_resources_clean = (
+                    self._back_up_previous_resources_file(upgrade_report_path)
                 )
 
         # note, this should run after we've loaded/backed up the previous version set, if required!
         logger.info(
-            "%s updating autocuration set in model pack: %s",
+            "%s updating auto generated resources in model pack: %s",
             self.name,
-            self.ontology_autocuration_set_path,
+            self.ontology_auto_generated_resources_set_path,
         )
-        dump_curated_terms(
-            new_version_autocuration_set_clean, self.ontology_autocuration_set_path, force=True
+        dump_ontology_string_resources(
+            new_version_auto_generated_resources_clean,
+            self.ontology_auto_generated_resources_set_path,
+            force=True,
         )
 
         if upgrade_report:
@@ -534,25 +540,25 @@ class OntologyParser(ABC):
                 self.name,
                 upgrade_report_path,
             )
-            novel_set = new_version_autocuration_set_clean.difference(
-                previous_version_autocuration_set_clean
+            novel_set = new_version_auto_generated_resources_clean.difference(
+                previous_version_auto_generated_resources_clean
             )
             if novel_set:
-                dump_curated_terms(
+                dump_ontology_string_resources(
                     novel_set,
-                    upgrade_report_path.joinpath("novel_autocuration_terms.jsonl"),
+                    upgrade_report_path.joinpath("novel_auto_generated_resources.jsonl"),
                     force=True,
                 )
 
-                obsolete_set = previous_version_autocuration_set_clean.difference(novel_set)
+                obsolete_set = previous_version_auto_generated_resources_clean.difference(novel_set)
                 if obsolete_set:
-                    dump_curated_terms(
+                    dump_ontology_string_resources(
                         obsolete_set,
-                        upgrade_report_path.joinpath("obsolete_autocuration_terms.jsonl"),
+                        upgrade_report_path.joinpath("obsolete_auto_generated_resources.jsonl"),
                         force=True,
                     )
 
-        return new_version_autocuration_set_clean
+        return new_version_auto_generated_resources_clean
 
     def _create_upgrade_report_path(self) -> Path:
         upgrade_report_path = as_path(self.in_path).parent.joinpath(
@@ -564,37 +570,37 @@ class OntologyParser(ABC):
         upgrade_report_path.mkdir()
         return upgrade_report_path
 
-    def _back_up_previous_curation_file(
+    def _back_up_previous_resources_file(
         self, upgrade_report_path: Path
     ) -> set[OntologyStringResource]:
         logger.info(
-            "%s loading previous version autocuration set",
+            "%s loading previous version auto generated resources",
             self.name,
         )
-        previous_version_autocuration_set_clean = load_curated_terms(
-            self.ontology_autocuration_set_path
+        previous_version_auto_generated_resources_clean = load_ontology_string_resources(
+            self.ontology_auto_generated_resources_set_path
         )
         backup_path = upgrade_report_path.joinpath(
-            "old_" + self.ontology_autocuration_set_path.name
+            "old_" + self.ontology_auto_generated_resources_set_path.name
         )
         logger.info(
-            "%s backing up previous version autocuration set to %s",
+            "%s backing up previous version auto generated resources to %s",
             self.name,
             backup_path,
         )
 
-        dump_curated_terms(previous_version_autocuration_set_clean, backup_path)
-        return previous_version_autocuration_set_clean
+        dump_ontology_string_resources(previous_version_auto_generated_resources_clean, backup_path)
+        return previous_version_auto_generated_resources_clean
 
-    def _generate_dirty_default_curations(
+    def _generate_dirty_default_resources(
         self, terms: set[SynonymTerm]
     ) -> set[OntologyStringResource]:
-        """Dirty curations come directly from a set of :class:`.SynonymTerm`\\, and are
+        """Dirty resources come directly from a set of :class:`.SynonymTerm`\\, and are
         optionally further modified by synonym generation and autocuration routines.
 
         They are not guaranteed to be conflict free - hence why they are 'dirty'.
         """
-        default_term_set = syn_terms_to_curations(terms)
+        default_term_set = syn_terms_to_ontology_string_resources(terms)
         if self.synonym_generator is not None:
             logger.info(
                 "%s synonym generation configuration detected",
@@ -648,25 +654,25 @@ class OntologyParser(ABC):
         # metadata db needs to be populated before call to export_synonym_terms
         self.metadata_db.add_parser(self.name, self.entity_class, metadata)
         intermediate_synonym_terms = self.export_synonym_terms(self.name)
-        maybe_ner_curations, final_syn_terms = self.process_curations(intermediate_synonym_terms)
+        maybe_ner_resources, final_syn_terms = self.process_resources(intermediate_synonym_terms)
         self.parsed_dataframe = None  # clear the reference to save memory
 
         self.synonym_db.add_parser(self.name, final_syn_terms)
-        return maybe_ner_curations, metadata, final_syn_terms
+        return maybe_ner_resources, metadata, final_syn_terms
 
     def populate_databases(
-        self, force: bool = False, return_curations: bool = False
+        self, force: bool = False, return_resources: bool = False
     ) -> Optional[list[OntologyStringResource]]:
         """Populate the databases with the results of the parser.
 
-        Also calculates the term norms associated with any curations (if provided) which
+        Also calculates the term norms associated with any resources (if provided) which
         can then be used for Dictionary based NER
 
         :param force: do not use the cache for the ontology parser
-        :param return_curations: should processed curations be returned?
-        :return: curations if required
+        :param return_resources: should processed resources be returned?
+        :return: resources if required
         """
-        if self.name in self.synonym_db.loaded_parsers and not force and not return_curations:
+        if self.name in self.synonym_db.loaded_parsers and not force and not return_resources:
             logger.debug("parser %s already loaded.", self.name)
             return None
 
@@ -677,14 +683,14 @@ class OntologyParser(ABC):
             kazu_disk_cache.delete(self.export_synonym_terms.__cache_key__(self, self.name))
             kazu_disk_cache.delete(cache_key)
 
-        maybe_curations, metadata, final_syn_terms = self._populate_databases(self.name)
+        maybe_resources, metadata, final_syn_terms = self._populate_databases(self.name)
 
         if self.name not in self.synonym_db.loaded_parsers:
             logger.info("populating database for %s from cache", self.name)
             self.metadata_db.add_parser(self.name, self.entity_class, metadata)
             self.synonym_db.add_parser(self.name, final_syn_terms)
 
-        return maybe_curations if return_curations else None
+        return maybe_resources if return_resources else None
 
     @abstractmethod
     def parse_to_dataframe(self) -> pd.DataFrame:

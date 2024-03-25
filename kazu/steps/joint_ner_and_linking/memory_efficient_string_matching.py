@@ -50,26 +50,26 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
         logger.info("Creating ahocorasick Automaton")
         for parser in self.parsers:
-            parser_curations = parser.populate_databases(return_curations=True)
-            if parser_curations is None:
+            parser_resources = parser.populate_databases(return_resources=True)
+            if parser_resources is None:
                 logger.warning(
-                    "tried to create ahocorasick data for parser %s, but no curations are available",
+                    "tried to create ahocorasick data for parser %s, but no ontology resources are available",
                     parser.name,
                 )
                 continue
-            if len(parser_curations) == 0:
+            if len(parser_resources) == 0:
                 logger.warning(
-                    "tried to create ahocorasick data for parser %s, but no curations were produced",
+                    "tried to create ahocorasick data for parser %s, but no ontology resources were produced",
                     parser.name,
                 )
                 continue
 
-            for curation in parser_curations:
-                # a curation can have different term_norms for different parsers,
+            for resource in parser_resources:
+                # a resource can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
-                # Also, a curation may exist in multiple SynonymTerm.terms
-                term_norm = curation.term_norm_for_linking(parser.entity_class)
-                for syn in curation.active_ner_synonyms():
+                # Also, a resource may exist in multiple SynonymTerm.terms
+                term_norm = resource.term_norm_for_linking(parser.entity_class)
+                for syn in resource.active_ner_synonyms():
                     entity_key = (
                         parser.entity_class,
                         syn.mention_confidence,
@@ -86,8 +86,8 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
             case_insensitive_automaton.make_automaton()
         else:
             raise RuntimeError(
-                f"No valid curations were available for {self.__class__.__name__}. Either remove this step "
-                "from your pipeline or ensure at least one valid curation is generated from the chosen "
+                f"No valid resources were available for {self.__class__.__name__}. Either remove this step "
+                "from your pipeline or ensure at least one valid resource is generated from the chosen "
                 "parsers."
             )
 
@@ -114,7 +114,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
     ) -> list[Entity]:
         entities = []
         for end_index, ontology_dict in automaton.iter(matchable_text):
-            # all keys should have the same value for curated synonym
+            # all keys should have the same value for synonym text
             match_key = next(iter(ontology_dict.keys()))[-1]
             start_index = end_index - len(match_key) + 1
             matched_text = original_text[start_index : end_index + 1]

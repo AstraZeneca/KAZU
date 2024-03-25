@@ -154,7 +154,7 @@ class OntologyMatcher:
     ) -> tuple[Optional[PhraseMatcher], Optional[PhraseMatcher]]:
         """Create spaCy `PhraseMatcher <https://spacy.io/api/phrasematcher>`_\\s.
 
-        Curations are produced by :py:meth:`.OntologyParser.populate_databases`\\ method.
+        :class:`.OntologyStringResource`\\ s are produced by :py:meth:`.OntologyParser.populate_databases`\\ method.
 
         :param parsers:
         :return:
@@ -167,16 +167,16 @@ class OntologyMatcher:
         lowercase_matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
         logger.info("ontology matcher build triggered.")
         for parser in parsers:
-            parser_curations = parser.populate_databases(return_curations=True)
-            if parser_curations is None:
+            parser_resources = parser.populate_databases(return_resources=True)
+            if parser_resources is None:
                 logger.warning(
-                    "tried to create PhraseMatchers from Curations for parser %s, but none have been provided",
+                    "tried to create PhraseMatchers from Resources for parser %s, but none have been provided",
                     parser.name,
                 )
                 continue
-            if len(parser_curations) == 0:
+            if len(parser_resources) == 0:
                 logger.warning(
-                    "tried to create PhraseMatchers from Curations for parser %s, but no Curations were produced",
+                    "tried to create PhraseMatchers from Resources for parser %s, but no Resources were produced",
                     parser.name,
                 )
                 continue
@@ -184,12 +184,12 @@ class OntologyMatcher:
             # deduplicating match id's and patterns saves memory in the spacy pipeline
             match_ids_and_strings_cs = set()
             match_ids_and_strings_ci = set()
-            for curation in parser_curations:
-                # a curation can have different term_norms for different parsers,
+            for resource in parser_resources:
+                # a resource can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
-                # Also, a curation may exist in multiple SynonymTerm.terms
-                term_norm = curation.term_norm_for_linking(parser.entity_class)
-                for syn in curation.active_ner_synonyms():
+                # Also, a resource may exist in multiple SynonymTerm.terms
+                term_norm = resource.term_norm_for_linking(parser.entity_class)
+                for syn in resource.active_ner_synonyms():
                     match_id = (
                         parser.name
                         + self.match_id_sep
@@ -227,11 +227,6 @@ class OntologyMatcher:
     def __call__(self, doc: Doc) -> Doc:
         if self.nr_strict_rules == 0 and self.nr_lowercase_rules == 0:
             raise ValueError("there are no matcher rules configured!")
-
-        # at least one phrasematcher will now be set.
-        # normally, this will only be one: either a strict matcher if constructed by curated list,
-        # or a lowercase matcher if constructed 'from scrach' using the parsers - currently just an
-        # initial step in building a curation-based phrasematcher
 
         if self.strict_matcher is not None and self.lowercase_matcher is not None:
             matches = set(self.strict_matcher(doc)).union(set(self.lowercase_matcher(doc)))

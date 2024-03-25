@@ -193,23 +193,23 @@ def write_curations(path: Path, terms: list[OntologyStringResource]):
 
 
 # for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of terms to 'IGNORE'
-def ignore_all_action(curated_term: OntologyStringResource) -> OntologyStringResource:
+def ignore_all_action(resource: OntologyStringResource) -> OntologyStringResource:
     return dataclasses.replace(
-        curated_term,
+        resource,
         original_synonyms=frozenset(
             dataclasses.replace(syn, mention_confidence=MentionConfidence.IGNORE)
-            for syn in curated_term.original_synonyms
+            for syn in resource.original_synonyms
         ),
         alternative_synonyms=frozenset(
             dataclasses.replace(syn, mention_confidence=MentionConfidence.IGNORE)
-            for syn in curated_term.alternative_synonyms
+            for syn in resource.alternative_synonyms
         ),
     )
 
 
 def ignore_all_by_default_autocurator_factory() -> AutoCurator:
     """When testing the behaviour of human :class:`OntologyStringResource`, remember
-    that 'default' curations are always generated from a parser.
+    that 'default' resources are always generated from a parser.
 
     To ensure these do not interfere with our test, we need an autocurator function to
     disable them.

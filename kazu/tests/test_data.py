@@ -128,8 +128,8 @@ st.register_type_strategy(
 
 
 @st.composite
-def curated_term_strat_no_conflict(
-    draw: st.DrawFn, _curated_term_class: type[OntologyStringResource], /, *args, **kwargs
+def ontology_resource_strat_no_conflict(
+    draw: st.DrawFn, _resource_class: type[OntologyStringResource], /, *args, **kwargs
 ) -> OntologyStringResource:
     """This strategy ensures no error is raised in OntologyStringResource.__post__init__
     .
@@ -162,7 +162,7 @@ def curated_term_strat_no_conflict(
     return ct
 
 
-st.register_type_strategy(OntologyStringResource, curated_term_strat_no_conflict)
+st.register_type_strategy(OntologyStringResource, ontology_resource_strat_no_conflict)
 
 
 @st.composite

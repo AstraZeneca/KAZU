@@ -47,12 +47,14 @@ class CombinatorialSynonymGenerator:
     def __init__(self, synonym_generators: Iterable[SynonymGenerator]):
         self.synonym_generators: set[SynonymGenerator] = set(synonym_generators)
 
-    def __call__(self, curated_terms: set[OntologyStringResource]) -> set[OntologyStringResource]:
+    def __call__(
+        self, ontology_resources: set[OntologyStringResource]
+    ) -> set[OntologyStringResource]:
         """Takes a set of :class:`~.OntologyStringResource`\\s, and returns a new set of
         ``OntologyStringResource``\\s with generated synonyms added as
         `alternative_synonyms`.
 
-        :param curated_terms:
+        :param ontology_resources:
         :return:
         """
         synonym_gen_permutations = list(itertools.permutations(self.synonym_generators))
@@ -61,7 +63,7 @@ class CombinatorialSynonymGenerator:
         )
         final_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
         original_strings = {
-            syn.string for term in curated_terms for syn in term.active_ner_synonyms()
+            syn.string for term in ontology_resources for syn in term.active_ner_synonyms()
         }
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original terms
@@ -74,13 +76,13 @@ class CombinatorialSynonymGenerator:
             generated_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
             for generator in permutation_list:
                 # run the generator. We call list here as we modify the original list
-                for curation in tqdm(
-                    curated_terms,
+                for resource in tqdm(
+                    ontology_resources,
                     desc=f"generating synonyms for {generator.__class__.__name__}",
                 ):
 
                     for syn in list(
-                        generated_results.get(curation, curation.active_ner_synonyms())
+                        generated_results.get(resource, resource.active_ner_synonyms())
                     ):
                         new_strings = generator(syn.string)
                         for string in new_strings:
@@ -92,19 +94,19 @@ class CombinatorialSynonymGenerator:
                                 case_sensitive=syn.case_sensitive,
                                 mention_confidence=syn.mention_confidence,
                             )
-                            generated_results[curation].add(alternative_syn)
-            for curation in curated_terms:
-                final_results[curation].update(generated_results[curation])
+                            generated_results[resource].add(alternative_syn)
+            for resource in ontology_resources:
+                final_results[resource].update(generated_results[resource])
 
         for generator in self.synonym_generators:
             generator.__call__.cache_clear()
 
-        new_curations = {
-            dataclasses.replace(curation, alternative_synonyms=frozenset(alternative_synonyms))
-            for curation, alternative_synonyms in final_results.items()
+        new_resources = {
+            dataclasses.replace(resource, alternative_synonyms=frozenset(alternative_synonyms))
+            for resource, alternative_synonyms in final_results.items()
         }
 
-        return new_curations
+        return new_resources
 
 
 # TODO: this isn't used currently - do we want to try and refine it

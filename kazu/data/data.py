@@ -884,7 +884,7 @@ class OntologyStringResource:
             return term_norm
         else:
             raise RuntimeError(
-                f"multiple term norms produced by {self}. This curation should be seperated into two or more seperate items."
+                f"multiple term norms produced by {self}. This resource should be separated into two or more seperate items."
             )
 
     @staticmethod
