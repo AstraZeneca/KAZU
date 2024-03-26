@@ -640,7 +640,9 @@ class OntologyParser(ABC):
     def _populate_databases(
         self, parser_name: str
     ) -> tuple[
-        Optional[list[OntologyStringResource]], dict[str, dict[str, SimpleValue]], set[LinkingCandidate]
+        Optional[list[OntologyStringResource]],
+        dict[str, dict[str, SimpleValue]],
+        set[LinkingCandidate],
     ]:
         """Disk cacheable method that populates all databases.
 
