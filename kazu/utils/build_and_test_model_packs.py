@@ -279,7 +279,7 @@ class ModelPackBuilder:
         )
 
     if TYPE_CHECKING:
-        from kazu.pipeline.pipeline import Pipeline
+        from kazu.pipeline import Pipeline
 
     def build_caches_and_run_sanity_checks(self, cfg: DictConfig) -> "Pipeline":
         """Execute all processed required to build model pack caches.
@@ -287,7 +287,7 @@ class ModelPackBuilder:
         :param cfg:
         :return: pipeline that was used to run sanity checks
         """
-        from kazu.pipeline.pipeline import Pipeline
+        from kazu.pipeline import Pipeline
         from kazu.data.data import Document, PROCESSING_EXCEPTION
 
         pipeline: Pipeline = instantiate(cfg.Pipeline)

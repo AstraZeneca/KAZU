@@ -479,8 +479,7 @@ class Section:
 
 @dataclass(unsafe_hash=True)
 class Document:
-    """A container that is the primary input into a
-    :class:`kazu.pipeline.pipeline.Pipeline`."""
+    """A container that is the primary input into a :class:`kazu.pipeline.Pipeline`."""
 
     #: a document identifier
     idx: str = field(default_factory=lambda: uuid.uuid4().hex)

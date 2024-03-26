@@ -10,7 +10,7 @@ for text and metadata (such as entities detected by an NER step).
 
 .. include:: single_step_example.rst
 
-For convenience, and to handle additional logging/failure events, Steps can be wrapped in a :class:`kazu.pipeline.pipeline.Pipeline`\ .
+For convenience, and to handle additional logging/failure events, Steps can be wrapped in a :class:`kazu.pipeline.Pipeline`\ .
 
 For further data model documentation, please see the API docs for :class:`kazu.data.data.Entity`, :class:`kazu.data.data.LinkingCandidate` etc.
 
