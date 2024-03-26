@@ -75,9 +75,9 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                         syn.mention_confidence,
                         syn.case_sensitive,
                         term_norm,
-                        syn.string,
+                        syn.text,
                     )
-                    key_to_ontology_info[syn.string.lower()][entity_key].add(parser.name)
+                    key_to_ontology_info[syn.text.lower()][entity_key].add(parser.name)
 
         if len(key_to_ontology_info) > 0:
             case_insensitive_automaton = ahocorasick.Automaton()

@@ -60,7 +60,7 @@ def load_ontology_string_resources(
 
 
 def _term_sort_reduce(term: OntologyStringResource) -> tuple[int, str]:
-    return min((len(syn.string), syn.string) for syn in term.original_synonyms)
+    return min((len(syn.text), syn.text) for syn in term.original_synonyms)
 
 
 def batch(
@@ -250,7 +250,7 @@ class OntologyStringConflictAnalyser:
                 alt_syns_by_term_norm[term_norm].update(resource.alternative_synonyms)
                 behaviours.add(resource.behaviour)
                 for syn in resource.all_synonyms():
-                    syn_string_lower_to_confidence[syn.string.lower()].add(syn.mention_confidence)
+                    syn_string_lower_to_confidence[syn.text.lower()].add(syn.mention_confidence)
                     if syn.case_sensitive:
                         case_sensitive = True
                 if resource.associated_id_sets is not None:
@@ -272,7 +272,7 @@ class OntologyStringConflictAnalyser:
                                 syn,
                                 case_sensitive=case_sensitive,
                                 mention_confidence=min(
-                                    syn_string_lower_to_confidence[syn.string.lower()]
+                                    syn_string_lower_to_confidence[syn.text.lower()]
                                 ),
                             )
                             for syn in mergeable_original_synonyms
@@ -282,7 +282,7 @@ class OntologyStringConflictAnalyser:
                                 syn,
                                 case_sensitive=case_sensitive,
                                 mention_confidence=min(
-                                    syn_string_lower_to_confidence[syn.string.lower()]
+                                    syn_string_lower_to_confidence[syn.text.lower()]
                                 ),
                             )
                             for syn in alt_syns_by_term_norm.get(term_norm, set())
@@ -341,7 +341,7 @@ class OntologyStringConflictAnalyser:
         maybe_good_resources_by_active_syn_lower = defaultdict(set)
         for resource in resources:
             for syn in resource.all_synonyms():
-                maybe_good_resources_by_active_syn_lower[syn.string.lower()].add(resource)
+                maybe_good_resources_by_active_syn_lower[syn.text.lower()].add(resource)
 
         all_conflicts = set()
         case_conflict_subsets = set()
@@ -443,7 +443,7 @@ class OntologyStringConflictAnalyser:
         normalisation_errors = set()
         for resource in resources:
             term_norms_this_term = set(
-                StringNormalizer.normalize(original_syn.string, entity_class=self.entity_class)
+                StringNormalizer.normalize(original_syn.text, entity_class=self.entity_class)
                 for original_syn in resource.original_synonyms
             )
             if len(term_norms_this_term) > 1:
@@ -486,9 +486,9 @@ class OntologyStringConflictAnalyser:
         for resource in resources:
             for syn in resource.active_ner_synonyms():
                 if syn.case_sensitive:
-                    cs_conf_lookup[syn.string].add(syn.mention_confidence)
+                    cs_conf_lookup[syn.text].add(syn.mention_confidence)
                 else:
-                    ci_conf_lookup[syn.string.lower()].add(syn.mention_confidence)
+                    ci_conf_lookup[syn.text.lower()].add(syn.mention_confidence)
 
         for syn_string, cs_confidences in cs_conf_lookup.items():
             ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(syn_string.lower(), set())
@@ -543,10 +543,10 @@ class OntologyStringConflictAnalyser:
             else:
                 working_dict[default_term_norm] = maybe_human_curation
                 # check the set of strings are equivalent. Otherwise new ones may have been created by syn generation
-                if set(syn.string for syn in maybe_human_curation.original_synonyms) != set(
-                    syn.string for syn in default_resource.original_synonyms
-                ) or set(syn.string for syn in maybe_human_curation.alternative_synonyms) != set(
-                    syn.string for syn in default_resource.alternative_synonyms
+                if set(syn.text for syn in maybe_human_curation.original_synonyms) != set(
+                    syn.text for syn in default_resource.original_synonyms
+                ) or set(syn.text for syn in maybe_human_curation.alternative_synonyms) != set(
+                    syn.text for syn in default_resource.alternative_synonyms
                 ):
                     resources_with_discrepancies.add(
                         (
@@ -1044,12 +1044,12 @@ class OntologyResourceProcessor:
                     )
         if len(resource_associated_id_set) > 0:
             is_symbolic = any(
-                StringNormalizer.classify_symbolic(syn.string, self.entity_class)
+                StringNormalizer.classify_symbolic(syn.text, self.entity_class)
                 for syn in resource.original_synonyms
             )
             new_term = SynonymTerm(
                 term_norm=term_norm,
-                terms=frozenset(term.string for term in resource.original_synonyms),
+                terms=frozenset(term.text for term in resource.original_synonyms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
                 associated_id_sets=resource_associated_id_set,

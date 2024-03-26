@@ -63,7 +63,7 @@ class CombinatorialSynonymGenerator:
         )
         final_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
         original_strings = {
-            syn.string for term in ontology_resources for syn in term.active_ner_synonyms()
+            syn.text for term in ontology_resources for syn in term.active_ner_synonyms()
         }
         for i, permutation_list in enumerate(synonym_gen_permutations):
             # make a copy of the original terms
@@ -84,13 +84,13 @@ class CombinatorialSynonymGenerator:
                     for syn in list(
                         generated_results.get(resource, resource.active_ner_synonyms())
                     ):
-                        new_strings = generator(syn.string)
-                        for string in new_strings:
-                            if string in original_strings:
-                                logger.debug("ignoring pre-existing string: %s", string)
+                        new_strings = generator(syn.text)
+                        for new_syn_text in new_strings:
+                            if new_syn_text in original_strings:
+                                logger.debug("ignoring pre-existing string: %s", new_syn_text)
                                 continue
                             alternative_syn = Synonym(
-                                string=string,
+                                text=new_syn_text,
                                 case_sensitive=syn.case_sensitive,
                                 mention_confidence=syn.mention_confidence,
                             )

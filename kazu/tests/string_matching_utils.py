@@ -92,7 +92,7 @@ FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE = OntologyStringResource(
         [
             Synonym(
                 mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                string="complexVII disease\u03B1",
+                text="complexVII disease\u03B1",
                 case_sensitive=False,
             )
         ]
@@ -235,7 +235,7 @@ TESTCASES = [
             dataclasses.replace(
                 FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE,
                 original_synonyms=frozenset(
-                    dataclasses.replace(orig_syn, string="This sentence is just to test")
+                    dataclasses.replace(orig_syn, text="This sentence is just to test")
                     for orig_syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE.original_synonyms
                 ),
             )

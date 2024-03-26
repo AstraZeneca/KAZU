@@ -182,8 +182,8 @@ class OntologyMatcher:
                 continue
 
             # deduplicating match id's and patterns saves memory in the spacy pipeline
-            match_ids_and_strings_cs = set()
-            match_ids_and_strings_ci = set()
+            match_ids_and_text_cs = set()
+            match_ids_and_text_ci = set()
             for resource in parser_resources:
                 # a resource can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
@@ -198,23 +198,23 @@ class OntologyMatcher:
                         + str(syn.mention_confidence.value)
                     )
                     if syn.case_sensitive:
-                        match_ids_and_strings_cs.add(
+                        match_ids_and_text_cs.add(
                             (
                                 match_id,
-                                syn.string,
+                                syn.text,
                             )
                         )
                     else:
-                        match_ids_and_strings_ci.add(
+                        match_ids_and_text_ci.add(
                             (
                                 match_id,
-                                syn.string.lower(),
+                                syn.text.lower(),
                             )
                         )
 
-            for match_id, match_str in match_ids_and_strings_cs:
+            for match_id, match_str in match_ids_and_text_cs:
                 strict_matcher.add(match_id, [self.nlp.tokenizer(match_str)])
-            for match_id, match_str in match_ids_and_strings_ci:
+            for match_id, match_str in match_ids_and_text_ci:
                 lowercase_matcher.add(match_id, [self.nlp.tokenizer(match_str)])
 
         # only set the phrasematcher if we have any rules for them

@@ -15,12 +15,12 @@ def test_case_conflict_within_single_resource(autofix):
             original_synonyms=frozenset(
                 [
                     Synonym(
-                        string="hello",
+                        text="hello",
                         mention_confidence=MentionConfidence.PROBABLE,
                         case_sensitive=True,
                     ),
                     Synonym(
-                        string="Hello",
+                        text="Hello",
                         mention_confidence=MentionConfidence.PROBABLE,
                         case_sensitive=False,
                     ),
@@ -50,12 +50,12 @@ def test_case_conflict_within_single_resource(autofix):
 def test_conflict_analyser_should_merge_resources(autofix):
     expected_merged_synonyms = [
         Synonym(
-            string="hello",
+            text="hello",
             mention_confidence=MentionConfidence.PROBABLE,
             case_sensitive=True,
         ),
         Synonym(
-            string="Hello",
+            text="Hello",
             mention_confidence=MentionConfidence.POSSIBLE,
             case_sensitive=False,
         ),
@@ -89,12 +89,12 @@ def test_conflict_analyser_should_merge_resources(autofix):
 def test_case_conflict_across_multiple_resources(autofix):
     expected_merged_synonyms = [
         Synonym(
-            string="hello",
+            text="hello",
             mention_confidence=MentionConfidence.PROBABLE,
             case_sensitive=True,
         ),
         Synonym(
-            string="Hello",
+            text="Hello",
             mention_confidence=MentionConfidence.PROBABLE,
             case_sensitive=False,
         ),
@@ -144,7 +144,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         original_synonyms=frozenset(
             [
                 Synonym(
-                    string="Estrogens, conjugated synthetic a",
+                    text="Estrogens, conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=True,
                 )
@@ -156,7 +156,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         original_synonyms=frozenset(
             [
                 Synonym(
-                    string="Estrogens,conjugated synthetic a",
+                    text="Estrogens,conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=True,
                 )
@@ -169,7 +169,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         original_synonyms=frozenset(
             [
                 Synonym(
-                    string="Estrogens ,conjugated synthetic a",
+                    text="Estrogens ,conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=True,
                 )
@@ -182,7 +182,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         original_synonyms=frozenset(
             [
                 Synonym(
-                    string="Estrogens, conjugated synthetic a",
+                    text="Estrogens, conjugated synthetic a",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=False,
                 ),
@@ -194,7 +194,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         original_synonyms=frozenset(
             [
                 Synonym(
-                    string="ESTROGENS, CONJUGATED SYNTHETIC A",
+                    text="ESTROGENS, CONJUGATED SYNTHETIC A",
                     mention_confidence=MentionConfidence.PROBABLE,
                     case_sensitive=False,
                 )

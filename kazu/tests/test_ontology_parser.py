@@ -138,7 +138,7 @@ def test_should_add_synonym_term_to_parser(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -205,7 +205,7 @@ def test_should_modify_resource_from_parser_via_general_rule(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -256,7 +256,7 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -297,7 +297,7 @@ def test_should_override_id_set(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -338,7 +338,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -375,7 +375,7 @@ def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -398,7 +398,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]
@@ -424,7 +424,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
             [
                 Synonym(
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
-                    string=TARGET_SYNONYM,
+                    text=TARGET_SYNONYM,
                     case_sensitive=False,
                 )
             ]

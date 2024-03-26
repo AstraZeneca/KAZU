@@ -61,7 +61,7 @@ max_mention_test_case = StringMatchingTestCase(
                     syn,
                     mention_confidence=MentionConfidence.HIGHLY_LIKELY,
                     case_sensitive=True,
-                    string="ComplexVII Disease\u03B1",
+                    text="ComplexVII Disease\u03B1",
                 )
                 for syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE.original_synonyms
             ),

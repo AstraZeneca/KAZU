@@ -36,7 +36,7 @@ def syn_terms_to_ontology_string_resources(
             for term_str in term.terms:
                 alts.add(
                     Synonym(
-                        string=term_str,
+                        text=term_str,
                         case_sensitive=False,
                         mention_confidence=MentionConfidence.PROBABLE,
                     )

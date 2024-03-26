@@ -33,7 +33,7 @@ def check_generator_result(
             original_synonyms=frozenset(
                 [
                     Synonym(
-                        string=input_str,
+                        text=input_str,
                         mention_confidence=MentionConfidence.PROBABLE,
                         case_sensitive=False,
                     )

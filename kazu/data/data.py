@@ -758,7 +758,7 @@ class GlobalParserActions:
 
 @dataclass(frozen=True)
 class Synonym:
-    string: str
+    text: str
     case_sensitive: bool
     mention_confidence: MentionConfidence
 
@@ -792,7 +792,7 @@ class OntologyStringResource:
             original_synonyms=frozenset(
                 [
                     Synonym(
-                        string="ALL",
+                        text="ALL",
                         mention_confidence=MentionConfidence.POSSIBLE,
                         case_sensitive=True,
                     )
@@ -815,7 +815,7 @@ class OntologyStringResource:
             original_synonyms=frozenset(
                 [
                     Synonym(
-                        string="LH",
+                        text="LH",
                         mention_confidence=MentionConfidence.POSSIBLE,
                         case_sensitive=True,
                     )
@@ -835,7 +835,7 @@ class OntologyStringResource:
             original_synonyms=frozenset(
                 [
                     Synonym(
-                        string="breast carcinoma",
+                        text="breast carcinoma",
                         mention_confidence=MentionConfidence.POSSIBLE,
                         case_sensitive=True,
                     )
@@ -867,9 +867,9 @@ class OntologyStringResource:
             raise ValueError(f"no synonyms for: {self}")
         for syn in self.active_ner_synonyms():
             if syn.case_sensitive:
-                cs_syns[syn.string].add(syn.mention_confidence)
+                cs_syns[syn.text].add(syn.mention_confidence)
             else:
-                ci_syns[syn.string.lower()].add(syn.mention_confidence)
+                ci_syns[syn.text.lower()].add(syn.mention_confidence)
         for cs_syn, cs_confidences in ci_syns.items():
             ci_confidences = ci_syns.get(cs_syn.lower(), {MentionConfidence.POSSIBLE})
             if min(ci_confidences) < min(cs_confidences):
@@ -877,7 +877,7 @@ class OntologyStringResource:
 
     def term_norm_for_linking(self, entity_class: str) -> str:
         norms = set(
-            StringNormalizer.normalize(syn.string, entity_class) for syn in self.original_synonyms
+            StringNormalizer.normalize(syn.text, entity_class) for syn in self.original_synonyms
         )
         if len(norms) == 1:
             term_norm = next(iter(norms))
@@ -922,7 +922,7 @@ class OntologyStringResource:
 
     def all_strings(self) -> Iterable[str]:
         for syn in self.all_synonyms():
-            yield syn.string
+            yield syn.text
 
     def active_ner_synonyms(self) -> Iterable[Synonym]:
         if self.behaviour is OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING:

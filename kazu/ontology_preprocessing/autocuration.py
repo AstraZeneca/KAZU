@@ -16,7 +16,7 @@ class SymbolicToCaseSensitiveAction(AutoCurationAction):
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
         all_symbolic = all(
-            StringNormalizer.classify_symbolic(syn.string, entity_class=self.entity_class)
+            StringNormalizer.classify_symbolic(syn.text, entity_class=self.entity_class)
             for syn in resource.original_synonyms
         )
         if all_symbolic:
@@ -42,7 +42,7 @@ class IsCommmonWord(AutoCurationAction):
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
         found_common = (
-            all(word in self.common_words for word in syn.string.lower().split())
+            all(word in self.common_words for word in syn.text.lower().split())
             for syn in resource.original_synonyms
         )
 
@@ -68,7 +68,7 @@ class MinLength(AutoCurationAction):
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
         for syn in resource.original_synonyms:
-            if len(syn.string) < self.min_len:
+            if len(syn.text) < self.min_len:
                 return dataclasses.replace(
                     resource, behaviour=OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
                 )
@@ -83,7 +83,7 @@ class MaxLength(AutoCurationAction):
         self.max_len = max_len
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
-        if any(len(syn.string) > self.max_len for syn in resource.original_synonyms):
+        if any(len(syn.text) > self.max_len for syn in resource.original_synonyms):
             return dataclasses.replace(
                 resource, behaviour=OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
             )
@@ -104,7 +104,7 @@ def is_upper_case_word_to_case_insensitive(
     :return:
     """
 
-    if all(syn.string.isupper() and syn.string.isalpha() for syn in resource.original_synonyms):
+    if all(syn.text.isupper() and syn.text.isalpha() for syn in resource.original_synonyms):
         return dataclasses.replace(
             resource,
             original_synonyms=frozenset(
@@ -131,7 +131,7 @@ def initial_lowercase_then_upper_to_case_sensitive(
     :return:
     """
     if any(
-        len(syn.string) >= 2 and syn.string[0].islower() and syn.string[1].isupper()
+        len(syn.text) >= 2 and syn.text[0].islower() and syn.text[1].isupper()
         for syn in resource.original_synonyms
     ):
         return dataclasses.replace(
