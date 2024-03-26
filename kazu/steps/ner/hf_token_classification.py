@@ -1,11 +1,11 @@
 import logging
-from collections.abc import Iterable, Callable
+from collections.abc import Iterable, Iterator, Callable
 from functools import partial
-from typing import Optional, cast
+from typing import Optional, cast, Any
 
 import torch
 from torch import Tensor, sigmoid, softmax
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, IterableDataset
 from transformers import (
     AutoModelForTokenClassification,
     AutoConfig,
@@ -17,13 +17,39 @@ from transformers import (
 from transformers.file_utils import PaddingStrategy
 
 from kazu.data.data import Document, Section
-from kazu.data.pytorch import HFDataset
 from kazu.steps import Step, document_batch_step
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
+
+
+class HFDataset(IterableDataset[dict[str, Any]]):
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        return {
+            "input_ids": self.encodings.data["input_ids"][index],
+            "attention_mask": self.encodings.data["attention_mask"][index],
+            "token_type_ids": self.encodings.data["token_type_ids"][index],
+        }
+
+    def __init__(self, encodings: BatchEncoding):
+        """Simple implementation of :class:`torch.utils.data.IterableDataset`\\ ,
+        producing HF tokenizer input_id.
+
+        :param encodings:
+        """
+        self.encodings = encodings
+        self.dataset_size = len(encodings.data["input_ids"])
+
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+
+        for i in range(self.dataset_size):
+            yield {
+                "input_ids": self.encodings.data["input_ids"][i],
+                "attention_mask": self.encodings.data["attention_mask"][i],
+                "token_type_ids": self.encodings.data["token_type_ids"][i],
+            }
 
 
 class TransformersModelForTokenClassificationNerStep(Step):
