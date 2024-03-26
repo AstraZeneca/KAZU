@@ -32,9 +32,9 @@ senses. We could arbitrarily choose one (or both). For scenario 3, it would seem
 handle all three scenarios.
 
 Enter the Kazu :class:`.OntologyParser`. The job of the OntologyParser is to transform an Ontology or Knowledgebase
-into a set of :class:`.SynonymTerm`\ s. A :class:`.SynonymTerm` is a container for a synonym, which understands what set of IDs the
+into a set of :class:`.LinkingCandidate`\ s. A :class:`.LinkingCandidate` is a container for a synonym, which understands what set of IDs the
 synonym may refer to and whether they refer to a single group of closely related concepts or multiple separate ones. This is handled by the attribute
-:attr:`.SynonymTerm.associated_id_sets`. A :class:`.SynonymTerm` holds various other pieces of useful information
+:attr:`.LinkingCandidate.associated_id_sets`. A :class:`.LinkingCandidate` holds various other pieces of useful information
 such as whether the term is symbolic (i.e. an abbreviation or some other identifier).
 
 How does it work? When an ambiguous term is detected in the ontology, the parser must decide whether it should group the confused IDs into the same
@@ -93,8 +93,8 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
      sapbert similarity: 0.7426. Threshold: 0.70.
      Decision: merge into one instance of :class:`.EquivalentIdSet`
 
-Naturally, this behaviour may not always be desired. You may want two instances of :class:`.SynonymTerm` for the term "XLOA" (despite the MONDO ontology
-suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.SynonymTerm` is most appropriate.
+Naturally, this behaviour may not always be desired. You may want two instances of :class:`.LinkingCandidate` for the term "XLOA" (despite the MONDO ontology
+suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.LinkingCandidate` is most appropriate.
 In this case, you can override this behaviour with :meth:`.OntologyParser.score_and_group_ids`\ .
 
 .. _writing-a-custom-parser:
@@ -212,7 +212,7 @@ Finally, when we want to use our new parser, we need to give it information abou
 That's it! The datasource is now ready for integration into Kazu, and can be referenced as a linking target or elsewhere.
 
 Using "OntologyStringResource" for dictionary based matching and/or to modify an Ontology's behaviour
---------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 The data sources that Kazu users tend to concern themselves with are often a rich source of nouns that can be accurately used for
 dictionary based string matching. Naively, we might think it is sufficient to simply take all of the entity labels from an
@@ -249,7 +249,7 @@ Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` class (and co
 
 The flow of an ontology parser to handling the underlying strings is as follows:
 
-1) On first initialisation, the set of :class:`.SynonymTerm`\s an ontology produces is converted into a set of
+1) On first initialisation, the set of :class:`.LinkingCandidate`\s an ontology produces is converted into a set of
    :class:`.OntologyStringResource`. This happens via :func:`.syn_terms_to_ontology_string_resources`.
 2) If configured, the :class:`.CombinatorialSynonymGenerator` is executed to generate additional forms
    for each :class:`.OntologyStringResource`.
