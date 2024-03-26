@@ -751,9 +751,9 @@ class Synonym:
 @dataclass(frozen=True)
 class OntologyStringResource:
     """A OntologyStringResource represents the behaviour of a specific
-    :class:`.SynonymTerm` within an Ontology.
+    :class:`.LinkingCandidate` within an Ontology.
 
-    For each SynonymTerm, a default OntologyStringResource is produced with its
+    For each LinkingCandidate, a default OntologyStringResource is produced with its
     behaviour determined by an instance of
     :class:`kazu.ontology_preprocessing.autocuration.AutoCurator` and the
     :class:`kazu.ontology_preprocessing.curation_utils.OntologyStringResourceConflictAnalyser`\\.
@@ -812,7 +812,7 @@ class OntologyStringResource:
 
     Example 3:
 
-    A :class:`.SynonymTerm` has an alternative synonym not referenced in the underlying ontology, and we want to add it.
+    A :class:`.LinkingCandidate` has an alternative synonym not referenced in the underlying ontology, and we want to add it.
 
     .. code-block:: python
 
@@ -837,7 +837,7 @@ class OntologyStringResource:
     behaviour: OntologyStringBehaviour
     #: Alternative synonyms generated from the originals by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\.
     alternative_synonyms: frozenset[Synonym] = field(default_factory=frozenset)
-    #: If specified, will override the parser defaults for the associated :class:`.SynonymTerm`\, as long as conflicts do not occur
+    #: If specified, will override the parser defaults for the associated :class:`.LinkingCandidate`\, as long as conflicts do not occur
     associated_id_sets: Optional[AssociatedIdSets] = None
     _id: bson.ObjectId = field(default_factory=bson.ObjectId, compare=False)
     #: results of any decisions by the :class:`kazu.ontology_preprocessing.autocuration.AutoCurator`

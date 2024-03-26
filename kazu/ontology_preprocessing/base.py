@@ -595,8 +595,8 @@ class OntologyParser(ABC):
     def _generate_dirty_default_resources(
         self, terms: set[LinkingCandidate]
     ) -> set[OntologyStringResource]:
-        """Dirty resources come directly from a set of :class:`.SynonymTerm`\\, and are
-        optionally further modified by synonym generation and autocuration routines.
+        """Dirty resources come directly from a set of :class:`.LinkingCandidate`\\, and
+        are optionally further modified by synonym generation and autocuration routines.
 
         They are not guaranteed to be conflict free - hence why they are 'dirty'.
         """

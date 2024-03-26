@@ -91,7 +91,7 @@ class SynonymDatabase(metaclass=Singleton):
         """Add synonyms to the database.
 
         :param name: name of ontology to add to
-        :param synonyms: iterable of SynonymTerms to add
+        :param synonyms: iterable of LinkingCandidates to add
         :return:
         """
         self.loaded_parsers.add(name)

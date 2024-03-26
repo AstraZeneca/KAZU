@@ -608,12 +608,12 @@ class LinkingCandidateModificationResult(AutoNameEnum):
 
 class OntologyResourceProcessor:
     """A OntologyResourceProcessor is responsible for modifying the set of
-    :class:`.SynonymTerm`\\s produced by an
+    :class:`.LinkingCandidate`\\s produced by an
     :class:`kazu.ontology_preprocessing.base.OntologyParser` with any relevant
     :class:`.GlobalParserActions` and/or :class:`.OntologyStringResource` associated
     with the parser.
 
-    This class should be used before instances of :class:`.SynonymTerm`\\s are loaded into the
+    This class should be used before instances of :class:`.LinkingCandidate`\\s are loaded into the
     internal database representation.
     """
 
@@ -741,9 +741,9 @@ class OntologyResourceProcessor:
             LinkingCandidateModificationResult.NO_ACTION,
         ]
     ]:
-        """Remove a given id from all :class:`.SynonymTerm`\\ s.
+        """Remove a given id from all :class:`.LinkingCandidate`\\ s.
 
-        Drop any :class:`.SynonymTerm`\\ s with no remaining ID after removal.
+        Drop any :class:`.LinkingCandidate`\\ s with no remaining ID after removal.
 
         :param id_to_drop:
         :return:
@@ -764,7 +764,7 @@ class OntologyResourceProcessor:
         LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
-        """Remove an id from a given :class:`.SynonymTerm`\\ .
+        """Remove an id from a given :class:`.LinkingCandidate`\\ .
 
         :param id_to_drop:
         :param term_to_modify:
@@ -809,8 +809,8 @@ class OntologyResourceProcessor:
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
         LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
     ]:
-        """Modifies or drops a :class:`.SynonymTerm` after a :class:`.AssociatedIdSets`
-        has changed.
+        """Modifies or drops a :class:`.LinkingCandidate` after a
+        :class:`.AssociatedIdSets` has changed.
 
         :param new_associated_id_sets:
         :param synonym_term:
@@ -848,7 +848,7 @@ class OntologyResourceProcessor:
         curations/global actions.
 
         The returned :class:`.OntologyStringResource`\\s can be used for Dictionary based NER, whereas the
-        returned :class:`.SynonymTerm`\\s can be loaded into the internal database for linking.
+        returned :class:`.LinkingCandidate`\\s can be loaded into the internal database for linking.
 
         :return:
         """
@@ -897,7 +897,7 @@ class OntologyResourceProcessor:
                         logger.warning("failed to drop %s from %s", idx, self.parser_name)
                     else:
                         logger.debug(
-                            "dropped ID %s from %s. SynonymTerm modified count: %s, SynonymTerm dropped count: %s",
+                            "dropped ID %s from %s. LinkingCandidate modified count: %s, LinkingCandidate dropped count: %s",
                             idx,
                             self.parser_name,
                             counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED],
@@ -950,8 +950,8 @@ class OntologyResourceProcessor:
         LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
-        """Create a new :class:`~kazu.data.data.SynonymTerm` for the database, or return
-        an existing matching one if already present.
+        """Create a new :class:`~kazu.data.data.LinkingCandidate` for the database, or
+        return an existing matching one if already present.
 
         Notes:
 
@@ -962,7 +962,7 @@ class OntologyResourceProcessor:
         If so, no action will be taken. If not, a warning will be logged as adding it
         will cause irregularities in the database.
 
-        If the term_norm does not exist, this method will create a new :class:`~kazu.data.data.SynonymTerm`
+        If the term_norm does not exist, this method will create a new :class:`~kazu.data.data.LinkingCandidate`
         with the provided :class:`.AssociatedIdSets`\\.
 
         :param resource:
@@ -1019,7 +1019,7 @@ class OntologyResourceProcessor:
                 logger.debug(
                     log_prefix
                     + " but term_norm <%(term_norm)s> already exists in synonym database."
-                    + "since this SynonymTerm matches the id_set, no action is required. %(existing_id_set)s",
+                    + "since this LinkingCandidate matches the id_set, no action is required. %(existing_id_set)s",
                     log_formatting_dict,
                 )
                 return LinkingCandidateModificationResult.NO_ACTION

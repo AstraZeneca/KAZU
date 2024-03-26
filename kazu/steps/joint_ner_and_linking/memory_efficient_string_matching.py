@@ -67,7 +67,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
             for resource in parser_resources:
                 # a resource can have different term_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
-                # Also, a resource may exist in multiple SynonymTerm.terms
+                # Also, a resource may exist in multiple LinkingCandidate.terms
                 term_norm = resource.term_norm_for_linking(parser.entity_class)
                 for syn in resource.active_ner_synonyms():
                     entity_key = (

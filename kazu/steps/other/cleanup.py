@@ -92,7 +92,7 @@ class DropUnmappedEntityFilter:
             )
 
 
-class SynonymTermRemovalCleanupAction:
+class LinkingCandidateRemovalCleanupAction:
     def __init__(self):
         pass
 
