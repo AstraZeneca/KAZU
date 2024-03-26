@@ -13,6 +13,7 @@ from kazu.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
 )
+from kazu.ontology_preprocessing.curation_utils import dump_ontology_string_resources
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
 from kazu.steps.joint_ner_and_linking.memory_efficient_string_matching import (
     MemoryEfficientStringMatchingStep,
@@ -31,7 +32,7 @@ from kazu.tests.string_matching_utils import (
     StringMatchingTestCase,
     convert_test_case_to_param,
 )
-from kazu.tests.utils import DummyParser, write_curations, ignore_all_by_default_autocurator_factory
+from kazu.tests.utils import DummyParser, ignore_all_by_default_autocurator_factory
 from kazu.utils.utils import Singleton
 
 pytestmark = pytest.mark.usefixtures(
@@ -109,8 +110,8 @@ def test_pipeline_build_from_parsers_and_curated_list(
     Singleton.clear_all()
     TEST_RESOURCES_PATH_PARSER_1 = tmp_path / "parser1_resources.jsonl"
     TEST_RESOURCES_PATH_PARSER_2 = tmp_path / "parser2_resources.jsonl"
-    write_curations(path=TEST_RESOURCES_PATH_PARSER_1, terms=parser_1_resources)
-    write_curations(path=TEST_RESOURCES_PATH_PARSER_2, terms=parser_2_resources)
+    dump_ontology_string_resources(terms=parser_1_resources, path=TEST_RESOURCES_PATH_PARSER_1)
+    dump_ontology_string_resources(terms=parser_2_resources, path=TEST_RESOURCES_PATH_PARSER_2)
 
     parser_1 = DummyParser(
         name=FIRST_MOCK_PARSER,

@@ -1,5 +1,4 @@
 import dataclasses
-import json
 import os
 import tempfile
 from os import getenv
@@ -15,7 +14,6 @@ from kazu.data.data import (
     GlobalParserActions,
     OntologyStringResource,
     MentionConfidence,
-    kazu_json_converter,
 )
 from kazu.language.string_similarity_scorers import StringSimilarityScorer
 from kazu.ontology_preprocessing.base import (
@@ -184,12 +182,6 @@ def make_dummy_synonym_term(
         aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
         is_symbolic=True,
     )
-
-
-def write_curations(path: Path, terms: list[OntologyStringResource]):
-    with open(path, "w") as f:
-        for curation in terms:
-            f.write(json.dumps(kazu_json_converter.unstructure(curation)) + "\n")
 
 
 # for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of terms to 'IGNORE'

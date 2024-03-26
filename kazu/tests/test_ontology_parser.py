@@ -22,9 +22,13 @@ from kazu.ontology_preprocessing.base import (
     SYN,
     MAPPING_TYPE,
 )
-from kazu.ontology_preprocessing.curation_utils import load_global_actions, CurationError
+from kazu.ontology_preprocessing.curation_utils import (
+    load_global_actions,
+    dump_ontology_string_resources,
+    CurationError,
+)
 from kazu.ontology_preprocessing.parsers import GeneOntologyParser
-from kazu.tests.utils import DummyParser, write_curations
+from kazu.tests.utils import DummyParser
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import Singleton
 
@@ -74,7 +78,7 @@ def setup_databases(
     curations_path = None
     if human_curated_resources is not None:
         curations_path = base_path.joinpath("curations.jsonl")
-        write_curations(curations_path, human_curated_resources)
+        dump_ontology_string_resources(terms=human_curated_resources, path=curations_path)
 
     global_actions_path = None
     if global_actions is not None:
