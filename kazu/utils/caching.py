@@ -2,14 +2,13 @@ import logging
 import os
 import sys
 import tempfile
+from collections.abc import Iterable, Callable
 from pathlib import Path
 from typing import Any, TypeVar, Protocol, Optional, Union
-from collections.abc import Iterable, Callable
 
 from cachetools import LFUCache
 from diskcache import Cache
-
-from kazu.data.data import Entity, SynonymTermWithMetrics
+from kazu.data.data import Entity, CandidatesToMetrics
 from kazu.utils.utils import get_match_entity_class_hash
 
 logger = logging.getLogger(__name__)
@@ -100,17 +99,15 @@ class EntityLinkingLookupCache:
     bert)"""
 
     def __init__(self, lookup_cache_size: int = 5000):
-        self.terms_lookup_cache: LFUCache[int, set[SynonymTermWithMetrics]] = LFUCache(
-            lookup_cache_size
-        )
+        self.terms_lookup_cache: LFUCache[int, CandidatesToMetrics] = LFUCache(lookup_cache_size)
 
-    def update_terms_lookup_cache(
-        self, entity: Entity, terms: Iterable[SynonymTermWithMetrics]
+    def update_candidates_lookup_cache(
+        self, entity: Entity, candidates: CandidatesToMetrics
     ) -> None:
         hash_val = get_match_entity_class_hash(entity)
         cache_hit = self.terms_lookup_cache.get(hash_val)
         if cache_hit is None:
-            self.terms_lookup_cache[hash_val] = set(terms)
+            self.terms_lookup_cache[hash_val] = candidates
 
     def check_lookup_cache(self, entities: Iterable[Entity]) -> list[Entity]:
         """Checks the cache for synonym terms. If relevant terms are found for an
@@ -123,9 +120,9 @@ class EntityLinkingLookupCache:
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
-            terms_from_cache = self.terms_lookup_cache.get(hash_val, set())
-            if not terms_from_cache:
+            candidates_from_cache = self.terms_lookup_cache.get(hash_val)
+            if not candidates_from_cache:
                 cache_misses.append(ent)
             else:
-                ent.update_terms(terms_from_cache)
+                ent.add_or_update_linking_candidates(candidates_from_cache)
         return cache_misses

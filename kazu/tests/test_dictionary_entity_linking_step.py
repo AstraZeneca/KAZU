@@ -27,6 +27,4 @@ def test_skips_prelinked_entities(mock_kazu_disk_cache_on_parsers):
     doc.sections[0].entities.extend(ents)
 
     step([doc])
-    assert (
-        len(ents[0].syn_term_to_synonym_terms) == 0 and len(ents[1].syn_term_to_synonym_terms) > 0
-    )
+    assert len(ents[0].linking_candidates) == 0 and len(ents[1].linking_candidates) > 0

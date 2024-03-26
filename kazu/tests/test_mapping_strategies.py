@@ -1,4 +1,4 @@
-import dataclasses
+from typing import Iterable
 
 import pytest
 from hydra.utils import instantiate
@@ -8,7 +8,9 @@ from kazu.data.data import (
     Mapping,
     StringMatchConfidence,
     Entity,
-    SynonymTermWithMetrics,
+    LinkingCandidate,
+    LinkingMetrics,
+    CandidatesToMetrics,
 )
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.language.string_similarity_scorers import SapbertStringSimilarityScorer
@@ -28,7 +30,7 @@ pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
 
 @pytest.fixture(scope="session")
-def set_up_disease_mapping_test_case() -> tuple[set[SynonymTermWithMetrics], DummyParser]:
+def set_up_disease_mapping_test_case() -> tuple[CandidatesToMetrics, DummyParser]:
 
     dummy_data = {
         IDX: ["1", "1", "2"],
@@ -42,14 +44,13 @@ def set_up_disease_mapping_test_case() -> tuple[set[SynonymTermWithMetrics], Dum
     }
     parser = DummyParser(data=dummy_data, name="test_tfidf_parsr", source="test_tfidf_parsr")
     parser.populate_databases()
-    terms_with_metrics = set(
-        SynonymTermWithMetrics.from_synonym_term(term)
-        for term in SynonymDatabase().get_all(parser.name).values()
-    )
+    terms_with_metrics = {
+        candidate: LinkingMetrics() for candidate in SynonymDatabase().get_all(parser.name).values()
+    }
     return terms_with_metrics, parser
 
 
-def check_correct_terms_selected(terms: set[SynonymTermWithMetrics], mappings: list[Mapping]):
+def check_correct_terms_selected(terms: Iterable[LinkingCandidate], mappings: list[Mapping]):
     term_ids = set(
         (
             term.parser_name,
@@ -70,16 +71,15 @@ def check_correct_terms_selected(terms: set[SynonymTermWithMetrics], mappings: l
 
 
 def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
 
     text1 = "p27 is often confused"
     ent_match = "p27"
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_term = next(filter(lambda x: x.term_norm == ent_match_norm, terms))
-    target_term_exact_match = dataclasses.replace(target_term, exact_match=True)
-    terms.remove(target_term)
-    terms.add(target_term_exact_match)
+    target_candidate = next(filter(lambda x: x.term_norm == ent_match_norm, candidates))
+    exact_match_metric = LinkingMetrics(exact_match=True)
+    candidates[target_candidate] = exact_match_metric
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
@@ -88,7 +88,7 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
         entity_class="test",  # we set this to 'test' instead of gene for consistent stringnormaliser behaviour
         namespace="test",
     )
-    p27_ent.update_terms(terms)
+    p27_ent.add_or_update_linking_candidates(candidates)
 
     doc.sections[0].entities.append(p27_ent)
     strategy = ExactMatchMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
@@ -98,22 +98,22 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
             ent_match=ent_match,
             ent_match_norm=ent_match_norm,
             document=doc,
-            terms=frozenset(terms),
+            candidates=candidates,
         )
     )
 
-    check_correct_terms_selected({target_term}, mappings)
+    check_correct_terms_selected({target_candidate}, mappings)
 
 
 def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
 
     text1 = "PAK-2p27 is often confused"
     ent_match = "PAK-2p27"
 
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_term = next(filter(lambda x: x.term_norm == ent_match_norm, terms))
+    target_candidate = next(filter(lambda x: x.term_norm == ent_match_norm, candidates))
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
@@ -122,7 +122,7 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
         entity_class="test",
         namespace="test",
     )
-    p27_ent.update_terms(terms)
+    p27_ent.add_or_update_linking_candidates(candidates)
 
     doc.sections[0].entities.append(p27_ent)
     strategy = SymbolMatchMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
@@ -132,21 +132,21 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
             ent_match=ent_match,
             ent_match_norm=ent_match_norm,
             document=doc,
-            terms=frozenset(terms),
+            candidates=candidates,
         )
     )
 
-    check_correct_terms_selected({target_term}, mappings)
+    check_correct_terms_selected({target_candidate}, mappings)
 
 
 def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
     text1 = "CDKN1B gene has the wrong NER spans on it"
     ent_match = "CDKN1B gene"
 
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", terms))
+    target_candidate = next(filter(lambda x: x.term_norm == "CDKN1B", candidates))
 
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
@@ -156,7 +156,7 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
         entity_class="test",
         namespace="test",
     )
-    p27_ent.update_terms(terms)
+    p27_ent.add_or_update_linking_candidates(candidates)
 
     doc.sections[0].entities.append(p27_ent)
     strategy = TermNormIsSubStringMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
@@ -166,35 +166,37 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
             ent_match=ent_match,
             ent_match_norm=ent_match_norm,
             document=doc,
-            terms=frozenset(terms),
+            candidates=candidates,
         )
     )
 
-    check_correct_terms_selected({target_term}, mappings)
+    check_correct_terms_selected({target_candidate}, mappings)
 
 
 @pytest.mark.parametrize("search_threshold,differential", [(100.0, 0.0), (85.0, 15.0)])
 def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshold, differential):
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
 
     text1 = "p27 is often confused"
     ent_match = "p27"
-    terms_with_scores = set()
-    target_terms = set()
-    for i, (_, terms) in enumerate(sort_then_group(terms, key_func=lambda x: x.associated_id_sets)):
-        for term in terms:
+    candidates_with_scores = {}
+    target_candidates = {}
+    for i, (_, terms) in enumerate(
+        sort_then_group(candidates, key_func=lambda x: x.associated_id_sets)
+    ):
+        for candidate in terms:
             if i == 0:
-                new_term = dataclasses.replace(term, search_score=100.0)
-                terms_with_scores.add(new_term)
-                target_terms.add(new_term)
+                metric = LinkingMetrics(search_score=100.0)
+                candidates_with_scores[candidate] = metric
+                target_candidates[candidate] = metric
             elif i == 1:
-                new_term = dataclasses.replace(term, search_score=88.0)
-                terms_with_scores.add(new_term)
+                metric = LinkingMetrics(search_score=88.0)
+                candidates_with_scores[candidate] = metric
                 if differential > 0.0:
-                    target_terms.add(new_term)
+                    target_candidates[candidate] = metric
             else:
-                new_term = dataclasses.replace(term, search_score=70.0)
-                terms_with_scores.add(new_term)
+                metric = LinkingMetrics(search_score=70.0)
+                candidates_with_scores[candidate] = metric
 
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
@@ -204,7 +206,7 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
         entity_class="test",
         namespace="test",
     )
-    p27_ent.update_terms(terms_with_scores)
+    p27_ent.add_or_update_linking_candidates(candidates)
 
     doc.sections[0].entities.append(p27_ent)
     strategy = StrongMatchMappingStrategy(
@@ -219,11 +221,11 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
             ent_match=ent_match,
             ent_match_norm=StringNormalizer.normalize(ent_match),
             document=doc,
-            terms=frozenset(terms_with_scores),
+            candidates=candidates_with_scores,
         )
     )
 
-    check_correct_terms_selected(target_terms, mappings)
+    check_correct_terms_selected(target_candidates, mappings)
 
 
 @pytest.mark.parametrize(
@@ -240,15 +242,16 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
     sapbert_helper = instantiate(kazu_test_config.SapbertHelper)
     string_scorer = SapbertStringSimilarityScorer(sapbert=sapbert_helper)
 
-    terms, parser = set_up_disease_mapping_test_case
-    terms_with_scores = set()
-    target_terms = set()
+    candidates, parser = set_up_disease_mapping_test_case
+    candidates_with_scores = {}
+    target_candidates = set()
 
-    for term in terms:
-        new_term = dataclasses.replace(term, search_score=95.0)
-        terms_with_scores.add(new_term)
-        if target_string in term.term_norm:
-            target_terms.add(term)
+    for candidate in candidates:
+        metric = LinkingMetrics(search_score=95.0)
+        candidates[candidate] = metric
+        candidates_with_scores[candidate] = metric
+        if target_string in candidate.term_norm:
+            target_candidates.add(candidate)
 
     doc = Document.create_simple_document(text)
     disease_ent = Entity.load_contiguous_entity(
@@ -258,7 +261,7 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
         entity_class="disease",
         namespace="test",
     )
-    disease_ent.update_terms(terms_with_scores)
+    disease_ent.add_or_update_linking_candidates(candidates)
 
     doc.sections[0].entities.append(disease_ent)
     strategy = StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(
@@ -274,8 +277,8 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
             ent_match=ent_match,
             ent_match_norm=StringNormalizer.normalize(ent_match),
             document=doc,
-            terms=frozenset(terms_with_scores),
+            candidates=candidates,
         )
     )
 
-    check_correct_terms_selected(target_terms, mappings)
+    check_correct_terms_selected(target_candidates, mappings)

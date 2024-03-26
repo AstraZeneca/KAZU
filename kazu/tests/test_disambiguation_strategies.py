@@ -11,7 +11,7 @@ from kazu.data.data import (
     Entity,
     EquivalentIdAggregationStrategy,
     EquivalentIdSet,
-    SynonymTermWithMetrics,
+    LinkingMetrics,
 )
 from kazu.database.in_memory_db import MetadataDatabase, SynonymDatabase
 from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TYPE
@@ -44,9 +44,7 @@ def check_ids_are_represented(
 ):
     strategy.prepare(doc)
     all_id_sets: set[EquivalentIdSet] = set(
-        chain.from_iterable(
-            term.associated_id_sets for term in entity_to_test.syn_term_to_synonym_terms.values()
-        )
+        chain.from_iterable(term.associated_id_sets for term in entity_to_test.linking_candidates)
     )
     disambiguated_id_sets = list(
         strategy.disambiguate(
@@ -63,7 +61,7 @@ def check_ids_are_represented(
 
 
 def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
 
     text1 = "p27 is often confused, but in this context it's Autoantigen p27"
     text2 = ", and definitely not CDKN1B"
@@ -87,7 +85,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         entity_class="gene",
         namespace="test",
     )
-    autoantip27_ent.update_terms(terms)
+    autoantip27_ent.add_or_update_linking_candidates(candidates)
 
     p27_ent = Entity.load_contiguous_entity(
         start=0,
@@ -96,7 +94,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         entity_class="gene",
         namespace="test",
     )
-    p27_ent.update_terms(terms)
+    p27_ent.add_or_update_linking_candidates(candidates)
 
     doc = create_doc_with_ents([autoantip27_ent, p27_ent])
     strategy = DefinedElsewhereInDocumentDisambiguationStrategy(
@@ -109,7 +107,7 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     )
 
     # now add a good mapping, that should be selected from the set of terms
-    target_term = next(filter(lambda x: x.term_norm == "AUTOANTIGEN P 27", terms))
+    target_term = next(filter(lambda x: x.term_norm == "AUTOANTIGEN P 27", candidates))
     target_id_set_for_good_mapping = next(
         filter(lambda x: "3" in x.ids, target_term.associated_id_sets)
     )
@@ -140,9 +138,9 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         entity_class="gene",
         namespace="test",
     )
-    cdkn1b_ent.update_terms(terms)
+    cdkn1b_ent.add_or_update_linking_candidates(candidates)
 
-    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", terms))
+    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", candidates))
     target_id_set_for_good_mapping = next(
         filter(lambda x: "1" in x.ids, target_term.associated_id_sets)
     )
@@ -175,7 +173,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case, mock_build_vectoriser_cache)
     # that fixture is session scoped).
     if TfIdfScorer in Singleton._instances:
         Singleton._instances.pop(TfIdfScorer)
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
 
     text = "p27 is often confused, but in this context it's CDKN1B"
     doc = Document.create_simple_document(text)
@@ -195,7 +193,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case, mock_build_vectoriser_cache)
         namespace="test",
     )
 
-    p27_ent.update_terms(terms)
+    p27_ent.add_or_update_linking_candidates(candidates)
     doc.sections[0].entities.append(p27_ent)
 
     strategy = TfIdfDisambiguationStrategy(
@@ -212,7 +210,7 @@ def test_TfIdfContextStrategy(set_up_p27_test_case, mock_build_vectoriser_cache)
 
 def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
 
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
     text = "p27 is often confused, but in this context it's CDKN1B"
     doc = Document.create_simple_document(text)
     cdkn1b_ent = Entity.load_contiguous_entity(
@@ -222,7 +220,7 @@ def test_AnnotationLevelDisambiguationStrategy(set_up_p27_test_case):
         entity_class="gene",
         namespace="test",
     )
-    cdkn1b_ent.update_terms(terms)
+    cdkn1b_ent.add_or_update_linking_candidates(candidates)
     doc.sections[0].entities.append(cdkn1b_ent)
     metadata_db = MetadataDatabase()
 
@@ -284,10 +282,6 @@ def test_PreferDefaultLabelMatchDisambiguationStrategy():
         data=dummy_data, name="test_default_label_strategy", source="test_default_label_strategy"
     )
     parser.populate_databases()
-    terms_with_metrics = set(
-        SynonymTermWithMetrics.from_synonym_term(term)
-        for term in SynonymDatabase().get_all(parser.name).values()
-    )
 
     text = "CDKN1B is confused in this test,but with this strategy we want the id where CDKN1B is the default label"
     doc = Document.create_simple_document(text)
@@ -298,7 +292,8 @@ def test_PreferDefaultLabelMatchDisambiguationStrategy():
         entity_class=parser.entity_class,
         namespace="test",
     )
-    cdkn1b_ent.update_terms(terms_with_metrics)
+    for candidate in SynonymDatabase().get_all(parser.name).values():
+        cdkn1b_ent.add_or_update_linking_candidate(candidate, LinkingMetrics())
     doc.sections[0].entities.append(cdkn1b_ent)
 
     strategy = PreferDefaultLabelMatchDisambiguationStrategy(
@@ -317,7 +312,7 @@ def test_GildaTfIdfContextStrategy(
 
     Singleton._instances.pop(GildaTfIdfScorer, None)
 
-    terms, parser = set_up_p27_test_case
+    candidates, parser = set_up_p27_test_case
     json_path = tmp_path.joinpath("p27_disamb_test.json")
     data: dict[str, dict[str, str]] = {
         parser.name: {
@@ -328,8 +323,8 @@ It is often referred to as a cell cycle inhibitor protein because its major func
         }
     }
 
-    for term in terms:
-        for equiv_id_set in term.associated_id_sets:
+    for candidate in candidates:
+        for equiv_id_set in candidate.associated_id_sets:
             for idx in equiv_id_set.ids:
                 if idx != "1":
                     data[parser.name][idx] = "this is not relevant"
@@ -364,7 +359,7 @@ It is often referred to as a cell cycle inhibitor protein because its major func
         namespace="test",
     )
 
-    p27_ent.update_terms(terms)
+    p27_ent.add_or_update_linking_candidates(candidates)
     doc.sections[0].entities.append(p27_ent)
 
     check_ids_are_represented(
@@ -396,10 +391,9 @@ def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(kazu_test_co
         entity_class="disease",
     )
     parser.populate_databases()
-    terms_with_metrics = set(
-        SynonymTermWithMetrics.from_synonym_term(term)
-        for term in SynonymDatabase().get_all(parser.name).values()
-    )
+    candidates_with_metrics = {
+        candidate: LinkingMetrics() for candidate in SynonymDatabase().get_all(parser.name).values()
+    }
 
     text = "breast carcinoma and breast cancer are related."
     doc = Document.create_simple_document(text)
@@ -410,7 +404,7 @@ def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(kazu_test_co
         entity_class=parser.entity_class,
         namespace="test",
     )
-    bc_ent.update_terms(terms_with_metrics)
+    bc_ent.add_or_update_linking_candidates(candidates_with_metrics)
     doc.sections[0].entities.append(bc_ent)
 
     strategy = PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(
@@ -420,9 +414,7 @@ def test_PreferNearestEmbeddingToDefaultLabelDisambiguationStrategy(kazu_test_co
 
     strategy.prepare(doc)
     all_id_sets: set[EquivalentIdSet] = set(
-        chain.from_iterable(
-            term.associated_id_sets for term in bc_ent.syn_term_to_synonym_terms.values()
-        )
+        chain.from_iterable(candidate.associated_id_sets for candidate in bc_ent.linking_candidates)
     )
 
     disambiguated_id_sets = list(

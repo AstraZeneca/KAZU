@@ -7,8 +7,8 @@ from kazu.data.data import (
     Document,
     Section,
     Entity,
-    SynonymTermWithMetrics,
     MentionConfidence,
+    LinkingMetrics,
 )
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.ontology_matching import assemble_pipeline
@@ -105,15 +105,14 @@ class ExplosionStringMatchingStep(ParserDependentStep):
                         entity_class=entity_class,
                         namespace=self.namespace(),
                     )
-                    terms = []
                     for parser_name, term_norm, confidence in per_parser_term_norm_set:
                         mention_confidence = MentionConfidence(int(confidence))
                         confidences.add(mention_confidence)
-                        term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
-                            self.synonym_db.get(parser_name, term_norm), exact_match=True
+                        e.add_or_update_linking_candidate(
+                            self.synonym_db.get(parser_name, term_norm),
+                            LinkingMetrics(exact_match=True),
                         )
-                        terms.append(term_with_metrics)
-                    e.update_terms(terms)
+
                     e.mention_confidence = max(confidences)
                     entities.append(e)
 

@@ -99,7 +99,7 @@ class SynonymTermRemovalCleanupAction:
     def cleanup(self, doc: Document) -> None:
         for section in doc.sections:
             for ent in section.entities:
-                ent.syn_term_to_synonym_terms.clear()
+                ent.linking_candidates.clear()
 
 
 class StripMappingURIsAction:

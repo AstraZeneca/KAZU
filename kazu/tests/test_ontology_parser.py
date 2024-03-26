@@ -35,7 +35,7 @@ from kazu.utils.utils import Singleton
 PARSER_1_NAME = "I am the target for actions"
 NOOP_PARSER_NAME = "I am the result of the same parser without human curated resources"
 TARGET_SYNONYM = "hello I'm injected"
-# this should be split by the parser logic into two equivalent_id_sets for the same SynonymTerm
+# this should be split by the parser logic into two equivalent_id_sets for the same LinkingCandidate
 ID_TO_BE_REMOVED = TARGET_SYNONYM.replace(" ", "-")
 DUMMY_PARSER_SOURCE = "test_parser_source"
 

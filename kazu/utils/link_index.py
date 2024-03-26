@@ -7,7 +7,7 @@ import numpy
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from kazu.utils.caching import kazu_disk_cache
-from kazu.data.data import SynonymTerm, SynonymTermWithMetrics
+from kazu.data.data import LinkingCandidate, LinkingMetrics
 from kazu.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,
@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 class DictionaryIndex:
-    """The dictionary index looks for SynonymTerms via a char ngram search between the
-    normalised version of the query string and the term_norm of all SynonymTerms
-    associated with the provided OntologyParser."""
+    """The dictionary index looks for LinkingCandidates via a char ngram search between
+    the normalised version of the query string and the term_norm of all
+    LinkingCandidates associated with the provided OntologyParser."""
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class DictionaryIndex:
         self.namespace = self.__class__.__name__
         self.boolean_scorers = boolean_scorers
         self.normalized_synonyms: list[str] = []
-        self.synonym_list: list[SynonymTerm] = []
+        self.synonym_list: list[LinkingCandidate] = []
         # we sort here to ensure that the order of self.synonym_list matches the
         # order of the synonyms in the cached vectorized from _build_index_cache
         # if present, without relying on the order in the SynonymDatabase being the
@@ -69,13 +69,15 @@ class DictionaryIndex:
         else:
             return True
 
-    def search(self, query: str, top_n: int = 15) -> Iterable[SynonymTermWithMetrics]:
+    def search(
+        self, query: str, top_n: int = 15
+    ) -> Iterable[tuple[LinkingCandidate, LinkingMetrics]]:
         """Search the index with a query string.
 
         .. note::
            This method will only return results with search scores above 0.
            As a result, it will return fewer than ``top_n`` results when there are not
-           ``top_n`` :class:`~.SynonymTerm`\\ s in the index that score about 0 for the given
+           ``top_n`` :class:`~.LinkingCandidate`\\ s in the index that score about 0 for the given
            query.
 
         :param query: term to search
@@ -86,10 +88,7 @@ class DictionaryIndex:
         match_norm = StringNormalizer.normalize(query, entity_class=self.entity_class)
         exact_match_term = self.synonyms_for_parser.get(match_norm)
         if exact_match_term is not None:
-            term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
-                exact_match_term, search_score=100.0, bool_score=True, exact_match=True
-            )
-            yield term_with_metrics
+            yield exact_match_term, LinkingMetrics(exact_match=True)
 
         else:
             # benchmarking suggests converting to dense is faster than using the
@@ -109,16 +108,15 @@ class DictionaryIndex:
             for neighbour, score in zip(neighbours, distances):
                 if score > 0.0:
                     # get by index
-                    term = self.synonym_list[neighbour]
+                    candidate = self.synonym_list[neighbour]
                     if self.apply_boolean_scorers(
-                        reference_term=match_norm, query_term=term.term_norm
+                        reference_term=match_norm, query_term=candidate.term_norm
                     ):
-                        term_with_metrics = SynonymTermWithMetrics.from_synonym_term(
-                            term, search_score=score, bool_score=True, exact_match=False
+                        yield candidate, LinkingMetrics(
+                            exact_match=False, search_score=score, bool_score=True
                         )
-                        yield term_with_metrics
                     else:
-                        logger.debug("filtered term %s as failed boolean checks", term)
+                        logger.debug("filtered candidate %s as failed boolean checks", candidate)
                 else:
                     logger.debug("score is 0.0")
 

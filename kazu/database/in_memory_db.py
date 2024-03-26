@@ -4,7 +4,7 @@ from typing import Optional, Any
 from collections.abc import Iterable
 
 from kazu.data.data import (
-    SynonymTerm,
+    LinkingCandidate,
     EquivalentIdAggregationStrategy,
     AssociatedIdSets,
 )
@@ -78,14 +78,16 @@ class SynonymDatabase(metaclass=Singleton):
     """Singleton of a database of synonyms."""
 
     def __init__(self):
-        self._syns_database_by_syn: dict[ParserName, dict[NormalisedSynonymStr, SynonymTerm]] = {}
+        self._syns_database_by_syn: dict[
+            ParserName, dict[NormalisedSynonymStr, LinkingCandidate]
+        ] = {}
         self._syns_by_aggregation_strategy: dict[
             ParserName, dict[EquivalentIdAggregationStrategy, dict[Idx, set[NormalisedSynonymStr]]]
         ] = {}
         self._associated_id_sets_by_id: dict[ParserName, dict[str, set[AssociatedIdSets]]] = {}
         self.loaded_parsers: set[ParserName] = set()
 
-    def add_parser(self, name: ParserName, synonyms: Iterable[SynonymTerm]) -> None:
+    def add_parser(self, name: ParserName, synonyms: Iterable[LinkingCandidate]) -> None:
         """Add synonyms to the database.
 
         :param name: name of ontology to add to
@@ -110,7 +112,7 @@ class SynonymDatabase(metaclass=Singleton):
                         synonym.associated_id_sets
                     )
 
-    def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> SynonymTerm:
+    def get(self, name: ParserName, synonym: NormalisedSynonymStr) -> LinkingCandidate:
         """Get a set of EquivalentIdSets associated with an ontology and synonym string.
 
         :param name: name of ontology to query
@@ -138,7 +140,7 @@ class SynonymDatabase(metaclass=Singleton):
                 )
         return result
 
-    def get_all(self, name: ParserName) -> dict[NormalisedSynonymStr, SynonymTerm]:
+    def get_all(self, name: ParserName) -> dict[NormalisedSynonymStr, LinkingCandidate]:
         """Get all synonyms associated with an ontology.
 
         :param name: name of ontology

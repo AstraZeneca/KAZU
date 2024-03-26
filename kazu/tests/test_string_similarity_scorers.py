@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, SynonymTerm
+from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, LinkingCandidate
 from kazu.language.string_similarity_scorers import (
     EntitySubtypeStringSimilarityScorer,
     NumberMatchStringSimilarityScorer,
@@ -74,9 +74,9 @@ def test_RapidFuzzStringSimilarityScorer():
     )
 
 
-def make_term_for_scorer_test(synonyms: Sequence[str]) -> SynonymTerm:
+def make_term_for_scorer_test(synonyms: Sequence[str]) -> LinkingCandidate:
 
-    return SynonymTerm(
+    return LinkingCandidate(
         terms=frozenset(synonyms),
         term_norm=StringNormalizer.normalize(synonyms[0]),
         associated_id_sets=frozenset(

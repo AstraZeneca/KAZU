@@ -37,7 +37,7 @@ class DisambiguationStrategy(ABC):
 
     .. warning::
        The :class:`.EquivalentIdSet`\\s produced needn't map to those contained within
-       :attr:`~.SynonymTerm.associated_id_sets`\\. This may cause confusing behaviour
+       :attr:`~.LinkingCandidate.associated_id_sets`\\. This may cause confusing behaviour
        during debugging.
 
 
@@ -195,9 +195,9 @@ class TfIdfDisambiguationStrategy(DisambiguationStrategy):
         :return:
         """
         parser_names = frozenset(
-            term.parser_name
+            candidate.parser_name
             for ent in document.get_entities()
-            for term in ent.syn_term_to_synonym_terms
+            for candidate in ent.linking_candidates
         )
         self.parser_name_to_doc_representation = self.cacheable_build_document_representation(
             scorer=self.scorer, doc=document, parsers=parser_names

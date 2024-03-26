@@ -6,10 +6,12 @@ from kazu.data.data import (
     Document,
     StringMatchConfidence,
     Entity,
-    SynonymTermWithMetrics,
     EquivalentIdSet,
     DisambiguationConfidence,
     MentionConfidence,
+    CandidatesToMetrics,
+    LinkingCandidate,
+    LinkingMetrics,
 )
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.ontology_preprocessing.base import IDX, SYN
@@ -23,15 +25,15 @@ from kazu.tests.utils import DummyParser
 
 
 class NoopMappingStrategy(MappingStrategy):
-    def filter_terms(
+    def filter_candidates(
         self,
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: frozenset[SynonymTermWithMetrics],
+        candidates: CandidatesToMetrics,
         parser_name: str,
-    ) -> set[SynonymTermWithMetrics]:
-        return set(terms)
+    ) -> CandidatesToMetrics:
+        return candidates
 
 
 @pytest.fixture(scope="session")
@@ -57,7 +59,7 @@ class TestStrategy(MappingStrategy):
 
         :param confidence:
         :param ent_match: filter_terms only fires when ent_match is this this value
-        :param expected_ids: only return SynonymTermWithMetrics which have this id
+        :param expected_ids: only return CandidatesToMetrics which have this id
         :param disambiguation_strategies:
         """
         super().__init__(confidence, disambiguation_strategies)
@@ -69,23 +71,23 @@ class TestStrategy(MappingStrategy):
     def prepare(self, document: Document):
         self.expected_ids = self.temp_ids
 
-    def filter_terms(
+    def filter_candidates(
         self,
         ent_match: str,
         ent_match_norm: str,
         document: Document,
-        terms: frozenset[SynonymTermWithMetrics],
+        candidates: CandidatesToMetrics,
         parser_name: str,
-    ) -> set[SynonymTermWithMetrics]:
+    ) -> CandidatesToMetrics:
         if ent_match == self.ent_match:
-            return set(
-                term
-                for term in terms
-                for id_set in term.associated_id_sets
+            return {
+                candidate: metrics
+                for candidate, metrics in candidates.items()
+                for id_set in candidate.associated_id_sets
                 if any(expected_id in id_set.ids for expected_id in self.expected_ids)
-            )
+            }
         else:
-            return set()
+            return {}
 
 
 class TestDoNothingDisambiguationStrategy(DisambiguationStrategy):
@@ -193,10 +195,10 @@ def build_runner(expected_id_groups: dict[str, set[str]]) -> StrategyRunner:
 
 
 def create_test_doc(
-    parser1_hit_1: SynonymTermWithMetrics,
-    parser1_hit_2: SynonymTermWithMetrics,
-    parser2_hit_1: SynonymTermWithMetrics,
-    parser2_hit_2: SynonymTermWithMetrics,
+    parser1_hit_1: LinkingCandidate,
+    parser1_hit_2: LinkingCandidate,
+    parser2_hit_1: LinkingCandidate,
+    parser2_hit_2: LinkingCandidate,
 ) -> tuple[Document, dict[str, list[Entity]]]:
     """Create a test doc with dummy entities.
 
@@ -217,7 +219,7 @@ def create_test_doc(
         namespace="group1",
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
-    e1_group_1.update_terms({parser1_hit_1})
+    e1_group_1.add_or_update_linking_candidate(parser1_hit_1, LinkingMetrics())
     e2_group_1 = Entity.load_contiguous_entity(
         start=10,
         end=12,
@@ -226,7 +228,7 @@ def create_test_doc(
         namespace="group1",
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
-    e2_group_1.update_terms({parser1_hit_1})
+    e2_group_1.add_or_update_linking_candidate(parser1_hit_1, LinkingMetrics())
     e1_group_2 = Entity.load_contiguous_entity(
         start=0,
         end=1,
@@ -235,7 +237,7 @@ def create_test_doc(
         namespace="group2",
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
-    e1_group_2.update_terms({parser2_hit_1})
+    e1_group_2.add_or_update_linking_candidate(parser2_hit_1, LinkingMetrics())
     e2_group_2 = Entity.load_contiguous_entity(
         start=15,
         end=20,
@@ -244,7 +246,7 @@ def create_test_doc(
         namespace="group2",
         mention_confidence=MentionConfidence.HIGHLY_LIKELY,
     )
-    e2_group_2.update_terms({parser2_hit_1})
+    e2_group_2.add_or_update_linking_candidate(parser2_hit_1, LinkingMetrics())
 
     e1_group_3 = Entity.load_contiguous_entity(
         start=0,
@@ -254,7 +256,9 @@ def create_test_doc(
         namespace="group3",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e1_group_3.update_terms({parser1_hit_1, parser2_hit_1})
+    e1_group_3.add_or_update_linking_candidates(
+        {parser1_hit_1: LinkingMetrics(), parser2_hit_1: LinkingMetrics()}
+    )
     e2_group_3 = Entity.load_contiguous_entity(
         start=15,
         end=20,
@@ -263,7 +267,9 @@ def create_test_doc(
         namespace="group3",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e2_group_3.update_terms({parser1_hit_1, parser2_hit_1})
+    e2_group_3.add_or_update_linking_candidates(
+        {parser1_hit_1: LinkingMetrics(), parser2_hit_1: LinkingMetrics()}
+    )
 
     e1_group_4 = Entity.load_contiguous_entity(
         start=0,
@@ -273,7 +279,9 @@ def create_test_doc(
         namespace="group4",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e1_group_4.update_terms({parser1_hit_1, parser1_hit_2})
+    e1_group_4.add_or_update_linking_candidates(
+        {parser1_hit_1: LinkingMetrics(), parser1_hit_2: LinkingMetrics()}
+    )
     e2_group_4 = Entity.load_contiguous_entity(
         start=15,
         end=20,
@@ -282,7 +290,9 @@ def create_test_doc(
         namespace="group4",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e2_group_4.update_terms({parser1_hit_1, parser1_hit_2})
+    e2_group_4.add_or_update_linking_candidates(
+        {parser1_hit_1: LinkingMetrics(), parser1_hit_2: LinkingMetrics()}
+    )
 
     e1_group_5 = Entity.load_contiguous_entity(
         start=0,
@@ -292,7 +302,9 @@ def create_test_doc(
         namespace="group5",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e1_group_5.update_terms({parser2_hit_1, parser2_hit_2})
+    e1_group_5.add_or_update_linking_candidates(
+        {parser2_hit_1: LinkingMetrics(), parser2_hit_2: LinkingMetrics()}
+    )
     e2_group_5 = Entity.load_contiguous_entity(
         start=15,
         end=20,
@@ -301,7 +313,9 @@ def create_test_doc(
         namespace="group5",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e2_group_5.update_terms({parser2_hit_1, parser2_hit_2})
+    e2_group_5.add_or_update_linking_candidates(
+        {parser2_hit_1: LinkingMetrics(), parser2_hit_2: LinkingMetrics()}
+    )
 
     e1_group_default = Entity.load_contiguous_entity(
         start=0,
@@ -311,7 +325,9 @@ def create_test_doc(
         namespace="group_default",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e1_group_default.update_terms({parser1_hit_2, parser2_hit_2})
+    e1_group_default.add_or_update_linking_candidates(
+        {parser1_hit_2: LinkingMetrics(), parser2_hit_2: LinkingMetrics()}
+    )
     e2_group_default = Entity.load_contiguous_entity(
         start=15,
         end=20,
@@ -320,7 +336,9 @@ def create_test_doc(
         namespace="group_default",
         mention_confidence=MentionConfidence.PROBABLE,
     )
-    e2_group_default.update_terms({parser1_hit_2, parser2_hit_2})
+    e2_group_default.add_or_update_linking_candidates(
+        {parser1_hit_2: LinkingMetrics(), parser2_hit_2: LinkingMetrics()}
+    )
 
     doc = Document.create_simple_document("hello")
     doc.sections[0].entities = [
@@ -384,27 +402,21 @@ def extract_expected_ids_from_parsers(
 
 def extract_terms_from_parsers(
     parser1: DummyParser, parser2: DummyParser
-) -> tuple[
-    SynonymTermWithMetrics, SynonymTermWithMetrics, SynonymTermWithMetrics, SynonymTermWithMetrics
-]:
-    """Extract a tuple of SynonymTermWithMetrics we need for testing.
+) -> tuple[LinkingCandidate, LinkingCandidate, LinkingCandidate, LinkingCandidate]:
+    """Extract a tuple of Linking Candidates we need for testing.
 
     :param parser1:
     :param parser2:
     :return:
     """
-    parser1_hit_1 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser1.name, synonym=parser1.data[SYN][0])
-    )
-    parser1_hit_2 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser1.name, synonym=parser1.data[SYN][4])
-    )
-    parser2_hit_1 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser2.name, synonym=parser2.data[SYN][2])
-    )
-    parser2_hit_2 = SynonymTermWithMetrics.from_synonym_term(
-        SynonymDatabase().get(parser2.name, synonym=parser2.data[SYN][4])
-    )
+    parser1_hit_1 = SynonymDatabase().get(parser1.name, synonym=parser1.data[SYN][0])
+
+    parser1_hit_2 = SynonymDatabase().get(parser1.name, synonym=parser1.data[SYN][4])
+
+    parser2_hit_1 = SynonymDatabase().get(parser2.name, synonym=parser2.data[SYN][2])
+
+    parser2_hit_2 = SynonymDatabase().get(parser2.name, synonym=parser2.data[SYN][4])
+
     return parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2
 
 

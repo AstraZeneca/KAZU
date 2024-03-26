@@ -5,7 +5,7 @@ import pytest
 from hydra import compose, initialize_config_dir
 from omegaconf import DictConfig
 
-from kazu.data.data import Document, SynonymTermWithMetrics
+from kazu.data.data import Document, LinkingMetrics, CandidatesToMetrics
 from kazu.annotation.label_studio import (
     LabelStudioManager,
 )
@@ -71,7 +71,7 @@ def ner_simple_test_cases() -> list[Document]:
 
 
 @pytest.fixture(scope="session")
-def set_up_p27_test_case() -> tuple[set[SynonymTermWithMetrics], DummyParser]:
+def set_up_p27_test_case() -> tuple[CandidatesToMetrics, DummyParser]:
 
     dummy_data = {
         IDX: ["1", "1", "1", "2", "2", "2", "3", "3", "3"],
@@ -101,10 +101,10 @@ def set_up_p27_test_case() -> tuple[set[SynonymTermWithMetrics], DummyParser]:
     }
     parser = DummyParser(data=dummy_data, name="test_tfidf_parser", source="test_tfidf_parser")
     parser.populate_databases()
-    terms_with_metrics = set(
-        SynonymTermWithMetrics.from_synonym_term(term)
-        for term in SynonymDatabase().get_all(parser.name).values()
-    )
+    terms_with_metrics = {
+        candidate: LinkingMetrics() for candidate in SynonymDatabase().get_all(parser.name).values()
+    }
+
     return terms_with_metrics, parser
 
 

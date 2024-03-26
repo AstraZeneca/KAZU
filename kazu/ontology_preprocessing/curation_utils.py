@@ -10,7 +10,7 @@ from typing import Optional, Literal, Any
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
-    SynonymTerm,
+    LinkingCandidate,
     OntologyStringResource,
     ParserBehaviour,
     OntologyStringBehaviour,
@@ -631,7 +631,7 @@ class OntologyResourceProcessor:
         entity_class: str,
         global_actions: Optional[GlobalParserActions],
         resources: list[OntologyStringResource],
-        synonym_terms: set[SynonymTerm],
+        synonym_terms: set[LinkingCandidate],
     ):
         """
 
@@ -644,8 +644,8 @@ class OntologyResourceProcessor:
         self.global_actions = global_actions
         self.entity_class = entity_class
         self.parser_name = parser_name
-        self._terms_by_term_norm: dict[NormalisedSynonymStr, SynonymTerm] = {}
-        self._terms_by_id: defaultdict[Idx, set[SynonymTerm]] = defaultdict(set)
+        self._terms_by_term_norm: dict[NormalisedSynonymStr, LinkingCandidate] = {}
+        self._terms_by_id: defaultdict[Idx, set[LinkingCandidate]] = defaultdict(set)
         for term in synonym_terms:
             self._update_term_lookups(term, False)
         self.resources = set(resources)
@@ -664,7 +664,7 @@ class OntologyResourceProcessor:
         )
 
     def _update_term_lookups(
-        self, term: SynonymTerm, override: bool
+        self, term: LinkingCandidate, override: bool
     ) -> Literal[
         LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
@@ -758,7 +758,7 @@ class OntologyResourceProcessor:
         return counter
 
     def _drop_id_from_synonym_term(
-        self, id_to_drop: Idx, term_to_modify: SynonymTerm
+        self, id_to_drop: Idx, term_to_modify: LinkingCandidate
     ) -> Literal[
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
         LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
@@ -804,7 +804,7 @@ class OntologyResourceProcessor:
         return new_assoc_id_frozenset
 
     def _modify_or_drop_synonym_term_after_id_set_change(
-        self, new_associated_id_sets: AssociatedIdSets, synonym_term: SynonymTerm
+        self, new_associated_id_sets: AssociatedIdSets, synonym_term: LinkingCandidate
     ) -> Literal[
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
         LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
@@ -843,7 +843,7 @@ class OntologyResourceProcessor:
 
     def export_resources_and_final_terms(
         self,
-    ) -> tuple[list[OntologyStringResource], set[SynonymTerm]]:
+    ) -> tuple[list[OntologyStringResource], set[LinkingCandidate]]:
         """Perform any updates required to the synonym terms as specified in the
         curations/global actions.
 
@@ -1047,7 +1047,7 @@ class OntologyResourceProcessor:
                 StringNormalizer.classify_symbolic(syn.text, self.entity_class)
                 for syn in resource.original_synonyms
             )
-            new_term = SynonymTerm(
+            new_term = LinkingCandidate(
                 term_norm=term_norm,
                 terms=frozenset(term.text for term in resource.original_synonyms),
                 is_symbolic=is_symbolic,

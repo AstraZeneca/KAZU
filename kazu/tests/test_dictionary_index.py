@@ -8,12 +8,12 @@ pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 def test_DictionaryIndex():
     parser = DummyParser()
     index = DictionaryIndex(parser)
-    terms = list(index.search("3"))
-    assert len(terms) == 1
-    term = terms[0]
-    assert term.parser_name == parser.name
-    assert term.exact_match
+    candidates_and_metrics = list(index.search("3"))
+    assert len(candidates_and_metrics) == 1
+    candidate, metrics = candidates_and_metrics[0]
+    assert candidate.parser_name == parser.name
+    assert metrics.exact_match
 
-    terms = list(index.search("nothing"))
+    candidates_and_metrics = list(index.search("nothing"))
 
-    assert all(term.search_score == 0.0 for term in terms)
+    assert all(metrics.search_score == 0.0 for _, metrics in candidates_and_metrics)

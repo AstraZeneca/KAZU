@@ -3,7 +3,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 import ahocorasick
-from kazu.data.data import Document, Entity, SynonymTermWithMetrics, MentionConfidence
+from kazu.data.data import Document, Entity, MentionConfidence, LinkingMetrics, LinkingCandidate
 from kazu.database.in_memory_db import SynonymDatabase, ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step
@@ -123,7 +123,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 for entity_class, entity_info_groups in sort_then_group(
                     ontology_dict.keys(), key_func=lambda x: x[0]
                 ):
-                    terms: set[SynonymTermWithMetrics] = set()
+                    terms: set[LinkingCandidate] = set()
                     confidences: defaultdict[str, set[MentionConfidence]] = defaultdict(set)
                     for entity_info in entity_info_groups:
                         (
@@ -146,11 +146,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
                         for parser_name in parser_name_set:
                             confidences[parser_name].add(confidence)
-                            terms.add(
-                                SynonymTermWithMetrics.from_synonym_term(
-                                    self.synonym_db.get(parser_name, term_norm), exact_match=True
-                                )
-                            )
+                            terms.add(self.synonym_db.get(parser_name, term_norm))
 
                     if len(terms) > 0:
 
@@ -169,7 +165,10 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                             namespace=self.namespace(),
                             mention_confidence=chosen_conf,
                         )
-                        e.update_terms(terms)
+                        for candidate in terms:
+                            e.add_or_update_linking_candidate(
+                                candidate, LinkingMetrics(exact_match=True)
+                            )
                         entities.append(e)
         return entities
 

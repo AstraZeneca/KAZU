@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from typing import Optional
 
-from kazu.data.data import Document, SynonymTermWithMetrics
+from kazu.data.data import Document
 from kazu.steps import Step, document_batch_step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group
@@ -70,13 +70,15 @@ class DictionaryEntityLinkingStep(Step):
                 else:
                     indices_to_search = self.entity_class_to_indices.get(ent_match_and_class[1])
                     if indices_to_search:
-                        terms: list[SynonymTermWithMetrics] = []
+                        candidates = {}
                         for index in indices_to_search:
-                            terms.extend(index.search(ent_match_and_class[0], self.top_n))
-
+                            for candidate, metrics in index.search(
+                                ent_match_and_class[0], self.top_n
+                            ):
+                                candidates[candidate] = metrics
                         for ent in ents_this_match:
-                            ent.update_terms(terms)
+                            ent.add_or_update_linking_candidates(candidates)
 
-                        self.lookup_cache.update_terms_lookup_cache(
-                            entity=next(iter(ents_this_match)), terms=terms
+                        self.lookup_cache.update_candidates_lookup_cache(
+                            entity=next(iter(ents_this_match)), candidates=candidates
                         )

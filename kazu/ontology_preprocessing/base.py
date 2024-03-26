@@ -8,7 +8,7 @@ import pandas as pd
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
-    SynonymTerm,
+    LinkingCandidate,
     SimpleValue,
     OntologyStringResource,
     AssociatedIdSets,
@@ -128,9 +128,9 @@ class OntologyParser(ABC):
         :param synonym_generator: optional CombinatorialSynonymGenerator. Used to generate synonyms for dictionary
             based NER matching
         :param autocurator: optional :class:`~.AutoCurator`. An AutoCurator contains a series of heuristics that
-            determines what the default behaviour for a :class:`~.SynonymTerm` should be. For example, "Ignore
+            determines what the default behaviour for a :class:`~.LinkingCandidate` should be. For example, "Ignore
             any strings shorter than two characters or longer than 50 characters", or "use case sensitive matching when
-            the SynonymTerm is symbolic"
+            the LinkingCandidate is symbolic"
         :param curations_path: path to jsonl file of human-curated :class:`~.OntologyStringResource`\\s to override the defaults of the parser.
         :param global_actions: path to json file of :class:`~.GlobalParserActions` to apply to the parser.
         :param run_upgrade_report: Use when upgrading the version of the underlying data. When True, reports novel and
@@ -173,7 +173,7 @@ class OntologyParser(ABC):
         """
         pass
 
-    def resolve_synonyms(self, synonym_df: pd.DataFrame) -> set[SynonymTerm]:
+    def resolve_synonyms(self, synonym_df: pd.DataFrame) -> set[LinkingCandidate]:
 
         result = set()
         synonym_df["syn_norm"] = synonym_df[SYN].apply(
@@ -208,7 +208,7 @@ class OntologyParser(ABC):
             )
             associated_id_sets, agg_strategy = self.score_and_group_ids(ids_and_source, is_symbolic)
 
-            synonym_term = SynonymTerm(
+            synonym_term = LinkingCandidate(
                 term_norm=syn_norm,
                 terms=frozenset(syn_set),
                 is_symbolic=is_symbolic,
@@ -233,7 +233,7 @@ class OntologyParser(ABC):
         COX 1 could be 'ENSG00000095303' OR 'ENSG00000198804').
 
         Since synonyms from data sources are confused in such a manner, we need to decide some way to cluster them into
-        a single :class:`~.SynonymTerm` concept, which in turn is a container for one or more :class:`~.EquivalentIdSet`
+        a single :class:`~.LinkingCandidate` concept, which in turn is a container for one or more :class:`~.EquivalentIdSet`
         (depending on whether the concept is ambiguous or not)
 
         The job of ``score_and_group_ids`` is to determine how many :class:`~.EquivalentIdSet`\\ s for a given set of
@@ -385,8 +385,8 @@ class OntologyParser(ABC):
         return cast(dict[str, dict[str, SimpleValue]], metadata)
 
     def process_resources(
-        self, terms: set[SynonymTerm]
-    ) -> tuple[Optional[list[OntologyStringResource]], set[SynonymTerm]]:
+        self, terms: set[LinkingCandidate]
+    ) -> tuple[Optional[list[OntologyStringResource]], set[LinkingCandidate]]:
         if not self.ontology_auto_generated_resources_set_path.exists() or self.run_upgrade_report:
             clean_resources = self.generate_clean_default_resources(
                 terms, upgrade_report=self.run_upgrade_report
@@ -488,7 +488,7 @@ class OntologyParser(ABC):
         return human_and_auto_generated_resources_merged_curation_report.clean_resources
 
     def generate_clean_default_resources(
-        self, terms: set[SynonymTerm], upgrade_report: bool = False
+        self, terms: set[LinkingCandidate], upgrade_report: bool = False
     ) -> set[OntologyStringResource]:
         """
 
@@ -593,7 +593,7 @@ class OntologyParser(ABC):
         return previous_version_auto_generated_resources_clean
 
     def _generate_dirty_default_resources(
-        self, terms: set[SynonymTerm]
+        self, terms: set[LinkingCandidate]
     ) -> set[OntologyStringResource]:
         """Dirty resources come directly from a set of :class:`.SynonymTerm`\\, and are
         optionally further modified by synonym generation and autocuration routines.
@@ -617,8 +617,8 @@ class OntologyParser(ABC):
         return default_term_set
 
     @kazu_disk_cache.memoize(ignore={0})
-    def export_synonym_terms(self, parser_name: str) -> set[SynonymTerm]:
-        """Export :class:`.SynonymTerm` from the parser.
+    def export_synonym_terms(self, parser_name: str) -> set[LinkingCandidate]:
+        """Export :class:`.LinkingCandidate` from the parser.
 
         :param parser_name: name of this parser. Required for correct operation of cache
             (Note, we cannot pass self to the disk cache as the constructor consumes too
@@ -640,7 +640,7 @@ class OntologyParser(ABC):
     def _populate_databases(
         self, parser_name: str
     ) -> tuple[
-        Optional[list[OntologyStringResource]], dict[str, dict[str, SimpleValue]], set[SynonymTerm]
+        Optional[list[OntologyStringResource]], dict[str, dict[str, SimpleValue]], set[LinkingCandidate]
     ]:
         """Disk cacheable method that populates all databases.
 

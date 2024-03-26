@@ -5,8 +5,9 @@ import pytest
 from kazu.data.data import (
     EquivalentIdSet,
     Mapping,
-    SynonymTerm,
-    SynonymTermWithMetrics,
+    LinkingCandidate,
+    LinkingMetrics,
+    CandidatesToMetrics,
     Entity,
     Section,
     Document,
@@ -24,7 +25,7 @@ from kazu.data.data import (
     kazu_json_converter,
     _initialize_json_converter,
 )
-from kazu.tests.utils import make_dummy_synonym_term
+from kazu.tests.utils import make_dummy_linking_candidate
 
 
 def test_overlap_logic():
@@ -60,7 +61,7 @@ def test_overlap_logic():
     assert not e1.is_partially_overlapped(e2)
 
 
-def test_syn_term_manipulation():
+def test_candidate_manipulation():
     e1 = Entity(
         namespace="test",
         match="metastatic liver cancer",
@@ -68,25 +69,34 @@ def test_syn_term_manipulation():
         spans=frozenset([CharSpan(start=16, end=39)]),
     )
 
-    # first test syn_terms are merged correctly (same id set, same parser name)
-    syn_term_1 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", search_score=99.5)
-    e1.update_terms([syn_term_1])
-    syn_term_2 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test", embed_score=99.6)
-    e1.update_terms([syn_term_2])
-    assert len(e1.syn_term_to_synonym_terms) == 1
-    merged_syn_term: SynonymTermWithMetrics = next(iter(e1.syn_term_to_synonym_terms.values()))
-    assert merged_syn_term.embed_score == 99.6
-    assert merged_syn_term.search_score == 99.5
+    # first test candidates are merged correctly (same id set, same parser name)
+    candidate_1, metrics = make_dummy_linking_candidate(
+        ["1", "2", "3"], parser_name="test", search_score=99.5
+    )
+    e1.add_or_update_linking_candidate(candidate_1, metrics)
+    candidate_2, metrics = make_dummy_linking_candidate(
+        ["1", "2", "3"], parser_name="test", embed_score=99.6
+    )
+    e1.add_or_update_linking_candidate(candidate_2, metrics)
+
+    assert len(e1.linking_candidates) == 1
+    candidate, merged_metric = next(iter(e1.linking_candidates.items()))
+    assert merged_metric.embed_score == 99.6
+    assert merged_metric.search_score == 99.5
 
     # now test syn_terms are differentiated if parser name is different
-    syn_term_3 = make_dummy_synonym_term(["1", "2", "3"], parser_name="test_2", search_score=99.5)
-    e1.update_terms([syn_term_3])
-    assert len(e1.syn_term_to_synonym_terms) == 2
+    candidate_3, metrics = make_dummy_linking_candidate(
+        ["1", "2", "3"], parser_name="test_2", search_score=99.5
+    )
+    e1.add_or_update_linking_candidate(candidate_3, metrics)
+    assert len(e1.linking_candidates) == 2
 
     # now test syn_terms are differentiated if id set is different
-    syn_term_4 = make_dummy_synonym_term(["1", "2"], parser_name="test", search_score=99.5)
-    e1.update_terms([syn_term_4])
-    assert len(e1.syn_term_to_synonym_terms) == 3
+    candidate_4, metrics = make_dummy_linking_candidate(
+        ["1", "2"], parser_name="test", search_score=99.5
+    )
+    e1.add_or_update_linking_candidate(candidate_4, metrics)
+    assert len(e1.linking_candidates) == 3
 
 
 def test_section_sentence_spans_is_immutable():
@@ -110,7 +120,12 @@ st.register_type_strategy(bson.ObjectId, oid_strat)
 # needed, otherwise the __post_init__ throws an error in calc_starts_and_ends when the set of spans is empty.
 valid_spans_for_entity = st.frozensets(st.builds(CharSpan), min_size=1)
 
-st.register_type_strategy(Entity, st.builds(Entity, spans=valid_spans_for_entity))
+st.register_type_strategy(
+    Entity,
+    st.builds(
+        Entity, spans=valid_spans_for_entity, linking_candidates=st.from_type(CandidatesToMetrics)
+    ),
+)
 
 # needed, otherwise the __post_init__ throws an error for length 0 parser_to_target_id_mappings
 # or if a set of the target_id_mappings is empty.
@@ -186,8 +201,8 @@ simply_serializable_types = (
     CharSpan,
     EquivalentIdSet,
     Mapping,
-    SynonymTerm,
-    SynonymTermWithMetrics,
+    LinkingCandidate,
+    LinkingMetrics,
     Synonym,
     OntologyStringResource,
     ParserAction,

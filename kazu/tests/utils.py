@@ -10,12 +10,14 @@ import pytest
 from kazu.data.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
-    SynonymTermWithMetrics,
     GlobalParserActions,
     OntologyStringResource,
     MentionConfidence,
+    LinkingMetrics,
+    LinkingCandidate,
 )
 from kazu.language.string_similarity_scorers import StringSimilarityScorer
+from kazu.ontology_preprocessing.autocuration import AutoCurator
 from kazu.ontology_preprocessing.base import (
     IDX,
     DEFAULT_LABEL,
@@ -24,7 +26,6 @@ from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
-from kazu.ontology_preprocessing.autocuration import AutoCurator
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -149,13 +150,13 @@ class DummyParser(OntologyParser):
         return pd.DataFrame.from_dict(self.data)
 
 
-def make_dummy_synonym_term(
+def make_dummy_linking_candidate(
     ids: list[str],
     parser_name: str,
     search_score: Optional[float] = None,
     embed_score: Optional[float] = None,
-) -> SynonymTermWithMetrics:
-    return SynonymTermWithMetrics(
+) -> tuple[LinkingCandidate, LinkingMetrics]:
+    return LinkingCandidate(
         terms=frozenset(
             (
                 "1",
@@ -164,8 +165,6 @@ def make_dummy_synonym_term(
         ),
         term_norm="1",
         parser_name=parser_name,
-        search_score=search_score,
-        embed_score=embed_score,
         associated_id_sets=frozenset(
             (
                 EquivalentIdSet(
@@ -181,7 +180,7 @@ def make_dummy_synonym_term(
         ),
         aggregated_by=EquivalentIdAggregationStrategy.NO_STRATEGY,
         is_symbolic=True,
-    )
+    ), LinkingMetrics(search_score=search_score, embed_score=embed_score)
 
 
 # for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of terms to 'IGNORE'

@@ -1,13 +1,13 @@
 import logging
+from collections.abc import Iterable
 from copy import deepcopy
 from itertools import groupby
 from typing import Optional
-from collections.abc import Iterable
 
 from kazu.data.data import (
     Document,
     Entity,
-    SynonymTermWithMetrics,
+    LinkingCandidate,
     Mapping,
     MentionConfidence,
 )
@@ -23,7 +23,7 @@ EntityClassStrategy = dict[str, list[MappingStrategy]]
 
 
 # hashable representation of all identical (for the purposes of mapping) entities in the document
-EntityKey = tuple[str, str, str, frozenset[SynonymTermWithMetrics]]
+EntityKey = tuple[str, str, str, frozenset[LinkingCandidate]]
 
 
 def entity_to_entity_key(
@@ -33,7 +33,7 @@ def entity_to_entity_key(
         e.match,
         e.match_norm,
         e.entity_class,
-        frozenset(e.syn_term_to_synonym_terms),
+        frozenset(e.linking_candidates),
     )
 
 
@@ -85,7 +85,7 @@ class ConfidenceLevelStrategyExecution:
         if maybe_unresolved_parsers is not None:
             return maybe_unresolved_parsers
         else:
-            unresolved_parsers = set(x.parser_name for x in entity.syn_term_to_synonym_terms)
+            unresolved_parsers = set(x.parser_name for x in entity.linking_candidates)
             self.unresolved_parsers[entity_key] = unresolved_parsers
             return unresolved_parsers
 
@@ -128,21 +128,21 @@ class ConfidenceLevelStrategyExecution:
                     f"<{entity.match}> "
                 )
                 strategy.prepare(document)
-                terms_to_consider = (
-                    t
-                    for t in entity.syn_term_to_synonym_terms
-                    if t.parser_name in unresolved_parsers
+                candidates_to_consider = (
+                    t for t in entity.linking_candidates if t.parser_name in unresolved_parsers
                 )
-                terms_by_parser = sort_then_group(
-                    terms_to_consider, key_func=lambda x: x.parser_name
+                candidates_by_parser = sort_then_group(
+                    candidates_to_consider, key_func=lambda x: x.parser_name
                 )
 
-                for parser_name, terms_this_parser in terms_by_parser:
-                    terms_this_parser_set = frozenset(terms_this_parser)
+                for parser_name, terms_this_parser in candidates_by_parser:
                     for mapping in strategy(
                         ent_match=entity.match,
                         ent_match_norm=entity.match_norm,
-                        terms=terms_this_parser_set,
+                        candidates={
+                            candidate: entity.linking_candidates[candidate]
+                            for candidate in terms_this_parser
+                        },  # pass a shallow copy so that delegated implementations don't have to worry about data corruption
                         document=document,
                     ):
                         self.unresolved_parsers[entity_key].discard(mapping.parser_name)
@@ -171,7 +171,7 @@ class StrategyRunner:
 
     1. the confidence of the NER systems in the match, in that different systems vary in terms of precision and recall for detecting
        entity spans.
-    2. what SynonymTerms are associated with the entity, and from which parser they originated from.
+    2. what LinkingCandidates are associated with the entity, and from which parser they originated from.
 
     The __call__ method of this class operates as follows:
 

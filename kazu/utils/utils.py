@@ -10,7 +10,7 @@ from kazu.data.data import (
     OntologyStringResource,
     OntologyStringBehaviour,
     MentionConfidence,
-    SynonymTerm,
+    LinkingCandidate,
     Synonym,
 )
 from transformers import BatchEncoding, PreTrainedTokenizerBase
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def syn_terms_to_ontology_string_resources(
-    terms: Iterable[SynonymTerm],
+    terms: Iterable[LinkingCandidate],
 ) -> set[OntologyStringResource]:
     """
 

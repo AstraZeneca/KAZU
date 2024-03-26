@@ -9,23 +9,21 @@ See the page linked above for a quick introduction to the key concepts.
    See :ref:`deserialize-generic-metadata` for details.
 """
 
-import dataclasses
 import json
 import uuid
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum, auto, IntEnum
 from math import inf
 from typing import Any, Optional, Union
-from collections.abc import Iterable
 
 import bson
-from bson import json_util
 import cattrs.preconf.json
 import cattrs.strategies
-from numpy import ndarray, float32, float16
-
+from bson import json_util
 from kazu.utils.string_normalizer import StringNormalizer
+from numpy import ndarray, float32, float16
 
 IS_SUBSPAN = "is_subspan"
 # BIO schema
@@ -201,9 +199,9 @@ AssociatedIdSets = frozenset[EquivalentIdSet]
 
 
 @dataclass(frozen=True, eq=True)
-class SynonymTerm:
-    """A SynonymTerm is a container for a single normalised synonym, and is produced by
-    an :class:`~.OntologyParser` implementation.
+class LinkingCandidate:
+    """A LinkingCandidate is a container for a single normalised synonym, and is
+    produced by an :class:`~.OntologyParser` implementation.
 
     It may be composed of multiple terms that normalise to the same
     unique string (e.g. "breast cancer" and "Breast Cancer"). The number
@@ -230,16 +228,16 @@ class SynonymTerm:
         return len(self.associated_id_sets) > 1
 
     @staticmethod
-    def from_dict(term_dict: dict) -> "SynonymTerm":
-        return kazu_json_converter.structure(term_dict, SynonymTerm)
+    def from_dict(term_dict: dict) -> "LinkingCandidate":
+        return kazu_json_converter.structure(term_dict, LinkingCandidate)
 
 
-@dataclass(frozen=True, eq=True)
-class SynonymTermWithMetrics(SynonymTerm):
-    """Similar to SynonymTerm, but also allows metrics to be scored.
+@dataclass()
+class LinkingMetrics:
+    """Metrics for Entity Linking.
 
-    As these metrics are not used in the hash function, care should be taken when
-    hashing of this object is required.
+    LinkingMetrics holds data on various quality metrics, for how well a :class:`~.LinkingCandidate`
+     maps to a host :class:`~.Entity`\\.
     """
 
     search_score: Optional[float] = field(compare=False, default=None)
@@ -248,34 +246,11 @@ class SynonymTermWithMetrics(SynonymTerm):
     exact_match: Optional[bool] = field(compare=False, default=None)
 
     @staticmethod
-    def from_synonym_term(
-        term: SynonymTerm,
-        search_score: Optional[float] = None,
-        embed_score: Optional[float] = None,
-        bool_score: Optional[float] = None,
-        exact_match: Optional[bool] = None,
-    ) -> "SynonymTermWithMetrics":
+    def from_dict(metric_dict: dict) -> "LinkingMetrics":
+        return kazu_json_converter.structure(metric_dict, LinkingMetrics)
 
-        return SynonymTermWithMetrics(
-            search_score=search_score,
-            embed_score=embed_score,
-            bool_score=bool_score,
-            exact_match=exact_match,
-            **term.__dict__,
-        )
 
-    def merge_metrics(self, term: "SynonymTermWithMetrics") -> "SynonymTermWithMetrics":
-        new_values = {
-            k: v
-            for k, v in term.__dict__.items()
-            if k in {"search_score", "embed_score", "bool_score", "exact_match"} and v is not None
-        }
-        new_term = dataclasses.replace(self, **new_values)
-        return new_term
-
-    @staticmethod
-    def from_dict(term_dict: dict) -> "SynonymTermWithMetrics":
-        return kazu_json_converter.structure(term_dict, SynonymTermWithMetrics)
+CandidatesToMetrics = dict[LinkingCandidate, LinkingMetrics]
 
 
 @dataclass(unsafe_hash=True)
@@ -284,7 +259,7 @@ class Entity:
     single entity detected within a :class:`kazu.data.data.Section`\\ .
 
     Within an :class:`kazu.data.data.Entity`, the most important fields are :attr:`.Entity.match` (the actual string detected),
-    :attr:`.Entity.syn_term_to_synonym_terms`, a dict of :class:`kazu.data.data.SynonymTermWithMetrics` (candidates for knowledgebase hits)
+    :attr:`.Entity.linking_candidates`, a dict of :class:`kazu.data.data.CandidatesToMetrics` (candidates for knowledgebase hits)
     and :attr:`.Entity.mappings`, the final product of linked references to the underlying entity.
     """
 
@@ -304,20 +279,22 @@ class Entity:
     start: int = field(init=False, hash=False)
     end: int = field(init=False, hash=False)
     match_norm: str = field(init=False, hash=False)
-    syn_term_to_synonym_terms: dict[SynonymTermWithMetrics, SynonymTermWithMetrics] = field(
-        default_factory=dict, hash=False
-    )
+    linking_candidates: CandidatesToMetrics = field(default_factory=dict, hash=False)
 
-    def update_terms(self, terms: Iterable[SynonymTermWithMetrics]) -> None:
-        for term in terms:
-            existing_term: Optional[SynonymTermWithMetrics] = self.syn_term_to_synonym_terms.get(
-                term
-            )
-            if existing_term is not None:
-                new_term = existing_term.merge_metrics(term)
-                self.syn_term_to_synonym_terms[new_term] = new_term
-            else:
-                self.syn_term_to_synonym_terms[term] = term
+    def add_or_update_linking_candidates(self, candidates: CandidatesToMetrics) -> None:
+        for candidate, metrics in candidates.items():
+            self.add_or_update_linking_candidate(candidate, metrics)
+
+    def add_or_update_linking_candidate(
+        self, term: LinkingCandidate, new_metrics: LinkingMetrics
+    ) -> None:
+        maybe_existing_metrics = self.linking_candidates.get(term)
+        if not maybe_existing_metrics:
+            self.linking_candidates[term] = new_metrics
+        else:
+            for k, v in new_metrics.__dict__.items():
+                if v is not None:
+                    setattr(maybe_existing_metrics, k, v)
 
     def calc_starts_and_ends(self) -> tuple[int, int]:
         earliest_start = inf
@@ -597,21 +574,47 @@ def _initialize_json_converter(testing: bool = False) -> cattrs.preconf.json.Jso
     json_conv.register_unstructure_hook(MentionConfidence, lambda v: v.name)
     json_conv.register_structure_hook(MentionConfidence, lambda v, _: MentionConfidence[v])
 
+    def _linking_candidates_unstruct_hook(
+        candidates_and_metrics: CandidatesToMetrics,
+    ) -> list[list[dict[str, JsonEncodable]]]:
+        return [
+            [json_conv.unstructure(candidate), json_conv.unstructure(metrics)]
+            for candidate, metrics in candidates_and_metrics.items()
+        ]
+
     json_conv.register_unstructure_hook(
         Entity,
         cattrs.gen.make_dict_unstructure_fn(
             Entity,
             json_conv,
-            syn_term_to_synonym_terms=cattrs.gen.override(
-                rename="synonym_terms",
-                unstruct_hook=lambda v: [json_conv.unstructure(x) for x in v.values()],
-            ),
             # omit the `_id` if we're not testing, as it's an 'internal' field
             # that users won't want to see in serialized output by default,
             # and it will add to the output size.
             _id=cattrs.gen.override(omit=not testing),
+            linking_candidates=cattrs.gen.override(unstruct_hook=_linking_candidates_unstruct_hook),
             _cattrs_include_init_false=True,
             _cattrs_omit_if_default=True,
+        ),
+    )
+
+    def _linking_candidates_struct_hook(
+        candidates_and_metrics: list[list[dict[str, JsonEncodable]]],
+        _: type,
+    ) -> CandidatesToMetrics:
+        return {
+            json_conv.structure(candidate_and_metric[0], LinkingCandidate): json_conv.structure(
+                candidate_and_metric[1], LinkingMetrics
+            )
+            for candidate_and_metric in candidates_and_metrics
+        }
+
+    json_conv.register_structure_hook(
+        Entity,
+        cattrs.gen.make_dict_structure_fn(
+            Entity,
+            json_conv,
+            linking_candidates=cattrs.gen.override(struct_hook=_linking_candidates_struct_hook),
+            _cattrs_include_init_false=True,
         ),
     )
 
@@ -623,24 +626,6 @@ def _initialize_json_converter(testing: bool = False) -> cattrs.preconf.json.Jso
             _sentence_spans=cattrs.gen.override(rename="sentence_spans", omit_if_default=True),
             _cattrs_include_init_false=True,
             _cattrs_omit_if_default=True,
-        ),
-    )
-
-    def _syn_term_to_synonym_terms_struct_hook(
-        synonym_terms: list[dict[str, JsonEncodable]], _: type
-    ) -> dict[SynonymTermWithMetrics, SynonymTermWithMetrics]:
-        syn_terms = (json_conv.structure(x, SynonymTermWithMetrics) for x in synonym_terms)
-        return {st: st for st in syn_terms}
-
-    json_conv.register_structure_hook(
-        Entity,
-        cattrs.gen.make_dict_structure_fn(
-            Entity,
-            json_conv,
-            syn_term_to_synonym_terms=cattrs.gen.override(
-                rename="synonym_terms", struct_hook=_syn_term_to_synonym_terms_struct_hook
-            ),
-            _cattrs_include_init_false=True,
         ),
     )
 
