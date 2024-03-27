@@ -77,7 +77,7 @@ def test_RapidFuzzStringSimilarityScorer():
 def make_term_for_scorer_test(synonyms: Sequence[str]) -> LinkingCandidate:
 
     return LinkingCandidate(
-        terms=frozenset(synonyms),
+        raw_synonyms=frozenset(synonyms),
         synonym_norm=StringNormalizer.normalize(synonyms[0]),
         associated_id_sets=frozenset(
             (

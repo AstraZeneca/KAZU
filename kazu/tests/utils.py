@@ -157,7 +157,7 @@ def make_dummy_linking_candidate(
     embed_score: Optional[float] = None,
 ) -> tuple[LinkingCandidate, LinkingMetrics]:
     return LinkingCandidate(
-        terms=frozenset(
+        raw_synonyms=frozenset(
             (
                 "1",
                 "one",

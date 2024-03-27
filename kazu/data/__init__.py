@@ -210,7 +210,7 @@ class LinkingCandidate:
     """
 
     #: unnormalised synonym strings
-    terms: frozenset[str]
+    raw_synonyms: frozenset[str]
     #: normalised form
     synonym_norm: str
     #: ontology parser name

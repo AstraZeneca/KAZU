@@ -33,7 +33,7 @@ def syn_terms_to_ontology_string_resources(
     for term_norm, terms in sort_then_group(terms, key_func=lambda x: x.synonym_norm):
         alts = set()
         for term in terms:
-            for term_str in term.terms:
+            for term_str in term.raw_synonyms:
                 alts.add(
                     Synonym(
                         text=term_str,

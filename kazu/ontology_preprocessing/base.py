@@ -210,7 +210,7 @@ class OntologyParser(ABC):
 
             synonym_term = LinkingCandidate(
                 synonym_norm=syn_norm,
-                terms=frozenset(syn_set),
+                raw_synonyms=frozenset(syn_set),
                 is_symbolic=is_symbolic,
                 mapping_types=mapping_type_set,
                 associated_id_sets=associated_id_sets,

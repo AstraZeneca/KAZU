@@ -1048,7 +1048,7 @@ class OntologyResourceProcessor:
             )
             new_term = LinkingCandidate(
                 synonym_norm=term_norm,
-                terms=frozenset(term.text for term in resource.original_synonyms),
+                raw_synonyms=frozenset(term.text for term in resource.original_synonyms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
                 associated_id_sets=resource_associated_id_set,
