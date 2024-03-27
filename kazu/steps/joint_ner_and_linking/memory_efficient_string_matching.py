@@ -6,8 +6,7 @@ import ahocorasick
 from kazu.data import Document, Entity, MentionConfidence, LinkingMetrics, LinkingCandidate
 from kazu.database.in_memory_db import SynonymDatabase, ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import OntologyParser
-from kazu.steps import document_iterating_step
-from kazu.steps.step import ParserDependentStep
+from kazu.steps import document_iterating_step, ParserDependentStep
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
