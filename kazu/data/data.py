@@ -259,7 +259,7 @@ class Entity:
     single entity detected within a :class:`kazu.data.data.Section`\\ .
 
     Within an :class:`kazu.data.data.Entity`, the most important fields are :attr:`.Entity.match` (the actual string detected),
-    :attr:`.Entity.linking_candidates`, a dict of :class:`kazu.data.data.CandidatesToMetrics` (candidates for knowledgebase hits)
+    :attr:`.Entity.linking_candidates`, (candidates for knowledgebase hits)
     and :attr:`.Entity.mappings`, the final product of linked references to the underlying entity.
     """
 
