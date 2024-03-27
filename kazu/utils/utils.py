@@ -30,7 +30,7 @@ def syn_terms_to_ontology_string_resources(
     :return:
     """
     result = set()
-    for term_norm, terms in sort_then_group(terms, key_func=lambda x: x.term_norm):
+    for term_norm, terms in sort_then_group(terms, key_func=lambda x: x.synonym_norm):
         alts = set()
         for term in terms:
             for term_str in term.terms:

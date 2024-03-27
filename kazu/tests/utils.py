@@ -163,7 +163,7 @@ def make_dummy_linking_candidate(
                 "one",
             )
         ),
-        term_norm="1",
+        synonym_norm="1",
         parser_name=parser_name,
         associated_id_sets=frozenset(
             (

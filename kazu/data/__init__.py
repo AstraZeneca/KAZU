@@ -212,7 +212,7 @@ class LinkingCandidate:
     #: unnormalised synonym strings
     terms: frozenset[str]
     #: normalised form
-    term_norm: str
+    synonym_norm: str
     #: ontology parser name
     parser_name: str
     #: is the term symbolic? Determined by the OntologyParser

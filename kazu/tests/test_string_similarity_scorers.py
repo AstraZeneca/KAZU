@@ -57,8 +57,8 @@ def test_boolean_scorer(scorer, ent_match, matching_synonyms, not_matching_synon
 
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    assert scorer(reference_term=ent_match_norm, query_term=matching_syn_term.term_norm)
-    assert not scorer(reference_term=ent_match_norm, query_term=not_matching_syn_term.term_norm)
+    assert scorer(reference_term=ent_match_norm, query_term=matching_syn_term.synonym_norm)
+    assert not scorer(reference_term=ent_match_norm, query_term=not_matching_syn_term.synonym_norm)
 
 
 def test_RapidFuzzStringSimilarityScorer():
@@ -68,7 +68,7 @@ def test_RapidFuzzStringSimilarityScorer():
     assert (
         scorer(
             reference_term=StringNormalizer.normalize(ent_match),
-            query_term=syn_term.term_norm,
+            query_term=syn_term.synonym_norm,
         )
         > 0.0
     )
@@ -78,7 +78,7 @@ def make_term_for_scorer_test(synonyms: Sequence[str]) -> LinkingCandidate:
 
     return LinkingCandidate(
         terms=frozenset(synonyms),
-        term_norm=StringNormalizer.normalize(synonyms[0]),
+        synonym_norm=StringNormalizer.normalize(synonyms[0]),
         associated_id_sets=frozenset(
             (
                 EquivalentIdSet(

@@ -230,7 +230,7 @@ def convert_entities_to_match_ontology_data(
                 (
                     e.entity_class,
                     candidate.parser_name,
-                    candidate.term_norm,
+                    candidate.synonym_norm,
                     e.mention_confidence,
                 )
             )

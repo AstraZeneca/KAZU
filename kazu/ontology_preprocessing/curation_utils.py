@@ -670,7 +670,7 @@ class OntologyResourceProcessor:
     ]:
 
         safe_to_add = False
-        maybe_existing_term = self._terms_by_term_norm.get(term.term_norm)
+        maybe_existing_term = self._terms_by_term_norm.get(term.synonym_norm)
         if maybe_existing_term is None:
             logger.debug("adding new term %s", term)
             safe_to_add = True
@@ -689,7 +689,7 @@ class OntologyResourceProcessor:
                 term,
             )
         if safe_to_add:
-            self._terms_by_term_norm[term.term_norm] = term
+            self._terms_by_term_norm[term.synonym_norm] = term
             for equiv_ids in term.associated_id_sets:
                 for idx in equiv_ids.ids:
                     self._terms_by_id[idx].add(term)
@@ -836,7 +836,7 @@ class OntologyResourceProcessor:
             result = LinkingCandidateModificationResult.ID_SET_MODIFIED
         else:
             # if there are no longer any id sets associated with the record, remove it completely
-            self._drop_synonym_term(synonym_term.term_norm)
+            self._drop_synonym_term(synonym_term.synonym_norm)
             result = LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED
         return result
 
@@ -949,8 +949,8 @@ class OntologyResourceProcessor:
         LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
-        """Create a new :class:`~kazu.data.LinkingCandidate` for the database, or
-        return an existing matching one if already present.
+        """Create a new :class:`~kazu.data.LinkingCandidate` for the database, or return
+        an existing matching one if already present.
 
         Notes:
 
@@ -1047,7 +1047,7 @@ class OntologyResourceProcessor:
                 for syn in resource.original_synonyms
             )
             new_term = LinkingCandidate(
-                term_norm=term_norm,
+                synonym_norm=term_norm,
                 terms=frozenset(term.text for term in resource.original_synonyms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),

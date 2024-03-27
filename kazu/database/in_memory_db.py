@@ -99,7 +99,7 @@ class SynonymDatabase(metaclass=Singleton):
             self._syns_database_by_syn[name] = {}
             self._associated_id_sets_by_id[name] = {}
         for synonym in synonyms:
-            self._syns_database_by_syn[name][synonym.term_norm] = synonym
+            self._syns_database_by_syn[name][synonym.synonym_norm] = synonym
             for equiv_ids in synonym.associated_id_sets:
                 for idx in equiv_ids.ids:
                     dict_for_this_parser = self._syns_by_aggregation_strategy.setdefault(name, {})
@@ -107,7 +107,7 @@ class SynonymDatabase(metaclass=Singleton):
                         synonym.aggregated_by, {}
                     )
                     syn_set_for_this_id = dict_for_this_aggregation_strategy.setdefault(idx, set())
-                    syn_set_for_this_id.add(synonym.term_norm)
+                    syn_set_for_this_id.add(synonym.synonym_norm)
                     self._associated_id_sets_by_id[name].setdefault(idx, set()).add(
                         synonym.associated_id_sets
                     )

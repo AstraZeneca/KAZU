@@ -331,7 +331,7 @@ class SymbolMatchMappingStrategy(MappingStrategy):
         parser_name: str,
     ) -> CandidatesToMetrics:
         return {
-            k: v for k, v in candidates.items() if cls.match_symbols(ent_match_norm, k.term_norm)
+            k: v for k, v in candidates.items() if cls.match_symbols(ent_match_norm, k.synonym_norm)
         }
 
 
@@ -381,11 +381,11 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
                     candidate,
                     metrics,
                 ),
-                len(candidate.term_norm),
+                len(candidate.synonym_norm),
             )
             for candidate, metrics in candidates.items()
-            if candidate.term_norm in norm_tokens
-            and len(candidate.term_norm) >= self.min_term_norm_len_to_consider
+            if candidate.synonym_norm in norm_tokens
+            and len(candidate.synonym_norm) >= self.min_term_norm_len_to_consider
         ]
         filtered_terms_and_len.sort(key=lambda x: x[1], reverse=True)
         filtered_terms_by_len_groups = itertools.groupby(filtered_terms_and_len, key=lambda x: x[1])

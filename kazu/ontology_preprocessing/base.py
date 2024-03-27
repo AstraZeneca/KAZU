@@ -209,7 +209,7 @@ class OntologyParser(ABC):
             associated_id_sets, agg_strategy = self.score_and_group_ids(ids_and_source, is_symbolic)
 
             synonym_term = LinkingCandidate(
-                term_norm=syn_norm,
+                synonym_norm=syn_norm,
                 terms=frozenset(syn_set),
                 is_symbolic=is_symbolic,
                 mapping_types=mapping_type_set,
