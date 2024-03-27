@@ -2,7 +2,7 @@ from collections.abc import Callable
 from copy import deepcopy
 from typing import Optional
 
-from kazu.data.data import Entity, CharSpan
+from kazu.data import Entity, CharSpan
 from kazu.utils.spacy_pipeline import SpacyPipelines
 from spacy.tokens import Doc
 
@@ -99,7 +99,7 @@ class SplitOnNumericalListPatternWithPrefix:
     .. testsetup::
 
         from kazu.steps.ner.entity_post_processing import SplitOnNumericalListPatternWithPrefix
-        from kazu.data.data import Entity
+        from kazu.data import Entity
 
     .. testcode::
 

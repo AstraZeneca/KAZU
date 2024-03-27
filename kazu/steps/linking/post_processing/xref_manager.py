@@ -9,7 +9,7 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 
 from kazu.utils.caching import kazu_disk_cache
-from kazu.data.data import Mapping, IdsAndSource
+from kazu.data import Mapping, IdsAndSource
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import MappingFactory
 
 logger = logging.getLogger(__name__)

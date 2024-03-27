@@ -1,4 +1,4 @@
-from kazu.data.data import Entity
+from kazu.data import Entity
 from kazu.steps.ner.entity_post_processing import (
     NonContiguousEntitySplitter,
     SplitOnNumericalListPatternWithPrefix,

@@ -3,7 +3,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.pipeline import Pipeline
-from kazu.data.data import Document
+from kazu.data import Document
 
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="conf", config_name="config")

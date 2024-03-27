@@ -7,7 +7,7 @@ import numpy
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from kazu.utils.caching import kazu_disk_cache
-from kazu.data.data import LinkingCandidate, LinkingMetrics
+from kazu.data import LinkingCandidate, LinkingMetrics
 from kazu.database.in_memory_db import (
     MetadataDatabase,
     SynonymDatabase,

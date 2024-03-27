@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 import torch
-from kazu.data.data import Entity, ENTITY_OUTSIDE_SYMBOL, ENTITY_START_SYMBOL, IS_SUBSPAN
+from kazu.data import Entity, ENTITY_OUTSIDE_SYMBOL, ENTITY_START_SYMBOL, IS_SUBSPAN
 from torch import Tensor
 
 logger = logging.getLogger(__name__)

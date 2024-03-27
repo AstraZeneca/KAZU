@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import cast, Optional
 
 import pandas as pd
-from kazu.data.data import (
+from kazu.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     LinkingCandidate,

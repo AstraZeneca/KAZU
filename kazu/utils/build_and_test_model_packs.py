@@ -288,7 +288,7 @@ class ModelPackBuilder:
         :return: pipeline that was used to run sanity checks
         """
         from kazu.pipeline import Pipeline
-        from kazu.data.data import Document, PROCESSING_EXCEPTION
+        from kazu.data import Document, PROCESSING_EXCEPTION
 
         pipeline: Pipeline = instantiate(cfg.Pipeline)
         for test_string in self.build_config.sanity_test_strings:

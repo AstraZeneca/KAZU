@@ -7,7 +7,7 @@ from typing import Optional
 
 import pandas as pd
 import pytest
-from kazu.data.data import (
+from kazu.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     GlobalParserActions,

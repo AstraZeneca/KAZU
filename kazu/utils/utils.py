@@ -3,7 +3,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Union, overload, Any
 
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Entity,
     Section,

@@ -1,28 +1,28 @@
 disambiguation_highly_likely:
-  _target_: kazu.data.data.DisambiguationConfidence
+  _target_: kazu.data.DisambiguationConfidence
   _args_:
     - HIGHLY_LIKELY
 disambiguation_probable:
-  _target_: kazu.data.data.DisambiguationConfidence
+  _target_: kazu.data.DisambiguationConfidence
   _args_:
     - PROBABLE
 disambiguation_possible:
-  _target_: kazu.data.data.DisambiguationConfidence
+  _target_: kazu.data.DisambiguationConfidence
   _args_:
     - POSSIBLE
 disambiguation_ambiguous:
-  _target_: kazu.data.data.DisambiguationConfidence
+  _target_: kazu.data.DisambiguationConfidence
   _args_:
     - HIGHLY_LIKELY
 string_matching_highly_likely:
-  _target_: kazu.data.data.StringMatchConfidence
+  _target_: kazu.data.StringMatchConfidence
   _args_:
     - HIGHLY_LIKELY
 string_matching_probable:
-  _target_: kazu.data.data.StringMatchConfidence
+  _target_: kazu.data.StringMatchConfidence
   _args_:
     - PROBABLE
 string_matching_possible:
-  _target_: kazu.data.data.StringMatchConfidence
+  _target_: kazu.data.StringMatchConfidence
   _args_:
     - POSSIBLE

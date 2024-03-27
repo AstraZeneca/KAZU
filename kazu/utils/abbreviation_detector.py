@@ -73,7 +73,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from typing import Optional
 
-from kazu.data.data import Document, Entity, Section, MentionConfidence
+from kazu.data import Document, Entity, Section, MentionConfidence
 from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
 from spacy.matcher import Matcher
 from spacy.tokens import Span, Doc

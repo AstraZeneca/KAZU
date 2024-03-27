@@ -4,7 +4,7 @@ from copy import deepcopy
 from itertools import groupby
 from typing import Optional
 
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Entity,
     LinkingCandidate,

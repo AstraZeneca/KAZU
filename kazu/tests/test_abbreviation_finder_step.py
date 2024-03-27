@@ -1,6 +1,6 @@
 import pytest
 
-from kazu.data.data import Section, Entity, Document
+from kazu.data import Section, Entity, Document
 from kazu.steps.document_post_processing.abbreviation_finder import AbbreviationFinderStep
 
 

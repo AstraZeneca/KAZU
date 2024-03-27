@@ -8,7 +8,7 @@ from typing import Any, TypeVar, Protocol, Optional, Union
 
 from cachetools import LFUCache
 from diskcache import Cache
-from kazu.data.data import Entity, CandidatesToMetrics
+from kazu.data import Entity, CandidatesToMetrics
 from kazu.utils.utils import get_match_entity_class_hash
 
 logger = logging.getLogger(__name__)

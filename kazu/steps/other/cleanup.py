@@ -4,7 +4,7 @@ import urllib
 from collections.abc import Iterable, Callable
 from typing import Protocol, Optional
 
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Entity,
     Mapping,
@@ -103,8 +103,7 @@ class LinkingCandidateRemovalCleanupAction:
 
 
 class StripMappingURIsAction:
-    """Strip the IDs in :class:`kazu.data.data.Mapping` to just the final part of the
-    URI.
+    """Strip the IDs in :class:`kazu.data.Mapping` to just the final part of the URI.
 
     For example, this will turn
     http://purl.obolibrary.org/obo/MONDO_0004979

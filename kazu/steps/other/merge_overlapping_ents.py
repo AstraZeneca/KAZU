@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 
-from kazu.data.data import Document, Entity
+from kazu.data import Document, Entity
 from kazu.steps import Step, document_iterating_step
 
 logger = logging.getLogger(__name__)

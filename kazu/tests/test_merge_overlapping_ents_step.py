@@ -2,7 +2,7 @@ import pytest
 from omegaconf import DictConfig
 from hydra.utils import instantiate
 
-from kazu.data.data import Entity, CharSpan, Document, Mapping, StringMatchConfidence
+from kazu.data import Entity, CharSpan, Document, Mapping, StringMatchConfidence
 from kazu.steps import (
     MergeOverlappingEntsStep,
     ExplosionStringMatchingStep,

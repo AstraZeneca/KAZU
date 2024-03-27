@@ -1,6 +1,6 @@
 from typing import Any
 
-from kazu.data.data import Document
+from kazu.data import Document
 from kazu.annotation.label_studio import (
     LabelStudioAnnotationView,
     KazuToLabelStudioConverter,

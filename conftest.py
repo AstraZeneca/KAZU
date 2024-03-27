@@ -5,7 +5,7 @@ import pytest
 from hydra import compose, initialize_config_dir
 from omegaconf import DictConfig
 
-from kazu.data.data import Document, LinkingMetrics, CandidatesToMetrics
+from kazu.data import Document, LinkingMetrics, CandidatesToMetrics
 from kazu.annotation.label_studio import (
     LabelStudioManager,
 )

@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 import spacy
 
-from kazu.data.data import (
+from kazu.data import (
     MentionConfidence,
 )
 from kazu.ontology_matching.assemble_pipeline import main as assemble_pipeline

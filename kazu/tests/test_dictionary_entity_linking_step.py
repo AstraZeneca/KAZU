@@ -1,5 +1,5 @@
 from kazu.steps.linking.dictionary import DictionaryEntityLinkingStep, DictionaryIndex
-from kazu.data.data import Entity, Document
+from kazu.data import Entity, Document
 from kazu.tests.utils import DummyParser
 
 

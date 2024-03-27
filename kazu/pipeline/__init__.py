@@ -10,7 +10,7 @@ import psutil
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION
+from kazu.data import Document, PROCESSING_EXCEPTION
 from kazu.steps import Step
 from kazu.utils.utils import PathLike, as_path
 

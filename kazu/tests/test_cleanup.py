@@ -1,7 +1,7 @@
 import dataclasses
 
 from hydra.utils import instantiate
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Entity,
     Section,

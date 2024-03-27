@@ -58,7 +58,7 @@ To make use of these, and process a simple document:
 import hydra
 from hydra.utils import instantiate
 
-from kazu.data.data import Document
+from kazu.data import Document
 from kazu.pipeline import Pipeline
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from pathlib import Path
@@ -105,7 +105,7 @@ Kazu includes elements under compatible licenses (full licenses are in relevant 
 - The AddRequestIdMiddleware Starlette Middleware in req_id_header.py is modified from 'CustomHeaderMiddleware' in the [Starlette Middleware docs](https://www.starlette.io/middleware/#basehttpmiddleware).
   This is licensed under BSD 3-Clause along with the rest of Starlette.
 - The kazu-jvm folder includes files like gradelw and gradelw.bat distributed by gradle under Apache 2.0 - see the files for details.
-- [kazu/data/data.py](https://github.com/AstraZeneca/KAZU/blob/main/kazu/data/data.py) contains `AutoNameEnum`, which is `AutoName` from
+- [kazu/data.py](https://github.com/AstraZeneca/KAZU/blob/main/kazu/data.py) contains `AutoNameEnum`, which is `AutoName` from
   the [Python Enum Docs](https://docs.python.org/3/howto/enum.html#using-automatic-values) licensed under [Zero-Clause BSD](https://docs.python.org/3/license.html#zero-clause-bsd-license-for-code-in-the-python-release-documentation).
 
 ## Dataset licences

@@ -51,7 +51,7 @@ from ray import serve
 from starlette.requests import HTTPConnection, Request
 
 from kazu import __version__ as kazu_version
-from kazu.data.data import Document, Entity
+from kazu.data import Document, Entity
 from kazu.pipeline import Pipeline, PipelineValueError
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.web.routes import (

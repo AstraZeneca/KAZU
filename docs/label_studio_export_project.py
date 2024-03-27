@@ -1,5 +1,5 @@
 from kazu.annotation.label_studio import LabelStudioManager
-from kazu.data.data import Document
+from kazu.data import Document
 
 url_and_port = "http://localhost:8080"
 headers = {

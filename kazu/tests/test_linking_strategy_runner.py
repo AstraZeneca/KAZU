@@ -2,7 +2,7 @@ from typing import Optional
 
 import pytest
 
-from kazu.data.data import (
+from kazu.data import (
     Document,
     StringMatchConfidence,
     Entity,

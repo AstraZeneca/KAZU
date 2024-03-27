@@ -1,7 +1,7 @@
 import pytest
 from hydra.utils import instantiate
 
-from kazu.data.data import Document
+from kazu.data import Document
 from kazu.tests.utils import requires_model_pack, ner_long_document_test_cases
 from kazu.steps import Step
 

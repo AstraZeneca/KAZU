@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from typing import Optional
 
-from kazu.data.data import Document
+from kazu.data import Document
 from kazu.steps import Step, document_batch_step
 from kazu.utils.caching import EntityLinkingLookupCache
 from kazu.utils.grouping import sort_then_group

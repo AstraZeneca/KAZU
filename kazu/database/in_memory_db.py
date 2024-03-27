@@ -3,7 +3,7 @@ from copy import deepcopy
 from typing import Optional, Any
 from collections.abc import Iterable
 
-from kazu.data.data import (
+from kazu.data import (
     LinkingCandidate,
     EquivalentIdAggregationStrategy,
     AssociatedIdSets,

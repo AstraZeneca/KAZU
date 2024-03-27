@@ -2,7 +2,7 @@ from spacy.tokens import Token
 from spacy.tokens.underscore import Underscore
 import pytest
 
-from kazu.data.data import Section, Entity
+from kazu.data import Section, Entity
 from kazu.utils.spacy_object_mapper import KazuToSpacyObjectMapper
 
 

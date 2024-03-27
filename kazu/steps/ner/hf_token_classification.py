@@ -16,7 +16,7 @@ from transformers import (
 )
 from transformers.file_utils import PaddingStrategy
 
-from kazu.data.data import Document, Section
+from kazu.data import Document, Section
 from kazu.steps import Step, document_batch_step
 from kazu.steps.ner.entity_post_processing import NonContiguousEntitySplitter
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor, TokenizedWord
@@ -145,8 +145,8 @@ class TransformersModelForTokenClassificationNerStep(Step):
             return self.activation_fn(results)
 
     def get_dataloader(self, docs: list[Document]) -> tuple[DataLoader, dict[int, Section]]:
-        """Get a dataloader from a List of :class:`kazu.data.data.Document`. Collation
-        is handled via :class:`transformers.DataCollatorWithPadding`\\ .
+        """Get a dataloader from a List of :class:`kazu.data.Document`. Collation is
+        handled via :class:`transformers.DataCollatorWithPadding`\\ .
 
         :param docs:
         :return: The returned dict's keys map to overflow_to_sample_mapping in the

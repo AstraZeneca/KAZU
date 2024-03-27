@@ -31,7 +31,7 @@ import packaging.version
 
 from kazu.database.in_memory_db import MetadataDatabase
 
-from kazu.data.data import (
+from kazu.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     OntologyStringResource,

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, Literal
 
 import pytest
-from kazu.data.data import (
+from kazu.data import (
     OntologyStringResource,
     MentionConfidence,
     ParserAction,

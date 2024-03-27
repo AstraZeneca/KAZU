@@ -1,4 +1,4 @@
-from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
+from kazu.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.annotation.label_studio import (
     LabelStudioManager,
     LabelStudioAnnotationView,

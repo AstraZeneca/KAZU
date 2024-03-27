@@ -6,7 +6,7 @@ from rapidfuzz import fuzz
 from torch import Tensor, cosine_similarity
 from cachetools import LFUCache
 
-from kazu.data.data import NumericMetric
+from kazu.data import NumericMetric
 from kazu.utils.utils import Singleton
 from kazu.utils.sapbert import SapBertHelper
 

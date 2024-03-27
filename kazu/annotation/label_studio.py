@@ -6,12 +6,12 @@ from typing import Any, Optional, Union, cast
 from collections.abc import Iterable
 from collections.abc import (
     Mapping as CollectionsMapping,
-)  # due to name conflict with kazu.data.data.Mapping
+)  # due to name conflict with kazu.data.Mapping
 from xml.dom.minidom import Document as XMLDocument, DOMImplementation
 from xml.dom.minidom import Element, getDOMImplementation
 
 import requests
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Section,
     Entity,

@@ -3,7 +3,7 @@ from typing import Iterable
 import pytest
 from hydra.utils import instantiate
 
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Mapping,
     StringMatchConfidence,

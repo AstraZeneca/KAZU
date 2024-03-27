@@ -1,7 +1,7 @@
 import dataclasses
 import uuid
 
-from kazu.data.data import Document, Entity
+from kazu.data import Document, Entity
 from kazu.steps.linking.entity_class_disambiguation import (
     EntityClassDisambiguationStep,
     DisambiguationEntry,

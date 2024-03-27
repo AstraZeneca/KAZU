@@ -12,7 +12,7 @@ from scipy.sparse import csr_matrix, vstack
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.utils.extmath import safe_sparse_dot
 
-from kazu.data.data import EquivalentIdSet
+from kazu.data import EquivalentIdSet
 from kazu.database.in_memory_db import SynonymDatabase
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.utils import create_char_ngrams, create_word_ngrams, Singleton

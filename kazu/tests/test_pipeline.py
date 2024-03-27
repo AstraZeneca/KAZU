@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from hydra.utils import instantiate
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION
+from kazu.data import Document, PROCESSING_EXCEPTION
 from kazu.pipeline import FailedDocsFileHandler, Pipeline, PipelineValueError
 from kazu.steps import Step, document_iterating_step
 from kazu.tests.utils import requires_model_pack

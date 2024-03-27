@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Iterable, Protocol
 
-from kazu.data.data import OntologyStringResource, MentionConfidence, OntologyStringBehaviour
+from kazu.data import OntologyStringResource, MentionConfidence, OntologyStringBehaviour
 from kazu.utils.string_normalizer import StringNormalizer
 
 

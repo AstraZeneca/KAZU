@@ -1,5 +1,5 @@
 import pytest
-from kazu.data.data import (
+from kazu.data import (
     OntologyStringResource,
     Synonym,
     MentionConfidence,

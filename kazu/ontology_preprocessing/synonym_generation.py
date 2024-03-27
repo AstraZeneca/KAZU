@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Optional
 
-from kazu.data.data import OntologyStringResource, Synonym
+from kazu.data import OntologyStringResource, Synonym
 from kazu.language.language_phenomena import GREEK_SUBS, DASHES
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from kazu.utils.utils import PathLike

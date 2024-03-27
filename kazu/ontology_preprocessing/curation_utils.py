@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from enum import auto
 from typing import Optional, Literal, Any
 
-from kazu.data.data import (
+from kazu.data import (
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,
     LinkingCandidate,
@@ -40,10 +40,9 @@ class CurationError(Exception):
 def load_ontology_string_resources(
     path: PathLike,
 ) -> set[OntologyStringResource]:
-    """Load :class:`kazu.data.data.OntologyStringResource`\\ s from a file path or
-    directory.
+    """Load :class:`kazu.data.OntologyStringResource`\\ s from a file path or directory.
 
-    :param path: path to a jsonl file or directory of jsonl files that map to :class:`kazu.data.data.OntologyStringResource`
+    :param path: path to a jsonl file or directory of jsonl files that map to :class:`kazu.data.OntologyStringResource`
     :return:
     """
     resources_path = as_path(path)
@@ -78,11 +77,11 @@ def dump_ontology_string_resources(
     force: bool = False,
     split_at: int = 10000,
 ) -> None:
-    """Dump an iterable of :class:`kazu.data.data.OntologyStringResource`\\s to the file
+    """Dump an iterable of :class:`kazu.data.OntologyStringResource`\\s to the file
     system.
 
     :param terms: terms to dump
-    :param path: path to a directory of json lines files that map to :class:`kazu.data.data.OntologyStringResource`
+    :param path: path to a directory of json lines files that map to :class:`kazu.data.OntologyStringResource`
     :param force: override existing directory, if it exists
     :param split_at: number of lines per partition
     :return:
@@ -135,7 +134,7 @@ class OntologyResourceSetIntegrityReport:
 
 class OntologyStringConflictAnalyser:
     """Find and potentially fix conflicting behaviour in a set of
-    :class:`kazu.data.data.OntologyStringResource`\\s."""
+    :class:`kazu.data.OntologyStringResource`\\s."""
 
     CLEAN_RESOURCES_FN = "clean_resources.jsonl"
     MERGED_RESOURCES_FN = "merged_resources.jsonl"
@@ -161,14 +160,14 @@ class OntologyStringConflictAnalyser:
         Conflicts can occur for the following reasons:
 
         1) If two or more resources normalise to the same string,
-           but have different :class:`kazu.data.data.OntologyStringBehaviour`\\.
+           but have different :class:`kazu.data.OntologyStringBehaviour`\\.
 
         2) If two or more resources normalise to the same value,
            but have different associated ID sets specified, such that one would
            override the other.
 
         3) If two or more resources have conflicting values for case sensitivity and
-           :class:`kazu.data.data.MentionConfidence`\\. E.g. A case-insensitive resource
+           :class:`kazu.data.MentionConfidence`\\. E.g. A case-insensitive resource
            cannot have a higher mention confidence value than a case-sensitive one for
            the same string.
 
@@ -950,7 +949,7 @@ class OntologyResourceProcessor:
         LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
-        """Create a new :class:`~kazu.data.data.LinkingCandidate` for the database, or
+        """Create a new :class:`~kazu.data.LinkingCandidate` for the database, or
         return an existing matching one if already present.
 
         Notes:
@@ -962,7 +961,7 @@ class OntologyResourceProcessor:
         If so, no action will be taken. If not, a warning will be logged as adding it
         will cause irregularities in the database.
 
-        If the term_norm does not exist, this method will create a new :class:`~kazu.data.data.LinkingCandidate`
+        If the term_norm does not exist, this method will create a new :class:`~kazu.data.LinkingCandidate`
         with the provided :class:`.AssociatedIdSets`\\.
 
         :param resource:

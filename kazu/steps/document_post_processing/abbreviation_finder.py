@@ -1,6 +1,6 @@
 from typing import Optional
 
-from kazu.data.data import Document
+from kazu.data import Document
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.abbreviation_detector import KazuAbbreviationDetector
 

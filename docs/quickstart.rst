@@ -118,7 +118,7 @@ The below code assumes a standard ``.py`` file (or console), if you wish to use 
     import hydra
     from hydra.utils import instantiate
 
-    from kazu.data.data import Document
+    from kazu.data import Document
     from kazu.pipeline import Pipeline
     from kazu.utils.constants import HYDRA_VERSION_BASE
     from pathlib import Path
@@ -174,7 +174,7 @@ the `hydra compose API <https://hydra.cc/docs/advanced/compose_api/>`_\ :
     from hydra import compose, initialize_config_dir
     from hydra.utils import instantiate
 
-    from kazu.data.data import Document
+    from kazu.data import Document
     from kazu.pipeline import Pipeline
     from kazu.utils.constants import HYDRA_VERSION_BASE
     from pathlib import Path

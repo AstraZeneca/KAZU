@@ -1,6 +1,6 @@
 .. testcode::
 
-    from kazu.data.data import Document, Entity
+    from kazu.data import Document, Entity
     from kazu.steps.document_post_processing.abbreviation_finder import (
         AbbreviationFinderStep,
     )

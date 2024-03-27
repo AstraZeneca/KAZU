@@ -7,7 +7,7 @@ except ImportError as e:
         "You can either install stanza yourself, or install kazu[all-steps].\n"
     ) from e
 
-from kazu.data.data import Document, CharSpan
+from kazu.data import Document, CharSpan
 from kazu.steps import Step, document_iterating_step
 
 

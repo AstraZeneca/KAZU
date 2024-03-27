@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Protocol, TypeVar
 from collections.abc import Iterable, Callable
 
-from kazu.data.data import Document, PROCESSING_EXCEPTION
+from kazu.data import Document, PROCESSING_EXCEPTION
 from kazu.ontology_preprocessing.base import OntologyParser
 
 
@@ -60,12 +60,12 @@ Self = TypeVar("Self")
 def document_iterating_step(
     per_doc_callable: Callable[[Self, Document], Any]
 ) -> Callable[[Self, list[Document]], tuple[list[Document], list[Document]]]:
-    """Handle a list of :class:`~kazu.data.data.Document`\\ s and add error handling.
+    """Handle a list of :class:`~kazu.data.Document`\\ s and add error handling.
 
-    Use this to decorate a method that processes a single :class:`~kazu.data.data.Document`\\ .
+    Use this to decorate a method that processes a single :class:`~kazu.data.Document`\\ .
     The resulting method will then iterate over a list of
-    :class:`~kazu.data.data.Document`\\ s, calling the decorated function for each
-    :class:`~kazu.data.data.Document`\\ . Errors are handled automatically and added to the
+    :class:`~kazu.data.Document`\\ s, calling the decorated function for each
+    :class:`~kazu.data.Document`\\ . Errors are handled automatically and added to the
     ``PROCESSING_EXCEPTION`` metadata of documents, with failed docs returned as the second element
     of the return value, as expected by :meth:`Step.__call__`\\ .
 
@@ -106,9 +106,9 @@ def document_batch_step(
     batch_doc_callable: Callable[[Self, list[Document]], Any]
 ) -> Callable[[Self, list[Document]], tuple[list[Document], list[Document]]]:
     """Add error handling to a method that processes batches of
-    :class:`~kazu.data.data.Document`\\ s.
+    :class:`~kazu.data.Document`\\ s.
 
-    Use this to decorate a method that processes a batch of :class:`~kazu.data.data.Document`\\ s
+    Use this to decorate a method that processes a batch of :class:`~kazu.data.Document`\\ s
     at a time. The resulting method will wrap a call to the decorated function with error handling
     which will add exceptions to the ``PROCESSING_EXCEPTION`` metadata of documents. Failed
     documents will be returned as the second element of the return value, as expected by

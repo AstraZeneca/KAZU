@@ -3,7 +3,7 @@ from sys import maxunicode
 from typing import Union
 
 import pytest
-from kazu.data.data import (
+from kazu.data import (
     OntologyStringResource,
     MentionConfidence,
     OntologyStringBehaviour,

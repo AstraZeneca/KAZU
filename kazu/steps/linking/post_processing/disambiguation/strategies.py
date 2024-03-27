@@ -7,7 +7,7 @@ from os import getenv
 from typing import Optional
 
 import numpy as np
-from kazu.data.data import (
+from kazu.data import (
     Document,
     EquivalentIdSet,
     EquivalentIdAggregationStrategy,

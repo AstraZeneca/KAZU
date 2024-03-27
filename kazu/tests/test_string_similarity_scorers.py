@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from kazu.data.data import EquivalentIdSet, EquivalentIdAggregationStrategy, LinkingCandidate
+from kazu.data import EquivalentIdSet, EquivalentIdAggregationStrategy, LinkingCandidate
 from kazu.language.string_similarity_scorers import (
     EntitySubtypeStringSimilarityScorer,
     NumberMatchStringSimilarityScorer,

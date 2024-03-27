@@ -7,7 +7,7 @@ from spacy.matcher import Matcher
 from spacy.tokens import Span
 
 
-from kazu.data.data import Document, Entity, Section, AutoNameEnum
+from kazu.data import Document, Entity, Section, AutoNameEnum
 from kazu.steps import document_iterating_step, Step
 from kazu.utils.spacy_pipeline import (
     SpacyPipelines,

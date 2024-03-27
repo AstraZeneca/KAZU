@@ -10,7 +10,7 @@ except ImportError as e:
         "You can either install py4j yourself, or install kazu[all-steps].\n"
     ) from e
 
-from kazu.data.data import Document, Entity, Mapping, StringMatchConfidence
+from kazu.data import Document, Entity, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step
 
 

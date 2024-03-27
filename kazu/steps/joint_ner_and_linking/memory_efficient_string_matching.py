@@ -3,7 +3,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 import ahocorasick
-from kazu.data.data import Document, Entity, MentionConfidence, LinkingMetrics, LinkingCandidate
+from kazu.data import Document, Entity, MentionConfidence, LinkingMetrics, LinkingCandidate
 from kazu.database.in_memory_db import SynonymDatabase, ParserName, NormalisedSynonymStr
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.steps import document_iterating_step

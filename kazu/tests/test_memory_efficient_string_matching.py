@@ -2,7 +2,7 @@ import dataclasses
 from collections.abc import Iterable
 
 import pytest
-from kazu.data.data import (
+from kazu.data import (
     MentionConfidence,
     Document,
     Entity,

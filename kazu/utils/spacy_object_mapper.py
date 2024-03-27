@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from kazu.data.data import Section, Entity
+from kazu.data import Section, Entity
 from kazu.utils.spacy_pipeline import SpacyPipelines, BASIC_PIPELINE_NAME, basic_spacy_pipeline
 from spacy.tokens import Doc, Span, Token
 

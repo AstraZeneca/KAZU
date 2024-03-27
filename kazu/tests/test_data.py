@@ -2,7 +2,7 @@ from hypothesis import assume, given, settings, strategies as st
 import bson
 import pytest
 
-from kazu.data.data import (
+from kazu.data import (
     EquivalentIdSet,
     Mapping,
     LinkingCandidate,

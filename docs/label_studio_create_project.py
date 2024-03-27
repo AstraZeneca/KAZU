@@ -2,7 +2,7 @@ from kazu.annotation.label_studio import (
     LabelStudioManager,
     LabelStudioAnnotationView,
 )
-from kazu.data.data import Document
+from kazu.data import Document
 
 docs: list[Document]
 

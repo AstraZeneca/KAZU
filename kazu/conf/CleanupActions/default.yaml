@@ -3,7 +3,7 @@ MappingFilterCleanupAction:
   filter_fns:
     - _target_: kazu.steps.other.cleanup.DropMappingsByConfidenceMappingFilter
       disambiguation_ranks_to_drop:
-        - _target_: kazu.data.data.DisambiguationConfidence
+        - _target_: kazu.data.DisambiguationConfidence
           _args_:
             - AMBIGUOUS
       string_match_ranks_to_drop:

@@ -4,7 +4,7 @@ from abc import ABC
 from collections.abc import Iterable
 from typing import Optional
 
-from kazu.data.data import (
+from kazu.data import (
     Document,
     Mapping,
     EquivalentIdSet,

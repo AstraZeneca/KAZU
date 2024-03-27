@@ -1,18 +1,18 @@
 Kazu Data Model
 ================================
 
-The Kazu datamodel is based around the concepts of :class:`kazu.data.data.Document`\ s and :class:`kazu.steps.step.Step`\ s. Steps are run over documents,
+The Kazu datamodel is based around the concepts of :class:`kazu.data.Document`\ s and :class:`kazu.steps.step.Step`\ s. Steps are run over documents,
 generally returning the original document with additional information added.
 
 
-Documents are composed of a sequence of :class:`kazu.data.data.Section`\ s (for instance: title, body). A :class:`~kazu.data.data.Section` is a container
+Documents are composed of a sequence of :class:`kazu.data.Section`\ s (for instance: title, body). A :class:`~kazu.data.Section` is a container
 for text and metadata (such as entities detected by an NER step).
 
 .. include:: single_step_example.rst
 
 For convenience, and to handle additional logging/failure events, Steps can be wrapped in a :class:`kazu.pipeline.Pipeline`\ .
 
-For further data model documentation, please see the API docs for :class:`kazu.data.data.Entity`, :class:`kazu.data.data.LinkingCandidate` etc.
+For further data model documentation, please see the API docs for :class:`kazu.data.Entity`, :class:`kazu.data.LinkingCandidate` etc.
 
 .. _data-serialization:
 
@@ -28,7 +28,7 @@ a :meth:`~.Document.from_dict` method.
 
 .. note::
    Under the hood, Kazu uses `cattrs <https://catt.rs/en/stable/index.html>`_ for its (de)serialization,
-   so if you are already familiar with ``cattrs``, you may prefer to use :attr:`kazu.data.data.kazu_json_converter`
+   so if you are already familiar with ``cattrs``, you may prefer to use :attr:`kazu.data.kazu_json_converter`
    directly instead.
 
 .. _deserialize-generic-metadata:
@@ -54,7 +54,7 @@ as this is required in json.
 Kazu uses `cattrs <https://catt.rs/en/stable/index.html>`_ for its (de)serialization, which means that
 primitives, enums and python :external+python:mod:`dataclasses` (with fields that are themselves supported)
 are supported out of the box for serialization as values in the ``metadata`` dictionary.
-As a result, all dataclasses and Enums in ``kazu.data.data`` will serialize without errors when stored inside
+As a result, all dataclasses and Enums in ``kazu.data`` will serialize without errors when stored inside
 one of these ``metadata`` fields.
 
 Unfortunately, deserializing this output will leave the result containing dictionaries representing the relevant class/enum,
@@ -62,7 +62,7 @@ rather than instances of the same class you originally had:
 
 .. testcode::
 
-    from kazu.data.data import Document, Section
+    from kazu.data import Document, Section
 
     doc = Document(
         idx="my_doc_id",
@@ -87,7 +87,7 @@ However, you can work around this with cattrs by deserializing the metadata sect
 
 .. testcode::
 
-    from kazu.data.data import kazu_json_converter
+    from kazu.data import kazu_json_converter
 
     # continuing from above
     doc_dict["metadata"] = kazu_json_converter.structure(

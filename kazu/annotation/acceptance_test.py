@@ -10,7 +10,7 @@ from collections.abc import Iterable
 import hydra
 from hydra.utils import instantiate
 
-from kazu.data.data import Entity, Document, IdsAndSource
+from kazu.data import Entity, Document, IdsAndSource
 from kazu.pipeline import Pipeline
 from kazu.utils.constants import HYDRA_VERSION_BASE
 from kazu.utils.grouping import sort_then_group

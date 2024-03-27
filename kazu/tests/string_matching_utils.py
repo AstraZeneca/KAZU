@@ -21,7 +21,7 @@ import pytest
 # internal import, but we only use it for type annotation
 from _pytest.mark import ParameterSet
 
-from kazu.data.data import (
+from kazu.data import (
     OntologyStringResource,
     MentionConfidence,
     OntologyStringBehaviour,

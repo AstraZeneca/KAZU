@@ -2,7 +2,7 @@ import pytest
 import requests
 from omegaconf import DictConfig
 
-from kazu.data.data import Document
+from kazu.data import Document
 from kazu.tests.utils import requires_model_pack, maybe_skip_server_tests
 from kazu.web.routes import (
     KAZU,

@@ -22,7 +22,7 @@ Our recommended workflow is as follows:
    .. literalinclude:: label_studio_export_project.py
       :language: python
 
-4) Your 'gold standard' entities will now be accessible on the :attr:`kazu.data.data.Section.metadata` dictionary with the key: 'gold_entities'
+4) Your 'gold standard' entities will now be accessible on the :attr:`kazu.data.Section.metadata` dictionary with the key: 'gold_entities'
 
 
 For an example of how we integrate label studio into the Kazu acceptance tests, take a look at :func:`kazu.annotation.acceptance_test.analyse_full_pipeline`

@@ -13,7 +13,7 @@ except ImportError as e:
         "You can either install these yourself, or install kazu[all-steps].\n"
     ) from e
 
-from kazu.data.data import Document, Entity, CharSpan, Mapping, StringMatchConfidence
+from kazu.data import Document, Entity, CharSpan, Mapping, StringMatchConfidence
 from kazu.steps import Step, document_iterating_step
 
 
@@ -105,7 +105,7 @@ class OpsinStep(Step):
 
         from hydra.utils import instantiate
 
-        from kazu.data.data import Mapping
+        from kazu.data import Mapping
         from kazu.steps.ner.opsin import OpsinStep
 
         opsin_step: OpsinStep = instantiate(kazu_config.OpsinStep)

@@ -2,7 +2,7 @@ import logging
 from collections.abc import Iterator, Iterable
 from typing import cast
 
-from kazu.data.data import (
+from kazu.data import (
     CharSpan,
     Document,
     Section,

@@ -1,5 +1,5 @@
 import pytest
-from kazu.data.data import Document, Entity, Section
+from kazu.data import Document, Entity, Section
 from kazu.steps.linking.rules_based_disambiguation import (
     RulesBasedEntityClassDisambiguationFilterStep,
     SpacyMatcherRules,

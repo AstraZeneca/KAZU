@@ -1,6 +1,6 @@
 from hydra.utils import instantiate
 
-from kazu.data.data import Document, Entity
+from kazu.data import Document, Entity
 from kazu.tests.utils import requires_model_pack
 
 test_text = (
