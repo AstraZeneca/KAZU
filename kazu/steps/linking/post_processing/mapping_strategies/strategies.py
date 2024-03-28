@@ -172,7 +172,7 @@ class MappingStrategy(ABC):
 
         Ideally, this will be a dict with a single element. However, it may not be possible to
         identify a single best match. In this scenario, the id sets of multiple
-        :class:`.LinkingCandidates` will be carried forward for disambiguation
+        :class:`.LinkingCandidate`\\ s will be carried forward for disambiguation
         (if configured).
 
         :param ent_match: the raw entity string.

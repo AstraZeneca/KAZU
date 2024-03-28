@@ -755,7 +755,7 @@ class OntologyStringResource:
     For each LinkingCandidate, a default OntologyStringResource is produced with its
     behaviour determined by an instance of
     :class:`kazu.ontology_preprocessing.autocuration.AutoCurator` and the
-    :class:`kazu.ontology_preprocessing.curation_utils.OntologyStringResourceConflictAnalyser`\\.
+    :class:`kazu.ontology_preprocessing.curation_utils.OntologyStringConflictAnalyser`\\.
 
     .. note::
 
