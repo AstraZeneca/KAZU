@@ -111,7 +111,7 @@ class MappingStrategy(ABC):
 
     This is performed in two steps:
 
-    1. Filter the set of :class:`.CandidatesToMetrics` associated with an :class:`.Entity` down
+    1. Filter the set of :data:`~.CandidatesToMetrics` associated with an :class:`.Entity` down
        to the most appropriate ones, (e.g. based on string similarity).
 
     2. If required, apply any configured :class:`.DisambiguationStrategy` to the filtered instances
@@ -133,7 +133,7 @@ class MappingStrategy(ABC):
         :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
             for human users, and has no bearing on the actual algorithm.
         :param disambiguation_strategies: after :meth:`filter_candidates` is called, these strategies are triggered if either
-            multiple entries of :class:`.CandidatesToMetrics` remain, and/or any of them are ambiguous.
+            multiple entries of :data:`~.CandidatesToMetrics` remain, and/or any of them are ambiguous.
         :param disambiguation_essential: disambiguation strategies MUST deliver a result, in order for this strategy to pass.
         """
 
@@ -168,7 +168,7 @@ class MappingStrategy(ABC):
         parser_name: str,
     ) -> CandidatesToMetrics:
         """Algorithms should override this method to return the "best"
-        :class:`.CandidatesToMetrics` for a given query string.
+        :data:`~.CandidatesToMetrics` for a given query string.
 
         Ideally, this will be a dict with a single element. However, it may not be possible to
         identify a single best match. In this scenario, the id sets of multiple
@@ -336,10 +336,10 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 
 class SynNormIsSubStringMappingStrategy(MappingStrategy):
-    """For a :class:`.CandidatesToMetrics`, see if any of their .synonym_norm are string
+    """For a :data:`~.CandidatesToMetrics`, see if any of their .synonym_norm are string
     matches of the match_norm tokens based on whitespace tokenisation.
 
-    If exactly one element of :class:`.CandidatesToMetrics` matches, prefer it.
+    If exactly one element of :data:`~.CandidatesToMetrics` matches, prefer it.
 
     Works best on symbolic entities, e.g. "TESTIN gene" ->"TESTIN".
     """
@@ -357,7 +357,7 @@ class SynNormIsSubStringMappingStrategy(MappingStrategy):
         :param disambiguation_strategies:
         :param disambiguation_essential:
         :param min_syn_norm_len_to_consider: only consider elements of
-            :class:`.CandidatesToMetrics` where the length of :attr:`~.LinkingCandidate.synonym_norm` is
+            :data:`~.CandidatesToMetrics` where the length of :attr:`~.LinkingCandidate.synonym_norm` is
             equal to or greater than this value.
         """
         super().__init__(
@@ -401,7 +401,7 @@ class SynNormIsSubStringMappingStrategy(MappingStrategy):
 
 class StrongMatchMappingStrategy(MappingStrategy):
     """
-    1. sort :class:`.CandidatesToMetrics` by highest scoring search match to identify the
+    1. sort :data:`~.CandidatesToMetrics` by highest scoring search match to identify the
        highest scoring match.
     2. query remaining matches to see whether their scores are greater than this best score - the
        differential (i.e. there are many close string matches).
@@ -480,7 +480,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
 class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMappingStrategy):
     """Same as parent class, but a complex string scorer with a predefined threshold is
     used to confirm that the ent_match is broadly similar to one of the candidates
-    attached to the :class:`.CandidatesToMetrics`\\ .
+    attached to the :data:`~.CandidatesToMetrics`\\ .
 
     Useful for refining non-symbolic close string matches (e.g. "Neck disease" and "Heck
     disease").

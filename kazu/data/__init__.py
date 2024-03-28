@@ -251,6 +251,12 @@ class LinkingMetrics:
 
 
 CandidatesToMetrics = dict[LinkingCandidate, LinkingMetrics]
+"""This type is used whenever we have :class:`~.LinkingCandidate`\\ s and some metrics
+for how well they map to a specific :class:`~.Entity`\\.
+
+In particular, :attr:`~.Entity.linking_candidates` holds relevant candidates and their metrics, and this type is used in parts
+of kazu which produce, modify or use this field.
+"""
 
 
 @dataclass(unsafe_hash=True)
