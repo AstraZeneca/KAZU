@@ -335,7 +335,7 @@ class SymbolMatchMappingStrategy(MappingStrategy):
         }
 
 
-class TermNormIsSubStringMappingStrategy(MappingStrategy):
+class SynNormIsSubStringMappingStrategy(MappingStrategy):
     """For a :class:`.CandidatesToMetrics`, see if any of their .synonym_norm are string
     matches of the match_norm tokens based on whitespace tokenisation.
 

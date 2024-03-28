@@ -18,7 +18,7 @@ from kazu.ontology_preprocessing.base import IDX, DEFAULT_LABEL, SYN, MAPPING_TY
 from kazu.steps.linking.post_processing.mapping_strategies.strategies import (
     ExactMatchMappingStrategy,
     SymbolMatchMappingStrategy,
-    TermNormIsSubStringMappingStrategy,
+    SynNormIsSubStringMappingStrategy,
     StrongMatchMappingStrategy,
     StrongMatchWithEmbeddingConfirmationStringMatchingStrategy,
 )
@@ -141,7 +141,7 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
     check_correct_candidates_selected({target_candidate}, mappings)
 
 
-def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
+def test_SynNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     candidates, parser = set_up_p27_test_case
     text1 = "CDKN1B gene has the wrong NER spans on it"
     ent_match = "CDKN1B gene"
@@ -161,7 +161,7 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
     p27_ent.add_or_update_linking_candidates(candidates)
 
     doc.sections[0].entities.append(p27_ent)
-    strategy = TermNormIsSubStringMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
+    strategy = SynNormIsSubStringMappingStrategy(confidence=StringMatchConfidence.HIGHLY_LIKELY)
     strategy.prepare(doc)
     mappings = list(
         strategy(

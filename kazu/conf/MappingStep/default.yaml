@@ -16,7 +16,7 @@ strategy_runner:
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
           confidence: ${confidence.string_matching_probable}
           disambiguation_strategies: ${DisambiguationStrategies.default}
-        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
+        - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SynNormIsSubStringMappingStrategy
           confidence: ${confidence.string_matching_probable}
           disambiguation_strategies: ${DisambiguationStrategies.default}
         - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
@@ -35,7 +35,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SynNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
@@ -50,7 +50,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.default}
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SynNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.default}
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
@@ -68,7 +68,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SynNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
 
@@ -137,7 +137,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.ExactMatchMappingStrategy
             confidence: ${confidence.string_matching_highly_likely}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SynNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.gene}
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.StrongMatchMappingStrategy
@@ -168,7 +168,7 @@ strategy_runner:
           - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SymbolMatchMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
-          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.TermNormIsSubStringMappingStrategy
+          - _target_: kazu.steps.linking.post_processing.mapping_strategies.strategies.SynNormIsSubStringMappingStrategy
             confidence: ${confidence.string_matching_probable}
             disambiguation_strategies: ${DisambiguationStrategies.cell_line}
     PROBABLE:
