@@ -70,7 +70,7 @@ class MinLength(AutoCurationAction):
         for syn in resource.original_synonyms:
             if len(syn.text) < self.min_len:
                 return dataclasses.replace(
-                    resource, behaviour=OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+                    resource, behaviour=OntologyStringBehaviour.DROP_FOR_LINKING
                 )
 
         return resource
@@ -84,9 +84,7 @@ class MaxLength(AutoCurationAction):
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
         if any(len(syn.text) > self.max_len for syn in resource.original_synonyms):
-            return dataclasses.replace(
-                resource, behaviour=OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
-            )
+            return dataclasses.replace(resource, behaviour=OntologyStringBehaviour.DROP_FOR_LINKING)
         else:
             return resource
 

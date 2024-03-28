@@ -666,11 +666,11 @@ class OntologyStringBehaviour(AutoNameEnum):
     ADD_FOR_NER_AND_LINKING = auto()
     #: use the resource only as a linking target. Note, this is not required if the resource is already in the
     #: underlying ontology, as all ontology resources are included as linking targets by default
-    #: (Also see DROP_SYNONYM_TERM_FOR_LINKING)
+    #: (Also see DROP_FOR_LINKING)
     ADD_FOR_LINKING_ONLY = auto()
     #: do not use this resource as a linking target. Normally, you would use this for a resource you want to remove
     #: from the underlying ontology (e.g. a 'bad' synonym). If the resource does not exist, has no effect
-    DROP_SYNONYM_TERM_FOR_LINKING = auto()
+    DROP_FOR_LINKING = auto()
 
 
 class ParserBehaviour(AutoNameEnum):

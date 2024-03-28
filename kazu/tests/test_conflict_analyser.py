@@ -188,7 +188,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
                 ),
             ]
         ),
-        behaviour=OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+        behaviour=OntologyStringBehaviour.DROP_FOR_LINKING,
     )
     case_conflict_resource = OntologyStringResource(
         original_synonyms=frozenset(

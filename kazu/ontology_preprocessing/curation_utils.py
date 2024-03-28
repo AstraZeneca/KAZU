@@ -255,8 +255,8 @@ class OntologyStringConflictAnalyser:
                 if resource.associated_id_sets is not None:
                     assoc_id_sets.update(resource.associated_id_sets)
 
-            if OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING in behaviours:
-                chosen_behaviour = OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING
+            if OntologyStringBehaviour.DROP_FOR_LINKING in behaviours:
+                chosen_behaviour = OntologyStringBehaviour.DROP_FOR_LINKING
             elif OntologyStringBehaviour.ADD_FOR_LINKING_ONLY in behaviours:
                 chosen_behaviour = OntologyStringBehaviour.ADD_FOR_LINKING_ONLY
             else:
@@ -620,7 +620,7 @@ class OntologyResourceProcessor:
     BEHAVIOUR_APPLICATION_ORDER = (
         OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,
-        OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING,
+        OntologyStringBehaviour.DROP_FOR_LINKING,
     )
     _BEHAVIOUR_TO_ORDER_INDEX = {behav: i for i, behav in enumerate(BEHAVIOUR_APPLICATION_ORDER)}
 
@@ -867,7 +867,7 @@ class OntologyResourceProcessor:
 
     def _process_resource_action(self, resource: OntologyStringResource) -> OntologyStringResource:
 
-        if resource.behaviour is OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
+        if resource.behaviour is OntologyStringBehaviour.DROP_FOR_LINKING:
             self._drop_linking_candidate(resource.syn_norm_for_linking(self.entity_class))
         elif resource.behaviour is OntologyStringBehaviour.ADD_FOR_LINKING_ONLY:
             self._attempt_to_add_database_entry_for_resource(
