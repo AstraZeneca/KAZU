@@ -273,7 +273,7 @@ class Entity:
     match: str
     entity_class: str
     spans: frozenset[CharSpan]
-    #: # namespace of the :class:`~.Step` that produced this instance
+    #: namespace of the :class:`~.Step` that produced this instance
     namespace: str
     mention_confidence: MentionConfidence = MentionConfidence.HIGHLY_LIKELY
     _id: str = field(default_factory=lambda: uuid.uuid4().hex)
