@@ -600,8 +600,8 @@ class OntologyStringConflictAnalyser:
 
 class LinkingCandidateModificationResult(AutoNameEnum):
     ID_SET_MODIFIED = auto()
-    SYNONYM_TERM_ADDED = auto()
-    SYNONYM_TERM_DROPPED = auto()
+    LINKING_CANDIDATE_ADDED = auto()
+    LINKING_CANDIDATE_DROPPED = auto()
     NO_ACTION = auto()
 
 
@@ -665,7 +665,7 @@ class OntologyResourceProcessor:
     def _update_candidate_lookups(
         self, candidate: LinkingCandidate, override: bool
     ) -> Literal[
-        LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
+        LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
 
@@ -695,7 +695,7 @@ class OntologyResourceProcessor:
             for equiv_ids in candidate.associated_id_sets:
                 for idx in equiv_ids.ids:
                     self._candidates_by_id[idx].add(candidate)
-            return LinkingCandidateModificationResult.SYNONYM_TERM_ADDED
+            return LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED
         else:
             return LinkingCandidateModificationResult.NO_ACTION
 
@@ -738,7 +738,7 @@ class OntologyResourceProcessor:
     ) -> Counter[
         Literal[
             LinkingCandidateModificationResult.ID_SET_MODIFIED,
-            LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
+            LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED,
             LinkingCandidateModificationResult.NO_ACTION,
         ]
     ]:
@@ -764,7 +764,7 @@ class OntologyResourceProcessor:
         self, id_to_drop: Idx, candidate_to_modify: LinkingCandidate
     ) -> Literal[
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
-        LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
+        LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
         """Remove an id from a given :class:`.LinkingCandidate`\\ .
@@ -813,7 +813,7 @@ class OntologyResourceProcessor:
         self, new_associated_id_sets: AssociatedIdSets, candidate: LinkingCandidate
     ) -> Literal[
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
-        LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
+        LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED,
     ]:
         """Modifies or drops a :class:`.LinkingCandidate` after a
         :class:`.AssociatedIdSets` has changed.
@@ -824,7 +824,7 @@ class OntologyResourceProcessor:
         """
         result: Literal[
             LinkingCandidateModificationResult.ID_SET_MODIFIED,
-            LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
+            LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED,
         ]
         if len(new_associated_id_sets) > 0:
             if new_associated_id_sets == candidate.associated_id_sets:
@@ -839,12 +839,12 @@ class OntologyResourceProcessor:
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
             add_result = self._update_candidate_lookups(new_candidate, True)
-            assert add_result is LinkingCandidateModificationResult.SYNONYM_TERM_ADDED
+            assert add_result is LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED
             result = LinkingCandidateModificationResult.ID_SET_MODIFIED
         else:
             # if there are no longer any id sets associated with the record, remove it completely
             self._drop_linking_candidate(candidate.synonym_norm)
-            result = LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED
+            result = LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
         return result
 
     def export_resources_and_final_candidates(
@@ -897,7 +897,9 @@ class OntologyResourceProcessor:
                     counter_this_idx = self._drop_id_from_all_linking_candidates(idx)
                     if (
                         counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED]
-                        + counter_this_idx[LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED]
+                        + counter_this_idx[
+                            LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
+                        ]
                         == 0
                     ):
                         logger.warning("failed to drop %s from %s", idx, self.parser_name)
@@ -908,7 +910,7 @@ class OntologyResourceProcessor:
                             self.parser_name,
                             counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED],
                             counter_this_idx[
-                                LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED
+                                LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
                             ],
                         )
 
@@ -953,7 +955,7 @@ class OntologyResourceProcessor:
         self,
         resource: OntologyStringResource,
     ) -> Literal[
-        LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
+        LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
         """Create a new :class:`~kazu.data.LinkingCandidate` for the database, or return
