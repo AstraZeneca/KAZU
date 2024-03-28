@@ -1,3 +1,7 @@
+from collections.abc import Callable
+import inspect
+from typing import Any
+
 from hypothesis import assume, given, settings, strategies as st
 import bson
 import pytest
@@ -7,7 +11,6 @@ from kazu.data import (
     Mapping,
     LinkingCandidate,
     LinkingMetrics,
-    CandidatesToMetrics,
     Entity,
     Section,
     Document,
@@ -117,14 +120,37 @@ oid_arg_strat = st.one_of(st.none(), st.binary(min_size=12, max_size=12), hex_st
 oid_strat = st.builds(bson.ObjectId, oid=oid_arg_strat)
 st.register_type_strategy(bson.ObjectId, oid_strat)
 
+
+def _optional_fields_to_ellipses(t: Callable) -> dict[str, Any]:  # type: ignore[type-arg] # because any callable is fine!
+    """A function to get all optional arguments of a callable with 'infer' behaviour.
+
+    For use with hypothesis.builds so we can register our strategies to generate
+    optional arguments by default. ``...``/``ellipsis`` is used by hypothesis to mean
+    'infer a strategy from the type'.
+
+    Note that the return type hint is overly broad - in 3.10 onwards, we can use EllipsisType,
+    but trying to do it cross-version is a pain that isn't worth it here for a private test function.
+
+    Note that for just dataclasses (which is what we current use this for),
+    this could be achieved slightly more simply with dataclasses.fields(), but
+    this approach covers non-dataclass classes as well with only a little more/uglier
+    code, and also other callables if we wanted to use them.
+    """
+
+    sig = inspect.signature(t)
+    return {
+        p_name: ...
+        for p_name, p in sig.parameters.items()
+        if p.default is not inspect.Parameter.empty
+    }
+
+
 # needed, otherwise the __post_init__ throws an error in calc_starts_and_ends when the set of spans is empty.
 valid_spans_for_entity = st.frozensets(st.builds(CharSpan), min_size=1)
 
 st.register_type_strategy(
     Entity,
-    st.builds(
-        Entity, spans=valid_spans_for_entity, linking_candidates=st.from_type(CandidatesToMetrics)
-    ),
+    st.builds(Entity, spans=valid_spans_for_entity, **_optional_fields_to_ellipses(Entity)),
 )
 
 # needed, otherwise the __post_init__ throws an error for length 0 parser_to_target_id_mappings
@@ -144,7 +170,8 @@ st.register_type_strategy(
 
 @st.composite
 def ontology_resource_strat_no_conflict(
-    draw: st.DrawFn, _resource_class: type[OntologyStringResource], /, *args, **kwargs
+    draw: st.DrawFn,
+    _resource_class: type[OntologyStringResource],
 ) -> OntologyStringResource:
     """This strategy ensures no error is raised in OntologyStringResource.__post__init__
     .
@@ -166,8 +193,7 @@ def ontology_resource_strat_no_conflict(
             st.builds(
                 OntologyStringResource,
                 original_synonyms=st.frozensets(elements=st.builds(Synonym), min_size=1),
-                *args,
-                **kwargs,
+                **_optional_fields_to_ellipses(OntologyStringResource),
             )
         )
         conflict = False
@@ -194,8 +220,11 @@ def add_sent_spans(draw, s: Section):
 
 
 # needed, as _sentence_spans is `init=False`, so otherwise, it's always None
-st.register_type_strategy(Section, st.builds(Section).flatmap(add_sent_spans))
+st.register_type_strategy(
+    Section, st.builds(Section, **_optional_fields_to_ellipses(Section)).flatmap(add_sent_spans)
+)
 
+st.register_type_strategy(Document, st.builds(Document, **_optional_fields_to_ellipses(Document)))
 
 simply_serializable_types = (
     CharSpan,
@@ -211,7 +240,6 @@ simply_serializable_types = (
 
 entity_and_containers = (Entity, Section, Document)
 all_serializable_types = simply_serializable_types + entity_and_containers
-
 comparable_class_strategy = st.one_of(*(st.from_type(t) for t in all_serializable_types))
 
 testing_json_converter = _initialize_json_converter(testing=True)
@@ -248,6 +276,8 @@ valid_json_metadata = st.dictionaries(
     keys=st.text(), values=st.one_of(*(st.from_type(t) for t in all_serializable_types + enums))
 )
 
+# note: no optional fields other than metadata will be generated
+# that wouldn't add to what we're testing here, and examples would take longer to generate
 class_with_complex_metadata = st.one_of(
     st.builds(Mapping, metadata=valid_json_metadata),
     # spans as above - unfortunately we have to repeat it here.
