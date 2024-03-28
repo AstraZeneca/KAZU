@@ -64,16 +64,16 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 continue
 
             for resource in parser_resources:
-                # a resource can have different term_norms for different parsers,
+                # a resource can have different syn_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
-                # Also, a resource may exist in multiple LinkingCandidate.terms
-                term_norm = resource.term_norm_for_linking(parser.entity_class)
+                # Also, a synonym may exist in multiple LinkingCandidate.raw_synonyms
+                syn_norm = resource.syn_norm_for_linking(parser.entity_class)
                 for syn in resource.active_ner_synonyms():
                     entity_key = (
                         parser.entity_class,
                         syn.mention_confidence,
                         syn.case_sensitive,
-                        term_norm,
+                        syn_norm,
                         syn.text,
                     )
                     key_to_ontology_info[syn.text.lower()][entity_key].add(parser.name)
@@ -122,14 +122,14 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                 for entity_class, entity_info_groups in sort_then_group(
                     ontology_dict.keys(), key_func=lambda x: x[0]
                 ):
-                    terms: set[LinkingCandidate] = set()
+                    candidates: set[LinkingCandidate] = set()
                     confidences: defaultdict[str, set[MentionConfidence]] = defaultdict(set)
                     for entity_info in entity_info_groups:
                         (
                             _,
                             confidence,
                             case_sensitive,
-                            term_norm,
+                            syn_norm,
                             original_case,
                         ) = entity_info
 
@@ -145,9 +145,9 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
                         for parser_name in parser_name_set:
                             confidences[parser_name].add(confidence)
-                            terms.add(self.synonym_db.get(parser_name, term_norm))
+                            candidates.add(self.synonym_db.get(parser_name, syn_norm))
 
-                    if len(terms) > 0:
+                    if len(candidates) > 0:
 
                         confidence_values = {max(conf_set) for conf_set in confidences.values()}
                         chosen_conf = max(confidence_values)
@@ -164,7 +164,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
                             namespace=self.namespace(),
                             mention_confidence=chosen_conf,
                         )
-                        for candidate in terms:
+                        for candidate in candidates:
                             e.add_or_update_linking_candidate(
                                 candidate, LinkingMetrics(exact_match=True)
                             )

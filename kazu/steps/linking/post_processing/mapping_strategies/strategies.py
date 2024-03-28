@@ -132,7 +132,7 @@ class MappingStrategy(ABC):
 
         :param confidence: the level of confidence that should be assigned to this strategy. This is simply a label
             for human users, and has no bearing on the actual algorithm.
-        :param disambiguation_strategies: after :meth:`filter_terms` is called, these strategies are triggered if either
+        :param disambiguation_strategies: after :meth:`filter_candidates` is called, these strategies are triggered if either
             multiple entries of :class:`.CandidatesToMetrics` remain, and/or any of them are ambiguous.
         :param disambiguation_essential: disambiguation strategies MUST deliver a result, in order for this strategy to pass.
         """
@@ -193,20 +193,20 @@ class MappingStrategy(ABC):
         ent_match_norm: str,
     ) -> tuple[set[EquivalentIdSet], Optional[str], Optional[DisambiguationConfidence]]:
         """Applies disambiguation strategies if configured, and either
-        len(filtered_terms) > 1 or any of the filtered_terms are ambiguous. If ids are
-        still ambiguous after all strategies have run, the disambiguation confidence
-        will be :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
+        len(filtered_candidates) > 1 or any of the filtered_candidates are ambiguous. If
+        ids are still ambiguous after all strategies have run, the disambiguation
+        confidence will be :attr:`.DisambiguationConfidence.AMBIGUOUS`\\
 
-        :param filtered_candidates: terms to disambiguate
+        :param filtered_candidates: candidates to disambiguate
         :param document: originating Document
-        :param parser_name: parser name associated with these terms
+        :param parser_name: parser name associated with these candidates
         :param ent_match: string of entity to be disambiguated
         :param ent_match_norm: normalised string of entity to be disambiguated
         :return:
         """
 
         all_id_sets = set(
-            id_set for term in filtered_candidates for id_set in term.associated_id_sets
+            id_set for candidates in filtered_candidates for id_set in candidates.associated_id_sets
         )
 
         if not self.disambiguation_essential and len(all_id_sets) == 1:
@@ -249,20 +249,20 @@ class MappingStrategy(ABC):
         :return:
         """
         parser_name = next(iter(candidates)).parser_name
-        filtered_terms = self.filter_candidates(
+        filtered_candidates = self.filter_candidates(
             ent_match=ent_match,
             ent_match_norm=ent_match_norm,
             document=document,
             candidates=candidates,
             parser_name=parser_name,
         )
-        if filtered_terms:
+        if filtered_candidates:
             (
                 id_sets,
                 successful_disambiguation_strategy,
                 disambiguation_confidence,
             ) = self.disambiguate_if_required(
-                filtered_terms,
+                filtered_candidates,
                 document,
                 parser_name,
                 ent_match=ent_match,
@@ -336,7 +336,7 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 
 class TermNormIsSubStringMappingStrategy(MappingStrategy):
-    """For a :class:`.CandidatesToMetrics`, see if any of their .term_norm are string
+    """For a :class:`.CandidatesToMetrics`, see if any of their .synonym_norm are string
     matches of the match_norm tokens based on whitespace tokenisation.
 
     If exactly one element of :class:`.CandidatesToMetrics` matches, prefer it.
@@ -349,21 +349,21 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
         confidence: StringMatchConfidence,
         disambiguation_strategies: Optional[list[DisambiguationStrategy]] = None,
         disambiguation_essential: bool = False,
-        min_term_norm_len_to_consider: int = 3,
+        min_syn_norm_len_to_consider: int = 3,
     ):
         """
 
         :param confidence:
         :param disambiguation_strategies:
         :param disambiguation_essential:
-        :param min_term_norm_len_to_consider: only consider elements of
-            :class:`.CandidatesToMetrics` where the length of :attr:`~.LinkingCandidate.term_norm` is
+        :param min_syn_norm_len_to_consider: only consider elements of
+            :class:`.CandidatesToMetrics` where the length of :attr:`~.LinkingCandidate.synonym_norm` is
             equal to or greater than this value.
         """
         super().__init__(
             confidence, disambiguation_strategies, disambiguation_essential=disambiguation_essential
         )
-        self.min_term_norm_len_to_consider = min_term_norm_len_to_consider
+        self.min_syn_norm_len_to_consider = min_syn_norm_len_to_consider
 
     def filter_candidates(
         self,
@@ -375,7 +375,7 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
     ) -> CandidatesToMetrics:
         norm_tokens = set(ent_match_norm.split(" "))
 
-        filtered_terms_and_len = [
+        filtered_candidates_and_len = [
             (
                 (
                     candidate,
@@ -385,14 +385,16 @@ class TermNormIsSubStringMappingStrategy(MappingStrategy):
             )
             for candidate, metrics in candidates.items()
             if candidate.synonym_norm in norm_tokens
-            and len(candidate.synonym_norm) >= self.min_term_norm_len_to_consider
+            and len(candidate.synonym_norm) >= self.min_syn_norm_len_to_consider
         ]
-        filtered_terms_and_len.sort(key=lambda x: x[1], reverse=True)
-        filtered_terms_by_len_groups = itertools.groupby(filtered_terms_and_len, key=lambda x: x[1])
-        for _, terms_and_len_iter in filtered_terms_by_len_groups:
-            terms_and_len_list = list(terms_and_len_iter)
-            if len(terms_and_len_list) == 1:
-                candidate, metrics = terms_and_len_list[0][0]
+        filtered_candidates_and_len.sort(key=lambda x: x[1], reverse=True)
+        filtered_candidates_by_len_groups = itertools.groupby(
+            filtered_candidates_and_len, key=lambda x: x[1]
+        )
+        for _, candidates_and_len_iter in filtered_candidates_by_len_groups:
+            candidates_and_len_list = list(candidates_and_len_iter)
+            if len(candidates_and_len_list) == 1:
+                candidate, metrics = candidates_and_len_list[0][0]
                 return {candidate: metrics}
         return {}
 
@@ -419,9 +421,9 @@ class StrongMatchMappingStrategy(MappingStrategy):
         :param confidence:
         :param disambiguation_strategies:
         :param disambiguation_essential:
-        :param search_threshold: only consider synonym terms above this search threshold
-        :param symbolic_only: only consider terms that are symbolic
-        :param differential: only consider terms with search scores equal or greater to the best match minus this value
+        :param search_threshold: only consider linking candidates above this search threshold
+        :param symbolic_only: only consider candidates that are symbolic
+        :param differential: only consider candidates with search scores equal or greater to the best match minus this value
         """
         super().__init__(
             confidence, disambiguation_strategies, disambiguation_essential=disambiguation_essential
@@ -439,7 +441,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
         parser_name: str,
     ) -> CandidatesToMetrics:
         if self.symbolic_only:
-            relevant_terms_with_scores = [
+            relevant_candidates_with_scores = [
                 (
                     (
                         candidate,
@@ -451,7 +453,7 @@ class StrongMatchMappingStrategy(MappingStrategy):
                 if candidate.is_symbolic and (score := metrics.search_score) is not None
             ]
         else:
-            relevant_terms_with_scores = [
+            relevant_candidates_with_scores = [
                 (
                     (
                         candidate,
@@ -463,22 +465,22 @@ class StrongMatchMappingStrategy(MappingStrategy):
                 if (score := metrics.search_score) is not None
             ]
 
-        if len(relevant_terms_with_scores) == 0:
+        if len(relevant_candidates_with_scores) == 0:
             return {}
 
-        best_score = max((score for _, score in relevant_terms_with_scores))
+        best_score = max((score for _, score in relevant_candidates_with_scores))
 
         return {
             candidates_and_metrics[0]: candidates_and_metrics[1]
-            for candidates_and_metrics, score in relevant_terms_with_scores
+            for candidates_and_metrics, score in relevant_candidates_with_scores
             if score >= self.search_threshold and best_score - score <= self.differential
         }
 
 
 class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMappingStrategy):
     """Same as parent class, but a complex string scorer with a predefined threshold is
-    used to confirm that the ent_match is broadly similar to one of the terms attached
-    to the :class:`.CandidatesToMetrics`\\ .
+    used to confirm that the ent_match is broadly similar to one of the candidates
+    attached to the :class:`.CandidatesToMetrics`\\ .
 
     Useful for refining non-symbolic close string matches (e.g. "Neck disease" and "Heck
     disease").
@@ -497,14 +499,14 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
     ):
         """
         :param confidence:
-        :param complex_string_scorer: only consider synonym terms passing this string scorer call
+        :param complex_string_scorer: only consider linking candidates passing this string scorer call
         :param disambiguation_strategies:
         :param disambiguation_essential:
-        :param search_threshold: only consider synonym terms above this search threshold
-        :param embedding_threshold: the Entity.match and one of the LinkingCandidate.terms must be
-            above this threshold (according to the complex_string_scorer) for the term to be valid
-        :param symbolic_only: only consider terms that are symbolic
-        :param differential: only consider terms with search scores equal or greater to the best match minus this value
+        :param search_threshold: only consider candidates above this search threshold
+        :param embedding_threshold: the Entity.match and one of the LinkingCandidate.raw_synonyms must be
+            above this threshold (according to the complex_string_scorer) for the candidate to be valid
+        :param symbolic_only: only consider candidates that are symbolic
+        :param differential: only consider candidates with search scores equal or greater to the best match minus this value
         """
         super().__init__(
             confidence=confidence,
@@ -525,7 +527,7 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
         candidates: CandidatesToMetrics,
         parser_name: str,
     ) -> CandidatesToMetrics:
-        synonym_term_sorted_by_score = sorted(
+        candidate_sorted_by_score = sorted(
             super()
             .filter_candidates(
                 ent_match=ent_match,
@@ -539,13 +541,13 @@ class StrongMatchWithEmbeddingConfirmationStringMatchingStrategy(StrongMatchMapp
             reverse=True,
         )
         selected_id_sets = set()
-        selected_terms = {}
-        for term, metrics in synonym_term_sorted_by_score:
-            if term.associated_id_sets not in selected_id_sets:
-                selected_id_sets.add(term.associated_id_sets)
+        selected_candidates = {}
+        for candidate, metrics in candidate_sorted_by_score:
+            if candidate.associated_id_sets not in selected_id_sets:
+                selected_id_sets.add(candidate.associated_id_sets)
                 if any(
-                    self.complex_string_scorer(ent_match, original_term) >= self.embedding_threshold
-                    for original_term in term.terms
+                    self.complex_string_scorer(ent_match, original_syn) >= self.embedding_threshold
+                    for original_syn in candidate.raw_synonyms
                 ):
-                    selected_terms[term] = metrics
-        return selected_terms
+                    selected_candidates[candidate] = metrics
+        return selected_candidates

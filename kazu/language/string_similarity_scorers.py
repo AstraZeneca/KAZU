@@ -13,7 +13,7 @@ from kazu.utils.sapbert import SapBertHelper
 
 class StringSimilarityScorer(Protocol):
     """Calculates a NumericMetric based on a string match or a normalised string match
-    and a normalised term."""
+    and a normalised synonym."""
 
     def __call__(self, reference_term: str, query_term: str) -> NumericMetric:
         raise NotImplementedError
@@ -25,7 +25,7 @@ class BooleanStringSimilarityScorer(StringSimilarityScorer, Protocol):
 
 
 class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """Checks all numbers in reference_term are represented in term_norm."""
+    """Checks all numbers in reference_term are represented in query_term."""
 
     number_finder = re.compile("[0-9]+")
 
@@ -37,7 +37,7 @@ class NumberMatchStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """Checks all TYPE x mentions in match norm are represented in term norm."""
+    """Checks all TYPE x mentions in match norm are represented in syn norm."""
 
     # need to handle I explicitly
     # other roman numerals get normalized to integers,
@@ -63,7 +63,7 @@ class EntitySubtypeStringSimilarityScorer(BooleanStringSimilarityScorer):
 
 
 class EntityNounModifierStringSimilarityScorer(BooleanStringSimilarityScorer):
-    """Checks all modifier phrases in reference_term are represented in term_norm."""
+    """Checks all modifier phrases in reference_term are represented in query_term."""
 
     def __init__(self, noun_modifier_phrases: list[str]):
         self.noun_modifier_phrases = noun_modifier_phrases

@@ -44,7 +44,9 @@ def check_ids_are_represented(
 ):
     strategy.prepare(doc)
     all_id_sets: set[EquivalentIdSet] = set(
-        chain.from_iterable(term.associated_id_sets for term in entity_to_test.linking_candidates)
+        chain.from_iterable(
+            candidate.associated_id_sets for candidate in entity_to_test.linking_candidates
+        )
     )
     disambiguated_id_sets = list(
         strategy.disambiguate(
@@ -106,16 +108,16 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
         ids_to_check=set(), strategy=strategy, doc=doc, parser=parser, entity_to_test=p27_ent
     )
 
-    # now add a good mapping, that should be selected from the set of terms
-    target_term = next(filter(lambda x: x.term_norm == "AUTOANTIGEN P 27", candidates))
+    # now add a good mapping, that should be selected from the set of candidates
+    target_candidate = next(filter(lambda x: x.synonym_norm == "AUTOANTIGEN P 27", candidates))
     target_id_set_for_good_mapping = next(
-        filter(lambda x: "3" in x.ids, target_term.associated_id_sets)
+        filter(lambda x: "3" in x.ids, target_candidate.associated_id_sets)
     )
     target_mappings: set[Mapping] = set()
     target_mappings.update(
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
-            parser_name=target_term.parser_name,
+            parser_name=target_candidate.parser_name,
             string_match_strategy="test",
             disambiguation_strategy=None,
             string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,
@@ -140,15 +142,15 @@ def test_DefinedElsewhereInDocumentStrategy(set_up_p27_test_case):
     )
     cdkn1b_ent.add_or_update_linking_candidates(candidates)
 
-    target_term = next(filter(lambda x: x.term_norm == "CDKN1B", candidates))
+    target_candidate = next(filter(lambda x: x.synonym_norm == "CDKN1B", candidates))
     target_id_set_for_good_mapping = next(
-        filter(lambda x: "1" in x.ids, target_term.associated_id_sets)
+        filter(lambda x: "1" in x.ids, target_candidate.associated_id_sets)
     )
     target_mappings = set()
     target_mappings.update(
         MappingFactory.create_mapping_from_id_set(
             id_set=target_id_set_for_good_mapping,
-            parser_name=target_term.parser_name,
+            parser_name=target_candidate.parser_name,
             string_match_strategy="test",
             disambiguation_strategy=None,
             string_match_confidence=StringMatchConfidence.HIGHLY_LIKELY,

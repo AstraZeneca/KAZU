@@ -58,21 +58,21 @@ def load_ontology_string_resources(
     return resources
 
 
-def _term_sort_reduce(term: OntologyStringResource) -> tuple[int, str]:
-    return min((len(syn.text), syn.text) for syn in term.original_synonyms)
+def _resource_sort_reduce(resource: OntologyStringResource) -> tuple[int, str]:
+    return min((len(syn.text), syn.text) for syn in resource.original_synonyms)
 
 
 def batch(
     iterable: Iterable[OntologyStringResource], n: int = 1
 ) -> Iterable[list[OntologyStringResource]]:
-    lst = sorted(iterable, key=_term_sort_reduce)
+    lst = sorted(iterable, key=_resource_sort_reduce)
     length = len(lst)
     for ndx in range(0, length, n):
         yield lst[ndx : ndx + n]
 
 
 def dump_ontology_string_resources(
-    terms: Iterable[OntologyStringResource],
+    resources: Iterable[OntologyStringResource],
     path: PathLike,
     force: bool = False,
     split_at: int = 10000,
@@ -80,7 +80,7 @@ def dump_ontology_string_resources(
     """Dump an iterable of :class:`kazu.data.OntologyStringResource`\\s to the file
     system.
 
-    :param terms: terms to dump
+    :param resources: resources to dump
     :param path: path to a directory of json lines files that map to :class:`kazu.data.OntologyStringResource`
     :param force: override existing directory, if it exists
     :param split_at: number of lines per partition
@@ -96,7 +96,7 @@ def dump_ontology_string_resources(
             shutil.rmtree(resources_path)
 
     resources_path.mkdir(parents=True)
-    for i, resources_partition in enumerate(batch(terms, n=split_at)):
+    for i, resources_partition in enumerate(batch(resources, n=split_at)):
         with resources_path.joinpath(f"{i}.jsonl").open(mode="w") as jsonlf:
             for resource in resources_partition:
                 jsonlf.write(resource.to_json() + "\n")
@@ -121,14 +121,14 @@ def load_global_actions(
 
 @dataclasses.dataclass
 class OntologyResourceSetIntegrityReport:
-    #: Terms with no conflicts
+    #: Resources with no conflicts
     clean_resources: set[OntologyStringResource]
-    #: Terms that can be safely merged without affecting :class:`.OntologyStringBehaviour`. However,
+    #: Resources that can be safely merged without affecting :class:`.OntologyStringBehaviour`. However,
     #: may still conflict on :class:`.MentionConfidence` and/or case sensitivity
     merged_resources: set[OntologyStringResource]
-    #: Terms that conflict on normalisation value
+    #: Resources that conflict on normalisation value
     normalisation_conflicts: set[frozenset[OntologyStringResource]]
-    #: Terms that conflict on case
+    #: Resources that conflict on case
     case_conflicts: set[frozenset[OntologyStringResource]]
 
 
@@ -155,7 +155,7 @@ class OntologyStringConflictAnalyser:
     def verify_resource_set_integrity(
         self, resources: set[OntologyStringResource], path: Optional[PathLike] = None
     ) -> OntologyResourceSetIntegrityReport:
-        """Verify that a set of terms has consistent behaviour.
+        """Verify that a set of resources has consistent behaviour.
 
         Conflicts can occur for the following reasons:
 
@@ -237,16 +237,16 @@ class OntologyStringConflictAnalyser:
         """
         cleaned_resources = set()
         for conflicted_set in resource_conflicts:
-            original_synonyms_by_term_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
-            alt_syns_by_term_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
+            original_synonyms_by_syn_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
+            alt_syns_by_syn_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
             case_sensitive = False
             syn_string_lower_to_confidence = defaultdict(set)
             assoc_id_sets: set[EquivalentIdSet] = set()
             behaviours: set[OntologyStringBehaviour] = set()
             for resource in conflicted_set:
-                term_norm = resource.term_norm_for_linking(self.entity_class)
-                original_synonyms_by_term_norm[term_norm].update(resource.original_synonyms)
-                alt_syns_by_term_norm[term_norm].update(resource.alternative_synonyms)
+                syn_norm = resource.syn_norm_for_linking(self.entity_class)
+                original_synonyms_by_syn_norm[syn_norm].update(resource.original_synonyms)
+                alt_syns_by_syn_norm[syn_norm].update(resource.alternative_synonyms)
                 behaviours.add(resource.behaviour)
                 for syn in resource.all_synonyms():
                     syn_string_lower_to_confidence[syn.text.lower()].add(syn.mention_confidence)
@@ -262,7 +262,7 @@ class OntologyStringConflictAnalyser:
             else:
                 chosen_behaviour = OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING
 
-            for term_norm, mergeable_original_synonyms in original_synonyms_by_term_norm.items():
+            for syn_norm, mergeable_original_synonyms in original_synonyms_by_syn_norm.items():
                 cleaned_resources.add(
                     OntologyStringResource(
                         behaviour=chosen_behaviour,
@@ -284,7 +284,7 @@ class OntologyStringConflictAnalyser:
                                     syn_string_lower_to_confidence[syn.text.lower()]
                                 ),
                             )
-                            for syn in alt_syns_by_term_norm.get(term_norm, set())
+                            for syn in alt_syns_by_syn_norm.get(syn_norm, set())
                         ),
                         associated_id_sets=frozenset(assoc_id_sets)
                         if len(assoc_id_sets) > 0
@@ -334,7 +334,7 @@ class OntologyStringConflictAnalyser:
         of equal or higher rank than a case-sensitive one.
 
         :param resources:
-        :return: a set of conflicted subsets, and a set of clean terms.
+        :return: a set of conflicted subsets, and a set of clean resources.
         """
 
         maybe_good_resources_by_active_syn_lower = defaultdict(set)
@@ -369,10 +369,10 @@ class OntologyStringConflictAnalyser:
         set[OntologyStringResource],
         set[frozenset[OntologyStringResource]],
     ]:
-        """Find behaviour conflicts in the resource set indexed by term_norm.
+        """Find behaviour conflicts in the resource set indexed by syn_norm.
 
         If possible, resources will be merged. If not, they will be added to a set of
-        conflicting terms.
+        conflicting resources.
 
         :param resources:
         :return: A set of newly created merged resources, a set of resources eliminated
@@ -380,8 +380,8 @@ class OntologyStringConflictAnalyser:
             be merged,
         """
 
-        resources_by_term_norm = (
-            self._group_resources_by_term_norm_and_check_for_normalisation_consistency_errors(
+        resources_by_syn_norm = (
+            self._group_resources_by_syn_norm_and_check_for_normalisation_consistency_errors(
                 resources
             )
         )
@@ -389,7 +389,7 @@ class OntologyStringConflictAnalyser:
         normalisation_conflicts = set()
         merged_resources = set()
         eliminated_resources = set()
-        for term_norm, potentially_conflicting_resources in resources_by_term_norm.items():
+        for syn_norm, potentially_conflicting_resources in resources_by_syn_norm.items():
             if len(potentially_conflicting_resources) == 1:
                 # no conflict
                 continue
@@ -397,7 +397,7 @@ class OntologyStringConflictAnalyser:
             # uh ho we have a normalisation/behaviour/id set conflict. If we can't merge, report an error
             original_synonyms_merged: set[Synonym] = set()
             generated_synonyms_merged: set[Synonym] = set()
-            associated_id_sets_this_term_norm: set[frozenset[EquivalentIdSet]] = set()
+            associated_id_sets_this_syn_norm: set[frozenset[EquivalentIdSet]] = set()
             comments = []
             behaviours = set()
             for conflicted_resource in potentially_conflicting_resources:
@@ -406,11 +406,11 @@ class OntologyStringConflictAnalyser:
                 original_synonyms_merged.update(conflicted_resource.original_synonyms)
                 generated_synonyms_merged.update(conflicted_resource.alternative_synonyms)
                 if conflicted_resource.associated_id_sets is not None:
-                    associated_id_sets_this_term_norm.add(conflicted_resource.associated_id_sets)
+                    associated_id_sets_this_syn_norm.add(conflicted_resource.associated_id_sets)
                 if conflicted_resource.comment is not None:
                     comments.append(conflicted_resource.comment)
 
-            if len(behaviours) > 1 or len(associated_id_sets_this_term_norm) > 1:
+            if len(behaviours) > 1 or len(associated_id_sets_this_syn_norm) > 1:
                 # uh ho - behaviours/id set clash. Add to norm conflicts
                 normalisation_conflicts.add(frozenset(potentially_conflicting_resources))
             else:
@@ -419,36 +419,36 @@ class OntologyStringConflictAnalyser:
                     behaviour=next(iter(behaviours)),
                     original_synonyms=frozenset(original_synonyms_merged),
                     alternative_synonyms=frozenset(generated_synonyms_merged),
-                    associated_id_sets=next(iter(associated_id_sets_this_term_norm))
-                    if len(associated_id_sets_this_term_norm) == 1
+                    associated_id_sets=next(iter(associated_id_sets_this_syn_norm))
+                    if len(associated_id_sets_this_syn_norm) == 1
                     else None,
                     comment="\n".join(comments) if len(comments) > 0 else None,
                 )
                 merged_resources.add(merged_resource)
 
                 logger.warning(
-                    "duplicate resource set merged. term norm: %s, conflicts:\n%s\n merged to: %s",
-                    term_norm,
+                    "duplicate resource set merged. synonym_norm: %s, conflicts:\n%s\n merged to: %s",
+                    syn_norm,
                     potentially_conflicting_resources,
                     merged_resource,
                 )
                 eliminated_resources.update(potentially_conflicting_resources)
         return merged_resources, eliminated_resources, normalisation_conflicts
 
-    def _group_resources_by_term_norm_and_check_for_normalisation_consistency_errors(
+    def _group_resources_by_syn_norm_and_check_for_normalisation_consistency_errors(
         self, resources: set[OntologyStringResource]
     ) -> defaultdict[str, set[OntologyStringResource]]:
-        resources_by_term_norm: defaultdict[str, set[OntologyStringResource]] = defaultdict(set)
+        resources_by_syn_norm: defaultdict[str, set[OntologyStringResource]] = defaultdict(set)
         normalisation_errors = set()
         for resource in resources:
-            term_norms_this_term = set(
+            syn_norms_this_resource = set(
                 StringNormalizer.normalize(original_syn.text, entity_class=self.entity_class)
                 for original_syn in resource.original_synonyms
             )
-            if len(term_norms_this_term) > 1:
+            if len(syn_norms_this_resource) > 1:
                 normalisation_errors.add(resource)
-            term_norm = next(iter(term_norms_this_term))
-            resources_by_term_norm[term_norm].add(resource)
+            syn_norm = next(iter(syn_norms_this_resource))
+            resources_by_syn_norm[syn_norm].add(resource)
         if normalisation_errors:
             # This should never be thrown by automatically generated resources
             raise CurationError(
@@ -456,7 +456,7 @@ class OntologyStringConflictAnalyser:
                 " can happen if the implementation of the StringNormalizer has changed. Please correct the following"
                 " resources:\n" + "\n".join(resource.to_json() for resource in normalisation_errors)
             )
-        return resources_by_term_norm
+        return resources_by_syn_norm
 
     @staticmethod
     def _resource_set_has_case_conflicts(resources: set[OntologyStringResource]) -> bool:
@@ -524,23 +524,23 @@ class OntologyStringConflictAnalyser:
         resources_with_discrepancies = set()
         superfluous_human_curations = human_curated_resources.intersection(autocurated_resources)
         effective_human_curations = human_curated_resources.difference(autocurated_resources)
-        human_by_term_norm = {
-            resource.term_norm_for_linking(self.entity_class): resource
+        human_by_syn_norm = {
+            resource.syn_norm_for_linking(self.entity_class): resource
             for resource in human_curated_resources
         }
-        default_by_term_norm = {
-            resource.term_norm_for_linking(self.entity_class): resource
+        default_by_syn_norm = {
+            resource.syn_norm_for_linking(self.entity_class): resource
             for resource in autocurated_resources
         }
 
         working_dict = {}
-        for default_term_norm, default_resource in default_by_term_norm.items():
+        for default_syn_norm, default_resource in default_by_syn_norm.items():
 
-            maybe_human_curation = human_by_term_norm.pop(default_term_norm, None)
+            maybe_human_curation = human_by_syn_norm.pop(default_syn_norm, None)
             if maybe_human_curation is None:
-                working_dict[default_term_norm] = default_resource
+                working_dict[default_syn_norm] = default_resource
             else:
-                working_dict[default_term_norm] = maybe_human_curation
+                working_dict[default_syn_norm] = maybe_human_curation
                 # check the set of strings are equivalent. Otherwise new ones may have been created by syn generation
                 if set(syn.text for syn in maybe_human_curation.original_synonyms) != set(
                     syn.text for syn in default_resource.original_synonyms
@@ -555,9 +555,9 @@ class OntologyStringConflictAnalyser:
                     )
 
         # add any remaining to the obsolete set, unless they're additional
-        for human_term_norm, human_curation in human_by_term_norm.items():
+        for human_syn_norm, human_curation in human_by_syn_norm.items():
             if human_curation.additional_to_source:
-                working_dict[human_term_norm] = human_curation
+                working_dict[human_syn_norm] = human_curation
             else:
                 obsolete_human_set.add(human_curation)
 
@@ -630,7 +630,7 @@ class OntologyResourceProcessor:
         entity_class: str,
         global_actions: Optional[GlobalParserActions],
         resources: list[OntologyStringResource],
-        synonym_terms: set[LinkingCandidate],
+        linking_candidates: set[LinkingCandidate],
     ):
         """
 
@@ -638,15 +638,15 @@ class OntologyResourceProcessor:
         :param entity_class: name of parser entity_class to process (typically as passed to :class:`kazu.ontology_preprocessing.base.OntologyParser`\\ )
         :param global_actions:
         :param resources:
-        :param synonym_terms:
+        :param linking_candidates:
         """
         self.global_actions = global_actions
         self.entity_class = entity_class
         self.parser_name = parser_name
-        self._terms_by_term_norm: dict[NormalisedSynonymStr, LinkingCandidate] = {}
-        self._terms_by_id: defaultdict[Idx, set[LinkingCandidate]] = defaultdict(set)
-        for term in synonym_terms:
-            self._update_term_lookups(term, False)
+        self._candidates_by_syn_norm: dict[NormalisedSynonymStr, LinkingCandidate] = {}
+        self._candidates_by_id: defaultdict[Idx, set[LinkingCandidate]] = defaultdict(set)
+        for candidate in linking_candidates:
+            self._update_candidate_lookups(candidate, False)
         self.resources = set(resources)
         self.dropped_keys: set[NormalisedSynonymStr] = set()
 
@@ -662,56 +662,58 @@ class OntologyResourceProcessor:
             resource.associated_id_sets is not None,
         )
 
-    def _update_term_lookups(
-        self, term: LinkingCandidate, override: bool
+    def _update_candidate_lookups(
+        self, candidate: LinkingCandidate, override: bool
     ) -> Literal[
         LinkingCandidateModificationResult.SYNONYM_TERM_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
 
         safe_to_add = False
-        maybe_existing_term = self._terms_by_term_norm.get(term.synonym_norm)
-        if maybe_existing_term is None:
-            logger.debug("adding new term %s", term)
+        maybe_existing_candidate = self._candidates_by_syn_norm.get(candidate.synonym_norm)
+        if maybe_existing_candidate is None:
+            logger.debug("adding new candidate %s", candidate)
             safe_to_add = True
         elif override:
             safe_to_add = True
-            logger.debug("overriding existing term %s", maybe_existing_term)
+            logger.debug("overriding existing candidate %s", maybe_existing_candidate)
         elif (
             len(
-                term.associated_id_sets.symmetric_difference(maybe_existing_term.associated_id_sets)
+                candidate.associated_id_sets.symmetric_difference(
+                    maybe_existing_candidate.associated_id_sets
+                )
             )
             > 0
         ):
             logger.warning(
-                "conflict on term norms \n%s\n%s\nthe latter will be ignored",
-                maybe_existing_term,
-                term,
+                "conflict on synonym norms \n%s\n%s\nthe latter will be ignored",
+                maybe_existing_candidate,
+                candidate,
             )
         if safe_to_add:
-            self._terms_by_term_norm[term.synonym_norm] = term
-            for equiv_ids in term.associated_id_sets:
+            self._candidates_by_syn_norm[candidate.synonym_norm] = candidate
+            for equiv_ids in candidate.associated_id_sets:
                 for idx in equiv_ids.ids:
-                    self._terms_by_id[idx].add(term)
+                    self._candidates_by_id[idx].add(candidate)
             return LinkingCandidateModificationResult.SYNONYM_TERM_ADDED
         else:
             return LinkingCandidateModificationResult.NO_ACTION
 
-    def _drop_synonym_term(self, synonym: NormalisedSynonymStr) -> None:
-        """Remove a synonym term from the database, so that it cannot be used as a
+    def _drop_linking_candidate(self, synonym: NormalisedSynonymStr) -> None:
+        """Remove a linking candidate from the database, so that it cannot be used as a
         linking target.
 
         :param synonym:
         :return:
         """
         try:
-            term_to_remove = self._terms_by_term_norm.pop(synonym)
+            candidate_to_remove = self._candidates_by_syn_norm.pop(synonym)
             self.dropped_keys.add(synonym)
-            for equiv_id_set in term_to_remove.associated_id_sets:
+            for equiv_id_set in candidate_to_remove.associated_id_sets:
                 for idx in equiv_id_set.ids:
-                    terms_by_id = self._terms_by_id.get(idx)
-                    if terms_by_id is not None:
-                        terms_by_id.remove(term_to_remove)
+                    candidates_by_id = self._candidates_by_id.get(idx)
+                    if candidates_by_id is not None:
+                        candidates_by_id.remove(candidate_to_remove)
             logger.debug(
                 "successfully dropped %s from database for %s",
                 synonym,
@@ -731,7 +733,7 @@ class OntologyResourceProcessor:
                     self.parser_name,
                 )
 
-    def _drop_id_from_all_synonym_terms(
+    def _drop_id_from_all_linking_candidates(
         self, id_to_drop: Idx
     ) -> Counter[
         Literal[
@@ -748,16 +750,18 @@ class OntologyResourceProcessor:
         :return:
         """
 
-        terms_to_modify = self._terms_by_id.get(id_to_drop, set())
+        candidates_to_modify = self._candidates_by_id.get(id_to_drop, set())
         counter = Counter(
-            self._drop_id_from_synonym_term(id_to_drop=id_to_drop, term_to_modify=term_to_modify)
-            for term_to_modify in set(terms_to_modify)
+            self._drop_id_from_linking_candidate(
+                id_to_drop=id_to_drop, candidate_to_modify=candidate_to_modify
+            )
+            for candidate_to_modify in set(candidates_to_modify)
         )
 
         return counter
 
-    def _drop_id_from_synonym_term(
-        self, id_to_drop: Idx, term_to_modify: LinkingCandidate
+    def _drop_id_from_linking_candidate(
+        self, id_to_drop: Idx, candidate_to_modify: LinkingCandidate
     ) -> Literal[
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
         LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
@@ -766,17 +770,20 @@ class OntologyResourceProcessor:
         """Remove an id from a given :class:`.LinkingCandidate`\\ .
 
         :param id_to_drop:
-        :param term_to_modify:
+        :param candidate_to_modify:
         :return:
         """
         new_assoc_id_frozenset = self._drop_id_from_associated_id_sets(
-            id_to_drop, term_to_modify.associated_id_sets
+            id_to_drop, candidate_to_modify.associated_id_sets
         )
-        if len(new_assoc_id_frozenset.symmetric_difference(term_to_modify.associated_id_sets)) == 0:
+        if (
+            len(new_assoc_id_frozenset.symmetric_difference(candidate_to_modify.associated_id_sets))
+            == 0
+        ):
             return LinkingCandidateModificationResult.NO_ACTION
         else:
-            return self._modify_or_drop_synonym_term_after_id_set_change(
-                new_associated_id_sets=new_assoc_id_frozenset, synonym_term=term_to_modify
+            return self._modify_or_drop_linking_candidate_after_id_set_change(
+                new_associated_id_sets=new_assoc_id_frozenset, candidate=candidate_to_modify
             )
 
     def _drop_id_from_associated_id_sets(
@@ -802,8 +809,8 @@ class OntologyResourceProcessor:
         new_assoc_id_frozenset = frozenset(new_assoc_id_set)
         return new_assoc_id_frozenset
 
-    def _modify_or_drop_synonym_term_after_id_set_change(
-        self, new_associated_id_sets: AssociatedIdSets, synonym_term: LinkingCandidate
+    def _modify_or_drop_linking_candidate_after_id_set_change(
+        self, new_associated_id_sets: AssociatedIdSets, candidate: LinkingCandidate
     ) -> Literal[
         LinkingCandidateModificationResult.ID_SET_MODIFIED,
         LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
@@ -812,7 +819,7 @@ class OntologyResourceProcessor:
         :class:`.AssociatedIdSets` has changed.
 
         :param new_associated_id_sets:
-        :param synonym_term:
+        :param candidate:
         :return:
         """
         result: Literal[
@@ -820,30 +827,30 @@ class OntologyResourceProcessor:
             LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED,
         ]
         if len(new_associated_id_sets) > 0:
-            if new_associated_id_sets == synonym_term.associated_id_sets:
+            if new_associated_id_sets == candidate.associated_id_sets:
                 raise ValueError(
                     "function called inappropriately where the id sets haven't changed. This"
                     " has failed as it will otherwise modify the value of aggregated_by, when"
                     " nothing has changed"
                 )
-            new_term = dataclasses.replace(
-                synonym_term,
+            new_candidate = dataclasses.replace(
+                candidate,
                 associated_id_sets=new_associated_id_sets,
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
-            add_result = self._update_term_lookups(new_term, True)
+            add_result = self._update_candidate_lookups(new_candidate, True)
             assert add_result is LinkingCandidateModificationResult.SYNONYM_TERM_ADDED
             result = LinkingCandidateModificationResult.ID_SET_MODIFIED
         else:
             # if there are no longer any id sets associated with the record, remove it completely
-            self._drop_synonym_term(synonym_term.synonym_norm)
+            self._drop_linking_candidate(candidate.synonym_norm)
             result = LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED
         return result
 
-    def export_resources_and_final_terms(
+    def export_resources_and_final_candidates(
         self,
     ) -> tuple[list[OntologyStringResource], set[LinkingCandidate]]:
-        """Perform any updates required to the synonym terms as specified in the
+        """Perform any updates required to the linking candidates as specified in the
         curations/global actions.
 
         The returned :class:`.OntologyStringResource`\\s can be used for Dictionary based NER, whereas the
@@ -852,7 +859,7 @@ class OntologyResourceProcessor:
         :return:
         """
         self._process_global_actions()
-        return list(self._process_resources()), set(self._terms_by_term_norm.values())
+        return list(self._process_resources()), set(self._candidates_by_syn_norm.values())
 
     def _process_resources(self) -> Iterable[OntologyStringResource]:
         for resource in sorted(self.resources, key=self.resource_sort_key):
@@ -861,7 +868,7 @@ class OntologyResourceProcessor:
     def _process_resource_action(self, resource: OntologyStringResource) -> OntologyStringResource:
 
         if resource.behaviour is OntologyStringBehaviour.DROP_SYNONYM_TERM_FOR_LINKING:
-            self._drop_synonym_term(resource.term_norm_for_linking(self.entity_class))
+            self._drop_linking_candidate(resource.syn_norm_for_linking(self.entity_class))
         elif resource.behaviour is OntologyStringBehaviour.ADD_FOR_LINKING_ONLY:
             self._attempt_to_add_database_entry_for_resource(
                 resource,
@@ -887,7 +894,7 @@ class OntologyResourceProcessor:
             if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
                 ids = action.parser_to_target_id_mappings[self.parser_name]
                 for idx in ids:
-                    counter_this_idx = self._drop_id_from_all_synonym_terms(idx)
+                    counter_this_idx = self._drop_id_from_all_linking_candidates(idx)
                     if (
                         counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED]
                         + counter_this_idx[LinkingCandidateModificationResult.SYNONYM_TERM_DROPPED]
@@ -954,41 +961,41 @@ class OntologyResourceProcessor:
 
         Notes:
 
-        If a term_norm already exists in self._terms_by_term_norm that matches 'resource.term_norm_for_linking',
+        If a syn_norm already exists in self._candidates_by_syn_norm that matches 'resource.syn_norm_for_linking',
         this method will check to see if the 'resource_associated_id_set' matches the existing terms
         :class:`.AssociatedIdSets`\\.
 
         If so, no action will be taken. If not, a warning will be logged as adding it
         will cause irregularities in the database.
 
-        If the term_norm does not exist, this method will create a new :class:`~kazu.data.LinkingCandidate`
+        If the syn_norm does not exist, this method will create a new :class:`~kazu.data.LinkingCandidate`
         with the provided :class:`.AssociatedIdSets`\\.
 
         :param resource:
         :return:
         """
-        log_prefix = "%(parser_name)s attempting to create synonym term for term_norm: <%(term_norm)s> resource: %(resource)s"
-        term_norm = resource.term_norm_for_linking(self.entity_class)
+        log_prefix = "%(parser_name)s attempting to create linking candidate for syn_norm: <%(syn_norm)s> resource: %(resource)s"
+        syn_norm = resource.syn_norm_for_linking(self.entity_class)
         log_formatting_dict: dict[str, Any] = {
             "parser_name": self.parser_name,
-            "term_norm": term_norm,
+            "syn_norm": syn_norm,
             "resource": resource,
         }
 
-        # look up the term norm in the db
-        maybe_existing_synonym_term = self._terms_by_term_norm.get(term_norm)
+        # look up the syn norm in the db
+        maybe_existing_linking_candidate = self._candidates_by_syn_norm.get(syn_norm)
         resource_associated_id_set = resource.associated_id_sets
-        if resource_associated_id_set is None and maybe_existing_synonym_term is not None:
+        if resource_associated_id_set is None and maybe_existing_linking_candidate is not None:
             logger.debug(
                 log_prefix
-                + " but no associated id set provided, so term will inherit the parser defaults",
+                + " but no associated id set provided, so candidate will inherit the parser defaults",
                 log_formatting_dict,
             )
             return LinkingCandidateModificationResult.NO_ACTION
-        elif resource_associated_id_set is None and maybe_existing_synonym_term is None:
+        elif resource_associated_id_set is None and maybe_existing_linking_candidate is None:
             logger.error(
                 log_prefix
-                + " but term_norm <%(term_norm)s> does not exist in synonym database."
+                + " but syn_norm <%(syn_norm)s> does not exist in synonym database."
                 + " Since no id set was provided, no entry can be created",
                 log_formatting_dict,
             )
@@ -1004,20 +1011,22 @@ class OntologyResourceProcessor:
             )
             return LinkingCandidateModificationResult.NO_ACTION
 
-        if maybe_existing_synonym_term is not None:
-            log_formatting_dict["existing_id_set"] = maybe_existing_synonym_term.associated_id_sets
+        if maybe_existing_linking_candidate is not None:
+            log_formatting_dict[
+                "existing_id_set"
+            ] = maybe_existing_linking_candidate.associated_id_sets
 
             if (
                 len(
                     resource_associated_id_set.symmetric_difference(
-                        maybe_existing_synonym_term.associated_id_sets
+                        maybe_existing_linking_candidate.associated_id_sets
                     )
                 )
                 == 0
             ):
                 logger.debug(
                     log_prefix
-                    + " but term_norm <%(term_norm)s> already exists in synonym database."
+                    + " but syn_nom <%(syn_norm)s> already exists in synonym database."
                     + "since this LinkingCandidate matches the id_set, no action is required. %(existing_id_set)s",
                     log_formatting_dict,
                 )
@@ -1025,20 +1034,20 @@ class OntologyResourceProcessor:
             else:
                 logger.debug(
                     log_prefix
-                    + " . Will remove existing term_norm <%(term_norm)s> as an ID set override has been specified",
+                    + " . Will remove existing syn_norm <%(syn_norm)s> as an ID set override has been specified",
                     log_formatting_dict,
                 )
 
-        # no term exists, or we want to override so one will be made
+        # no candidate exists, or we want to override so one will be made
         assert resource_associated_id_set is not None
         for equiv_id_set in set(resource_associated_id_set):
             for idx in equiv_id_set.ids:
-                if idx not in self._terms_by_id:
+                if idx not in self._candidates_by_id:
                     resource_associated_id_set = self._drop_id_from_associated_id_sets(
                         id_to_drop=idx, associated_id_sets=resource_associated_id_set
                     )
                     logger.warning(
-                        "Attempted to add term containing %s but this id does not exist in the parser and will be ignored",
+                        "Attempted to add candidate containing %s but this id does not exist in the parser and will be ignored",
                         idx,
                     )
         if len(resource_associated_id_set) > 0:
@@ -1046,15 +1055,15 @@ class OntologyResourceProcessor:
                 StringNormalizer.classify_symbolic(syn.text, self.entity_class)
                 for syn in resource.original_synonyms
             )
-            new_term = LinkingCandidate(
-                synonym_norm=term_norm,
-                raw_synonyms=frozenset(term.text for term in resource.original_synonyms),
+            new_candidate = LinkingCandidate(
+                synonym_norm=syn_norm,
+                raw_synonyms=frozenset(syn.text for syn in resource.original_synonyms),
                 is_symbolic=is_symbolic,
                 mapping_types=frozenset(("kazu_curated",)),
                 associated_id_sets=resource_associated_id_set,
                 parser_name=self.parser_name,
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
-            return self._update_term_lookups(new_term, True)
+            return self._update_candidate_lookups(new_candidate, True)
         else:
             return LinkingCandidateModificationResult.NO_ACTION

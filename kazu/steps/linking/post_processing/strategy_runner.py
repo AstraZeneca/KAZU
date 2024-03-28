@@ -135,13 +135,13 @@ class ConfidenceLevelStrategyExecution:
                     candidates_to_consider, key_func=lambda x: x.parser_name
                 )
 
-                for parser_name, terms_this_parser in candidates_by_parser:
+                for parser_name, candidates_this_parser in candidates_by_parser:
                     for mapping in strategy(
                         ent_match=entity.match,
                         ent_match_norm=entity.match_norm,
                         candidates={
                             candidate: entity.linking_candidates[candidate]
-                            for candidate in terms_this_parser
+                            for candidate in candidates_this_parser
                         },  # pass a shallow copy so that delegated implementations don't have to worry about data corruption
                         document=document,
                     ):

@@ -183,7 +183,7 @@ def make_dummy_linking_candidate(
     ), LinkingMetrics(search_score=search_score, embed_score=embed_score)
 
 
-# for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of terms to 'IGNORE'
+# for the purposes of testing, we set up an autocurator action that tells the parsers to set the default behaviour of Synonyms to 'IGNORE'
 def ignore_all_action(resource: OntologyStringResource) -> OntologyStringResource:
     return dataclasses.replace(
         resource,

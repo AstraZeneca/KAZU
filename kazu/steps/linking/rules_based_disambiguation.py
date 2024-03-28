@@ -153,17 +153,17 @@ class RulesBasedEntityClassDisambiguationFilterStep(Step):
     def _build_mention_matchers(self) -> None:
         result: MentionMatchers = {}
         rule_type: TPOrFP
-        for class_name, target_term_dict in self.mention_matcher_rules.items():
-            for target_term, rules in target_term_dict.items():
+        for class_name, target_syn_dict in self.mention_matcher_rules.items():
+            for target_syn, rules in target_syn_dict.items():
                 for rule_type, rule_instances in rules.items():
                     if rule_instances is not None:
                         matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
-                        matcher.add(f"{class_name}_{target_term}_{rule_type}", rule_instances)
+                        matcher.add(f"{class_name}_{target_syn}_{rule_type}", rule_instances)
                         result_for_class = result.setdefault(class_name, {})
-                        result_for_class_and_target_term = result_for_class.setdefault(
-                            target_term, {}
+                        result_for_class_and_target_syn = result_for_class.setdefault(
+                            target_syn, {}
                         )
-                        result_for_class_and_target_term[rule_type] = matcher
+                        result_for_class_and_target_syn[rule_type] = matcher
         self.mention_matchers = result
 
     @document_iterating_step

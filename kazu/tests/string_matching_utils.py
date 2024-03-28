@@ -47,22 +47,22 @@ ENT_TYPE_1 = "ent_type_1"
 ENT_TYPE_2 = "ent_type_2"
 PARSER_1_DEFAULT_DATA = {
     IDX: [
-        "http://my.fake.ontology/synonym_term_id_123",
+        "http://my.fake.ontology/entity_id_123",
         TARGET_IDX,
         TARGET_IDX,
         "http://my.fake.ontology_amongst_id_123",
         "http://my.fake.ontology_amongst_id_124",
     ],
     DEFAULT_LABEL: [
-        "SynonymTerm",
-        "SynonymTerm",
+        "LinkingCandidate",
+        "LinkingCandidate",
         "Complex Disease Alpha VII",
         "Amongst",
         "Amongst Us",
     ],
     SYN: [
-        "SynonymTerm",
-        "SynonymTerm",
+        "LinkingCandidate",
+        "LinkingCandidate",
         "complexVII disease\u03B1",
         "amongst",
         "amongst us",
@@ -72,18 +72,18 @@ PARSER_1_DEFAULT_DATA = {
 
 PARSER_2_DEFAULT_DATA = {
     IDX: [
-        "http://my.fake.ontology/synonym_term_id_123",
-        "http://my.fake.ontology/synonym_term_id_456",
+        "http://my.fake.ontology/entity_id_123",
+        "http://my.fake.ontology/entity_id_456",
         TARGET_IDX,
         "http://my.fake.ontology_amongst_id_123",
     ],
     DEFAULT_LABEL: [
-        "SynonymTerm",
-        "SynonymTerm",
+        "LinkingCandidate",
+        "LinkingCandidate",
         "Complex Disease Alpha VII",
         "Amongst",
     ],
-    SYN: ["SynonymTerm", "SynonymTerm", "complexVII disease\u03B1", "amongst"],
+    SYN: ["LinkingCandidate", "LinkingCandidate", "complexVII disease\u03B1", "amongst"],
     MAPPING_TYPE: ["test", "test", "test", "test"],
 }
 
@@ -137,7 +137,7 @@ MatchOntologyData = set[tuple[EntityClass, ParserName, NormalisedSynonymStr, Men
 
 
 STRINGMATCHING_EXAMPLE_TEXT = """There is a Q42_ID and Q42_syn in this sentence, as well as Q42_syn & Q8_syn synonyms.
-    This sentence is just to test when there are multiple synonyms for a single SynonymTerm,
+    This sentence is just to test when there are multiple synonyms for a single LinkingCandidate,
     like for complex 7 disease alpha a.k.a ComplexVII Disease\u03B1 amongst others."""
 
 
@@ -166,7 +166,7 @@ STRINGMATCHING_PARAM_NAMES = tuple(
 
 TESTCASES = [
     StringMatchingTestCase(
-        id="Two case insensitive terms from two parsers Both should hit",
+        id="Two case insensitive resources from two parsers Both should hit",
         parser_1_resources=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
         parser_2_resources=[SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
         match_len=2,

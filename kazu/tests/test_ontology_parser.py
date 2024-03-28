@@ -78,7 +78,7 @@ def setup_databases(
     curations_path = None
     if human_curated_resources is not None:
         curations_path = base_path.joinpath("curations.jsonl")
-        dump_ontology_string_resources(terms=human_curated_resources, path=curations_path)
+        dump_ontology_string_resources(resources=human_curated_resources, path=curations_path)
 
     global_actions_path = None
     if global_actions is not None:
@@ -132,7 +132,7 @@ def setup_databases(
     return SynonymDatabase()
 
 
-def test_should_add_synonym_term_to_parser(tmp_path):
+def test_should_add_resource_to_parser(tmp_path):
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -249,7 +249,7 @@ def test_should_modify_resource_from_parser_via_general_rule(tmp_path):
     assert len(syn_db.get_syns_for_id(PARSER_1_NAME, "first")) == 0
 
 
-def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
+def test_should_not_add_a_resource_as_id_nonexistant(tmp_path):
     override_id = "I do not exist"
     resource = OntologyStringResource(
         original_synonyms=frozenset(
@@ -285,9 +285,9 @@ def test_should_not_add_a_term_as_id_nonexistant(tmp_path):
     )
 
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
-    affected_term = syn_db.get(PARSER_1_NAME, StringNormalizer.normalize(TARGET_SYNONYM))
-    assert len(affected_term.associated_id_sets) == 1
-    modified_equivalent_ids = next(iter(affected_term.associated_id_sets)).ids
+    affected_candidate = syn_db.get(PARSER_1_NAME, StringNormalizer.normalize(TARGET_SYNONYM))
+    assert len(affected_candidate.associated_id_sets) == 1
+    modified_equivalent_ids = next(iter(affected_candidate.associated_id_sets)).ids
     assert override_id not in modified_equivalent_ids
 
 
@@ -325,14 +325,14 @@ def test_should_override_id_set(tmp_path):
         parser_data_includes_target_synonym=True,
     )
 
-    term_norm_lookup = resource.term_norm_for_linking(entity_class=ENTITY_CLASS)
-    assert len(syn_db.get(PARSER_1_NAME, term_norm_lookup).associated_id_sets) == 1
-    equiv_id_set = next(iter(syn_db.get(PARSER_1_NAME, term_norm_lookup).associated_id_sets))
+    syn_norm_lookup = resource.syn_norm_for_linking(entity_class=ENTITY_CLASS)
+    assert len(syn_db.get(PARSER_1_NAME, syn_norm_lookup).associated_id_sets) == 1
+    equiv_id_set = next(iter(syn_db.get(PARSER_1_NAME, syn_norm_lookup).associated_id_sets))
     assert "first" not in equiv_id_set.ids
     assert "second" in equiv_id_set.ids
 
 
-def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
+def test_should_not_add_a_resource_to_db_as_one_already_exists(tmp_path):
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -369,7 +369,7 @@ def test_should_not_add_a_synonym_term_to_db_as_one_already_exists(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_should_not_add_a_term_as_can_infer_associated_id_sets(tmp_path):
+def test_should_not_add_a_resource_as_can_infer_associated_id_sets(tmp_path):
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [

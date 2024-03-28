@@ -110,8 +110,8 @@ def test_pipeline_build_from_parsers_and_curated_list(
     Singleton.clear_all()
     TEST_RESOURCES_PATH_PARSER_1 = tmp_path / "parser1_resources.jsonl"
     TEST_RESOURCES_PATH_PARSER_2 = tmp_path / "parser2_resources.jsonl"
-    dump_ontology_string_resources(terms=parser_1_resources, path=TEST_RESOURCES_PATH_PARSER_1)
-    dump_ontology_string_resources(terms=parser_2_resources, path=TEST_RESOURCES_PATH_PARSER_2)
+    dump_ontology_string_resources(resources=parser_1_resources, path=TEST_RESOURCES_PATH_PARSER_1)
+    dump_ontology_string_resources(resources=parser_2_resources, path=TEST_RESOURCES_PATH_PARSER_2)
 
     parser_1 = DummyParser(
         name=FIRST_MOCK_PARSER,
@@ -175,18 +175,23 @@ def test_pipeline_build_from_parsers_alone():
         source="test",
         data={
             IDX: [
-                "http://my.fake.ontology/synonym_term_id_123",
+                "http://my.fake.ontology/entity_id_123",
                 "http://my.fake.ontology/complex_disease_123",
                 "http://my.fake.ontology/complex_disease_123",
                 "http://my.fake.ontology_amongst_id_123",
             ],
             DEFAULT_LABEL: [
-                "SynonymTerm",
+                "LinkingCandidate",
                 "Complex Disease Alpha VII",
                 "Complex Disease Alpha VII",
                 "Amongst",
             ],
-            SYN: ["SynonymTerm", "complex 7 disease alpha", "complexVII disease\u03B1", "amongst"],
+            SYN: [
+                "LinkingCandidate",
+                "complex 7 disease alpha",
+                "complexVII disease\u03B1",
+                "amongst",
+            ],
             MAPPING_TYPE: ["test", "test", "test", "test"],
         },
     )
@@ -199,7 +204,7 @@ def test_pipeline_build_from_parsers_alone():
     match_texts = {
         "Q42_syn",
         "Q8_syn",
-        "SynonymTerm",
+        "LinkingCandidate",
         "complex 7 disease alpha",
         "ComplexVII Disease\u03B1",
         "amongst",
@@ -207,7 +212,7 @@ def test_pipeline_build_from_parsers_alone():
     match_ontology_data = {
         ("ent_type_1", "first_mock_parser", "Q42_SYN", MentionConfidence.PROBABLE),
         ("ent_type_2", "second_mock_parser", "Q8_SYN", MentionConfidence.PROBABLE),
-        ("ent_type_3", "third_mock_parser", "SYNONYMTERM", MentionConfidence.PROBABLE),
+        ("ent_type_3", "third_mock_parser", "LINKINGCANDIDATE", MentionConfidence.PROBABLE),
         (
             "ent_type_3",
             "third_mock_parser",

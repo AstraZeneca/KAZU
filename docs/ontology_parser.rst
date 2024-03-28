@@ -35,12 +35,12 @@ Enter the Kazu :class:`.OntologyParser`. The job of the OntologyParser is to tra
 into a set of :class:`.LinkingCandidate`\ s. A :class:`.LinkingCandidate` is a container for a synonym, which understands what set of IDs the
 synonym may refer to and whether they refer to a single group of closely related concepts or multiple separate ones. This is handled by the attribute
 :attr:`.LinkingCandidate.associated_id_sets`. A :class:`.LinkingCandidate` holds various other pieces of useful information
-such as whether the term is symbolic (i.e. an abbreviation or some other identifier).
+such as whether the candidate is symbolic (i.e. an abbreviation or some other identifier).
 
-How does it work? When an ambiguous term is detected in the ontology, the parser must decide whether it should group the confused IDs into the same
+How does it work? When an ambiguous candidate is detected in the ontology, the parser must decide whether it should group the confused IDs into the same
 :class:`.EquivalentIdSet`, or different ones. The algorithm for doing this works as follows:
 
-1) Use the :class:`.StringNormalizer` to determine if the term is symbolic or not. If it's not symbolic (i.e. a noun phrase),
+1) Use the :class:`.StringNormalizer` to determine if the candidate is symbolic or not. If it's not symbolic (i.e. a noun phrase),
    merge the IDs into a single :class:`.EquivalentIdSet`. The idea here is that noun phrase entities 'ought' to be distinct enough such that
    references to the same string across different identifiers refer to the same concept.
 
@@ -58,7 +58,7 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
 
      :attr:`.EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC`
 
-2) If the term is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
+2) If the candidate is symbolic, use the configured string scorer to calculate the similarity of default labels associated with the different IDs, and using a predefined threshold,
    group these IDs into one or more sets of IDs. The idea here is that we can use embeddings to check if semantically, each ID associated with a confused symbol is referring
    to either a very similar concept to another ID associated with the symbol, or something completely different in the knowledgebase. Typically, we use a distilled form of the
    `SapBert <https://github.com/cambridgeltl/sapbert>`_ model here, as it's very good at this.
@@ -93,7 +93,7 @@ How does it work? When an ambiguous term is detected in the ontology, the parser
      sapbert similarity: 0.7426. Threshold: 0.70.
      Decision: merge into one instance of :class:`.EquivalentIdSet`
 
-Naturally, this behaviour may not always be desired. You may want two instances of :class:`.LinkingCandidate` for the term "XLOA" (despite the MONDO ontology
+Naturally, this behaviour may not always be desired. You may want two instances of :class:`.LinkingCandidate` for the synonym "XLOA" (despite the MONDO ontology
 suggesting this abbreviation is appropriate for either ID), and allow another step to decide which candidate :class:`.LinkingCandidate` is most appropriate.
 In this case, you can override this behaviour with :meth:`.OntologyParser.score_and_group_ids`\ .
 
@@ -123,7 +123,7 @@ There are two methods you need to override: :meth:`.OntologyParser.parse_to_data
 
 
     def parse_to_dataframe(self) -> pd.DataFrame:
-        """The objective of this method is to create a long, thin pandas dataframe of terms and
+        """The objective of this method is to create a long, thin pandas dataframe of entities and
         associated metadata.
 
         We need at the very least, to extract an id and a default label. Normally, we'd also be
@@ -197,7 +197,8 @@ Finally, when we want to use our new parser, we need to give it information abou
 
 .. code-block:: python
 
-    # We need a string scorer to resolve similar terms.
+    # We need a string scorer to resolve similar
+    # and potentially ambiguous synonyms.
     # Here, we use a trivial example for brevity.
     string_scorer = lambda string_1, string_2: 0.75
     parser = ChemblOntologyParser(
@@ -250,7 +251,7 @@ Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` class (and co
 The flow of an ontology parser to handling the underlying strings is as follows:
 
 1) On first initialisation, the set of :class:`.LinkingCandidate`\s an ontology produces is converted into a set of
-   :class:`.OntologyStringResource`. This happens via :func:`.syn_terms_to_ontology_string_resources`.
+   :class:`.OntologyStringResource`. This happens via :func:`.linking_candidates_to_ontology_string_resources`.
 2) If configured, the :class:`.CombinatorialSynonymGenerator` is executed to generate additional forms
    for each :class:`.OntologyStringResource`.
 3) If configured, the :class:`.AutoCurator` is executed to adjust the default behaviour for each :class:`.OntologyStringResource`.
@@ -266,7 +267,7 @@ The flow of an ontology parser to handling the underlying strings is as follows:
    the automatically curated version. If ``run_curation_report`` is set on :class:`.OntologyParser`, a report will be
    generated alongside the ontology file that describe what human curations are obsolete/broken/superfluous.
 6) Finally, when upgrading an ontology, the serialised set of automatically produced :class:`.OntologyStringResource` from step 4
-   is used to compare the new and old ontologies, migrating terms where possible and describing the differences
+   is used to compare the new and old ontologies, migrating resources where possible and describing the differences
    between the old and the new versions. The results are summarised in a report inside the Kazu model pack, alongside the
    original ontology input data.
 

@@ -45,7 +45,7 @@ class OntologyMatcherConfig:
     parser_name_to_entity_type: dict[str, str]
 
 
-# the strings in the tuple are: parser_name, term_norm, confidence value
+# the strings in the tuple are: parser_name, syn_norm, confidence value
 _MatcherOntologyData = dict[str, set[tuple[str, str, str]]]
 
 
@@ -185,15 +185,15 @@ class OntologyMatcher:
             match_ids_and_text_cs = set()
             match_ids_and_text_ci = set()
             for resource in parser_resources:
-                # a resource can have different term_norms for different parsers,
+                # a resource can have different syn_norms for different parsers,
                 # since the string normalizer's output depends on the entity class.
-                # Also, a resource may exist in multiple LinkingCandidate.terms
-                term_norm = resource.term_norm_for_linking(parser.entity_class)
+                # Also, a synonym may exist in multiple LinkingCandidate.raw_synonyms
+                syn_norm = resource.syn_norm_for_linking(parser.entity_class)
                 for syn in resource.active_ner_synonyms():
                     match_id = (
                         parser.name
                         + self.match_id_sep
-                        + term_norm
+                        + syn_norm
                         + self.match_id_sep
                         + str(syn.mention_confidence.value)
                     )
@@ -249,11 +249,11 @@ class OntologyMatcher:
         ):
             data = defaultdict(set)
             for mat in matches_grp:
-                parser_name, term_norm, confidence = self.nlp.vocab.strings.as_string(mat[0]).split(
+                parser_name, syn_norm, confidence = self.nlp.vocab.strings.as_string(mat[0]).split(
                     self.match_id_sep, maxsplit=2
                 )
                 ent_class = self.parser_name_to_entity_type[parser_name]
-                data[ent_class].add((parser_name, term_norm, confidence))
+                data[ent_class].add((parser_name, syn_norm, confidence))
             for ent_class, ent_class_data in data.items():
                 # we use a uuid here so that every span hash is unique
                 new_span = Span(doc, start, end, label=uuid.uuid4().hex)

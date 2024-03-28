@@ -99,20 +99,22 @@ class EntityLinkingLookupCache:
     bert)"""
 
     def __init__(self, lookup_cache_size: int = 5000):
-        self.terms_lookup_cache: LFUCache[int, CandidatesToMetrics] = LFUCache(lookup_cache_size)
+        self.candidate_lookup_cache: LFUCache[int, CandidatesToMetrics] = LFUCache(
+            lookup_cache_size
+        )
 
     def update_candidates_lookup_cache(
         self, entity: Entity, candidates: CandidatesToMetrics
     ) -> None:
         hash_val = get_match_entity_class_hash(entity)
-        cache_hit = self.terms_lookup_cache.get(hash_val)
+        cache_hit = self.candidate_lookup_cache.get(hash_val)
         if cache_hit is None:
-            self.terms_lookup_cache[hash_val] = candidates
+            self.candidate_lookup_cache[hash_val] = candidates
 
     def check_lookup_cache(self, entities: Iterable[Entity]) -> list[Entity]:
-        """Checks the cache for synonym terms. If relevant terms are found for an
-        entity, update it accordingly. If not return as a list of cache misses (e.g. for
-        further processing)
+        """Checks the cache for linking candidates. If relevant candidates are found for
+        an entity, update it accordingly. If not return as a list of cache misses (e.g.
+        for further processing)
 
         :param entities:
         :return:
@@ -120,7 +122,7 @@ class EntityLinkingLookupCache:
         cache_misses = []
         for ent in entities:
             hash_val = get_match_entity_class_hash(ent)
-            candidates_from_cache = self.terms_lookup_cache.get(hash_val)
+            candidates_from_cache = self.candidate_lookup_cache.get(hash_val)
             if not candidates_from_cache:
                 cache_misses.append(ent)
             else:

@@ -21,22 +21,22 @@ from kazu.utils.grouping import sort_then_group
 logger = logging.getLogger(__name__)
 
 
-def syn_terms_to_ontology_string_resources(
-    terms: Iterable[LinkingCandidate],
+def linking_candidates_to_ontology_string_resources(
+    candidates: Iterable[LinkingCandidate],
 ) -> set[OntologyStringResource]:
     """
 
-    :param terms:
+    :param candidates:
     :return:
     """
     result = set()
-    for term_norm, terms in sort_then_group(terms, key_func=lambda x: x.synonym_norm):
+    for syn_norm, candidates in sort_then_group(candidates, key_func=lambda x: x.synonym_norm):
         alts = set()
-        for term in terms:
-            for term_str in term.raw_synonyms:
+        for candidate in candidates:
+            for raw_syn in candidate.raw_synonyms:
                 alts.add(
                     Synonym(
-                        text=term_str,
+                        text=raw_syn,
                         case_sensitive=False,
                         mention_confidence=MentionConfidence.PROBABLE,
                     )

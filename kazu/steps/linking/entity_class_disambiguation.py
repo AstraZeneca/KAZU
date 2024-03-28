@@ -116,7 +116,7 @@ class EntityClassDisambiguationStep(Step):
         to correlate an entity's actual textual context with the provided expected context, and provided thresholds are
         used to allow the tf-idf model to choose the most suitable entity class.
 
-        :param context: Specifies terms to disambiguate along with an expected textual context around those terms.
+        :param context: Specifies synonyms to disambiguate along with an expected textual context around those synonyms.
         """
         self.spans_to_disambiguate = set(context.keys())
         self.entity_class_scorer = EntityClassTfIdfScorer.from_spans_to_sentence_disambiguator(

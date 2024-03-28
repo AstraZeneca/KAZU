@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class DictionaryIndex:
     """The dictionary index looks for LinkingCandidates via a char ngram search between
-    the normalised version of the query string and the term_norm of all
+    the normalised version of the query string and the synonym_norm of all
     LinkingCandidates associated with the provided OntologyParser."""
 
     def __init__(
@@ -54,9 +54,9 @@ class DictionaryIndex:
         # order of the synonyms in the cached vectorized from _build_index_cache
         # if present, without relying on the order in the SynonymDatabase being the
         # same.
-        for norm_syn, syn_term in sorted(self.synonyms_for_parser.items()):
+        for norm_syn, linking_candidate in sorted(self.synonyms_for_parser.items()):
             self.normalized_synonyms.append(norm_syn)
-            self.synonym_list.append(syn_term)
+            self.synonym_list.append(linking_candidate)
         self.vectorizer, self.tf_idf_matrix = self.build_index_cache()
 
     def apply_boolean_scorers(self, reference_term: str, query_term: str) -> bool:
@@ -80,15 +80,15 @@ class DictionaryIndex:
            ``top_n`` :class:`~.LinkingCandidate`\\ s in the index that score about 0 for the given
            query.
 
-        :param query: term to search
+        :param query: query string to search
         :param top_n: max number of results
         :return:
         """
 
         match_norm = StringNormalizer.normalize(query, entity_class=self.entity_class)
-        exact_match_term = self.synonyms_for_parser.get(match_norm)
-        if exact_match_term is not None:
-            yield exact_match_term, LinkingMetrics(exact_match=True)
+        exact_match_candidate = self.synonyms_for_parser.get(match_norm)
+        if exact_match_candidate is not None:
+            yield exact_match_candidate, LinkingMetrics(exact_match=True)
 
         else:
             # benchmarking suggests converting to dense is faster than using the
@@ -110,7 +110,7 @@ class DictionaryIndex:
                     # get by index
                     candidate = self.synonym_list[neighbour]
                     if self.apply_boolean_scorers(
-                        reference_term=match_norm, query_term=candidate.term_norm
+                        reference_term=match_norm, query_term=candidate.synonym_norm
                     ):
                         yield candidate, LinkingMetrics(
                             exact_match=False, search_score=score, bool_score=True

@@ -96,7 +96,7 @@ class ExplosionStringMatchingStep(ParserDependentStep):
                 ontology_data,
             ) in self.extract_entity_data_from_spans(spans):
 
-                for entity_class, per_parser_term_norm_set in ontology_data.items():
+                for entity_class, per_parser_syn_norm_set in ontology_data.items():
                     confidences = set()
                     e = Entity.load_contiguous_entity(
                         start=start_char,
@@ -105,11 +105,11 @@ class ExplosionStringMatchingStep(ParserDependentStep):
                         entity_class=entity_class,
                         namespace=self.namespace(),
                     )
-                    for parser_name, term_norm, confidence in per_parser_term_norm_set:
+                    for parser_name, syn_norm, confidence in per_parser_syn_norm_set:
                         mention_confidence = MentionConfidence(int(confidence))
                         confidences.add(mention_confidence)
                         e.add_or_update_linking_candidate(
-                            self.synonym_db.get(parser_name, term_norm),
+                            self.synonym_db.get(parser_name, syn_norm),
                             LinkingMetrics(exact_match=True),
                         )
 

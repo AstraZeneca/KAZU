@@ -41,8 +41,8 @@ def check_generator_result(
             ),
             behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         )
-        generated_terms = generator({resource})
-        new_syns = {s for term in generated_terms for s in term.all_strings()}
+        generated_resources = generator({resource})
+        new_syns = {s for resource in generated_resources for s in resource.all_strings()}
 
     else:
         new_syns = generator(input_str)

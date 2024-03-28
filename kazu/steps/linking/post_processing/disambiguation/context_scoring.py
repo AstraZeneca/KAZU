@@ -228,5 +228,5 @@ class GildaTfIdfScorer(metaclass=Singleton):
             neighbours = scores.argsort()
             distances = scores[neighbours]
             for neighbour, score in zip(neighbours, distances):
-                term = idx_lst[neighbour]
-                yield term, -score
+                idx = idx_lst[neighbour]
+                yield idx, -score

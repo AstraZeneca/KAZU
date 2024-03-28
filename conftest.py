@@ -101,11 +101,11 @@ def set_up_p27_test_case() -> tuple[CandidatesToMetrics, DummyParser]:
     }
     parser = DummyParser(data=dummy_data, name="test_tfidf_parser", source="test_tfidf_parser")
     parser.populate_databases()
-    terms_with_metrics = {
+    candidates_with_metrics = {
         candidate: LinkingMetrics() for candidate in SynonymDatabase().get_all(parser.name).values()
     }
 
-    return terms_with_metrics, parser
+    return candidates_with_metrics, parser
 
 
 @pytest.fixture(scope="session")
@@ -167,7 +167,7 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
     funcs = [
         OntologyParser._populate_databases,
         OntologyParser.export_metadata,
-        OntologyParser.export_synonym_terms,
+        OntologyParser.export_linking_candidates,
     ]
     # ...mapped to the underlying function
     # type ignore needed because it would be a pain to try and tell mypy that

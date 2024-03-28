@@ -58,7 +58,7 @@ class TestStrategy(MappingStrategy):
         """
 
         :param confidence:
-        :param ent_match: filter_terms only fires when ent_match is this this value
+        :param ent_match: filter_candidates only fires when ent_match is this value
         :param expected_ids: only return CandidatesToMetrics which have this id
         :param disambiguation_strategies:
         """
@@ -371,7 +371,7 @@ def build_and_execute_runner(
 ) -> tuple[dict[str, set[str]], dict[str, list[Entity]]]:
     parser1, parser2 = populate_databases
     expected_id_groups = extract_expected_ids_from_parsers(parser1, parser2)
-    parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2 = extract_terms_from_parsers(
+    parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2 = extract_candidates_from_parsers(
         parser1, parser2
     )
     doc, test_groups = create_test_doc(parser1_hit_1, parser1_hit_2, parser2_hit_1, parser2_hit_2)
@@ -400,7 +400,7 @@ def extract_expected_ids_from_parsers(
     }
 
 
-def extract_terms_from_parsers(
+def extract_candidates_from_parsers(
     parser1: DummyParser, parser2: DummyParser
 ) -> tuple[LinkingCandidate, LinkingCandidate, LinkingCandidate, LinkingCandidate]:
     """Extract a tuple of Linking Candidates we need for testing.
@@ -435,7 +435,7 @@ def check_mappings_from_ents(
 def test_StrategyRunner(mock_kazu_disk_cache_on_parsers, populate_databases):
     expected_id_groups, test_groups = build_and_execute_runner(populate_databases)
     message = (
-        "first test: the entity has a single term from a single parser."
+        "first test: the entity has a single candidate from a single parser."
         " It should receive mapping with group_1_expected_idx (first configured strategy fires)"
     )
     check_mappings_from_ents(test_groups["test_1"], 1, expected_id_groups["test_1"], message)
@@ -445,23 +445,23 @@ def test_StrategyRunner(mock_kazu_disk_cache_on_parsers, populate_databases):
     )
     check_mappings_from_ents(test_groups["test_2"], 1, expected_id_groups["test_2"], message)
     message = (
-        "third test: the entities have a single term from multiple parser namespace. Should receive a mapping "
+        "third test: the entities have a single candidate from multiple parser namespace. Should receive a mapping "
         "from each"
     )
     check_mappings_from_ents(test_groups["test_3"], 2, expected_id_groups["test_3"], message)
     message = (
-        "fourth test: the entities have multiple terms from a single parser namespace. A disambiguation strategy "
+        "fourth test: the entities have multiple candidates from a single parser namespace. A disambiguation strategy "
         "is configured, so only one mapping is produced"
     )
     check_mappings_from_ents(test_groups["test_4"], 1, expected_id_groups["test_4"], message)
     message = (
-        "fifth test: the entities have multiple terms from a parser namespace. no disambiguation strategy is "
+        "fifth test: the entities have multiple candidates from a parser namespace. no disambiguation strategy is "
         "configured, so multiple mappings expected"
     )
     check_mappings_from_ents(test_groups["test_5"], 2, expected_id_groups["test_5"], message)
 
     message = (
-        "default test: the entities have a single term from multiple parser namespaces. all default strategies should fail,"
+        "default test: the entities have a single candidate from multiple parser namespaces. all default strategies should fail,"
         "# so the runner uses the default strategy, which succeeds, producing a mapping from each namespace "
     )
     check_mappings_from_ents(

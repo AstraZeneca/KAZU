@@ -77,7 +77,7 @@ class MinLength(AutoCurationAction):
 
 
 class MaxLength(AutoCurationAction):
-    """Drop terms that exceed a maximum string length."""
+    """Drop resources that exceed a maximum string length."""
 
     def __init__(self, max_len: int = 60):
         self.max_len = max_len

@@ -203,7 +203,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
     )
 
-    # The mergeable_resources contains two terms that normalise to the same value and should be merged into a single resource
+    # The mergeable_resources contains two resources that normalise to the same value and should be merged into a single resource
     # in all cases. This new resource now causes a case conflict on case_conflict_resource. If autofix=True, this is resolved.
     # if autofix = False, the conflict set appears in mergeable_curation_report.case_conflicts
     mergeable_resources = {
@@ -226,7 +226,7 @@ def test_normalisation_and_case_conflict_resolution(autofix):
         assert len(mergeable_curation_report.normalisation_conflicts) == 0
         assert len(mergeable_curation_report.case_conflicts) == 1
 
-    # The unmergeable_resources_1/2 contain two terms that normalise to the same value and cannot be merged into a single resource.
+    # The unmergeable_resources_1/2 contain two resources that normalise to the same value and cannot be merged into a single resource.
     # If autofix = True, the conflict is resolved via the conflict analyser resolution logic.
     # However, this resolved resource now causes a conflict on case_conflict_resource. If autofix = True, this is also resolved.
     # if autofix = False, the conflict is reported in curation_report.normalisation_conflicts. Until the normalisation conflict

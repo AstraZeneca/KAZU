@@ -203,7 +203,7 @@ class LinkingCandidate:
     """A LinkingCandidate is a container for a single normalised synonym, and is
     produced by an :class:`~.OntologyParser` implementation.
 
-    It may be composed of multiple terms that normalise to the same
+    It may be composed of multiple synonyms that normalise to the same
     unique string (e.g. "breast cancer" and "Breast Cancer"). The number
     of ``associated_id_sets`` that this synonym maps to is determined by the
     :meth:`~.OntologyParser.score_and_group_ids` method of the associated OntologyParser.
@@ -215,7 +215,7 @@ class LinkingCandidate:
     synonym_norm: str
     #: ontology parser name
     parser_name: str
-    #: is the term symbolic? Determined by the OntologyParser
+    #: is the candidate symbolic? Determined by the OntologyParser
     is_symbolic: bool
     associated_id_sets: AssociatedIdSets
     #: aggregation strategy, determined by the ontology parser
@@ -228,8 +228,8 @@ class LinkingCandidate:
         return len(self.associated_id_sets) > 1
 
     @staticmethod
-    def from_dict(term_dict: dict) -> "LinkingCandidate":
-        return kazu_json_converter.structure(term_dict, LinkingCandidate)
+    def from_dict(candidate_dict: dict) -> "LinkingCandidate":
+        return kazu_json_converter.structure(candidate_dict, LinkingCandidate)
 
 
 @dataclass()
@@ -286,11 +286,11 @@ class Entity:
             self.add_or_update_linking_candidate(candidate, metrics)
 
     def add_or_update_linking_candidate(
-        self, term: LinkingCandidate, new_metrics: LinkingMetrics
+        self, candidate: LinkingCandidate, new_metrics: LinkingMetrics
     ) -> None:
-        maybe_existing_metrics = self.linking_candidates.get(term)
+        maybe_existing_metrics = self.linking_candidates.get(candidate)
         if not maybe_existing_metrics:
-            self.linking_candidates[term] = new_metrics
+            self.linking_candidates[candidate] = new_metrics
         else:
             for k, v in new_metrics.__dict__.items():
                 if v is not None:
@@ -662,14 +662,14 @@ If you are familiar with cattrs, you may prefer to use the ``structure``, ``unst
 
 
 class OntologyStringBehaviour(AutoNameEnum):
-    #: use the term for both dictionary based NER and as a linking target.
+    #: use the resource for both dictionary based NER and as a linking target.
     ADD_FOR_NER_AND_LINKING = auto()
-    #: use the term only as a linking target. Note, this is not required if the term is already in the
-    #: underlying ontology, as all ontology terms are included as linking targets by default
+    #: use the resource only as a linking target. Note, this is not required if the resource is already in the
+    #: underlying ontology, as all ontology resources are included as linking targets by default
     #: (Also see DROP_SYNONYM_TERM_FOR_LINKING)
     ADD_FOR_LINKING_ONLY = auto()
-    #: do not use this term as a linking target. Normally, you would use this for a term you want to remove
-    #: from the underlying ontology (e.g. a 'bad' synonym). If the term does not exist, has no effect
+    #: do not use this resource as a linking target. Normally, you would use this for a resource you want to remove
+    #: from the underlying ontology (e.g. a 'bad' synonym). If the resource does not exist, has no effect
     DROP_SYNONYM_TERM_FOR_LINKING = auto()
 
 
@@ -830,9 +830,9 @@ class OntologyStringResource:
         )
     """
 
-    #: Original versions of this term, exactly as specified in the source ontology. These should all normalise to the same string.
+    #: Original synonyms, exactly as specified in the source ontology. These should all normalise to the same string.
     original_synonyms: frozenset[Synonym]
-    #: The intended behaviour for this term.
+    #: The intended behaviour for this resource.
     behaviour: OntologyStringBehaviour
     #: Alternative synonyms generated from the originals by :class:`kazu.ontology_preprocessing.synonym_generation.CombinatorialSynonymGenerator`\.
     alternative_synonyms: frozenset[Synonym] = field(default_factory=frozenset)
@@ -859,16 +859,16 @@ class OntologyStringResource:
             if min(ci_confidences) < min(cs_confidences):
                 raise ValueError(f"case sensitive conflict: {self}")
 
-    def term_norm_for_linking(self, entity_class: str) -> str:
+    def syn_norm_for_linking(self, entity_class: str) -> str:
         norms = set(
             StringNormalizer.normalize(syn.text, entity_class) for syn in self.original_synonyms
         )
         if len(norms) == 1:
-            term_norm = next(iter(norms))
-            return term_norm
+            syn_norm = next(iter(norms))
+            return syn_norm
         else:
             raise RuntimeError(
-                f"multiple term norms produced by {self}. This resource should be separated into two or more seperate items."
+                f"multiple synonym norms produced by {self}. This resource should be separated into two or more separate items."
             )
 
     @staticmethod
@@ -893,8 +893,8 @@ class OntologyStringResource:
 
     @property
     def additional_to_source(self) -> bool:
-        """True if this term created in addition to the source terms defined in the
-        original Ontology."""
+        """True if this resource created in addition to the source resources defined in
+        the original Ontology."""
         return self.associated_id_sets is not None and self.behaviour in {
             OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
             OntologyStringBehaviour.ADD_FOR_LINKING_ONLY,

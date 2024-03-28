@@ -33,7 +33,7 @@ from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.string_normalizer import StringNormalizer
 from kazu.utils.utils import (
     as_path,
-    syn_terms_to_ontology_string_resources,
+    linking_candidates_to_ontology_string_resources,
     PathLike,
 )
 
@@ -134,7 +134,7 @@ class OntologyParser(ABC):
         :param curations_path: path to jsonl file of human-curated :class:`~.OntologyStringResource`\\s to override the defaults of the parser.
         :param global_actions: path to json file of :class:`~.GlobalParserActions` to apply to the parser.
         :param run_upgrade_report: Use when upgrading the version of the underlying data. When True, reports novel and
-            obsolete terms in the model pack directory. Note that this will overwrite the default
+            obsolete ontology string resources in the model pack directory. Note that this will overwrite the default
             :class:`~.OntologyStringResource`\\s associated with this parser in the model pack.
         :param run_curation_report: Use when adjusting the human curations. When True, creates a report in the model
             pack directory describing various aspects of the curation set, such as no-op curations,
@@ -192,7 +192,9 @@ class OntologyParser(ABC):
             mapping_type_set: frozenset[str] = frozenset(row[MAPPING_TYPE])
             syn_norm = row["syn_norm"]
             if len(syn_set) > 1:
-                logger.debug("normaliser has merged %s into a single term: %s", syn_set, syn_norm)
+                logger.debug(
+                    "normaliser has merged %s into a single candidate: %s", syn_set, syn_norm
+                )
 
             is_symbolic = all(
                 StringNormalizer.classify_symbolic(x, self.entity_class) for x in syn_set
@@ -208,17 +210,17 @@ class OntologyParser(ABC):
             )
             associated_id_sets, agg_strategy = self.score_and_group_ids(ids_and_source, is_symbolic)
 
-            synonym_term = LinkingCandidate(
-                synonym_norm=syn_norm,
-                raw_synonyms=frozenset(syn_set),
-                is_symbolic=is_symbolic,
-                mapping_types=mapping_type_set,
-                associated_id_sets=associated_id_sets,
-                parser_name=self.name,
-                aggregated_by=agg_strategy,
+            result.add(
+                LinkingCandidate(
+                    synonym_norm=syn_norm,
+                    raw_synonyms=frozenset(syn_set),
+                    is_symbolic=is_symbolic,
+                    mapping_types=mapping_type_set,
+                    associated_id_sets=associated_id_sets,
+                    parser_name=self.name,
+                    aggregated_by=agg_strategy,
+                )
             )
-
-            result.add(synonym_term)
 
         return result
 
@@ -385,11 +387,11 @@ class OntologyParser(ABC):
         return cast(dict[str, dict[str, SimpleValue]], metadata)
 
     def process_resources(
-        self, terms: set[LinkingCandidate]
+        self, candidates: set[LinkingCandidate]
     ) -> tuple[Optional[list[OntologyStringResource]], set[LinkingCandidate]]:
         if not self.ontology_auto_generated_resources_set_path.exists() or self.run_upgrade_report:
             clean_resources = self.generate_clean_default_resources(
-                terms, upgrade_report=self.run_upgrade_report
+                candidates, upgrade_report=self.run_upgrade_report
             )
 
         else:
@@ -402,9 +404,9 @@ class OntologyParser(ABC):
             resources=list(clean_resources),
             parser_name=self.name,
             entity_class=self.entity_class,
-            synonym_terms=terms,
+            linking_candidates=candidates,
         )
-        return curation_processor.export_resources_and_final_terms()
+        return curation_processor.export_resources_and_final_candidates()
 
     def build_curation_report(
         self, maybe_auto_generated_resources_clean: Optional[set[OntologyStringResource]]
@@ -448,7 +450,7 @@ class OntologyParser(ABC):
             )
             human_curation_set_report_path.mkdir()
             human_and_auto_generated_resources_conflict_report_path = curation_report_path.joinpath(
-                "active_term_conflict_report"
+                "active_resources_conflict_report"
             )
             human_and_auto_generated_resources_conflict_report_path.mkdir()
 
@@ -488,11 +490,11 @@ class OntologyParser(ABC):
         return human_and_auto_generated_resources_merged_curation_report.clean_resources
 
     def generate_clean_default_resources(
-        self, terms: set[LinkingCandidate], upgrade_report: bool = False
+        self, candidates: set[LinkingCandidate], upgrade_report: bool = False
     ) -> set[OntologyStringResource]:
         """
 
-        :param terms:
+        :param candidates:
         :param upgrade_report:
         :return:
         """
@@ -501,7 +503,7 @@ class OntologyParser(ABC):
             self.name,
         )
 
-        new_version_auto_generated_resources = self._generate_dirty_default_resources(terms)
+        new_version_auto_generated_resources = self._generate_dirty_default_resources(candidates)
 
         # autofix is true, to ensure a clean set of resources
         conflict_analyser = OntologyStringConflictAnalyser(self.entity_class, autofix=True)
@@ -536,7 +538,7 @@ class OntologyParser(ABC):
 
         if upgrade_report:
             logger.info(
-                "%s writing novel/obsolete terms after upgrade to %s",
+                "%s writing novel/obsolete resources after upgrade to %s",
                 self.name,
                 upgrade_report_path,
             )
@@ -593,31 +595,31 @@ class OntologyParser(ABC):
         return previous_version_auto_generated_resources_clean
 
     def _generate_dirty_default_resources(
-        self, terms: set[LinkingCandidate]
+        self, candidates: set[LinkingCandidate]
     ) -> set[OntologyStringResource]:
         """Dirty resources come directly from a set of :class:`.LinkingCandidate`\\, and
         are optionally further modified by synonym generation and autocuration routines.
 
         They are not guaranteed to be conflict free - hence why they are 'dirty'.
         """
-        default_term_set = syn_terms_to_ontology_string_resources(terms)
+        default_candidate_set = linking_candidates_to_ontology_string_resources(candidates)
         if self.synonym_generator is not None:
             logger.info(
                 "%s synonym generation configuration detected",
                 self.name,
             )
-            default_term_set = self.synonym_generator(default_term_set)
+            default_candidate_set = self.synonym_generator(default_candidate_set)
         if self.autocurator is not None:
             logger.info(
                 "%s autocuration configuration detected",
                 self.name,
             )
-            default_term_set = set(self.autocurator(default_term_set))
+            default_candidate_set = set(self.autocurator(default_candidate_set))
 
-        return default_term_set
+        return default_candidate_set
 
     @kazu_disk_cache.memoize(ignore={0})
-    def export_synonym_terms(self, parser_name: str) -> set[LinkingCandidate]:
+    def export_linking_candidates(self, parser_name: str) -> set[LinkingCandidate]:
         """Export :class:`.LinkingCandidate` from the parser.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -633,8 +635,8 @@ class OntologyParser(ABC):
         syn_df[SYN] = syn_df[SYN].apply(str.strip)
         syn_df.drop_duplicates(subset=self.all_synonym_column_names)
         assert set(OntologyParser.all_synonym_column_names).issubset(syn_df.columns)
-        synonym_terms = self.resolve_synonyms(synonym_df=syn_df)
-        return synonym_terms
+        linking_candidates = self.resolve_synonyms(synonym_df=syn_df)
+        return linking_candidates
 
     @kazu_disk_cache.memoize(ignore={0})
     def _populate_databases(
@@ -653,22 +655,24 @@ class OntologyParser(ABC):
         """
         logger.info("populating database for %s from source", self.name)
         metadata = self.export_metadata(self.name)
-        # metadata db needs to be populated before call to export_synonym_terms
+        # metadata db needs to be populated before call to export_linking_candidates
         self.metadata_db.add_parser(self.name, self.entity_class, metadata)
-        intermediate_synonym_terms = self.export_synonym_terms(self.name)
-        maybe_ner_resources, final_syn_terms = self.process_resources(intermediate_synonym_terms)
+        intermediate_linking_candidates = self.export_linking_candidates(self.name)
+        maybe_ner_resources, final_linking_candidates = self.process_resources(
+            intermediate_linking_candidates
+        )
         self.parsed_dataframe = None  # clear the reference to save memory
 
-        self.synonym_db.add_parser(self.name, final_syn_terms)
-        return maybe_ner_resources, metadata, final_syn_terms
+        self.synonym_db.add_parser(self.name, final_linking_candidates)
+        return maybe_ner_resources, metadata, final_linking_candidates
 
     def populate_databases(
         self, force: bool = False, return_resources: bool = False
     ) -> Optional[list[OntologyStringResource]]:
         """Populate the databases with the results of the parser.
 
-        Also calculates the term norms associated with any resources (if provided) which
-        can then be used for Dictionary based NER
+        Also calculates the synonym norms associated with any resources (if provided)
+        which can then be used for Dictionary based NER
 
         :param force: do not use the cache for the ontology parser
         :param return_resources: should processed resources be returned?
@@ -682,15 +686,15 @@ class OntologyParser(ABC):
 
         if force:
             kazu_disk_cache.delete(self.export_metadata.__cache_key__(self, self.name))
-            kazu_disk_cache.delete(self.export_synonym_terms.__cache_key__(self, self.name))
+            kazu_disk_cache.delete(self.export_linking_candidates.__cache_key__(self, self.name))
             kazu_disk_cache.delete(cache_key)
 
-        maybe_resources, metadata, final_syn_terms = self._populate_databases(self.name)
+        maybe_resources, metadata, final_linking_candidates = self._populate_databases(self.name)
 
         if self.name not in self.synonym_db.loaded_parsers:
             logger.info("populating database for %s from cache", self.name)
             self.metadata_db.add_parser(self.name, self.entity_class, metadata)
-            self.synonym_db.add_parser(self.name, final_syn_terms)
+            self.synonym_db.add_parser(self.name, final_linking_candidates)
 
         return maybe_resources if return_resources else None
 

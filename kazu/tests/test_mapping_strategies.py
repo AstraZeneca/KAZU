@@ -44,20 +44,22 @@ def set_up_disease_mapping_test_case() -> tuple[CandidatesToMetrics, DummyParser
     }
     parser = DummyParser(data=dummy_data, name="test_tfidf_parsr", source="test_tfidf_parsr")
     parser.populate_databases()
-    terms_with_metrics = {
+    candidates_with_metrics = {
         candidate: LinkingMetrics() for candidate in SynonymDatabase().get_all(parser.name).values()
     }
-    return terms_with_metrics, parser
+    return candidates_with_metrics, parser
 
 
-def check_correct_terms_selected(terms: Iterable[LinkingCandidate], mappings: list[Mapping]):
-    term_ids = set(
+def check_correct_candidates_selected(
+    candidates: Iterable[LinkingCandidate], mappings: list[Mapping]
+):
+    candidate_ids = set(
         (
-            term.parser_name,
+            candidate.parser_name,
             idx,
         )
-        for term in terms
-        for id_set in term.associated_id_sets
+        for candidate in candidates
+        for id_set in candidate.associated_id_sets
         for idx in id_set.ids
     )
     mapping_ids = set(
@@ -67,7 +69,7 @@ def check_correct_terms_selected(terms: Iterable[LinkingCandidate], mappings: li
         )
         for mapping in mappings
     )
-    assert len(term_ids.symmetric_difference(mapping_ids)) == 0
+    assert len(candidate_ids.symmetric_difference(mapping_ids)) == 0
 
 
 def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
@@ -77,7 +79,7 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
     ent_match = "p27"
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_candidate = next(filter(lambda x: x.term_norm == ent_match_norm, candidates))
+    target_candidate = next(filter(lambda x: x.synonym_norm == ent_match_norm, candidates))
     exact_match_metric = LinkingMetrics(exact_match=True)
     candidates[target_candidate] = exact_match_metric
     doc = Document.create_simple_document(text1)
@@ -102,7 +104,7 @@ def test_ExactMatchStringMatchingStrategy(set_up_p27_test_case):
         )
     )
 
-    check_correct_terms_selected({target_candidate}, mappings)
+    check_correct_candidates_selected({target_candidate}, mappings)
 
 
 def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
@@ -113,7 +115,7 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
 
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_candidate = next(filter(lambda x: x.term_norm == ent_match_norm, candidates))
+    target_candidate = next(filter(lambda x: x.synonym_norm == ent_match_norm, candidates))
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
         start=0,
@@ -136,7 +138,7 @@ def test_SymbolMatchStringMatchingStrategy(set_up_p27_test_case):
         )
     )
 
-    check_correct_terms_selected({target_candidate}, mappings)
+    check_correct_candidates_selected({target_candidate}, mappings)
 
 
 def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
@@ -146,7 +148,7 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
 
     ent_match_norm = StringNormalizer.normalize(ent_match)
 
-    target_candidate = next(filter(lambda x: x.term_norm == "CDKN1B", candidates))
+    target_candidate = next(filter(lambda x: x.synonym_norm == "CDKN1B", candidates))
 
     doc = Document.create_simple_document(text1)
     p27_ent = Entity.load_contiguous_entity(
@@ -170,7 +172,7 @@ def test_TermNormIsSubStringStringMatchingStrategy(set_up_p27_test_case):
         )
     )
 
-    check_correct_terms_selected({target_candidate}, mappings)
+    check_correct_candidates_selected({target_candidate}, mappings)
 
 
 @pytest.mark.parametrize("search_threshold,differential", [(100.0, 0.0), (85.0, 15.0)])
@@ -181,10 +183,10 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
     ent_match = "p27"
     candidates_with_scores = {}
     target_candidates = {}
-    for i, (_, terms) in enumerate(
+    for i, (_, candidates) in enumerate(
         sort_then_group(candidates, key_func=lambda x: x.associated_id_sets)
     ):
-        for candidate in terms:
+        for candidate in candidates:
             if i == 0:
                 metric = LinkingMetrics(search_score=100.0)
                 candidates_with_scores[candidate] = metric
@@ -225,7 +227,7 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
         )
     )
 
-    check_correct_terms_selected(target_candidates, mappings)
+    check_correct_candidates_selected(target_candidates, mappings)
 
 
 @pytest.mark.parametrize(
@@ -250,7 +252,7 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
         metric = LinkingMetrics(search_score=95.0)
         candidates[candidate] = metric
         candidates_with_scores[candidate] = metric
-        if target_string in candidate.term_norm:
+        if target_string in candidate.synonym_norm:
             target_candidates.add(candidate)
 
     doc = Document.create_simple_document(text)
@@ -281,4 +283,4 @@ def test_StrongMatchWithEmbeddingConfirmationNormalisationStrategy(
         )
     )
 
-    check_correct_terms_selected(target_candidates, mappings)
+    check_correct_candidates_selected(target_candidates, mappings)

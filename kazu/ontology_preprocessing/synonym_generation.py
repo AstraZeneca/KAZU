@@ -63,10 +63,9 @@ class CombinatorialSynonymGenerator:
         )
         final_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
         original_strings = {
-            syn.text for term in ontology_resources for syn in term.active_ner_synonyms()
+            syn.text for resource in ontology_resources for syn in resource.active_ner_synonyms()
         }
         for i, permutation_list in enumerate(synonym_gen_permutations):
-            # make a copy of the original terms
             logger.info(
                 "running permutation set %s of %s. Permutations: %s",
                 i + 1,
@@ -164,7 +163,7 @@ class StopWordRemover(SynonymGenerator):
 
     @classmethod
     def call(cls, synonym_str: str) -> set[str]:
-        new_terms = set()
+        new_synoyms = set()
         lst = []
         detected = False
         for token in synonym_str.split():
@@ -173,8 +172,8 @@ class StopWordRemover(SynonymGenerator):
             else:
                 lst.append(token)
         if detected:
-            new_terms.add(" ".join(lst))
-        return new_terms
+            new_synoyms.add(" ".join(lst))
+        return new_synoyms
 
 
 class GreekSymbolSubstitution:
@@ -288,19 +287,19 @@ class SuffixReplacement(SynonymGenerator):
         self.suffixes = set(suffixes)
 
     def call(self, synonym_str: str) -> set[str]:
-        new_terms: set[str] = set()
+        new_synonyms: set[str] = set()
         for suffix in self.suffixes:
             # Note that this will trigger twice for 'ia' since 'a' is also present.
             # We expect this to be noisy, and then curate from this.
             if synonym_str.endswith(suffix):
-                term_without_suffix = synonym_str.removesuffix(suffix)
-                new_terms.update(
-                    term_without_suffix + new_suffix
+                syn_without_suffix = synonym_str.removesuffix(suffix)
+                new_synonyms.update(
+                    syn_without_suffix + new_suffix
                     for new_suffix in self.suffixes
                     if new_suffix is not suffix
                 )
 
-        return new_terms
+        return new_synonyms
 
 
 class SpellingVariationReplacement(SynonymGenerator):
@@ -315,11 +314,11 @@ class SpellingVariationReplacement(SynonymGenerator):
         self.variation_mapping = {k.lower(): val for k, val in raw_variation_mapping.items()}
 
     def call(self, synonym_str: str) -> set[str]:
-        new_terms = set()
+        new_synonyms = set()
         variations = self.variation_mapping.get(synonym_str.lower())
         if variations is not None:
-            new_terms.update(variations)
-        return new_terms
+            new_synonyms.update(variations)
+        return new_synonyms
 
 
 class NgramHyphenation(SynonymGenerator):
@@ -329,14 +328,14 @@ class NgramHyphenation(SynonymGenerator):
         self.ngram = ngram
 
     def call(self, synonym_str: str) -> set[str]:
-        new_terms: set[str] = set()
+        new_synonyms: set[str] = set()
         parts = synonym_str.split()
         if len(parts) != self.ngram:
-            return new_terms
+            return new_synonyms
         else:
             for hyphen in DASHES:
-                new_terms.add(hyphen.join(parts))
-        return new_terms
+                new_synonyms.add(hyphen.join(parts))
+        return new_synonyms
 
 
 class TokenListReplacementGenerator(SynonymGenerator):
@@ -374,7 +373,7 @@ class TokenListReplacementGenerator(SynonymGenerator):
         self.token_matcher = matcher
 
     def call(self, synonym_str: str) -> set[str]:
-        new_terms = set()
+        new_synonyms = set()
         doc = SpacyPipelines().process_single(text=synonym_str, model_name=BASIC_PIPELINE_NAME)
         matches = self.token_matcher(doc)
         if matches is not None:
@@ -382,8 +381,8 @@ class TokenListReplacementGenerator(SynonymGenerator):
                 found_tokens = doc[match_start:match_end].text
                 variant_list = self.token_lists_to_consider[match_id]
                 for variant in variant_list:
-                    new_terms.add(synonym_str.replace(found_tokens, variant))
-        return new_terms
+                    new_synonyms.add(synonym_str.replace(found_tokens, variant))
+        return new_synonyms
 
 
 class VerbPhraseVariantGenerator(SynonymGenerator):
@@ -437,7 +436,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
             yield template.format(**{self.NOUN_PLACEHOLDER: noun, self.VERB_PLACEHOLDER: form})
 
     def call(self, synonym_str: str) -> set[str]:
-        new_terms: set[str] = set()
+        new_synonyms: set[str] = set()
         doc = SpacyPipelines().process_single(text=synonym_str, model_name=self.spacy_model_path)
         noun_matches = self.lemma_matcher(doc)
         if noun_matches is not None:
@@ -453,7 +452,7 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
                     noun_str = " ".join(noun)
                     surface_forms = self.lemmas_to_consider[verb_lemma]
                     for template in self.tense_templates:
-                        new_terms.update(
+                        new_synonyms.update(
                             self._populate_lemma_template(
                                 template=template,
                                 surface_forms=surface_forms,
@@ -461,4 +460,4 @@ class VerbPhraseVariantGenerator(SynonymGenerator):
                                 lemma=verb_lemma,
                             )
                         )
-        return new_terms
+        return new_synonyms

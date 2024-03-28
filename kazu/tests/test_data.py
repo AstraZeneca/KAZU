@@ -84,14 +84,14 @@ def test_candidate_manipulation():
     assert merged_metric.embed_score == 99.6
     assert merged_metric.search_score == 99.5
 
-    # now test syn_terms are differentiated if parser name is different
+    # now test linking_candidates are differentiated if parser name is different
     candidate_3, metrics = make_dummy_linking_candidate(
         ["1", "2", "3"], parser_name="test_2", search_score=99.5
     )
     e1.add_or_update_linking_candidate(candidate_3, metrics)
     assert len(e1.linking_candidates) == 2
 
-    # now test syn_terms are differentiated if id set is different
+    # now test linking_candidates are differentiated if id set is different
     candidate_4, metrics = make_dummy_linking_candidate(
         ["1", "2"], parser_name="test", search_score=99.5
     )
