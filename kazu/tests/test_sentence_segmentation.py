@@ -1,9 +1,9 @@
 import pytest
 from hydra.utils import instantiate
 
-from kazu.data import Document
+from kazu.data import Document, CharSpan
 from kazu.tests.utils import requires_model_pack, ner_long_document_test_cases
-from kazu.steps import Step
+from kazu.steps import Step, document_iterating_step
 
 
 @requires_model_pack
@@ -30,15 +30,33 @@ def test_generates_correct_spans(kazu_test_config):
     assert sent_spans[1].start == 29 and sent_spans[1].end == 63
 
 
-@pytest.mark.skip(
-    reason="ExplosionStringMatchingStep is semi deprecated - not in default model pack so not built, making this test extrememly slow."
-)
+class _DummySentenceSplitterStep(Step):
+    """A dummy sentence splitter with static results.
+
+    Results are appropriate for the text used in
+    test_multiple_sentence_splitters_causes_error.
+
+    This is a class rather than a function so we can use
+    @document_iterating_step.
+    """
+
+    def __init__(self):
+        pass
+
+    @document_iterating_step
+    def __call__(self, doc: Document) -> None:
+        for section in doc.sections:
+            char_spans = (
+                CharSpan(0, 29),
+                CharSpan(30, 64),
+            )
+            section.sentence_spans = char_spans
+
+
 @requires_model_pack
 def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     st_step: Step = instantiate(kazu_test_config.StanzaStep)
-    ex_step: Step = instantiate(
-        kazu_test_config.ExplosionStringMatchingStep, include_sentence_offsets=True
-    )
+    dummy_step = _DummySentenceSplitterStep()
 
     docs: list[Document] = [
         Document.create_simple_document(
@@ -47,9 +65,9 @@ def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     ]
 
     st_step(docs)
-    ex_processed, ex_failures = ex_step(docs)
+    dummy_processed, dummy_failures = dummy_step(docs)
 
-    assert len(ex_failures) == 1
+    assert len(dummy_failures) == 1
 
 
 @pytest.mark.skip(
