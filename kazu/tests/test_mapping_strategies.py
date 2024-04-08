@@ -208,7 +208,7 @@ def test_StrongMatchStringMatchingStrategy(set_up_p27_test_case, search_threshol
         entity_class="test",
         namespace="test",
     )
-    p27_ent.add_or_update_linking_candidates(candidates)
+    p27_ent.add_or_update_linking_candidates(candidates_with_scores)
 
     doc.sections[0].entities.append(p27_ent)
     strategy = StrongMatchMappingStrategy(
