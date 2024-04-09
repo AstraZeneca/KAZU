@@ -1,12 +1,15 @@
 from contextlib import nullcontext as does_not_raise
+from datetime import timedelta
 import tempfile
 import traceback
 from pathlib import Path
+from typing import cast, Iterable
 
 import pytest
 from hydra.utils import instantiate
+from hypothesis import given, example, settings, HealthCheck, strategies as st
 
-from kazu.data import Document, PROCESSING_EXCEPTION
+from kazu.data import Document, Section, PROCESSING_EXCEPTION
 from kazu.pipeline import FailedDocsFileHandler, Pipeline, PipelineValueError
 from kazu.steps import Step, document_iterating_step
 from kazu.tests.utils import requires_model_pack
@@ -46,14 +49,55 @@ def test_pipeline_error_handling(tmp_path: Path):
     assert len(error_files) == 2 * (len(docs) + len(more_docs))
 
 
+@pytest.fixture(scope="function")
+def kazu_default_pipeline(kazu_test_config) -> Iterable[Pipeline]:
+    pipeline = cast(Pipeline, instantiate(kazu_test_config.Pipeline))
+    yield pipeline
+    del pipeline
+
+
+# we don't want things like entities, sentence spans etc. on these 'unprocessed' docs
+# st.builds on section is crucial, using st.from_type(Section) or st.from_type(list[Section])
+# would cause the Section to sometimes get Entities, sentence spans etc.
+# we also know that the pipeline will fail to run on a Document with no Sections or
+# a Section with no text.
+unprocessed_docs_strat = st.lists(
+    elements=st.builds(
+        Document,
+        sections=st.lists(elements=st.builds(Section, text=st.text(min_size=1)), min_size=1),
+    ),
+    min_size=1,
+)
+
+
 @requires_model_pack
-def test_full_pipeline_and_serialisation(kazu_test_config):
-    # test the default pipeline can load/configs are all correct
-    pipeline: Pipeline = instantiate(kazu_test_config.Pipeline)
-    doc = Document.create_simple_document("EGFR is an important gene in breast cancer")
-    doc = pipeline([doc])[0]
+@given(docs=unprocessed_docs_strat)
+# provide an explicit example here so that we're definitely providing
+# a text with some actual entities that Kazu should recognise.
+@example(docs=[Document.create_simple_document("EGFR is an important gene in breast cancer")])
+# health check suppress is because a function scoped fixture doesn't reset between 'examples' here, which
+# is often not what you want, so hypothesis has this health check. Usually you should use a 'wider' scope -
+# that causes memory issues for us though on the GitHub runner, so this IS what we want.
+@settings(
+    deadline=timedelta(minutes=2), suppress_health_check=[HealthCheck.function_scoped_fixture]
+)
+def test_full_pipeline_and_serialisation(kazu_default_pipeline: Pipeline, docs: list[Document]):
+    """Test some hypothesis-generated documents run through the default pipeline without
+    an exception occuring during processing.
+
+    This tests both that the configs are correct, and that documents should not fail
+    processing in general.
+
+    Of course, the space of possible texts is enormous, and bugs could be triggered by
+    very specific behaviours that hypothesis isn't targeted at specifically, so this
+    isn't a guarantee that no exception will occur at runtime.
+    """
+
+    processed_docs = kazu_default_pipeline(docs)
+    assert not any(PROCESSING_EXCEPTION in doc.metadata for doc in processed_docs)
     with tempfile.TemporaryFile(mode="w") as f:
-        f.write(doc.to_json())
+        for doc in processed_docs:
+            f.write(doc.to_json())
 
 
 class MetadataTaggingStep(Step):
