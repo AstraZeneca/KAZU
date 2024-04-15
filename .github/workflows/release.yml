@@ -75,6 +75,7 @@ jobs:
           export BASE_KAZU_CONF_PATH=$GITHUB_WORKSPACE"/kazu/conf"
           # random suffix to prevent clashes with other runs
           export MODEL_PACK_BUILD_PATH=$GITHUB_WORKSPACE"/temp_model_pack_test_dir_"$RANDOM
+          export KAZU_MODEL_PACK_BUILD_RESOURCES_PATH=$GITHUB_WORKSPACE"/resources/"
 
           mkdir $MODEL_PACK_BUILD_PATH
 
@@ -101,7 +102,6 @@ jobs:
           echo "NEW_MODEL_PACK_ZIP=${NEW_MODEL_PACK_ZIP}" >> $GITHUB_ENV
 
         env:
-          KAZU_MODEL_PACK_BUILD_RESOURCES_PATH: resources
           LS_TOKEN: ${{ secrets.LS_TOKEN }}
           LS_URL_PORT: ${{ secrets.LS_URL_PORT }}
 
