@@ -37,7 +37,7 @@ class SynonymGenerator(ABC):
         :return:
         """
 
-        return self.call(string_to_mutate).union({string_to_mutate})
+        return self.call(string_to_mutate)
 
 
 class CombinatorialSynonymGenerator:

@@ -42,7 +42,9 @@ def check_generator_result(
             behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
         )
         generated_resources = generator({resource})
-        new_syns = {s for resource in generated_resources for s in resource.all_strings()}
+        new_syns = {
+            s.text for resource in generated_resources for s in resource.alternative_synonyms
+        }
 
     else:
         new_syns = generator(input_str)
@@ -56,7 +58,6 @@ def check_generator_result(
         (
             "ABAC (ABAC1/ABAC2)",
             {
-                "ABAC (ABAC1/ABAC2)",
                 "ABAC",
                 "ABAC1",
                 "ABAC2",
@@ -66,7 +67,6 @@ def check_generator_result(
         (
             "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
             {
-                "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
                 "cyclin-dependent kinase inhibitor 1B",
                 "p27",
                 "Kip1",
@@ -76,11 +76,11 @@ def check_generator_result(
         ),
         (
             "gonadotropin-releasing hormone (type 2) receptor 2",
-            {"gonadotropin-releasing hormone (type 2) receptor 2","gonadotropin-releasing hormone receptor 2"},
+            {"gonadotropin-releasing hormone receptor 2"},
         ),
         (
             "oxidase (cytochrome c) assembly 1-like",
-            {"oxidase (cytochrome c) assembly 1-like","oxidase assembly 1-like"},
+            {"oxidase assembly 1-like"},
         ),
     ),
 )
@@ -93,7 +93,7 @@ def test_StopWordRemover():
     generator = StopWordRemover()
     check_generator_result(
         input_str="The cat sat in the mat",
-        expected_syns={"cat sat mat", "The cat sat in the mat"},
+        expected_syns={"cat sat mat"},
         generator=generator,
     )
 
@@ -105,7 +105,6 @@ def test_StringReplacement():
         expected_syns={
             "The dog sat on the mat",
             "The chicken sat on the mat",
-            "The cat sat on the mat",
         },
         generator=generator,
     )
@@ -121,20 +120,19 @@ def greek_symbol_generator() -> StringReplacement:
     argvalues=(
         (
             "alpha-thalassaemia",
-            {"alpha-thalassaemia", "α-thalassaemia", "Α-thalassaemia"},
+            {"α-thalassaemia", "Α-thalassaemia"},
         ),
         (
             "α-thalassaemia",
-            {"α-thalassaemia", "alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"},
+            {"alpha-thalassaemia", "a-thalassaemia", "Α-thalassaemia"},
         ),
         (
             "A-thalassaemia",
-            {"A-thalassaemia"},
+            set(),
         ),
         pytest.param(
             "beta test",
             {
-                "beta test",
                 "β test",
                 "ϐ test",
                 "Β test",
@@ -144,7 +142,6 @@ def greek_symbol_generator() -> StringReplacement:
         pytest.param(
             "alpha beta test",
             {
-                "alpha beta test",
                 "alpha β test",
                 "alpha ϐ test",
                 "alpha Β test",
@@ -189,6 +186,9 @@ def test_VerbPhraseVariantGenerator(kazu_test_config):
     )
     input_str = "ALT increased"
     expected_syns = {
+        # the input string isn't 'inherently' included
+        # in the output, but happens to be produced
+        # in this case
         input_str,
         "ALT increasing",
         "ALT increase",
@@ -199,7 +199,6 @@ def test_VerbPhraseVariantGenerator(kazu_test_config):
     check_generator_result(input_str, expected_syns, generator)
     input_str = "decreasing ALT"
     expected_syns = {
-        input_str,
         "ALT decreasing",
         "ALT decrease",
         "ALT decreased",
@@ -256,7 +255,6 @@ def test_CombinatorialSynonymGenerator():
     check_generator_result(
         input_str="alpha-thalassaemia",
         expected_syns={
-            "alpha-thalassaemia",
             "alpha thalassaemia",
             "alpha_thalassaemia",
             "α-thalassaemia",
