@@ -873,7 +873,7 @@ class OntologyStringResource:
             syn_norm = next(iter(norms))
             return syn_norm
         else:
-            raise RuntimeError(
+            raise ValueError(
                 f"multiple synonym norms produced by {self}. This resource should be separated into two or more separate items."
             )
 
