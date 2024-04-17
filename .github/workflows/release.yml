@@ -88,7 +88,8 @@ jobs:
           --model_packs_to_build kazu_model_pack_public \
           --zip_model_pack \
           --logging_config_path $KAZU_LOGGING_CONF \
-          --model_pack_output_path $MODEL_PACK_BUILD_PATH
+          --model_pack_output_path $MODEL_PACK_BUILD_PATH \
+          --debug
 
           export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
 
