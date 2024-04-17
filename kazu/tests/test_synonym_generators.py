@@ -51,18 +51,12 @@ def check_generator_result(
     assert new_syns == expected_syns
 
 
-# fmt: off
 @pytest.mark.parametrize(
     argnames=("input_str", "expected_syns"),
     argvalues=(
         (
             "ABAC (ABAC1/ABAC2)",
-            {
-                "ABAC",
-                "ABAC1",
-                "ABAC2",
-                "ABAC1/ABAC2",
-                "ABAC ABAC1/ABAC2"},
+            {"ABAC", "ABAC1", "ABAC2", "ABAC1/ABAC2", "ABAC ABAC1/ABAC2"},
         ),
         (
             "cyclin-dependent kinase inhibitor 1B (p27, Kip1)",
@@ -84,7 +78,6 @@ def check_generator_result(
         ),
     ),
 )
-# fmt: on
 def test_SeparatorExpansion(input_str, expected_syns):
     check_generator_result(input_str, expected_syns, SeparatorExpansion())
 
