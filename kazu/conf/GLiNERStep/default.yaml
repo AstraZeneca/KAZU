@@ -1,0 +1,6 @@
+_target_: kazu.steps.ner.gliner.GLiNERStep
+pretrained_model_name_or_path: urchade/gliner_large_bio-v0.1
+gliner_class_prompt_to_entity_class:
+  "gene": "gene"
+  "disease": "disease"
+  "drug": "drug"

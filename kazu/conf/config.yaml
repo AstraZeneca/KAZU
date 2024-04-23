@@ -48,6 +48,7 @@ defaults:
   - confidence: default
   - cache_sizes: default
   - global_actions: default
+  - GLiNERStep: default
   - _self_  # see https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
 
 # we set certain env vars here for things that are statically initialised

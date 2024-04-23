@@ -258,4 +258,5 @@ nitpick_ignore = [
     # regex doesn't seem to have API docs at all
     ("py:class", "_regex.Pattern"),
     ("py:class", "urllib3.util.retry.Retry"),
+    ("py:class", "gliner.GLiNER"),
 ]

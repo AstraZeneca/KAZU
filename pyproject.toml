@@ -191,7 +191,8 @@ module = [
     "rdkit.*",
     "ahocorasick.*",
     "scipy.*",
-    "mwparserfromhell.*"
+    "mwparserfromhell.*",
+    "gliner.*"
 ]
 ignore_missing_imports = true
 
