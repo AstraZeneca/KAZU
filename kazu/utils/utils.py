@@ -3,6 +3,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Union, overload, Any
 
+import more_itertools
 from kazu.data import (
     Document,
     Entity,
@@ -197,3 +198,36 @@ class Singleton(type):
             "anti-pattern, and this is a reason why!!!"
         )
         Singleton._instances.clear()
+
+
+def token_sliding_window(
+    token_and_indices: Iterable[tuple[str, int, int]], window_size: int, stride: int, text: str
+) -> Iterable[tuple[str, int, int]]:
+    """For an iterable of tokens and indices across a given piece of text, yield sliding
+    windows of text with token indices representing novel data within each window.
+
+    :param token_and_indices: Tuples of token text, start index and end index.
+    :param window_size: Desired window size.
+    :param stride: Desired number of tokens in each window's overlap.
+    :param text: Original text.
+    :return: Windows of subtext, and start/end indices to be processed within this
+        window.
+    """
+    step_size = window_size - stride
+    # get a list of windows
+    windows = more_itertools.windowed(token_and_indices, n=window_size, step=step_size)
+    overlap_size = window_size - step_size
+    for frame_index, window in enumerate(windows):
+        # filter any Nones that may occur via call to more_itertools.windowed
+        window_lst = list(filter(lambda x: x is not None, window))
+        if len(window_lst) > 0:
+            first, last = window_lst[0], window_lst[-1]
+            sub_text = text[first[1] : last[2] + 1]  # type: ignore[index] # mypy false positive?
+
+            if frame_index == 0:
+                start_index = 0
+            else:
+                start_index = overlap_size
+            window_starts_at = window_lst[start_index][1]  # type: ignore[index] # mypy false positive?
+            window_ends_at = last[2] + 1  # type: ignore[index] # mypy false positive?
+            yield sub_text, window_starts_at, window_ends_at
