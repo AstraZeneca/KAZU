@@ -54,9 +54,8 @@ class GLiNERStep(Step):
         entity_class_counter: defaultdict[str, Counter[str]] = defaultdict(Counter)
 
         for section in doc.sections:
-            token_and_offsets = [token for token in self.token_splitter(section.text)]
             for sub_text, entities_start_at_index, entities_end_at_index in token_sliding_window(
-                token_and_offsets,
+                self.token_splitter(section.text),
                 window_size=self.window_size,
                 stride=self.stride,
                 text=section.text,
