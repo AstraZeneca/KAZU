@@ -51,6 +51,13 @@ maybe_skip_server_tests = pytest.mark.skipif(
     getenv("SKIP_KAZU_SERVER_TESTS") is not None, reason=SKIP_MESSAGE_SERVER_TESTS
 )
 
+SKIP_MESSAGE_EXPERIMENTAL_MODEL = """Some models are deemed to be experimental, and are therefore
+not tested in our standard test battery.
+"""
+
+maybe_skip_experimental_tests = pytest.mark.skipif(
+    getenv("SKIP_KAZU_EXPERIMENTAL_TESTS") is not None, reason=SKIP_MESSAGE_EXPERIMENTAL_MODEL
+)
 
 SKIP_MESSAGE_NO_LABEL_STUDIO = """Skipping acceptance test as either LS_PROJECT_NAME, LS_URL_PORT \
 or LS_TOKEN are not provided as an environment variable.

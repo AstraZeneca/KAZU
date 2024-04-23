@@ -97,6 +97,8 @@ jobs:
 
           # skip server tests on runner due to low shared memory.
           export SKIP_KAZU_SERVER_TESTS=1
+          # skip experimental modules
+          export SKIP_KAZU_EXPERIMENTAL_TESTS=1
 
           cd /tmp
           # separate out hypothesis and non-hypothesis tests
