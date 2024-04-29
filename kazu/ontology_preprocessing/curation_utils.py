@@ -472,10 +472,19 @@ class OntologyStringConflictAnalyser:
         "EGFR" -> cs and POSSIBLE
         "Egfr" -> cs and PROBABLE
 
-        ...while the following situation is conflicted:
+        ...while the following situations are conflicted:
 
         "eGFR" -> ci and PROBABLE
         "Egfr" -> cs and POSSIBLE
+
+        "Egfr" -> cs and PROBABLE
+        "Egfr" -> cs and POSSIBLE
+
+        "EGFR" -> ci and PROBABLE
+        "Egfr" -> ci and POSSIBLE
+
+        "Egfr" -> ci and PROBABLE
+        "Egfr" -> ci and POSSIBLE
 
         :param resources:
         :return:
@@ -492,9 +501,13 @@ class OntologyStringConflictAnalyser:
         for syn_string, cs_confidences in cs_conf_lookup.items():
             ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(syn_string.lower(), set())
             if (
-                len(ci_confidences) > 0
-                and len(cs_confidences) > 0
-                and min(cs_confidences) <= min(ci_confidences)
+                len(ci_confidences) > 1
+                or len(cs_confidences) > 1
+                or (
+                    len(ci_confidences) == 1
+                    and len(cs_confidences) == 0
+                    and min(cs_confidences) <= min(ci_confidences)
+                )
             ):
                 return True
         return False
