@@ -17,9 +17,11 @@ from omegaconf import DictConfig
 
 from kazu import __version__ as kazu_version
 
+
 #: A default timeout in seconds for Ray to finish building the model packs within.
 #: This is equal to 3 hours
 DEFAULT_RAY_TIMEOUT = 180.0 * 60
+GLOBAL_CONFLICT_REPORT_DIR = "global_parser_conflict_reports"
 GLOBAL_CONFLICT_REPORT_FN = "global_string_match_conflicts.txt"
 
 
@@ -76,7 +78,7 @@ class ModelPackBuilder:
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
-        run_global_string_match_conflict_report: bool,
+        run_global_conflict_report: bool,
     ):
         """A ModelPackBuilder is a helper class to assist in the building of a model
         pack.
@@ -97,7 +99,7 @@ class ModelPackBuilder:
         :param maybe_base_configuration_path: if this pack requires the base configuration, specify path
         :param skip_tests: don't run any tests
         :param zip_pack: zip the pack at the end (requires the 'zip' CLI tool)
-        :param run_global_string_match_conflict_report: Checks the strings associated configured for string matching across each parser, and reports any inconsistencies.
+        :param run_global_conflict_report: writes reports in the model pack about inter and intra parser resource conflicts.
         """
         if logging_config_path is not None:
             fileConfig(logging_config_path)
@@ -111,7 +113,7 @@ class ModelPackBuilder:
         self.model_pack_build_path = self.build_dir.joinpath(self.target_model_pack_path.name)
         os.environ["KAZU_MODEL_PACK"] = str(self.model_pack_build_path)
         self.build_config = self.load_build_configuration()
-        self.run_global_string_match_conflict_report = run_global_string_match_conflict_report
+        self.run_global_conflict_report = run_global_conflict_report
 
     def __repr__(self):
         """For nice log messages."""
@@ -139,7 +141,9 @@ class ModelPackBuilder:
                 config_name="config",
                 overrides=["hydra/job_logging=none", "hydra/hydra_logging=none"],
             )
-            pipeline = self.build_caches_and_run_sanity_checks(cfg)
+            if self.run_global_conflict_report:
+                self.write_resource_conflict_reports(cfg)
+            self.build_caches_and_run_sanity_checks(cfg)
             if not self.skip_tests:
                 # our annotations expect URI stripping, so if cleanup actions
                 # are specified, ensure this is configured.
@@ -177,10 +181,11 @@ class ModelPackBuilder:
                 if self.build_config.run_consistency_checks:
                     analyse_annotation_consistency(docs)
                 if self.build_config.run_acceptance_tests:
+                    # need to reinstantiate pipeline with modified config.
+                    pipeline = self.build_caches_and_run_sanity_checks(cfg)
                     analyse_full_pipeline(pipeline, docs, acceptance_criteria=acceptance_criteria())
             self.report_tested_dependencies()
-            if self.run_global_string_match_conflict_report:
-                self.create_global_string_match_conflict_report(cfg)
+
             if self.zip_pack:
                 self.zip_model_pack()
 
@@ -308,12 +313,30 @@ class ModelPackBuilder:
         with self.model_pack_build_path.joinpath("tested_dependencies.txt").open(mode="w") as f:
             f.write(dependencies)
 
-    def create_global_string_match_conflict_report(self, cfg: DictConfig) -> None:
+    def write_resource_conflict_reports(self, cfg: DictConfig) -> None:
 
         resource_to_parser_name = {}
+        global_report_dir = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_DIR)
+        global_report_dir.mkdir()
+
         for parser in instantiate(cfg.ontologies.parsers).values():
-            for resource in parser.populate_databases(return_resources=True):
+            resource_report = parser.populate_metadata_db_and_resolve_string_resources()
+            resource_report.write_reports_for_parser(
+                path=global_report_dir, parser_name=parser.name
+            )
+
+            # we need the clean resources and the conflicted resources from the parser
+            for resource in resource_report.final_conflict_report.clean_resources:
                 resource_to_parser_name[resource] = parser.name
+            for resource_set in resource_report.final_conflict_report.case_conflicts:
+                for resource in resource_set:
+                    resource_to_parser_name[resource] = parser.name
+            if resource_report.human_conflict_report:
+                for resource in resource_report.human_conflict_report.clean_resources:
+                    resource_to_parser_name[resource] = parser.name
+                for resource_set in resource_report.human_conflict_report.case_conflicts:
+                    for resource in resource_set:
+                        resource_to_parser_name[resource] = parser.name
 
         from kazu.ontology_preprocessing.curation_utils import (
             OntologyStringConflictAnalyser,
@@ -326,7 +349,7 @@ class ModelPackBuilder:
             resource_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 
-        global_conflict_report_path = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_FN)
+        global_conflict_report_path = global_report_dir.joinpath(GLOBAL_CONFLICT_REPORT_FN)
         with global_conflict_report_path.open(mode="w") as jsonlf:
             for conflict_set in case_conflicts:
                 result = defaultdict(list)
@@ -352,7 +375,7 @@ def build_all_model_packs(
     max_parallel_build: Optional[int],
     debug: bool = False,
     ray_timeout: Optional[float] = DEFAULT_RAY_TIMEOUT,
-    run_global_string_match_conflict_report: bool = False,
+    run_global_conflict_report: bool = False,
 ) -> None:
     """Build multiple model packs.
 
@@ -366,7 +389,7 @@ def build_all_model_packs(
         None, use all available CPUs
     :param debug: Disables Ray parallelization, enabling the use of debugger tools
     :param ray_timeout: A timeout for Ray to complete model pack building within. Defaults to :attr:`~DEFAULT_RAY_TIMEOUT`
-    :param run_global_string_match_conflict_report: Checks the strings associated configured for string matching across
+    :param run_global_conflict_report: Checks the strings associated configured for string matching across
         each parser, and reports any inconsistencies.
     :return:
     """
@@ -402,7 +425,7 @@ def build_all_model_packs(
             target_model_pack_path=model_pack_path,
             build_dir=output_dir,
             skip_tests=skip_tests,
-            run_global_string_match_conflict_report=run_global_string_match_conflict_report,
+            run_global_conflict_report=run_global_conflict_report,
         )
         if not debug:
             futures.append(cast(ray.ObjectRef, builder.build_model_pack.remote()))
@@ -523,10 +546,10 @@ paths in a model packs build_config.json.
         required=False,
     )
     parser.add_argument(
-        "--run_global_string_match_conflict_report",
+        "--run_global_conflict_report",
         action="store_true",
-        help="Checks the strings associated configured for string matching across each parser,"
-        f" and reports any inconsistencies. These are reported in a file called {GLOBAL_CONFLICT_REPORT_FN}"
+        help="Checks the strings associated configured for string matching across and within each parser,"
+        f" and reports any inconsistencies. These are reported in a directory called {GLOBAL_CONFLICT_REPORT_FN}"
         " in the model pack root. WARNING: this may cause a spike in memory usage.",
     )
 
@@ -542,5 +565,5 @@ paths in a model packs build_config.json.
         max_parallel_build=args.max_parallel_build,
         debug=args.debug,
         ray_timeout=args.ray_timeout,
-        run_global_string_match_conflict_report=args.run_global_string_match_conflict_report,
+        run_global_conflict_report=args.run_global_conflict_report,
     )
