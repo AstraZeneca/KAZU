@@ -109,7 +109,6 @@ class OntologyParser(ABC):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         """
 
@@ -136,9 +135,6 @@ class OntologyParser(ABC):
         :param run_upgrade_report: Use when upgrading the version of the underlying data. When True, reports novel and
             obsolete ontology string resources in the model pack directory. Note that this will overwrite the default
             :class:`~.OntologyStringResource`\\s associated with this parser in the model pack.
-        :param run_curation_report: Use when adjusting the human curations. When True, creates a report in the model
-            pack directory describing various aspects of the curation set, such as no-op curations,
-            case sensitivity/mention confidence conflicts etc.
         """
 
         self.in_path = as_path(in_path)
@@ -159,7 +155,6 @@ class OntologyParser(ABC):
         self.curations_path = as_path(curations_path) if curations_path is not None else None
         self.global_actions = global_actions
         self.run_upgrade_report = run_upgrade_report
-        self.run_curation_report = run_curation_report
         self.parsed_dataframe: Optional[pd.DataFrame] = None
         self.metadata_db = MetadataDatabase()
         self.synonym_db = SynonymDatabase()

@@ -105,7 +105,6 @@ class DummyParser(OntologyParser):
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         """
 
@@ -123,7 +122,6 @@ class DummyParser(OntologyParser):
         :param curations_path:
         :param global_actions:
         :param run_upgrade_report:
-        :param run_curation_report:
         """
         if in_path == "":
             temp_parent = tempfile.mkdtemp()
@@ -142,7 +140,6 @@ class DummyParser(OntologyParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
         self.source = source
         if data is not None:

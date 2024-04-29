@@ -115,7 +115,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         """
 
@@ -131,7 +130,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         :param curations_path:
         :param global_actions:
         :param run_upgrade_report:
-        :param run_curation_report:
         """
         super().__init__(
             in_path=in_path,
@@ -145,7 +143,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
         self.allowed_therapeutic_areas = set(allowed_therapeutic_areas)
         self.metadata_db = MetadataDatabase()
@@ -300,7 +297,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         """
 
@@ -317,7 +313,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         :param curations_path:
         :param global_actions:
         :param run_upgrade_report:
-        :param run_curation_report:
         """
         super().__init__(
             in_path=in_path,
@@ -331,7 +326,6 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
         self.excluded_biotypes: set[str] = set(excluded_biotypes) if excluded_biotypes else set()
 
@@ -498,7 +492,6 @@ class RDFGraphParser(OntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
         label_predicate: RdfRef = rdflib.RDFS.label,
     ):
         super().__init__(
@@ -513,7 +506,6 @@ class RDFGraphParser(OntologyParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -660,7 +652,6 @@ class SKOSXLGraphParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
         label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
     ):
         super().__init__(
@@ -680,7 +671,6 @@ class SKOSXLGraphParser(RDFGraphParser):
             label_predicate=label_predicate,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
 
@@ -719,7 +709,6 @@ class GeneOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -739,7 +728,6 @@ class GeneOntologyParser(RDFGraphParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
         self.instances.add(name)
 
@@ -804,7 +792,6 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -825,7 +812,6 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             exclude_entity_patterns=[],
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
 
@@ -846,7 +832,6 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -867,7 +852,6 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             exclude_entity_patterns=[],
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
 
@@ -888,7 +872,6 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -909,7 +892,6 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             exclude_entity_patterns=[],
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
 
@@ -930,7 +912,6 @@ class UberonOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
 
         super().__init__(
@@ -949,7 +930,6 @@ class UberonOntologyParser(RDFGraphParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1032,7 +1012,6 @@ class HGNCGeneOntologyParser(OntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -1046,7 +1025,6 @@ class HGNCGeneOntologyParser(OntologyParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1161,7 +1139,6 @@ class CLOOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -1179,7 +1156,6 @@ class CLOOntologyParser(RDFGraphParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1294,7 +1270,6 @@ class MeddraOntologyParser(OntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
         exclude_socs: Iterable[str] = (
             "Surgical and medical procedures",
             "Social circumstances",
@@ -1313,7 +1288,6 @@ class MeddraOntologyParser(OntologyParser):
             name=name,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
         self.exclude_socs = exclude_socs
@@ -1453,7 +1427,6 @@ class CLOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
 
         super().__init__(
@@ -1474,7 +1447,6 @@ class CLOntologyParser(RDFGraphParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1553,7 +1525,6 @@ class TabularOntologyParser(OntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
         **kwargs: Any,
     ):
         """
@@ -1569,7 +1540,6 @@ class TabularOntologyParser(OntologyParser):
         :param curations_path:
         :param global_actions:
         :param run_upgrade_report:
-        :param run_curation_report:
         :param kwargs: passed to pandas.read_csv
         """
         super().__init__(
@@ -1584,7 +1554,6 @@ class TabularOntologyParser(OntologyParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
         self._raw_dataframe: pd.DataFrame = pd.read_csv(self.in_path, **kwargs)
 
@@ -1622,7 +1591,6 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
         super().__init__(
             in_path=in_path,
@@ -1643,7 +1611,6 @@ class ATCDrugClassificationParser(TabularOntologyParser):
             engine="python",
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
     levels_to_ignore = {"1", "2", "3"}
@@ -1694,7 +1661,6 @@ class StatoParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         run_upgrade_report: bool = False,
-        run_curation_report: bool = False,
     ):
 
         super().__init__(
@@ -1713,7 +1679,6 @@ class StatoParser(RDFGraphParser):
             global_actions=global_actions,
             autocurator=autocurator,
             run_upgrade_report=run_upgrade_report,
-            run_curation_report=run_curation_report,
         )
 
     def find_kb(self, string: str) -> str:
