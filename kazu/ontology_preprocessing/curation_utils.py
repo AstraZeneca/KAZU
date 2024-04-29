@@ -267,9 +267,7 @@ class OntologyResourceSetCompleteReport:
                 "%s reporting discrepancies in human curation set and auto generated resources",
                 parser_name,
             )
-            merge_report_path = as_path(path).parent.joinpath(
-                f"{parser_name}{_ONTOLOGY_MERGE_REPORT_DIR}"
-            )
+            merge_report_path = as_path(path).joinpath(f"{parser_name}{_ONTOLOGY_MERGE_REPORT_DIR}")
             if merge_report_path.exists():
                 shutil.rmtree(merge_report_path)
             merge_report_path.mkdir()
