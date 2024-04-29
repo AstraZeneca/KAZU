@@ -239,9 +239,7 @@ class OntologyResourceSetCompleteReport:
     merge_report: Optional[OntologyResourceSetMergeReport] = None
 
     def write_reports_for_parser(self, path: PathLike, parser_name: str) -> None:
-        curation_report_path = as_path(path).parent.joinpath(
-            f"{parser_name}{_CURATION_REPORT_FILENAME}"
-        )
+        curation_report_path = as_path(path).joinpath(f"{parser_name}{_CURATION_REPORT_FILENAME}")
         if curation_report_path.exists():
             shutil.rmtree(curation_report_path)
 
