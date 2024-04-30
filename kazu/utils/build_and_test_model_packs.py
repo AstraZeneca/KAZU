@@ -362,19 +362,19 @@ class ModelPackBuilder:
             resource_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 
-        from kazu.data import OntologyStringResource
 
         result: defaultdict[
-            frozenset[str], defaultdict[str, list[OntologyStringResource]]
-        ] = defaultdict(lambda: defaultdict(list))
+            frozenset[str], list[defaultdict[str,list[dict]]]] = defaultdict(list)
+
         for conflict_set in case_conflicts:
-            entity_class_key = frozenset(
-                resource_to_entity_class[resource] for resource in conflict_set
-            )
-            for resource in conflict_set:
-                result[entity_class_key][resource_to_parser_name[resource]].append(
-                    resource.to_dict(preserve_structured_object_id=False)
-                )
+            entity_classes = set()
+            defaults = defaultdict(list)
+            for conflict_resource in conflict_set:
+                entity_classes.add(resource_to_entity_class[conflict_resource])
+                defaults[resource_to_parser_name[conflict_resource]].append(conflict_resource.to_dict(preserve_structured_object_id=False))
+            result[frozenset(entity_classes)].append(defaults)
+
+
 
         with global_report_dir.joinpath(CROSS_CLASS_GLOBAL_CONFLICT_REPORT_FN).open(
             mode="w"
@@ -382,11 +382,12 @@ class ModelPackBuilder:
             with global_report_dir.joinpath(SAME_CLASS_GLOBAL_CONFLICT_REPORT_FN).open(
                 mode="w"
             ) as same_class_f:
-                for ent_class_set, conflict_dict in result.items():
-                    if len(ent_class_set) == 1:
-                        same_class_f.write(json.dumps(conflict_dict) + "\n")
-                    else:
-                        cross_class_f.write(json.dumps(conflict_dict) + "\n")
+                for ent_class_set, conflict_list in result.items():
+                    for conflict_dict in conflict_list:
+                        if len(ent_class_set) == 1:
+                            same_class_f.write(json.dumps(conflict_dict) + "\n")
+                        else:
+                            cross_class_f.write(json.dumps(conflict_dict) + "\n")
 
 
 @ray.remote(num_cpus=1)
