@@ -132,7 +132,6 @@ class ModelPackBuilder:
         self.clear_cached_resources_from_model_pack_dir()
         # local import so the cache is correctly configured with KAZU_MODEL_PACK
         from kazu.utils.constants import HYDRA_VERSION_BASE
-        from kazu.steps.other.cleanup import StripMappingURIsAction
 
         with initialize_config_dir(
             version_base=HYDRA_VERSION_BASE,
@@ -146,51 +145,57 @@ class ModelPackBuilder:
                 self.write_resource_conflict_reports(cfg)
             self.build_caches_and_run_sanity_checks(cfg)
             if not self.skip_tests:
-                # our annotations expect URI stripping, so if cleanup actions
-                # are specified, ensure this is configured.
-                # Note, this may cause unexpected behaviour if CleanupActions
-                # is configured with anything other than 'default'?
-                if "CleanupActions" in cfg:
-                    if StripMappingURIsAction.__name__ not in cfg.CleanupActions:
-                        self.logger.warning(
-                            "%s will be overridden for acceptance tests.",
-                            StripMappingURIsAction.__name__,
-                        )
-                        cfg = compose(
-                            config_name="config",
-                            overrides=[
-                                "hydra/job_logging=none",
-                                "hydra/hydra_logging=none",
-                                "CleanupActions=[default,uri_stripping]",
-                            ],
-                        )
-
-                # local import so the cache is correctly configured with KAZU_MODEL_PACK
-                from kazu.annotation.acceptance_test import (
-                    analyse_full_pipeline,
-                    analyse_annotation_consistency,
-                    acceptance_criteria,
-                )
-                from kazu.annotation.label_studio import LSToKazuConversion
-
-                assert self.build_config.acceptance_test_json_path is not None
-                with self.model_pack_build_path.joinpath(
-                    self.build_config.acceptance_test_json_path
-                ).open(mode="r") as f:
-                    docs_json = json.load(f)
-                    docs = LSToKazuConversion.convert_tasks_to_docs(docs_json)
-                if self.build_config.run_consistency_checks:
-                    analyse_annotation_consistency(docs)
-                if self.build_config.run_acceptance_tests:
-                    # need to reinstantiate pipeline with modified config.
-                    pipeline = self.build_caches_and_run_sanity_checks(cfg)
-                    analyse_full_pipeline(pipeline, docs, acceptance_criteria=acceptance_criteria())
+                self.run_acceptance_tests(cfg)
             self.report_tested_dependencies()
 
             if self.zip_pack:
                 self.zip_model_pack()
 
         return self.model_pack_build_path
+
+    def run_acceptance_tests(self, cfg: DictConfig)->None:
+        self.logger.info("running acceptance tests")
+        from kazu.steps.other.cleanup import StripMappingURIsAction
+
+        # our annotations expect URI stripping, so if cleanup actions
+        # are specified, ensure this is configured.
+        # Note, this may cause unexpected behaviour if CleanupActions
+        # is configured with anything other than 'default'?
+        if "CleanupActions" in cfg:
+            if StripMappingURIsAction.__name__ not in cfg.CleanupActions:
+                self.logger.warning(
+                    "%s will be overridden for acceptance tests.",
+                    StripMappingURIsAction.__name__,
+                )
+                cfg = compose(
+                    config_name="config",
+                    overrides=[
+                        "hydra/job_logging=none",
+                        "hydra/hydra_logging=none",
+                        "CleanupActions=[default,uri_stripping]",
+                    ],
+                )
+        # local import so the cache is correctly configured with KAZU_MODEL_PACK
+        from kazu.annotation.acceptance_test import (
+            analyse_full_pipeline,
+            analyse_annotation_consistency,
+            acceptance_criteria,
+        )
+        from kazu.annotation.label_studio import LSToKazuConversion
+
+        assert self.build_config.acceptance_test_json_path is not None
+        with self.model_pack_build_path.joinpath(self.build_config.acceptance_test_json_path).open(
+            mode="r"
+        ) as f:
+            docs_json = json.load(f)
+            docs = LSToKazuConversion.convert_tasks_to_docs(docs_json)
+        if self.build_config.run_consistency_checks:
+            analyse_annotation_consistency(docs)
+        if self.build_config.run_acceptance_tests:
+            self.logger.info("instantiating pipeline for acceptance tests")
+            # need to reinstantiate pipeline with modified config.
+            pipeline = instantiate(cfg.Pipeline)
+            analyse_full_pipeline(pipeline, docs, acceptance_criteria=acceptance_criteria())
 
     def load_build_configuration(self) -> BuildConfiguration:
         """Try to load a build configuration from the model pack root.
@@ -296,6 +301,7 @@ class ModelPackBuilder:
         from kazu.pipeline import Pipeline
         from kazu.data import Document, PROCESSING_EXCEPTION
 
+        self.logger.info("instantiating pipeline for sanity checks")
         pipeline: Pipeline = instantiate(cfg.Pipeline)
         for test_string in self.build_config.sanity_test_strings:
             doc = Document.create_simple_document(test_string)
