@@ -22,7 +22,8 @@ from kazu import __version__ as kazu_version
 #: This is equal to 3 hours
 DEFAULT_RAY_TIMEOUT = 180.0 * 60
 GLOBAL_CONFLICT_REPORT_DIR = "global_parser_conflict_reports"
-GLOBAL_CONFLICT_REPORT_FN = "global_string_match_conflicts.txt"
+CROSS_CLASS_GLOBAL_CONFLICT_REPORT_FN = "cross_class_global_string_match_conflicts.txt"
+SAME_CLASS_GLOBAL_CONFLICT_REPORT_FN = "same_class_global_string_match_conflicts.txt"
 
 
 @dataclass
@@ -314,8 +315,10 @@ class ModelPackBuilder:
             f.write(dependencies)
 
     def write_resource_conflict_reports(self, cfg: DictConfig) -> None:
+        self.logger.info("creating resource conflict reports")
 
         resource_to_parser_name = {}
+        resource_to_entity_class = {}
         global_report_dir = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_DIR)
         global_report_dir.mkdir()
 
@@ -328,15 +331,19 @@ class ModelPackBuilder:
             # we need the clean resources and the conflicted resources from the parser
             for resource in resource_report.final_conflict_report.clean_resources:
                 resource_to_parser_name[resource] = parser.name
+                resource_to_entity_class[resource] = parser.entity_class
             for resource_set in resource_report.final_conflict_report.case_conflicts:
                 for resource in resource_set:
                     resource_to_parser_name[resource] = parser.name
+                    resource_to_entity_class[resource] = parser.entity_class
             if resource_report.human_conflict_report:
                 for resource in resource_report.human_conflict_report.clean_resources:
                     resource_to_parser_name[resource] = parser.name
+                    resource_to_entity_class[resource] = parser.entity_class
                 for resource_set in resource_report.human_conflict_report.case_conflicts:
                     for resource in resource_set:
                         resource_to_parser_name[resource] = parser.name
+                        resource_to_entity_class[resource] = parser.entity_class
 
         from kazu.ontology_preprocessing.curation_utils import (
             OntologyStringConflictAnalyser,
@@ -349,15 +356,31 @@ class ModelPackBuilder:
             resource_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
 
-        global_conflict_report_path = global_report_dir.joinpath(GLOBAL_CONFLICT_REPORT_FN)
-        with global_conflict_report_path.open(mode="w") as jsonlf:
-            for conflict_set in case_conflicts:
-                result = defaultdict(list)
-                for resource in conflict_set:
-                    result[resource_to_parser_name[resource]].append(
-                        resource.to_dict(preserve_structured_object_id=False)
-                    )
-                jsonlf.write(json.dumps(result) + "\n")
+        from kazu.data import OntologyStringResource
+
+        result: defaultdict[
+            frozenset[str], defaultdict[str, list[OntologyStringResource]]
+        ] = defaultdict(lambda: defaultdict(list))
+        for conflict_set in case_conflicts:
+            entity_class_key = frozenset(
+                resource_to_entity_class[resource] for resource in conflict_set
+            )
+            for resource in conflict_set:
+                result[entity_class_key][resource_to_parser_name[resource]].append(
+                    resource.to_dict(preserve_structured_object_id=False)
+                )
+
+        with global_report_dir.joinpath(CROSS_CLASS_GLOBAL_CONFLICT_REPORT_FN).open(
+            mode="w"
+        ) as cross_class_f:
+            with global_report_dir.joinpath(SAME_CLASS_GLOBAL_CONFLICT_REPORT_FN).open(
+                mode="w"
+            ) as same_class_f:
+                for ent_class_set, conflict_dict in result.items():
+                    if len(ent_class_set) == 1:
+                        same_class_f.write(json.dumps(conflict_dict) + "\n")
+                    else:
+                        cross_class_f.write(json.dumps(conflict_dict) + "\n")
 
 
 @ray.remote(num_cpus=1)
@@ -549,7 +572,7 @@ paths in a model packs build_config.json.
         "--run_global_conflict_report",
         action="store_true",
         help="Checks the strings associated configured for string matching across and within each parser,"
-        f" and reports any inconsistencies. These are reported in a directory called {GLOBAL_CONFLICT_REPORT_FN}"
+        f" and reports any inconsistencies. These are reported in a directory called {GLOBAL_CONFLICT_REPORT_DIR}"
         " in the model pack root. WARNING: this may cause a spike in memory usage.",
     )
 
