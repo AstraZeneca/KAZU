@@ -64,6 +64,6 @@ def test_multiple_sentence_splitters_causes_error(kazu_test_config):
     ]
 
     st_step(docs)
-    dummy_processed, dummy_failures = dummy_step(docs)
+    _dummy_processed, dummy_failures = dummy_step(docs)
 
     assert len(dummy_failures) == 1
