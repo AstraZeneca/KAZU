@@ -242,7 +242,7 @@ class LinkingMetrics:
 
     search_score: Optional[float] = field(compare=False, default=None)
     embed_score: Optional[float] = field(compare=False, default=None)
-    bool_score: Optional[float] = field(compare=False, default=None)
+    bool_score: Optional[bool] = field(compare=False, default=None)
     exact_match: Optional[bool] = field(compare=False, default=None)
 
     @staticmethod
