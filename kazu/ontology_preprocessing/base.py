@@ -60,6 +60,7 @@ DATA_ORIGIN = "data_origin"
 
 _ONTOLOGY_DEFAULTS_FILENAME = "_defaults.jsonl"
 _ONTOLOGY_UPGRADE_REPORT_DIR = "_ontology_upgrade_report"
+ONTOLOGY_METADATA = dict[str, dict[str, SimpleValue]]
 
 
 class OntologyParser(ABC):
@@ -365,7 +366,7 @@ class OntologyParser(ABC):
                 )
 
     @kazu_disk_cache.memoize(ignore={0})
-    def export_metadata(self, parser_name: str) -> dict[str, dict[str, SimpleValue]]:
+    def export_metadata(self, parser_name: str) -> ONTOLOGY_METADATA:
         """Export the metadata from the ontology.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -382,7 +383,7 @@ class OntologyParser(ABC):
         metadata_df.set_index(inplace=True, drop=True, keys=IDX)
         assert set(OntologyParser.minimum_metadata_column_names).issubset(metadata_df.columns)
         metadata = metadata_df.to_dict(orient="index")
-        return cast(dict[str, dict[str, SimpleValue]], metadata)
+        return cast(ONTOLOGY_METADATA, metadata)
 
     def process_candidates_and_string_resources(
         self, candidates: set[LinkingCandidate], clean_resources: set[OntologyStringResource]
@@ -624,11 +625,7 @@ class OntologyParser(ABC):
     @kazu_disk_cache.memoize(ignore={0})
     def _populate_databases(
         self, parser_name: str
-    ) -> tuple[
-        Optional[list[OntologyStringResource]],
-        dict[str, dict[str, SimpleValue]],
-        set[LinkingCandidate],
-    ]:
+    ) -> tuple[Optional[list[OntologyStringResource]], ONTOLOGY_METADATA, set[LinkingCandidate],]:
         """Disk cacheable method that populates all databases.
 
         :param parser_name: name of this parser. Required for correct operation of cache
@@ -637,7 +634,7 @@ class OntologyParser(ABC):
         :return:
         """
         logger.info("populating database for %s from source", self.name)
-        report = self.populate_metadata_db_and_resolve_string_resources()
+        metadata, report = self.populate_metadata_db_and_resolve_string_resources()
         (
             maybe_ner_resources,
             final_linking_candidates,
@@ -647,11 +644,11 @@ class OntologyParser(ABC):
         self.parsed_dataframe = None  # clear the reference to save memory
 
         self.synonym_db.add_parser(self.name, final_linking_candidates)
-        return maybe_ner_resources, report.metadata, final_linking_candidates
+        return maybe_ner_resources, metadata, final_linking_candidates
 
     def populate_metadata_db_and_resolve_string_resources(
         self,
-    ) -> OntologyResourceSetCompleteReport:
+    ) -> tuple[ONTOLOGY_METADATA, OntologyResourceSetCompleteReport]:
         """Loads the metadata DB and resolves any :class:`.OntologyStringResource`\\s
         associated with this parser.
 
@@ -672,8 +669,7 @@ class OntologyParser(ABC):
                 "%s is configured to use raw ontology synonyms. This may result in noisy NER performance.",
                 self.name,
             )
-            return OntologyResourceSetCompleteReport(
-                metadata=metadata,
+            return metadata, OntologyResourceSetCompleteReport(
                 intermediate_linking_candidates=intermediate_linking_candidates,
                 final_conflict_report=OntologyResourceSetConflictReport(
                     clean_resources=auto_generated_resources_clean,
@@ -691,8 +687,7 @@ class OntologyParser(ABC):
 
         combined_report = self.create_combined_conflict_report(merge_report.effective_resources)
 
-        return OntologyResourceSetCompleteReport(
-            metadata=metadata,
+        return metadata, OntologyResourceSetCompleteReport(
             intermediate_linking_candidates=intermediate_linking_candidates,
             final_conflict_report=combined_report,
             human_conflict_report=human_resource_report,

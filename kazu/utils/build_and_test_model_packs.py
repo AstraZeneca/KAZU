@@ -323,58 +323,10 @@ class ModelPackBuilder:
         global_report_dir.mkdir()
 
         for parser in instantiate(cfg.ontologies.parsers).values():
-            resource_report = parser.populate_metadata_db_and_resolve_string_resources()
+            _, resource_report = parser.populate_metadata_db_and_resolve_string_resources()
             resource_report.write_reports_for_parser(
                 path=global_report_dir, parser_name=parser.name
             )
-
-        # moved to tool
-        #     # we need the clean resources and the conflicted resources from the parser
-        #     for resource in resource_report.final_conflict_report.clean_resources:
-        #         resource_to_parser_name[resource].add(parser.name)
-        #         resource_to_entity_class[resource].add(parser.entity_class)
-        #     for resource_set in resource_report.final_conflict_report.case_conflicts:
-        #         for resource in resource_set:
-        #             resource_to_parser_name[resource].add(parser.name)
-        #             resource_to_entity_class[resource].add(parser.entity_class)
-        #     if resource_report.human_conflict_report:
-        #         for resource in resource_report.human_conflict_report.clean_resources:
-        #             resource_to_parser_name[resource].add(parser.name)
-        #             resource_to_entity_class[resource].add(parser.entity_class)
-        #         for resource_set in resource_report.human_conflict_report.case_conflicts:
-        #             for resource in resource_set:
-        #                 resource_to_parser_name[resource].add(parser.name)
-        #                 resource_to_entity_class[resource].add(parser.entity_class)
-        #
-        # from kazu.ontology_preprocessing.curation_utils import (
-        #     OntologyStringConflictAnalyser,
-        # )
-        #
-        # (
-        #     case_conflicts,
-        #     _clean_resources,
-        # ) = OntologyStringConflictAnalyser.check_for_case_conflicts_across_resources(
-        #     resource_to_parser_name.keys()  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
-        # )
-        #
-        # result: defaultdict[frozenset[str], list[defaultdict[str, list[dict]]]] = defaultdict(list)
-        #
-        # for conflict_set in case_conflicts:
-        #     entity_classes = set()
-        #     defaults = defaultdict(list)
-        #     for conflict_resource in conflict_set:
-        #         entity_classes.add(resource_to_entity_class[conflict_resource])
-        #         defaults[resource_to_parser_name[conflict_resource]].append(
-        #             conflict_resource.to_dict(preserve_structured_object_id=False)
-        #         )
-        #     result[frozenset(entity_classes)].append(defaults)
-        #
-        # with global_report_dir.joinpath(GLOBAL_CONFLICT_REPORT_FN).open(
-        #     mode="w"
-        # ) as f:
-        #     for ent_class_set, conflict_list in result.items():
-        #         for conflict_dict in conflict_list:
-        #             f.write(json.dumps(conflict_dict) + "\n")
 
 
 @ray.remote(num_cpus=1)
