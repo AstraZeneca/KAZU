@@ -636,7 +636,7 @@ class OntologyParser(ABC):
             much memory)
         :return:
         """
-
+        logger.info("populating database for %s from source", self.name)
         report = self.populate_metadata_db_and_resolve_string_resources()
         (
             maybe_ner_resources,
@@ -658,7 +658,7 @@ class OntologyParser(ABC):
         Note that the metadata database loading must be handled here, as the call to :meth:`.export_linking_candidates`
         may depend on it being loaded.
         """
-        logger.info("populating database for %s from source", self.name)
+
         metadata = self.export_metadata(self.name)
         # metadata db needs to be populated before call to export_linking_candidates
         self.metadata_db.add_parser(self.name, self.entity_class, metadata)
