@@ -139,7 +139,6 @@ class DummyParser(OntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
-            run_upgrade_report=run_upgrade_report,
         )
         self.source = source
         if data is not None:
