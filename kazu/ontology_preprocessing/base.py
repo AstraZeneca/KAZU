@@ -497,8 +497,6 @@ class OntologyParser(ABC):
         )
         # need to invalidate cache here, otherwise the previous version of the linking candidates will be returned
         self.clear_cache()
-        # this is a bit dodgy - we're making the unsafe assumption that the state of the parser hasn't
-        # changed between instantiation and the time this method is called.
         (
             intermediate_linking_candidates,
             _,
