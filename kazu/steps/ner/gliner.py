@@ -78,7 +78,7 @@ class GLiNERStep(Step):
     ):
         """
 
-        :param pretrained_model_name_or_path: Passed to :meth:`GLiNER.from_pretrained`\\.
+        :param pretrained_model_name_or_path: Passed to ``GLiNER.from_pretrained``.
         :param gliner_class_prompt_to_entity_class: Since GLiNER needs entity class prompts, these might not map exactly
             to our global NER classes. Therefore, this dictionary provides this mapping.
         :param threshold: passed to :meth:`GLiNER.predict_entities`\\.
