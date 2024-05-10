@@ -245,8 +245,9 @@ In addition, there are the following considerations:
 
 Points 1-4 above are handled by the :class:`.OntologyStringResource` concept and :class:`.Synonym` concept. Point 5 is handled by
 the :class:`.CombinatorialSynonymGenerator` class. Point 6 is handled by the :class:`.AutoCurator` class. Point 7 is
-handled by :meth:`.OntologyParser._generate_clean_default_resources` (and controlled by the ``run_upgrade_report`` flag).
-Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` class (and controlled by the ``run_curation_report`` flag).
+handled by :meth:`.OntologyParser.upgrade_ontology_version`.
+Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` and :class:`.OntologyResourceSetCompleteReport` classes
+(and executed via :meth:`.OntologyParser.populate_metadata_db_and_resolve_string_resources`).
 
 The flow of an ontology parser to handling the underlying strings is as follows:
 
@@ -255,6 +256,8 @@ The flow of an ontology parser to handling the underlying strings is as follows:
 2) If configured, the :class:`.CombinatorialSynonymGenerator` is executed to generate additional forms
    for each :class:`.OntologyStringResource`.
 3) If configured, the :class:`.AutoCurator` is executed to adjust the default behaviour for each :class:`.OntologyStringResource`.
+   Note that autocuration results can lead to conflicts, which are then "optimistically" resolved to a consistent result via
+   :class:`.OntologyStringConflictAnalyser`.
 4) The final set of the automatically generated :class:`.OntologyStringResource`\s is serialised in the model pack. This
    is required when upgrading to a new version of the ontology, and can also be used as the basis for human curations
    (supplied via a seperate file to the ``curations_path`` argument to :class:`.OntologyParser`).
@@ -264,12 +267,13 @@ The flow of an ontology parser to handling the underlying strings is as follows:
    called (once per python process, or as long as ``force=True``). This will throw an exception in the case of conflicts,
    describing the human curations that need to be adjusted. When the human :class:`.OntologyStringResource` are consistent, they
    will override their automatically generated equivalents, ensuring the human curated behaviour takes precedent over
-   the automatically curated version. If ``run_curation_report`` is set on :class:`.OntologyParser`, a report will be
-   generated alongside the ontology file that describe what human curations are obsolete/broken/superfluous.
-6) Finally, when upgrading an ontology, the serialised set of automatically produced :class:`.OntologyStringResource` from step 4
-   is used to compare the new and old ontologies, migrating resources where possible and describing the differences
-   between the old and the new versions. The results are summarised in a report inside the Kazu model pack, alongside the
-   original ontology input data.
+   the automatically curated version. A :class:`.OntologyResourceSetCompleteReport` can be generated to describe what
+   resources are obsolete/broken/superfluous via :meth:`.OntologyParser.populate_metadata_db_and_resolve_string_resources`.
+6) Finally, when upgrading an ontology, the :meth:`.OntologyParser.upgrade_ontology_version` is used to generate
+   a :class:`.OntologyResourceSetCompleteReport`,  describing the differences between the old and the new versions. The results
+   are then used to supplement the existing :class:`.OntologyStringResource`\s for the new version.
+
+We are working on a simple tool to guide the user through each of these stages, which will be available in a future release.
 
 To explore the other capabilities of the :class:`.OntologyParser`, such as synonym generation and ID filtering, please
 refer to the API documentation.

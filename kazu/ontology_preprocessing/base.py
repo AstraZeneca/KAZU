@@ -630,8 +630,8 @@ class OntologyParser(ABC):
         """Loads the metadata DB and resolves any :class:`~.OntologyStringResource`\\s
         associated with this parser.
 
-        Note that the metadata database loading must be handled here, as the call to :meth:`._export_linking_candidates`
-        may depend on it being loaded.
+        Note that the metadata database loading must be handled here, as the call to
+        self._export_linking_candidates may depend on it being loaded.
         """
 
         (
