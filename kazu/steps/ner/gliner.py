@@ -1,8 +1,14 @@
 import dataclasses
 from collections import defaultdict, Counter
 
-from gliner import GLiNER
-from gliner.modules.token_splitter import WhitespaceTokenSplitter
+try:
+    from gliner import GLiNER
+    from gliner.modules.token_splitter import WhitespaceTokenSplitter
+except ImportError as e:
+    raise ImportError(
+        "To use GLiNERStep, you need to install gliner.\n"
+        "Install with 'pip install kazu[all-steps]'.\n"
+    ) from e
 from kazu.data import Document, Entity
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.utils import token_sliding_window, sort_then_group
