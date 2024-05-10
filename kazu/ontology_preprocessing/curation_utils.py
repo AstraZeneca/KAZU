@@ -624,14 +624,16 @@ class OntologyStringConflictAnalyser:
                 else:
                     ci_conf_lookup[syn.text.lower()].add(syn.mention_confidence)
 
-        for syn_string, cs_confidences in cs_conf_lookup.items():
-            ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(syn_string.lower(), set())
+        for cased_syn_string, cs_confidences in cs_conf_lookup.items():
+            ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(
+                cased_syn_string.lower(), set()
+            )
             if (
                 len(ci_confidences) > 1
                 or len(cs_confidences) > 1
                 or (
                     len(ci_confidences) == 1
-                    and len(cs_confidences) == 0
+                    and len(cs_confidences) > 0
                     and min(cs_confidences) <= min(ci_confidences)
                 )
             ):
