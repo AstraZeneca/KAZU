@@ -76,35 +76,37 @@ def test_GLINERStep_windowing(gliner_step):
         assert ent_list[0].entity_class == long_doc_ent_class
 
 
-@pytest.mark.parametrize(argnames=("stride", "window_size"), argvalues=((2, 10), (4, 5)))
-def test_string_windowing(stride, window_size):
+@pytest.mark.parametrize(
+    argnames=("stride", "window_size", "expected_texts"),
+    argvalues=(
+        (2, 10, ["ab cd ef gh ij kl mn op qr st ", "qr st uv wx yx"]),
+        (
+            4,
+            5,
+            [
+                "ab cd ef gh ij ",
+                "cd ef gh ij kl ",
+                "ef gh ij kl mn ",
+                "gh ij kl mn op ",
+                "ij kl mn op qr ",
+                "kl mn op qr st ",
+                "mn op qr st uv ",
+                "op qr st uv wx ",
+                "qr st uv wx yx",
+            ],
+        ),
+    ),
+)
+def test_string_windowing(stride, window_size, expected_texts):
     alphabet = "ab cd ef gh ij kl mn op qr st uv wx yx"
-    expected_texts = (
-        ["ab cd ef gh ij kl mn op qr st ", "qr st uv wx yx"]
-        if stride == 2
-        else [
-            "ab cd ef gh ij ",
-            "cd ef gh ij kl ",
-            "ef gh ij kl mn ",
-            "gh ij kl mn op ",
-            "ij kl mn op qr ",
-            "kl mn op qr st ",
-            "mn op qr st uv ",
-            "op qr st uv wx ",
-            "qr st uv wx yx",
-        ]
-    )
 
     test_window = list(WhitespaceTokenSplitter()(alphabet))
-    frames = list(
-        enumerate(
-            token_sliding_window(test_window, window_size=window_size, stride=stride, text=alphabet)
-        )
+    frames = token_sliding_window(
+        test_window, window_size=window_size, stride=stride, text=alphabet
     )
-    assert len(frames) == len(expected_texts)
-    capture_locs = []
-    for frame_index, (text, start_at, end_at) in frames:
-        capture_loc = alphabet[start_at:end_at]
-        capture_locs.append(capture_loc)
-        assert text == expected_texts[frame_index]
-    assert "".join(capture_locs) == alphabet
+
+    captured_text = ""
+    for (text, start_at, end_at), expected_text in zip(frames, expected_texts, strict=True):
+        captured_text += alphabet[start_at:end_at]
+        assert text == expected_text
+    assert captured_text == alphabet
