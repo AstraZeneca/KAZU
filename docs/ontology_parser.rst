@@ -245,7 +245,7 @@ In addition, there are the following considerations:
 
 Points 1-4 above are handled by the :class:`.OntologyStringResource` concept and :class:`.Synonym` concept. Point 5 is handled by
 the :class:`.CombinatorialSynonymGenerator` class. Point 6 is handled by the :class:`.AutoCurator` class. Point 7 is
-handled by :meth:`.OntologyParser.generate_clean_default_resources` (and controlled by the ``run_upgrade_report`` flag).
+handled by :meth:`.OntologyParser._generate_clean_default_resources` (and controlled by the ``run_upgrade_report`` flag).
 Point 8 is handled by the :class:`.OntologyStringConflictAnalyser` class (and controlled by the ``run_curation_report`` flag).
 
 The flow of an ontology parser to handling the underlying strings is as follows:

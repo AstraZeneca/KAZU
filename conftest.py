@@ -167,8 +167,8 @@ def mock_kazu_disk_cache_on_parsers(monkeypatch):
     # list of memoize functions
     funcs = [
         OntologyParser._populate_databases,
-        OntologyParser.export_metadata,
-        OntologyParser.export_linking_candidates,
+        OntologyParser._export_metadata,
+        OntologyParser._export_linking_candidates,
     ]
     # ...mapped to the underlying function
     # type ignore needed because it would be a pain to try and tell mypy that
