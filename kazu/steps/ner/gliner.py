@@ -118,7 +118,7 @@ class GLiNERStep(Step):
                     end = ent_pred_dict["end"] + entities_start_at_index
                     # skip the window overlap
                     if start >= entities_start_at_index and end < entities_end_at_index:
-                        ent_class = entity_class = self.gliner_class_prompt_to_entity_class[
+                        entity_class = self.gliner_class_prompt_to_entity_class[
                             ent_pred_dict["label"]
                         ]
                         match = ent_pred_dict["text"]
