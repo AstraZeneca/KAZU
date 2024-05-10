@@ -3,6 +3,7 @@ import os
 import jwt
 import pytest
 from hydra import compose, initialize_config_dir
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from kazu.data import Document, LinkingMetrics, CandidatesToMetrics
@@ -212,3 +213,8 @@ def mock_build_gilda_vectoriser_cache(monkeypatch):
         "_calculate_id_vectors",
         GildaTfIdfScorer._calculate_id_vectors.__wrapped__,  # type: ignore[attr-defined]
     )
+
+
+@pytest.fixture(scope="class")
+def gliner_step(kazu_test_config):
+    yield instantiate(kazu_test_config.GLiNERStep)
