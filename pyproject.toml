@@ -89,6 +89,8 @@ all-steps = [
   "py4j>=0.10.9",
   "rdkit>=2023.3.1",
   "stanza>=1.0.0,<1.6.0", # We're seeing IT test failures on linux with stanza 1.6.0
+  "gliner==0.1.7" # GLINER is under active development, so pinning version until API stabilises
+
 ]
 dev = [
   "kazu[webserver,typed,model-training,all-steps,model-training]",
