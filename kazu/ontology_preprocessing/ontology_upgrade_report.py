@@ -1,4 +1,3 @@
-import dataclasses
 import logging
 from pathlib import Path
 
@@ -11,38 +10,59 @@ from kazu.ontology_preprocessing.curation_utils import (
 
 logger = logging.getLogger(__name__)
 
-
 _ONTOLOGY_UPGRADE_REPORT_DIR = "_ontology_upgrade_report"
 
 
-@dataclasses.dataclass()
 class OntologyUpgradeReport:
-    parser_name: str
-    new_version_auto_generated_resources_clean: set[OntologyStringResource] = dataclasses.field(
-        default_factory=set
-    )
-    previous_version_auto_generated_resources_clean: set[
-        OntologyStringResource
-    ] = dataclasses.field(default_factory=set)
+    """A report on the delta of :class:`~.OntologyStringResource`\\s generated between
+    two versions of an ontology, or the same version of the ontology with a different
+    configuration of :class:`~.AutoCurator`\\.
+
+    This is useful to highlight which resources are novel or obsolete between versions.
+    """
+
+    def __init__(
+        self,
+        new_version_auto_generated_resources_clean: set[OntologyStringResource],
+        previous_version_auto_generated_resources_clean: set[OntologyStringResource],
+    ):
+        """
+
+        :param new_version_auto_generated_resources_clean: resources from new version.
+        :param previous_version_auto_generated_resources_clean: resources from previous version.
+        """
+        self.new_version_auto_generated_resources_clean = new_version_auto_generated_resources_clean
+        self.previous_version_auto_generated_resources_clean = (
+            previous_version_auto_generated_resources_clean
+        )
 
     @property
     def new_resources_after_upgrade(self) -> set[OntologyStringResource]:
+        """Novel resources generated after upgrade/config change :return:"""
         return self.new_version_auto_generated_resources_clean.difference(
             self.previous_version_auto_generated_resources_clean
         )
 
     @property
     def obsolete_resources_after_upgrade(self) -> set[OntologyStringResource]:
+        """Resources that are now obsolete (i.e. no longer do anything) after upgrade
+        :return:"""
         return self.previous_version_auto_generated_resources_clean.difference(
             self.new_resources_after_upgrade
         )
 
-    def write_report(self, ontology_data_path: Path) -> None:
+    def write_report(self, ontology_data_path: Path, parser_name: str) -> None:
+        """Write a report for human review of the delta.
+
+        :param ontology_data_path:
+        :param parser_name:
+        :return:
+        """
 
         upgrade_report_path = ontology_data_path.parent.joinpath(_ONTOLOGY_UPGRADE_REPORT_DIR)
         logger.info(
             "%s writing novel/obsolete resource reports after upgrade (to %s)",
-            self.parser_name,
+            parser_name,
             upgrade_report_path,
         )
 
