@@ -49,10 +49,8 @@ def test_GLINERStep(kazu_test_config, ner_simple_test_cases):
     assert len(processed) == 1
     assert len(failures) == 0
     for ent_class, ents in sort_then_group(conflicted_doc.get_entities(), lambda x: x.entity_class):
-        if ent_class == "gene":
-            assert len(list(ents)) == 3
-        else:
-            pytest.fail("non-gene entity types detected")
+        assert ent_class == "gene", "non-gene entity types detected"
+        assert len(list(ents)) == 3
 
     # test windowing
     doc_string, mention_count, long_doc_ent_class = ner_long_document_test_cases()[0]
