@@ -375,7 +375,7 @@ class OntologyStringConflictAnalyser:
         for conflicted_set in resource_conflicts:
             original_synonyms_by_syn_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
             alt_syns_by_syn_norm: defaultdict[str, set[Synonym]] = defaultdict(set)
-            case_sensitive = False
+            case_sensitivities = set()
             syn_string_lower_to_confidence = defaultdict(set)
             assoc_id_sets: set[EquivalentIdSet] = set()
             behaviours: set[OntologyStringBehaviour] = set()
@@ -386,8 +386,7 @@ class OntologyStringConflictAnalyser:
                 behaviours.add(resource.behaviour)
                 for syn in resource.all_synonyms():
                     syn_string_lower_to_confidence[syn.text.lower()].add(syn.mention_confidence)
-                    if syn.case_sensitive:
-                        case_sensitive = True
+                    case_sensitivities.add(syn.case_sensitive)
                 if resource.associated_id_sets is not None:
                     assoc_id_sets.update(resource.associated_id_sets)
 
@@ -398,6 +397,12 @@ class OntologyStringConflictAnalyser:
             else:
                 chosen_behaviour = OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING
 
+            chosen_case_sensitivity = (
+                min(case_sensitivities)
+                if self.autofix is AutofixStrategy.OPTIMISTIC
+                else max(case_sensitivities)
+            )
+
             for syn_norm, mergeable_original_synonyms in original_synonyms_by_syn_norm.items():
                 cleaned_resources.add(
                     OntologyStringResource(
@@ -405,7 +410,7 @@ class OntologyStringConflictAnalyser:
                         original_synonyms=frozenset(
                             dataclasses.replace(
                                 syn,
-                                case_sensitive=case_sensitive,
+                                case_sensitive=chosen_case_sensitivity,
                                 mention_confidence=agg_func(
                                     syn_string_lower_to_confidence[syn.text.lower()]
                                 ),
@@ -415,7 +420,7 @@ class OntologyStringConflictAnalyser:
                         alternative_synonyms=frozenset(
                             dataclasses.replace(
                                 syn,
-                                case_sensitive=case_sensitive,
+                                case_sensitive=chosen_case_sensitivity,
                                 mention_confidence=agg_func(
                                     syn_string_lower_to_confidence[syn.text.lower()]
                                 ),
