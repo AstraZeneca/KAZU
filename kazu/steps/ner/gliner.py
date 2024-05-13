@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 from collections import defaultdict, Counter
 
 try:
@@ -11,7 +12,9 @@ except ImportError as e:
     ) from e
 from kazu.data import Document, Entity
 from kazu.steps import Step, document_iterating_step
-from kazu.utils.utils import token_sliding_window, sort_then_group
+from kazu.utils.utils import sort_then_group
+
+logger = logging.getLogger(__name__)
 
 
 class GLiNERStep(Step):
@@ -73,8 +76,6 @@ class GLiNERStep(Step):
         pretrained_model_name_or_path: str,
         gliner_class_prompt_to_entity_class: dict[str, str],
         threshold: float = 0.3,
-        stride: int = 30,
-        window_size: int = 300,
     ):
         """
 
@@ -82,17 +83,12 @@ class GLiNERStep(Step):
         :param gliner_class_prompt_to_entity_class: Since GLiNER needs entity class prompts, these might not map exactly
             to our global NER classes. Therefore, this dictionary provides this mapping.
         :param threshold: passed to ``GLiNER.predict_entities``.
-        :param stride: number of tokens used for sliding window overlap.
-        :param window_size: total window size. This should be the same as the maximum number of tokens the GLiNER model
-            supports.
         """
 
         self.model = GLiNER.from_pretrained(pretrained_model_name_or_path)
-        self.token_splitter = WhitespaceTokenSplitter()
         self.gliner_class_prompt_to_entity_class = gliner_class_prompt_to_entity_class
         self.threshold = threshold
-        self.stride = stride
-        self.window_size = window_size
+        self.splitter = WhitespaceTokenSplitter()
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
@@ -101,41 +97,46 @@ class GLiNERStep(Step):
         entity_class_counter: defaultdict[str, Counter[str]] = defaultdict(Counter)
 
         for section in doc.sections:
-            for sub_text, entities_start_at_index, entities_end_at_index in token_sliding_window(
-                self.token_splitter(section.text),
-                window_size=self.window_size,
-                stride=self.stride,
-                text=section.text,
-            ):
+            if section.text and not section.sentence_spans:
+                logger.warning(
+                    "Skipping section of docid %s as %s requires a sentence splitter to have run"
+                )
+                continue
 
+            for sent_span in section.sentence_spans:
+                sentence = section.text[sent_span.start : sent_span.end]
+                token_count = len(list(self.splitter(sentence)))
+                if token_count > self.model.config.max_len:
+                    logger.warning(
+                        "long sentence detected in docid %s. Only the first %s tokens will"
+                        "be processed",
+                        doc.idx,
+                        self.model.config.max_len,
+                    )
                 predictions = self.model.predict_entities(
-                    sub_text,
+                    sentence,
                     labels=self.gliner_class_prompt_to_entity_class.keys(),
                     threshold=self.threshold,
                 )
                 for ent_pred_dict in predictions:
-                    start = ent_pred_dict["start"] + entities_start_at_index
-                    end = ent_pred_dict["end"] + entities_start_at_index
-                    # skip the window overlap
-                    if start >= entities_start_at_index and end < entities_end_at_index:
-                        entity_class = self.gliner_class_prompt_to_entity_class[
-                            ent_pred_dict["label"]
-                        ]
-                        match = ent_pred_dict["text"]
-                        entity_class_counter[match][ent_class] += 1
+                    start = ent_pred_dict["start"] + sent_span.start
+                    end = ent_pred_dict["end"] + sent_span.start
+                    entity_class = self.gliner_class_prompt_to_entity_class[ent_pred_dict["label"]]
+                    match = ent_pred_dict["text"]
+                    entity_class_counter[match][entity_class] += 1
 
-                        section_entities_map[section].append(
-                            Entity.load_contiguous_entity(
-                                start=start,
-                                end=end,
-                                match=match,
-                                entity_class=entity_class,
-                                namespace=self.namespace(),
-                                metadata={f"{self.namespace()}_score": ent_pred_dict["score"]},
-                            )
+                    section_entities_map[section].append(
+                        Entity.load_contiguous_entity(
+                            start=start,
+                            end=end,
+                            match=match,
+                            entity_class=entity_class,
+                            namespace=self.namespace(),
+                            metadata={f"{self.namespace()}_score": ent_pred_dict["score"]},
                         )
-        # calculate majority vote and update sections
-        for section, entities in section_entities_map.items():
+                    )
+        # calculate majority vote and update sections.
+        for section, entities in section_entities_map.copy().items():
             for ent_match, ents_this_match in sort_then_group(entities, lambda x: x.match):
                 most_common_class_this_match = entity_class_counter[ent_match].most_common(1)[0][0]
                 section.entities.extend(

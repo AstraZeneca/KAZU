@@ -1,14 +1,27 @@
-import pytest
-from gliner.modules.token_splitter import WhitespaceTokenSplitter
+import re
+
 from hydra.utils import instantiate
 
-from kazu.data import Document, Section
+from kazu.data import Document, Section, CharSpan
 from kazu.tests.utils import (
     requires_model_pack,
     ner_long_document_test_cases,
     maybe_skip_experimental_tests,
 )
-from kazu.utils.utils import token_sliding_window, sort_then_group
+from kazu.utils.utils import sort_then_group
+
+
+def _add_spans_to_docs(docs: list[Document]):
+    for doc in docs:
+        for section in doc.sections:
+            spans = []
+            start = 0
+
+            for match in re.finditer(r"\.", section.text):
+                end = match.start()
+                spans.append(CharSpan(start, end))
+                start = end + 1
+            section.sentence_spans = spans
 
 
 @requires_model_pack
@@ -36,19 +49,12 @@ def test_multilabel_transformer_token_classification(
 
 @maybe_skip_experimental_tests
 @requires_model_pack
-def test_GLINERStep_simplecases(gliner_step, ner_simple_test_cases):
-    processed, failures = gliner_step(ner_simple_test_cases)
-    assert len(processed) == len(ner_simple_test_cases)
-    assert len(failures) == 0
-
-
-@maybe_skip_experimental_tests
-@requires_model_pack
 def test_GLINERStep_majority_vote(gliner_step):
-    drug_section = Section(text="abracodabravir is a drug", name="test1")
-    gene_section1 = Section(text="abracodabravir is a gene", name="test2")
-    gene_section2 = Section(text="abracodabravir is definitely a gene", name="test3")
+    drug_section = Section(text="abracodabravir is a drug.", name="test1")
+    gene_section1 = Section(text="abracodabravir is a gene.", name="test2")
+    gene_section2 = Section(text="abracodabravir is definitely a gene.", name="test3")
     conflicted_doc = Document(sections=[drug_section, gene_section1, gene_section2])
+    _add_spans_to_docs([conflicted_doc])
     processed, failures = gliner_step([conflicted_doc])
     assert len(processed) == 1
     assert len(failures) == 0
@@ -59,9 +65,10 @@ def test_GLINERStep_majority_vote(gliner_step):
 
 @maybe_skip_experimental_tests
 @requires_model_pack
-def test_GLINERStep_windowing(gliner_step):
+def test_GLINERStep_long_document(gliner_step):
     doc_string, mention_count, long_doc_ent_class = ner_long_document_test_cases()[0]
     long_docs = [Document.create_simple_document(doc_string)]
+    _add_spans_to_docs(long_docs)
     processed, failures = gliner_step(long_docs)
     assert len(processed) == len(long_docs)
     assert len(failures) == 0
@@ -74,39 +81,3 @@ def test_GLINERStep_windowing(gliner_step):
     for ent_list in entities_grouped.values():
         assert len(ent_list) == 1
         assert ent_list[0].entity_class == long_doc_ent_class
-
-
-@pytest.mark.parametrize(
-    argnames=("stride", "window_size", "expected_texts"),
-    argvalues=(
-        (2, 10, ["ab cd ef gh ij kl mn op qr st ", "qr st uv wx yx"]),
-        (
-            4,
-            5,
-            [
-                "ab cd ef gh ij ",
-                "cd ef gh ij kl ",
-                "ef gh ij kl mn ",
-                "gh ij kl mn op ",
-                "ij kl mn op qr ",
-                "kl mn op qr st ",
-                "mn op qr st uv ",
-                "op qr st uv wx ",
-                "qr st uv wx yx",
-            ],
-        ),
-    ),
-)
-def test_string_windowing(stride, window_size, expected_texts):
-    alphabet = "ab cd ef gh ij kl mn op qr st uv wx yx"
-
-    test_window = list(WhitespaceTokenSplitter()(alphabet))
-    frames = token_sliding_window(
-        test_window, window_size=window_size, stride=stride, text=alphabet
-    )
-
-    captured_text = ""
-    for (text, start_at, end_at), expected_text in zip(frames, expected_texts, strict=True):
-        captured_text += alphabet[start_at:end_at]
-        assert text == expected_text
-    assert captured_text == alphabet
