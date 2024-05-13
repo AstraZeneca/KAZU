@@ -23,9 +23,10 @@ class GLiNERStep(Step):
     This is to avoid the 'windowing' problem, whereby a multi-token entity could be
     split across two windows, leading to ambiguity over the entity class and spans.
 
-    If multiple classes
-    are detected for the same string, the most frequently occuring one will be selected for all strings
-    (a.k.a majority vote). In the case of a tie, the first sequentially detected class will be used.
+    If multiple classes are detected for the same string, the most frequently occuring
+    one will be selected for all strings (a.k.a majority vote). In the case of a tie,
+    the first sequentially detected class will be used.
+
     .. attention::
         To use this step, you will need `gliner <https://github.com/urchade/GLiNER>`_
         installed, which is not installed as part of the default kazu install
