@@ -18,45 +18,33 @@ logger = logging.getLogger(__name__)
 
 
 class GLiNERStep(Step):
-    """Wrapper for GLiNER models and library.
+    """Wrapper for GLiNER models and library. Requires :class:`kazu.data.Section` to
+    have sentence spans set on it, as sentences are processed individually by GLiNER.
+    This is to avoid the 'windowing' problem, whereby a multi-token entity could be
+    split across two windows, leading to ambiguity over the entity class and spans.
 
-    Implements a sliding window to enable the library to process long contexts. If multiple classes
+    If multiple classes
     are detected for the same string, the most frequently occuring one will be selected for all strings
     (a.k.a majority vote). In the case of a tie, the first sequentially detected class will be used.
-
-
     .. attention::
-
         To use this step, you will need `gliner <https://github.com/urchade/GLiNER>`_
         installed, which is not installed as part of the default kazu install
         because this step isn't used as part of the default pipeline.
-
         You can either do:
-
         .. code-block:: console
-
             $ pip install gliner
-
         Or you can install required dependencies for all steps included in kazu
         with:
-
         .. code-block:: console
-
             $ pip install kazu[all-steps]
-
     Paper:
-
     | GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.
     | Urchade Zaratiana, Nadi Tomeh, Pierre Holat, Thierry Charnois
     | https://arxiv.org/abs/2311.08526
-
     .. raw:: html
-
         <details>
         <summary>Bibtex Citation Details</summary>
-
     .. code:: bibtex
-
         @misc{zaratiana2023gliner,
               title={GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer},
               author={Urchade Zaratiana and Nadi Tomeh and Pierre Holat and Thierry Charnois},
@@ -65,9 +53,7 @@ class GLiNERStep(Step):
               archivePrefix={arXiv},
               primaryClass={cs.CL}
         }
-
     .. raw:: html
-
         </details>
     """
 
