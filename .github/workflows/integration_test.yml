@@ -79,7 +79,11 @@ jobs:
           # skip server tests on runner due to low shared memory.
           export SKIP_KAZU_SERVER_TESTS=1
 
-          pytest
+          # separate out hypothesis and non-hypothesis tests
+          # because the hypothesis cache causes memory to grow significantly and
+          # cause the run to fail.
+          pytest -m "not hypothesis"
+          pytest -m "hypothesis"
           # build sphinx html and run doctests
           # this needs to be after the model pack build because they depend on the
           # model pack being present for doctests that load the full pipeline.

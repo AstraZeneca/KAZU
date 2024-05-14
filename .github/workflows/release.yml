@@ -99,7 +99,11 @@ jobs:
           export SKIP_KAZU_SERVER_TESTS=1
 
           cd /tmp
-          pytest $GITHUB_WORKSPACE/kazu/tests
+          # separate out hypothesis and non-hypothesis tests
+          # because the hypothesis cache causes memory to grow significantly and
+          # cause the run to fail.
+          pytest -m "not hypothesis" $GITHUB_WORKSPACE/kazu/tests
+          pytest -m "hypothesis" $GITHUB_WORKSPACE/kazu/tests
 
           NEW_MODEL_PACK_ZIP=$(echo $MODEL_PACK_BUILD_PATH/*.zip)
           echo "NEW_MODEL_PACK_ZIP=${NEW_MODEL_PACK_ZIP}" >> $GITHUB_ENV
