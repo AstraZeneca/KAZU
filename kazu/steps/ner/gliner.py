@@ -28,34 +28,47 @@ class GLiNERStep(Step):
     the first sequentially detected class will be used.
 
     .. attention::
-        To use this step, you will need `gliner <https://github.com/urchade/GLiNER>`_
-        installed, which is not installed as part of the default kazu install
-        because this step isn't used as part of the default pipeline.
-        You can either do:
-        .. code-block:: console
-            $ pip install gliner
-        Or you can install required dependencies for all steps included in kazu
-        with:
-        .. code-block:: console
-            $ pip install kazu[all-steps]
+
+       To use this step, you will need `gliner <https://github.com/urchade/GLiNER>`_
+       installed, which is not installed as part of the default kazu install
+       because this step isn't used as part of the default pipeline.
+       You can either do:
+
+       .. code-block:: console
+
+          $ pip install gliner
+
+       Or you can install required dependencies for all steps included in kazu
+       with:
+
+       .. code-block:: console
+
+          $ pip install kazu[all-steps]
+
     Paper:
     | GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.
     | Urchade Zaratiana, Nadi Tomeh, Pierre Holat, Thierry Charnois
     | https://arxiv.org/abs/2311.08526
+
     .. raw:: html
-        <details>
-        <summary>Bibtex Citation Details</summary>
+
+       <details>
+       <summary>Bibtex Citation Details</summary>
+
     .. code:: bibtex
-        @misc{zaratiana2023gliner,
-              title={GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer},
-              author={Urchade Zaratiana and Nadi Tomeh and Pierre Holat and Thierry Charnois},
-              year={2023},
-              eprint={2311.08526},
-              archivePrefix={arXiv},
-              primaryClass={cs.CL}
-        }
+
+       @misc{zaratiana2023gliner,
+             title={GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer},
+             author={Urchade Zaratiana and Nadi Tomeh and Pierre Holat and Thierry Charnois},
+             year={2023},
+             eprint={2311.08526},
+             archivePrefix={arXiv},
+             primaryClass={cs.CL}
+       }
+
     .. raw:: html
-        </details>
+
+       </details>
     """
 
     def __init__(
