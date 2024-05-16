@@ -1,6 +1,7 @@
 import dataclasses
 import logging
 from collections import defaultdict, Counter
+from typing import Iterable
 
 try:
     from gliner import GLiNER
@@ -10,7 +11,7 @@ except ImportError as e:
         "To use GLiNERStep, you need to install gliner.\n"
         "Install with 'pip install kazu[all-steps]'.\n"
     ) from e
-from kazu.data import Document, Entity
+from kazu.data import Document, Entity, CharSpan, Section
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.utils import sort_then_group
 
@@ -19,9 +20,11 @@ logger = logging.getLogger(__name__)
 
 class GLiNERStep(Step):
     """Wrapper for GLiNER models and library. Requires :class:`kazu.data.Section` to
-    have sentence spans set on it, as sentences are processed individually by GLiNER.
-    This is to avoid the 'windowing' problem, whereby a multi-token entity could be
-    split across two windows, leading to ambiguity over the entity class and spans.
+    have sentence spans set on it, as sentences are processed in batches by GLiNER. This
+    is to avoid the 'windowing' problem, whereby a multi-token entity could be split
+    across two windows, leading to ambiguity over the entity class and spans. Since
+    entities cannot theoretically cross sentences, batching sentences eliminates this
+    problem.
 
     If multiple classes are detected for the same string, the most frequently occuring
     one will be selected for all strings (a.k.a majority vote). In the case of a tie,
@@ -89,38 +92,59 @@ class GLiNERStep(Step):
         self.gliner_class_prompt_to_entity_class = gliner_class_prompt_to_entity_class
         self.threshold = threshold
         self.splitter = WhitespaceTokenSplitter()
+        self.max_batch_size = (
+            self.model.config.max_len - 10
+        )  # -10 to keep a few tokens back for 'special tokens'
+
+    def _create_batches(
+        self, section: Section, doc_idx: str
+    ) -> Iterable[tuple[CharSpan, list[str]]]:
+        tokens_this_batch = 0
+        start_span_this_batch: CharSpan = list(section.sentence_spans)[0]
+        sentences_this_batch: list[str] = []
+
+        for sent_span in section.sentence_spans:
+
+            sentence = section.text[sent_span.start : sent_span.end]
+            token_count = len(list(self.splitter(sentence)))
+            if token_count > self.model.config.max_len:
+                logger.warning(
+                    "long sentence detected in docid %s. Only the first %s tokens will"
+                    "be processed",
+                    doc_idx,
+                    self.model.config.max_len,
+                )
+            if tokens_this_batch + token_count >= self.max_batch_size:
+                yield start_span_this_batch, sentences_this_batch
+                tokens_this_batch = 0
+                start_span_this_batch = sent_span
+                sentences_this_batch = []
+
+            tokens_this_batch += token_count
+            sentences_this_batch.append(sentence)
+        if sentences_this_batch:
+            yield start_span_this_batch, sentences_this_batch
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
         # needed for majority voting at the end of the document
         section_entities_map = defaultdict(list)
         entity_class_counter: defaultdict[str, Counter[str]] = defaultdict(Counter)
-
         for section in doc.sections:
             if section.text and not section.sentence_spans:
                 logger.warning(
                     "Skipping section of docid %s as %s requires a sentence splitter to have run"
                 )
                 continue
-
-            for sent_span in section.sentence_spans:
-                sentence = section.text[sent_span.start : sent_span.end]
-                token_count = len(list(self.splitter(sentence)))
-                if token_count > self.model.config.max_len:
-                    logger.warning(
-                        "long sentence detected in docid %s. Only the first %s tokens will"
-                        "be processed",
-                        doc.idx,
-                        self.model.config.max_len,
-                    )
+            for batch_start_span, sentences in self._create_batches(section, doc.idx):
                 predictions = self.model.predict_entities(
-                    sentence,
+                    "".join(sentences),
                     labels=self.gliner_class_prompt_to_entity_class.keys(),
                     threshold=self.threshold,
                 )
                 for ent_pred_dict in predictions:
-                    start = ent_pred_dict["start"] + sent_span.start
-                    end = ent_pred_dict["end"] + sent_span.start
+                    start = ent_pred_dict["start"] + batch_start_span.start
+                    end = ent_pred_dict["end"] + batch_start_span.start
                     entity_class = self.gliner_class_prompt_to_entity_class[ent_pred_dict["label"]]
                     match = ent_pred_dict["text"]
                     entity_class_counter[match][entity_class] += 1
