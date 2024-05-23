@@ -98,11 +98,11 @@ class GLiNERStep(Step):
 
     def _create_batches(
         self, section: Section, doc_idx: str
-    ) -> Iterable[tuple[CharSpan, list[str]]]:
+    ) -> Iterable[tuple[CharSpan, CharSpan]]:
         tokens_this_batch = 0
-        start_span_this_batch: CharSpan = list(section.sentence_spans)[0]
-        sentences_this_batch: list[str] = []
-
+        span_list = list(section.sentence_spans)
+        start_span_this_batch: CharSpan = span_list[0]
+        end_span_this_batch: CharSpan = start_span_this_batch
         for sent_span in section.sentence_spans:
 
             sentence = section.text[sent_span.start : sent_span.end]
@@ -115,15 +115,14 @@ class GLiNERStep(Step):
                     self.model.config.max_len,
                 )
             if tokens_this_batch + token_count >= self.max_batch_size:
-                yield start_span_this_batch, sentences_this_batch
+                yield start_span_this_batch, end_span_this_batch
                 tokens_this_batch = 0
                 start_span_this_batch = sent_span
-                sentences_this_batch = []
+            elif sent_span is span_list[-1]:
+                yield start_span_this_batch, sent_span
 
+            end_span_this_batch = sent_span
             tokens_this_batch += token_count
-            sentences_this_batch.append(sentence)
-        if sentences_this_batch:
-            yield start_span_this_batch, sentences_this_batch
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
@@ -136,9 +135,9 @@ class GLiNERStep(Step):
                     "Skipping section of docid %s as %s requires a sentence splitter to have run"
                 )
                 continue
-            for batch_start_span, sentences in self._create_batches(section, doc.idx):
+            for batch_start_span, batch_end_span in self._create_batches(section, doc.idx):
                 predictions = self.model.predict_entities(
-                    "".join(sentences),
+                    section.text[batch_start_span.start : batch_end_span.end],
                     labels=self.gliner_class_prompt_to_entity_class.keys(),
                     threshold=self.threshold,
                 )
