@@ -49,6 +49,7 @@ class GLiNERStep(Step):
           $ pip install kazu[all-steps]
 
     Paper:
+
     | GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.
     | Urchade Zaratiana, Nadi Tomeh, Pierre Holat, Thierry Charnois
     | https://arxiv.org/abs/2311.08526
