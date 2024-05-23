@@ -88,8 +88,43 @@ max_mention_test_case = StringMatchingTestCase(
     parser_2_ent_type=ENT_TYPE_1,
 )
 
+word_boundary_test_case = StringMatchingTestCase(
+    id="Matches should only happen at word boundaries",
+    parser_1_resources=[FIRST_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE],
+    parser_2_resources=[
+        dataclasses.replace(
+            SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE,
+            original_synonyms=frozenset(
+                # technically we don't need to specify mention_confidence=MentionConfidence.HIGHLY_LIKELY
+                # as it is the default. However, it's clearer if we do
+                dataclasses.replace(
+                    syn,
+                    mention_confidence=MentionConfidence.HIGHLY_LIKELY,
+                    case_sensitive=True,
+                    text="plexVII Dis",
+                )
+                for syn in SECOND_MOCK_PARSER_DEFAULT_COMPLEX7_RESOURCE.original_synonyms
+            ),
+        )
+    ],
+    match_len=1,
+    match_texts={"ComplexVII Disease\u03B1"},
+    match_ontology_data={
+        (
+            ENT_TYPE_1,
+            FIRST_MOCK_PARSER,
+            COMPLEX_7_DISEASE_ALPHA_NORM,
+            MentionConfidence.HIGHLY_LIKELY,
+        ),
+    },
+    # they need to be the same entity type
+    # to get aggregated together
+    parser_2_ent_type=ENT_TYPE_1,
+)
+
 mem_efficient_param_values = STRINGMATCHING_PARAM_VALUES + [
-    convert_test_case_to_param(max_mention_test_case)
+    convert_test_case_to_param(max_mention_test_case),
+    convert_test_case_to_param(word_boundary_test_case),
 ]
 
 
