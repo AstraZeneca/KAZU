@@ -134,7 +134,9 @@ class GLiNERStep(Step):
         for section in doc.sections:
             if section.text and not section.sentence_spans:
                 logger.warning(
-                    "Skipping section of docid %s as %s requires a sentence splitter to have run"
+                    "Skipping section of docid %s as %s requires a sentence splitter to have run",
+                    doc.idx,
+                    self.namespace(),
                 )
                 continue
             for batch_start_span, batch_end_span in self._create_batches(section, doc.idx):
