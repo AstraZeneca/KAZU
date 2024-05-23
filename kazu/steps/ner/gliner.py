@@ -163,7 +163,7 @@ class GLiNERStep(Step):
                         )
                     )
         # calculate majority vote and update sections.
-        for section, entities in section_entities_map.copy().items():
+        for section, entities in section_entities_map.items():
             for ent_match, ents_this_match in sort_then_group(entities, lambda x: x.match):
                 most_common_class_this_match = entity_class_counter[ent_match].most_common(1)[0][0]
                 section.entities.extend(
