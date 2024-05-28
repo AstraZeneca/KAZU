@@ -543,7 +543,6 @@ class OntologyParser(ABC):
             ).clean_resources
         )
 
-        # note, this should run after we've loaded/backed up the previous version set, if required!
         logger.info(
             "%s updating auto generated resources in model pack: %s",
             self.name,
