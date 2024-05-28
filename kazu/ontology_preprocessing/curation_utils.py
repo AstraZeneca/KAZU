@@ -218,13 +218,11 @@ _ONTOLOGY_MERGE_REPORT_DIR = "_ontology_merge_report"
 
 @dataclasses.dataclass
 class OntologyResourceSetCompleteReport:
-    """Manages the state of Ontology resources after parsers have extracted linking
-    candidates but before resources have modified them.
-
-    Since this class also contains the reports of various stages of ontology resources
-    resolution, it can also be used to inspect various conflicts between resources that
-    can arise.
-    """
+    """Describes the state of :class:`kazu.data.OntologyStringResource`\\s configured
+    for a given :class:`kazu.ontology_preprocessing.base.OntologyParser`, such as any
+    conflicts in how string matching is configured, or discrepancies between resources
+    produced by :class:`kazu.ontology_preprocessing.autocuration.AutoCurator` and their
+    human curated overrrides."""
 
     #: parser linking candidates before they are processed with :class:`.OntologyStringResource`\\s
     intermediate_linking_candidates: set[LinkingCandidate]
