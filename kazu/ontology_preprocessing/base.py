@@ -711,7 +711,7 @@ class OntologyParser(ABC):
         return maybe_resources if return_resources else None
 
     def clear_cache(self) -> None:
-        """Clears the disk cache for this parser :return:"""
+        """Clears the disk cache for this parser."""
         cache_key = self._populate_databases.__cache_key__(self, self.name)
         kazu_disk_cache.delete(self._export_metadata.__cache_key__(self, self.name))
         kazu_disk_cache.delete(self._export_linking_candidates.__cache_key__(self, self.name))
