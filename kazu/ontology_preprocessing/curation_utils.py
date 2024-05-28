@@ -119,9 +119,14 @@ def load_global_actions(
     return global_actions
 
 
+_CURATION_REPORT_FILENAME = "_curation_report"
+_ONTOLOGY_MERGE_REPORT_DIR = "_ontology_merge_report"
 CLEAN_RESOURCES_FN = "clean_resources.jsonl"
 MERGED_RESOURCES_FN = "merged_resources.jsonl"
 NORM_CONFLICT_RESOURCES_FN = "normalisation_conflicts.jsonl"
+OBSOLETE_RESOURCES_FN = "obsolete_human_curations_set.jsonl"
+SUPERFLUOUS_RESOURCES_FN = "superfluous_human_curations_set.jsonl"
+EFFECTIVE_RESOURCES_FN = "effective_human_curations.jsonl"
 
 
 @dataclasses.dataclass
@@ -175,27 +180,22 @@ class OntologyResourceSetMergeReport:
     resources_with_discrepancies: set[tuple[OntologyStringResource, OntologyStringResource]]
 
     def write_ontology_merge_report(self, path: PathLike) -> None:
-        path_ = as_path(path)
-        if self.obsolete_resources:
-            dump_ontology_string_resources(
-                self.obsolete_resources,
-                path_.joinpath("obsolete_human_curations_set.jsonl"),
-                force=True,
-            )
-        if self.superfluous_resources:
-            dump_ontology_string_resources(
-                self.superfluous_resources,
-                path_.joinpath("superfluous_human_curations_set.jsonl"),
-                force=True,
-            )
-        if self.effective_resources:
-            dump_ontology_string_resources(
-                self.effective_resources,
-                path_.joinpath("effective_human_curations.jsonl"),
-                force=True,
-            )
+        report_path = as_path(path)
+        filename_to_resources: dict[str, set[OntologyStringResource]] = {
+            OBSOLETE_RESOURCES_FN: self.obsolete_resources,
+            SUPERFLUOUS_RESOURCES_FN: self.superfluous_resources,
+            EFFECTIVE_RESOURCES_FN: self.effective_resources,
+        }
+        for filename, resources in filename_to_resources.items():
+            if resources:
+                dump_ontology_string_resources(
+                    resources,
+                    report_path.joinpath(filename),
+                    force=True,
+                )
+
         if self.resources_with_discrepancies:
-            with path_.joinpath("human_curations_with_synonym_discrepancies_set.jsonl").open(
+            with report_path.joinpath("human_curations_with_synonym_discrepancies_set.jsonl").open(
                 mode="w"
             ) as jsonlf:
                 for (
@@ -207,10 +207,6 @@ class OntologyResourceSetMergeReport:
                     jsonlf.write("DEFAULT:" + "\n")
                     jsonlf.write(default_resource.to_json() + "\n")
                     jsonlf.write("\n\n")
-
-
-_CURATION_REPORT_FILENAME = "_curation_report"
-_ONTOLOGY_MERGE_REPORT_DIR = "_ontology_merge_report"
 
 
 @dataclasses.dataclass
