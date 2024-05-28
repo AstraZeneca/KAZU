@@ -329,9 +329,7 @@ class OntologyStringConflictAnalyser:
         if self.autofix is not AutofixStrategy.NONE:
 
             logger.info("Resources will be automatically fixed")
-            autofixed_resources_from_conflicts = self.autofix_resources(
-                normalisation_conflicts,
-            )
+            autofixed_resources_from_conflicts = self.autofix_resources(normalisation_conflicts)
             # add the fixed resources to the merged set
             merged_resources.update(autofixed_resources_from_conflicts)
             resources.update(autofixed_resources_from_conflicts)
