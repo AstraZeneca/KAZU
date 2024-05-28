@@ -48,7 +48,7 @@ class OntologyUpgradeReport:
         """Resources that are now obsolete (i.e. no longer do anything) after upgrade
         :return:"""
         return self.previous_version_auto_generated_resources_clean.difference(
-            self.new_resources_after_upgrade
+            self.new_version_auto_generated_resources_clean
         )
 
     def write_report(self, ontology_data_path: Path, parser_name: str) -> None:
