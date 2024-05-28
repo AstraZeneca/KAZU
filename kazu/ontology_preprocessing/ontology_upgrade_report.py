@@ -38,7 +38,7 @@ class OntologyUpgradeReport:
 
     @property
     def new_resources_after_upgrade(self) -> set[OntologyStringResource]:
-        """Novel resources generated after upgrade/config change :return:"""
+        """Novel resources generated after upgrade/config change."""
         return self.new_version_auto_generated_resources_clean.difference(
             self.previous_version_auto_generated_resources_clean
         )
