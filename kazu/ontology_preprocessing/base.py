@@ -518,7 +518,7 @@ class OntologyParser(ABC):
     ) -> set[OntologyStringResource]:
         """From a set of candidates, produce default resources that do not conflict
         internally, based upon any configured autocuration regime.
-        
+
         Note, they may still conflict with other parsers in your model pack.
 
         :param candidates:
@@ -629,11 +629,7 @@ class OntologyParser(ABC):
         self,
     ) -> tuple[OntologyMetadata, OntologyResourceSetCompleteReport]:
         """Loads the metadata DB and resolves any :class:`~.OntologyStringResource`\\s
-        associated with this parser.
-
-        Note that the metadata database loading must be handled here, as the call to
-        self._export_linking_candidates may depend on it being loaded.
-        """
+        associated with this parser."""
 
         (
             intermediate_linking_candidates,
