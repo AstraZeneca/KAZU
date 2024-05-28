@@ -424,7 +424,7 @@ class OntologyParser(ABC):
 
         if len(human_curation_report.normalisation_conflicts) > 0:
             raise CurationError(
-                f"{self.name} normalisation conflicts detected in human curation set. Fix these before continuing.{human_curation_report.normalisation_conflicts}"
+                f"{self.name} normalisation conflicts detected in human curation set. Fix these before continuing.\n\n{human_curation_report.normalisation_conflicts}"
             )
 
         if len(human_curation_report.case_conflicts) > 0:
