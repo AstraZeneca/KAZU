@@ -517,8 +517,9 @@ class OntologyParser(ABC):
         self, candidates: set[LinkingCandidate], save_resources: bool = True
     ) -> set[OntologyStringResource]:
         """From a set of candidates, produce default resources that do not conflict
-        internally, based upon any configured autocuration regime. Note, they may still
-        conflict with other parsers in your model pack.
+        internally, based upon any configured autocuration regime.
+        
+        Note, they may still conflict with other parsers in your model pack.
 
         :param candidates:
         :param save_resources: should the generated resources be persisted within the
