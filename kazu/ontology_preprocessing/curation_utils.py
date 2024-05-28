@@ -151,15 +151,12 @@ class OntologyResourceSetConflictReport:
                 with report_path.joinpath(path_name).open(mode="w") as f:
                     for resource in resource_data:
                         f.write(resource.to_json() + "\n")
-        path_to_resource_conflicts: dict[str, set[frozenset[OntologyStringResource]]] = {
-            NORM_CONFLICT_RESOURCES_FN: self.normalisation_conflicts,
-        }
-        for path_name, resource_conflict_data in path_to_resource_conflicts.items():
-            if resource_conflict_data:
-                with report_path.joinpath(path_name).open(mode="w") as f:
-                    for resource_set in resource_conflict_data:
-                        for resource in resource_set:
-                            f.write(resource.to_json() + "\n")
+
+        if self.normalisation_conflicts:
+            with report_path.joinpath(NORM_CONFLICT_RESOURCES_FN).open(mode="w") as f:
+                for resource_set in self.normalisation_conflicts:
+                    for resource in resource_set:
+                        f.write(resource.to_json() + "\n")
 
 
 @dataclasses.dataclass
