@@ -265,8 +265,6 @@ class OntologyResourceSetCompleteReport:
                 parser_name,
             )
             merge_report_path = as_path(path).joinpath(f"{parser_name}{_ONTOLOGY_MERGE_REPORT_DIR}")
-            if merge_report_path.exists():
-                shutil.rmtree(merge_report_path)
             merge_report_path.mkdir()
             self.merge_report.write_ontology_merge_report(merge_report_path)
 
