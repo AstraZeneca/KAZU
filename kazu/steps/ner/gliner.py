@@ -84,7 +84,7 @@ class GLiNERStep(Step):
         """
 
         :param pretrained_model_name_or_path: Passed to ``GLiNER.from_pretrained``. Note that this could attempt to
-            download a model from the HuggingFace Hub (see docs for class:`hub_mixin.ModelHubMixin`).
+            download a model from the HuggingFace Hub (see docs for `ModelHubMixin <https://huggingface.co/docs/huggingface_hub/en/package_reference/mixins#huggingface_hub.ModelHubMixin>`_ ).
         :param gliner_class_prompt_to_entity_class: Since GLiNER needs entity class prompts, these might not map exactly
             to our global NER classes. Therefore, this dictionary provides this mapping.
         :param threshold: passed to ``GLiNER.predict_entities``.
