@@ -1,7 +1,7 @@
 import dataclasses
 import logging
 from collections import defaultdict, Counter
-from typing import Iterable
+from typing import Iterable, Optional
 
 try:
     from gliner import GLiNER
@@ -105,7 +105,7 @@ class GLiNERStep(Step):
         tokens_this_batch = 0
         span_list = list(section.sentence_spans)
         start_span_this_batch: CharSpan = span_list[0]
-        end_span_this_batch: CharSpan = start_span_this_batch
+        end_span_this_batch: Optional[CharSpan] = None
         for sent_span in section.sentence_spans:
 
             sentence = section.text[sent_span.start : sent_span.end]
@@ -117,7 +117,10 @@ class GLiNERStep(Step):
                     doc_idx,
                     self.model.config.max_len,
                 )
-            if tokens_this_batch + token_count >= self.max_batch_size:
+            if (
+                tokens_this_batch + token_count >= self.max_batch_size
+                and end_span_this_batch is not None
+            ):
                 yield start_span_this_batch, end_span_this_batch
                 tokens_this_batch = 0
                 start_span_this_batch = sent_span
