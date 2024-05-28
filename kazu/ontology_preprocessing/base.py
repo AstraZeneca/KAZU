@@ -672,7 +672,7 @@ class OntologyParser(ABC):
         self,
     ) -> tuple[set[LinkingCandidate], OntologyMetadata]:
         """Note that the metadata database loading must be handled here, as the call to
-        :meth:`.export_linking_candidates` may depend on it being loaded.
+        ``self._export_linking_candidates`` may depend on it being loaded.
 
         :return:
         """
