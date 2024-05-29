@@ -146,6 +146,34 @@ def initial_lowercase_then_upper_to_case_sensitive(
         return resource
 
 
+class LikelyAcronym(AutoCurationAction):
+    """If all synonyms are less than or equal to the specified length, and are all upper
+    case, give a confidence of POSSIBLE to all forms."""
+
+    def __init__(self, max_len_to_consider: int = 5):
+        self.max_len_to_consider = max_len_to_consider
+
+    def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
+
+        if all(
+            len(syn.text) <= self.max_len_to_consider and syn.text.isupper()
+            for syn in resource.original_synonyms
+        ):
+            return dataclasses.replace(
+                resource,
+                original_synonyms=frozenset(
+                    dataclasses.replace(syn, mention_confidence=MentionConfidence.POSSIBLE)
+                    for syn in resource.original_synonyms
+                ),
+                alternative_synonyms=frozenset(
+                    dataclasses.replace(syn, mention_confidence=MentionConfidence.POSSIBLE)
+                    for syn in resource.alternative_synonyms
+                ),
+            )
+        else:
+            return resource
+
+
 class AutoCurator:
     def __init__(self, actions: list[AutoCurationAction]):
         self.actions = actions

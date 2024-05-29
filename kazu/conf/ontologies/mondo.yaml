@@ -19,6 +19,7 @@ parsers:
       actions:
         - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
           entity_class: ${ontologies.parsers.mondo_parser.entity_class}
+        - _target_: kazu.ontology_preprocessing.autocuration.LikelyAcronym
         - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
           path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
         - _target_: kazu.ontology_preprocessing.autocuration.MinLength
