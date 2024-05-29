@@ -102,7 +102,12 @@ class DisambiguationConfidence(AutoNameEnum):
 @dataclass(frozen=True)
 class CharSpan:
     """A concept similar to a spaCy Span, except is character index based rather than
-    token based."""
+    token based.
+
+    Example: ``text[char_span.start:char_span.end]`` will precisely cover the target.
+    This means that ``text[char_span.end]`` will give the first character **not** in the
+    span.
+    """
 
     start: int
     end: int
