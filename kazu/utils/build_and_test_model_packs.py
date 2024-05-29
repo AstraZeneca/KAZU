@@ -190,7 +190,7 @@ class ModelPackBuilder:
         if self.build_config.run_acceptance_tests:
             self.logger.info("instantiating pipeline for acceptance tests")
             # need to reinstantiate pipeline with modified config.
-            pipeline = instantiate(cfg.Pipeline)
+            pipeline = instantiate(cfg.Pipeline, _convert_="all")
             analyse_full_pipeline(pipeline, docs, acceptance_criteria=acceptance_criteria())
 
     def load_build_configuration(self) -> BuildConfiguration:
@@ -298,7 +298,7 @@ class ModelPackBuilder:
         from kazu.data import Document, PROCESSING_EXCEPTION
 
         self.logger.info("instantiating pipeline for sanity checks")
-        pipeline: Pipeline = instantiate(cfg.Pipeline)
+        pipeline: Pipeline = instantiate(cfg.Pipeline, _convert_="all")
         for test_string in self.build_config.sanity_test_strings:
             doc = Document.create_simple_document(test_string)
             pipeline([doc])
@@ -322,7 +322,7 @@ class ModelPackBuilder:
         global_report_dir = self.model_pack_build_path.joinpath(GLOBAL_CONFLICT_REPORT_DIR)
         global_report_dir.mkdir()
 
-        for parser in instantiate(cfg.ontologies.parsers).values():
+        for parser in instantiate(cfg.ontologies.parsers, _convert_="all").values():
             _, resource_report = parser.populate_metadata_db_and_resolve_string_resources()
             resource_report.write_reports_for_parser(
                 path=global_report_dir, parser_name=parser.name
