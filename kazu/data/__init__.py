@@ -358,7 +358,7 @@ class Entity:
         case 2: non-contiguous entities
 
         text: lung and liver cancer
-        lung cancer -> [CharSpan(0,4), CharSpan(1521
+        lung cancer -> [CharSpan(0,4), CharSpan(15, 21)]
         liver cancer -> [CharSpan(9,21)]
 
         result: is_partially_overlapped -> False (entities are distinct)
