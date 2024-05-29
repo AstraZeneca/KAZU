@@ -960,21 +960,29 @@ class OntologyResourceProcessor:
 
     def _process_resources(self) -> Iterable[OntologyStringResource]:
         for resource in sorted(self.resources, key=self.resource_sort_key):
-            yield self._process_resource_action(resource)
+            maybe_resource = self._process_resource_action(resource)
+            if maybe_resource:
+                yield maybe_resource
 
-    def _process_resource_action(self, resource: OntologyStringResource) -> OntologyStringResource:
+    def _process_resource_action(
+        self, resource: OntologyStringResource
+    ) -> Optional[OntologyStringResource]:
 
         if resource.behaviour is OntologyStringBehaviour.DROP_FOR_LINKING:
             self._drop_linking_candidate(resource.syn_norm_for_linking(self.entity_class))
+            result = None
         elif resource.behaviour is OntologyStringBehaviour.ADD_FOR_LINKING_ONLY:
-            self._attempt_to_add_database_entry_for_resource(
+            result = self._attempt_to_add_database_entry_for_resource(
                 resource,
             )
         elif resource.behaviour is OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING:
-            self._attempt_to_add_database_entry_for_resource(resource)
+            result = self._attempt_to_add_database_entry_for_resource(resource)
         else:
             raise ValueError(f"unknown behaviour for parser {self.parser_name}, {resource}")
-        return resource
+        if result is LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED:
+            return None
+        else:
+            return resource
 
     def _process_global_actions(self) -> None:
         if self.global_actions is None:
@@ -1053,6 +1061,7 @@ class OntologyResourceProcessor:
         resource: OntologyStringResource,
     ) -> Literal[
         LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED,
+        LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
         """Create a new :class:`~kazu.data.LinkingCandidate` for the database, or return
@@ -1098,7 +1107,7 @@ class OntologyResourceProcessor:
                 + " Since no id set was provided, no entry can be created",
                 log_formatting_dict,
             )
-            return LinkingCandidateModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
 
         # resource_associated_id_set is implicitly not None
         assert resource_associated_id_set is not None
@@ -1108,7 +1117,7 @@ class OntologyResourceProcessor:
                 resource,
                 self.parser_name,
             )
-            return LinkingCandidateModificationResult.NO_ACTION
+            return LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
 
         if maybe_existing_linking_candidate is not None:
             log_formatting_dict[
