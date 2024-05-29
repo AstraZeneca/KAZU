@@ -1101,9 +1101,10 @@ class OntologyResourceProcessor:
             )
             return LinkingCandidateModificationResult.NO_ACTION
         elif resource_associated_id_set is None and maybe_existing_linking_candidate is None:
-            logger.error(
+            logger.info(
                 log_prefix
                 + " but syn_norm <%(syn_norm)s> does not exist in synonym database."
+                + " It may have been removed by a global action."
                 + " Since no id set was provided, no entry can be created",
                 log_formatting_dict,
             )
