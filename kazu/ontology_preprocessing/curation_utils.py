@@ -625,6 +625,9 @@ class OntologyStringConflictAnalyser:
                 )
             ):
                 return True
+        for ci_confidences in ci_conf_lookup.values():
+            if len(ci_confidences) > 1:
+                return True
         return False
 
     def merge_human_and_auto_resources(
