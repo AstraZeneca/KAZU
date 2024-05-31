@@ -91,9 +91,15 @@ jobs:
           --zip_model_pack \
           --logging_config_path $KAZU_LOGGING_CONF \
           --model_pack_output_path $MODEL_PACK_BUILD_PATH \
+          --skip_tests \
           --debug
 
           export KAZU_MODEL_PACK=$(echo $MODEL_PACK_BUILD_PATH/kazu_model_pack_public)
+
+          # we now skip the acceptance tests above and run in a separate process here
+          # since we previously had memory issues on the GitHub runners when trying to
+          # do it all in the same process.
+          python $GITHUB_WORKSPACE/.github/workflows/run_acceptance_tests.py
 
           # skip server tests on runner due to low shared memory.
           export SKIP_KAZU_SERVER_TESTS=1
