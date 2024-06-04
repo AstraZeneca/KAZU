@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 - 2024-06-04
+
+
+### Features
+
+- (De)serialization has been greatly improved, simplified, made correct, and given a slightly more compact serialized representation.
+  This does mean there are some small changes in (de)serialization behaviour since the previous release.
+- Curation process has been significantly improved and simplified for the end user, including introducing the `AutoCurator` concept to aid in this. This will enable us to build out better documentation and an interactive tool in future releases, which are currently in draft. Overally, this will greatly simplify upgrading ontology versions, adding curations for a new ontology etc.
+- Datamodel has been substantially revised in a **backwards incompatible** manner to clear up confusing concepts, fix longstanding issues etc.
+- New Zero shot NER model with GLiNER
+
+### Deprecations and Removals
+
+- Remove deprecated `GildaUtils.replace_dashes`. This was superceded by `GildaUtils.split_on_dashes_or_space` and was already deprecated pending removal.
+- Remove deprecated `SpacyToKazuObjectMapper`, as this was renamed to `KazuToSpacyObjectMapper`, and the old name already deprecated pending removal.
+- Remove deprecated `create_phrasematchers_using_curations` method of `OntologyMatcher`. This was renamed to `create_phrasematchers` and was already deprecated pending removal.
+- Rename `Document.json` to `to_json`, and remove optional arguments.
+  The previous name was inconsistent with naming on other classes, as the function signature were parallel to `to_json` methods.
+  The argument `drop_unmapped_ents` had functionality that was duplicated with `DropUnmappedEntityFilter` within the `CleanupStep`,
+  and it made sense to add the `drop_terms` behaviour to a new `LinkingCandidateRemovalCleanupAction` to collect this behaviour together
+  and significantly simplify the Document serialization code.
+- Rename `ParserActions.from_json` and `GlobalParserActions.from_json` to `from_dict`.
+  The previous names were misleading, as the function signature were parallel to the `from_dict` methods on other classes, not to their `from_json` methods.
+- Renamed `SynonymDatabase.add` to `SynonymDatabase.add_parser`, for consistency with `MetadataDatabase.add_parser`.
+
+
 ## 1.5.1 - 2024-01-29
 
 
