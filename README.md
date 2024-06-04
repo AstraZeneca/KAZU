@@ -1,11 +1,15 @@
-![Maturity level-1](https://img.shields.io/badge/Maturity%20Level-ML--1-yellow)
+![Maturity level-1](https://img.shields.io/badge/Maturity%20Level-ML--2-green)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/AstraZeneca/KAZU/main/docs/kazu_logo.png" alt="Kazu - Biomedical NLP Framework" align=middle style="width: 66%;height: auto;"/>
   <br><br>
 </p>
 
+[Find our docs here](https://astrazeneca.github.io/KAZU/index.html)
+
 # Kazu - Biomedical NLP Framework
+
+**Note: the recent 2.0 release has large elements of backwards incompatibility if you are using a custom model pack and curations.**
 
 Welcome to Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
 designed to handle production workloads.
@@ -16,10 +20,7 @@ research contained within are our own, but most of it comes from the community, 
 If you want to use Kazu, please cite our [EMNLP 2022 publication](https://aclanthology.org/2022.emnlp-industry.63)!
 ([**citation link**](https://aclanthology.org/2022.emnlp-industry.63.bib))
 
-[Please click here for the **web live demo** (Swagger UI) from http://kazu.korea.ac.kr/](http://kazu.korea.ac.kr/)
-
 [Please click here for the TinyBERN2 training and evaluation code](https://github.com/dmis-lab/KAZU-NER-module)
-
 
 # Quickstart
 
@@ -82,10 +83,6 @@ def kazu_test(cfg):
 if __name__ == "__main__":
     kazu_test()
 ```
-
-# Documentation
-
-[Find our docs here](https://astrazeneca.github.io/KAZU/index.html)
 
 ## License
 
@@ -156,56 +153,62 @@ Christopher J Mungall, Melissa A Haendel, Peter N Robinson,
 
 The Human Phenotype Ontology in 2021,
 
-Nucleic Acids Research, Volume 49, Issue D1, 8 January 2021, Pages D1207–D1217,
+Nucleic Acids Research, Volume 49, Issue D1, 8 January 2021, Pages D1207–D1217,<br>
 https://doi.org/10.1093/nar/gkaa1043
 
 
 #### OPEN TARGETS
 Open Targets datasets are kindly provided by www.opentargets.org, which are free for commercial use cases <https://platform-docs.opentargets.org/licence>
 
-Ochoa, D. et al. (2021). Open Targets Platform: supporting systematic drug–target identification and prioritisation. Nucleic Acids Research.
+Ochoa, D. et al. (2021). Open Targets Platform: supporting systematic drug–target identification and prioritisation. Nucleic Acids Research.<br>
 https://doi.org/10.1093/nar/gkaa1027
 
 #### STANZA
 
 The Stanza framework:
 
-Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020. Stanza: A Python Natural Language Processing Toolkit for Many Human Languages. In Association for Computational Linguistics (ACL) System Demonstrations. 2020.
+Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020. Stanza: A Python Natural Language Processing Toolkit for Many Human Languages. In Association for Computational Linguistics (ACL) System Demonstrations. 2020.<br>
 https://arxiv.org/abs/2003.07082
 
 Biomedical NLP models are derived from:
 
-Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz.
-Biomedical and Clinical English Model Packages in the Stanza Python NLP Library,
-Journal of the American Medical Informatics Association. 2021.
+Yuhao Zhang, Yuhui Zhang, Peng Qi, Christopher D. Manning, Curtis P. Langlotz.<br>
+Biomedical and Clinical English Model Packages in the Stanza Python NLP Library,<br>
+Journal of the American Medical Informatics Association. 2021.<br>
 https://doi.org/10.1093/jamia/ocab090
 
 #### SCISPACY
 
 Biomedical scispacy models are derived from
 
-Mark Neumann, Daniel King, Iz Beltagy, Waleed Ammar
-ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing
-Proceedings of the 18th BioNLP Workshop and Shared Task
-ACL 2019
+Mark Neumann, Daniel King, Iz Beltagy, Waleed Ammar<br>
+ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing<br>
+Proceedings of the 18th BioNLP Workshop and Shared Task<br>
+ACL 2019<br>
 https://www.aclweb.org/anthology/W19-5034
 
 #### SAPBERT
 
 Kazu uses a distilled form of SAPBERT, from
 
-Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, Nigel Collier
-Self-Alignment Pretraining for Biomedical Entity Representations
-ACL 2021
+Fangyu Liu, Ehsan Shareghi, Zaiqiao Meng, Marco Basaldella, Nigel Collier<br>
+Self-Alignment Pretraining for Biomedical Entity Representations<br>
+ACL 2021<br>
 https://aclanthology.org/2021.naacl-main.334/
+
+#### GLINER
+
+GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.<br>
+Urchade Zaratiana, Nadi Tomeh, Pierre Holat, Thierry Charnois<br>
+https://arxiv.org/abs/2311.08526
 
 #### SETH
 
 Kazu's SethStep uses Py4j to call the SETH mutation finder.
 
-Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).
-[SETH detects and normalizes genetic variants in text](https://pubmed.ncbi.nlm.nih.gov/27256315/)
-Bioinformatics (2016)
+Thomas, P., Rocktäschel, T., Hakenberg, J., Mayer, L., and Leser, U. (2016).<br>
+[SETH detects and normalizes genetic variants in text](https://pubmed.ncbi.nlm.nih.gov/27256315/)<br>
+Bioinformatics (2016)<br>
 http://dx.doi.org/10.1093/bioinformatics/btw234
 
 
@@ -213,7 +216,7 @@ http://dx.doi.org/10.1093/bioinformatics/btw234
 
 Kazu's OpsinStep uses Py4j to call OPSIN: Open Parser for Systematic IUPAC nomenclature.
 
-Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen
-Chemical Name to Structure: OPSIN, an Open Source Solution
-Journal of Chemical Information and Modeling 2011 51 (3), 739-753
+Daniel M. Lowe, Peter T. Corbett, Peter Murray-Rust, and Robert C. Glen<br>
+Chemical Name to Structure: OPSIN, an Open Source Solution<br>
+Journal of Chemical Information and Modeling 2011 51 (3), 739-753<br>
 DOI: [10.1021/ci100384d](https://doi.org/10.1021/ci100384d)
