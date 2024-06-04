@@ -1,0 +1,1 @@
+Curation process has been significantly improved and simplified for the end user, including introducing the `AutoCurator` concept to aid in this. This will enable us to build out better documentation and an interactive tool in future releases, which are currently in draft. Overally, this will greatly simplify upgrading ontology versions, adding curations for a new ontology etc.
