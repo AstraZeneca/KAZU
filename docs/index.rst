@@ -18,6 +18,7 @@ Welcome to Kazu's documentation!
    Kazu Data Model <datamodel>
    Visualising results in Label Studio <label_studio_integration>
    The OntologyParser <ontology_parser>
+   The Kazu Resource Tool <kazu_resource_tool>
    Curating a knowledge base for NER and Linking <curating_a_knowledgebase>
    Scaling with Ray <scaling_kazu>
    Kazu as a WebService <kazu_webservice>
