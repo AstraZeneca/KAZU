@@ -117,7 +117,9 @@ dev = [
   "towncrier>=23.10.0",
   "ray>=1.10.0",
   # required for parsing wikimedia data for disambiguation
-  'mwparserfromhell'
+  'mwparserfromhell',
+  # required for krt
+  'streamlit'
 ]
 
 [build-system]
