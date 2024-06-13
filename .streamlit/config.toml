@@ -1,0 +1,4 @@
+[runner]
+
+postScriptGC = false
+magicEnabled = false
