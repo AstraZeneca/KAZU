@@ -259,4 +259,6 @@ nitpick_ignore = [
     ("py:class", "_regex.Pattern"),
     ("py:class", "urllib3.util.retry.Retry"),
     ("py:class", "gliner.GLiNER"),
+    # no sphinx for streamlit
+    ("py:class", "streamlit.delta_generator.DeltaGenerator"),
 ]

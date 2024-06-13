@@ -273,7 +273,7 @@ The flow of an ontology parser to handling the underlying strings is as follows:
    a :class:`.OntologyResourceSetCompleteReport`,  describing the differences between the old and the new versions. The results
    are then used to supplement the existing :class:`.OntologyStringResource`\s for the new version.
 
-We are working on a simple tool to guide the user through each of these stages, which will be available in a future release.
+To assist with the above, Kazu provides a simple Streamlit tool :ref:`kazu_resource_tool` to help with the curation process.
 
 To explore the other capabilities of the :class:`.OntologyParser`, such as synonym generation and ID filtering, please
 refer to the API documentation.
