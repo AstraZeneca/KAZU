@@ -224,24 +224,6 @@ class ResourceEditor:
         )
 
     @staticmethod
-    def display_synonym_editor(
-        resources: Iterable[OntologyStringResource], parser_name: str
-    ) -> None:
-        """Displays an editor for each synonym in the provided resources.
-
-        Each editor is contained within a bordered container.
-        :param resources:
-        :param parser_name:
-        :return:
-        """
-        for resource in resources:
-            for synonym in resource.all_synonyms():
-                with st.container(border=True):
-                    ResourceEditor._display_synonym_options_container_with_defaults(
-                        resource=resource, synonym=synonym, parser_name=parser_name
-                    )
-
-    @staticmethod
     def _build_parser_lookup(
         resources: Iterable[OntologyStringResource],
     ) -> dict[str, set[OntologyStringResource]]:
