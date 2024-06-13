@@ -129,7 +129,7 @@ def init_discrepancy_manager() -> ResourceDiscrepancyManger:
     return dm
 
 
-def test_resource_manager_sync():
+def test_resource_manager_sync(mock_kazu_disk_cache_on_parsers):
     rm = init_test_resource_manager()
     for parser in rm.parsers.values():
         old_resources = parser.populate_metadata_db_and_resolve_string_resources()[
@@ -146,7 +146,7 @@ def test_resource_manager_sync():
             assert new_resource in rm.resource_to_parsers
 
 
-def test_string_conflict_manager_sync():
+def test_string_conflict_manager_sync(mock_kazu_disk_cache_on_parsers):
     scm = init_test_string_conflict_manager()
     new_resources: set[OntologyStringResource] = set()
     assert len(scm.unresolved_conflicts) == 2
@@ -161,7 +161,7 @@ def test_string_conflict_manager_sync():
     assert new_resources.issubset(scm.manager.resource_to_parsers)
 
 
-def test_discrepancy_manager_sync():
+def test_discrepancy_manager_sync(mock_kazu_disk_cache_on_parsers):
     dm = init_discrepancy_manager()
     new_resources: set[OntologyStringResource] = set()
     assert len(dm.unresolved_discrepancies) == 2
