@@ -116,7 +116,7 @@ class ResourceEditor:
         PlaceholderResource.delete_placeholder()
 
     @staticmethod
-    def display_case_sensitivity_selector(
+    def _display_case_sensitivity_selector(
         row: list[DeltaGenerator],
         row_index: int,
         default_syn: Optional[Synonym],
@@ -142,7 +142,7 @@ class ResourceEditor:
         )
 
     @staticmethod
-    def display_confidence_selector(
+    def _display_confidence_selector(
         row: list[DeltaGenerator],
         row_index: int,
         default_syn: Optional[Synonym],
@@ -180,16 +180,16 @@ class ResourceEditor:
         :param default_syn:
         :return:
         """
-        cs = ResourceEditor.display_case_sensitivity_selector(
+        cs = ResourceEditor._display_case_sensitivity_selector(
             row=row, row_index=0, default_syn=default_syn
         )
-        conf = ResourceEditor.display_confidence_selector(
+        conf = ResourceEditor._display_confidence_selector(
             row=row, row_index=1, default_syn=default_syn
         )
         return cs, conf
 
     @staticmethod
-    def display_synonym_options_container_with_defaults(
+    def _display_synonym_options_container_with_defaults(
         resource: OntologyStringResource, synonym: Synonym, parser_name: str
     ) -> None:
         """Displays a container with the synonym string and selectors for case
@@ -210,7 +210,7 @@ class ResourceEditor:
             synonym=synonym,
             suffix=ResourceEditor.CASE_SELECTOR,
         )
-        ResourceEditor.display_case_sensitivity_selector(
+        ResourceEditor._display_case_sensitivity_selector(
             row=row, row_index=0, default_syn=synonym, key=cs_key
         )
         conf_key = ResourceEditor._get_key(
@@ -219,7 +219,7 @@ class ResourceEditor:
             synonym=synonym,
             suffix=ResourceEditor.CONFIDENCE_SELECTOR,
         )
-        ResourceEditor.display_confidence_selector(
+        ResourceEditor._display_confidence_selector(
             row=row, row_index=1, default_syn=synonym, key=conf_key
         )
 
@@ -237,7 +237,7 @@ class ResourceEditor:
         for resource in resources:
             for synonym in resource.all_synonyms():
                 with st.container(border=True):
-                    ResourceEditor.display_synonym_options_container_with_defaults(
+                    ResourceEditor._display_synonym_options_container_with_defaults(
                         resource=resource, synonym=synonym, parser_name=parser_name
                     )
 
@@ -295,7 +295,7 @@ class ResourceEditor:
                         )
                         for synonym in resource.all_synonyms():
                             with st.container(border=True):
-                                ResourceEditor.display_synonym_options_container_with_defaults(
+                                ResourceEditor._display_synonym_options_container_with_defaults(
                                     resource=resource, synonym=synonym, parser_name=parser_name
                                 )
 
@@ -364,7 +364,7 @@ class ResourceEditor:
                 st.form_submit_button("Submit", on_click=on_click_override, args=args)
             else:
                 st.form_submit_button(
-                    "Submit", on_click=ResourceEditor.submit_form_for_edits, args=(resources,)
+                    "Submit", on_click=ResourceEditor._submit_form_for_edits, args=(resources,)
                 )
 
     @staticmethod
@@ -401,7 +401,7 @@ class ResourceEditor:
             return None
 
     @staticmethod
-    def submit_form_for_edits(resources: set[OntologyStringResource]) -> None:
+    def _submit_form_for_edits(resources: set[OntologyStringResource]) -> None:
         for parser_name, resource_set in ResourceEditor._build_parser_lookup(resources).items():
             for original_resource, new_resource in ResourceEditor.extract_form_data_from_state(
                 parser_name=parser_name, resources=resource_set
@@ -449,7 +449,7 @@ class ResourceEditor:
             yield resource, new_resource
 
     @staticmethod
-    def extract_updated_synonym_data_from_state(
+    def _extract_updated_synonym_data_from_state(
         parser_name: str, resource: OntologyStringResource, synonym: Synonym
     ) -> Synonym:
         conf = st.session_state[
@@ -477,14 +477,14 @@ class ResourceEditor:
         new_originals = set()
         for synonym in resource.original_synonyms:
             new_originals.add(
-                ResourceEditor.extract_updated_synonym_data_from_state(
+                ResourceEditor._extract_updated_synonym_data_from_state(
                     parser_name, resource, synonym
                 )
             )
         new_alts = set()
         for synonym in resource.alternative_synonyms:
             new_alts.add(
-                ResourceEditor.extract_updated_synonym_data_from_state(
+                ResourceEditor._extract_updated_synonym_data_from_state(
                     parser_name, resource, synonym
                 )
             )

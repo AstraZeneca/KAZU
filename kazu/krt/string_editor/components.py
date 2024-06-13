@@ -33,7 +33,7 @@ class StringConflictForm:
     FORM_PICKER = "FORM_PICKER"
 
     @staticmethod
-    def submit_form_for_batch_conflict_resolution(conflicts: Iterable[ResourceConflict]) -> None:
+    def _submit_form_for_batch_conflict_resolution(conflicts: Iterable[ResourceConflict]) -> None:
         for conflict in conflicts:
             logging.info(f"submit form {id(conflict)}")
             if (
@@ -54,7 +54,7 @@ class StringConflictForm:
         del st.session_state[StringConflictForm.DATAFRAME]
 
     @staticmethod
-    def submit_form_for_individual_conflicts(conflicts: Iterable[ResourceConflict]) -> None:
+    def _submit_form_for_individual_conflicts(conflicts: Iterable[ResourceConflict]) -> None:
         for conflict in conflicts:
             logging.info(f"submit form {id(conflict)}")
             if (
@@ -87,7 +87,7 @@ class StringConflictForm:
         del st.session_state[StringConflictForm.DATAFRAME]
 
     @staticmethod
-    def individual_conflict_resolution_form() -> None:
+    def _individual_conflict_resolution_form() -> None:
         row_ids = (
             st.session_state[StringConflictForm.DATAFRAME_SELECTION]
             .get("selection", {})
@@ -105,12 +105,12 @@ class StringConflictForm:
             )
             ResourceEditor.display_resource_editor(
                 resources=resources,
-                on_click_override=StringConflictForm.submit_form_for_individual_conflicts,
+                on_click_override=StringConflictForm._submit_form_for_individual_conflicts,
                 args=([conflict],),
             )
 
     @staticmethod
-    def batch_conflict_resolution_form() -> None:
+    def _batch_conflict_resolution_form() -> None:
         df = st.session_state[StringConflictForm.DATAFRAME]
         resolution_choices = list(CaseConflictResolutionRequest)
         resolution_choices.remove(CaseConflictResolutionRequest.CUSTOM)
@@ -141,7 +141,7 @@ class StringConflictForm:
             disabled = True
         submitted = st.button("submit batch", key="submit_batch", disabled=disabled)
         if submitted:
-            StringConflictForm.submit_form_for_batch_conflict_resolution(conflicts)
+            StringConflictForm._submit_form_for_batch_conflict_resolution(conflicts)
             st.rerun()
 
     @staticmethod
@@ -166,7 +166,7 @@ class StringConflictForm:
             else:
 
                 if st.session_state[StringConflictForm.FORM_PICKER] == "apply to all":
-                    StringConflictForm.batch_conflict_resolution_form()
+                    StringConflictForm._batch_conflict_resolution_form()
                 else:
                     df = st.session_state[StringConflictForm.DATAFRAME]
                     st.dataframe(
@@ -178,7 +178,7 @@ class StringConflictForm:
                         column_config={"conflict": None},
                         key=StringConflictForm.DATAFRAME_SELECTION,
                     )
-                    StringConflictForm.individual_conflict_resolution_form()
+                    StringConflictForm._individual_conflict_resolution_form()
 
     @staticmethod
     def search_and_edit_synonyms_form() -> None:
@@ -189,7 +189,7 @@ class StringConflictForm:
                 maybe_resources = manager.synonym_lookup.get(text.lower())
                 if not maybe_resources:
                     st.write("No existing resources found that contain this string")
-                    StringConflictForm.add_new_resource_form(text)
+                    StringConflictForm._add_new_resource_form(text)
                 else:
                     st.write(
                         "One or more resources already exists for this string. You can edit them here:"
@@ -202,10 +202,10 @@ class StringConflictForm:
                     if mode == "edit existing":
                         ResourceEditor.display_resource_editor(maybe_resources)
                     else:
-                        StringConflictForm.add_new_resource_form(text)
+                        StringConflictForm._add_new_resource_form(text)
 
     @staticmethod
-    def add_new_resource_form(text: str) -> None:
+    def _add_new_resource_form(text: str) -> None:
         ParserSelector.display_parser_selector()
         maybe_parser_name = ParserSelector.get_selected_parser_name()
         if maybe_parser_name:
