@@ -26,6 +26,7 @@ from kazu.ontology_preprocessing.base import (
     OntologyParser,
 )
 from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymGenerator
+from kazu.ontology_preprocessing.curation_utils import dump_ontology_string_resources
 
 TEST_ASSETS_PATH = Path(__file__).parent.joinpath("test_assets")
 
@@ -104,7 +105,7 @@ class DummyParser(OntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[str] = None,
         global_actions: Optional[GlobalParserActions] = None,
-        run_upgrade_report: bool = False,
+        curations_injections: Optional[set[OntologyStringResource]] = None,
     ):
         """
 
@@ -121,13 +122,18 @@ class DummyParser(OntologyParser):
         :param autocurator:
         :param curations_path:
         :param global_actions:
-        :param run_upgrade_report:
+        :param curations_injections: resources to inject into the curations path for testing
         """
         if in_path == "":
             temp_parent = tempfile.mkdtemp()
             in_path = tempfile.mkdtemp(dir=temp_parent)
         elif len(os.listdir(in_path)) != 0:
             raise ValueError("DummyParser used with non-empty directory. This is problematic")
+        assert in_path is not None
+        if curations_injections:
+            curations_path = str(Path(in_path).joinpath("curations").absolute())
+            dump_ontology_string_resources(curations_injections, curations_path)
+
         super().__init__(
             in_path,
             entity_class,
