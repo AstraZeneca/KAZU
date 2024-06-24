@@ -51,3 +51,7 @@ parsers:
           max_len: 60
         - _target_: hydra.utils.get_method
           path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
+    ontology_downloader:
+      _target_: kazu.ontology_preprocessing.downloads.OpenTargetsOntologyDownloader
+      open_targets_version: ${..data_origin}
+      open_targets_dataset_name: diseases
