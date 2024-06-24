@@ -17,7 +17,7 @@ from kazu.data import (
     EquivalentIdSet,
     OntologyStringBehaviour,
 )
-from kazu.krt.utils import get_resource_manager
+from kazu.krt.utils import get_resource_manager, load_config
 
 
 def save() -> None:
@@ -503,19 +503,33 @@ class ParserSelector:
     PARSER_SELECTOR = "PARSER_SELECTOR"
 
     @staticmethod
-    def display_parser_selector(exclude: Optional[set[str]] = None) -> None:
-        manager = get_resource_manager()
-        choices = (
-            manager.parser_to_report.keys()
-            if not exclude
-            else set(manager.parser_to_report.keys()).difference(exclude)
-        )
+    def display_parser_selector(
+        exclude: Optional[set[str]] = None, clear_state: bool = False
+    ) -> None:
+        cfg = load_config()
+        parser_names = set(parser_cfg.name for parser_cfg in cfg.ontologies.parsers.values())
+        choices = parser_names if not exclude else set(parser_names).difference(exclude)
         st.selectbox(
             "SELECT PARSER",
-            options=choices,
+            options=sorted(choices),
             index=None,
+            on_change=ParserSelector.submit_form_and_clear_state
+            if clear_state
+            else ParserSelector.submit_form_and_keep_state,
             key=ParserSelector.PARSER_SELECTOR,
         )
+
+    @staticmethod
+    def submit_form_and_keep_state() -> None:
+        st.session_state[ParserSelector.PARSER_SELECTOR] = st.session_state.get(
+            ParserSelector.PARSER_SELECTOR
+        )
+
+    @staticmethod
+    def submit_form_and_clear_state() -> None:
+        selected_parser = st.session_state.get(ParserSelector.PARSER_SELECTOR)
+        st.session_state.clear()
+        st.session_state[ParserSelector.PARSER_SELECTOR] = selected_parser
 
     @staticmethod
     def get_selected_parser_name() -> Optional[str]:
