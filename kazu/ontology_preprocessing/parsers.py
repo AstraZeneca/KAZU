@@ -222,10 +222,6 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         for json_dict in jsons_gen:
             default_label: str = json_dict["name"]
 
-            # skip top level therapeutic areas
-            if json_dict.get("ontology", {}).get("isTherapeuticArea"):
-                continue
-
             if set(json_dict.get("therapeuticAreas", ())).isdisjoint(
                 self.allowed_therapeutic_areas
             ):
