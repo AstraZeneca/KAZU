@@ -11,6 +11,7 @@ from omegaconf import DictConfig
 from kazu.ontology_preprocessing.base import OntologyParser
 
 
+@st.cache_resource(show_spinner="Loading configuration")
 def load_config() -> DictConfig:
     """Loads the configuration for the ResourceManager instance.
 
