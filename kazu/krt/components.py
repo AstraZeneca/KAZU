@@ -5,6 +5,10 @@ from typing import Iterable, Optional, Any, cast, Callable, Union
 
 import pandas as pd
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
+from streamlit.elements.lib.column_config_utils import ColumnDataKind
+from streamlit.elements.widgets.data_editor import _apply_dataframe_edits
+
 from kazu.data import (
     OntologyStringResource,
     MentionConfidence,
@@ -14,9 +18,6 @@ from kazu.data import (
     OntologyStringBehaviour,
 )
 from kazu.krt.utils import get_resource_manager
-from streamlit.delta_generator import DeltaGenerator
-from streamlit.elements.lib.column_config_utils import ColumnDataKind
-from streamlit.elements.widgets.data_editor import _apply_dataframe_edits
 
 
 def save() -> None:
