@@ -206,7 +206,7 @@ class StringConflictForm:
 
     @staticmethod
     def _add_new_resource_form(text: str) -> None:
-        ParserSelector.display_parser_selector()
+        ParserSelector.display_parser_selector(clear_state=False)
         maybe_parser_name = ParserSelector.get_selected_parser_name()
         if maybe_parser_name:
             parser = get_resource_manager().parsers[maybe_parser_name]
