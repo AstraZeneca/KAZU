@@ -51,6 +51,7 @@ from kazu.ontology_preprocessing.synonym_generation import CombinatorialSynonymG
 from kazu.utils.grouping import sort_then_group
 from kazu.ontology_preprocessing.autocuration import AutoCurator
 from kazu.utils.utils import PathLike
+from kazu.ontology_preprocessing.downloads import OntologyDownloader
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +115,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         """
 
@@ -128,6 +130,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
         :param autocurator:
         :param curations_path:
         :param global_actions:
+        :param: ontology_downloader:
         """
         super().__init__(
             in_path=in_path,
@@ -140,6 +143,7 @@ class OpenTargetsDiseaseOntologyParser(JsonLinesOntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
         self.allowed_therapeutic_areas = set(allowed_therapeutic_areas)
         self.metadata_db = MetadataDatabase()
@@ -289,6 +293,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         """
 
@@ -304,6 +309,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
         :param autocurator:
         :param curations_path:
         :param global_actions:
+        :param ontology_downloader:
         """
         super().__init__(
             in_path=in_path,
@@ -316,6 +322,7 @@ class OpenTargetsTargetOntologyParser(JsonLinesOntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
         self.excluded_biotypes: set[str] = set(excluded_biotypes) if excluded_biotypes else set()
 
@@ -481,6 +488,7 @@ class RDFGraphParser(OntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
         label_predicate: RdfRef = rdflib.RDFS.label,
     ):
         super().__init__(
@@ -494,6 +502,7 @@ class RDFGraphParser(OntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
         if isinstance(uri_regex, re.Pattern):
@@ -639,6 +648,7 @@ class SKOSXLGraphParser(RDFGraphParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
         label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
     ):
         super().__init__(
@@ -657,6 +667,7 @@ class SKOSXLGraphParser(RDFGraphParser):
             global_actions=global_actions,
             label_predicate=label_predicate,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
 
@@ -694,6 +705,7 @@ class GeneOntologyParser(RDFGraphParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -712,6 +724,7 @@ class GeneOntologyParser(RDFGraphParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
         self.instances.add(name)
 
@@ -775,6 +788,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -794,6 +808,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
             ],
             exclude_entity_patterns=[],
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
 
@@ -813,6 +828,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -832,6 +848,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
             ],
             exclude_entity_patterns=[],
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
 
@@ -851,6 +868,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -870,6 +888,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
             ],
             exclude_entity_patterns=[],
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
 
@@ -889,6 +908,7 @@ class UberonOntologyParser(RDFGraphParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
 
         super().__init__(
@@ -906,6 +926,7 @@ class UberonOntologyParser(RDFGraphParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
     def find_kb(self, string: str) -> str:
@@ -987,6 +1008,7 @@ class HGNCGeneOntologyParser(OntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -999,6 +1021,7 @@ class HGNCGeneOntologyParser(OntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1112,6 +1135,7 @@ class CLOOntologyParser(RDFGraphParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1128,6 +1152,7 @@ class CLOOntologyParser(RDFGraphParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1241,6 +1266,7 @@ class MeddraOntologyParser(OntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
         exclude_socs: Iterable[str] = (
             "Surgical and medical procedures",
             "Social circumstances",
@@ -1258,6 +1284,7 @@ class MeddraOntologyParser(OntologyParser):
             global_actions=global_actions,
             name=name,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
         self.exclude_socs = exclude_socs
@@ -1396,6 +1423,7 @@ class CLOntologyParser(RDFGraphParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
 
         super().__init__(
@@ -1415,6 +1443,7 @@ class CLOntologyParser(RDFGraphParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
     def find_kb(self, string: str) -> str:
@@ -1492,6 +1521,7 @@ class TabularOntologyParser(OntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
         **kwargs: Any,
     ):
         """
@@ -1506,6 +1536,7 @@ class TabularOntologyParser(OntologyParser):
         :param autocurator:
         :param curations_path:
         :param global_actions:
+        :param ontology_downloader:
         :param kwargs: passed to pandas.read_csv
         """
         super().__init__(
@@ -1519,6 +1550,7 @@ class TabularOntologyParser(OntologyParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
         self._raw_dataframe: pd.DataFrame = pd.read_csv(self.in_path, **kwargs)
 
@@ -1555,6 +1587,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
         super().__init__(
             in_path=in_path,
@@ -1574,6 +1607,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
             # pandas logs a warning.
             engine="python",
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
     levels_to_ignore = {"1", "2", "3"}
@@ -1623,6 +1657,7 @@ class StatoParser(RDFGraphParser):
         autocurator: Optional[AutoCurator] = None,
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
+        ontology_downloader: Optional[OntologyDownloader] = None,
     ):
 
         super().__init__(
@@ -1640,6 +1675,7 @@ class StatoParser(RDFGraphParser):
             curations_path=curations_path,
             global_actions=global_actions,
             autocurator=autocurator,
+            ontology_downloader=ontology_downloader,
         )
 
     def find_kb(self, string: str) -> str:
