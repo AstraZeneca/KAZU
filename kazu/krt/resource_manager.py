@@ -85,6 +85,24 @@ class ResourceManager:
 
         return len(self.parsers)
 
+    def delete_resource(self, resource: OntologyStringResource, parser_name: str) -> None:
+        """Deletes a resource from the internal state.
+
+        :param resource: The resource to be deleted.
+        :param parser_name: The name of the parser that is handling the resource.
+        :return:
+        """
+
+        for synonym in resource.all_strings():
+            self.synonym_lookup[synonym.lower()].discard(resource)
+
+        self.parser_to_curations[parser_name].discard(resource)
+        # it may have already been popped, or not exist
+        try:
+            self.resource_to_parsers.pop(resource)
+        except KeyError:
+            pass
+
     def sync_resources(
         self,
         original_resource: Optional[OntologyStringResource],
@@ -109,15 +127,7 @@ class ResourceManager:
             # Only do something if the resource has actually changed
             resources_are_equal = original_resource == new_resource
             if not resources_are_equal:
-                for synonym in original_resource.all_strings():
-                    self.synonym_lookup[synonym.lower()].discard(original_resource)
-
-                self.parser_to_curations[parser_name].discard(original_resource)
-                # it may have already been popped, or not exist
-                try:
-                    self.resource_to_parsers.pop(original_resource)
-                except KeyError:
-                    pass
+                self.delete_resource(original_resource, parser_name)
 
         if not original_resource or not resources_are_equal:
             for synonym in new_resource.all_strings():
