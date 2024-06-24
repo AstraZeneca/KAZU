@@ -75,7 +75,9 @@ def create_new_resource_with_updated_synonyms(
     )
 
 
-def resource_to_df(resource: OntologyStringResource) -> pd.DataFrame:
+def resource_to_df(
+    resource: OntologyStringResource, include_behaviour: bool = False
+) -> pd.DataFrame:
     """Convert an :class:`.OntologyStringResource` to a :class:`~pandas.DataFrame` for
     display in Streamlit.
 
@@ -86,6 +88,7 @@ def resource_to_df(resource: OntologyStringResource) -> pd.DataFrame:
     whether the synonym is case sensitive or not.
 
     :param resource:
+    :param include_behaviour: if True, include the behaviour column in the DataFrame
     :return:
     """
     data = [
@@ -105,4 +108,7 @@ def resource_to_df(resource: OntologyStringResource) -> pd.DataFrame:
         )
         for syn in resource.alternative_synonyms
     ]
-    return pd.DataFrame.from_records(data, columns=["type", "text", "confidence", "case_sensitive"])
+    df = pd.DataFrame.from_records(data, columns=["type", "text", "confidence", "case_sensitive"])
+    if include_behaviour:
+        df["behaviour"] = resource.behaviour
+    return df
