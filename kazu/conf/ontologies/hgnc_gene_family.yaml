@@ -29,7 +29,6 @@ parsers:
           path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
     ontology_downloader:
       _target_: kazu.ontology_preprocessing.downloads.SimpleOntologyDownloader
-#      url: ""
       url: |
         http://biomart.genenames.org/martservice/results?query=
         <!DOCTYPE Query><Query client="biomartclient" processor="TSV" limit="-1" header="1">
