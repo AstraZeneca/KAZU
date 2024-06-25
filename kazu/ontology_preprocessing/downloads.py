@@ -108,18 +108,42 @@ class OBOOntologyDownloader(SimpleOntologyDownloader):
 
 
 class OwlOntologyDownloader(SimpleOntologyDownloader):
-    _VERSION_QUERY = """SELECT ?aname
+    """Used when version info is contained within the ontology."""
+
+    _VERSION_INFO_QUERY = """SELECT ?aname
                     WHERE {
+                        ?a rdf:type owl:Ontology .
                         ?a owl:versionInfo ?aname .
                     }"""
 
+    _VERSION_IRI_QUERY = """SELECT ?aname
+                    WHERE {
+                        ?a rdf:type owl:Ontology .
+                        ?a owl:versionIRI ?aname .
+                    }"""
+
     def version(self, local_path: Optional[Path] = None) -> str:
+        """Queries the Ontology for owl:versionInfo. Failing that, queries for
+        owl:versionIRI. If it can't find it, it falls back to the superclass
+        implementation.
+
+        :param local_path:
+        :return:
+        """
         graph = rdflib.Graph().parse(local_path)
-        qres: ResultRow = cast(ResultRow, next(iter((graph.query(self._VERSION_QUERY)))))
-        if len(qres) == 1:
-            return str(qres[0])
+        v_info_result: list[ResultRow] = cast(
+            list[ResultRow], list(graph.query(self._VERSION_INFO_QUERY))
+        )
+        if len(v_info_result) == 1:
+            return str(v_info_result[0][0])
         else:
-            logger.warning("could not determine versionInfo for %s", local_path)
+            v_iri_result: list[ResultRow] = cast(
+                list[ResultRow], list(graph.query(self._VERSION_IRI_QUERY))
+            )
+            if len(v_iri_result) == 1:
+                return str(v_iri_result[0][0])
+            else:
+                logger.warning("could not determine versionInfo for %s", local_path)
             return super().version()
 
 
