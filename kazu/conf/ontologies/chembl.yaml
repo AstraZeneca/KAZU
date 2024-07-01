@@ -5,30 +5,16 @@ indices:
     boolean_scorers: ${StringScorers.number_match_only}
 parsers:
   chembl_parser:
-    _target_: kazu.ontology_preprocessing.parsers.ChemblOntologyParser
-    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_33.db
-    data_origin: '33'
+    _target_: kazu.ontology_preprocessing.parsers.ChemblParquetOntologyParser
+    in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/chembl_34_subset.parquet
+    data_origin: '34'
     name: CHEMBL
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.chemical}
     entity_class: drug
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
     global_actions: ${global_actions}
-    autocurator:
-      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
-      actions:
-        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
-          entity_class: ${ontologies.parsers.chembl_parser.entity_class}
-        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
-          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
-        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
-          min_len: 2
-        - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
-          max_len: 60
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.is_upper_case_word_to_case_insensitive
+    autocurator: ${autocurator.chembl}
     ontology_downloader:
-      _target_: kazu.ontology_preprocessing.downloads.ChemblOntologyDownloader
+      _target_: kazu.ontology_preprocessing.downloads.ChemblParquetOntologyDownloader
       chembl_version: ${..data_origin}

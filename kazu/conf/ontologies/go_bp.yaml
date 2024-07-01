@@ -8,25 +8,13 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.BiologicalProcessGeneOntologyParser
     name: BP_GENE_ONTOLOGY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: '2023-10-09'
+    data_origin: '2024-06-17'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: biological_process
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
     global_actions: ${global_actions}
-    autocurator:
-      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
-      actions:
-        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
-          entity_class: ${ontologies.parsers.go_bp_parser.entity_class}
-        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
-          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
-        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
-          min_len: 2
-        - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
-          max_len: 60
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
+    autocurator: ${autocurator.basic}
     ontology_downloader:
       _target_: kazu.ontology_preprocessing.downloads.OwlOntologyDownloader
       url: http://purl.obolibrary.org/obo/go.owl
