@@ -32,13 +32,18 @@ with st.expander("Description", expanded=True):
 
 
 ParserSelector.display_parser_selector()
-ResourceDiscrepancyResolutionForm.set_autofix_session_state()
 parser_name = ParserSelector.get_selected_parser_name()
 
 if parser_name:
     manager = get_resource_merge_manager_for_parser(parser_name)
+    if ResourceDiscrepancyResolutionForm.state_key(parser_name) not in st.session_state:
+        st.session_state[
+            ResourceDiscrepancyResolutionForm.state_key(parser_name)
+        ] = ResourceDiscrepancyResolutionForm(manager)
+
+    form = st.session_state[ResourceDiscrepancyResolutionForm.state_key(parser_name)]
     with st.container(border=True):
         if manager.summary_df().empty:
             st.write(f"""{len(manager.unresolved_discrepancies)} discrepancies remaining""")
         else:
-            ResourceDiscrepancyResolutionForm.display_main_form(manager)
+            form.display_main_form()
