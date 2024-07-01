@@ -1094,6 +1094,11 @@ class HGNCGeneOntologyParser(OntologyParser):
 class ChemblOntologyParser(OntologyParser):
     """Input is a directory containing an extracted sqllite dump from Chembl.
 
+    .. deprecated:: 2.1.0
+       Use :class:`kazu.ontology_preprocessing.downloads.ChemblParquetOntologyParser` instead.
+       This is deprecated so we don't have to store a large sqlite database file in resources.
+
+
     For example, this can be sourced from:
     https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_33/chembl_33_sqlite.tar.gz.
     """
@@ -1103,7 +1108,7 @@ class ChemblOntologyParser(OntologyParser):
 
     def parse_to_dataframe(self) -> pd.DataFrame:
         conn = sqlite3.connect(self.in_path)
-        query = f"""\
+        query = f"""
             SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
             FROM molecule_dictionary AS md
                      JOIN molecule_synonyms ms ON md.molregno = ms.molregno
@@ -1117,6 +1122,21 @@ class ChemblOntologyParser(OntologyParser):
 
         df.drop_duplicates(inplace=True)
 
+        return df
+
+
+class ChemblParquetOntologyParser(OntologyParser):
+    """Input is a parquet file containing an extracted sqllite dump from Chembl.
+
+    .. note::
+       See :class:`~ChemblParquetOntologyDownloader` for how the extraction is performed.
+    """
+
+    def find_kb(self, string: str) -> str:
+        return "CHEMBL"
+
+    def parse_to_dataframe(self) -> pd.DataFrame:
+        df = pd.read_parquet(self.in_path)
         return df
 
 
