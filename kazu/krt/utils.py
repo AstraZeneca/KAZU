@@ -1,28 +1,12 @@
 import dataclasses
-import os
 
 import pandas as pd
 import streamlit as st
-from hydra import initialize_config_dir, compose
 from hydra.utils import instantiate
 from kazu.data import MentionConfidence, OntologyStringResource
 from kazu.krt.resource_manager import ResourceManager
-from omegaconf import DictConfig
 from kazu.ontology_preprocessing.base import OntologyParser
-
-
-@st.cache_resource(show_spinner="Loading configuration")
-def load_config() -> DictConfig:
-    """Loads the configuration for the ResourceManager instance.
-
-    :return:
-    """
-    conf_dir = os.environ["KAZU_MODEL_PACK"] + "/conf"
-    from kazu.utils.constants import HYDRA_VERSION_BASE
-
-    with initialize_config_dir(version_base=HYDRA_VERSION_BASE, config_dir=str(conf_dir)):
-        cfg = compose(config_name="config", overrides=[])
-        return cfg
+from kazu.krt import load_config
 
 
 @st.cache_resource(show_spinner="Loading parsers")

@@ -9,10 +9,11 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, open_dict, OmegaConf
 
 from kazu.data import OntologyStringResource
-from kazu.krt.utils import load_config, resource_to_df
+from kazu.krt.utils import resource_to_df
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.ontology_preprocessing.curation_utils import dump_ontology_string_resources
 from kazu.ontology_preprocessing.ontology_upgrade_report import OntologyUpgradeReport
+from kazu.krt import load_config
 
 
 class OntologyUpdateManager:
