@@ -3,6 +3,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Optional, Iterable
 
+from hydra.utils import instantiate
 from kazu.data import (
     OntologyStringResource,
 )
@@ -13,6 +14,8 @@ from kazu.ontology_preprocessing.curation_utils import (
     dump_ontology_string_resources,
     OntologyResourceSetCompleteReport,
 )
+from kazu.pipeline import Pipeline
+from kazu.krt import load_config
 
 
 class ResourceManager:
@@ -37,6 +40,7 @@ class ResourceManager:
         # parser to report
         self.parser_to_report: dict[str, OntologyResourceSetCompleteReport] = {}
         self.parsers: dict[str, OntologyParser] = {}
+        self.parser_cache_invalid: set[str] = set()
 
         for parser in parsers:
             self.parsers[parser.name] = parser
@@ -128,6 +132,7 @@ class ResourceManager:
             resources_are_equal = original_resource == new_resource
             if not resources_are_equal:
                 self.delete_resource(original_resource, parser_name)
+                self.parser_cache_invalid.add(parser_name)
 
         if not original_resource or not resources_are_equal:
             for synonym in new_resource.all_strings():
@@ -135,6 +140,7 @@ class ResourceManager:
 
             self.parser_to_curations[parser_name].add(new_resource)
             self.resource_to_parsers[new_resource].add(parser_name)
+            self.parser_cache_invalid.add(parser_name)
 
     def save(self) -> Iterable[str]:
         """Saves updated resources to the model pack.
@@ -146,3 +152,19 @@ class ResourceManager:
             path = self.parser_to_path[parser_name]
             yield f"Saving updated resources to {path}"
             dump_ontology_string_resources(curation_set, path, force=True)
+
+    @staticmethod
+    def _load_pipeline() -> Pipeline:
+        load_config.clear()  # type: ignore[attr-defined]
+        cfg = load_config()
+        pipeline: Pipeline = instantiate(cfg.Pipeline)
+        return pipeline
+
+    def load_cache_state_aware_pipeline(self) -> Pipeline:
+        for parser_name in set(self.parser_cache_invalid):
+            parser = self.parsers[parser_name]
+            logging.info("clearing invalid cache for %s", parser_name)
+            parser.clear_cache()
+            self.parser_cache_invalid.discard(parser_name)
+
+        return self._load_pipeline()
