@@ -1,10 +1,7 @@
-from typing import cast
-
 import streamlit as st
 from kazu.data import MentionConfidence
 from kazu.krt.components import (
     ResourceEditor,
-    ParserSelector,
 )
 from kazu.krt.resource_discrepancy_editor.utils import (
     SynonymDiscrepancy,
@@ -40,78 +37,71 @@ class ResourceDiscrepancyResolutionForm:
     """
 
     ATTEMPT_AUTOFIX = "ATTEMPT_AUTOFIX"
-    AUTOFIX_ALREADY_ATTEMPTED = "AUTOFIX_ALREADY_ATTEMPTED"
+
+    def __init__(self, manager: ResourceDiscrepancyManger):
+        self.manager = manager
+        self.autofix_already_attempted = False
 
     @staticmethod
-    def display_main_form(manager: ResourceDiscrepancyManger) -> None:
+    def state_key(parser_name: str) -> str:
+        return f"{ResourceDiscrepancyResolutionForm.__name__}{parser_name}"
+
+    def display_main_form(self) -> None:
         """Display the main form for resolving resource discrepancies.
 
-        :param manager:
         :return:
         """
         st.write("select a row to resolve a discrepancy")
         event = st.dataframe(
-            manager.summary_df(),
+            self.manager.summary_df(),
             use_container_width=True,
             selection_mode="single-row",
             on_select="rerun",
             hide_index=True,
             column_config={"id": None},
         )
-        if not ResourceDiscrepancyResolutionForm._autofix_has_been_attempted():
-            ResourceDiscrepancyResolutionForm._display_attempt_autofix_button()
-            ResourceDiscrepancyResolutionForm._run_autofix_if_requested(manager)
+        if not self.autofix_already_attempted:
+            self._display_attempt_autofix_button()
+            self._run_autofix_if_requested()
 
         for row_id in event.get("selection", {}).get("rows", []):
-            ResourceDiscrepancyResolutionForm._display_discrepancy_form_for_selected_index(
-                index=row_id, manager=manager
-            )
+            self._display_discrepancy_form_for_selected_index(index=row_id)
 
-    @staticmethod
-    def _reset_form() -> None:
+    def _reset_form(self) -> None:
         """Reset the form by setting the AUTOFIX_ALREADY_ATTEMPTED session state to
         False."""
-        st.session_state[ResourceDiscrepancyResolutionForm.AUTOFIX_ALREADY_ATTEMPTED] = False
+        self.autofix_already_attempted = False
 
-    @staticmethod
-    def _display_attempt_autofix_button() -> None:
+    def _display_attempt_autofix_button(self) -> None:
         """Display a button for the user to attempt to autofix discrepancies.
 
         The button is disabled if autofix has already been attempted.
         """
         st.button(
             "Attempt to Autofix discrepancies",
-            key=ResourceDiscrepancyResolutionForm.ATTEMPT_AUTOFIX,
-            disabled=st.session_state[ResourceDiscrepancyResolutionForm.AUTOFIX_ALREADY_ATTEMPTED],
+            key=ResourceDiscrepancyResolutionForm.get_attempt_autofix_key(self.manager.parser_name),
+            disabled=self.autofix_already_attempted,
         )
 
     @staticmethod
-    def _run_autofix_if_requested(manager: ResourceDiscrepancyManger) -> None:
+    def get_attempt_autofix_key(parser_name: str) -> str:
+        return f"{ResourceDiscrepancyResolutionForm.ATTEMPT_AUTOFIX}_{parser_name}"
+
+    def _run_autofix_if_requested(self) -> None:
         """If the user has requested to run autofix, apply autofix to all resources and
         rerun the script.
 
-        :param manager:
         :return:
         """
-        if st.session_state.get(ResourceDiscrepancyResolutionForm.ATTEMPT_AUTOFIX):
-            manager.apply_autofix_to_all()
-            st.session_state[ResourceDiscrepancyResolutionForm.AUTOFIX_ALREADY_ATTEMPTED] = True
+        if st.session_state.get(
+            ResourceDiscrepancyResolutionForm.get_attempt_autofix_key(self.manager.parser_name)
+        ):
+            self.manager.apply_autofix_to_all()
+            self.autofix_already_attempted = True
             st.rerun()
 
-    @staticmethod
-    def set_autofix_session_state() -> None:
-        if ResourceDiscrepancyResolutionForm.AUTOFIX_ALREADY_ATTEMPTED not in st.session_state:
-            st.session_state[ResourceDiscrepancyResolutionForm.AUTOFIX_ALREADY_ATTEMPTED] = False
-
-    @staticmethod
-    def _autofix_has_been_attempted() -> bool:
-        return cast(
-            bool, st.session_state[ResourceDiscrepancyResolutionForm.AUTOFIX_ALREADY_ATTEMPTED]
-        )
-
-    @staticmethod
     def _submit_form_batch(
-        conf: MentionConfidence, cs: bool, conflict: SynonymDiscrepancy, index: int
+        self, conf: MentionConfidence, cs: bool, conflict: SynonymDiscrepancy, index: int
     ) -> None:
         """Submit the form to resolve a discrepancy.
 
@@ -126,67 +116,55 @@ class ResourceDiscrepancyResolutionForm:
         new_resource = create_new_resource_with_updated_synonyms(
             new_conf=conf, new_cs=cs, resource=conflict.auto_resource
         )
-        parser_name = ParserSelector.get_selected_parser_name()
-        if parser_name:
-            flow = get_resource_merge_manager_for_parser(parser_name)
-            assert flow is not None
-            flow.commit(
-                original_human_resource=conflict.human_resource,
-                new_resource=new_resource,
-                index=index,
-            )
-            ResourceDiscrepancyResolutionForm._reset_form()
+        self.manager.commit(
+            original_human_resource=conflict.human_resource,
+            new_resource=new_resource,
+            index=index,
+        )
+        self._reset_form()
 
-    @staticmethod
-    def _submit_form_individual(discrepancy: SynonymDiscrepancy, index: int) -> None:
+    def _submit_form_individual(self, discrepancy: SynonymDiscrepancy, index: int) -> None:
         """Submit the form to resolve a discrepancy with individual edits.
 
         :param discrepancy:
         :param index:
         :return:
         """
-        parser_name = ParserSelector.get_selected_parser_name()
-        assert parser_name is not None
-        flow = get_resource_merge_manager_for_parser(parser_name)
-        assert flow is not None
+
         for _, new_resource in ResourceEditor.extract_form_data_from_state(
-            parser_name=parser_name, resources={discrepancy.auto_resource}
+            parser_name=self.manager.parser_name, resources={discrepancy.auto_resource}
         ):
 
-            flow.commit(
+            self.manager.commit(
                 original_human_resource=discrepancy.human_resource,
                 new_resource=new_resource,
                 index=index,
             )
-            ResourceDiscrepancyResolutionForm._reset_form()
+            self._reset_form()
 
-    @staticmethod
-    def _display_discrepancy_form_for_selected_index(
-        index: int, manager: ResourceDiscrepancyManger
-    ) -> None:
+    def _display_discrepancy_form_for_selected_index(self, index: int) -> None:
         """Display the discrepancy form for the selected index.
 
         :param index:
-        :param manager:
         :return:
         """
-        discrepancy = manager.unresolved_discrepancies[index]
+        discrepancy = self.manager.unresolved_discrepancies[index]
         st.write(discrepancy.dataframe())
         form = st.radio("select a form", options=["apply to all", "edit individual"])
         if form == "apply to all":
-            ResourceDiscrepancyResolutionForm._display_batch_edit_form(discrepancy, index)
+            self._display_batch_edit_form(discrepancy, index)
         else:
             ResourceEditor.display_resource_editor(
                 resources={discrepancy.auto_resource},
                 on_click_override=ResourceDiscrepancyResolutionForm._submit_form_individual,
                 args=(
+                    self,
                     discrepancy,
                     index,
                 ),
             )
 
-    @staticmethod
-    def _display_batch_edit_form(discrepancy: SynonymDiscrepancy, index: int) -> None:
+    def _display_batch_edit_form(self, discrepancy: SynonymDiscrepancy, index: int) -> None:
         """Display the batch edit form for the given discrepancy.
 
         :param discrepancy:
@@ -206,6 +184,7 @@ class ResourceDiscrepancyResolutionForm:
                 "Submit",
                 on_click=ResourceDiscrepancyResolutionForm._submit_form_batch,
                 args=(
+                    self,
                     conf,
                     cs,
                     discrepancy,
