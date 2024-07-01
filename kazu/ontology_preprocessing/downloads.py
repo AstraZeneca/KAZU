@@ -50,22 +50,6 @@ def _cached_request(url: str, local_path: Path) -> None:
                 f.write(chunk)
 
 
-@functools.cache
-def _cached_wget(full_url: str, cwd: Path) -> None:
-    subprocess.run(
-        [
-            "wget",
-            "--recursive",
-            "--no-parent",
-            "--no-host-directories",
-            "--cut-dirs",
-            "8",
-            full_url,
-        ],
-        cwd=cwd,
-    )
-
-
 class OntologyDownloader(abc.ABC):
     @abc.abstractmethod
     def download(self, local_path: Path, skip_download: bool = False) -> Path:
@@ -238,10 +222,26 @@ class OpenTargetsOntologyDownloader(OntologyDownloader):
         self.open_targets_dataset_name = open_targets_dataset_name
         self.open_targets_version = open_targets_version
 
+    @staticmethod
+    @functools.cache
+    def _cached_wget(full_url: str, cwd: Path) -> None:
+        args = _get_proxy_args_for_wget()
+        args.extend(
+            [
+                "--recursive",
+                "--no-parent",
+                "--no-host-directories",
+                "--cut-dirs",
+                "8",
+                full_url,
+            ]
+        )
+        subprocess.run(args, cwd=cwd)
+
     def download(self, local_path: Path, skip_download: bool = False) -> Path:
         if not skip_download:
             full_url = f"{self.OT_PREFIX}{self.open_targets_version}/output/etl/json/{self.open_targets_dataset_name}"
-            _cached_wget(full_url, local_path.parent)
+            OpenTargetsOntologyDownloader._cached_wget(full_url, local_path.parent)
         return local_path
 
     def version(self, local_path: Optional[Path] = None) -> str:
