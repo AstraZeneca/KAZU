@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Iterable
 
 import pandas as pd
 from kazu.data import OntologyStringResource
@@ -103,7 +103,9 @@ class ResourceDiscrepancyManger:
                 SynonymDiscrepancy(human_resource=human_curation, auto_resource=autocuration)
                 for human_curation, autocuration in report.merge_report.resources_with_discrepancies
             )
+            self._build_discrepancy_lookup(todo)
 
+    def _build_discrepancy_lookup(self, todo: Iterable[SynonymDiscrepancy]) -> None:
         self.unresolved_discrepancies: dict[int, SynonymDiscrepancy] = {
             i: discrepancy for i, discrepancy in enumerate(todo)
         }
@@ -124,6 +126,8 @@ class ResourceDiscrepancyManger:
                     parser_name=self.parser_name,
                 )
                 self.unresolved_discrepancies.pop(i)
+        # need to recalculate lookup as UI indices no longer valid
+        self._build_discrepancy_lookup(self.unresolved_discrepancies.values())
 
     def commit(
         self,
@@ -144,6 +148,7 @@ class ResourceDiscrepancyManger:
             parser_name=self.parser_name,
         )
         self.unresolved_discrepancies.pop(index)
+        self._build_discrepancy_lookup(self.unresolved_discrepancies.values())
 
     def summary_df(self) -> pd.DataFrame:
         """Returns a :class:`pandas.DataFrame` summarizing the unresolved discrepancies.
