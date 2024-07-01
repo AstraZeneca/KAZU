@@ -17,7 +17,8 @@ from kazu.data import (
     EquivalentIdSet,
     OntologyStringBehaviour,
 )
-from kazu.krt.utils import get_resource_manager, load_config
+from kazu.krt.utils import get_resource_manager
+from kazu.krt import load_config
 
 
 def save() -> None:
