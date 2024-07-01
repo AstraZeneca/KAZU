@@ -14,21 +14,7 @@ parsers:
     entity_class: drug
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
     global_actions: ${global_actions}
-    autocurator:
-      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
-      actions:
-        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
-          entity_class: ${ontologies.parsers.ot_molecule_parser.entity_class}
-        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
-          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
-        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
-          min_len: 2
-        - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
-          max_len: 60
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.is_upper_case_word_to_case_insensitive
+    autocurator: ${autocurator.chembl}
     ontology_downloader:
       _target_: kazu.ontology_preprocessing.downloads.OpenTargetsOntologyDownloader
       open_targets_version: ${..data_origin}

@@ -24,20 +24,7 @@ parsers:
             value: 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
           mod: '+'
         - 'http://purl.obolibrary.org/obo/HP_0000118'
-    autocurator:
-      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
-      actions:
-        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
-          entity_class: ${ontologies.parsers.hpo_parser.entity_class}
-        - _target_: kazu.ontology_preprocessing.autocuration.LikelyAcronym
-        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
-          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
-        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
-          min_len: 2
-        - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
-          max_len: 60
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
+    autocurator: ${autocurator.basic}
     ontology_downloader:
       _target_: kazu.ontology_preprocessing.downloads.OwlOntologyDownloader
       url: https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp-full.owl

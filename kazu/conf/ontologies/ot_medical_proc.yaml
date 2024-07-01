@@ -8,7 +8,7 @@ parsers:
     name: OPENTARGETS_MEDICAL_PROC
     _target_: kazu.ontology_preprocessing.parsers.OpenTargetsDiseaseOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
-    data_origin: '23.09'
+    data_origin: '24.06'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: medical_procedure
@@ -16,20 +16,7 @@ parsers:
     global_actions: ${global_actions}
     allowed_therapeutic_areas:
       - 'EFO_0002571'
-    autocurator:
-      _target_: kazu.ontology_preprocessing.autocuration.AutoCurator
-      actions:
-        - _target_: kazu.ontology_preprocessing.autocuration.SymbolicToCaseSensitiveAction
-          entity_class: ${ontologies.parsers.ot_med_proc_parser.entity_class}
-        - _target_: kazu.ontology_preprocessing.autocuration.LikelyAcronym
-        - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
-          path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
-        - _target_: kazu.ontology_preprocessing.autocuration.MinLength
-          min_len: 2
-        - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
-          max_len: 60
-        - _target_: hydra.utils.get_method
-          path: kazu.ontology_preprocessing.autocuration.initial_lowercase_then_upper_to_case_sensitive
+    autocurator: ${autocurator.basic}
     ontology_downloader:
       _target_: kazu.ontology_preprocessing.downloads.OpenTargetsOntologyDownloader
       open_targets_version: ${..data_origin}
