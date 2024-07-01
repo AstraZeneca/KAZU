@@ -5,17 +5,36 @@ import functools
 import logging
 import os
 import re
-import shutil
 import sqlite3
 import subprocess
 from pathlib import Path
 from typing import Optional, cast
 
+import pandas as pd
 import rdflib
 import requests
 from rdflib.query import ResultRow
 
+from kazu.ontology_preprocessing.constants import IDX, DEFAULT_LABEL, MAPPING_TYPE, SYN
+
 logger = logging.getLogger(__name__)
+
+
+def _get_proxy_args_for_wget() -> list[str]:
+    http_proxy = os.getenv("HTTP_PROXY")
+    https_proxy = os.getenv("HTTPS_PROXY")
+    args = ["wget"]
+    proxy_args = []
+    if http_proxy:
+        proxy_args.append(f"-e http_proxy={http_proxy}")
+    if https_proxy:
+        proxy_args.append(f"-e https_proxy={https_proxy}")
+
+    if proxy_args:
+        args.append("-e use_proxy=yes")
+        args.extend(proxy_args)
+
+    return args
 
 
 @functools.cache
@@ -147,9 +166,21 @@ class OwlOntologyDownloader(SimpleOntologyDownloader):
             return super().version()
 
 
-class ChemblOntologyDownloader(OntologyDownloader):
+class ChemblParquetOntologyDownloader(OntologyDownloader):
 
     CHEMBL_TEMPLATE = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_%s/chembl_%s_sqlite.tar.gz"
+
+    CHEMBL_QUERY = f"""SELECT DISTINCT * FROM (
+                        SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, synonyms AS {SYN}, syn_type AS {MAPPING_TYPE}
+                        FROM molecule_dictionary AS md
+                            JOIN molecule_synonyms ms ON md.molregno = ms.molregno
+                        UNION ALL
+                        SELECT chembl_id AS {IDX}, pref_name AS {DEFAULT_LABEL}, pref_name AS {SYN}, 'pref_name' AS {MAPPING_TYPE}
+                        FROM molecule_dictionary) as t1
+                    WHERE t1.DEFAULT_LABEL is not null;
+                    """
+
+    CHEMBL_FILENAME_TEMPLATE = "chembl_%s_subset.parquet"
 
     def __init__(self, chembl_version: str):
         self.chembl_version = chembl_version
@@ -159,50 +190,37 @@ class ChemblOntologyDownloader(OntologyDownloader):
         # since cheml comes as a zip, we use the parent path to extract it
         parent_path = local_path.parent
         chembl_zip_path = parent_path.joinpath(chembl_url.split("/")[-1])
+        if chembl_zip_path.exists() or skip_download:
+            logger.info(
+                "chembl db already exists %s or skip_download specified, skipping download",
+                chembl_zip_path,
+            )
+        else:
+
+            logger.info("downloading chembl %s", self.chembl_version)
+
+            args = _get_proxy_args_for_wget()
+            args.append(chembl_url)
+            subprocess.run(
+                args,
+                cwd=parent_path,
+            )
+
         chembl_unzip_path = parent_path.joinpath(f"chembl_{self.chembl_version}")
         chembl_db_path = chembl_unzip_path.joinpath(
             f"chembl_{self.chembl_version}_sqlite"
         ).joinpath(f"chembl_{self.chembl_version}.db")
-        new_path = parent_path.joinpath(chembl_db_path.name)
-        if not skip_download:
-            logger.info("downloading chembl %s", self.chembl_version)
-            subprocess.run(
-                ["wget", chembl_url],
-                cwd=parent_path,
-            )
+        if chembl_db_path.exists():
+            logger.info("chembl db already exists %s, skipping extraction", chembl_db_path)
+        else:
             logger.info("extracting chembl DB")
             subprocess.run(["tar", "-xvzf", str(chembl_zip_path.absolute())], cwd=parent_path)
-            os.remove(chembl_zip_path)
-            # move it to the parent
-            shutil.move(chembl_db_path, new_path)
 
-            conn = sqlite3.connect(new_path)
-            LIST_TABLES = """SELECT
-                name
-            FROM
-                sqlite_schema
-            WHERE
-                type ='table' AND
-                name NOT LIKE 'sqlite_%';"""
-            cur = conn.cursor()
-            tables = cur.execute(LIST_TABLES)
-            logger.info("removing superfluous chembl tables to save space")
-            for table_tup in tables.fetchall():
-                table_name = table_tup[0]
-                if table_name not in {
-                    "molecule_atc_classification",
-                    "molecule_dictionary",
-                    "molecule_hierarchy",
-                    "molecule_synonyms",
-                }:
-                    logger.info("dropping table %s", table_name)
-                    conn.execute(f"DROP TABLE {table_name}")
-            cur.close()
-            logger.info("running sqllite VACUUM")
-            conn = sqlite3.connect(chembl_db_path, isolation_level=None)
-            conn.execute("VACUUM")
-            conn.close()
-        return new_path
+        out_path = parent_path.joinpath(self.CHEMBL_FILENAME_TEMPLATE % self.chembl_version)
+        df = pd.read_sql(self.CHEMBL_QUERY, sqlite3.connect(chembl_db_path))
+        df.to_parquet(out_path)
+
+        return out_path
 
     def version(self, local_path: Optional[Path] = None) -> str:
         return self.chembl_version
