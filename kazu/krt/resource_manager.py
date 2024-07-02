@@ -153,6 +153,8 @@ class ResourceManager:
             yield f"Saving updated resources to {path}"
             dump_ontology_string_resources(curation_set, path, force=True)
 
+        self.clear_invalid_caches()
+
     @staticmethod
     def _load_pipeline() -> Pipeline:
         load_config.clear()  # type: ignore[attr-defined]
@@ -160,11 +162,13 @@ class ResourceManager:
         pipeline: Pipeline = instantiate(cfg.Pipeline)
         return pipeline
 
-    def load_cache_state_aware_pipeline(self) -> Pipeline:
+    def clear_invalid_caches(self) -> None:
         for parser_name in set(self.parser_cache_invalid):
             parser = self.parsers[parser_name]
             logging.info("clearing invalid cache for %s", parser_name)
             parser.clear_cache()
             self.parser_cache_invalid.discard(parser_name)
 
+    def load_cache_state_aware_pipeline(self) -> Pipeline:
+        self.clear_invalid_caches()
         return self._load_pipeline()
