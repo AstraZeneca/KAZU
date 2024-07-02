@@ -34,14 +34,15 @@ class OntologyUpdateManager:
     def get_downloader_args_and_vals(self) -> dict[str, Any]:
         """Get the arguments and their values of the configured
         :class:`kazu.ontology_preprocessing.downloads.OntologyDownloader` class."""
-        x = dict(self.original_parser_cfg.ontology_downloader)
-        x.pop("_target_")
-        return x
+        configured_args_dict = dict(self.original_parser_cfg.ontology_downloader)
+        # remove target as it is not an argument
+        configured_args_dict.pop("_target_")
+        return configured_args_dict
 
     def display_new_parser_config_as_yaml(self) -> str:
         return OmegaConf.to_yaml(self.new_parser_cfg)
 
-    def display_downloader_new_parser_config_as_yaml(self) -> str:
+    def display_new_downloader_config_as_yaml(self) -> str:
         return OmegaConf.to_yaml(self.new_parser_cfg.ontology_downloader)
 
     @staticmethod
