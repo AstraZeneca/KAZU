@@ -116,7 +116,7 @@ class OntologyUpdateForm:
                     st.markdown("### new downloader yaml config is as follows:")
                     st.markdown(
                         f"""```yaml
-                    {manager.display_downloader_new_parser_config_as_yaml()}```"""
+                    {manager.display_new_downloader_config_as_yaml()}```"""
                     )
                     OntologyUpdateForm.display_download_form(manager)
                 if OntologyUpdateForm.get_download_completed_or_skipped(parser_name):
