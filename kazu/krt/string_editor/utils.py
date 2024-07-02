@@ -157,7 +157,7 @@ class ResourceConflictManager:
             case_conflicts,
             _,
         ) = OntologyStringConflictAnalyser.check_for_case_conflicts_across_resources(
-            resources  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
+            resources, strict=True  # type: ignore[arg-type]  # dict_keys isn't a subtype of builtin set
         )
         unresolved_conflicts = set()
         for conflict_set in case_conflicts:
