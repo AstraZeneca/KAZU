@@ -79,6 +79,10 @@ class OntologyDownloader(abc.ABC):
         known a priori). If this is not the case, you can implement a method here to do
         something more sophisticated, such as querying the ontology directly via sparql.
 
+        Alternatively, it may only be known prior to calling the download method. In
+        this case, implementations should store the version as a field, so it can be
+        returned from there.
+
         :param local_path: the path to the ontology
         :return: the version of the ontology
         """
@@ -151,6 +155,7 @@ class OwlOntologyDownloader(SimpleOntologyDownloader):
 
 
 class ChemblParquetOntologyDownloader(OntologyDownloader):
+    """Downloads the ChEMBL database and exports a subset of it as a parquet file."""
 
     CHEMBL_TEMPLATE = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_%s/chembl_%s_sqlite.tar.gz"
 

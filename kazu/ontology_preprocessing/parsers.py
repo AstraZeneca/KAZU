@@ -1095,7 +1095,7 @@ class ChemblOntologyParser(OntologyParser):
     """Input is a directory containing an extracted sqllite dump from Chembl.
 
     .. deprecated:: 2.1.0
-       Use :class:`kazu.ontology_preprocessing.downloads.ChemblParquetOntologyParser` instead.
+       Use :class:`kazu.ontology_preprocessing.parsers.ChemblParquetOntologyParser` instead.
        This is deprecated so we don't have to store a large sqlite database file in resources.
 
 
@@ -1129,7 +1129,7 @@ class ChemblParquetOntologyParser(OntologyParser):
     """Input is a parquet file containing an extracted sqllite dump from Chembl.
 
     .. note::
-       See :class:`~ChemblParquetOntologyDownloader` for how the extraction is performed.
+       See :class:`kazu.ontology_preprocessing.downloads.ChemblParquetOntologyDownloader` for how the extraction is performed.
     """
 
     def find_kb(self, string: str) -> str:
