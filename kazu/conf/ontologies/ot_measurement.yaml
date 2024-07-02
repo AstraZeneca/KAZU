@@ -8,7 +8,7 @@ parsers:
     name: OPENTARGETS_MEASUREMENT
     _target_: kazu.ontology_preprocessing.parsers.OpenTargetsDiseaseOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
-    data_origin: '23.09'
+    data_origin: '24.06'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: measurement

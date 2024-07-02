@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.OpenTargetsMoleculeOntologyParser
     name: OPENTARGETS_MOLECULE
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/molecule
-    data_origin: '23.09'
+    data_origin: '24.06'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.chemical}
     entity_class: drug
