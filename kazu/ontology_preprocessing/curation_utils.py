@@ -423,7 +423,7 @@ class OntologyStringConflictAnalyser:
 
     @staticmethod
     def check_for_case_conflicts_across_resources(
-        resources: set[OntologyStringResource],
+        resources: set[OntologyStringResource], strict: bool = False
     ) -> tuple[set[frozenset[OntologyStringResource]], set[OntologyStringResource]]:
         """Find conflicts in case sensitivity within a set of resources.
 
@@ -432,6 +432,7 @@ class OntologyStringConflictAnalyser:
         of equal or higher rank than a case-sensitive one.
 
         :param resources:
+        :param strict: if True, then the function will return True if there are any conflicts in case sensitivity, regardless of the mention confidence
         :return: a set of conflicted subsets, and a set of clean resources.
         """
 
@@ -440,12 +441,13 @@ class OntologyStringConflictAnalyser:
         )
 
         return OntologyStringConflictAnalyser.find_case_conflicts(
-            maybe_good_resources_by_active_syn_lower
+            maybe_good_resources_by_active_syn_lower, strict=strict
         )
 
     @staticmethod
     def find_case_conflicts(
-        maybe_good_resources_by_active_syn_lower: defaultdict[str, set[OntologyStringResource]]
+        maybe_good_resources_by_active_syn_lower: defaultdict[str, set[OntologyStringResource]],
+        strict: bool = False,
     ) -> tuple[set[frozenset[OntologyStringResource]], set[OntologyStringResource]]:
         all_conflicts = set()
         case_conflict_subsets = set()
@@ -453,7 +455,7 @@ class OntologyStringConflictAnalyser:
         for potential_conflict_set in maybe_good_resources_by_active_syn_lower.values():
 
             if OntologyStringConflictAnalyser._resource_set_has_case_conflicts(
-                potential_conflict_set
+                potential_conflict_set, strict
             ):
                 # uh ho - we have multiple identical synonyms attached to different resources
                 case_conflict_subsets.add(frozenset(potential_conflict_set))
@@ -572,7 +574,9 @@ class OntologyStringConflictAnalyser:
         return resources_by_syn_norm
 
     @staticmethod
-    def _resource_set_has_case_conflicts(resources: set[OntologyStringResource]) -> bool:
+    def _resource_set_has_case_conflicts(
+        resources: set[OntologyStringResource], strict: bool = False
+    ) -> bool:
         """Checks for case conflicts in a set of :class:`.OntologyStringResource`\\ s.
 
         Intended behaviour is to allow different cases to produce different
@@ -600,6 +604,7 @@ class OntologyStringConflictAnalyser:
         "Egfr" -> ci and POSSIBLE
 
         :param resources:
+        :param strict: if True, then the function will return True if there are any conflicts in case sensitivity, regardless of the mention confidence
         :return:
         """
         cs_conf_lookup = defaultdict(set)
@@ -623,6 +628,7 @@ class OntologyStringConflictAnalyser:
                     and len(cs_confidences) > 0
                     and min(cs_confidences) <= min(ci_confidences)
                 )
+                or ((len(ci_confidences) + len(cs_confidences)) > 1 and strict)
             ):
                 return True
         for ci_confidences in ci_conf_lookup.values():
