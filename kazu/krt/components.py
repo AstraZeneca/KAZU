@@ -522,13 +522,11 @@ class ParserSelector:
 
     @staticmethod
     def submit_form_and_keep_state() -> None:
-        st.session_state[ParserSelector.PARSER_SELECTOR] = st.session_state.get(
-            ParserSelector.PARSER_SELECTOR
-        )
+        st.session_state[ParserSelector.PARSER_SELECTOR] = ParserSelector.get_selected_parser_name()
 
     @staticmethod
     def submit_form_and_clear_state() -> None:
-        selected_parser = st.session_state.get(ParserSelector.PARSER_SELECTOR)
+        selected_parser = ParserSelector.get_selected_parser_name()
         st.session_state.clear()
         st.session_state[ParserSelector.PARSER_SELECTOR] = selected_parser
 
