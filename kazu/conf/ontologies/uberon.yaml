@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.UberonOntologyParser
     name: UBERON
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/uberon.owl
-    data_origin: '2023-09-05'
+    data_origin: 'http://purl.obolibrary.org/obo/uberon/releases/2024-05-13/uberon.owl'
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: anatomy
