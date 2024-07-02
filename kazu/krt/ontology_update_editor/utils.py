@@ -102,7 +102,7 @@ class OntologyUpdateManager:
         """
         parser = self.instantiate_parser_with_new_config()
         assert parser.ontology_downloader is not None
-        parser.ontology_downloader.download(parser.in_path)
+        parser.download_ontology()
 
     def obsolete_df(self) -> Optional[pd.DataFrame]:
         """Get the dataframe of the obsolete resources.
