@@ -214,11 +214,6 @@ class ChemblParquetOntologyDownloader(OntologyDownloader):
     def version(self, local_path: Optional[Path] = None) -> str:
         return self.chembl_version
 
-    def delete_previous(self, local_path: Path) -> None:
-        for file in local_path.parent.glob("chembl_*.db"):
-            if self.chembl_version not in file.name:
-                os.remove(file)
-
 
 class OpenTargetsOntologyDownloader(OntologyDownloader):
     OT_PREFIX = "ftp://ftp.ebi.ac.uk/pub/databases/opentargets/platform/"
