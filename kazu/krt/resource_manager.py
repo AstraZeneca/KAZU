@@ -10,7 +10,6 @@ from kazu.data import (
 from kazu.ontology_preprocessing.base import OntologyParser
 from kazu.ontology_preprocessing.curation_utils import (
     OntologyStringConflictAnalyser,
-    load_ontology_string_resources,
     dump_ontology_string_resources,
     OntologyResourceSetCompleteReport,
 )
@@ -59,21 +58,26 @@ class ResourceManager:
             for resource_set in resource_report.final_conflict_report.case_conflicts:
                 for resource in resource_set:
                     self.resource_to_parsers[resource].add(parser.name)
+
             if resource_report.human_conflict_report:
                 for resource in resource_report.human_conflict_report.clean_resources:
                     self.resource_to_parsers[resource].add(parser.name)
+                    self.parser_to_curations[parser.name].add(resource)
                 for resource_set in resource_report.human_conflict_report.case_conflicts:
                     for resource in resource_set:
                         self.resource_to_parsers[resource].add(parser.name)
+                        self.parser_to_curations[parser.name].add(resource)
+                for (
+                    frozen_resource_set
+                ) in resource_report.human_conflict_report.normalisation_conflicts:
+                    for resource in frozen_resource_set:
+                        self.resource_to_parsers[resource].add(parser.name)
+                        self.parser_to_curations[parser.name].add(resource)
+
             if resource_report.merge_report:
                 for r1, r2 in resource_report.merge_report.resources_with_discrepancies:
                     self.resource_to_parsers[r1].add(parser.name)
                     self.resource_to_parsers[r2].add(parser.name)
-
-            if parser.curations_path:
-                self.parser_to_curations[parser.name].update(
-                    load_ontology_string_resources(parser.curations_path)
-                )
 
         logging.info("building synonym lookup...")
 
