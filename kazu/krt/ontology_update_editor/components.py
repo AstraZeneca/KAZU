@@ -2,6 +2,7 @@ import streamlit as st
 
 from kazu.krt.components import ParserSelector
 from kazu.krt.ontology_update_editor.utils import OntologyUpdateManager
+from kazu.krt.utils import get_resource_manager
 
 
 @st.cache_resource
@@ -97,6 +98,8 @@ class OntologyUpdateForm:
     def _write_new_defaults_to_model_pack(manager: OntologyUpdateManager) -> None:
         with st.spinner("writing new defaults to model pack"):
             manager.write_new_defaults_to_model_pack()
+        # writing defaults to model pack will invalidate the resource manager cache
+        get_resource_manager.clear()  # type: ignore[attr-defined]
 
     @staticmethod
     def display_main_form() -> None:
