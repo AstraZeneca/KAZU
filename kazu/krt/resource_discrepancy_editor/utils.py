@@ -103,7 +103,7 @@ class ResourceDiscrepancyManger:
                 SynonymDiscrepancy(human_resource=human_curation, auto_resource=autocuration)
                 for human_curation, autocuration in report.merge_report.resources_with_discrepancies
             )
-            self._build_discrepancy_lookup(todo)
+        self._build_discrepancy_lookup(todo)
 
     def _build_discrepancy_lookup(self, todo: Iterable[SynonymDiscrepancy]) -> None:
         self.unresolved_discrepancies: dict[int, SynonymDiscrepancy] = {
