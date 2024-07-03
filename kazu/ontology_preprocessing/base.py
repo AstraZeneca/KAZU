@@ -422,7 +422,7 @@ class OntologyParser(ABC):
 
         if len(human_curation_report.case_conflicts) > 0:
             logger.warning(
-                "%s case conflicts detected in human curation set for %s. These will not be used until they are fixed. See the global conflict report in the model pack root.",
+                "%s case conflicts detected in human curation set for %s. These will not be used until they are fixed. Use the Kazu Resource Tool to fix these.",
                 len(human_curation_report.case_conflicts),
                 self.name,
             )
