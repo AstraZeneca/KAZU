@@ -432,7 +432,8 @@ class OntologyStringConflictAnalyser:
         of equal or higher rank than a case-sensitive one.
 
         :param resources:
-        :param strict: if True, then the function will return True if there are any conflicts in case sensitivity, regardless of the mention confidence
+        :param strict: if True, then the function will return True if there
+            are multiple mention confidences for a given string, regardless of case sensitivity
         :return: a set of conflicted subsets, and a set of clean resources.
         """
 
@@ -604,7 +605,8 @@ class OntologyStringConflictAnalyser:
         "Egfr" -> ci and POSSIBLE
 
         :param resources:
-        :param strict: if True, then the function will return True if there are any conflicts in case sensitivity, regardless of the mention confidence
+        :param strict: if True, then the function will return True if there
+            are multiple mention confidences for a given string, regardless of case sensitivity
         :return:
         """
         cs_conf_lookup = defaultdict(set)
@@ -620,15 +622,10 @@ class OntologyStringConflictAnalyser:
             ci_confidences: set[MentionConfidence] = ci_conf_lookup.get(
                 cased_syn_string.lower(), set()
             )
-            if (
-                len(ci_confidences) > 1
-                or len(cs_confidences) > 1
-                or (
-                    len(ci_confidences) == 1
-                    and len(cs_confidences) > 0
-                    and min(cs_confidences) <= min(ci_confidences)
-                )
-                or ((len(ci_confidences) + len(cs_confidences)) > 1 and strict)
+            if len(ci_confidences) > 1 or (
+                len(ci_confidences) == 1
+                and len(cs_confidences) > 0
+                and (min(cs_confidences) <= min(ci_confidences) or strict)
             ):
                 return True
         for ci_confidences in ci_conf_lookup.values():
