@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 2.1.0 - 2024-07-04
+
+
+### Features
+
+- Added new Kazu Resource Tool UI to ease the process of updating resources and resource configuration.
+- New OntologyDownloader abstraction to assist with resource updating.
+- Updated resources for June 2024.
+
+
 ## 2.0.0 - 2024-06-04
 
 
