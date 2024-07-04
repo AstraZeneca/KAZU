@@ -133,7 +133,7 @@ class ModelPackBuilder:
                 overrides=["hydra/job_logging=none", "hydra/hydra_logging=none"],
             )
             self.build_caches_and_run_sanity_checks(cfg)
-            if not self.skip_tests:
+            if self.build_config.run_acceptance_tests and not self.skip_tests:
                 self.run_acceptance_tests(cfg)
             self.report_tested_dependencies()
 
