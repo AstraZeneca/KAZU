@@ -165,9 +165,10 @@ def test_discrepancy_manager_sync(mock_kazu_disk_cache_on_parsers):
     dm = init_discrepancy_manager()
     new_resources: set[OntologyStringResource] = set()
     assert len(dm.unresolved_discrepancies) == 2
-    for index, discrepancy in list(dm.unresolved_discrepancies.items()):
+    for discrepancy in list(dm.unresolved_discrepancies.values()):
         new_resource = discrepancy.auto_resolve()
         assert new_resource is not None
         new_resources.add(new_resource)
-        dm.commit(discrepancy.human_resource, new_resource, index)
+        # index is always 0 as is recalculated after every commit
+        dm.commit(discrepancy.human_resource, new_resource, 0)
     assert new_resources.issubset(dm.manager.resource_to_parsers)
