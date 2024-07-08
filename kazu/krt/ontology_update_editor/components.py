@@ -112,6 +112,9 @@ class OntologyUpdateForm:
                 st.write(
                     "no downloader available for this parser. To update, manually put the resource in the model pack and delete the default resources folder."
                 )
+                skip_button = st.button("Continue")
+                if skip_button:
+                    OntologyUpdateForm._build_upgrade_report(manager, parser_name)
             else:
                 if not OntologyUpdateForm.get_download_completed_or_skipped(parser_name):
                     st.header("set the parameters for the download")
@@ -133,21 +136,21 @@ class OntologyUpdateForm:
                     )
 
                     if not OntologyUpdateForm.get_updates_saved(parser_name):
-                        with st.spinner("building upgrade_report"):
-
-                            report = manager.get_or_build_upgrade_report()
-
-                        st.write(
-                            f"found {len(report.obsolete_resources_after_upgrade)} obsolete resources"
-                        )
-                        st.write(manager.obsolete_df())
-                        st.write(f"found {len(report.new_resources_after_upgrade)} new resources")
-                        st.write(manager.novel_df())
-                        st.button(
-                            f"click here to update the default resources for {parser_name}",
-                            on_click=OntologyUpdateForm._write_new_defaults_to_model_pack,
-                            args=(manager,),
-                            key=OntologyUpdateForm.get_updates_saved_key(parser_name),
-                        )
+                        OntologyUpdateForm._build_upgrade_report(manager, parser_name)
                     else:
                         st.write("updates saved")
+
+    @staticmethod
+    def _build_upgrade_report(manager: OntologyUpdateManager, parser_name: str) -> None:
+        with st.spinner("building upgrade_report"):
+            report = manager.get_or_build_upgrade_report()
+        st.write(f"found {len(report.obsolete_resources_after_upgrade)} obsolete resources")
+        st.write(manager.obsolete_df())
+        st.write(f"found {len(report.new_resources_after_upgrade)} new resources")
+        st.write(manager.novel_df())
+        st.button(
+            f"click here to update the default resources for {parser_name}",
+            on_click=OntologyUpdateForm._write_new_defaults_to_model_pack,
+            args=(manager,),
+            key=OntologyUpdateForm.get_updates_saved_key(parser_name),
+        )
