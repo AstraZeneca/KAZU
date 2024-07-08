@@ -178,16 +178,11 @@ jobs:
         run: |
           . kazu-env/bin/activate
 
-          hatch publish --user $ARTIFACT_USERNAME --auth $ARTIFACT_TOKEN --repo $ARTIFACT_PYPI_URL
-          export KAZU_BASE_CONF_ZIP="base-conf-"$(echo "${{ env.KAZU_RELEASE_VERSION }}")".zip"
-          (cd kazu && zip -r ../${KAZU_BASE_CONF_ZIP} conf )
-          curl -u $ARTIFACT_USERNAME:$ARTIFACT_TOKEN  -T ${KAZU_BASE_CONF_ZIP} "${ARTIFACT_GENERIC_URL}${KAZU_BASE_CONF_ZIP}"
+          hatch publish -r main
 
         env:
-          ARTIFACT_USERNAME: ${{ secrets.ARTIFACT_USERNAME }}
-          ARTIFACT_TOKEN: ${{ secrets.ARTIFACT_TOKEN }}
-          ARTIFACT_PYPI_URL: ${{ secrets.ARTIFACT_PYPI_URL }}
-          ARTIFACT_GENERIC_URL: ${{ secrets.ARTIFACT_GENERIC_URL }}
+          HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
+          HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
 
       - name: remove temp resources
         run: |
