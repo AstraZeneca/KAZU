@@ -360,6 +360,9 @@ def build_all_model_packs(
         timeout = ray_timeout if ray_timeout is not None else DEFAULT_RAY_TIMEOUT
         builder_creator = ModelPackBuilderActor.remote  # type: ignore[attr-defined]
     else:
+        assert (
+            len(model_pack_paths) == 1
+        ), "Cannot build multiple packs if debug mode is on, due to cache pollution."
         builder_creator = ModelPackBuilder
 
     futures: list[ray.ObjectRef] = []
