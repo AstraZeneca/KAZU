@@ -21,7 +21,7 @@ class OntologyUpdateManager:
 
     def __init__(self, parser_name: str):
         self.original_parser_cfg: DictConfig = self.name_to_parser_cfg()[parser_name]
-        self.parser = instantiate(self.original_parser_cfg)
+        self.parser = instantiate(self.original_parser_cfg, _convert_="all")
         self.new_parser_cfg: DictConfig = self.original_parser_cfg.copy()
 
     def get_downloader_args_and_types(self) -> dict[str, type]:
@@ -72,7 +72,7 @@ class OntologyUpdateManager:
 
         :return:
         """
-        parser = instantiate(self.new_parser_cfg)
+        parser = instantiate(self.new_parser_cfg, _convert_="all")
         new_in_path = parser.ontology_downloader.download(parser.in_path, skip_download=True)
         with open_dict(self.new_parser_cfg):
             self.new_parser_cfg.data_origin = parser.ontology_downloader.version(parser.in_path)
@@ -83,7 +83,7 @@ class OntologyUpdateManager:
 
         :return:
         """
-        return cast(OntologyParser, instantiate(self.new_parser_cfg))
+        return cast(OntologyParser, instantiate(self.new_parser_cfg, _convert_="all"))
 
     @functools.cache
     def get_or_build_upgrade_report(self) -> OntologyUpgradeReport:

@@ -163,7 +163,7 @@ class ResourceManager:
     def _load_pipeline() -> Pipeline:
         load_config.clear()  # type: ignore[attr-defined]
         cfg = load_config()
-        pipeline: Pipeline = instantiate(cfg.Pipeline)
+        pipeline: Pipeline = instantiate(cfg.Pipeline, _convert_="all")
         return pipeline
 
     def clear_invalid_caches(self) -> None:
