@@ -14,7 +14,7 @@ def load_parsers() -> list[OntologyParser]:
     cfg = load_config()
     parsers = []
     for parser in cfg.ontologies.parsers.values():
-        parsers.append(instantiate(parser))
+        parsers.append(instantiate(parser, _convert_="all"))
     return parsers
 
 
