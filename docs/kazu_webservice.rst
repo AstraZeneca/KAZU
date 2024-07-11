@@ -47,6 +47,7 @@ Following is an example of such a message:
     deployments={'KazuWebAPI': DeploymentStatusOverview(status=<DeploymentStatus.HEALTHY: 'HEALTHY'>, status_trigger=<DeploymentStatusTrigger.CONFIG_UPDATE_COMPLETED: 
     'CONFIG_UPDATE_COMPLETED'>, replica_states={'RUNNING': 1}, message='')})}, target_capacity=None)
 
+
 To test, execute the following example from any machine on the same network as the server:
 
 .. code-block:: bash
@@ -68,3 +69,8 @@ You can see the FastAPI documentation at :
 http://<your-ip-address>:<port>/docs
 
 One successful example is http://kazu.korea.ac.kr/docs.
+
+
+Note
+----
+We tested this tutorial with python 3.9.6, Kazu 2.1.1, on a CPU-only linux server. 
