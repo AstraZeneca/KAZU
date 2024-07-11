@@ -35,16 +35,16 @@ Run the web server:
     mkdir run_dir
     python -m kazu.web.server --config-path "${KAZU_MODEL_PACK}/conf" hydra.run.dir="${PWD}/run_dir"
 
-It will take a few minutes to be fully deployed. Once fully deployed, you will see a completion message. 
+It will take a few minutes to be fully deployed. Once fully deployed, you will see a completion message.
 
 Following is an example of such a message:
 
 .. code-block:: bash
 
     2024-07-11 01:44:28,366 INFO api.py:609 -- Deployed app 'default' successfully.
-    2024-07-11 01:44:28,379 INFO server.py:648 -- ServeStatus(proxies={'0d2e08c45946473': <ProxyStatus.HEALTHY: 'HEALTHY'>}, 
-    applications={'default': ApplicationStatusOverview(status=<ApplicationStatus.RUNNING: 'RUNNING'>, message='', last_deployed_time_s=172067695.0692, 
-    deployments={'KazuWebAPI': DeploymentStatusOverview(status=<DeploymentStatus.HEALTHY: 'HEALTHY'>, status_trigger=<DeploymentStatusTrigger.CONFIG_UPDATE_COMPLETED: 
+    2024-07-11 01:44:28,379 INFO server.py:648 -- ServeStatus(proxies={'0d2e08c45946473': <ProxyStatus.HEALTHY: 'HEALTHY'>},
+    applications={'default': ApplicationStatusOverview(status=<ApplicationStatus.RUNNING: 'RUNNING'>, message='', last_deployed_time_s=172067695.0692,
+    deployments={'KazuWebAPI': DeploymentStatusOverview(status=<DeploymentStatus.HEALTHY: 'HEALTHY'>, status_trigger=<DeploymentStatusTrigger.CONFIG_UPDATE_COMPLETED:
     'CONFIG_UPDATE_COMPLETED'>, replica_states={'RUNNING': 1}, message='')})}, target_capacity=None)
 
 
@@ -73,4 +73,4 @@ One successful example is http://kazu.korea.ac.kr/docs.
 
 Note
 ----
-We tested this tutorial with python 3.9.6, Kazu 2.1.1, on a CPU-only linux server. 
+We tested this tutorial with python 3.9.6, Kazu 2.1.1, on a CPU-only linux server.
