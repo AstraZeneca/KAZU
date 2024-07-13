@@ -40,7 +40,7 @@ import ray
 from fastapi import Depends, FastAPI, HTTPException, Body
 from fastapi import __version__ as fastapi_version
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import HTTPBearer
 from fastapi.security.http import HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
@@ -379,7 +379,6 @@ class KazuWebAPI:
                 name="static-ui-content",
             )
 
-    @app.get("/")
     @app.get(f"/{API}")
     @app.get(f"/{API}/")
     def get(self):
@@ -616,6 +615,22 @@ class KazuWebAPI:
             step_group=step_group,
         )
 
+    @app.post("/visualize/")
+    def visualize_ner_results(
+        self, 
+        request: Request, 
+        text_request: dict = Body(...)
+    ):
+        request_body = {"text": text_request['text']}
+        doc_collection = DocumentCollection(__root__=[SimpleWebDocument(text=text_request['text'])])
+        response = self.ner_only(request, doc_collection=doc_collection)
+        return response
+
+    @app.get("/", response_class=HTMLResponse)
+    def get_home(self):
+        current_directory = os.path.dirname(__file__)
+        with open(os.path.join(current_directory, "static","index.html")) as f:
+            return HTMLResponse(content=f.read(), media_type="text/html")
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../conf", config_name="config")
 def start(cfg: DictConfig) -> None:
