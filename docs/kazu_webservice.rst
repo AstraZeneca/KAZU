@@ -17,8 +17,12 @@ Install the library with the `webserver` option:
 
 .. code-block:: bash
 
-    export VERSION=2.1.1
-    pip install kazu[webserver]==${VERSION}
+    pip install 'kazu[webserver]'
+
+    # Get the version of Kazu in a dynamic manner
+    # Alternatively, you can set the version string manually, 
+    # for example: export VERSION=2.1.1
+    export VERSION=$(python -c "from importlib.metadata import version; print(version('kazu'))")
 
     wget https://github.com/AstraZeneca/KAZU/releases/download/v${VERSION}/kazu_model_pack_public-v${VERSION}.zip
     unzip kazu_model_pack_public-v${VERSION}.zip
@@ -61,16 +65,33 @@ To test, execute the following example from any machine on the same network as t
      --data '{"text": "EGFR is an important gene in breast cancer study."}' \
      http://${IP_ADDR}:${PORT}/api/kazu
 
-FastAPI
+Demo Front Page
+---------------
+
+(New feature) - in development stage (PR #57)
+
+You can see the demo frontend page at:
+
+`http://<your-ip-address>:<port>/`
+
+You can find an example from here: http://kazu.korea.ac.kr/
+
+
+Swagger UI (by FastAPI)
 -------
 
-You can see the FastAPI documentation at :
+You can see the FastAPI documentation (Swagger UI) at :
 
-http://<your-ip-address>:<port>/docs
+`http://<your-ip-address>:<port>/api/docs`
 
-One successful example is http://kazu.korea.ac.kr/docs.
+One example is http://kazu.korea.ac.kr/api/docs
 
 
 Note
 ----
-We tested this tutorial with python 3.9.6, Kazu 2.1.1, on a CPU-only linux server.
+
+We tested this tutorial with:
+
+1. Python 3.9.6, Kazu 2.1.1, on a CPU-only Linux server.
+2. Python 3.11, Kazu 2.1.1+, on a CPU-only macOS (Intel MacBook).
+
