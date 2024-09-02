@@ -68,9 +68,9 @@ class ConflictScorer:
             automaton.make_automaton()
 
             for section in doc.sections:
-                self.automaton_matching(automaton, namespace, section)
+                self._automaton_matching(automaton, namespace, section)
 
-    def automaton_matching(
+    def _automaton_matching(
         self, automaton: ahocorasick.Automaton, namespace: str, section: Section
     ) -> None:
         spacy_doc = self.spacy_pipelines.process_single(section.text, BASIC_PIPELINE_NAME)
